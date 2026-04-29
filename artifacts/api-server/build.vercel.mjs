@@ -28,12 +28,8 @@ async function buildServerless() {
       "better-sqlite3",
       "sqlite3",
       "canvas",
-      "bcrypt",
-      "argon2",
       "fsevents",
       "pg-native",
-      "pino-pretty",
-      "thread-stream",
     ],
     sourcemap: false,
     banner: {

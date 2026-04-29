@@ -34,6 +34,18 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
-seed().catch((err) => logger.error({ err }, "Seed failed"));
+let seedPromise: Promise<void> | null = null;
+app.use((req, _res, next) => {
+  if (!seedPromise) {
+    seedPromise = seed().catch((err) => {
+      logger.error({ err }, "Seed failed");
+    });
+  }
+  seedPromise.finally(() => next());
+});
+
+if (process.env.NODE_ENV !== "production") {
+  seedPromise = seed().catch((err) => logger.error({ err }, "Seed failed"));
+}
 
 export default app;
