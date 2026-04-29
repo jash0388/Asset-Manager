@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { login as loginRequest } from "@workspace/api-client-react";
 
 interface AuthAdmin {
   id: number;
@@ -9,12 +10,14 @@ interface AuthAdmin {
 interface AuthContextType {
   token: string | null;
   admin: AuthAdmin | null;
-  login: (token: string, admin: AuthAdmin) => void;
   logout: () => void;
-  isAuthenticated: boolean;
+  isReady: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+const DEFAULT_EMAIL = "jashwanth038@gmail.com";
+const DEFAULT_PASSWORD = "ADMIN";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("qr_token"));
@@ -22,23 +25,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem("qr_admin");
     return stored ? JSON.parse(stored) : null;
   });
+  const [isReady, setIsReady] = useState<boolean>(!!localStorage.getItem("qr_token"));
 
-  const login = useCallback((newToken: string, newAdmin: AuthAdmin) => {
-    localStorage.setItem("qr_token", newToken);
-    localStorage.setItem("qr_admin", JSON.stringify(newAdmin));
-    setToken(newToken);
-    setAdmin(newAdmin);
-  }, []);
+  useEffect(() => {
+    if (token) {
+      setIsReady(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await loginRequest({ email: DEFAULT_EMAIL, password: DEFAULT_PASSWORD });
+        if (cancelled) return;
+        localStorage.setItem("qr_token", data.token);
+        localStorage.setItem("qr_admin", JSON.stringify(data.admin));
+        setToken(data.token);
+        setAdmin(data.admin);
+      } catch (err) {
+        console.error("Auto-login failed", err);
+      } finally {
+        if (!cancelled) setIsReady(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const logout = useCallback(() => {
     localStorage.removeItem("qr_token");
     localStorage.removeItem("qr_admin");
     setToken(null);
     setAdmin(null);
+    setIsReady(false);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ token, admin, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ token, admin, logout, isReady }}>
       {children}
     </AuthContext.Provider>
   );
