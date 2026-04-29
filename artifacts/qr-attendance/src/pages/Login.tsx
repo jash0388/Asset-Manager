@@ -7,8 +7,8 @@ import { ShieldCheck, Eye, EyeOff, Lock } from "lucide-react";
 export default function Login() {
   const [, navigate] = useLocation();
   const { login } = useAuth();
-  const [email, setEmail] = useState("admin@college.edu");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("jashwanth038@gmail.com");
+  const [password, setPassword] = useState("ADMIN");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
@@ -69,7 +69,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
-                placeholder="admin@college.edu"
+                placeholder="jashwanth038@gmail.com"
               />
             </div>
 

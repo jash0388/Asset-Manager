@@ -11,8 +11,8 @@ export async function seed() {
       return;
     }
 
-    const passwordHash = await bcrypt.hash("admin123", 10);
-    await db.insert(adminsTable).values({ email: "admin@college.edu", name: "Admin", passwordHash });
+    const passwordHash = await bcrypt.hash("ADMIN", 10);
+    await db.insert(adminsTable).values({ email: "jashwanth038@gmail.com", name: "Admin", passwordHash });
 
     const students = await db.insert(usersTable).values([
       { name: "Arjun Sharma", uniqueId: "STU001", role: "student" },
@@ -51,7 +51,7 @@ export async function seed() {
       });
     }
 
-    logger.info("Database seeded successfully. Admin: admin@college.edu / admin123");
+    logger.info("Database seeded successfully. Admin: jashwanth038@gmail.com / ADMIN");
   } catch (err) {
     logger.error({ err }, "Seed error");
   }

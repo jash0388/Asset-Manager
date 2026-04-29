@@ -42,8 +42,8 @@ A mobile-first attendance app for college campuses. Security guards scan student
 PostgreSQL with three tables (admins, users, attendance). Schema in `lib/db/src/schema.ts`. Push changes with `pnpm --filter @workspace/db run push`.
 
 ### Default Admin Login
-- Email: `admin@college.edu`
-- Password: `admin123`
+- Email: `jashwanth038@gmail.com`
+- Password: `ADMIN`
 - Seed also creates 5 sample users (3 students, 2 staff) with sample attendance.
 
 ### Key Behavior
