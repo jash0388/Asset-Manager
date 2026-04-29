@@ -1,0 +1,305 @@
+You are an expert full-stack engineer. Build a complete production-ready mobile-first web + Android-compatible application called **"Smart QR Attendance, Access Control & Student Tracking System"**.
+
+This system is used in a college where a security guard scans ID card QR codes to automatically mark attendance (entry/exit), while admins can search any student and view their complete past attendance history.
+
+---
+
+## 🎯 CORE SYSTEM MODULES
+
+Build a complete system with:
+
+1. Mobile QR Scanner App (for security guards)
+2. Backend API server
+3. Admin Dashboard (Web)
+4. Search & History Tracking System (IMPORTANT)
+5. Authentication & Security
+6. Database (persistent storage)
+
+---
+
+## 🧱 TECH STACK (STRICT)
+
+* Frontend (Dashboard + Scanner UI): React + Tailwind CSS
+* Mobile-friendly Scanner: React PWA (camera access)
+* Backend: Node.js + Express
+* Database: MongoDB with Mongoose
+* QR Scanner: html5-qrcode (or similar)
+* Authentication: JWT-based login
+
+---
+
+## 📱 FEATURE REQUIREMENTS
+
+---
+
+### 🔐 1. AUTH SYSTEM
+
+* Admin login (email + password)
+* JWT authentication
+* Protected routes
+* Logout functionality
+
+---
+
+### 👥 2. USER MANAGEMENT
+
+Admin can:
+
+* Add users (students/staff)
+* Fields:
+
+  * Full Name
+  * Unique ID (auto-generate or manual)
+  * Role (student/staff)
+* Auto-generate QR Code for each user
+* Download QR as PNG
+
+---
+
+### 🔳 3. QR CODE SYSTEM
+
+* QR contains ONLY the unique user ID
+* No sensitive data inside QR
+* Secure validation via backend
+
+---
+
+### 📷 4. SCANNER SYSTEM (MAIN FEATURE)
+
+* Mobile responsive full-screen scanner
+
+* Camera-based QR scanning
+
+* On scan:
+
+  * Send QR ID to backend
+  * Validate user
+  * Mark attendance
+
+* Show instant UI feedback:
+
+  * ✅ Access Granted (with name)
+  * ❌ Invalid QR
+
+* Add sound or vibration feedback
+
+---
+
+### ⏱️ 5. ATTENDANCE LOGIC (STRICT)
+
+* If first scan of the day → mark ENTRY
+* If second scan → mark EXIT
+* If more scans → ignore or log safely
+
+Store:
+
+* userId
+* date (YYYY-MM-DD)
+* entryTime
+* exitTime
+* scanCount
+
+Prevent misuse:
+
+* Ignore repeated scans within 30 seconds
+
+---
+
+### 🔍 6. SEARCH & STUDENT HISTORY (VERY IMPORTANT FEATURE)
+
+Admin dashboard must include a powerful search system:
+
+#### 🔎 Search Bar:
+
+* Search by:
+
+  * Name (partial match)
+  * Unique ID
+
+#### 📊 On selecting a student:
+
+Show FULL attendance history:
+
+* Table with:
+
+  * Date
+  * Entry Time
+  * Exit Time
+  * Total Duration (calculate automatically)
+  * Status (Present / Left / Inside)
+
+#### 📅 Filters:
+
+* Filter by:
+
+  * Date range (from → to)
+  * Month
+  * Role (student/staff)
+
+#### 📈 Extra:
+
+* Show summary:
+
+  * Total days present
+  * Average time spent
+  * Late entries count
+
+---
+
+### 📊 7. ADMIN DASHBOARD
+
+Create a modern UI with:
+
+#### a. Overview Cards
+
+* Total Users
+* Today’s Attendance
+* Currently Inside Campus
+
+#### b. Live Attendance Table
+
+* Real-time updates
+* Show who just entered/exited
+
+#### c. Student Search Section (MAIN FEATURE)
+
+* Search + detailed history panel
+
+#### d. Export System
+
+* Download CSV of:
+
+  * Daily attendance
+  * Individual student history
+
+---
+
+### 🌐 8. API ENDPOINTS
+
+Auth:
+
+* POST /api/auth/login
+
+Users:
+
+* POST /api/users
+* GET /api/users
+* GET /api/users/:id
+* DELETE /api/users/:id
+
+QR:
+
+* GET /api/qrcode/:userId
+
+Attendance:
+
+* POST /api/scan
+* GET /api/attendance
+* GET /api/attendance/today
+* GET /api/attendance/user/:userId  ← IMPORTANT (history endpoint)
+
+Search:
+
+* GET /api/search?query=NAME_OR_ID
+
+---
+
+### 🧾 9. DATABASE SCHEMA (MONGOOSE)
+
+User Schema:
+
+* name
+* role
+* uniqueId
+* qrCode
+
+Attendance Schema:
+
+* userId (reference)
+* date
+* entryTime
+* exitTime
+* scanCount
+
+---
+
+### 🎨 10. UI REQUIREMENTS
+
+* Use Tailwind CSS
+* Clean, modern dashboard
+* Fully mobile responsive
+
+Pages:
+
+* Login Page
+* Dashboard
+* User Management
+* Scanner Page
+* Student History Page (IMPORTANT)
+
+---
+
+### 🔐 11. SECURITY
+
+* Validate all inputs
+* Use JWT middleware
+* Prevent duplicate scans
+* Handle invalid QR safely
+
+---
+
+### 📁 12. PROJECT STRUCTURE
+
+/client (React)
+/server (Node.js)
+/models
+/routes
+/controllers
+/middleware
+
+---
+
+### ⚡ 13. BONUS (IF POSSIBLE)
+
+* Sound/vibration on scan
+* “Inside Campus” live tracking
+* Auto duration calculation
+* Graphs for attendance trends
+
+---
+
+## ⚙️ FINAL INSTRUCTIONS
+
+* Generate FULL working code (NO pseudo code)
+
+* Include:
+
+  * Backend code
+  * Frontend code
+  * package.json files
+  * .env example
+  * Setup steps
+  * Run instructions
+
+* Code must be:
+
+  * Clean
+  * Modular
+  * Ready to run
+
+* DO NOT skip ANY feature
+
+* DO NOT summarize
+
+* Build COMPLETE SYSTEM
+
+---
+
+## 🚀 OUTPUT FORMAT
+
+1. Backend (all files)
+2. Frontend (all files)
+3. Setup Instructions
+4. Run Commands
+
+Everything must be fully functional and copy-paste ready.
