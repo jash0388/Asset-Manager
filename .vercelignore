@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+.git
+.local
+.cache
+.migration-backup
+attached_assets
+artifacts/api-server/dist
+artifacts/qr-attendance/node_modules
+artifacts/mockup-sandbox
+lib/**/node_modules
+**/.turbo
+**/coverage
+**/dist/dev
+*.log
