@@ -32,17 +32,25 @@ router.get("/users", authMiddleware, async (req, res) => {
 router.post("/users", authMiddleware, async (req, res) => {
   const parsed = CreateUserBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body" });
+    const issues = parsed.error.issues.map((i) => `${i.path.join(".") || "body"}: ${i.message}`).join("; ");
+    res.status(400).json({ error: `Invalid input - ${issues || "missing fields"}` });
     return;
   }
-  const { name, uniqueId, role } = parsed.data;
-  const uid = uniqueId || generateUniqueId();
+  const name = parsed.data.name.trim();
+  if (!name) {
+    res.status(400).json({ error: "Name cannot be empty" });
+    return;
+  }
+  const role = parsed.data.role;
+  const uid = (parsed.data.uniqueId || "").trim() || generateUniqueId();
   try {
     const inserted = await db.insert(usersTable).values({ name, uniqueId: uid, role }).returning();
     res.status(201).json(formatUser(inserted[0]));
   } catch (err: any) {
-    if (err.code === "23505") {
-      res.status(400).json({ error: "Unique ID already exists" });
+    const pgCode = err?.code ?? err?.cause?.code ?? err?.original?.code;
+    const msg = String(err?.message ?? "") + " " + String(err?.cause?.message ?? "");
+    if (pgCode === "23505" || msg.includes("duplicate key") || msg.includes("unique constraint")) {
+      res.status(400).json({ error: `Unique ID "${uid}" already exists. Try a different one.` });
       return;
     }
     req.log.error({ err }, "Create user error");

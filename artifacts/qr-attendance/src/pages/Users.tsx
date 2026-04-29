@@ -86,15 +86,35 @@ export default function Users() {
       )
     : users;
 
+  const [createError, setCreateError] = useState<string | null>(null);
+
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
+    setCreateError(null);
+    const trimmedName = newUser.name.trim();
+    if (!trimmedName) {
+      setCreateError("Please enter a name.");
+      return;
+    }
     createMutation.mutate(
-      { name: newUser.name, ...(newUser.uniqueId ? { uniqueId: newUser.uniqueId } : {}), role: newUser.role },
+      { name: trimmedName, ...(newUser.uniqueId.trim() ? { uniqueId: newUser.uniqueId.trim() } : {}), role: newUser.role },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
           setNewUser({ name: "", uniqueId: "", role: "student" });
           setShowForm(false);
+          setCreateError(null);
+        },
+        onError: async (err: any) => {
+          let msg = "Failed to create user.";
+          try {
+            if (err?.data?.error) msg = err.data.error;
+            else if (err?.response) {
+              const json = await err.response.clone().json();
+              if (json?.error) msg = json.error;
+            } else if (err?.message) msg = err.message;
+          } catch {}
+          setCreateError(msg);
         },
       }
     );
@@ -138,6 +158,11 @@ export default function Users() {
         {showForm && (
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
             <h2 className="text-sm font-semibold text-white mb-4">Add New User</h2>
+            {createError && (
+              <div data-testid="create-user-error" className="mb-4 px-3 py-2 rounded-lg bg-red-900/40 border border-red-700 text-red-200 text-sm">
+                {createError}
+              </div>
+            )}
             <form onSubmit={handleCreate} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">Full Name *</label>
@@ -146,7 +171,7 @@ export default function Users() {
                   type="text"
                   required
                   value={newUser.name}
-                  onChange={(e) => setNewUser((p) => ({ ...p, name: e.target.value }))}
+                  onChange={(e) => { setCreateError(null); setNewUser((p) => ({ ...p, name: e.target.value })); }}
                   className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500"
                   placeholder="Full name"
                 />
@@ -157,7 +182,7 @@ export default function Users() {
                   data-testid="user-uid-input"
                   type="text"
                   value={newUser.uniqueId}
-                  onChange={(e) => setNewUser((p) => ({ ...p, uniqueId: e.target.value }))}
+                  onChange={(e) => { setCreateError(null); setNewUser((p) => ({ ...p, uniqueId: e.target.value })); }}
                   className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500"
                   placeholder="Auto-generated if blank"
                 />
