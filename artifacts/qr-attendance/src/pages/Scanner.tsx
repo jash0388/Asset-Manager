@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useScanQr, getGetDashboardStatsQueryKey, getGetTodayAttendanceQueryKey, getGetCurrentlyInsideQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, XCircle, QrCode, Camera } from "lucide-react";
+import { CheckCircle, XCircle, QrCode, Camera, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 
 type ScanResult = {
   success: boolean;
@@ -116,6 +117,15 @@ export default function Scanner() {
       {/* Header */}
       <div className="bg-slate-900 border-b border-slate-800 px-4 py-4">
         <div className="flex items-center gap-3 max-w-md mx-auto">
+          <Link href="/dashboard">
+            <button
+              data-testid="back-button"
+              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
+              title="Back to Dashboard"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          </Link>
           <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
             <QrCode className="w-5 h-5 text-white" />
           </div>

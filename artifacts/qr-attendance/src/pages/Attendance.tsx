@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useListAttendance, getListAttendanceQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
+import { BackButton } from "@/components/BackButton";
 import { Download, Filter } from "lucide-react";
 
 function StatusBadge({ status }: { status: string }) {
@@ -68,6 +69,7 @@ export default function Attendance() {
   return (
     <Layout>
       <div className="p-6 max-w-7xl mx-auto">
+        <BackButton />
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Attendance Records</h1>

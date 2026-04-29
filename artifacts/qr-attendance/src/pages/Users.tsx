@@ -8,6 +8,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
+import { BackButton } from "@/components/BackButton";
 import { UserPlus, Trash2, QrCode, Download, Search, X } from "lucide-react";
 
 type NewUser = { name: string; uniqueId: string; role: "student" | "staff" };
@@ -117,6 +118,7 @@ export default function Users() {
         <QrModal userId={qrUserId} name={qrUserName} onClose={() => setQrUserId(null)} />
       )}
       <div className="p-6 max-w-6xl mx-auto">
+        <BackButton />
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Users</h1>

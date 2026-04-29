@@ -7,8 +7,8 @@ import {
   getGetUserAttendanceQueryKey,
 } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
-import { Search, Download, Calendar, Clock, AlertCircle, ArrowLeft } from "lucide-react";
-import { Link } from "wouter";
+import { BackButton } from "@/components/BackButton";
+import { Search, Download, Calendar, Clock, AlertCircle } from "lucide-react";
 
 function formatTime(iso: string | null | undefined) {
   if (!iso) return "—";
@@ -210,16 +210,10 @@ export default function History() {
   return (
     <Layout>
       <div className="p-6 max-w-5xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Link href="/dashboard">
-            <span className="text-slate-400 hover:text-white cursor-pointer">
-              <ArrowLeft className="w-5 h-5" />
-            </span>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Student History</h1>
-            <p className="text-sm text-slate-400 mt-1">Search and view complete attendance history</p>
-          </div>
+        <BackButton />
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-white">Student History</h1>
+          <p className="text-sm text-slate-400 mt-1">Search and view complete attendance history</p>
         </div>
 
         {/* Search */}
