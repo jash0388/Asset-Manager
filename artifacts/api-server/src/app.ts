@@ -10,7 +10,12 @@ const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any)
 const app = express();
 
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    // If no origin (like mobile apps), allow it
+    if (!origin) return callback(null, true);
+    // Otherwise, echo back the origin (safe since we have auth on routes)
+    callback(null, true);
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]

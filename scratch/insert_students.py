@@ -71,7 +71,8 @@ req = urllib.request.Request(
         "apikey":        SERVICE_KEY,
         "Authorization": f"Bearer {SERVICE_KEY}",
         "Content-Type":  "application/json",
-        "Prefer":        "resolution=merge-duplicates",   # upsert on unique_id
+        "Prefer":        "resolution=merge-duplicates",
+        "on-conflict":   "unique_id"
     },
     method="POST",
 )
