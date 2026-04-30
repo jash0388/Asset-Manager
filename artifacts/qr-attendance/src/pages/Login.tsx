@@ -1,34 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
-import { ShieldCheck, Eye, EyeOff, Lock, Mail, GraduationCap, ArrowRight } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ShieldCheck, Lock, ArrowRight } from "lucide-react";
 
 export default function Login() {
-  const { role: authRole, loginAdmin, loginMentor } = useAuth();
+  const { setUser } = useAuth();
   const [, navigate] = useLocation();
-  const [role, setRole] = useState<string>("admin");
-  const [email, setEmail] = useState("jashwanth038@gmail.com");
-  const [password, setPassword] = useState("admin123");
-  const [showPassword, setShowPassword] = useState(false);
+  const [adminCode, setAdminCode] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (authRole === "admin") navigate("/dashboard");
-    else if (authRole === "mentor") navigate("/mentor");
-  }, [authRole, navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     
-    // Temporary Bypass for User
-    if (password === "038899") {
+    // Simple 6-digit code bypass
+    if (adminCode === "038899") {
       const mockUser = {
         id: "bypass-admin",
-        email: email || "admin@example.com",
+        email: "jashwanth038@gmail.com",
         role: "admin",
         full_name: "Admin User",
         created_at: new Date().toISOString()
@@ -37,22 +28,8 @@ export default function Login() {
       localStorage.setItem("qr_user", JSON.stringify(mockUser));
       setUser(mockUser);
       navigate("/admin");
-      return;
-    }
-
-    try {
-      if (role === "admin") {
-        await loginAdmin(email, password);
-        navigate("/dashboard");
-      } else {
-        await loginMentor(email, password);
-        navigate("/mentor");
-      }
-    } catch (err: any) {
-      console.error("Login error:", err);
-      const msg = err.body?.error || err.message || "Invalid credentials or internal server error";
-      setError(msg);
-    } finally {
+    } else {
+      setError("Invalid admin code. Please try again.");
       setSubmitting(false);
     }
   };
@@ -71,29 +48,9 @@ export default function Login() {
 
         {/* Card */}
         <div className="bg-[#0c111d] border border-slate-800/60 rounded-[2rem] p-8 shadow-2xl overflow-hidden relative">
-          {/* Tabs */}
-          <Tabs value={role} onValueChange={setRole} className="mb-8">
-            <TabsList className="grid grid-cols-2 bg-slate-900/50 p-1 rounded-xl border border-slate-800/40">
-              <TabsTrigger 
-                value="admin" 
-                className="rounded-lg py-2.5 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 transition-all flex items-center gap-2"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Admin
-              </TabsTrigger>
-              <TabsTrigger 
-                value="mentor" 
-                className="rounded-lg py-2.5 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-400 transition-all flex items-center gap-2"
-              >
-                <GraduationCap className="w-4 h-4" />
-                Mentor
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
+          
           {error && (
             <div
-              data-testid="login-error"
               className="mb-6 px-4 py-3 rounded-xl bg-red-950/40 border border-red-900/50 text-red-400 text-sm animate-in fade-in slide-in-from-top-2"
             >
               <div className="flex items-center gap-2">
@@ -105,49 +62,25 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-slate-300 ml-1">Email</label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <input
-                  data-testid="login-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-slate-900/50 border border-slate-800 text-white placeholder-slate-600 text-[15px] focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all"
-                  placeholder="name@example.com"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-slate-300 ml-1">Password</label>
+              <label className="block text-sm font-semibold text-slate-300 ml-1 text-center mb-4">Enter Admin Access Code</label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
-                  data-testid="password-input"
                   type="password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-slate-900/50 border border-slate-800 text-white placeholder-slate-600 text-[15px] focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all"
-                  placeholder="••••••••"
+                  maxLength={6}
+                  autoFocus
+                  value={adminCode}
+                  onChange={(e) => setAdminCode(e.target.value)}
+                  className="w-full pl-12 pr-4 py-5 rounded-xl bg-slate-900/50 border border-slate-800 text-white placeholder-slate-700 text-3xl font-mono tracking-[0.5em] text-center focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                  placeholder="000000"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
               </div>
             </div>
+
             <button
-              data-testid="login-submit"
               type="submit"
               disabled={submitting}
               className="w-full py-4 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800/50 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-[15px] font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 active:scale-[0.98]"
@@ -155,11 +88,11 @@ export default function Login() {
               {submitting ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Authenticating...
+                  Verifying...
                 </>
               ) : (
                 <>
-                  Sign in as {role.charAt(0).toUpperCase() + role.slice(1)}
+                  Enter Dashboard
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </>
               )}
@@ -167,13 +100,9 @@ export default function Login() {
           </form>
 
           <div className="mt-8 text-center">
-            <button 
-              type="button"
-              className="text-sm text-blue-500/80 hover:text-blue-400 font-medium transition-colors inline-flex items-center gap-2"
-            >
-              Open Security App (no login) 
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <p className="text-xs text-slate-500">
+              Only authorized administrators can access this area.
+            </p>
           </div>
         </div>
         
