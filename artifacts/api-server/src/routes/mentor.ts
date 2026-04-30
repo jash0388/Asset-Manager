@@ -40,7 +40,7 @@ function formatRecord(record: any, user?: any) {
   };
 }
 
-router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res) => {
+router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res: any) => {
   const mentorId = req.mentorId!;
   const today = getTodayDate();
   try {
@@ -80,13 +80,13 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res)
       };
     });
     res.json(result);
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Mentor students error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req: any, res) => {
+router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req: any, res: any) => {
   const mentorId = req.mentorId!;
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) {
@@ -153,7 +153,7 @@ router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req:
       records: records ? records.map((r: any) => formatRecord(r, user)) : [],
       summary,
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Mentor user attendance error");
     res.status(500).json({ error: "Internal server error" });
   }

@@ -166,7 +166,7 @@ router.post("/scan", async (req: any, res: any) => {
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
       attendance: formatRecord(updated, user),
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Scan error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -185,7 +185,7 @@ router.get("/attendance/recent", async (req: any, res: any) => {
 
     if (error) throw error;
     res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Recent scans error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -202,7 +202,7 @@ router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
 
     if (error) throw error;
     res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Today attendance error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -220,7 +220,7 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
 
     if (error) throw error;
     res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Currently inside error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -253,7 +253,7 @@ router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: 
       currentlyInsideCount: currentlyInsideCount || 0,
       recentActivity: recentResult ? recentResult.map((r: any) => formatRecord(r, r.qr_users)) : [],
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Dashboard stats error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -318,7 +318,7 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any
       records: records.map((r: any) => formatRecord(r, user)),
       summary,
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "User attendance error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -353,7 +353,7 @@ router.get("/attendance", authMiddleware, async (req: any, res: any) => {
     }
 
     res.json(filtered.map((r: any) => formatRecord(r, r.qr_users)));
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "List attendance error");
     res.status(500).json({ error: "Internal server error" });
   }

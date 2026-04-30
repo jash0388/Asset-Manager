@@ -45,7 +45,7 @@ router.post("/auth/login", async (req: any, res: any) => {
       token,
       admin: { id: admin.id, email: admin.email, name: admin.name },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("[Login API] Fatal error:", err);
     req.log.error({ err }, "Login error");
     res.status(500).json({ error: "Internal server error: " + (err instanceof Error ? err.message : "Unknown error") });
@@ -88,7 +88,7 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
       token,
       mentor: { id: mentor.id, email: mentor.email, name: mentor.name },
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Mentor login error");
     res.status(500).json({ error: "Internal server error" });
   }
