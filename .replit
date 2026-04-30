@@ -32,7 +32,7 @@ task = "shell.exec"
 args = "(PORT=8080 NODE_ENV=development pnpm --filter @workspace/api-server dev 2>&1 | sed -u 's/^/[api] /' &) && PORT=20169 BASE_PATH=/ pnpm --filter @workspace/qr-attendance dev"
 
 [agent]
-stack = "PNPM_WORKSPACE"
+stack = "BEST_EFFORT_FALLBACK"
 expertMode = true
 
 [postMerge]
