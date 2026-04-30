@@ -8,15 +8,11 @@ import { rm, mkdir } from "node:fs/promises";
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(artifactDir, "..", "..");
 const outDir = path.resolve(artifactDir, "api");
-const repoOutDir = path.resolve(repoRoot, "api");
 
 async function buildVercel() {
   await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
-  await rm(repoOutDir, { recursive: true, force: true });
-  await mkdir(repoOutDir, { recursive: true });
 
   await esbuild({
     entryPoints: { index: path.resolve(artifactDir, "src/serverless.ts") },
@@ -49,9 +45,6 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);`,
     },
   });
   
-  const { copyFile } = await import("node:fs/promises");
-  await copyFile(path.resolve(outDir, "index.mjs"), path.resolve(repoOutDir, "index.mjs"));
-
   console.log("✓ Vercel bundle written to api/index.mjs");
 }
 
