@@ -7,7 +7,7 @@ import { LoginBody } from "@workspace/api-zod";
 const router = Router();
 const SESSION_SECRET = process.env["SESSION_SECRET"] || "fallback-dev-secret";
 
-router.post("/auth/login", async (req: Request, res: Response) => {
+router.post("/auth/login", async (req: any, res: any) => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });
@@ -52,7 +52,7 @@ router.post("/auth/login", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/auth/mentor-login", async (req: Request, res: Response) => {
+router.post("/auth/mentor-login", async (req: any, res: any) => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });

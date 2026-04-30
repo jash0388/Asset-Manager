@@ -92,7 +92,7 @@ function tryExtractFromString(raw: string): string | null {
   return trimmed;
 }
 
-router.post("/scan", async (req: Request, res: Response) => {
+router.post("/scan", async (req: any, res: any) => {
   const uniqueId = extractUniqueId(req.body);
   if (!uniqueId) {
     res.status(400).json({ error: "Invalid QR code — missing identifier" });
@@ -172,7 +172,7 @@ router.post("/scan", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/attendance/recent", async (req: Request, res: Response) => {
+router.get("/attendance/recent", async (req: any, res: any) => {
   const limitRaw = req.query.limit as string | undefined;
   const limit = limitRaw && /^\d+$/.test(limitRaw) ? Math.min(Number(limitRaw), 100) : 30;
   try {
@@ -189,7 +189,7 @@ router.get("/attendance/recent", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/attendance/today", authMiddleware, async (req: Request, res: Response) => {
+router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
   const today = getTodayDate();
   try {
     const { data: records, error } = await supabase
@@ -206,7 +206,7 @@ router.get("/attendance/today", authMiddleware, async (req: Request, res: Respon
   }
 });
 
-router.get("/attendance/currently-inside", authMiddleware, async (req: Request, res: Response) => {
+router.get("/attendance/currently-inside", authMiddleware, async (req: any, res: any) => {
   const today = getTodayDate();
   try {
     const { data: records, error } = await supabase
@@ -224,7 +224,7 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: Request, 
   }
 });
 
-router.get("/attendance/dashboard-stats", authMiddleware, async (req: Request, res: Response) => {
+router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: any) => {
   const today = getTodayDate();
   try {
     const [
@@ -257,7 +257,7 @@ router.get("/attendance/dashboard-stats", authMiddleware, async (req: Request, r
   }
 });
 
-router.get("/attendance/user/:userId", authMiddleware, async (req: Request, res: Response) => {
+router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any) => {
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) {
     res.status(400).json({ error: "Invalid user ID" });
@@ -322,7 +322,7 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: Request, res:
   }
 });
 
-router.get("/attendance", authMiddleware, async (req: Request, res: Response) => {
+router.get("/attendance", authMiddleware, async (req: any, res: any) => {
   const { from, to, role, month } = req.query as Record<string, string>;
   try {
     let query = supabase.from("qr_attendance").select("*, qr_users(*)");
