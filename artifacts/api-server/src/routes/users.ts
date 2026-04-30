@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
 import { CreateUserBody, GetUserParams, DeleteUserParams, ListUsersQueryParams } from "@workspace/api-zod";
-import { authMiddleware } from "../middlewares/auth.js";
+import { authMiddleware, adminOnly } from "../middlewares/auth.js";
 import QRCode from "qrcode";
 
 const router = Router();
@@ -10,20 +10,7 @@ function generateUniqueId(): string {
   return "UID" + Math.random().toString(36).substring(2, 9).toUpperCase();
 }
 
-function formatUser(u: typeof usersTable.$inferSelect) {
-  return {
-    id: u.id,
-    name: u.name,
-    uniqueId: u.uniqueId,
-    role: u.role,
-    mentorId: u.mentorId ?? null,
-    createdAt: u.createdAt.toISOString(),
-  };
-}
 
-function formatMentor(m: typeof mentorsTable.$inferSelect) {
-  return { id: m.id, email: m.email, name: m.name };
-}
 
 router.get("/users", authMiddleware, async (req: any, res: any) => {
   const parsed = ListUsersQueryParams.safeParse(req.query);

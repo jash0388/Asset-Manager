@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
-import { setAuthTokenGetter, setBaseUrl } from "@workspace/api-client-react";
+import { setAuthTokenGetter, setAuthTokenRefresher, setBaseUrl } from "@workspace/api-client-react";
+import { ensureFreshToken } from "./contexts/AuthContext";
 import App from "./App";
 import "./index.css";
 

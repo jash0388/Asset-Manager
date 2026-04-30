@@ -42,7 +42,7 @@ export default function Scanner() {
     const uid = (decodedText ?? "").trim();
     if (!uid) return;
     scanMutation.mutate(
-      { uniqueId: uid },
+      { data: { uniqueId: uid } },
       {
         onSuccess: (data) => {
           showResult({

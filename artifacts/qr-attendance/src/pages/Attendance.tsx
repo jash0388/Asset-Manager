@@ -37,12 +37,14 @@ export default function Attendance() {
   const [role, setRole] = useState<"" | "student" | "staff">("");
   const [applied, setApplied] = useState({ from: today, to: today, role: "" });
 
-  const { data: records = [], isLoading } = useListAttendance({
-    query: {
-      queryKey: getListAttendanceQueryKey({ from: applied.from, to: applied.to, ...(applied.role ? { role: applied.role } : {}) }),
-    },
-    params: { from: applied.from, to: applied.to, ...(applied.role ? { role: applied.role as "student" | "staff" } : {}) },
-  });
+  const { data: records = [], isLoading } = useListAttendance(
+    { from: applied.from, to: applied.to, ...(applied.role ? { role: applied.role as any } : {}) },
+    {
+      query: {
+        queryKey: getListAttendanceQueryKey({ from: applied.from, to: applied.to, ...(applied.role ? { role: applied.role as any } : {}) }),
+      }
+    }
+  );
 
   const applyFilters = () => setApplied({ from, to, role });
 

@@ -60,22 +60,30 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
   }
   const { email, password } = parsed.data;
   try {
-    const mentors = await db
-      .select()
-      .from(mentorsTable)
-      .where(eq(mentorsTable.email, email))
+    const { data: mentors, error } = await supabase
+      .from("qr_mentors")
+      .select("*")
+      .eq("email", email)
       .limit(1);
-    const mentor = mentors[0];
+
+    if (error) throw error;
+
+    const mentor = mentors?.[0];
     if (!mentor) {
       res.status(401).json({ error: "Invalid credentials" });
       return;
     }
-    const valid = await bcrypt.compare(password, mentor.passwordHash);
+
+    const valid = await bcrypt.compare(password, mentor.password_hash);
     if (!valid) {
       res.status(401).json({ error: "Invalid credentials" });
       return;
     }
-    const token = signMentorToken(mentor.id);
+
+    const token = jwt.sign({ id: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, {
+      expiresIn: "24h",
+    });
+
     res.json({
       token,
       mentor: { id: mentor.id, email: mentor.email, name: mentor.name },

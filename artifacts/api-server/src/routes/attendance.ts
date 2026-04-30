@@ -176,13 +176,15 @@ router.get("/attendance/recent", async (req: any, res: any) => {
   const limitRaw = req.query.limit as string | undefined;
   const limit = limitRaw && /^\d+$/.test(limitRaw) ? Math.min(Number(limitRaw), 100) : 30;
   try {
-    const records = await db
-      .select({ record: attendanceTable, user: usersTable })
-      .from(attendanceTable)
-      .innerJoin(usersTable, eq(attendanceTable.userId, usersTable.id))
-      .orderBy(sql`COALESCE(${attendanceTable.lastScanAt}, ${attendanceTable.entryTime}) DESC`)
+    const { data: records, error } = await supabase
+      .from("qr_attendance")
+      .select("*, qr_users(*)")
+      .order("last_scan_at", { ascending: false, nullsFirst: false })
+      .order("entry_time", { ascending: false })
       .limit(limit);
-    res.json(records.map((r) => formatRecord(r.record, r.user)));
+
+    if (error) throw error;
+    res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
   } catch (err) {
     req.log.error({ err }, "Recent scans error");
     res.status(500).json({ error: "Internal server error" });
