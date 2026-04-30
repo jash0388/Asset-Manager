@@ -1,5 +1,11 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "installCommand": "pnpm install"
+  "installCommand": "pnpm install",
+  "functions": {
+    "api/index.mjs": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
 }
