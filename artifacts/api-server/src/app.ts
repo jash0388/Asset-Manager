@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express from "express";
 import cors from "cors";
 import * as pinoHttpModule from "pino-http";
 import router from "./routes/index.js";
@@ -7,7 +7,7 @@ import { seed } from "./seed.js";
 
 const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any).pinoHttp ?? pinoHttpModule;
 
-const app: Express = express();
+const app = express();
 
 app.use(
   pinoHttp({
