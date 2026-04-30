@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useScanQr, getGetDashboardStatsQueryKey, getGetTodayAttendanceQueryKey, getGetCurrentlyInsideQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, XCircle, QrCode, Camera, ArrowLeft } from "lucide-react";
+import { CheckCircle, XCircle, QrCode, Camera, ArrowLeft, Volume2, VolumeX, Play } from "lucide-react";
 import { Link } from "wouter";
 
 type ScanResult = {
@@ -19,6 +19,12 @@ export default function Scanner() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [cameraError, setCameraError] = useState("");
+  const [volume, setVolume] = useState<number>(() => {
+    if (typeof window === "undefined") return 0.7;
+    const saved = window.localStorage.getItem("qr_scanner_volume");
+    const n = saved == null ? 0.7 : parseFloat(saved);
+    return Number.isFinite(n) && n >= 0 && n <= 1 ? n : 0.7;
+  });
   const resultTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastScanRef = useRef<{ text: string; at: number }>({ text: "", at: 0 });
   const isProcessingRef = useRef(false);
@@ -63,6 +69,7 @@ export default function Scanner() {
   };
 
   const playBeep = (success: boolean) => {
+    if (volume <= 0) return;
     const ctx = ensureAudio();
     if (!ctx) return;
     try {
@@ -70,13 +77,24 @@ export default function Scanner() {
     } catch {}
     try {
       if (success) {
-        playTone(ctx, 880, 120, 0, "sine", 0.3);
-        playTone(ctx, 1320, 180, 130, "sine", 0.3);
+        playTone(ctx, 880, 120, 0, "sine", 0.3 * volume);
+        playTone(ctx, 1320, 180, 130, "sine", 0.3 * volume);
       } else {
-        playTone(ctx, 220, 180, 0, "sawtooth", 0.25);
-        playTone(ctx, 180, 220, 200, "sawtooth", 0.25);
+        playTone(ctx, 220, 180, 0, "sawtooth", 0.25 * volume);
+        playTone(ctx, 180, 220, 200, "sawtooth", 0.25 * volume);
       }
     } catch {}
+  };
+
+  const handleVolumeChange = (next: number) => {
+    setVolume(next);
+    try { window.localStorage.setItem("qr_scanner_volume", String(next)); } catch {}
+  };
+
+  const testSound = async () => {
+    const ctx = ensureAudio();
+    try { if (ctx && ctx.state === "suspended") await ctx.resume(); } catch {}
+    playBeep(true);
   };
 
   const safePauseScanner = () => {
@@ -351,8 +369,47 @@ export default function Scanner() {
           )}
         </div>
 
+        {/* Volume control */}
+        <div className="mt-6 w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3">
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              onClick={() => handleVolumeChange(volume > 0 ? 0 : 0.7)}
+              className="text-slate-300 hover:text-white transition-colors"
+              title={volume > 0 ? "Mute" : "Unmute"}
+              data-testid="toggle-mute"
+            >
+              {volume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5 text-slate-500" />}
+            </button>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-slate-400">Beep volume</span>
+                <span className="text-xs font-mono text-slate-500">{Math.round(volume * 100)}%</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={volume}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                className="w-full accent-blue-500 cursor-pointer"
+                data-testid="volume-slider"
+              />
+            </div>
+            <button
+              onClick={testSound}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700"
+              title="Play test beep"
+              data-testid="test-sound"
+            >
+              <Play className="w-3.5 h-3.5" />
+              Test
+            </button>
+          </div>
+        </div>
+
         {/* Instructions */}
-        <div className="mt-6 w-full space-y-2">
+        <div className="mt-4 w-full space-y-2">
           {[
             "Point camera at QR code on ID card",
             "Hold steady until scan is detected",
