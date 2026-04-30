@@ -1,9 +1,15 @@
-import { db, adminsTable, usersTable, attendanceTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, adminsTable, usersTable, mentorsTable } from "@workspace/db";
 import bcrypt from "bcryptjs";
 import { logger } from "./lib/logger.js";
+import { runMigrations } from "./migrate.js";
+import studentsData from "./students-data.json" with { type: "json" };
+
+type StudentRow = { uniqueId: string; name: string };
+
+let seeded = false;
 
 export async function seed() {
+  if (seeded) return;
   try {
     const passwordHash = await bcrypt.hash("admin123", 10);
     
@@ -56,9 +62,27 @@ export async function seed() {
         scanCount: 2,
         lastScanAt: new Date(new Date(yesterday).setHours(16, 30, 0)),
       });
+      logger.info("Sample mentor seeded. Login: mentor@example.com / mentor@2006");
     }
 
-    logger.info("Database seeded successfully. Admin: admin@college.edu / admin123");
+    const existingUsers = await db.select().from(usersTable).limit(1);
+    if (existingUsers.length === 0) {
+      const students = studentsData as StudentRow[];
+      const batchSize = 100;
+      let inserted = 0;
+      for (let i = 0; i < students.length; i += batchSize) {
+        const batch = students.slice(i, i + batchSize).map((s) => ({
+          name: s.name,
+          uniqueId: s.uniqueId,
+          role: "student" as const,
+        }));
+        await db.insert(usersTable).values(batch).onConflictDoNothing();
+        inserted += batch.length;
+      }
+      logger.info({ count: inserted }, "Bulk-seeded students");
+    }
+
+    seeded = true;
   } catch (err) {
     logger.error({ err }, "Seed error");
   }

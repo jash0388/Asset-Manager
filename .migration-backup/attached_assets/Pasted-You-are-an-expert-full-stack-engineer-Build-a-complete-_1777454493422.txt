@@ -1,0 +1,240 @@
+You are an expert full-stack engineer. Build a complete production-ready mobile-first web + Android-compatible application called **"Smart QR Attendance & Access Control System"**.
+
+The system is used by a college where a security guard scans ID card QR codes to automatically mark attendance with time, date, and entry/exit tracking.
+
+---
+
+## 🎯 CORE REQUIREMENTS
+
+Build a full system with:
+
+1. Mobile-friendly QR scanner app (for security guards)
+2. Backend API server
+3. Admin dashboard (web)
+4. Database integration
+5. Authentication system
+
+---
+
+## 🧱 TECH STACK (STRICT)
+
+* Frontend (Web + Dashboard): React + Tailwind CSS
+* Mobile App: React (PWA style, camera access for QR scanning)
+* Backend: Node.js + Express
+* Database: MongoDB (use Mongoose)
+* QR Scanner: Use a JS library like html5-qrcode
+* Authentication: JWT-based login system
+
+---
+
+## 📱 FEATURES TO IMPLEMENT
+
+### 1. AUTH SYSTEM
+
+* Admin login (email + password)
+* JWT authentication
+* Protected routes
+
+---
+
+### 2. USER MANAGEMENT
+
+* Admin can:
+
+  * Add student/staff
+  * Assign:
+
+    * Name
+    * ID
+    * Role (student/staff)
+    * Unique QR code (auto-generate)
+
+---
+
+### 3. QR CODE SYSTEM
+
+* Generate QR codes for each user
+* QR should contain only a unique user ID (NOT full data)
+* Provide download option for QR (PNG)
+
+---
+
+### 4. SCANNER APP (MAIN FEATURE)
+
+* Mobile-friendly page with:
+
+  * Camera access
+  * Live QR scanning
+* On scan:
+
+  * Send QR data to backend API
+  * Backend validates user
+  * Mark attendance
+
+---
+
+### 5. ATTENDANCE LOGIC (IMPORTANT)
+
+* If first scan of the day → mark as ENTRY with timestamp
+
+* If second scan → mark as EXIT with timestamp
+
+* Store:
+
+  * user_id
+  * date
+  * entry_time
+  * exit_time
+  * scan_count
+
+* Prevent spam:
+
+  * Ignore scans within 30 seconds
+
+---
+
+### 6. ADMIN DASHBOARD
+
+Create a clean dashboard with:
+
+#### a. Overview
+
+* Total users
+* Today attendance count
+* Active users
+
+#### b. Attendance Table
+
+* Show:
+
+  * Name
+  * ID
+  * Date
+  * Entry Time
+  * Exit Time
+  * Status (Present / Left / Inside)
+
+#### c. Filters
+
+* Filter by date
+* Filter by role
+
+#### d. Export
+
+* Download attendance as CSV
+
+---
+
+### 7. API ENDPOINTS
+
+Create structured REST API:
+
+Auth:
+
+* POST /api/auth/login
+
+Users:
+
+* POST /api/users
+* GET /api/users
+* DELETE /api/users/:id
+
+QR:
+
+* GET /api/qrcode/:userId
+
+Attendance:
+
+* POST /api/scan
+* GET /api/attendance
+* GET /api/attendance/today
+
+---
+
+### 8. DATABASE SCHEMA (MONGOOSE)
+
+User Schema:
+
+* name
+* email (optional)
+* role (student/staff)
+* uniqueId
+* qrCode
+
+Attendance Schema:
+
+* userId (ref)
+* date
+* entryTime
+* exitTime
+* scanCount
+
+---
+
+### 9. UI REQUIREMENTS
+
+* Use Tailwind CSS
+* Clean modern UI
+* Mobile responsive
+* Dark/light friendly
+
+Pages:
+
+* Login Page
+* Dashboard
+* User Management
+* Scanner Page (full screen camera)
+
+---
+
+### 10. SECURITY
+
+* Validate all inputs
+* Use JWT middleware
+* Prevent duplicate scans
+* Handle invalid QR codes
+
+---
+
+### 11. PROJECT STRUCTURE
+
+Create proper folder structure:
+
+/client (React app)
+/server (Node.js backend)
+/models
+/routes
+/controllers
+/middleware
+
+---
+
+### 12. BONUS FEATURES (IF POSSIBLE)
+
+* Sound/vibration feedback on scan
+* Show "Access Granted / Denied"
+* Live clock display
+* Basic analytics (graph)
+
+---
+
+## ⚙️ FINAL INSTRUCTIONS
+
+* Generate COMPLETE working code (no pseudo code)
+* Include package.json for both frontend and backend
+* Include setup instructions
+* Include .env example
+* Use clean, readable code
+* Do NOT skip any feature
+* Do NOT summarize — generate FULL IMPLEMENTATION
+
+---
+
+## 🚀 OUTPUT FORMAT
+
+1. Backend code
+2. Frontend code
+3. Setup steps
+4. Run instructions
+
+Everything must be ready to copy-paste and run.

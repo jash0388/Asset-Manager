@@ -1,0 +1,153 @@
+You are an expert full-stack and DevOps engineer. I already have a working QR Attendance System built with a frontend and backend. Your task is to **modify and restructure the existing project so it can be deployed entirely on Vercel (frontend + backend together)**.
+
+IMPORTANT:
+
+* DO NOT rebuild from scratch
+* DO NOT remove existing features
+* ONLY refactor the backend to work with Vercel serverless functions
+
+---
+
+## 🎯 GOAL
+
+Convert the current architecture:
+
+* Existing backend (Express server)
+* Existing frontend (React)
+
+Into a **Vercel-compatible full-stack app** where:
+
+* Frontend stays as is (Vite/React)
+* Backend is moved into `/api` serverless functions
+
+---
+
+## 🔁 BACKEND CONVERSION (VERY IMPORTANT)
+
+Take all existing Express routes and convert them into Vercel functions:
+
+FROM (Express style):
+app.post("/api/scan", ...)
+app.get("/api/users", ...)
+
+TO (Vercel structure):
+
+/api/scan.js
+/api/users.js
+/api/auth/login.js
+/api/attendance.js
+/api/search.js
+
+Each file must:
+
+* Export default async function handler(req, res)
+* Handle method switching (GET, POST, DELETE inside file)
+* Use standard Node request/response
+
+---
+
+## 🧠 DATABASE CONNECTION
+
+* Keep existing database (MongoDB or PostgreSQL)
+* Create a reusable connection file (like `/lib/db.js`)
+* Ensure connection works in serverless environment (no multiple reconnect issues)
+
+---
+
+## 🔐 AUTH (JWT)
+
+* Keep existing auth logic
+* Adapt middleware into reusable function for serverless
+* Use headers for token verification
+
+---
+
+## 🌐 FRONTEND CHANGES
+
+* REMOVE hardcoded backend URLs
+* Replace all API calls:
+
+FROM:
+http://localhost:5000/api/...
+
+TO:
+"/api/..."
+
+* Ensure frontend works on same domain as backend (Vercel)
+
+---
+
+## 📁 FINAL STRUCTURE
+
+/project-root
+/api
+scan.js
+users.js
+auth.js
+attendance.js
+search.js
+
+/client (or root if already frontend)
+/lib/db.js
+vercel.json
+package.json
+
+---
+
+## ⚙️ VERCEL CONFIG
+
+Create `vercel.json`:
+
+{
+"routes": [
+{ "src": "/api/(.*)", "dest": "/api/$1" },
+{ "src": "/(.*)", "dest": "/" }
+]
+}
+
+---
+
+## 🔐 ENV VARIABLES
+
+Prepare `.env.example`:
+
+MONGO_URI=your_db
+JWT_SECRET=your_secret
+
+Ensure code uses:
+process.env.MONGO_URI
+process.env.JWT_SECRET
+
+---
+
+## 🚀 DEPLOYMENT INSTRUCTIONS
+
+Include steps:
+
+1. Push project to GitHub
+2. Import into Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
+
+---
+
+## ⚠️ IMPORTANT RULES
+
+* DO NOT break existing functionality
+* DO NOT remove features
+* DO NOT use Express server after conversion
+* Ensure scanner, admin dashboard, and APIs all work together
+
+---
+
+## 📦 OUTPUT
+
+Provide:
+
+1. Updated folder structure
+2. Converted API files (full code)
+3. Any modified frontend code
+4. vercel.json
+5. Deployment steps
+
+Everything must be ready to deploy on Vercel in one click.

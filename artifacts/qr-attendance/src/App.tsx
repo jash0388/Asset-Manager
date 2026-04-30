@@ -1,15 +1,19 @@
-import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Users from "@/pages/Users";
 import Scanner from "@/pages/Scanner";
 import Attendance from "@/pages/Attendance";
 import History from "@/pages/History";
 import NotFound from "@/pages/not-found";
+import Login from "@/pages/Login";
+import SecurityApp from "@/pages/SecurityApp";
+import MentorApp from "@/pages/MentorApp";
+import Mentors from "@/pages/Mentors";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,41 +24,51 @@ const queryClient = new QueryClient({
   },
 });
 
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { isAuthenticated } = useAuth();
-  if (!isAuthenticated) return <Redirect to="/login" />;
-  return <Component />;
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const { role } = useAuth();
+  const [, navigate] = useLocation();
+  useEffect(() => {
+    if (role !== "admin") navigate("/login");
+  }, [role, navigate]);
+  if (role !== "admin") return null;
+  return <>{children}</>;
 }
 
 function AppRouter() {
-  const { isAuthenticated } = useAuth();
-  const [location] = useLocation();
-
   return (
     <Switch>
-      <Route path="/login">
-        {isAuthenticated ? <Redirect to="/dashboard" /> : <Login />}
-      </Route>
+      {/* Public routes */}
+      <Route path="/security" component={SecurityApp} />
+      <Route path="/login" component={Login} />
+
+      {/* Mentor */}
+      <Route path="/mentor" component={MentorApp} />
+
+      {/* Admin routes */}
       <Route path="/dashboard">
-        <ProtectedRoute component={Dashboard} />
+        <RequireAdmin><Dashboard /></RequireAdmin>
       </Route>
       <Route path="/users">
-        <ProtectedRoute component={Users} />
+        <RequireAdmin><Users /></RequireAdmin>
+      </Route>
+      <Route path="/mentors">
+        <RequireAdmin><Mentors /></RequireAdmin>
       </Route>
       <Route path="/scanner">
-        <ProtectedRoute component={Scanner} />
+        <RequireAdmin><Scanner /></RequireAdmin>
       </Route>
       <Route path="/attendance">
-        <ProtectedRoute component={Attendance} />
+        <RequireAdmin><Attendance /></RequireAdmin>
       </Route>
       <Route path="/history/:userId">
-        <ProtectedRoute component={History} />
+        {(params) => <RequireAdmin><History /></RequireAdmin>}
       </Route>
       <Route path="/history">
-        <ProtectedRoute component={History} />
+        <RequireAdmin><History /></RequireAdmin>
       </Route>
+
       <Route path="/">
-        {isAuthenticated ? <Redirect to="/dashboard" /> : <Redirect to="/login" />}
+        <Redirect to="/login" />
       </Route>
       <Route component={NotFound} />
     </Switch>
@@ -66,7 +80,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <WouterRouter base={(import.meta.env.BASE_URL || "/").replace(/\/$/, "")}>
             <AppRouter />
           </WouterRouter>
           <Toaster />

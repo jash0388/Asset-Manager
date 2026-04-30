@@ -10,9 +10,29 @@ function generateUniqueId(): string {
   return "UID" + Math.random().toString(36).substring(2, 9).toUpperCase();
 }
 
+function formatUser(u: typeof usersTable.$inferSelect) {
+  return {
+    id: u.id,
+    name: u.name,
+    uniqueId: u.uniqueId,
+    role: u.role,
+    mentorId: u.mentorId ?? null,
+    createdAt: u.createdAt.toISOString(),
+  };
+}
+
+function formatMentor(m: typeof mentorsTable.$inferSelect) {
+  return { id: m.id, email: m.email, name: m.name };
+}
+
 router.get("/users", authMiddleware, async (req, res) => {
   const parsed = ListUsersQueryParams.safeParse(req.query);
   const role = parsed.success ? parsed.data.role : undefined;
+  const mentorIdRaw = req.query.mentorId;
+  const mentorId =
+    typeof mentorIdRaw === "string" && /^\d+$/.test(mentorIdRaw)
+      ? Number(mentorIdRaw)
+      : undefined;
   try {
     let query = supabase.from("qr_users").select("*");
     if (role) {
@@ -27,14 +47,21 @@ router.get("/users", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/users", authMiddleware, async (req, res) => {
+router.post("/users", authMiddleware, adminOnly, async (req, res) => {
   const parsed = CreateUserBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body" });
+    const issues = parsed.error.issues.map((i) => `${i.path.join(".") || "body"}: ${i.message}`).join("; ");
+    res.status(400).json({ error: `Invalid input - ${issues || "missing fields"}` });
     return;
   }
-  const { name, uniqueId, role } = parsed.data;
-  const uid = uniqueId || generateUniqueId();
+  const name = parsed.data.name.trim();
+  if (!name) {
+    res.status(400).json({ error: "Name cannot be empty" });
+    return;
+  }
+  const role = parsed.data.role;
+  const uid = (parsed.data.uniqueId || "").trim() || generateUniqueId();
+  const mentorId = parsed.data.mentorId ?? null;
   try {
     const { data: inserted, error } = await supabase
       .from("qr_users")

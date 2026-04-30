@@ -11,6 +11,26 @@ env = { "CI" = "true" }
 [workflows]
 runButton = "Project"
 
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "(PORT=8080 NODE_ENV=development pnpm --filter @workspace/api-server dev 2>&1 | sed -u 's/^/[api] /' &) && PORT=20169 BASE_PATH=/ pnpm --filter @workspace/qr-attendance dev"
+
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
@@ -24,12 +44,5 @@ localPort = 8080
 externalPort = 8080
 
 [[ports]]
-localPort = 8081
-externalPort = 80
-
-[[ports]]
 localPort = 20169
-externalPort = 3000
-
-[nix]
-channel = "stable-25_05"
+externalPort = 80

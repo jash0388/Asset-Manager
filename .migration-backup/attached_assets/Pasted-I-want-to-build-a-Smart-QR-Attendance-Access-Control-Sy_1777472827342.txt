@@ -1,0 +1,74 @@
+I want to build a **Smart QR Attendance & Access Control System** that has two main parts: a **mobile scanner app for security guards** and a **web dashboard for admins**.
+
+The goal of this system is to replace manual attendance by using QR codes on ID cards. Every student or staff member will have a unique QR code that contains only their unique ID.
+
+The **security guard app** will be very simple and lightweight because the guard is unpaid and should only focus on scanning. The app will:
+
+* Open directly to a camera-based QR scanner
+* Scan ID cards using the device camera
+* Send the scanned QR data (user ID) to the backend
+* Show instant feedback like “Access Granted” or “Invalid ID”
+* Automatically mark attendance (entry/exit with time and date)
+* Maintain a simple scan history list (recent scans only, no complex controls)
+
+The security side should NOT have admin features, editing options, or management tools — only scanning and viewing recent history.
+
+The **admin website/dashboard** will handle everything else and must be fully featured. It will:
+
+* Allow admin login with authentication
+* Add, edit, and delete students/staff
+* Automatically generate QR codes for each user
+* View real-time attendance logs
+* See who is currently inside campus
+* Display full attendance tables with entry and exit times
+
+A key feature is **search and history tracking**:
+
+* Admin can search any student by name or ID
+* View complete attendance history (all past records)
+* See entry time, exit time, total duration, and status
+* Filter data by date or range
+* Export attendance data as CSV
+
+The **attendance logic** should work like this:
+
+* First scan of the day = ENTRY time
+* Second scan = EXIT time
+* Extra scans should be ignored or handled safely
+* Duplicate scans within a short time (like 30 seconds) should be blocked
+
+The **backend server** will handle:
+
+* QR validation
+* Attendance logic
+* Database storage
+* API endpoints
+
+The **database** will store:
+
+* Users (name, role, unique ID, QR code)
+* Attendance records (user ID, date, entry time, exit time, scan count)
+
+The entire system should be:
+
+* Mobile-friendly for scanning
+* Secure (QR should not expose personal data)
+* Fast and real-time
+* Clean UI using modern design
+
+Tech stack:
+
+* Frontend: React + Tailwind CSS
+* Backend: Node.js + Express
+* Database: MongoDB
+* QR scanning: camera-based web scanner
+
+The final output should be a complete working system with:
+
+* Scanner app (mobile-friendly)
+* Admin dashboard (web)
+* Backend APIs
+* Database integration
+* Setup and run instructions
+
+This system should feel like a real-world college security and attendance solution, not just a basic demo.

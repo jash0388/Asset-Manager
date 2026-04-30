@@ -18,20 +18,26 @@ import type {
 
 import type {
   AttendanceRecord,
+  CreateMentorBody,
   CreateUserBody,
   DashboardStats,
   ErrorResponse,
+  GetRecentScansParams,
   GetUserAttendanceParams,
   HealthStatus,
   ListAttendanceParams,
   ListUsersParams,
   LoginBody,
   LoginResponse,
+  Mentor,
+  MentorLoginResponse,
+  MentorStudent,
   MessageResponse,
   QrCodeResponse,
   ScanBody,
   ScanResult,
   SearchUsersParams,
+  UpdateUserBody,
   User,
   UserAttendanceHistory,
 } from "./api.schemas";
@@ -204,6 +210,92 @@ export const useLogin = <
   TContext
 > => {
   return useMutation(getLoginMutationOptions(options));
+};
+
+/**
+ * @summary Mentor login
+ */
+export const getMentorLoginUrl = () => {
+  return `/api/auth/mentor-login`;
+};
+
+export const mentorLogin = async (
+  loginBody: LoginBody,
+  options?: RequestInit,
+): Promise<MentorLoginResponse> => {
+  return customFetch<MentorLoginResponse>(getMentorLoginUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(loginBody),
+  });
+};
+
+export const getMentorLoginMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof mentorLogin>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof mentorLogin>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  const mutationKey = ["mentorLogin"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof mentorLogin>>,
+    { data: BodyType<LoginBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return mentorLogin(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MentorLoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof mentorLogin>>
+>;
+export type MentorLoginMutationBody = BodyType<LoginBody>;
+export type MentorLoginMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Mentor login
+ */
+export const useMentorLogin = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof mentorLogin>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof mentorLogin>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  return useMutation(getMentorLoginMutationOptions(options));
 };
 
 /**
@@ -545,6 +637,93 @@ export const useDeleteUser = <
   TContext
 > => {
   return useMutation(getDeleteUserMutationOptions(options));
+};
+
+/**
+ * @summary Update a user (assign mentor, etc.)
+ */
+export const getUpdateUserUrl = (id: number) => {
+  return `/api/users/${id}`;
+};
+
+export const updateUser = async (
+  id: number,
+  updateUserBody: UpdateUserBody,
+  options?: RequestInit,
+): Promise<User> => {
+  return customFetch<User>(getUpdateUserUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateUserBody),
+  });
+};
+
+export const getUpdateUserMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateUser>>,
+    TError,
+    { id: number; data: BodyType<UpdateUserBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateUser>>,
+  TError,
+  { id: number; data: BodyType<UpdateUserBody> },
+  TContext
+> => {
+  const mutationKey = ["updateUser"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateUser>>,
+    { id: number; data: BodyType<UpdateUserBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateUser(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateUserMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateUser>>
+>;
+export type UpdateUserMutationBody = BodyType<UpdateUserBody>;
+export type UpdateUserMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update a user (assign mentor, etc.)
+ */
+export const useUpdateUser = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateUser>>,
+    TError,
+    { id: number; data: BodyType<UpdateUserBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateUser>>,
+  TError,
+  { id: number; data: BodyType<UpdateUserBody> },
+  TContext
+> => {
+  return useMutation(getUpdateUserMutationOptions(options));
 };
 
 /**
@@ -963,6 +1142,100 @@ export function useGetCurrentlyInside<
 }
 
 /**
+ * @summary Get recent scans (public, for security guard)
+ */
+export const getGetRecentScansUrl = (params?: GetRecentScansParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/attendance/recent?${stringifiedParams}`
+    : `/api/attendance/recent`;
+};
+
+export const getRecentScans = async (
+  params?: GetRecentScansParams,
+  options?: RequestInit,
+): Promise<AttendanceRecord[]> => {
+  return customFetch<AttendanceRecord[]>(getGetRecentScansUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetRecentScansQueryKey = (params?: GetRecentScansParams) => {
+  return [`/api/attendance/recent`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetRecentScansQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRecentScans>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetRecentScansParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRecentScans>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetRecentScansQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecentScans>>> = ({
+    signal,
+  }) => getRecentScans(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRecentScans>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRecentScansQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRecentScans>>
+>;
+export type GetRecentScansQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get recent scans (public, for security guard)
+ */
+
+export function useGetRecentScans<
+  TData = Awaited<ReturnType<typeof getRecentScans>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetRecentScansParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRecentScans>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRecentScansQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * @summary Get dashboard statistics
  */
 export const getGetDashboardStatsUrl = () => {
@@ -1243,6 +1516,335 @@ export function useSearchUsers<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getSearchUsersQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List all mentors
+ */
+export const getListMentorsUrl = () => {
+  return `/api/mentors`;
+};
+
+export const listMentors = async (options?: RequestInit): Promise<Mentor[]> => {
+  return customFetch<Mentor[]>(getListMentorsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListMentorsQueryKey = () => {
+  return [`/api/mentors`] as const;
+};
+
+export const getListMentorsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listMentors>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listMentors>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListMentorsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listMentors>>> = ({
+    signal,
+  }) => listMentors({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listMentors>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListMentorsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listMentors>>
+>;
+export type ListMentorsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all mentors
+ */
+
+export function useListMentors<
+  TData = Awaited<ReturnType<typeof listMentors>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listMentors>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListMentorsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a new mentor
+ */
+export const getCreateMentorUrl = () => {
+  return `/api/mentors`;
+};
+
+export const createMentor = async (
+  createMentorBody: CreateMentorBody,
+  options?: RequestInit,
+): Promise<Mentor> => {
+  return customFetch<Mentor>(getCreateMentorUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createMentorBody),
+  });
+};
+
+export const getCreateMentorMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createMentor>>,
+    TError,
+    { data: BodyType<CreateMentorBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createMentor>>,
+  TError,
+  { data: BodyType<CreateMentorBody> },
+  TContext
+> => {
+  const mutationKey = ["createMentor"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createMentor>>,
+    { data: BodyType<CreateMentorBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createMentor(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateMentorMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createMentor>>
+>;
+export type CreateMentorMutationBody = BodyType<CreateMentorBody>;
+export type CreateMentorMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a new mentor
+ */
+export const useCreateMentor = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createMentor>>,
+    TError,
+    { data: BodyType<CreateMentorBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createMentor>>,
+  TError,
+  { data: BodyType<CreateMentorBody> },
+  TContext
+> => {
+  return useMutation(getCreateMentorMutationOptions(options));
+};
+
+/**
+ * @summary Get the logged-in mentor's assigned students with today's status
+ */
+export const getGetMentorStudentsUrl = () => {
+  return `/api/mentor/students`;
+};
+
+export const getMentorStudents = async (
+  options?: RequestInit,
+): Promise<MentorStudent[]> => {
+  return customFetch<MentorStudent[]>(getGetMentorStudentsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMentorStudentsQueryKey = () => {
+  return [`/api/mentor/students`] as const;
+};
+
+export const getGetMentorStudentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMentorStudents>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMentorStudents>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMentorStudentsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMentorStudents>>
+  > = ({ signal }) => getMentorStudents({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMentorStudents>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMentorStudentsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMentorStudents>>
+>;
+export type GetMentorStudentsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get the logged-in mentor's assigned students with today's status
+ */
+
+export function useGetMentorStudents<
+  TData = Awaited<ReturnType<typeof getMentorStudents>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMentorStudents>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMentorStudentsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get attendance history of one of the mentor's students
+ */
+export const getGetMentorStudentAttendanceUrl = (userId: number) => {
+  return `/api/mentor/attendance/${userId}`;
+};
+
+export const getMentorStudentAttendance = async (
+  userId: number,
+  options?: RequestInit,
+): Promise<UserAttendanceHistory> => {
+  return customFetch<UserAttendanceHistory>(
+    getGetMentorStudentAttendanceUrl(userId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetMentorStudentAttendanceQueryKey = (userId: number) => {
+  return [`/api/mentor/attendance/${userId}`] as const;
+};
+
+export const getGetMentorStudentAttendanceQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMentorStudentAttendance>>,
+  TError = ErrorType<unknown>,
+>(
+  userId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMentorStudentAttendance>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetMentorStudentAttendanceQueryKey(userId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMentorStudentAttendance>>
+  > = ({ signal }) =>
+    getMentorStudentAttendance(userId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!userId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMentorStudentAttendance>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMentorStudentAttendanceQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMentorStudentAttendance>>
+>;
+export type GetMentorStudentAttendanceQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get attendance history of one of the mentor's students
+ */
+
+export function useGetMentorStudentAttendance<
+  TData = Awaited<ReturnType<typeof getMentorStudentAttendance>>,
+  TError = ErrorType<unknown>,
+>(
+  userId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMentorStudentAttendance>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMentorStudentAttendanceQueryOptions(
+    userId,
+    options,
+  );
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

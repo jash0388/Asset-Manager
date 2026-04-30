@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "QR Attendance System"
+version = "1.0.0"
+id = "artifacts/qr-attendance"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20169
+
+[services.development]
+run = "pnpm --filter @workspace/qr-attendance run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/qr-attendance", "run", "build" ]
+publicDir = "artifacts/qr-attendance/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20169"
+BASE_PATH = "/"

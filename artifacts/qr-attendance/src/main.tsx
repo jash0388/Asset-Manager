@@ -4,6 +4,7 @@ import App from "./App";
 import "./index.css";
 
 setAuthTokenGetter(() => localStorage.getItem("qr_token"));
+setAuthTokenRefresher(() => ensureFreshToken());
 
 // Dev → local API server; Production → Vercel backend URL
 if (import.meta.env.DEV) {

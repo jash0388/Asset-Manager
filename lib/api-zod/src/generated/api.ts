@@ -32,10 +32,28 @@ export const LoginResponse = zod.object({
 });
 
 /**
+ * @summary Mentor login
+ */
+export const MentorLoginBody = zod.object({
+  email: zod.string().email(),
+  password: zod.string(),
+});
+
+export const MentorLoginResponse = zod.object({
+  token: zod.string(),
+  mentor: zod.object({
+    id: zod.number(),
+    email: zod.string(),
+    name: zod.string(),
+  }),
+});
+
+/**
  * @summary List all users
  */
 export const ListUsersQueryParams = zod.object({
   role: zod.enum(["student", "staff"]).optional(),
+  mentorId: zod.coerce.number().optional(),
 });
 
 export const ListUsersResponseItem = zod.object({
@@ -43,6 +61,7 @@ export const ListUsersResponseItem = zod.object({
   name: zod.string(),
   uniqueId: zod.string(),
   role: zod.enum(["student", "staff"]),
+  mentorId: zod.number().nullish(),
   createdAt: zod.coerce.date(),
 });
 export const ListUsersResponse = zod.array(ListUsersResponseItem);
@@ -54,6 +73,7 @@ export const CreateUserBody = zod.object({
   name: zod.string(),
   uniqueId: zod.string().optional(),
   role: zod.enum(["student", "staff"]),
+  mentorId: zod.number().nullish(),
 });
 
 /**
@@ -68,6 +88,7 @@ export const GetUserResponse = zod.object({
   name: zod.string(),
   uniqueId: zod.string(),
   role: zod.enum(["student", "staff"]),
+  mentorId: zod.number().nullish(),
   createdAt: zod.coerce.date(),
 });
 
@@ -80,6 +101,27 @@ export const DeleteUserParams = zod.object({
 
 export const DeleteUserResponse = zod.object({
   message: zod.string(),
+});
+
+/**
+ * @summary Update a user (assign mentor, etc.)
+ */
+export const UpdateUserParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateUserBody = zod.object({
+  name: zod.string().optional(),
+  mentorId: zod.number().nullish(),
+});
+
+export const UpdateUserResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  uniqueId: zod.string(),
+  role: zod.enum(["student", "staff"]),
+  mentorId: zod.number().nullish(),
+  createdAt: zod.coerce.date(),
 });
 
 /**
@@ -110,6 +152,7 @@ export const ScanQrResponse = zod.object({
     name: zod.string(),
     uniqueId: zod.string(),
     role: zod.enum(["student", "staff"]),
+    mentorId: zod.number().nullish(),
     createdAt: zod.coerce.date(),
   }),
   attendance: zod
@@ -128,6 +171,7 @@ export const ScanQrResponse = zod.object({
           name: zod.string(),
           uniqueId: zod.string(),
           role: zod.enum(["student", "staff"]),
+          mentorId: zod.number().nullish(),
           createdAt: zod.coerce.date(),
         })
         .optional(),
@@ -160,6 +204,7 @@ export const ListAttendanceResponseItem = zod.object({
       name: zod.string(),
       uniqueId: zod.string(),
       role: zod.enum(["student", "staff"]),
+      mentorId: zod.number().nullish(),
       createdAt: zod.coerce.date(),
     })
     .optional(),
@@ -184,6 +229,7 @@ export const GetTodayAttendanceResponseItem = zod.object({
       name: zod.string(),
       uniqueId: zod.string(),
       role: zod.enum(["student", "staff"]),
+      mentorId: zod.number().nullish(),
       createdAt: zod.coerce.date(),
     })
     .optional(),
@@ -210,6 +256,7 @@ export const GetCurrentlyInsideResponseItem = zod.object({
       name: zod.string(),
       uniqueId: zod.string(),
       role: zod.enum(["student", "staff"]),
+      mentorId: zod.number().nullish(),
       createdAt: zod.coerce.date(),
     })
     .optional(),
@@ -217,6 +264,35 @@ export const GetCurrentlyInsideResponseItem = zod.object({
 export const GetCurrentlyInsideResponse = zod.array(
   GetCurrentlyInsideResponseItem,
 );
+
+/**
+ * @summary Get recent scans (public, for security guard)
+ */
+export const GetRecentScansQueryParams = zod.object({
+  limit: zod.coerce.number().optional(),
+});
+
+export const GetRecentScansResponseItem = zod.object({
+  id: zod.number(),
+  userId: zod.number(),
+  date: zod.coerce.date(),
+  entryTime: zod.string().nullish(),
+  exitTime: zod.string().nullish(),
+  scanCount: zod.number(),
+  durationMinutes: zod.number().nullish(),
+  status: zod.enum(["present", "left", "inside"]),
+  user: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      uniqueId: zod.string(),
+      role: zod.enum(["student", "staff"]),
+      mentorId: zod.number().nullish(),
+      createdAt: zod.coerce.date(),
+    })
+    .optional(),
+});
+export const GetRecentScansResponse = zod.array(GetRecentScansResponseItem);
 
 /**
  * @summary Get dashboard statistics
@@ -243,6 +319,7 @@ export const GetDashboardStatsResponse = zod.object({
           name: zod.string(),
           uniqueId: zod.string(),
           role: zod.enum(["student", "staff"]),
+          mentorId: zod.number().nullish(),
           createdAt: zod.coerce.date(),
         })
         .optional(),
@@ -269,6 +346,7 @@ export const GetUserAttendanceResponse = zod.object({
     name: zod.string(),
     uniqueId: zod.string(),
     role: zod.enum(["student", "staff"]),
+    mentorId: zod.number().nullish(),
     createdAt: zod.coerce.date(),
   }),
   records: zod.array(
@@ -287,6 +365,7 @@ export const GetUserAttendanceResponse = zod.object({
           name: zod.string(),
           uniqueId: zod.string(),
           role: zod.enum(["student", "staff"]),
+          mentorId: zod.number().nullish(),
           createdAt: zod.coerce.date(),
         })
         .optional(),
@@ -313,6 +392,112 @@ export const SearchUsersResponseItem = zod.object({
   name: zod.string(),
   uniqueId: zod.string(),
   role: zod.enum(["student", "staff"]),
+  mentorId: zod.number().nullish(),
   createdAt: zod.coerce.date(),
 });
 export const SearchUsersResponse = zod.array(SearchUsersResponseItem);
+
+/**
+ * @summary List all mentors
+ */
+export const ListMentorsResponseItem = zod.object({
+  id: zod.number(),
+  email: zod.string(),
+  name: zod.string(),
+});
+export const ListMentorsResponse = zod.array(ListMentorsResponseItem);
+
+/**
+ * @summary Create a new mentor
+ */
+export const CreateMentorBody = zod.object({
+  name: zod.string(),
+  email: zod.string().email(),
+  password: zod.string(),
+});
+
+/**
+ * @summary Get the logged-in mentor's assigned students with today's status
+ */
+export const GetMentorStudentsResponseItem = zod.object({
+  user: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    uniqueId: zod.string(),
+    role: zod.enum(["student", "staff"]),
+    mentorId: zod.number().nullish(),
+    createdAt: zod.coerce.date(),
+  }),
+  attendanceToday: zod
+    .object({
+      id: zod.number(),
+      userId: zod.number(),
+      date: zod.coerce.date(),
+      entryTime: zod.string().nullish(),
+      exitTime: zod.string().nullish(),
+      scanCount: zod.number(),
+      durationMinutes: zod.number().nullish(),
+      status: zod.enum(["present", "left", "inside"]),
+      user: zod
+        .object({
+          id: zod.number(),
+          name: zod.string(),
+          uniqueId: zod.string(),
+          role: zod.enum(["student", "staff"]),
+          mentorId: zod.number().nullish(),
+          createdAt: zod.coerce.date(),
+        })
+        .optional(),
+    })
+    .nullish(),
+  cameToday: zod.boolean(),
+});
+export const GetMentorStudentsResponse = zod.array(
+  GetMentorStudentsResponseItem,
+);
+
+/**
+ * @summary Get attendance history of one of the mentor's students
+ */
+export const GetMentorStudentAttendanceParams = zod.object({
+  userId: zod.coerce.number(),
+});
+
+export const GetMentorStudentAttendanceResponse = zod.object({
+  user: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    uniqueId: zod.string(),
+    role: zod.enum(["student", "staff"]),
+    mentorId: zod.number().nullish(),
+    createdAt: zod.coerce.date(),
+  }),
+  records: zod.array(
+    zod.object({
+      id: zod.number(),
+      userId: zod.number(),
+      date: zod.coerce.date(),
+      entryTime: zod.string().nullish(),
+      exitTime: zod.string().nullish(),
+      scanCount: zod.number(),
+      durationMinutes: zod.number().nullish(),
+      status: zod.enum(["present", "left", "inside"]),
+      user: zod
+        .object({
+          id: zod.number(),
+          name: zod.string(),
+          uniqueId: zod.string(),
+          role: zod.enum(["student", "staff"]),
+          mentorId: zod.number().nullish(),
+          createdAt: zod.coerce.date(),
+        })
+        .optional(),
+    }),
+  ),
+  summary: zod.object({
+    totalDaysPresent: zod.number(),
+    averageMinutesSpent: zod.number(),
+    lateEntriesCount: zod.number(),
+    totalDaysChecked: zod.number(),
+  }),
+});

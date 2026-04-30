@@ -33,6 +33,23 @@ export interface LoginResponse {
   admin: Admin;
 }
 
+export interface Mentor {
+  id: number;
+  email: string;
+  name: string;
+}
+
+export interface MentorLoginResponse {
+  token: string;
+  mentor: Mentor;
+}
+
+export interface CreateMentorBody {
+  name: string;
+  email: string;
+  password: string;
+}
+
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export const UserRole = {
@@ -45,6 +62,7 @@ export interface User {
   name: string;
   uniqueId: string;
   role: UserRole;
+  mentorId?: number | null;
   createdAt: string;
 }
 
@@ -60,6 +78,12 @@ export interface CreateUserBody {
   name: string;
   uniqueId?: string;
   role: CreateUserBodyRole;
+  mentorId?: number | null;
+}
+
+export interface UpdateUserBody {
+  name?: string;
+  mentorId?: number | null;
 }
 
 export interface QrCodeResponse {
@@ -131,8 +155,15 @@ export interface UserAttendanceHistory {
   summary: AttendanceSummary;
 }
 
+export interface MentorStudent {
+  user: User;
+  attendanceToday?: AttendanceRecord | null;
+  cameToday: boolean;
+}
+
 export type ListUsersParams = {
   role?: ListUsersRole;
+  mentorId?: number;
 };
 
 export type ListUsersRole = (typeof ListUsersRole)[keyof typeof ListUsersRole];
@@ -156,6 +187,10 @@ export const ListAttendanceRole = {
   student: "student",
   staff: "staff",
 } as const;
+
+export type GetRecentScansParams = {
+  limit?: number;
+};
 
 export type GetUserAttendanceParams = {
   from?: string;

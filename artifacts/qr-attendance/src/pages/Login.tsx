@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useLogin } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ShieldCheck, Eye, EyeOff, Lock, Mail, GraduationCap, ArrowRight } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Login() {
+  const { role, loginAdmin, loginMentor } = useAuth();
   const [, navigate] = useLocation();
   const { login } = useAuth();
   const [role, setRole] = useState("admin");
@@ -14,9 +14,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const loginMutation = useLogin();
+  useEffect(() => {
+    if (role === "admin") navigate("/dashboard");
+    else if (role === "mentor") navigate("/mentor");
+  }, [role, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     
@@ -34,7 +37,15 @@ export default function Login() {
           setError(serverError);
         },
       }
-    );
+    } catch (err: any) {
+      const msg =
+        err?.data?.error ||
+        err?.message?.replace(/^HTTP \d+ [^:]+: ?/, "") ||
+        "Login failed";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -109,8 +120,8 @@ export default function Login() {
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
-                  data-testid="login-password"
-                  type={showPassword ? "text" : "password"}
+                  data-testid="password-input"
+                  type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -126,14 +137,13 @@ export default function Login() {
                 </button>
               </div>
             </div>
-
             <button
               data-testid="login-submit"
               type="submit"
               disabled={loginMutation.isPending}
               className="w-full py-4 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800/50 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-[15px] font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 active:scale-[0.98]"
             >
-              {loginMutation.isPending ? (
+              {submitting ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Authenticating...

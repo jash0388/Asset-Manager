@@ -42,13 +42,62 @@ function formatRecord(record: any, user?: any) {
   };
 }
 
+function extractUniqueId(body: any): string | null {
+  if (!body) return null;
+
+  // Direct shape: { uniqueId: "..." }
+  if (typeof body.uniqueId === "string" && body.uniqueId.trim()) {
+    return body.uniqueId.trim();
+  }
+  // Some clients send { qrText } or { code } or { id }
+  for (const key of ["qrText", "code", "id", "data", "value", "text"]) {
+    const v = body[key];
+    if (typeof v === "string" && v.trim()) {
+      return tryExtractFromString(v.trim());
+    }
+  }
+  // Body is itself a raw string (sometimes happens with text/plain)
+  if (typeof body === "string") {
+    return tryExtractFromString(body.trim());
+  }
+  return null;
+}
+
+function tryExtractFromString(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  // If it looks like JSON, try to parse and pick uniqueId
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    try {
+      const obj = JSON.parse(trimmed);
+      if (obj && typeof obj === "object" && typeof (obj as any).uniqueId === "string") {
+        return (obj as any).uniqueId.trim();
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+  // If it looks like a URL, try to extract a uniqueId path/query param
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const u = new URL(trimmed);
+      const q = u.searchParams.get("uniqueId") || u.searchParams.get("uid");
+      if (q) return q.trim();
+      const last = u.pathname.split("/").filter(Boolean).pop();
+      if (last) return decodeURIComponent(last).trim();
+    } catch {
+      /* fall through */
+    }
+  }
+  return trimmed;
+}
+
 router.post("/scan", async (req, res) => {
-  const parsed = ScanQrBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body" });
+  const uniqueId = extractUniqueId(req.body);
+  if (!uniqueId) {
+    res.status(400).json({ error: "Invalid QR code — missing identifier" });
     return;
   }
-  const { uniqueId } = parsed.data;
   try {
     const { data: users, error: userError } = await supabase
       .from("qr_users")
@@ -119,6 +168,23 @@ router.post("/scan", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "Scan error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/attendance/recent", async (req, res) => {
+  const limitRaw = req.query.limit as string | undefined;
+  const limit = limitRaw && /^\d+$/.test(limitRaw) ? Math.min(Number(limitRaw), 100) : 30;
+  try {
+    const records = await db
+      .select({ record: attendanceTable, user: usersTable })
+      .from(attendanceTable)
+      .innerJoin(usersTable, eq(attendanceTable.userId, usersTable.id))
+      .orderBy(sql`COALESCE(${attendanceTable.lastScanAt}, ${attendanceTable.entryTime}) DESC`)
+      .limit(limit);
+    res.json(records.map((r) => formatRecord(r.record, r.user)));
+  } catch (err) {
+    req.log.error({ err }, "Recent scans error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
