@@ -27,16 +27,14 @@ const queryClient = new QueryClient({
 function RequireAdmin({ children }: { children: React.ReactNode }) {
   const { role } = useAuth();
   const [, navigate] = useLocation();
-  
+
   useEffect(() => {
-    const isBypass = localStorage.getItem("qr_auth_token") === "bypass-token";
-    if (role !== "admin" && !isBypass) {
+    if (role !== "admin") {
       navigate("/login");
     }
   }, [role, navigate]);
 
-  const isBypass = localStorage.getItem("qr_auth_token") === "bypass-token";
-  if (role !== "admin" && !isBypass) return null;
+  if (role !== "admin") return null;
   return <>{children}</>;
 }
 

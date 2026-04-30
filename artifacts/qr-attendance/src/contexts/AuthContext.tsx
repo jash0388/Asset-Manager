@@ -21,6 +21,7 @@ interface AuthContextValue {
   loading: boolean;
   loginAdmin: (email: string, password: string) => Promise<void>;
   loginMentor: (email: string, password: string) => Promise<void>;
+  loginBypass: () => void;
   logout: () => void;
 }
 
@@ -103,6 +104,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist]
   );
 
+  const loginBypass = useCallback(() => {
+    const bypassAdmin: AuthAdmin = {
+      id: -1,
+      email: "bypass@local",
+      name: "Admin (bypass)",
+    };
+    persist("bypass-token", "admin", bypassAdmin);
+  }, [persist]);
+
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(ROLE_KEY);
@@ -129,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ role, admin, mentor, token, loading, loginAdmin, loginMentor, logout }}
+      value={{ role, admin, mentor, token, loading, loginAdmin, loginMentor, loginBypass, logout }}
     >
       {children}
     </AuthContext.Provider>

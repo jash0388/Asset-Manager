@@ -1,12 +1,17 @@
 {
   "version": 2,
+  "framework": null,
+  "installCommand": "echo 'Skipping install - using prebuilt bundle'",
+  "buildCommand": "echo 'Skipping build - using prebuilt bundle'",
+  "outputDirectory": ".",
   "functions": {
     "api/index.mjs": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 10,
+      "includeFiles": "api/**"
     }
   },
-  "routes": [
-    { "source": "/(.*)", "destination": "api/index.mjs" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
   ]
 }

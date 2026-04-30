@@ -46,3 +46,8 @@ externalPort = 8080
 [[ports]]
 localPort = 20169
 externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+ALLOW_BYPASS_TOKEN = "true"

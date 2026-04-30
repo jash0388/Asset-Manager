@@ -2,38 +2,25 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ShieldCheck, Lock, ArrowRight } from "lucide-react";
 
+const BYPASS_CODE = "038899";
+
 export default function Login() {
-  const { setUser } = useAuth();
+  const { loginBypass } = useAuth();
   const [adminCode, setAdminCode] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
-    console.log("Attempting bypass with code:", adminCode);
 
-    if (adminCode === "038899") {
-      const mockUser = {
-        id: "bypass-admin",
-        email: "jashwanth038@gmail.com",
-        role: "admin",
-        full_name: "Admin User",
-        created_at: new Date().toISOString()
-      };
-      
-      // Save to localStorage FIRST
-      localStorage.setItem("qr_auth_token", "bypass-token");
-      localStorage.setItem("qr_user", JSON.stringify(mockUser));
-      
-      // Update state
-      setUser(mockUser);
-      
-      // Force a hard redirect to bypass any router issues
-      window.location.href = "/dashboard";
-    } else {
-      setError("Invalid code. Try 038899");
+    if (adminCode.trim() === BYPASS_CODE) {
+      loginBypass();
+      const base = (import.meta as any).env?.BASE_URL || "/";
+      window.location.href = `${base}dashboard`.replace(/\/+/g, "/");
+      return;
     }
+
+    setError("Invalid code. Try 038899");
   };
 
   return (
@@ -48,7 +35,6 @@ export default function Login() {
         </div>
 
         <div className="bg-[#0c111d] border border-slate-800/60 rounded-[2rem] p-8 shadow-2xl overflow-hidden relative">
-          
           {error && (
             <div className="mb-6 px-4 py-3 rounded-xl bg-red-950/40 border border-red-900/50 text-red-400 text-sm text-center">
               {error}
@@ -57,13 +43,17 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-slate-300 ml-1 text-center mb-4 uppercase tracking-wider">Admin Access</label>
+              <label className="block text-sm font-semibold text-slate-300 ml-1 text-center mb-4 uppercase tracking-wider">
+                Admin Access
+              </label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   maxLength={6}
                   autoFocus
