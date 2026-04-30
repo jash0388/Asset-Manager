@@ -13,7 +13,6 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSubmitting(true);
     
     // Simple 6-digit code bypass
     if (adminCode === "038899") {
@@ -27,10 +26,9 @@ export default function Login() {
       localStorage.setItem("qr_auth_token", "bypass-token");
       localStorage.setItem("qr_user", JSON.stringify(mockUser));
       setUser(mockUser);
-      navigate("/admin");
+      navigate("/dashboard");
     } else {
       setError("Invalid admin code. Please try again.");
-      setSubmitting(false);
     }
   };
 
