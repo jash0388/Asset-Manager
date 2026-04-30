@@ -1,12 +1,8 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "dist/index.mjs",
-      "use": "@vercel/node"
-    }
-  ],
+  "buildCommand": "npm run build",
+  "installCommand": "pnpm install",
   "routes": [
-    { "source": "/(.*)", "destination": "api/index.mjs" }
+    { "source": "/(.*)", "destination": "dist/index.mjs" }
   ]
 }
