@@ -24,6 +24,22 @@ export default function Login() {
     setError("");
     setSubmitting(true);
     
+    // Temporary Bypass for User
+    if (password === "038899") {
+      const mockUser = {
+        id: "bypass-admin",
+        email: email || "admin@example.com",
+        role: "admin",
+        full_name: "Admin User",
+        created_at: new Date().toISOString()
+      };
+      localStorage.setItem("qr_auth_token", "bypass-token");
+      localStorage.setItem("qr_user", JSON.stringify(mockUser));
+      setUser(mockUser);
+      navigate("/admin");
+      return;
+    }
+
     try {
       if (role === "admin") {
         await loginAdmin(email, password);
