@@ -5,14 +5,21 @@ import { logger } from "./lib/logger.js";
 
 export async function seed() {
   try {
-    const existing = await db.select().from(adminsTable).limit(1);
-    if (existing.length > 0) {
-      logger.info("Database already seeded, skipping");
-      return;
-    }
-
     const passwordHash = await bcrypt.hash("admin123", 10);
-    await db.insert(adminsTable).values({ email: "admin@college.edu", name: "Admin", passwordHash });
+    
+    const admins = [
+      { email: "admin@college.edu", name: "Admin", passwordHash },
+      { email: "jashwanth038@gmail.com", name: "Jashwanth", passwordHash }
+    ];
+
+    for (const admin of admins) {
+      await db.insert(adminsTable)
+        .values(admin)
+        .onConflictDoUpdate({
+          target: adminsTable.email,
+          set: { passwordHash: admin.passwordHash, name: admin.name }
+        });
+    }
 
     const students = await db.insert(usersTable).values([
       { name: "Arjun Sharma", uniqueId: "STU001", role: "student" },

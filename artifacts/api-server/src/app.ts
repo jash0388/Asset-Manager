@@ -32,6 +32,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
-seed().catch((err) => logger.error({ err }, "Seed failed"));
+// seed().catch((err) => logger.error({ err }, "Seed failed"));
 
 export default app;
