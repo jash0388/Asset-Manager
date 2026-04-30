@@ -41,12 +41,11 @@ function HistoryPanel({ userId }: { userId: number }) {
   const [to, setTo] = useState("");
   const [applied, setApplied] = useState<{ from?: string; to?: string }>({});
 
-  const { data, isLoading } = useGetUserAttendance(userId, {
+  const { data, isLoading } = useGetUserAttendance(userId, applied, {
     query: {
       queryKey: getGetUserAttendanceQueryKey(userId, applied),
       enabled: !!userId,
-    },
-    params: applied,
+    }
   });
 
   const exportCsv = () => {
@@ -199,13 +198,15 @@ export default function History() {
   const [query, setQuery] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<number | null>(params.userId ? parseInt(params.userId) : null);
 
-  const { data: searchResults = [], isLoading: searching } = useSearchUsers({
-    query: {
-      queryKey: getSearchUsersQueryKey({ query: query || " " }),
-      enabled: query.length >= 2,
-    },
-    params: { query: query || " " },
-  });
+  const { data: searchResults = [], isLoading: searching } = useSearchUsers(
+    { query: query || " " },
+    {
+      query: {
+        queryKey: getSearchUsersQueryKey({ query: query || " " }),
+        enabled: query.length >= 2,
+      },
+    }
+  );
 
   return (
     <Layout>

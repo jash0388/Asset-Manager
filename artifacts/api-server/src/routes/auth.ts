@@ -48,7 +48,7 @@ router.post("/auth/login", async (req: any, res: any) => {
       token,
       admin: { id: admin.id, email: admin.email, name: admin.name },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("[Login API] Fatal error:", err);
     req.log.error({ err }, "Login error");
     res.status(500).json({ error: "Internal server error: " + (err instanceof Error ? err.message : "Unknown error") });
@@ -63,27 +63,35 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
   }
   const { email, password } = parsed.data;
   try {
-    const mentors = await db
-      .select()
-      .from(mentorsTable)
-      .where(eq(mentorsTable.email, email))
+    const { data: mentors, error } = await supabase
+      .from("qr_mentors")
+      .select("*")
+      .eq("email", email)
       .limit(1);
-    const mentor = mentors[0];
+
+    if (error) throw error;
+
+    const mentor = mentors?.[0];
     if (!mentor) {
       res.status(401).json({ error: "Invalid credentials" });
       return;
     }
-    const valid = await bcrypt.compare(password, mentor.passwordHash);
+
+    const valid = await bcrypt.compare(password, mentor.password_hash);
     if (!valid) {
       res.status(401).json({ error: "Invalid credentials" });
       return;
     }
-    const token = signMentorToken(mentor.id);
+
+    const token = jwt.sign({ id: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, {
+      expiresIn: "24h",
+    });
+
     res.json({
       token,
       mentor: { id: mentor.id, email: mentor.email, name: mentor.name },
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Mentor login error");
     res.status(500).json({ error: "Internal server error" });
   }

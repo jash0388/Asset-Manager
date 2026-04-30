@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { db, usersTable, attendanceTable } from "@workspace/db";
-import { eq, and, gte, lte, sql } from "drizzle-orm";
-import { authMiddleware, mentorOnly, AuthRequest } from "../middlewares/auth.js";
+import { supabase } from "../lib/supabase.js";
+import { authMiddleware, mentorOnly } from "../middlewares/auth.js";
 
 const router = Router();
 
@@ -9,83 +8,85 @@ function getTodayDate(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-function formatUser(u: typeof usersTable.$inferSelect) {
+function formatUser(u: any) {
   return {
     id: u.id,
     name: u.name,
-    uniqueId: u.uniqueId,
+    uniqueId: u.unique_id,
     role: u.role,
-    mentorId: u.mentorId ?? null,
-    createdAt: u.createdAt.toISOString(),
+    mentorId: u.mentor_id ?? null,
+    createdAt: u.created_at,
   };
 }
 
-function formatRecord(record: typeof attendanceTable.$inferSelect, user?: typeof usersTable.$inferSelect) {
+function formatRecord(record: any, user?: any) {
   const durationMinutes =
-    record.entryTime && record.exitTime
-      ? Math.floor((new Date(record.exitTime).getTime() - new Date(record.entryTime).getTime()) / 60000)
+    record.entry_time && record.exit_time
+      ? Math.floor((new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 60000)
       : null;
   let status: "present" | "left" | "inside" = "inside";
-  if (record.exitTime) status = "left";
-  else if (record.entryTime) status = "inside";
+  if (record.exit_time) status = "left";
+  else if (record.entry_time) status = "inside";
   return {
     id: record.id,
-    userId: record.userId,
+    userId: record.user_id,
     date: record.date,
-    entryTime: record.entryTime ? record.entryTime.toISOString() : null,
-    exitTime: record.exitTime ? record.exitTime.toISOString() : null,
-    scanCount: record.scanCount,
+    entryTime: record.entry_time,
+    exitTime: record.exit_time,
+    scanCount: record.scan_count,
     durationMinutes,
     status,
     ...(user ? { user: formatUser(user) } : {}),
   };
 }
 
-router.get("/mentor/students", authMiddleware, mentorOnly, async (req: AuthRequest, res) => {
+router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res: any) => {
   const mentorId = req.mentorId!;
   const today = getTodayDate();
   try {
-    const students = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.mentorId, mentorId))
-      .orderBy(usersTable.name);
+    const { data: students, error: studentError } = await supabase
+      .from("qr_users")
+      .select("*")
+      .eq("mentor_id", mentorId)
+      .order("name");
 
-    if (students.length === 0) {
+    if (studentError) throw studentError;
+
+    if (!students || students.length === 0) {
       res.json([]);
       return;
     }
 
-    const studentIds = students.map((s) => s.id);
-    const records = await db
-      .select()
-      .from(attendanceTable)
-      .where(
-        and(
-          eq(attendanceTable.date, today),
-          sql`${attendanceTable.userId} IN (${sql.join(studentIds.map((id) => sql`${id}`), sql`, `)})`
-        )
-      );
+    const studentIds = students.map((s: any) => s.id);
+    const { data: records, error: recordError } = await supabase
+      .from("qr_attendance")
+      .select("*")
+      .eq("date", today)
+      .in("user_id", studentIds);
 
-    const recordsByUser = new Map<number, typeof records[number]>();
-    for (const r of records) recordsByUser.set(r.userId, r);
+    if (recordError) throw recordError;
 
-    const result = students.map((s) => {
+    const recordsByUser = new Map<number, any>();
+    if (records) {
+      for (const r of records) recordsByUser.set(r.user_id, r);
+    }
+
+    const result = students.map((s: any) => {
       const rec = recordsByUser.get(s.id);
       return {
         user: formatUser(s),
         attendanceToday: rec ? formatRecord(rec, s) : null,
-        cameToday: !!(rec && rec.entryTime),
+        cameToday: !!(rec && rec.entry_time),
       };
     });
     res.json(result);
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Mentor students error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req: AuthRequest, res) => {
+router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req: any, res: any) => {
   const mentorId = req.mentorId!;
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) {
@@ -94,61 +95,65 @@ router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req:
   }
   const { from, to, month } = req.query as Record<string, string>;
   try {
-    const users = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    const user = users[0];
+    const { data: users, error: userError } = await supabase
+      .from("qr_users")
+      .select("*")
+      .eq("id", userId)
+      .limit(1);
+
+    if (userError) throw userError;
+    const user = users?.[0];
     if (!user) {
       res.status(404).json({ error: "Student not found" });
       return;
     }
-    if (user.mentorId !== mentorId) {
+    if (user.mentor_id !== mentorId) {
       res.status(403).json({ error: "This student is not assigned to you" });
       return;
     }
 
-    let conditions = [eq(attendanceTable.userId, userId)];
-    if (from) conditions.push(gte(attendanceTable.date, from));
-    if (to) conditions.push(lte(attendanceTable.date, to));
+    let query = supabase.from("qr_attendance").select("*").eq("user_id", userId);
+    if (from) query = query.gte("date", from);
+    if (to) query = query.lte("date", to);
     if (month) {
       const [year, mon] = month.split("-");
       const start = `${year}-${mon}-01`;
       const endDay = new Date(parseInt(year), parseInt(mon), 0).getDate();
       const end = `${year}-${mon}-${String(endDay).padStart(2, "0")}`;
-      conditions.push(gte(attendanceTable.date, start));
-      conditions.push(lte(attendanceTable.date, end));
+      query = query.gte("date", start).lte("date", end);
     }
 
-    const records = await db
-      .select()
-      .from(attendanceTable)
-      .where(and(...conditions))
-      .orderBy(sql`${attendanceTable.date} DESC`);
+    const { data: records, error: recordError } = await query.order("date", { ascending: false });
+    if (recordError) throw recordError;
 
     const lateHour = 9;
     let totalDuration = 0;
     let durationCount = 0;
     let lateCount = 0;
-    for (const r of records) {
-      if (r.entryTime && r.exitTime) {
-        const dur = new Date(r.exitTime).getTime() - new Date(r.entryTime).getTime();
-        totalDuration += dur;
-        durationCount++;
-      }
-      if (r.entryTime && new Date(r.entryTime).getHours() >= lateHour) {
-        lateCount++;
+    if (records) {
+      for (const r of records) {
+        if (r.entry_time && r.exit_time) {
+          const dur = new Date(r.exit_time).getTime() - new Date(r.entry_time).getTime();
+          totalDuration += dur;
+          durationCount++;
+        }
+        if (r.entry_time && new Date(r.entry_time).getHours() >= lateHour) {
+          lateCount++;
+        }
       }
     }
     const summary = {
-      totalDaysPresent: records.length,
+      totalDaysPresent: records?.length || 0,
       averageMinutesSpent: durationCount > 0 ? Math.floor(totalDuration / durationCount / 60000) : 0,
       lateEntriesCount: lateCount,
-      totalDaysChecked: records.length,
+      totalDaysChecked: records?.length || 0,
     };
     res.json({
       user: formatUser(user),
-      records: records.map((r) => formatRecord(r, user)),
+      records: records ? records.map((r: any) => formatRecord(r, user)) : [],
       summary,
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Mentor user attendance error");
     res.status(500).json({ error: "Internal server error" });
   }

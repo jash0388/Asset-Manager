@@ -166,7 +166,7 @@ router.post("/scan", async (req: any, res: any) => {
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
       attendance: formatRecord(updated, user),
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Scan error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -176,14 +176,16 @@ router.get("/attendance/recent", async (req: any, res: any) => {
   const limitRaw = req.query.limit as string | undefined;
   const limit = limitRaw && /^\d+$/.test(limitRaw) ? Math.min(Number(limitRaw), 100) : 30;
   try {
-    const records = await db
-      .select({ record: attendanceTable, user: usersTable })
-      .from(attendanceTable)
-      .innerJoin(usersTable, eq(attendanceTable.userId, usersTable.id))
-      .orderBy(sql`COALESCE(${attendanceTable.lastScanAt}, ${attendanceTable.entryTime}) DESC`)
+    const { data: records, error } = await supabase
+      .from("qr_attendance")
+      .select("*, qr_users(*)")
+      .order("last_scan_at", { ascending: false, nullsFirst: false })
+      .order("entry_time", { ascending: false })
       .limit(limit);
-    res.json(records.map((r) => formatRecord(r.record, r.user)));
-  } catch (err) {
+
+    if (error) throw error;
+    res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
+  } catch (err: any) {
     req.log.error({ err }, "Recent scans error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -199,8 +201,8 @@ router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
       .order("entry_time", { ascending: false });
 
     if (error) throw error;
-    res.json(records.map((r) => formatRecord(r, r.qr_users)));
-  } catch (err) {
+    res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
+  } catch (err: any) {
     req.log.error({ err }, "Today attendance error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -217,8 +219,8 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
       .not("entry_time", "is", null);
 
     if (error) throw error;
-    res.json(records.map((r) => formatRecord(r, r.qr_users)));
-  } catch (err) {
+    res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
+  } catch (err: any) {
     req.log.error({ err }, "Currently inside error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -251,7 +253,7 @@ router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: 
       currentlyInsideCount: currentlyInsideCount || 0,
       recentActivity: recentResult ? recentResult.map((r: any) => formatRecord(r, r.qr_users)) : [],
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "Dashboard stats error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -313,10 +315,10 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any
     };
     res.json({
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
-      records: records.map((r) => formatRecord(r, user)),
+      records: records.map((r: any) => formatRecord(r, user)),
       summary,
     });
-  } catch (err) {
+  } catch (err: any) {
     req.log.error({ err }, "User attendance error");
     res.status(500).json({ error: "Internal server error" });
   }
@@ -347,11 +349,11 @@ router.get("/attendance", authMiddleware, async (req: any, res: any) => {
     // Filter out records where join failed if role was provided
     let filtered = results;
     if (role) {
-      filtered = results.filter((r) => r.qr_users !== null);
+      filtered = results.filter((r: any) => r.qr_users !== null);
     }
 
-    res.json(filtered.map((r) => formatRecord(r, r.qr_users)));
-  } catch (err) {
+    res.json(filtered.map((r: any) => formatRecord(r, r.qr_users)));
+  } catch (err: any) {
     req.log.error({ err }, "List attendance error");
     res.status(500).json({ error: "Internal server error" });
   }

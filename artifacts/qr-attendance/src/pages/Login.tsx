@@ -5,43 +5,36 @@ import { ShieldCheck, Eye, EyeOff, Lock, Mail, GraduationCap, ArrowRight } from 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Login() {
-  const { role, loginAdmin, loginMentor } = useAuth();
+  const { role: authRole, loginAdmin, loginMentor } = useAuth();
   const [, navigate] = useLocation();
-  const { login } = useAuth();
-  const [role, setRole] = useState("admin");
+  const [role, setRole] = useState<string>("admin");
   const [email, setEmail] = useState("jashwanth038@gmail.com");
   const [password, setPassword] = useState("admin123");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (role === "admin") navigate("/dashboard");
-    else if (role === "mentor") navigate("/mentor");
-  }, [role, navigate]);
+    if (authRole === "admin") navigate("/dashboard");
+    else if (authRole === "mentor") navigate("/mentor");
+  }, [authRole, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSubmitting(true);
     
-    // Fixed mutation call: data must be wrapped in a data object for generated hooks
-    loginMutation.mutate(
-      { data: { email, password } },
-      {
-        onSuccess: (data) => {
-          login(data.token, data.admin);
-          navigate("/dashboard");
-        },
-        onError: (err: any) => {
-          console.error("Login error response:", err);
-          const serverError = err.response?.data?.error || err.message || "Internal server error";
-          setError(serverError);
-        },
+    try {
+      if (role === "admin") {
+        await loginAdmin(email, password);
+        navigate("/dashboard");
+      } else {
+        await loginMentor(email, password);
+        navigate("/mentor");
       }
     } catch (err: any) {
-      const msg =
-        err?.data?.error ||
-        err?.message?.replace(/^HTTP \d+ [^:]+: ?/, "") ||
-        "Login failed";
+      console.error("Login error:", err);
+      const msg = err.body?.error || err.message || "Invalid credentials or internal server error";
       setError(msg);
     } finally {
       setSubmitting(false);
@@ -140,7 +133,7 @@ export default function Login() {
             <button
               data-testid="login-submit"
               type="submit"
-              disabled={loginMutation.isPending}
+              disabled={submitting}
               className="w-full py-4 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800/50 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-[15px] font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 active:scale-[0.98]"
             >
               {submitting ? (

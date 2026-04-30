@@ -70,10 +70,12 @@ export default function Users() {
   const [qrUserName, setQrUserName] = useState("");
   const [newUser, setNewUser] = useState<NewUser>({ name: "", uniqueId: "", role: "student" });
 
-  const { data: users = [], isLoading } = useListUsers({
-    query: { queryKey: getListUsersQueryKey(roleFilter ? { role: roleFilter } : undefined) },
-    ...(roleFilter ? { params: { role: roleFilter } } : {}),
-  });
+  const { data: users = [], isLoading } = useListUsers(
+    roleFilter ? { role: roleFilter } : undefined,
+    {
+      query: { queryKey: getListUsersQueryKey(roleFilter ? { role: roleFilter } : undefined) }
+    }
+  );
 
   const createMutation = useCreateUser();
   const deleteMutation = useDeleteUser();
@@ -97,7 +99,7 @@ export default function Users() {
       return;
     }
     createMutation.mutate(
-      { name: trimmedName, ...(newUser.uniqueId.trim() ? { uniqueId: newUser.uniqueId.trim() } : {}), role: newUser.role },
+      { data: { name: trimmedName, ...(newUser.uniqueId.trim() ? { uniqueId: newUser.uniqueId.trim() } : {}), role: newUser.role } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
