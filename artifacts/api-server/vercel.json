@@ -7,6 +7,6 @@
     }
   ],
   "routes": [
-    { "source": "/(.*)", "destination": "dist/index.mjs" }
+    { "source": "/(.*)", "destination": "api/index.mjs" }
   ]
 }
