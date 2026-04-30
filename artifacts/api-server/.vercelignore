@@ -1,8 +1,0 @@
-src/
-node_modules/
-dist/
-tsconfig.build.json
-build.mjs
-build.vercel.mjs
-.env
-.env.example
