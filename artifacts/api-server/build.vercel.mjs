@@ -9,7 +9,7 @@ globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(artifactDir, "..", "..");
-const outDir = path.resolve(repoRoot, "api");
+const outDir = path.resolve(artifactDir, "api");
 
 async function buildVercel() {
   await rm(outDir, { recursive: true, force: true });
