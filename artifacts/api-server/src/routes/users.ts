@@ -37,7 +37,7 @@ router.get("/users", authMiddleware, async (req: any, res: any) => {
 router.post("/users", authMiddleware, adminOnly, async (req: any, res: any) => {
   const parsed = CreateUserBody.safeParse(req.body);
   if (!parsed.success) {
-    const issues = parsed.error.issues.map((i) => `${i.path.join(".") || "body"}: ${i.message}`).join("; ");
+    const issues = parsed.error.issues.map((i: any) => `${i.path.join(".") || "body"}: ${i.message}`).join("; ");
     res.status(400).json({ error: `Invalid input - ${issues || "missing fields"}` });
     return;
   }

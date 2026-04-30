@@ -201,7 +201,7 @@ router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
       .order("entry_time", { ascending: false });
 
     if (error) throw error;
-    res.json(records.map((r) => formatRecord(r, r.qr_users)));
+    res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
   } catch (err) {
     req.log.error({ err }, "Today attendance error");
     res.status(500).json({ error: "Internal server error" });
@@ -219,7 +219,7 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
       .not("entry_time", "is", null);
 
     if (error) throw error;
-    res.json(records.map((r) => formatRecord(r, r.qr_users)));
+    res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
   } catch (err) {
     req.log.error({ err }, "Currently inside error");
     res.status(500).json({ error: "Internal server error" });
@@ -315,7 +315,7 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any
     };
     res.json({
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
-      records: records.map((r) => formatRecord(r, user)),
+      records: records.map((r: any) => formatRecord(r, user)),
       summary,
     });
   } catch (err) {
@@ -349,10 +349,10 @@ router.get("/attendance", authMiddleware, async (req: any, res: any) => {
     // Filter out records where join failed if role was provided
     let filtered = results;
     if (role) {
-      filtered = results.filter((r) => r.qr_users !== null);
+      filtered = results.filter((r: any) => r.qr_users !== null);
     }
 
-    res.json(filtered.map((r) => formatRecord(r, r.qr_users)));
+    res.json(filtered.map((r: any) => formatRecord(r, r.qr_users)));
   } catch (err) {
     req.log.error({ err }, "List attendance error");
     res.status(500).json({ error: "Internal server error" });

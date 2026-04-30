@@ -57,7 +57,7 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res)
       return;
     }
 
-    const studentIds = students.map((s) => s.id);
+    const studentIds = students.map((s: any) => s.id);
     const { data: records, error: recordError } = await supabase
       .from("qr_attendance")
       .select("*")
@@ -71,7 +71,7 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res)
       for (const r of records) recordsByUser.set(r.user_id, r);
     }
 
-    const result = students.map((s) => {
+    const result = students.map((s: any) => {
       const rec = recordsByUser.get(s.id);
       return {
         user: formatUser(s),
@@ -150,7 +150,7 @@ router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req:
     };
     res.json({
       user: formatUser(user),
-      records: records ? records.map((r) => formatRecord(r, user)) : [],
+      records: records ? records.map((r: any) => formatRecord(r, user)) : [],
       summary,
     });
   } catch (err) {
