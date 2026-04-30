@@ -25,7 +25,7 @@ function formatMentor(m: typeof mentorsTable.$inferSelect) {
   return { id: m.id, email: m.email, name: m.name };
 }
 
-router.get("/users", authMiddleware, async (req, res) => {
+router.get("/users", authMiddleware, async (req: Request, res: Response) => {
   const parsed = ListUsersQueryParams.safeParse(req.query);
   const role = parsed.success ? parsed.data.role : undefined;
   const mentorIdRaw = req.query.mentorId;
@@ -47,7 +47,7 @@ router.get("/users", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/users", authMiddleware, adminOnly, async (req, res) => {
+router.post("/users", authMiddleware, adminOnly, async (req: Request, res: Response) => {
   const parsed = CreateUserBody.safeParse(req.body);
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `${i.path.join(".") || "body"}: ${i.message}`).join("; ");
@@ -83,7 +83,7 @@ router.post("/users", authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
-router.get("/users/:id", authMiddleware, async (req, res) => {
+router.get("/users/:id", authMiddleware, async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid user ID" });
@@ -110,7 +110,7 @@ router.get("/users/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/users/:id", authMiddleware, async (req, res) => {
+router.delete("/users/:id", authMiddleware, async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid user ID" });
@@ -138,7 +138,7 @@ router.delete("/users/:id", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/qrcode/:userId", authMiddleware, async (req, res) => {
+router.get("/qrcode/:userId", authMiddleware, async (req: Request, res: Response) => {
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) {
     res.status(400).json({ error: "Invalid user ID" });
@@ -170,7 +170,7 @@ router.get("/qrcode/:userId", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/search", authMiddleware, async (req, res) => {
+router.get("/search", authMiddleware, async (req: Request, res: Response) => {
   const query = (req.query.query as string) || "";
   const role = req.query.role as string | undefined;
   if (!query) {

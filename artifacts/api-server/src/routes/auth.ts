@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { supabase } from "../lib/supabase.js";
@@ -7,7 +7,7 @@ import { LoginBody } from "@workspace/api-zod";
 const router = Router();
 const SESSION_SECRET = process.env["SESSION_SECRET"] || "fallback-dev-secret";
 
-router.post("/auth/login", async (req, res) => {
+router.post("/auth/login", async (req: Request, res: Response) => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });
@@ -52,7 +52,7 @@ router.post("/auth/login", async (req, res) => {
   }
 });
 
-router.post("/auth/mentor-login", async (req, res) => {
+router.post("/auth/mentor-login", async (req: Request, res: Response) => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid request body" });
