@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { useListAttendance, getListAttendanceQueryKey } from "@workspace/api-client-react";
+import { useMemo, useState } from "react";
+import { useListAttendance, getListAttendanceQueryKey, customFetch } from "@workspace/api-client-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { BackButton } from "@/components/BackButton";
-import { Download, Filter } from "lucide-react";
+import { Download, Filter, Trash2, AlertTriangle } from "lucide-react";
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
@@ -36,21 +37,68 @@ export default function Attendance() {
   const [to, setTo] = useState(today);
   const [role, setRole] = useState<"" | "student" | "staff">("");
   const [applied, setApplied] = useState({ from: today, to: today, role: "" });
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const queryClient = useQueryClient();
+  const queryKey = getListAttendanceQueryKey({ from: applied.from, to: applied.to, ...(applied.role ? { role: applied.role as any } : {}) });
 
   const { data: records = [], isLoading } = useListAttendance(
     { from: applied.from, to: applied.to, ...(applied.role ? { role: applied.role as any } : {}) },
-    {
-      query: {
-        queryKey: getListAttendanceQueryKey({ from: applied.from, to: applied.to, ...(applied.role ? { role: applied.role as any } : {}) }),
-      }
-    }
+    { query: { queryKey } }
   );
 
-  const applyFilters = () => setApplied({ from, to, role });
+  const allIds = useMemo(() => records.map((r: any) => r.id as number), [records]);
+  const allSelected = allIds.length > 0 && allIds.every((id) => selected.has(id));
+
+  const toggleOne = (id: number) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const toggleAll = () => {
+    if (allSelected) setSelected(new Set());
+    else setSelected(new Set(allIds));
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      return customFetch<{ deletedCount: number }>("/api/attendance/bulk-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+    },
+    onSuccess: () => {
+      setSelected(new Set());
+      setConfirmOpen(false);
+      setErrorMsg("");
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries();
+    },
+    onError: (err: any) => {
+      setErrorMsg(err?.data?.error ?? err?.message ?? "Failed to delete records");
+    },
+  });
+
+  const handleConfirmDelete = () => {
+    if (selected.size === 0) return;
+    setErrorMsg("");
+    deleteMutation.mutate(Array.from(selected));
+  };
+
+  const applyFilters = () => {
+    setApplied({ from, to, role });
+    setSelected(new Set());
+  };
 
   const exportCsv = () => {
     const headers = ["Name", "ID", "Role", "Date", "Entry", "Exit", "Duration", "Status"];
-    const rows = records.map((r) => [
+    const rows = records.map((r: any) => [
       r.user?.name ?? "",
       r.user?.uniqueId ?? "",
       r.user?.role ?? "",
@@ -72,20 +120,31 @@ export default function Attendance() {
     <Layout>
       <div className="p-6 max-w-7xl mx-auto">
         <BackButton />
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-white">Attendance Records</h1>
             <p className="text-sm text-slate-400 mt-1">{records.length} records found</p>
           </div>
-          <button
-            data-testid="export-csv"
-            onClick={exportCsv}
-            disabled={!records.length}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              data-testid="delete-selected"
+              onClick={() => setConfirmOpen(true)}
+              disabled={selected.size === 0 || deleteMutation.isPending}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Selected{selected.size > 0 ? ` (${selected.size})` : ""}
+            </button>
+            <button
+              data-testid="export-csv"
+              onClick={exportCsv}
+              disabled={!records.length}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -146,6 +205,16 @@ export default function Attendance() {
             <table data-testid="attendance-table" className="w-full">
               <thead>
                 <tr className="border-b border-slate-800">
+                  <th className="px-5 py-3 w-10">
+                    <input
+                      type="checkbox"
+                      data-testid="select-all"
+                      checked={allSelected}
+                      onChange={toggleAll}
+                      disabled={!records.length}
+                      className="h-4 w-4 rounded bg-slate-800 border-slate-600 accent-blue-500"
+                    />
+                  </th>
                   <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Name</th>
                   <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">ID</th>
                   <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Role</th>
@@ -160,7 +229,7 @@ export default function Attendance() {
                 {isLoading ? (
                   [...Array(5)].map((_, i) => (
                     <tr key={i}>
-                      {[...Array(8)].map((_, j) => (
+                      {[...Array(9)].map((_, j) => (
                         <td key={j} className="px-5 py-3">
                           <div className="h-4 bg-slate-800 rounded animate-pulse" />
                         </td>
@@ -169,13 +238,25 @@ export default function Attendance() {
                   ))
                 ) : !records.length ? (
                   <tr>
-                    <td colSpan={8} className="px-5 py-10 text-center text-sm text-slate-500">
+                    <td colSpan={9} className="px-5 py-10 text-center text-sm text-slate-500">
                       No records found for this period
                     </td>
                   </tr>
                 ) : (
-                  records.map((rec) => (
-                    <tr key={rec.id} className="hover:bg-slate-800/40 transition-colors">
+                  records.map((rec: any) => (
+                    <tr
+                      key={rec.id}
+                      className={`hover:bg-slate-800/40 transition-colors ${selected.has(rec.id) ? "bg-blue-950/30" : ""}`}
+                    >
+                      <td className="px-5 py-3">
+                        <input
+                          type="checkbox"
+                          data-testid={`select-row-${rec.id}`}
+                          checked={selected.has(rec.id)}
+                          onChange={() => toggleOne(rec.id)}
+                          className="h-4 w-4 rounded bg-slate-800 border-slate-600 accent-blue-500"
+                        />
+                      </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 flex-shrink-0">
@@ -205,6 +286,54 @@ export default function Attendance() {
           </div>
         </div>
       </div>
+
+      {/* Confirm delete modal */}
+      {confirmOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => !deleteMutation.isPending && setConfirmOpen(false)}
+        >
+          <div
+            className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Delete attendance records?</h3>
+                <p className="text-sm text-slate-400 mt-1">
+                  This will permanently remove <span className="font-bold text-white">{selected.size}</span> record{selected.size === 1 ? "" : "s"}. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            {errorMsg && (
+              <div className="mb-4 px-3 py-2 rounded-lg bg-red-900/30 border border-red-800 text-red-400 text-sm">
+                {errorMsg}
+              </div>
+            )}
+            <div className="flex gap-3 justify-end mt-2">
+              <button
+                onClick={() => setConfirmOpen(false)}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                data-testid="confirm-delete"
+                onClick={handleConfirmDelete}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                {deleteMutation.isPending ? "Deleting..." : "Delete Permanently"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

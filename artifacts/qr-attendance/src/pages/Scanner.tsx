@@ -8,6 +8,8 @@ type ScanResult = {
   success: boolean;
   message: string;
   userName?: string;
+  uniqueId?: string;
+  role?: string;
   action?: string;
 };
 
@@ -17,38 +19,139 @@ export default function Scanner() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [cameraError, setCameraError] = useState("");
-  const resultTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const resultTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastScanRef = useRef<{ text: string; at: number }>({ text: "", at: 0 });
+  const isProcessingRef = useRef(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const queryClient = useQueryClient();
   const scanMutation = useScanQr();
 
+  const ensureAudio = () => {
+    if (audioCtxRef.current) return audioCtxRef.current;
+    try {
+      const Ctor = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!Ctor) return null;
+      audioCtxRef.current = new Ctor();
+      return audioCtxRef.current;
+    } catch {
+      return null;
+    }
+  };
+
+  const playTone = (
+    ctx: AudioContext,
+    freq: number,
+    durationMs: number,
+    startOffsetMs: number,
+    type: OscillatorType = "sine",
+    peakGain = 0.25,
+  ) => {
+    const startTime = ctx.currentTime + startOffsetMs / 1000;
+    const stopTime = startTime + durationMs / 1000;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(peakGain, startTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, stopTime);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(stopTime + 0.02);
+  };
+
+  const playBeep = (success: boolean) => {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    try {
+      if (ctx.state === "suspended") ctx.resume();
+    } catch {}
+    try {
+      if (success) {
+        playTone(ctx, 880, 120, 0, "sine", 0.3);
+        playTone(ctx, 1320, 180, 130, "sine", 0.3);
+      } else {
+        playTone(ctx, 220, 180, 0, "sawtooth", 0.25);
+        playTone(ctx, 180, 220, 200, "sawtooth", 0.25);
+      }
+    } catch {}
+  };
+
+  const safePauseScanner = () => {
+    try {
+      const inst = scannerInstanceRef.current;
+      if (inst && typeof inst.pause === "function") {
+        const state = typeof inst.getState === "function" ? inst.getState() : null;
+        if (state === 2) {
+          inst.pause(true);
+        }
+      }
+    } catch {}
+  };
+
+  const safeResumeScanner = () => {
+    try {
+      const inst = scannerInstanceRef.current;
+      if (inst && typeof inst.resume === "function") {
+        const state = typeof inst.getState === "function" ? inst.getState() : null;
+        if (state === 3) {
+          inst.resume();
+        }
+      }
+    } catch {}
+  };
+
   const clearResult = () => {
     if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current);
+    resultTimeoutRef.current = null;
     setResult(null);
+    isProcessingRef.current = false;
+    safeResumeScanner();
   };
 
   const showResult = (r: ScanResult) => {
+    if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current);
     setResult(r);
+    playBeep(r.success);
     if (r.success) {
       try { window.navigator?.vibrate?.(200); } catch {}
+    } else {
+      try { window.navigator?.vibrate?.([100, 60, 100]); } catch {}
     }
     resultTimeoutRef.current = setTimeout(() => {
       setResult(null);
-    }, 4000);
+      isProcessingRef.current = false;
+      resultTimeoutRef.current = null;
+      safeResumeScanner();
+    }, 5000);
   };
 
   const handleScan = (decodedText: string) => {
-    if (scanMutation.isPending) return;
+    if (isProcessingRef.current || scanMutation.isPending) return;
+
     const uid = (decodedText ?? "").trim();
     if (!uid) return;
+
+    const now = Date.now();
+    if (lastScanRef.current.text === uid && now - lastScanRef.current.at < 5000) {
+      return;
+    }
+    lastScanRef.current = { text: uid, at: now };
+    isProcessingRef.current = true;
+    safePauseScanner();
+
     scanMutation.mutate(
       { data: { uniqueId: uid } },
       {
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
           showResult({
             success: data.action !== "ignored",
             message: data.message,
             userName: data.user?.name,
+            uniqueId: data.user?.uniqueId,
+            role: data.user?.role,
             action: data.action,
           });
           queryClient.invalidateQueries({ queryKey: getGetDashboardStatsQueryKey() });
@@ -58,7 +161,7 @@ export default function Scanner() {
         onError: (err: any) => {
           showResult({
             success: false,
-            message: err?.data?.error ?? "Invalid QR code",
+            message: err?.data?.error ?? err?.message ?? "Invalid QR code",
           });
         },
       }
@@ -68,6 +171,11 @@ export default function Scanner() {
   const startScanner = async () => {
     setCameraError("");
     setScanning(true);
+
+    // Prime the audio context inside the user-gesture handler so beeps
+    // are allowed to play later (browsers block autoplay otherwise).
+    const ctx = ensureAudio();
+    try { if (ctx && ctx.state === "suspended") await ctx.resume(); } catch {}
 
     try {
       const { Html5Qrcode } = await import("html5-qrcode");
@@ -100,17 +208,23 @@ export default function Scanner() {
 
   const stopScanner = async () => {
     try {
-      if (scannerInstanceRef.current) {
-        await scannerInstanceRef.current.stop();
+      const inst = scannerInstanceRef.current;
+      if (inst) {
+        const state = typeof inst.getState === "function" ? inst.getState() : null;
+        if (state === 2 || state === 3) {
+          await inst.stop();
+        }
         scannerInstanceRef.current = null;
       }
     } catch {}
     setScanning(false);
+    isProcessingRef.current = false;
   };
 
   useEffect(() => {
     return () => {
       stopScanner();
+      if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current);
     };
   }, []);
 
@@ -153,15 +267,29 @@ export default function Scanner() {
             ) : (
               <XCircle className="w-20 h-20 text-red-400 mb-4" />
             )}
-            <p className={`text-3xl font-bold mb-2 ${result.success ? "text-green-400" : "text-red-400"}`}>
+            <p className={`text-3xl font-bold mb-3 ${result.success ? "text-green-400" : "text-red-400"}`}>
               {result.success ? "Access Granted" : "Access Denied"}
             </p>
             {result.userName && (
-              <p className="text-xl font-semibold text-white mb-2">{result.userName}</p>
+              <p className="text-3xl font-extrabold text-white mb-2 text-center px-4 leading-tight">
+                {result.userName}
+              </p>
             )}
-            <p className="text-base text-slate-300 text-center">{result.message}</p>
+            {result.uniqueId && (
+              <p className="text-lg font-mono text-slate-200 mb-2 tracking-wider">
+                ID: {result.uniqueId}
+              </p>
+            )}
+            {result.role && (
+              <span className={`mb-3 px-3 py-0.5 rounded-full text-xs font-semibold uppercase ${
+                result.role === "student" ? "bg-blue-800 text-blue-200" : "bg-purple-800 text-purple-200"
+              }`}>
+                {result.role}
+              </span>
+            )}
+            <p className="text-sm text-slate-300 text-center mt-1 px-4">{result.message}</p>
             {result.action && (
-              <span className={`mt-3 px-4 py-1.5 rounded-full text-sm font-semibold ${
+              <span className={`mt-4 px-4 py-1.5 rounded-full text-sm font-semibold ${
                 result.action === "entry" ? "bg-green-800 text-green-200" : "bg-blue-800 text-blue-200"
               }`}>
                 {result.action === "entry" ? "Entry Recorded" : result.action === "exit" ? "Exit Recorded" : "Recorded"}

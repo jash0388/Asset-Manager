@@ -64488,7 +64488,7 @@ var users_default = router3;
 // src/routes/attendance.ts
 var import_express4 = __toESM(require_express2(), 1);
 var router4 = (0, import_express4.Router)();
-var DUPLICATE_SCAN_COOLDOWN_MS = 30 * 1e3;
+var DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1e3;
 function getTodayDate() {
   return (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
 }
@@ -64723,6 +64723,40 @@ router4.get("/attendance/user/:userId", authMiddleware, async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "User attendance error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+router4.post("/attendance/bulk-delete", authMiddleware, adminOnly, async (req, res) => {
+  const ids = req.body?.ids;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    res.status(400).json({ error: "ids must be a non-empty array" });
+    return;
+  }
+  const numericIds = ids.map((v) => typeof v === "number" ? v : parseInt(String(v), 10)).filter((n) => Number.isFinite(n));
+  if (numericIds.length === 0) {
+    res.status(400).json({ error: "ids must contain valid numbers" });
+    return;
+  }
+  try {
+    const { error, count } = await supabase.from("qr_attendance").delete({ count: "exact" }).in("id", numericIds);
+    if (error) throw error;
+    res.json({ deletedCount: count ?? 0 });
+  } catch (err) {
+    req.log.error({ err }, "Bulk delete attendance error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+router4.delete("/attendance/all", authMiddleware, adminOnly, async (req, res) => {
+  const { from, to } = req.query;
+  try {
+    let query = supabase.from("qr_attendance").delete({ count: "exact" }).gte("id", 0);
+    if (from) query = query.gte("date", from);
+    if (to) query = query.lte("date", to);
+    const { error, count } = await query;
+    if (error) throw error;
+    res.json({ deletedCount: count ?? 0 });
+  } catch (err) {
+    req.log.error({ err }, "Delete all attendance error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

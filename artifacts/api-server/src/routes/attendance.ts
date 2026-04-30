@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
 import { ScanQrBody } from "@workspace/api-zod";
-import { authMiddleware } from "../middlewares/auth.js";
+import { authMiddleware, adminOnly } from "../middlewares/auth.js";
 
 const router = Router();
 
-const DUPLICATE_SCAN_COOLDOWN_MS = 30 * 1000;
+const DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1000;
 
 function getTodayDate(): string {
   return new Date().toISOString().split("T")[0];
@@ -142,7 +142,7 @@ router.post("/scan", async (req: any, res: any) => {
     const record = existingRecords[0];
 
     if (record.last_scan_at && new Date().getTime() - new Date(record.last_scan_at).getTime() < DUPLICATE_SCAN_COOLDOWN_MS) {
-      res.status(400).json({ error: "Duplicate scan — please wait 30 seconds" });
+      res.status(400).json({ error: "Duplicate scan — please wait 30 minutes" });
       return;
     }
 
@@ -320,6 +320,47 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any
     });
   } catch (err: any) {
     req.log.error({ err }, "User attendance error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/attendance/bulk-delete", authMiddleware, adminOnly, async (req: any, res: any) => {
+  const ids = req.body?.ids;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    res.status(400).json({ error: "ids must be a non-empty array" });
+    return;
+  }
+  const numericIds = ids
+    .map((v: any) => (typeof v === "number" ? v : parseInt(String(v), 10)))
+    .filter((n: number) => Number.isFinite(n));
+  if (numericIds.length === 0) {
+    res.status(400).json({ error: "ids must contain valid numbers" });
+    return;
+  }
+  try {
+    const { error, count } = await supabase
+      .from("qr_attendance")
+      .delete({ count: "exact" })
+      .in("id", numericIds);
+    if (error) throw error;
+    res.json({ deletedCount: count ?? 0 });
+  } catch (err: any) {
+    req.log.error({ err }, "Bulk delete attendance error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/attendance/all", authMiddleware, adminOnly, async (req: any, res: any) => {
+  const { from, to } = req.query as Record<string, string>;
+  try {
+    let query = supabase.from("qr_attendance").delete({ count: "exact" }).gte("id", 0);
+    if (from) query = query.gte("date", from);
+    if (to) query = query.lte("date", to);
+    const { error, count } = await query;
+    if (error) throw error;
+    res.json({ deletedCount: count ?? 0 });
+  } catch (err: any) {
+    req.log.error({ err }, "Delete all attendance error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
