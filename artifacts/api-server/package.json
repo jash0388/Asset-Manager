@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development node --env-file=.env ./build.mjs && node --env-file=.env --enable-source-maps ./dist/index.mjs",
+    "dev": "NODE_ENV=development node ./build.mjs && node --enable-source-maps ./dist/index.mjs",
     "build": "node ./build.mjs",
     "build:vercel": "node ./build.vercel.mjs",
-    "start": "node --env-file=.env --enable-source-maps ./dist/index.mjs",
+    "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

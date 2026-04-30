@@ -1,7 +1,10 @@
 import { Router, type Request, type Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { eq } from "drizzle-orm";
+import { db, mentorsTable } from "@workspace/db";
 import { supabase } from "../lib/supabase.js";
+import { signMentorToken } from "../middlewares/auth.js";
 import { LoginBody } from "@workspace/api-zod";
 
 const router = Router();
