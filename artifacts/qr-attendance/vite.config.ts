@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { VitePWA } from "vite-plugin-pwa";
 
 const rawPort = process.env.PORT;
 const port = rawPort ? Number(rawPort) : 5173;
@@ -15,6 +16,51 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
+    VitePWA({
+      registerType: "autoUpdate",
+      injectRegister: "auto",
+      includeAssets: ["favicon.svg", "security-icon.svg"],
+      manifest: {
+        name: "QR Attendance — Security Scanner",
+        short_name: "Security Scanner",
+        description: "Offline-capable QR attendance scanner for security guards",
+        theme_color: "#EA580C",
+        background_color: "#020617",
+        display: "standalone",
+        orientation: "portrait",
+        start_url: "/security",
+        scope: "/",
+        icons: [
+          { src: "/security-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
+          { src: "/security-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
+        ],
+      },
+      workbox: {
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//],
+        globPatterns: ["**/*.{js,css,html,svg,png,jpg,woff2}"],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname === "/api/users",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "users-cache",
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 1, maxAgeSeconds: 60 * 60 * 24 },
+            },
+          },
+          {
+            urlPattern: ({ url }) => url.origin === "https://fonts.googleapis.com" || url.origin === "https://fonts.gstatic.com",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts",
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+        ],
+      },
+      devOptions: { enabled: false },
+    }),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [

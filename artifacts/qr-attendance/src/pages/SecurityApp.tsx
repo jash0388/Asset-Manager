@@ -1,23 +1,39 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "wouter";
-import { customFetch } from "@workspace/api-client-react";
-import { CheckCircle, XCircle, QrCode, Camera, History as HistoryIcon, ArrowLeft, ShieldCheck } from "lucide-react";
-
-type AttendanceRow = {
-  id: number;
-  userId: number;
-  date: string;
-  entryTime: string | null;
-  exitTime: string | null;
-  status: "inside" | "left" | "present";
-  user?: { id: number; name: string; uniqueId: string; role: string };
-};
+import {
+  CheckCircle, XCircle, Camera, History as HistoryIcon, ArrowLeft,
+  ShieldCheck, Wifi, WifiOff, RefreshCw, CloudUpload, Download, Clock,
+} from "lucide-react";
+import {
+  refreshUserCache, findUserLocal, getCachedUsers, getCacheFetchedAt,
+  getCooldownMsRemaining, markScannedLocally,
+  enqueueScan, getQueue, syncQueue, getLastSyncAt,
+  type CachedUser, type PendingScan,
+} from "../lib/offlineScanner";
 
 type ScanReply =
-  | { ok: true; action: "entry" | "exit"; userName: string; message: string }
+  | { ok: true; action: "queued"; user: CachedUser; queued: number }
   | { ok: false; message: string };
 
-const POPUP_MS = 3000;
+const POPUP_MS = 2500;
+const SYNC_INTERVAL_MS = 10_000;
+
+function formatAgo(ts: number | null): string {
+  if (!ts) return "never";
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 5) return "just now";
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function formatRemaining(ms: number): string {
+  const m = Math.ceil(ms / 60000);
+  return m <= 1 ? "1 min" : `${m} min`;
+}
 
 export default function SecurityApp() {
   const scannerRef = useRef<HTMLDivElement>(null);
@@ -26,61 +42,175 @@ export default function SecurityApp() {
   const [popup, setPopup] = useState<ScanReply | null>(null);
   const [cameraError, setCameraError] = useState("");
   const [showHistory, setShowHistory] = useState(false);
-  const [history, setHistory] = useState<AttendanceRow[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
   const popupTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
-  const inFlightRef = useRef(false);
   const lastScanRef = useRef<{ text: string; at: number } | null>(null);
 
+  const [online, setOnline] = useState<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [cachedCount, setCachedCount] = useState<number>(getCachedUsers().length);
+  const [cachedAt, setCachedAt] = useState<number | null>(getCacheFetchedAt());
+  const [queue, setQueue] = useState<PendingScan[]>(getQueue());
+  const [lastSync, setLastSync] = useState<number | null>(getLastSyncAt());
+  const [syncing, setSyncing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [installPromptEvt, setInstallPromptEvt] = useState<any>(null);
+  const [tick, setTick] = useState(0);
+
+  // ---------- Audio feedback (Web Audio API) ----------
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const ensureCtx = () => {
+    if (!audioCtxRef.current && typeof window !== "undefined") {
+      try {
+        const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (Ctx) audioCtxRef.current = new Ctx();
+      } catch {}
+    }
+    return audioCtxRef.current;
+  };
+  const beep = (kind: "ok" | "err") => {
+    const ctx = ensureCtx();
+    if (!ctx) return;
+    try {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      const vol = 0.15;
+      if (kind === "ok") {
+        o.frequency.setValueAtTime(880, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.12);
+      } else {
+        o.frequency.setValueAtTime(220, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.18);
+      }
+      g.gain.setValueAtTime(vol, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.22);
+      o.start();
+      o.stop(ctx.currentTime + 0.24);
+    } catch {}
+  };
+
+  // ---------- Online/offline tracking + install prompt ----------
+  useEffect(() => {
+    const goOn = () => setOnline(true);
+    const goOff = () => setOnline(false);
+    window.addEventListener("online", goOn);
+    window.addEventListener("offline", goOff);
+    const onInstall = (e: any) => { e.preventDefault(); setInstallPromptEvt(e); };
+    window.addEventListener("beforeinstallprompt", onInstall);
+    return () => {
+      window.removeEventListener("online", goOn);
+      window.removeEventListener("offline", goOff);
+      window.removeEventListener("beforeinstallprompt", onInstall);
+    };
+  }, []);
+
+  // ---------- Cache students on mount ----------
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setRefreshing(true);
+      const r = await refreshUserCache(false);
+      if (cancelled) return;
+      setCachedCount(r.count);
+      setCachedAt(getCacheFetchedAt());
+      setRefreshing(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const refreshCacheNow = async () => {
+    setRefreshing(true);
+    const r = await refreshUserCache(true);
+    setCachedCount(r.count);
+    setCachedAt(getCacheFetchedAt());
+    setRefreshing(false);
+  };
+
+  // ---------- Background sync loop ----------
+  const runSync = useCallback(async () => {
+    if (!navigator.onLine) return;
+    if (getQueue().length === 0) return;
+    setSyncing(true);
+    try {
+      await syncQueue();
+      setQueue(getQueue());
+      setLastSync(getLastSyncAt());
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => { runSync(); }, SYNC_INTERVAL_MS);
+    const onOnline = () => { runSync(); };
+    window.addEventListener("online", onOnline);
+    runSync();
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("online", onOnline);
+    };
+  }, [runSync]);
+
+  // 1Hz tick for "x seconds ago" labels and cooldown countdowns
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // ---------- Popup helper ----------
   const showPopup = (r: ScanReply) => {
     if (popupTimeoutRef.current) clearTimeout(popupTimeoutRef.current);
     setPopup(r);
     if (r.ok) {
-      try { window.navigator?.vibrate?.(150); } catch {}
+      beep("ok");
+      try { window.navigator?.vibrate?.(120); } catch {}
+    } else {
+      beep("err");
+      try { window.navigator?.vibrate?.([60, 40, 60]); } catch {}
     }
     popupTimeoutRef.current = setTimeout(() => setPopup(null), POPUP_MS);
   };
 
-  const submitScan = async (decodedText: string) => {
+  // ---------- LOCAL scan handling (instant, no network) ----------
+  const handleScan = (decodedText: string) => {
     const text = decodedText.trim();
     if (!text) return;
-    if (inFlightRef.current) return;
 
-    // Debounce same code within 3s to prevent spam scans.
     const last = lastScanRef.current;
     if (last && last.text === text && Date.now() - last.at < 3000) return;
     lastScanRef.current = { text, at: Date.now() };
 
-    inFlightRef.current = true;
-    try {
-      const res = await customFetch<{
-        action: "entry" | "exit" | "ignored";
-        message: string;
-        user?: { name: string };
-      }>("/api/scan", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ uniqueId: text }),
-      });
-      showPopup({
-        ok: res.action !== "ignored",
-        action: res.action as any,
-        userName: res.user?.name ?? "",
-        message: res.message,
-      });
-    } catch (err: any) {
+    const uid = text;
+    const user = findUserLocal(uid);
+    if (!user) {
+      showPopup({ ok: false, message: `Unknown QR code: ${uid}` });
+      return;
+    }
+
+    const cdRemaining = getCooldownMsRemaining(uid);
+    if (cdRemaining > 0) {
       showPopup({
         ok: false,
-        message: err?.data?.error ?? "Invalid QR Code",
+        message: `${user.name} already scanned. Wait ${formatRemaining(cdRemaining)}.`,
       });
-    } finally {
-      inFlightRef.current = false;
+      return;
+    }
+
+    enqueueScan(uid);
+    markScannedLocally(uid);
+    const newQueue = getQueue();
+    setQueue(newQueue);
+    showPopup({ ok: true, action: "queued", user, queued: newQueue.length });
+
+    if (navigator.onLine) {
+      setTimeout(() => { runSync(); }, 200);
     }
   };
 
+  // ---------- Camera ----------
   const startScanner = async () => {
     setCameraError("");
     setScanning(true);
+    ensureCtx();
     try {
       const { Html5Qrcode } = await import("html5-qrcode");
       if (!scannerRef.current) return;
@@ -98,8 +228,8 @@ export default function SecurityApp() {
       await scanner.start(
         cameraId,
         { fps: 10, qrbox: { width: 240, height: 240 } },
-        (text) => { submitScan(text); },
-        undefined
+        (text) => { handleScan(text); },
+        undefined,
       );
     } catch (err) {
       console.error(err);
@@ -125,22 +255,16 @@ export default function SecurityApp() {
     };
   }, []);
 
-  const loadHistory = async () => {
-    setHistoryLoading(true);
+  const installApp = async () => {
+    if (!installPromptEvt) return;
     try {
-      const data = await customFetch<AttendanceRow[]>("/api/attendance/recent?limit=50");
-      setHistory(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setHistoryLoading(false);
-    }
+      installPromptEvt.prompt();
+      await installPromptEvt.userChoice;
+    } catch {}
+    setInstallPromptEvt(null);
   };
 
-  const openHistory = () => {
-    setShowHistory(true);
-    loadHistory();
-  };
+  const queueLen = queue.length;
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col text-slate-100">
@@ -152,20 +276,54 @@ export default function SecurityApp() {
           </div>
           <div className="flex-1">
             <h1 className="text-base font-bold">Security Scanner</h1>
-            <p className="text-xs text-slate-400">Scan student/staff QR to record entry/exit</p>
+            <p className="text-xs text-slate-400">Offline-ready · validates locally · syncs later</p>
           </div>
           <button
             data-testid="open-history"
-            onClick={openHistory}
+            onClick={() => setShowHistory(true)}
             className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
-            title="History"
+            title="Pending queue"
           >
             <HistoryIcon className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      {/* 3-second popup */}
+      {/* Status bar */}
+      <div className="bg-slate-900/60 border-b border-slate-800 px-4 py-2">
+        <div className="max-w-md mx-auto flex items-center justify-between text-xs">
+          <div className={`flex items-center gap-1.5 ${online ? "text-emerald-400" : "text-amber-400"}`}>
+            {online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
+            <span className="font-medium">{online ? "Online" : "Offline"}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-slate-400">
+            <CloudUpload className={`w-3.5 h-3.5 ${syncing ? "animate-pulse text-blue-400" : ""}`} />
+            <span>{queueLen > 0 ? `${queueLen} pending` : "All synced"}</span>
+            {lastSync && <span className="text-slate-600">· {formatAgo(lastSync)}</span>}
+          </div>
+          <div className="flex items-center gap-1.5 text-slate-400">
+            <Download className="w-3.5 h-3.5" />
+            <span>{cachedCount} students</span>
+          </div>
+        </div>
+      </div>
+
+      {installPromptEvt && (
+        <div className="bg-orange-600/10 border-b border-orange-700/40 px-4 py-2">
+          <div className="max-w-md mx-auto flex items-center justify-between gap-3">
+            <p className="text-xs text-orange-200">Install this app to your home screen for offline scanning.</p>
+            <button
+              onClick={installApp}
+              data-testid="install-app"
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white"
+            >
+              Install
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Result popup */}
       {popup && (
         <div
           data-testid={popup.ok ? "scan-success" : "scan-error"}
@@ -179,18 +337,19 @@ export default function SecurityApp() {
             <XCircle className="w-24 h-24 text-red-400 mb-4" />
           )}
           <p className={`text-3xl font-bold mb-2 ${popup.ok ? "text-green-400" : "text-red-400"}`}>
-            {popup.ok ? "Access Granted" : "Invalid QR"}
+            {popup.ok ? "Access Granted" : "Denied"}
           </p>
-          {popup.ok && "userName" in popup && popup.userName && (
-            <p className="text-2xl font-semibold text-white">{popup.userName}</p>
+          {popup.ok && (
+            <>
+              <p className="text-2xl font-semibold text-white">{popup.user.name}</p>
+              <p className="text-sm text-slate-300 mt-1">{popup.user.uniqueId} · {popup.user.role}</p>
+              <span className="mt-4 px-3 py-1 rounded-full text-xs font-semibold bg-blue-800 text-blue-200">
+                Saved locally · {popup.queued} pending sync
+              </span>
+            </>
           )}
-          <p className="text-sm text-slate-300 text-center mt-2">{popup.message}</p>
-          {popup.ok && "action" in popup && popup.action && (
-            <span className={`mt-4 px-3 py-1 rounded-full text-xs font-semibold ${
-              popup.action === "entry" ? "bg-green-800 text-green-200" : "bg-blue-800 text-blue-200"
-            }`}>
-              {popup.action === "entry" ? "Entry recorded" : "Exit recorded"}
-            </span>
+          {!popup.ok && (
+            <p className="text-sm text-slate-300 text-center mt-2">{popup.message}</p>
           )}
         </div>
       )}
@@ -209,6 +368,11 @@ export default function SecurityApp() {
                 <Camera className="w-10 h-10 text-slate-400" />
               </div>
               <p className="text-sm text-slate-400 text-center px-6">Press Start to open the camera.</p>
+              {cachedCount === 0 && (
+                <p className="mt-2 text-xs text-amber-400 px-6 text-center">
+                  No students cached yet — connect once to download.
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -224,7 +388,8 @@ export default function SecurityApp() {
             <button
               data-testid="security-start-scanner"
               onClick={startScanner}
-              className="flex-1 py-4 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-base font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-900/30"
+              disabled={cachedCount === 0}
+              className="flex-1 py-4 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-base font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-900/30"
             >
               <Camera className="w-5 h-5" /> Start Scanner
             </button>
@@ -239,6 +404,35 @@ export default function SecurityApp() {
           )}
         </div>
 
+        <div className="w-full mt-4 grid grid-cols-2 gap-3">
+          <button
+            onClick={refreshCacheNow}
+            disabled={refreshing || !online}
+            data-testid="refresh-students"
+            className="py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-semibold text-slate-200 flex items-center justify-center gap-2"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh student list
+          </button>
+          <button
+            onClick={runSync}
+            disabled={syncing || queueLen === 0 || !online}
+            data-testid="sync-now"
+            className="py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-semibold text-slate-200 flex items-center justify-center gap-2"
+          >
+            <CloudUpload className={`w-3.5 h-3.5 ${syncing ? "animate-pulse text-blue-400" : ""}`} />
+            Sync now ({queueLen})
+          </button>
+        </div>
+
+        <div className="w-full mt-4 px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-xs text-slate-400">
+          {cachedAt ? (
+            <>Student cache updated {formatAgo(cachedAt)} · 30-min duplicate cooldown enforced locally.</>
+          ) : (
+            <>Student cache empty — refresh once with internet to enable offline scanning.</>
+          )}
+        </div>
+
         <Link href="/login">
           <span className="mt-6 text-xs text-slate-500 hover:text-blue-400 cursor-pointer">
             Admin / Mentor login →
@@ -246,7 +440,7 @@ export default function SecurityApp() {
         </Link>
       </div>
 
-      {/* History modal */}
+      {/* Pending queue modal */}
       {showHistory && (
         <div className="fixed inset-0 z-40 bg-black/70 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="w-full sm:max-w-lg sm:rounded-2xl bg-slate-900 border-t sm:border border-slate-800 max-h-[85vh] flex flex-col">
@@ -259,52 +453,54 @@ export default function SecurityApp() {
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
-                <h2 className="text-sm font-semibold text-white">Recent Scans</h2>
+                <h2 className="text-sm font-semibold text-white">Pending sync ({queueLen})</h2>
               </div>
               <button
-                onClick={loadHistory}
-                className="text-xs text-blue-400 hover:text-blue-300"
+                onClick={runSync}
+                disabled={syncing || queueLen === 0 || !online}
+                className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
               >
-                Refresh
+                {syncing ? "Syncing…" : "Sync now"}
               </button>
             </div>
             <div data-testid="history-list" className="flex-1 overflow-y-auto divide-y divide-slate-800">
-              {historyLoading ? (
-                <div className="p-6 text-center text-slate-500 text-sm">Loading…</div>
-              ) : history.length === 0 ? (
-                <div className="p-6 text-center text-slate-500 text-sm">No scans yet today</div>
+              {queueLen === 0 ? (
+                <div className="p-6 text-center text-slate-500 text-sm">
+                  No pending scans — everything is already on the dashboard.
+                </div>
               ) : (
-                history.map((r) => {
-                  const time = r.exitTime || r.entryTime;
-                  const t = time ? new Date(time).toLocaleString() : "—";
+                queue.slice().reverse().map((s) => {
+                  const u = findUserLocal(s.uniqueId);
                   return (
-                    <div key={r.id} className="flex items-center gap-3 px-4 py-3">
+                    <div key={s.clientScanId} className="flex items-center gap-3 px-4 py-3">
                       <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-200 flex-shrink-0">
-                        {r.user?.name?.charAt(0).toUpperCase() ?? "?"}
+                        {(u?.name ?? s.uniqueId).charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{r.user?.name}</p>
+                        <p className="text-sm font-medium text-white truncate">{u?.name ?? "Unknown"}</p>
                         <p className="text-xs text-slate-400 truncate">
-                          {r.user?.uniqueId} · {t}
+                          {s.uniqueId} · <Clock className="inline w-3 h-3 -mt-0.5" /> {new Date(s.scannedAt).toLocaleTimeString()}
                         </p>
                       </div>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          r.status === "inside"
-                            ? "bg-green-900/50 text-green-300"
-                            : "bg-slate-700 text-slate-300"
-                        }`}
-                      >
-                        {r.status === "inside" ? "Inside" : "Left"}
+                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-900/50 text-amber-300">
+                        Queued
                       </span>
                     </div>
                   );
                 })
               )}
             </div>
+            {lastSync && (
+              <div className="px-4 py-2 border-t border-slate-800 text-xs text-slate-500 text-center">
+                Last sync {formatAgo(lastSync)} · auto-syncs every 10s when online
+              </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* tick is referenced so React re-renders timestamps each second */}
+      <span className="hidden">{tick}</span>
     </div>
   );
 }

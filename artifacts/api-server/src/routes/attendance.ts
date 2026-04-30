@@ -92,6 +92,106 @@ function tryExtractFromString(raw: string): string | null {
   return trimmed;
 }
 
+router.post("/scan/batch", async (req: any, res: any) => {
+  const scans = req.body?.scans;
+  if (!Array.isArray(scans) || scans.length === 0) {
+    res.status(400).json({ error: "scans must be a non-empty array" });
+    return;
+  }
+  if (scans.length > 500) {
+    res.status(400).json({ error: "batch too large (max 500)" });
+    return;
+  }
+
+  const results: any[] = [];
+
+  for (const item of scans) {
+    const clientScanId = String(item?.clientScanId ?? "");
+    const uniqueId = extractUniqueId(item) ?? (typeof item?.uniqueId === "string" ? item.uniqueId.trim() : null);
+    const scannedAtRaw = item?.scannedAt;
+    const scannedAt = (() => {
+      const d = scannedAtRaw ? new Date(scannedAtRaw) : new Date();
+      return isNaN(d.getTime()) ? new Date() : d;
+    })();
+
+    if (!uniqueId) {
+      results.push({ clientScanId, status: "invalid", error: "Missing uniqueId" });
+      continue;
+    }
+
+    try {
+      const { data: users, error: userError } = await supabase
+        .from("qr_users")
+        .select("*")
+        .eq("unique_id", uniqueId)
+        .limit(1);
+
+      if (userError || !users?.[0]) {
+        results.push({ clientScanId, status: "user_not_found", error: "Invalid QR code — user not found" });
+        continue;
+      }
+      const user = users[0];
+      const date = scannedAt.toISOString().split("T")[0];
+      const ts = scannedAt.toISOString();
+
+      const { data: existingRecords } = await supabase
+        .from("qr_attendance")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", date)
+        .limit(1);
+
+      if (!existingRecords?.[0]) {
+        const { data: inserted, error: insertError } = await supabase
+          .from("qr_attendance")
+          .insert({ user_id: user.id, date, entry_time: ts, scan_count: 1, last_scan_at: ts })
+          .select()
+          .single();
+        if (insertError) throw insertError;
+        results.push({
+          clientScanId,
+          status: "ok",
+          action: "entry",
+          user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+          recordId: inserted.id,
+        });
+        continue;
+      }
+
+      const record = existingRecords[0];
+      const lastAt = record.last_scan_at ? new Date(record.last_scan_at).getTime() : 0;
+      if (scannedAt.getTime() - lastAt < DUPLICATE_SCAN_COOLDOWN_MS) {
+        results.push({ clientScanId, status: "duplicate", error: "Duplicate scan within cooldown", recordId: record.id });
+        continue;
+      }
+      if (record.scan_count >= 2) {
+        results.push({ clientScanId, status: "max_reached", error: "Maximum scans for today reached", recordId: record.id });
+        continue;
+      }
+
+      const { data: updated, error: updateError } = await supabase
+        .from("qr_attendance")
+        .update({ exit_time: ts, scan_count: record.scan_count + 1, last_scan_at: ts })
+        .eq("id", record.id)
+        .select()
+        .single();
+      if (updateError) throw updateError;
+      results.push({
+        clientScanId,
+        status: "ok",
+        action: "exit",
+        user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+        recordId: updated.id,
+      });
+    } catch (err: any) {
+      req.log.error({ err, clientScanId, uniqueId }, "Batch scan item failed");
+      results.push({ clientScanId, status: "error", error: "Server error processing scan" });
+    }
+  }
+
+  res.json({ results });
+});
+
 router.post("/scan", async (req: any, res: any) => {
   const uniqueId = extractUniqueId(req.body);
   if (!uniqueId) {
