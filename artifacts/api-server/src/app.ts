@@ -10,7 +10,20 @@ const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any)
 const app = express();
 
 app.use(cors({
-  origin: ["https://qr-attendance-app-eight.vercel.app", "http://localhost:5173"],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (
+      origin.endsWith(".vercel.app") || 
+      origin.startsWith("http://localhost:") ||
+      origin === "https://qr-attendance-app-eight.vercel.app"
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
