@@ -18,10 +18,46 @@ function QrModal({ userId, name, onClose }: { userId: number; name: string; onCl
 
   const handleDownload = () => {
     if (!data?.qrCodeDataUrl) return;
-    const a = document.createElement("a");
-    a.href = data.qrCodeDataUrl;
-    a.download = `qr-${name.replace(/\s+/g, "-")}-${data.uniqueId}.png`;
-    a.click();
+    
+    // Create a canvas to combine QR and labels
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const qrSize = img.width;
+      const labelHeight = 80;
+      canvas.width = qrSize;
+      canvas.height = qrSize + labelHeight;
+
+      // Fill white background
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw QR Code
+      ctx.drawImage(img, 0, 0);
+
+      // Draw Labels
+      ctx.fillStyle = "black";
+      ctx.textAlign = "center";
+      
+      // Roll Number
+      ctx.font = "bold 20px Helvetica, Arial, sans-serif";
+      ctx.fillText(data.uniqueId, qrSize / 2, qrSize + 25);
+      
+      // Name
+      ctx.font = "16px Helvetica, Arial, sans-serif";
+      ctx.fillText(name, qrSize / 2, qrSize + 55);
+
+      // Trigger Download
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `QR_${data.uniqueId}_${name.replace(/\s+/g, "_")}.png`;
+      link.click();
+    };
+    img.src = data.qrCodeDataUrl;
   };
 
   return (
