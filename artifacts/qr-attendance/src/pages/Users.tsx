@@ -170,6 +170,8 @@ export default function Users() {
     );
   };
 
+  const [isPrinting, setIsPrinting] = useState(false);
+
   return (
     <Layout>
       {qrUserId !== null && (
@@ -184,53 +186,68 @@ export default function Users() {
           </div>
           <div className="flex gap-2">
             <button
+              disabled={isPrinting || !users.length}
               onClick={async () => {
-                const { jsPDF } = await import("jspdf");
-                const doc = new jsPDF();
-                const margin = 10;
-                const qrSize = 40;
-                const spacing = 10;
-                const labelSpace = 15;
-                const cols = 4;
-                const rows = 4;
-                const perPage = cols * rows;
-                
-                let currentIdx = 0;
-                
-                for (const user of users) {
-                  if (currentIdx > 0 && currentIdx % perPage === 0) doc.addPage();
+                try {
+                  setIsPrinting(true);
+                  const { jsPDF } = await import("jspdf");
+                  const doc = new jsPDF();
+                  const margin = 10;
+                  const qrSize = 40;
+                  const spacing = 10;
+                  const labelSpace = 15;
+                  const cols = 4;
+                  const rows = 4;
+                  const perPage = cols * rows;
                   
-                  const pageIdx = currentIdx % perPage;
-                  const col = pageIdx % cols;
-                  const row = Math.floor(pageIdx / cols);
+                  let currentIdx = 0;
                   
-                  const x = margin + col * (qrSize + spacing);
-                  const y = margin + row * (qrSize + spacing + labelSpace);
+                  for (const user of users) {
+                    if (currentIdx > 0 && currentIdx % perPage === 0) doc.addPage();
+                    
+                    const pageIdx = currentIdx % perPage;
+                    const col = pageIdx % cols;
+                    const row = Math.floor(pageIdx / cols);
+                    
+                    const x = margin + col * (qrSize + spacing);
+                    const y = margin + row * (qrSize + spacing + labelSpace);
 
-                  // Fetch QR data URL (this uses the existing API)
-                  const res = await fetch(`/api/qrcode/${user.id}`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token") || "bypass-token"}` }
-                  });
-                  const { qrCodeDataUrl } = await res.json();
-
-                  if (qrCodeDataUrl) {
-                    doc.addImage(qrCodeDataUrl, "PNG", x, y, qrSize, qrSize);
-                    doc.setFontSize(8);
-                    doc.text(user.uniqueId, x + qrSize / 2, y + qrSize + 4, { align: "center" });
-                    doc.setFontSize(6);
-                    const displayName = user.name.length > 25 ? user.name.substring(0, 22) + "..." : user.name;
-                    doc.text(displayName, x + qrSize / 2, y + qrSize + 8, { align: "center" });
+                    try {
+                      const res = await fetch(`/api/qrcode/${user.id}`, {
+                        headers: { 
+                          "Authorization": `Bearer ${localStorage.getItem("token") || "bypass-token"}` 
+                        }
+                      });
+                      if (res.ok) {
+                        const { qrCodeDataUrl } = await res.json();
+                        if (qrCodeDataUrl) {
+                          doc.addImage(qrCodeDataUrl, "PNG", x, y, qrSize, qrSize);
+                          doc.setFontSize(8);
+                          doc.text(user.uniqueId, x + qrSize / 2, y + qrSize + 4, { align: "center" });
+                          doc.setFontSize(6);
+                          const displayName = user.name.length > 25 ? user.name.substring(0, 22) + "..." : user.name;
+                          doc.text(displayName, x + qrSize / 2, y + qrSize + 8, { align: "center" });
+                        }
+                      }
+                    } catch (e) {
+                      console.error("Error adding QR to PDF:", e);
+                    }
+                    
+                    currentIdx++;
                   }
                   
-                  currentIdx++;
+                  doc.save(`SPHN_All_Student_QR_Codes_${new Date().getTime()}.pdf`);
+                } catch (err) {
+                  console.error("PDF Export failed:", err);
+                  alert("Failed to export PDF. Please try again.");
+                } finally {
+                  setIsPrinting(false);
                 }
-                
-                doc.save("SPHN_All_Student_QR_Codes.pdf");
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition-colors border border-slate-700"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition-colors border border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="w-4 h-4" />
-              Print All
+              {isPrinting ? "Generating PDF..." : "Print All"}
             </button>
             <button
               data-testid="add-user-button"
