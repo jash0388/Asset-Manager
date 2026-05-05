@@ -182,14 +182,65 @@ export default function Users() {
             <h1 className="text-2xl font-bold text-white">Users</h1>
             <p className="text-sm text-slate-400 mt-1">Manage students and staff</p>
           </div>
-          <button
-            data-testid="add-user-button"
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
-          >
-            <UserPlus className="w-4 h-4" />
-            Add User
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                const { jsPDF } = await import("jspdf");
+                const doc = new jsPDF();
+                const margin = 10;
+                const qrSize = 40;
+                const spacing = 10;
+                const labelSpace = 15;
+                const cols = 4;
+                const rows = 4;
+                const perPage = cols * rows;
+                
+                let currentIdx = 0;
+                
+                for (const user of users) {
+                  if (currentIdx > 0 && currentIdx % perPage === 0) doc.addPage();
+                  
+                  const pageIdx = currentIdx % perPage;
+                  const col = pageIdx % cols;
+                  const row = Math.floor(pageIdx / cols);
+                  
+                  const x = margin + col * (qrSize + spacing);
+                  const y = margin + row * (qrSize + spacing + labelSpace);
+
+                  // Fetch QR data URL (this uses the existing API)
+                  const res = await fetch(`/api/qrcode/${user.id}`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token") || "bypass-token"}` }
+                  });
+                  const { qrCodeDataUrl } = await res.json();
+
+                  if (qrCodeDataUrl) {
+                    doc.addImage(qrCodeDataUrl, "PNG", x, y, qrSize, qrSize);
+                    doc.setFontSize(8);
+                    doc.text(user.uniqueId, x + qrSize / 2, y + qrSize + 4, { align: "center" });
+                    doc.setFontSize(6);
+                    const displayName = user.name.length > 25 ? user.name.substring(0, 22) + "..." : user.name;
+                    doc.text(displayName, x + qrSize / 2, y + qrSize + 8, { align: "center" });
+                  }
+                  
+                  currentIdx++;
+                }
+                
+                doc.save("SPHN_All_Student_QR_Codes.pdf");
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition-colors border border-slate-700"
+            >
+              <Download className="w-4 h-4" />
+              Print All
+            </button>
+            <button
+              data-testid="add-user-button"
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
+            >
+              <UserPlus className="w-4 h-4" />
+              Add User
+            </button>
+          </div>
         </div>
 
         {/* Add user form */}
