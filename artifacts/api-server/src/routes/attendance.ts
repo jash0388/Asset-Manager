@@ -5,7 +5,28 @@ import { authMiddleware, adminOnly } from "../middlewares/auth.js";
 
 const router = Router();
 
-const DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1000;
+const DUPLICATE_SCAN_COOLDOWN_MS = 1 * 60 * 1000; // 1 minute cooldown to prevent accidental double clicks
+
+async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
+  const { data: latestRecords } = await supabase
+    .from("qr_attendance")
+    .select("entry_time, exit_time")
+    .eq("user_id", userId)
+    .order("date", { ascending: false })
+    .order("last_scan_at", { ascending: false })
+    .limit(1);
+
+  if (!latestRecords?.[0]) return "inside";
+  const latest = latestRecords[0];
+  if (latest.exit_time && !latest.entry_time) {
+    return "left";
+  } else if (latest.exit_time && latest.entry_time) {
+    return new Date(latest.entry_time).getTime() > new Date(latest.exit_time).getTime() ? "inside" : "left";
+  } else if (!latest.exit_time && latest.entry_time) {
+    return "inside";
+  }
+  return "inside";
+}
 
 function getTodayDate(): string {
   return new Date().toISOString().split("T")[0];
@@ -14,12 +35,17 @@ function getTodayDate(): string {
 function formatRecord(record: any, user?: any) {
   const durationMinutes =
     record.entry_time && record.exit_time
-      ? Math.floor((new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 60000)
+      ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 60000)
       : null;
 
   let status: "inside" | "left" = "inside";
-  if (record.exit_time) status = "left";
-  else if (record.entry_time) status = "inside";
+  if (record.exit_time && !record.entry_time) {
+    status = "left";
+  } else if (record.exit_time && record.entry_time) {
+    status = new Date(record.entry_time).getTime() > new Date(record.exit_time).getTime() ? "inside" : "left";
+  } else if (!record.exit_time && record.entry_time) {
+    status = "inside";
+  }
 
   return {
     id: record.id,
@@ -134,6 +160,8 @@ router.post("/scan/batch", async (req: any, res: any) => {
       const date = scannedAt.toISOString().split("T")[0];
       const ts = scannedAt.toISOString();
 
+      const currentStatus = await getCurrentStatus(user.id);
+
       const { data: existingRecords } = await supabase
         .from("qr_attendance")
         .select("*")
@@ -142,16 +170,27 @@ router.post("/scan/batch", async (req: any, res: any) => {
         .limit(1);
 
       if (!existingRecords?.[0]) {
+        const insertData: any = { user_id: user.id, date, scan_count: 1, last_scan_at: ts };
+        let action = "";
+        
+        if (currentStatus === "inside") {
+          insertData.exit_time = ts;
+          action = "exit";
+        } else {
+          insertData.entry_time = ts;
+          action = "entry";
+        }
+
         const { data: inserted, error: insertError } = await supabase
           .from("qr_attendance")
-          .insert({ user_id: user.id, date, entry_time: ts, scan_count: 1, last_scan_at: ts })
+          .insert(insertData)
           .select()
           .single();
         if (insertError) throw insertError;
         results.push({
           clientScanId,
           status: "ok",
-          action: "entry",
+          action,
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
           recordId: inserted.id,
         });
@@ -164,14 +203,21 @@ router.post("/scan/batch", async (req: any, res: any) => {
         results.push({ clientScanId, status: "duplicate", error: "Duplicate scan within cooldown", recordId: record.id });
         continue;
       }
-      if (record.scan_count >= 2) {
-        results.push({ clientScanId, status: "max_reached", error: "Maximum scans for today reached", recordId: record.id });
-        continue;
+
+      let updateData: any = { scan_count: record.scan_count + 1, last_scan_at: ts };
+      let action = "";
+
+      if (currentStatus === "inside") {
+        updateData.exit_time = ts;
+        action = "exit";
+      } else {
+        updateData.entry_time = ts;
+        action = "entry";
       }
 
       const { data: updated, error: updateError } = await supabase
         .from("qr_attendance")
-        .update({ exit_time: ts, scan_count: record.scan_count + 1, last_scan_at: ts })
+        .update(updateData)
         .eq("id", record.id)
         .select()
         .single();
@@ -179,7 +225,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
       results.push({
         clientScanId,
         status: "ok",
-        action: "exit",
+        action,
         user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
         recordId: updated.id,
       });
@@ -212,6 +258,8 @@ router.post("/scan", async (req: any, res: any) => {
     const user = users[0];
     const today = getTodayDate();
     
+    const currentStatus = await getCurrentStatus(user.id);
+
     const { data: existingRecords, error: recordError } = await supabase
       .from("qr_attendance")
       .select("*")
@@ -222,17 +270,31 @@ router.post("/scan", async (req: any, res: any) => {
     const now = new Date().toISOString();
 
     if (!existingRecords?.[0]) {
+      const insertData: any = { user_id: user.id, date: today, scan_count: 1, last_scan_at: now };
+      let action = "";
+      let message = "";
+
+      if (currentStatus === "inside") {
+        insertData.exit_time = now;
+        action = "exit";
+        message = `Goodbye ${user.name}! You have LEFT the hostel.`;
+      } else {
+        insertData.entry_time = now;
+        action = "entry";
+        message = `Welcome back ${user.name}! You are now INSIDE the hostel.`;
+      }
+
       const { data: inserted, error: insertError } = await supabase
         .from("qr_attendance")
-        .insert({ user_id: user.id, date: today, entry_time: now, scan_count: 1, last_scan_at: now })
+        .insert(insertData)
         .select()
         .single();
 
       if (insertError) throw insertError;
 
       res.json({
-        action: "entry",
-        message: `Welcome ${user.name}! You are now INSIDE the hostel.`,
+        action,
+        message,
         user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
         attendance: formatRecord(inserted, user),
       });
@@ -242,18 +304,27 @@ router.post("/scan", async (req: any, res: any) => {
     const record = existingRecords[0];
 
     if (record.last_scan_at && new Date().getTime() - new Date(record.last_scan_at).getTime() < DUPLICATE_SCAN_COOLDOWN_MS) {
-      res.status(400).json({ error: "Duplicate scan — please wait 30 minutes" });
+      res.status(400).json({ error: "Duplicate scan — please wait 1 minute before scanning again" });
       return;
     }
 
-    if (record.scan_count >= 2) {
-      res.status(400).json({ error: "Maximum scans for today reached" });
-      return;
+    let updateData: any = { scan_count: record.scan_count + 1, last_scan_at: now };
+    let action = "";
+    let message = "";
+
+    if (currentStatus === "inside") {
+      updateData.exit_time = now;
+      action = "exit";
+      message = `Goodbye ${user.name}! You have LEFT the hostel.`;
+    } else {
+      updateData.entry_time = now;
+      action = "entry";
+      message = `Welcome back ${user.name}! You are now INSIDE the hostel.`;
     }
 
     const { data: updated, error: updateError } = await supabase
       .from("qr_attendance")
-      .update({ exit_time: now, scan_count: record.scan_count + 1, last_scan_at: now })
+      .update(updateData)
       .eq("id", record.id)
       .select()
       .single();
@@ -261,8 +332,8 @@ router.post("/scan", async (req: any, res: any) => {
     if (updateError) throw updateError;
 
     res.json({
-      action: "exit",
-      message: `Goodbye ${user.name}! You have LEFT the hostel.`,
+      action,
+      message,
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
       attendance: formatRecord(updated, user),
     });
@@ -314,12 +385,19 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
     const { data: records, error } = await supabase
       .from("qr_attendance")
       .select("*, qr_users(*)")
-      .eq("date", today)
-      .is("exit_time", null)
-      .not("entry_time", "is", null);
+      .eq("date", today);
 
     if (error) throw error;
-    res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
+    
+    // Filter in memory for "inside"
+    const insideRecords = records.filter((r: any) => {
+      if (r.exit_time && r.entry_time) {
+        return new Date(r.entry_time).getTime() > new Date(r.exit_time).getTime();
+      }
+      return !r.exit_time && r.entry_time;
+    });
+
+    res.json(insideRecords.map((r: any) => formatRecord(r, r.qr_users)));
   } catch (err: any) {
     req.log.error({ err }, "Currently inside error");
     res.status(500).json({ error: "Internal server error" });
@@ -334,23 +412,33 @@ router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: 
       { count: totalStudents },
       { count: totalStaff },
       { count: todayAttendanceCount },
-      { count: currentlyInsideCount },
+      { data: todayRecords },
       { data: recentResult }
     ] = await Promise.all([
       supabase.from("qr_users").select("*", { count: "exact", head: true }),
       supabase.from("qr_users").select("*", { count: "exact", head: true }).eq("role", "student"),
       supabase.from("qr_users").select("*", { count: "exact", head: true }).eq("role", "staff"),
       supabase.from("qr_attendance").select("*", { count: "exact", head: true }).eq("date", today),
-      supabase.from("qr_attendance").select("*", { count: "exact", head: true }).eq("date", today).is("exit_time", null).not("entry_time", "is", null),
-      supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("entry_time", { ascending: false }).limit(10),
+      supabase.from("qr_attendance").select("entry_time, exit_time").eq("date", today),
+      supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(10),
     ]);
+
+    let currentlyInsideCount = 0;
+    if (todayRecords) {
+      currentlyInsideCount = todayRecords.filter((r: any) => {
+        if (r.exit_time && r.entry_time) {
+          return new Date(r.entry_time).getTime() > new Date(r.exit_time).getTime();
+        }
+        return !r.exit_time && r.entry_time;
+      }).length;
+    }
 
     res.json({
       totalUsers: totalUsers || 0,
       totalStudents: totalStudents || 0,
       totalStaff: totalStaff || 0,
       todayAttendanceCount: todayAttendanceCount || 0,
-      currentlyInsideCount: currentlyInsideCount || 0,
+      currentlyInsideCount,
       recentActivity: recentResult ? recentResult.map((r: any) => formatRecord(r, r.qr_users)) : [],
     });
   } catch (err: any) {
@@ -393,13 +481,13 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any
     const { data: records, error: recordError } = await query.order("date", { ascending: false });
     if (recordError) throw recordError;
 
-    const lateHour = 9;
+    const lateHour = 21; // Assuming 9 PM is late for returning to the hostel
     let totalDuration = 0;
     let durationCount = 0;
     let lateCount = 0;
     for (const r of records) {
       if (r.entry_time && r.exit_time) {
-        const dur = new Date(r.exit_time).getTime() - new Date(r.entry_time).getTime();
+        const dur = Math.abs(new Date(r.entry_time).getTime() - new Date(r.exit_time).getTime());
         totalDuration += dur;
         durationCount++;
       }
