@@ -8,25 +8,23 @@ const router = Router();
 const DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes to prevent accidental double clicks
 
 async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
-  const { data: latestRecords } = await supabase
+  const today = getTodayDate();
+  const { data: records } = await supabase
     .from("qr_attendance")
     .select("entry_time, exit_time")
     .eq("user_id", userId)
-    .order("date", { ascending: false })
-    .order("last_scan_at", { ascending: false })
+    .eq("date", today)
     .limit(1);
 
-  if (!latestRecords?.[0]) {
-    // No records ever -> Default to inside for hostel
+  if (!records?.[0]) {
+    // No record for today yet -> Default to inside for a new day
     return "inside";
   }
 
-  const latest = latestRecords[0];
+  const latest = records[0];
   const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
   const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
 
-  // If entry exists after exit, we are currently inside
-  // Default to inside if times are ambiguous
   return entryTime >= exitTime ? "inside" : "left";
 }
 

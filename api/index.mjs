@@ -64490,11 +64490,12 @@ var import_express4 = __toESM(require_express2(), 1);
 var router4 = (0, import_express4.Router)();
 var DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1e3;
 async function getCurrentStatus(userId) {
-  const { data: latestRecords } = await supabase.from("qr_attendance").select("entry_time, exit_time").eq("user_id", userId).order("date", { ascending: false }).order("last_scan_at", { ascending: false }).limit(1);
-  if (!latestRecords?.[0]) {
+  const today = getTodayDate();
+  const { data: records } = await supabase.from("qr_attendance").select("entry_time, exit_time").eq("user_id", userId).eq("date", today).limit(1);
+  if (!records?.[0]) {
     return "inside";
   }
-  const latest = latestRecords[0];
+  const latest = records[0];
   const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
   const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
   return entryTime >= exitTime ? "inside" : "left";
