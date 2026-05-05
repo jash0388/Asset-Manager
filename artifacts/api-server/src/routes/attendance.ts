@@ -17,7 +17,7 @@ function formatRecord(record: any, user?: any) {
       ? Math.floor((new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 60000)
       : null;
 
-  let status: "present" | "left" | "inside" = "inside";
+  let status: "inside" | "left" = "inside";
   if (record.exit_time) status = "left";
   else if (record.entry_time) status = "inside";
 
@@ -232,7 +232,7 @@ router.post("/scan", async (req: any, res: any) => {
 
       res.json({
         action: "entry",
-        message: `Welcome ${user.name}! Entry recorded.`,
+        message: `Welcome ${user.name}! You are now INSIDE the hostel.`,
         user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
         attendance: formatRecord(inserted, user),
       });
@@ -262,7 +262,7 @@ router.post("/scan", async (req: any, res: any) => {
 
     res.json({
       action: "exit",
-      message: `Goodbye ${user.name}! Exit recorded.`,
+      message: `Goodbye ${user.name}! You have LEFT the hostel.`,
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
       attendance: formatRecord(updated, user),
     });
