@@ -5,7 +5,7 @@ import { authMiddleware, adminOnly } from "../middlewares/auth.js";
 
 const router = Router();
 
-const DUPLICATE_SCAN_COOLDOWN_MS = 1 * 60 * 1000; // 1 minute cooldown to prevent accidental double clicks
+const DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes to prevent accidental double clicks
 
 async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
   const { data: latestRecords } = await supabase
@@ -25,18 +25,9 @@ async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
   const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
   const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
 
-  // If we have an entry but no exit, or entry is later than exit -> Inside
-  if (entryTime > exitTime) {
-    return "inside";
-  }
-  
-  // If we have an exit but no entry, or exit is later than entry -> Left
-  if (exitTime > entryTime) {
-    return "left";
-  }
-
-  // If both are 0 (shouldn't happen with valid scans) or equal -> Default inside
-  return "inside";
+  // If entry exists after exit, we are currently inside
+  // Default to inside if times are ambiguous
+  return entryTime >= exitTime ? "inside" : "left";
 }
 
 function getTodayDate(): string {
@@ -218,12 +209,6 @@ router.post("/scan/batch", async (req: any, res: any) => {
       }
 
       const record = existingRecords[0];
-      const lastAt = record.last_scan_at ? new Date(record.last_scan_at).getTime() : 0;
-      
-      // Only enforce cooldown if it's NOT a batch scan from the same client session 
-      // (sometimes clients send multiple buffered scans for the same user)
-      // Actually, let's keep it but maybe reduce it for batch? 
-      // No, let's just use the cached status to toggle.
       
       let updateData: any = { scan_count: record.scan_count + 1, last_scan_at: ts };
       let action = "";
@@ -278,34 +263,35 @@ router.post("/scan", async (req: any, res: any) => {
       return;
     }
     const user = users[0];
-    const today = getTodayDate();
+    const date = getTodayDate();
+    const now = new Date().toISOString();
     
     const currentStatus = await getCurrentStatus(user.id);
+    req.log.info({ userId: user.id, name: user.name, currentStatus }, "Determined current status for scan");
 
-    const { data: existingRecords, error: recordError } = await supabase
+    const { data: existingRecords } = await supabase
       .from("qr_attendance")
       .select("*")
       .eq("user_id", user.id)
-      .eq("date", today)
+      .eq("date", date)
       .limit(1);
 
-    const now = new Date().toISOString();
-
     if (!existingRecords?.[0]) {
-      const insertData: any = { user_id: user.id, date: today, scan_count: 1, last_scan_at: now };
+      const insertData: any = { user_id: user.id, date, scan_count: 1, last_scan_at: now };
       let action = "";
       let message = "";
 
       if (currentStatus === "inside") {
         insertData.exit_time = now;
         action = "exit";
-        message = `Goodbye ${user.name}! You have LEFT the hostel.`;
+        message = `Goodbye ${user.name}! You have LEFT (Outside).`;
       } else {
         insertData.entry_time = now;
         action = "entry";
-        message = `Welcome back ${user.name}! You are now INSIDE the hostel.`;
+        message = `Welcome back ${user.name}! You are now INSIDE.`;
       }
 
+      req.log.info({ userId: user.id, action }, "Recording first scan of the day");
       const { data: inserted, error: insertError } = await supabase
         .from("qr_attendance")
         .insert(insertData)
@@ -314,20 +300,27 @@ router.post("/scan", async (req: any, res: any) => {
 
       if (insertError) throw insertError;
 
-      res.json({
+      return res.json({
+        success: true,
         action,
         message,
-        user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
-        attendance: formatRecord(inserted, user),
+        user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+        recordId: inserted.id,
       });
-      return;
     }
 
     const record = existingRecords[0];
-
-    if (record.last_scan_at && new Date().getTime() - new Date(record.last_scan_at).getTime() < DUPLICATE_SCAN_COOLDOWN_MS) {
-      res.status(400).json({ error: "Duplicate scan — please wait 1 minute before scanning again" });
-      return;
+    const lastAt = record.last_scan_at ? new Date(record.last_scan_at).getTime() : 0;
+    
+    const nowTime = new Date(now).getTime();
+    if (nowTime - lastAt < DUPLICATE_SCAN_COOLDOWN_MS) {
+      const remainingMins = Math.ceil((DUPLICATE_SCAN_COOLDOWN_MS - (nowTime - lastAt)) / 60000);
+      return res.json({
+        success: false,
+        action: "ignored",
+        message: `Cooldown: ${user.name} already scanned. Wait ${remainingMins}m.`,
+        user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+      });
     }
 
     let updateData: any = { scan_count: record.scan_count + 1, last_scan_at: now };
@@ -337,13 +330,14 @@ router.post("/scan", async (req: any, res: any) => {
     if (currentStatus === "inside") {
       updateData.exit_time = now;
       action = "exit";
-      message = `Goodbye ${user.name}! You have LEFT the hostel.`;
+      message = `Goodbye ${user.name}! You have LEFT (Outside).`;
     } else {
       updateData.entry_time = now;
       action = "entry";
-      message = `Welcome back ${user.name}! You are now INSIDE the hostel.`;
+      message = `Welcome back ${user.name}! You are now INSIDE.`;
     }
 
+    req.log.info({ userId: user.id, action }, "Updating existing record for today");
     const { data: updated, error: updateError } = await supabase
       .from("qr_attendance")
       .update(updateData)
@@ -354,6 +348,7 @@ router.post("/scan", async (req: any, res: any) => {
     if (updateError) throw updateError;
 
     res.json({
+      success: true,
       action,
       message,
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
