@@ -7,6 +7,11 @@ const router = Router();
 
 const DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes to prevent accidental double clicks
 
+function getTodayDate(): string {
+  // Use IST (Asia/Kolkata) to determine the date string
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+}
+
 async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
   const today = getTodayDate();
   const { data: records } = await supabase
@@ -17,7 +22,7 @@ async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
     .limit(1);
 
   if (!records?.[0]) {
-    // No record for today yet -> Default to inside for a new day
+    // No record for today (IST) yet -> Default to inside
     return "inside";
   }
 
@@ -25,11 +30,8 @@ async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
   const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
   const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
 
+  // If entry is later or equal to exit, they are inside
   return entryTime >= exitTime ? "inside" : "left";
-}
-
-function getTodayDate(): string {
-  return new Date().toISOString().split("T")[0];
 }
 
 function formatRecord(record: any, user?: any) {
