@@ -64764,8 +64764,18 @@ router4.get("/attendance/today", authMiddleware, async (req, res) => {
 });
 router4.get("/attendance/currently-inside", authMiddleware, async (req, res) => {
   try {
-    const { data: allUsers, error: userError } = await supabase.from("qr_users").select("*");
-    if (userError) throw userError;
+    let allUsers = [];
+    let from = 0;
+    const step = 1e3;
+    while (true) {
+      const { data, error } = await supabase.from("qr_users").select("*").range(from, from + step - 1);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      allUsers = allUsers.concat(data);
+      if (data.length < step) break;
+      from += step;
+    }
+    req.log.info({ totalUsers: allUsers.length }, "Fetched all users for currently-inside");
     const { data: latestRecords, error: recordError } = await supabase.from("qr_attendance").select("*").order("date", { ascending: false }).order("last_scan_at", { ascending: false });
     if (recordError) throw recordError;
     const latestByUser = /* @__PURE__ */ new Map();
@@ -64774,21 +64784,20 @@ router4.get("/attendance/currently-inside", authMiddleware, async (req, res) => 
         latestByUser.set(r.user_id, r);
       }
     }
-    const insideUsers = allUsers.filter((user) => {
-      const latest = latestByUser.get(user.id);
-      if (!latest) return true;
-      const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
-      const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
-      return entryTime >= exitTime;
-    });
-    const insideRecords = insideUsers.map((u) => {
+    const insideRecords = allUsers.map((u) => {
       const latest = latestByUser.get(u.id);
+      let isInside = true;
+      if (latest) {
+        const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
+        const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
+        isInside = entryTime >= exitTime;
+      }
+      if (!isInside) return null;
       if (latest) {
         return formatRecord(latest, u);
       } else {
         return {
           id: -u.id,
-          // Synthetic ID
           userId: u.id,
           date: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
           entryTime: null,
@@ -64796,16 +64805,11 @@ router4.get("/attendance/currently-inside", authMiddleware, async (req, res) => 
           scanCount: 0,
           durationMinutes: null,
           status: "inside",
-          user: {
-            id: u.id,
-            name: u.name,
-            uniqueId: u.unique_id,
-            role: u.role,
-            createdAt: u.created_at
-          }
+          user: { id: u.id, name: u.name, uniqueId: u.unique_id, role: u.role, createdAt: u.created_at }
         };
       }
-    });
+    }).filter(Boolean);
+    req.log.info({ insideCount: insideRecords.length }, "Calculated currently-inside");
     res.json(insideRecords);
   } catch (err) {
     req.log.error({ err }, "Currently inside error");
@@ -64830,28 +64834,33 @@ router4.get("/attendance/dashboard-stats", authMiddleware, async (req, res) => {
       supabase.from("qr_attendance").select("entry_time, exit_time").eq("date", today),
       supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(10)
     ]);
-    const { data: allLatestRecords } = await supabase.from("qr_attendance").select("user_id, entry_time, exit_time").order("date", { ascending: false }).order("last_scan_at", { ascending: false });
-    const latestStatusMap = /* @__PURE__ */ new Map();
-    if (allLatestRecords) {
-      for (const r of allLatestRecords) {
-        if (!latestStatusMap.has(r.user_id)) {
-          const entry = r.entry_time ? new Date(r.entry_time).getTime() : 0;
-          const exit = r.exit_time ? new Date(r.exit_time).getTime() : 0;
-          latestStatusMap.set(r.user_id, entry >= exit);
+    let allUsers = [];
+    let from = 0;
+    while (true) {
+      const { data } = await supabase.from("qr_users").select("id, role").range(from, from + 999);
+      if (!data || data.length === 0) break;
+      allUsers = allUsers.concat(data);
+      if (data.length < 1e3) break;
+      from += 1e3;
+    }
+    const { data: latestRecords } = await supabase.from("qr_attendance").select("user_id, entry_time, exit_time").order("date", { ascending: false }).order("last_scan_at", { ascending: false });
+    const latestByUser = /* @__PURE__ */ new Map();
+    if (latestRecords) {
+      for (const r of latestRecords) {
+        if (!latestByUser.has(r.user_id)) {
+          latestByUser.set(r.user_id, r);
         }
       }
     }
-    const students = await supabase.from("qr_users").select("id").eq("role", "student");
-    const staff = await supabase.from("qr_users").select("id").eq("role", "staff");
     let insideCount = 0;
-    if (students.data) {
-      for (const s of students.data) {
-        if (latestStatusMap.get(s.id) !== false) insideCount++;
-      }
-    }
-    if (staff.data) {
-      for (const s of staff.data) {
-        if (latestStatusMap.get(s.id) !== false) insideCount++;
+    for (const u of allUsers) {
+      const latest = latestByUser.get(u.id);
+      if (!latest) {
+        insideCount++;
+      } else {
+        const entry = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
+        const exit = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
+        if (entry >= exit) insideCount++;
       }
     }
     res.json({

@@ -403,14 +403,23 @@ router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
 
 router.get("/attendance/currently-inside", authMiddleware, async (req: any, res: any) => {
   try {
-    // For "Default Inside", we need to check ALL users and see who is NOT outside.
-    // 1. Get all users
-    const { data: allUsers, error: userError } = await supabase.from("qr_users").select("*");
-    if (userError) throw userError;
+    // 1. Get ALL users (handle pagination)
+    let allUsers: any[] = [];
+    let from = 0;
+    const step = 1000;
+    while (true) {
+      const { data, error } = await supabase.from("qr_users").select("*").range(from, from + step - 1);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      allUsers = allUsers.concat(data);
+      if (data.length < step) break;
+      from += step;
+    }
 
-    // 2. Get latest record for each user to determine status
-    // (This is inefficient but manageable for small-medium hostels)
-    // A more efficient way is to query only for those who HAVE scanned today or yesterday
+    req.log.info({ totalUsers: allUsers.length }, "Fetched all users for currently-inside");
+
+    // 2. Get latest records for ALL users who have ever scanned
+    // We order by date and scan time to get the absolute latest status
     const { data: latestRecords, error: recordError } = await supabase
       .from("qr_attendance")
       .select("*")
@@ -419,7 +428,7 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
     
     if (recordError) throw recordError;
 
-    // Group by user_id to get the single latest record
+    // Group by user_id to get the single latest record for each user
     const latestByUser = new Map<number, any>();
     for (const r of latestRecords) {
       if (!latestByUser.has(r.user_id)) {
@@ -427,24 +436,24 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
       }
     }
 
-    const insideUsers = allUsers.filter(user => {
-      const latest = latestByUser.get(user.id);
-      if (!latest) return true; // Default inside
-      
-      const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
-      const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
-      
-      return entryTime >= exitTime; // Inside if entry is latest or no scans ever
-    });
-
-    const insideRecords = insideUsers.map(u => {
+    const insideRecords = allUsers.map(u => {
       const latest = latestByUser.get(u.id);
+      
+      let isInside = true; // Default
+      if (latest) {
+        const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
+        const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
+        isInside = entryTime >= exitTime;
+      }
+
+      if (!isInside) return null;
+
+      // Return consistent record shape
       if (latest) {
         return formatRecord(latest, u);
       } else {
-        // Default inside student with no scans
         return {
-          id: -u.id, // Synthetic ID
+          id: -u.id,
           userId: u.id,
           date: new Date().toISOString().split("T")[0],
           entryTime: null,
@@ -452,17 +461,12 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
           scanCount: 0,
           durationMinutes: null,
           status: "inside",
-          user: {
-            id: u.id,
-            name: u.name,
-            uniqueId: u.unique_id,
-            role: u.role,
-            createdAt: u.created_at,
-          }
+          user: { id: u.id, name: u.name, uniqueId: u.unique_id, role: u.role, createdAt: u.created_at }
         };
       }
-    });
+    }).filter(Boolean);
 
+    req.log.info({ insideCount: insideRecords.length }, "Calculated currently-inside");
     res.json(insideRecords);
   } catch (err: any) {
     req.log.error({ err }, "Currently inside error");
@@ -489,37 +493,41 @@ router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: 
       supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(10),
     ]);
 
-    // Calculate currentlyInsideCount using "Default Inside" logic
-    // We need the latest record for every user
-    const { data: allLatestRecords } = await supabase
+    // Calculate currentlyInsideCount using the exact same logic as the list
+    let allUsers: any[] = [];
+    let from = 0;
+    while (true) {
+      const { data } = await supabase.from("qr_users").select("id, role").range(from, from + 999);
+      if (!data || data.length === 0) break;
+      allUsers = allUsers.concat(data);
+      if (data.length < 1000) break;
+      from += 1000;
+    }
+
+    const { data: latestRecords } = await supabase
       .from("qr_attendance")
       .select("user_id, entry_time, exit_time")
       .order("date", { ascending: false })
       .order("last_scan_at", { ascending: false });
 
-    const latestStatusMap = new Map<number, boolean>(); // true = inside
-    if (allLatestRecords) {
-      for (const r of allLatestRecords) {
-        if (!latestStatusMap.has(r.user_id)) {
-          const entry = r.entry_time ? new Date(r.entry_time).getTime() : 0;
-          const exit = r.exit_time ? new Date(r.exit_time).getTime() : 0;
-          latestStatusMap.set(r.user_id, entry >= exit);
+    const latestByUser = new Map<number, any>();
+    if (latestRecords) {
+      for (const r of latestRecords) {
+        if (!latestByUser.has(r.user_id)) {
+          latestByUser.set(r.user_id, r);
         }
       }
     }
 
-    const students = await supabase.from("qr_users").select("id").eq("role", "student");
-    const staff = await supabase.from("qr_users").select("id").eq("role", "staff");
-    
     let insideCount = 0;
-    if (students.data) {
-      for (const s of students.data) {
-        if (latestStatusMap.get(s.id) !== false) insideCount++; // Default true
-      }
-    }
-    if (staff.data) {
-      for (const s of staff.data) {
-        if (latestStatusMap.get(s.id) !== false) insideCount++; // Default true
+    for (const u of allUsers) {
+      const latest = latestByUser.get(u.id);
+      if (!latest) {
+        insideCount++; // Default inside
+      } else {
+        const entry = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
+        const exit = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
+        if (entry >= exit) insideCount++;
       }
     }
 
