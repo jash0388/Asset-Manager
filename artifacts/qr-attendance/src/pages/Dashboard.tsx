@@ -112,7 +112,7 @@ export default function Dashboard() {
               value={data?.currentlyInsideCount ?? 0}
               icon={Clock}
               color="bg-orange-900/40 text-orange-400"
-              sub="On campus now"
+              sub="Inside hostel now"
             />
             <StatCard
               label="Students"
