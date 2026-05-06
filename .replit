@@ -55,4 +55,3 @@ externalPort = 80
 
 [userenv.shared]
 ALLOW_BYPASS_TOKEN = "true"
-SUPABASE_URL = "https://ayevvaecybqjvlvmrbme.supabase.co"
