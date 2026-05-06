@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "seed": "ts-node src/seed.ts",
+    "dev": "tsx watch src/index.ts",
+    "seed": "tsx src/seed.ts",
     "build": "node ./build.vercel.mjs",
     "build:vercel": "node ./build.vercel.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
+    "tsx": "catalog:",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
