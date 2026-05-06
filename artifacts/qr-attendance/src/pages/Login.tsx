@@ -20,7 +20,7 @@ export default function Login() {
       return;
     }
 
-    setError("Invalid code. Try 038899");
+    setError("Invalid code. Please try again.");
   };
 
   return (
