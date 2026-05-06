@@ -8,7 +8,8 @@ import { rm, mkdir } from "node:fs/promises";
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
-const outDir = path.resolve(artifactDir, "api");
+const repoRoot = path.resolve(artifactDir, "../..");
+const outDir = path.resolve(repoRoot, "api");
 
 async function buildVercel() {
   await rm(outDir, { recursive: true, force: true });
