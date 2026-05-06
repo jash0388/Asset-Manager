@@ -101,7 +101,7 @@ export default function Dashboard() {
               sub={`${data?.totalStudents ?? 0} students, ${data?.totalStaff ?? 0} staff`}
             />
             <StatCard
-              label="Today's Attendance"
+              label="Today's Outing"
               value={data?.todayAttendanceCount ?? 0}
               icon={UserCheck}
               color="bg-emerald-900/40 text-emerald-400"
