@@ -7,10 +7,8 @@ import "./index.css";
 setAuthTokenGetter(() => localStorage.getItem("qr_token"));
 setAuthTokenRefresher(() => ensureFreshToken());
 
-// Dev → local API server; Production → Vercel backend URL
-if (import.meta.env.DEV) {
-  setBaseUrl("http://localhost:3000");
-} else if (import.meta.env.VITE_API_URL) {
+// Production → external backend URL (dev uses Vite proxy for /api)
+if (!import.meta.env.DEV && import.meta.env.VITE_API_URL) {
   setBaseUrl(import.meta.env.VITE_API_URL);
 }
 
