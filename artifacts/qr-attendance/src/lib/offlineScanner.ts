@@ -19,7 +19,7 @@ const KEY_QUEUE = "secapp.queue.v1";
 const KEY_COOLDOWN = "secapp.cooldown.v1";
 const KEY_LASTSYNC = "secapp.lastSyncAt.v1";
 
-const COOLDOWN_MS = 30 * 60 * 1000;
+const COOLDOWN_MS = 0;
 const USER_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function readJson<T>(key: string, fallback: T): T {
@@ -205,16 +205,10 @@ export async function syncQueue(): Promise<SyncResult> {
 
   for (const r of results) {
     if (!r || typeof r.clientScanId !== "string") continue;
+    acceptedIds.add(r.clientScanId);
     if (r.status === "ok") {
-      acceptedIds.add(r.clientScanId);
       synced++;
-    } else if (
-      r.status === "duplicate" ||
-      r.status === "max_reached" ||
-      r.status === "user_not_found" ||
-      r.status === "invalid"
-    ) {
-      acceptedIds.add(r.clientScanId);
+    } else {
       skipped++;
     }
   }

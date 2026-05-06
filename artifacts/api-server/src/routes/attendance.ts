@@ -268,21 +268,8 @@ router.post("/scan", async (req: any, res: any) => {
       });
     }
 
-    // Has record → student is RETURNING → apply cooldown to avoid accidental double-scan
+    // Has record → student is RETURNING → delete record
     const record = existingRecords[0];
-    const lastAt = record.last_scan_at ? new Date(record.last_scan_at).getTime() : 0;
-    const nowTime = new Date(now).getTime();
-    const RETURN_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
-
-    if (nowTime - lastAt < RETURN_COOLDOWN_MS) {
-      const remainingSecs = Math.ceil((RETURN_COOLDOWN_MS - (nowTime - lastAt)) / 1000);
-      return res.json({
-        success: false,
-        action: "ignored",
-        message: `Too soon — wait ${remainingSecs}s before scanning again.`,
-        user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-      });
-    }
 
     // Delete the record — student has returned inside
     req.log.info({ userId: user.id, name: user.name }, "Student returned to hostel, deleting outing record");
