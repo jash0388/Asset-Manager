@@ -284,11 +284,11 @@ router.post("/scan", async (req: any, res: any) => {
       if (currentStatus === "inside") {
         insertData.exit_time = now;
         action = "exit";
-        message = `Goodbye ${user.name}! You have LEFT (Outside).`;
+        message = `${user.name} has LEFT the Hostel.`;
       } else {
         insertData.entry_time = now;
         action = "entry";
-        message = `Welcome back ${user.name}! You are now INSIDE.`;
+        message = `${user.name} is now INSIDE the Hostel.`;
       }
 
       req.log.info({ userId: user.id, action }, "Recording first scan of the day");
@@ -330,11 +330,11 @@ router.post("/scan", async (req: any, res: any) => {
     if (currentStatus === "inside") {
       updateData.exit_time = now;
       action = "exit";
-      message = `Goodbye ${user.name}! You have LEFT (Outside).`;
+      message = `${user.name} has LEFT the Hostel.`;
     } else {
       updateData.entry_time = now;
       action = "entry";
-      message = `Welcome back ${user.name}! You are now INSIDE.`;
+      message = `${user.name} is now INSIDE the Hostel.`;
     }
 
     req.log.info({ userId: user.id, action }, "Updating existing record for today");

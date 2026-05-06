@@ -277,16 +277,26 @@ export default function Scanner() {
           <div
             data-testid={result.success ? "scan-success" : "scan-error"}
             className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-6 transition-all ${
-              result.success ? "bg-green-950/95" : "bg-red-950/95"
+              result.success
+                ? result.action === "exit"
+                  ? "bg-orange-950/95"
+                  : "bg-green-950/95"
+                : "bg-red-950/95"
             }`}
           >
             {result.success ? (
-              <CheckCircle className="w-20 h-20 text-green-400 mb-4" />
+              <CheckCircle className={`w-20 h-20 mb-4 ${result.action === "exit" ? "text-orange-400" : "text-green-400"}`} />
             ) : (
               <XCircle className="w-20 h-20 text-red-400 mb-4" />
             )}
-            <p className={`text-3xl font-bold mb-3 ${result.success ? "text-green-400" : "text-red-400"}`}>
-              {result.success ? "Access Granted" : "Access Denied"}
+            <p className={`text-3xl font-bold mb-3 ${result.success ? (result.action === "exit" ? "text-orange-400" : "text-green-400") : "text-red-400"}`}>
+              {result.success
+                ? result.action === "exit"
+                  ? "Left Hostel"
+                  : result.action === "entry"
+                  ? "Inside Hostel"
+                  : "Recorded"
+                : "Access Denied"}
             </p>
             {result.userName && (
               <p className="text-3xl font-extrabold text-white mb-2 text-center px-4 leading-tight">
@@ -308,9 +318,9 @@ export default function Scanner() {
             <p className="text-sm text-slate-300 text-center mt-1 px-4">{result.message}</p>
             {result.action && (
               <span className={`mt-4 px-4 py-1.5 rounded-full text-sm font-semibold ${
-                result.action === "entry" ? "bg-green-800 text-green-200" : "bg-blue-800 text-blue-200"
+                result.action === "entry" ? "bg-green-800 text-green-200" : result.action === "exit" ? "bg-orange-800 text-orange-200" : "bg-slate-800 text-slate-200"
               }`}>
-                {result.action === "entry" ? "Entry Recorded" : result.action === "exit" ? "Exit Recorded" : "Recorded"}
+                {result.action === "entry" ? "✓ Inside Hostel" : result.action === "exit" ? "✓ Left Hostel" : "Recorded"}
               </span>
             )}
             <button
