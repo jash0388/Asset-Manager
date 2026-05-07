@@ -64511,7 +64511,8 @@ function getHostelDate(baseDate = /* @__PURE__ */ new Date()) {
 }
 function getRecordStatus(record) {
   if (!record?.exit_time) return "inside";
-  if (!record.entry_time) return "left";
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  if (!hasEntry) return "left";
   const entryTime = new Date(record.entry_time).getTime();
   const exitTime = new Date(record.exit_time).getTime();
   return entryTime >= exitTime ? "inside" : "left";
@@ -64526,7 +64527,8 @@ function getLatestRecordsByUser(records = []) {
   return latestByUserId;
 }
 function formatRecord(record, user) {
-  const durationMinutes = record.entry_time && record.exit_time ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 6e4) : null;
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  const durationMinutes = hasEntry && record.exit_time ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 6e4) : null;
   const status = getRecordStatus(record);
   return {
     id: record.id,
@@ -64941,15 +64943,19 @@ function formatUser2(u) {
   };
 }
 function formatRecord2(record, user) {
-  const durationMinutes = record.entry_time && record.exit_time ? Math.floor((new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 6e4) : null;
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  const durationMinutes = hasEntry && record.exit_time ? Math.floor(Math.abs(new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 6e4) : null;
   let status = "inside";
-  if (record.exit_time) status = "left";
-  else if (record.entry_time) status = "inside";
+  if (record.exit_time && !hasEntry) {
+    status = "left";
+  } else if (hasEntry) {
+    status = "inside";
+  }
   return {
     id: record.id,
     userId: record.user_id,
     date: record.date,
-    entryTime: record.entry_time,
+    entryTime: hasEntry ? record.entry_time : null,
     exitTime: record.exit_time,
     scanCount: record.scan_count,
     durationMinutes,

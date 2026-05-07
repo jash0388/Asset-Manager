@@ -6,16 +6,17 @@ const SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
-async function checkTables() {
-  const tables = ['admins', 'users', 'attendance'];
-  for (const table of tables) {
-    const { error } = await supabase.from(table).select('id').limit(1);
-    if (error) {
-      console.log(`Table ${table} does not exist or error: ${error.message}`);
-    } else {
-      console.log(`Table ${table} exists!`);
-    }
+async function checkColumns() {
+  const { data, error } = await supabase
+    .from('qr_users')
+    .select('*')
+    .limit(1);
+  
+  if (error) {
+    console.log(`❌ Error: ${error.message}`);
+  } else {
+    console.log(`✅ Columns in qr_users:`, Object.keys(data[0] || {}));
   }
 }
 
-checkTables();
+checkColumns();

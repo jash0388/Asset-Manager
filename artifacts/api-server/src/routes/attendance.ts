@@ -50,7 +50,10 @@ async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
 
 function getRecordStatus(record: any): "inside" | "left" {
   if (!record?.exit_time) return "inside";
-  if (!record.entry_time) return "left";
+  
+  // Handle the 9999-12-31 dummy date or null
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  if (!hasEntry) return "left";
 
   const entryTime = new Date(record.entry_time).getTime();
   const exitTime = new Date(record.exit_time).getTime();
@@ -68,8 +71,9 @@ function getLatestRecordsByUser(records: any[] = []): Map<number, any> {
 }
 
 function formatRecord(record: any, user?: any) {
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
   const durationMinutes =
-    record.entry_time && record.exit_time
+    hasEntry && record.exit_time
       ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 60000)
       : null;
 

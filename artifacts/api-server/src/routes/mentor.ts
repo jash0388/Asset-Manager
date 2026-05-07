@@ -20,18 +20,24 @@ function formatUser(u: any) {
 }
 
 function formatRecord(record: any, user?: any) {
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
   const durationMinutes =
-    record.entry_time && record.exit_time
-      ? Math.floor((new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 60000)
+    hasEntry && record.exit_time
+      ? Math.floor(Math.abs(new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 60000)
       : null;
+  
   let status: "present" | "left" | "inside" = "inside";
-  if (record.exit_time) status = "left";
-  else if (record.entry_time) status = "inside";
+  if (record.exit_time && !hasEntry) {
+    status = "left";
+  } else if (hasEntry) {
+    status = "inside";
+  }
+
   return {
     id: record.id,
     userId: record.user_id,
     date: record.date,
-    entryTime: record.entry_time,
+    entryTime: hasEntry ? record.entry_time : null,
     exitTime: record.exit_time,
     scanCount: record.scan_count,
     durationMinutes,
