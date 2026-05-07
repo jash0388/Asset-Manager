@@ -5,33 +5,66 @@ import { authMiddleware, adminOnly } from "../middlewares/auth.js";
 
 const router = Router();
 
-const DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes to prevent accidental double clicks
+const HOSTEL_DAY_START_HOUR_IST = 6;
 
-function getTodayDate(): string {
-  // Use IST (Asia/Kolkata) to determine the date string
-  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+function getHostelDate(baseDate = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(baseDate);
+
+  const getPart = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  const year = getPart("year");
+  const month = getPart("month");
+  const day = getPart("day");
+  const hour = getPart("hour");
+
+  const hostelDay = new Date(Date.UTC(year, month - 1, day));
+  if (hour < HOSTEL_DAY_START_HOUR_IST) {
+    hostelDay.setUTCDate(hostelDay.getUTCDate() - 1);
+  }
+
+  return hostelDay.toISOString().slice(0, 10);
 }
 
 async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
-  const today = getTodayDate();
+  const today = getHostelDate();
   const { data: records } = await supabase
     .from("qr_attendance")
     .select("entry_time, exit_time")
     .eq("user_id", userId)
     .eq("date", today)
+    .order("last_scan_at", { ascending: false, nullsFirst: false })
     .limit(1);
 
   if (!records?.[0]) {
-    // No record for today (IST) yet -> Default to inside
     return "inside";
   }
 
-  const latest = records[0];
-  const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
-  const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
+  return getRecordStatus(records[0]);
+}
 
-  // If entry is later or equal to exit, they are inside
+function getRecordStatus(record: any): "inside" | "left" {
+  if (!record?.exit_time) return "inside";
+  if (!record.entry_time) return "left";
+
+  const entryTime = new Date(record.entry_time).getTime();
+  const exitTime = new Date(record.exit_time).getTime();
   return entryTime >= exitTime ? "inside" : "left";
+}
+
+function getLatestRecordsByUser(records: any[] = []): Map<number, any> {
+  const latestByUserId = new Map<number, any>();
+  for (const record of records) {
+    if (!latestByUserId.has(record.user_id)) {
+      latestByUserId.set(record.user_id, record);
+    }
+  }
+  return latestByUserId;
 }
 
 function formatRecord(record: any, user?: any) {
@@ -40,8 +73,7 @@ function formatRecord(record: any, user?: any) {
       ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 60000)
       : null;
 
-  // Records only exist when a student is currently OUT of the hostel
-  const status: "inside" | "left" = "left";
+  const status = getRecordStatus(record);
 
   return {
     id: record.id,
@@ -126,8 +158,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
   }
 
   const results: any[] = [];
-  // Track users processed in this batch: true = currently out, false = returned
-  const batchOutCache = new Map<number, boolean>();
+  const batchStatusCache = new Map<number, { status: "inside" | "left"; recordId?: number; scanCount: number }>();
 
   for (const item of scans) {
     const clientScanId = String(item?.clientScanId ?? "");
@@ -155,55 +186,53 @@ router.post("/scan/batch", async (req: any, res: any) => {
         continue;
       }
       const user = users[0];
-      const date = scannedAt.toISOString().split("T")[0];
+      const date = getHostelDate(scannedAt);
       const ts = scannedAt.toISOString();
 
-      // Check if already processed in this batch
-      let isCurrentlyOut: boolean;
-      if (batchOutCache.has(user.id)) {
-        isCurrentlyOut = batchOutCache.get(user.id)!;
+      let current: { status: "inside" | "left"; recordId?: number; scanCount: number };
+      if (batchStatusCache.has(user.id)) {
+        current = batchStatusCache.get(user.id)!;
       } else {
         const { data: existingRecords } = await supabase
           .from("qr_attendance")
-          .select("id")
+          .select("*")
           .eq("user_id", user.id)
           .eq("date", date)
+          .order("last_scan_at", { ascending: false, nullsFirst: false })
           .limit(1);
-        isCurrentlyOut = !!existingRecords?.[0];
+        const existing = existingRecords?.[0];
+        current = {
+          status: existing ? getRecordStatus(existing) : "inside",
+          recordId: existing?.id,
+          scanCount: existing?.scan_count ?? 0,
+        };
       }
 
-      if (!isCurrentlyOut) {
-        // No record → student is leaving → create record
+      if (current.status === "inside") {
         const { data: inserted, error: insertError } = await supabase
           .from("qr_attendance")
-          .insert({ user_id: user.id, date, exit_time: ts, scan_count: 1, last_scan_at: ts })
+          .insert({ user_id: user.id, date, exit_time: ts, entry_time: null, scan_count: 1, last_scan_at: ts })
           .select()
           .single();
         if (insertError) throw insertError;
-        batchOutCache.set(user.id, true);
+        const recordId = inserted.id;
+        batchStatusCache.set(user.id, { status: "left", recordId, scanCount: 1 });
         results.push({
           clientScanId,
           status: "ok",
           action: "exit",
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          recordId: inserted.id,
+          recordId,
         });
       } else {
-        // Has record → student is returning → delete record
-        const { data: existingRecords } = await supabase
+        if (!current.recordId) throw new Error("Missing attendance record for return scan");
+        const nextScanCount = current.scanCount + 1;
+        const { error: updateError } = await supabase
           .from("qr_attendance")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("date", date)
-          .limit(1);
-        if (existingRecords?.[0]) {
-          const { error: deleteError } = await supabase
-            .from("qr_attendance")
-            .delete()
-            .eq("id", existingRecords[0].id);
-          if (deleteError) throw deleteError;
-        }
-        batchOutCache.set(user.id, false);
+          .update({ entry_time: ts, scan_count: nextScanCount, last_scan_at: ts })
+          .eq("id", current.recordId);
+        if (updateError) throw updateError;
+        batchStatusCache.set(user.id, { status: "inside", recordId: current.recordId, scanCount: nextScanCount });
         results.push({
           clientScanId,
           status: "ok",
@@ -237,23 +266,25 @@ router.post("/scan", async (req: any, res: any) => {
       return;
     }
     const user = users[0];
-    const date = getTodayDate();
+    const date = getHostelDate();
     const now = new Date().toISOString();
 
-    // Check if student already has a record today (meaning they're currently OUT)
     const { data: existingRecords } = await supabase
       .from("qr_attendance")
       .select("*")
       .eq("user_id", user.id)
       .eq("date", date)
+      .order("last_scan_at", { ascending: false, nullsFirst: false })
       .limit(1);
 
-    if (!existingRecords?.[0]) {
-      // No record → student is LEAVING → create outing record
+    const record = existingRecords?.[0];
+    const currentStatus = record ? getRecordStatus(record) : "inside";
+
+    if (currentStatus === "inside") {
       req.log.info({ userId: user.id, name: user.name }, "Student leaving hostel");
       const { data: inserted, error: insertError } = await supabase
         .from("qr_attendance")
-        .insert({ user_id: user.id, date, exit_time: now, scan_count: 1, last_scan_at: now })
+        .insert({ user_id: user.id, date, exit_time: now, entry_time: null, scan_count: 1, last_scan_at: now })
         .select()
         .single();
 
@@ -268,17 +299,14 @@ router.post("/scan", async (req: any, res: any) => {
       });
     }
 
-    // Has record → student is RETURNING → delete record
-    const record = existingRecords[0];
-
-    // Delete the record — student has returned inside
-    req.log.info({ userId: user.id, name: user.name }, "Student returned to hostel, deleting outing record");
-    const { error: deleteError } = await supabase
+    req.log.info({ userId: user.id, name: user.name }, "Student returned to hostel");
+    const nextScanCount = (record.scan_count ?? 0) + 1;
+    const { error: updateError } = await supabase
       .from("qr_attendance")
-      .delete()
+      .update({ entry_time: now, scan_count: nextScanCount, last_scan_at: now })
       .eq("id", record.id);
 
-    if (deleteError) throw deleteError;
+    if (updateError) throw updateError;
 
     return res.json({
       success: true,
@@ -312,7 +340,7 @@ router.get("/attendance/recent", async (req: any, res: any) => {
 });
 
 router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
-  const today = getTodayDate();
+  const today = getHostelDate();
   try {
     const { data: records, error } = await supabase
       .from("qr_attendance")
@@ -330,7 +358,7 @@ router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
 
 router.get("/attendance/currently-inside", authMiddleware, async (req: any, res: any) => {
   try {
-    const today = getTodayDate();
+    const today = getHostelDate();
 
     // Get all users and today's outing records in parallel
     let allUsers: any[] = [];
@@ -344,29 +372,35 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
       from += 1000;
     }
 
-    // Get IDs of students currently OUT today (have a record)
-    const { data: outRecords, error: outError } = await supabase
+    const { data: todayRecords, error: outError } = await supabase
       .from("qr_attendance")
-      .select("user_id")
-      .eq("date", today);
+      .select("*")
+      .eq("date", today)
+      .order("last_scan_at", { ascending: false, nullsFirst: false });
     if (outError) throw outError;
 
-    const outUserIds = new Set((outRecords ?? []).map((r: any) => r.user_id));
+    const recordsByUserId = getLatestRecordsByUser(todayRecords ?? []);
+    const outUserIds = new Set(
+      Array.from(recordsByUserId.values()).filter((r: any) => getRecordStatus(r) === "left").map((r: any) => r.user_id)
+    );
 
-    // Inside = all users who are NOT currently out
     const insideRecords = allUsers
       .filter(u => !outUserIds.has(u.id))
-      .map(u => ({
-        id: -u.id,
-        userId: u.id,
-        date: today,
-        entryTime: null,
-        exitTime: null,
-        scanCount: 0,
-        durationMinutes: null,
-        status: "inside",
-        user: { id: u.id, name: u.name, uniqueId: u.unique_id, role: u.role, createdAt: u.created_at }
-      }));
+      .map(u => {
+        const record = recordsByUserId.get(u.id);
+        if (record) return formatRecord(record, u);
+        return {
+          id: -u.id,
+          userId: u.id,
+          date: today,
+          entryTime: null,
+          exitTime: null,
+          scanCount: 0,
+          durationMinutes: null,
+          status: "inside",
+          user: { id: u.id, name: u.name, uniqueId: u.unique_id, role: u.role, createdAt: u.created_at }
+        };
+      });
 
     req.log.info({ insideCount: insideRecords.length }, "Calculated currently-inside");
     res.json(insideRecords);
@@ -377,30 +411,31 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
 });
 
 router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: any) => {
-  const today = getTodayDate();
+  const today = getHostelDate();
   try {
     const [
       { count: totalUsers },
       { count: totalStudents },
       { count: totalStaff },
-      { count: todayOutingCount },
+      { data: todayRecords },
       { data: recentResult }
     ] = await Promise.all([
       supabase.from("qr_users").select("*", { count: "exact", head: true }),
       supabase.from("qr_users").select("*", { count: "exact", head: true }).eq("role", "student"),
       supabase.from("qr_users").select("*", { count: "exact", head: true }).eq("role", "staff"),
-      supabase.from("qr_attendance").select("*", { count: "exact", head: true }).eq("date", today),
+      supabase.from("qr_attendance").select("user_id, entry_time, exit_time, last_scan_at").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }),
       supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(10),
     ]);
 
-    // Inside = total users minus those currently out today
-    const currentlyInsideCount = (totalUsers || 0) - (todayOutingCount || 0);
+    const latestRecordsByUserId = getLatestRecordsByUser(todayRecords ?? []);
+    const leftUserIds = new Set(Array.from(latestRecordsByUserId.values()).filter((r: any) => getRecordStatus(r) === "left").map((r: any) => r.user_id));
+    const currentlyInsideCount = (totalUsers || 0) - leftUserIds.size;
 
     res.json({
       totalUsers: totalUsers || 0,
       totalStudents: totalStudents || 0,
       totalStaff: totalStaff || 0,
-      todayAttendanceCount: todayOutingCount || 0,
+      todayAttendanceCount: todayRecords?.length || 0,
       currentlyInsideCount,
       recentActivity: recentResult ? recentResult.map((r: any) => formatRecord(r, r.qr_users)) : [],
     });

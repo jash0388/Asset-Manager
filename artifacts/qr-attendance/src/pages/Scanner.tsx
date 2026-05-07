@@ -143,7 +143,7 @@ export default function Scanner() {
       isProcessingRef.current = false;
       resultTimeoutRef.current = null;
       safeResumeScanner();
-    }, 5000);
+    }, r.success ? 1800 : 3500);
   };
 
   const handleScan = (decodedText: string) => {
@@ -153,7 +153,7 @@ export default function Scanner() {
     if (!uid) return;
 
     const now = Date.now();
-    if (lastScanRef.current.text === uid && now - lastScanRef.current.at < 5000) {
+    if (lastScanRef.current.text === uid && now - lastScanRef.current.at < 1200) {
       return;
     }
     lastScanRef.current = { text: uid, at: now };
@@ -423,7 +423,7 @@ export default function Scanner() {
           {[
             "Point camera at QR code on ID card",
             "Hold steady until scan is detected",
-            "Wait for confirmation before next scan",
+            "Scan again after the confirmation to mark the student inside",
           ].map((tip, i) => (
             <div key={i} className="flex items-start gap-3 px-4 py-3 rounded-lg bg-slate-900/60 border border-slate-800">
               <span className="w-5 h-5 rounded-full bg-blue-900/60 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">

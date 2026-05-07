@@ -15,7 +15,7 @@ type ScanReply =
   | { ok: true; action: "queued"; user: CachedUser; queued: number }
   | { ok: false; message: string };
 
-const POPUP_MS = 2500;
+const POPUP_MS = 1800;
 const SYNC_INTERVAL_MS = 10_000;
 
 function formatAgo(ts: number | null): string {
@@ -176,7 +176,7 @@ export default function SecurityApp() {
     if (!text) return;
 
     const last = lastScanRef.current;
-    if (last && last.text === text && Date.now() - last.at < 3000) return;
+    if (last && last.text === text && Date.now() - last.at < 1200) return;
     lastScanRef.current = { text, at: Date.now() };
 
     const uid = text;

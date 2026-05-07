@@ -508,6 +508,121 @@ var require_browser = __commonJS({
   }
 });
 
+// ../../../node_modules/has-flag/index.js
+var require_has_flag = __commonJS({
+  "../../../node_modules/has-flag/index.js"(exports, module) {
+    "use strict";
+    module.exports = (flag, argv = process.argv) => {
+      const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
+      const position = argv.indexOf(prefix + flag);
+      const terminatorPosition = argv.indexOf("--");
+      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+    };
+  }
+});
+
+// ../../../node_modules/supports-color/index.js
+var require_supports_color = __commonJS({
+  "../../../node_modules/supports-color/index.js"(exports, module) {
+    "use strict";
+    var os = __require("os");
+    var tty = __require("tty");
+    var hasFlag = require_has_flag();
+    var { env } = process;
+    var forceColor;
+    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
+      forceColor = 0;
+    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
+      forceColor = 1;
+    }
+    if ("FORCE_COLOR" in env) {
+      if (env.FORCE_COLOR === "true") {
+        forceColor = 1;
+      } else if (env.FORCE_COLOR === "false") {
+        forceColor = 0;
+      } else {
+        forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+      }
+    }
+    function translateLevel(level) {
+      if (level === 0) {
+        return false;
+      }
+      return {
+        level,
+        hasBasic: true,
+        has256: level >= 2,
+        has16m: level >= 3
+      };
+    }
+    function supportsColor(haveStream, streamIsTTY) {
+      if (forceColor === 0) {
+        return 0;
+      }
+      if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
+        return 3;
+      }
+      if (hasFlag("color=256")) {
+        return 2;
+      }
+      if (haveStream && !streamIsTTY && forceColor === void 0) {
+        return 0;
+      }
+      const min = forceColor || 0;
+      if (env.TERM === "dumb") {
+        return min;
+      }
+      if (process.platform === "win32") {
+        const osRelease = os.release().split(".");
+        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
+          return Number(osRelease[2]) >= 14931 ? 3 : 2;
+        }
+        return 1;
+      }
+      if ("CI" in env) {
+        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
+          return 1;
+        }
+        return min;
+      }
+      if ("TEAMCITY_VERSION" in env) {
+        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+      }
+      if (env.COLORTERM === "truecolor") {
+        return 3;
+      }
+      if ("TERM_PROGRAM" in env) {
+        const version3 = parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+        switch (env.TERM_PROGRAM) {
+          case "iTerm.app":
+            return version3 >= 3 ? 3 : 2;
+          case "Apple_Terminal":
+            return 2;
+        }
+      }
+      if (/-256(color)?$/i.test(env.TERM)) {
+        return 2;
+      }
+      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+        return 1;
+      }
+      if ("COLORTERM" in env) {
+        return 1;
+      }
+      return min;
+    }
+    function getSupportLevel(stream) {
+      const level = supportsColor(stream, stream && stream.isTTY);
+      return translateLevel(level);
+    }
+    module.exports = {
+      supportsColor: getSupportLevel,
+      stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+      stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+    };
+  }
+});
+
 // ../../node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/node.js
 var require_node = __commonJS({
   "../../node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/node.js"(exports, module) {
@@ -526,7 +641,7 @@ var require_node = __commonJS({
     );
     exports.colors = [6, 2, 3, 4, 5, 1];
     try {
-      const supportsColor = __require("supports-color");
+      const supportsColor = require_supports_color();
       if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
         exports.colors = [
           20,
@@ -64488,13 +64603,46 @@ var users_default = router3;
 // src/routes/attendance.ts
 var import_express4 = __toESM(require_express2(), 1);
 var router4 = (0, import_express4.Router)();
-var DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1e3;
-function getTodayDate() {
-  return (/* @__PURE__ */ new Date()).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+var HOSTEL_DAY_START_HOUR_IST = 6;
+function getHostelDate(baseDate = /* @__PURE__ */ new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(baseDate);
+  const getPart = (type) => Number(parts.find((part) => part.type === type)?.value);
+  const year = getPart("year");
+  const month = getPart("month");
+  const day = getPart("day");
+  const hour = getPart("hour");
+  const hostelDay = new Date(Date.UTC(year, month - 1, day));
+  if (hour < HOSTEL_DAY_START_HOUR_IST) {
+    hostelDay.setUTCDate(hostelDay.getUTCDate() - 1);
+  }
+  return hostelDay.toISOString().slice(0, 10);
+}
+function getRecordStatus(record) {
+  if (!record?.exit_time) return "inside";
+  if (!record.entry_time) return "left";
+  const entryTime = new Date(record.entry_time).getTime();
+  const exitTime = new Date(record.exit_time).getTime();
+  return entryTime >= exitTime ? "inside" : "left";
+}
+function getLatestRecordsByUser(records = []) {
+  const latestByUserId = /* @__PURE__ */ new Map();
+  for (const record of records) {
+    if (!latestByUserId.has(record.user_id)) {
+      latestByUserId.set(record.user_id, record);
+    }
+  }
+  return latestByUserId;
 }
 function formatRecord(record, user) {
   const durationMinutes = record.entry_time && record.exit_time ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 6e4) : null;
-  const status = "left";
+  const status = getRecordStatus(record);
   return {
     id: record.id,
     userId: record.user_id,
@@ -64566,7 +64714,7 @@ router4.post("/scan/batch", async (req, res) => {
     return;
   }
   const results = [];
-  const batchOutCache = /* @__PURE__ */ new Map();
+  const batchStatusCache = /* @__PURE__ */ new Map();
   for (const item of scans) {
     const clientScanId = String(item?.clientScanId ?? "");
     const uniqueId = extractUniqueId(item) ?? (typeof item?.uniqueId === "string" ? item.uniqueId.trim() : null);
@@ -64586,33 +64734,38 @@ router4.post("/scan/batch", async (req, res) => {
         continue;
       }
       const user = users[0];
-      const date = scannedAt.toISOString().split("T")[0];
+      const date = getHostelDate(scannedAt);
       const ts = scannedAt.toISOString();
-      let isCurrentlyOut;
-      if (batchOutCache.has(user.id)) {
-        isCurrentlyOut = batchOutCache.get(user.id);
+      let current;
+      if (batchStatusCache.has(user.id)) {
+        current = batchStatusCache.get(user.id);
       } else {
-        const { data: existingRecords } = await supabase.from("qr_attendance").select("id").eq("user_id", user.id).eq("date", date).limit(1);
-        isCurrentlyOut = !!existingRecords?.[0];
+        const { data: existingRecords } = await supabase.from("qr_attendance").select("*").eq("user_id", user.id).eq("date", date).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(1);
+        const existing = existingRecords?.[0];
+        current = {
+          status: existing ? getRecordStatus(existing) : "inside",
+          recordId: existing?.id,
+          scanCount: existing?.scan_count ?? 0
+        };
       }
-      if (!isCurrentlyOut) {
-        const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, exit_time: ts, scan_count: 1, last_scan_at: ts }).select().single();
+      if (current.status === "inside") {
+        const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, exit_time: ts, entry_time: null, scan_count: 1, last_scan_at: ts }).select().single();
         if (insertError) throw insertError;
-        batchOutCache.set(user.id, true);
+        const recordId = inserted.id;
+        batchStatusCache.set(user.id, { status: "left", recordId, scanCount: 1 });
         results.push({
           clientScanId,
           status: "ok",
           action: "exit",
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          recordId: inserted.id
+          recordId
         });
       } else {
-        const { data: existingRecords } = await supabase.from("qr_attendance").select("id").eq("user_id", user.id).eq("date", date).limit(1);
-        if (existingRecords?.[0]) {
-          const { error: deleteError } = await supabase.from("qr_attendance").delete().eq("id", existingRecords[0].id);
-          if (deleteError) throw deleteError;
-        }
-        batchOutCache.set(user.id, false);
+        if (!current.recordId) throw new Error("Missing attendance record for return scan");
+        const nextScanCount = current.scanCount + 1;
+        const { error: updateError } = await supabase.from("qr_attendance").update({ entry_time: ts, scan_count: nextScanCount, last_scan_at: ts }).eq("id", current.recordId);
+        if (updateError) throw updateError;
+        batchStatusCache.set(user.id, { status: "inside", recordId: current.recordId, scanCount: nextScanCount });
         results.push({
           clientScanId,
           status: "ok",
@@ -64639,12 +64792,14 @@ router4.post("/scan", async (req, res) => {
       return;
     }
     const user = users[0];
-    const date = getTodayDate();
+    const date = getHostelDate();
     const now = (/* @__PURE__ */ new Date()).toISOString();
-    const { data: existingRecords } = await supabase.from("qr_attendance").select("*").eq("user_id", user.id).eq("date", date).limit(1);
-    if (!existingRecords?.[0]) {
+    const { data: existingRecords } = await supabase.from("qr_attendance").select("*").eq("user_id", user.id).eq("date", date).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(1);
+    const record = existingRecords?.[0];
+    const currentStatus = record ? getRecordStatus(record) : "inside";
+    if (currentStatus === "inside") {
       req.log.info({ userId: user.id, name: user.name }, "Student leaving hostel");
-      const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, exit_time: now, scan_count: 1, last_scan_at: now }).select().single();
+      const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, exit_time: now, entry_time: null, scan_count: 1, last_scan_at: now }).select().single();
       if (insertError) throw insertError;
       return res.json({
         success: true,
@@ -64654,10 +64809,10 @@ router4.post("/scan", async (req, res) => {
         recordId: inserted.id
       });
     }
-    const record = existingRecords[0];
-    req.log.info({ userId: user.id, name: user.name }, "Student returned to hostel, deleting outing record");
-    const { error: deleteError } = await supabase.from("qr_attendance").delete().eq("id", record.id);
-    if (deleteError) throw deleteError;
+    req.log.info({ userId: user.id, name: user.name }, "Student returned to hostel");
+    const nextScanCount = (record.scan_count ?? 0) + 1;
+    const { error: updateError } = await supabase.from("qr_attendance").update({ entry_time: now, scan_count: nextScanCount, last_scan_at: now }).eq("id", record.id);
+    if (updateError) throw updateError;
     return res.json({
       success: true,
       action: "entry",
@@ -64682,7 +64837,7 @@ router4.get("/attendance/recent", async (req, res) => {
   }
 });
 router4.get("/attendance/today", authMiddleware, async (req, res) => {
-  const today = getTodayDate();
+  const today = getHostelDate();
   try {
     const { data: records, error } = await supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("entry_time", { ascending: false });
     if (error) throw error;
@@ -64694,7 +64849,7 @@ router4.get("/attendance/today", authMiddleware, async (req, res) => {
 });
 router4.get("/attendance/currently-inside", authMiddleware, async (req, res) => {
   try {
-    const today = getTodayDate();
+    const today = getHostelDate();
     let allUsers = [];
     let from = 0;
     while (true) {
@@ -64705,20 +64860,27 @@ router4.get("/attendance/currently-inside", authMiddleware, async (req, res) => 
       if (data.length < 1e3) break;
       from += 1e3;
     }
-    const { data: outRecords, error: outError } = await supabase.from("qr_attendance").select("user_id").eq("date", today);
+    const { data: todayRecords, error: outError } = await supabase.from("qr_attendance").select("*").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false });
     if (outError) throw outError;
-    const outUserIds = new Set((outRecords ?? []).map((r) => r.user_id));
-    const insideRecords = allUsers.filter((u) => !outUserIds.has(u.id)).map((u) => ({
-      id: -u.id,
-      userId: u.id,
-      date: today,
-      entryTime: null,
-      exitTime: null,
-      scanCount: 0,
-      durationMinutes: null,
-      status: "inside",
-      user: { id: u.id, name: u.name, uniqueId: u.unique_id, role: u.role, createdAt: u.created_at }
-    }));
+    const recordsByUserId = getLatestRecordsByUser(todayRecords ?? []);
+    const outUserIds = new Set(
+      Array.from(recordsByUserId.values()).filter((r) => getRecordStatus(r) === "left").map((r) => r.user_id)
+    );
+    const insideRecords = allUsers.filter((u) => !outUserIds.has(u.id)).map((u) => {
+      const record = recordsByUserId.get(u.id);
+      if (record) return formatRecord(record, u);
+      return {
+        id: -u.id,
+        userId: u.id,
+        date: today,
+        entryTime: null,
+        exitTime: null,
+        scanCount: 0,
+        durationMinutes: null,
+        status: "inside",
+        user: { id: u.id, name: u.name, uniqueId: u.unique_id, role: u.role, createdAt: u.created_at }
+      };
+    });
     req.log.info({ insideCount: insideRecords.length }, "Calculated currently-inside");
     res.json(insideRecords);
   } catch (err) {
@@ -64727,27 +64889,29 @@ router4.get("/attendance/currently-inside", authMiddleware, async (req, res) => 
   }
 });
 router4.get("/attendance/dashboard-stats", authMiddleware, async (req, res) => {
-  const today = getTodayDate();
+  const today = getHostelDate();
   try {
     const [
       { count: totalUsers },
       { count: totalStudents },
       { count: totalStaff },
-      { count: todayOutingCount },
+      { data: todayRecords },
       { data: recentResult }
     ] = await Promise.all([
       supabase.from("qr_users").select("*", { count: "exact", head: true }),
       supabase.from("qr_users").select("*", { count: "exact", head: true }).eq("role", "student"),
       supabase.from("qr_users").select("*", { count: "exact", head: true }).eq("role", "staff"),
-      supabase.from("qr_attendance").select("*", { count: "exact", head: true }).eq("date", today),
+      supabase.from("qr_attendance").select("user_id, entry_time, exit_time, last_scan_at").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }),
       supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(10)
     ]);
-    const currentlyInsideCount = (totalUsers || 0) - (todayOutingCount || 0);
+    const latestRecordsByUserId = getLatestRecordsByUser(todayRecords ?? []);
+    const leftUserIds = new Set(Array.from(latestRecordsByUserId.values()).filter((r) => getRecordStatus(r) === "left").map((r) => r.user_id));
+    const currentlyInsideCount = (totalUsers || 0) - leftUserIds.size;
     res.json({
       totalUsers: totalUsers || 0,
       totalStudents: totalStudents || 0,
       totalStaff: totalStaff || 0,
-      todayAttendanceCount: todayOutingCount || 0,
+      todayAttendanceCount: todayRecords?.length || 0,
       currentlyInsideCount,
       recentActivity: recentResult ? recentResult.map((r) => formatRecord(r, r.qr_users)) : []
     });
@@ -64878,7 +65042,7 @@ var attendance_default = router4;
 // src/routes/mentor.ts
 var import_express5 = __toESM(require_express2(), 1);
 var router5 = (0, import_express5.Router)();
-function getTodayDate2() {
+function getTodayDate() {
   return (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
 }
 function formatUser2(u) {
@@ -64910,7 +65074,7 @@ function formatRecord2(record, user) {
 }
 router5.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
-  const today = getTodayDate2();
+  const today = getTodayDate();
   try {
     const { data: students, error: studentError } = await supabase.from("qr_users").select("*").eq("mentor_id", mentorId).order("name");
     if (studentError) throw studentError;
