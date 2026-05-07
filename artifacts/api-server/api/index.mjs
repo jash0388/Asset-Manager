@@ -64489,6 +64489,9 @@ var users_default = router3;
 var import_express4 = __toESM(require_express2(), 1);
 var router4 = (0, import_express4.Router)();
 var DUPLICATE_SCAN_COOLDOWN_MS = 30 * 60 * 1e3;
+function getTodayDate() {
+  return (/* @__PURE__ */ new Date()).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+}
 async function getCurrentStatus(userId) {
   const today = getTodayDate();
   const { data: records } = await supabase.from("qr_attendance").select("entry_time, exit_time").eq("user_id", userId).eq("date", today).limit(1);
@@ -64499,9 +64502,6 @@ async function getCurrentStatus(userId) {
   const entryTime = latest.entry_time ? new Date(latest.entry_time).getTime() : 0;
   const exitTime = latest.exit_time ? new Date(latest.exit_time).getTime() : 0;
   return entryTime >= exitTime ? "inside" : "left";
-}
-function getTodayDate() {
-  return (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
 }
 function formatRecord(record, user) {
   const durationMinutes = record.entry_time && record.exit_time ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 6e4) : null;
