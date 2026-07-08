@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist]
   );
 
-  const loginBypass = useCallback((role: AuthRole = "admin") => {
+  const loginBypass = useCallback((role: AuthRole = "admin", section?: string) => {
     if (role === "hod") {
       const bypassHod: AuthHod = {
         id: -2,
@@ -124,6 +124,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: "HOD (Data Science)",
       };
       persist("bypass-token-hod", "hod", bypassHod);
+    } else if (role === "mentor") {
+      const bypassMentor: AuthMentor = {
+        id: -3,
+        email: `mentor.${section?.toLowerCase().replace(/[^a-z0-9]/g, "") || "ds"}@local`,
+        name: `${section || "DS"} Mentor`,
+        section: section || "DS II/I/A",
+      };
+      persist("bypass-token-mentor", "mentor", bypassMentor);
     } else {
       const bypassAdmin: AuthAdmin = {
         id: -1,
