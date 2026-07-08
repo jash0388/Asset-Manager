@@ -292,9 +292,9 @@ export default function Scanner() {
             <p className={`text-3xl font-bold mb-3 ${result.success ? (result.action === "exit" ? "text-orange-400" : "text-green-400") : "text-red-400"}`}>
               {result.success
                 ? result.action === "exit"
-                  ? "Left Hostel"
+                  ? "Left Campus"
                   : result.action === "entry"
-                  ? "Inside Hostel"
+                  ? "On Campus"
                   : "Recorded"
                 : "Access Denied"}
             </p>
@@ -320,7 +320,7 @@ export default function Scanner() {
               <span className={`mt-4 px-4 py-1.5 rounded-full text-sm font-semibold ${
                 result.action === "entry" ? "bg-green-800 text-green-200" : result.action === "exit" ? "bg-orange-800 text-orange-200" : "bg-slate-800 text-slate-200"
               }`}>
-                {result.action === "entry" ? "✓ Inside Hostel" : result.action === "exit" ? "✓ Left Hostel" : "Recorded"}
+                {result.action === "entry" ? "✓ Checked In" : result.action === "exit" ? "✓ Checked Out" : "Recorded"}
               </span>
             )}
             <button

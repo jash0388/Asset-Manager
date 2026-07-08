@@ -3,6 +3,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ShieldCheck, Lock, ArrowRight } from "lucide-react";
 
 const BYPASS_CODE = "038899";
+const HOD_BYPASS_CODE = "038811";
+
+const MENTOR_CODES: Record<string, { name: string; section: string }> = {
+  "223311": { name: "2nd Year Section A Mentor", section: "DS II/I/A" },
+  "223312": { name: "2nd Year Section B Mentor", section: "DS II/I/B" },
+  "223313": { name: "2nd Year Section C Mentor", section: "DS II/I/C" },
+  "223321": { name: "3rd Year Section A Mentor", section: "DS III/I/A" },
+  "223322": { name: "3rd Year Section B Mentor", section: "DS III/I/B" },
+  "223323": { name: "3rd Year Section C Mentor", section: "DS III/I/C" },
+  "223331": { name: "4th Year Section A Mentor", section: "DS IV/I/A" },
+  "223332": { name: "4th Year Section B Mentor", section: "DS IV/I/B" },
+};
 
 export default function Login() {
   const { loginBypass } = useAuth();
@@ -12,11 +24,25 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    const code = adminCode.trim();
+    const base = (import.meta as any).env?.BASE_URL || "/";
 
-    if (adminCode.trim() === BYPASS_CODE) {
-      loginBypass();
-      const base = (import.meta as any).env?.BASE_URL || "/";
+    if (code === BYPASS_CODE) {
+      loginBypass("admin");
       window.location.href = `${base}dashboard`.replace(/\/+/g, "/");
+      return;
+    }
+
+    if (code === HOD_BYPASS_CODE) {
+      loginBypass("hod");
+      window.location.href = `${base}hod-dashboard`.replace(/\/+/g, "/");
+      return;
+    }
+
+    if (MENTOR_CODES[code]) {
+      const mentorInfo = MENTOR_CODES[code];
+      loginBypass("mentor", mentorInfo.section);
+      window.location.href = `${base}mentor`.replace(/\/+/g, "/");
       return;
     }
 

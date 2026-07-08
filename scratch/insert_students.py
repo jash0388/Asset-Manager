@@ -10,8 +10,8 @@ ssl_ctx = ssl.create_default_context()
 ssl_ctx.check_hostname = False
 ssl_ctx.verify_mode = ssl.CERT_NONE
 
-SUPABASE_URL = "https://ayevvaecybqjvlvmrbme.supabase.co"
-SERVICE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5ZXZ2YWVjeWJxanZsdm1yYm1lIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzQ1MTg1MiwiZXhwIjoyMDkzMDI3ODUyfQ.mIyomUW0MtEvGtUVYaKmbiIdHPW-4For-6b0YRtfCjg"
+SUPABASE_URL = "https://fothvpivwytaibkdhkci.supabase.co"
+SERVICE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdGh2cGl2d3l0YWlia2Roa2NpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzQ4NjE1NSwiZXhwIjoyMDk5MDYyMTU1fQ.4Zd8L5qYLHtV7T0SHe4r5wa8woX13Q1Km1foWr9zzUU"
 EXCEL_PATH   = "scratch/students.xlsx"
 
 # ── 1. Parse Excel ────────────────────────────────────────────────────────────

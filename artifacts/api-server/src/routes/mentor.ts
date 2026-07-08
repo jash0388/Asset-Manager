@@ -49,12 +49,15 @@ function formatRecord(record: any, user?: any) {
 router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res: any) => {
   const mentorId = req.mentorId!;
   const today = getTodayDate();
+  const section = req.query.section as string | undefined;
   try {
-    const { data: students, error: studentError } = await supabase
-      .from("qr_users")
-      .select("*")
-      .eq("mentor_id", mentorId)
-      .order("name");
+    let query = supabase.from("qr_users").select("*");
+    if (mentorId === -3 && section) {
+      query = query.eq("section", section);
+    } else {
+      query = query.eq("mentor_id", mentorId);
+    }
+    const { data: students, error: studentError } = await query.order("name");
 
     if (studentError) throw studentError;
 
@@ -113,7 +116,7 @@ router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req:
       res.status(404).json({ error: "Student not found" });
       return;
     }
-    if (user.mentor_id !== mentorId) {
+    if (mentorId !== -3 && user.mentor_id !== mentorId) {
       res.status(403).json({ error: "This student is not assigned to you" });
       return;
     }

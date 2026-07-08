@@ -4,24 +4,27 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   type ReactNode,
 } from "react";
 import { customFetch } from "@workspace/api-client-react";
 
-export type AuthRole = "admin" | "mentor";
+export type AuthRole = "admin" | "mentor" | "hod";
 
 export type AuthAdmin = { id: number; email: string; name: string };
-export type AuthMentor = { id: number; email: string; name: string };
+export type AuthMentor = { id: number; email: string; name: string; section?: string };
+export type AuthHod = { id: number; email: string; name: string };
 
 interface AuthContextValue {
   role: AuthRole | null;
   admin: AuthAdmin | null;
   mentor: AuthMentor | null;
+  hod: AuthHod | null;
   token: string | null;
   loading: boolean;
   loginAdmin: (email: string, password: string) => Promise<void>;
   loginMentor: (email: string, password: string) => Promise<void>;
-  loginBypass: () => void;
+  loginBypass: (role?: AuthRole, section?: string) => void;
   logout: () => void;
 }
 
@@ -49,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [role, setRole] = useState<AuthRole | null>(() => {
     const r = localStorage.getItem(ROLE_KEY);
-    return r === "admin" || r === "mentor" ? r : null;
+    return r === "admin" || r === "mentor" || r === "hod" ? r : null;
   });
   const [admin, setAdmin] = useState<AuthAdmin | null>(() =>
     localStorage.getItem(ROLE_KEY) === "admin" ? readStored<AuthAdmin>(PROFILE_KEY) : null
@@ -57,10 +60,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [mentor, setMentor] = useState<AuthMentor | null>(() =>
     localStorage.getItem(ROLE_KEY) === "mentor" ? readStored<AuthMentor>(PROFILE_KEY) : null
   );
+  const [hod, setHod] = useState<AuthHod | null>(() =>
+    localStorage.getItem(ROLE_KEY) === "hod" ? readStored<AuthHod>(PROFILE_KEY) : null
+  );
   const [loading] = useState(false);
 
   const persist = useCallback(
-    (newToken: string, newRole: AuthRole, profile: AuthAdmin | AuthMentor) => {
+    (newToken: string, newRole: AuthRole, profile: AuthAdmin | AuthMentor | AuthHod) => {
       localStorage.setItem(TOKEN_KEY, newToken);
       localStorage.setItem(ROLE_KEY, newRole);
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
@@ -69,9 +75,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (newRole === "admin") {
         setAdmin(profile as AuthAdmin);
         setMentor(null);
-      } else {
+        setHod(null);
+      } else if (newRole === "mentor") {
         setMentor(profile as AuthMentor);
         setAdmin(null);
+        setHod(null);
+      } else {
+        setHod(profile as AuthHod);
+        setAdmin(null);
+        setMentor(null);
       }
     },
     []
@@ -104,13 +116,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist]
   );
 
-  const loginBypass = useCallback(() => {
-    const bypassAdmin: AuthAdmin = {
-      id: -1,
-      email: "bypass@local",
-      name: "Admin (bypass)",
-    };
-    persist("bypass-token", "admin", bypassAdmin);
+  const loginBypass = useCallback((role: AuthRole = "admin") => {
+    if (role === "hod") {
+      const bypassHod: AuthHod = {
+        id: -2,
+        email: "hod.ds@local",
+        name: "HOD (Data Science)",
+      };
+      persist("bypass-token-hod", "hod", bypassHod);
+    } else {
+      const bypassAdmin: AuthAdmin = {
+        id: -1,
+        email: "bypass@local",
+        name: "Admin (bypass)",
+      };
+      persist("bypass-token", "admin", bypassAdmin);
+    }
   }, [persist]);
 
   const logout = useCallback(() => {
@@ -121,12 +142,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(null);
     setAdmin(null);
     setMentor(null);
+    setHod(null);
     // Hard redirect so any cached query state is reset.
     if (typeof window !== "undefined") {
       const base = (import.meta as any).env?.BASE_URL || "/";
       window.location.href = `${base}login`.replace(/\/+/g, "/");
     }
   }, []);
+
+  const value = useMemo(
+    () => ({
+      role,
+      admin,
+      mentor,
+      hod,
+      token,
+      loading,
+      loginAdmin,
+      loginMentor,
+      loginBypass,
+      logout,
+    }),
+    [role, admin, mentor, hod, token, loading, loginAdmin, loginMentor, loginBypass, logout]
+  );
 
   // Keep token state in sync if another tab logs in/out.
   useEffect(() => {
@@ -139,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ role, admin, mentor, token, loading, loginAdmin, loginMentor, loginBypass, logout }}
+      value={value}
     >
       {children}
     </AuthContext.Provider>

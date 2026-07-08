@@ -285,7 +285,7 @@ router.post("/scan", async (req: any, res: any) => {
     const currentStatus = record ? getRecordStatus(record) : "inside";
 
     if (currentStatus === "inside") {
-      req.log.info({ userId: user.id, name: user.name }, "Student leaving hostel");
+      req.log.info({ userId: user.id, name: user.name }, "Student checked out / leaving campus");
       const { data: inserted, error: insertError } = await supabase
         .from("qr_attendance")
         .insert({ user_id: user.id, date, exit_time: now, entry_time: null, scan_count: 1, last_scan_at: now })
@@ -297,13 +297,13 @@ router.post("/scan", async (req: any, res: any) => {
       return res.json({
         success: true,
         action: "exit",
-        message: `${user.name} has LEFT the Hostel.`,
+        message: `${user.name} has Checked Out / Left Campus.`,
         user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
         recordId: inserted.id,
       });
     }
 
-    req.log.info({ userId: user.id, name: user.name }, "Student returned to hostel");
+    req.log.info({ userId: user.id, name: user.name }, "Student checked in / arrived on campus");
     const nextScanCount = (record.scan_count ?? 0) + 1;
     const { error: updateError } = await supabase
       .from("qr_attendance")
@@ -315,7 +315,7 @@ router.post("/scan", async (req: any, res: any) => {
     return res.json({
       success: true,
       action: "entry",
-      message: `${user.name} is now INSIDE the Hostel.`,
+      message: `${user.name} has Checked In / Arrived on Campus.`,
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
     });
   } catch (err: any) {

@@ -39,7 +39,7 @@ function StatusBadge({ status }: { status: string }) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-900/40 text-green-400 text-xs font-medium">
         <Circle className="w-2 h-2 fill-current" />
-        Inside
+        In Campus
       </span>
     );
   }
@@ -47,7 +47,7 @@ function StatusBadge({ status }: { status: string }) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 text-xs font-medium">
         <Circle className="w-2 h-2 fill-current" />
-        Left
+        Left Campus
       </span>
     );
   }
@@ -101,18 +101,18 @@ export default function Dashboard() {
               sub={`${data?.totalStudents ?? 0} students, ${data?.totalStaff ?? 0} staff`}
             />
             <StatCard
-              label="Today's Outing"
+              label="Today's Check-ins"
               value={data?.todayAttendanceCount ?? 0}
               icon={UserCheck}
               color="bg-emerald-900/40 text-emerald-400"
               sub="Records today"
             />
             <StatCard
-              label="Currently Inside"
+              label="Still on Campus"
               value={data?.currentlyInsideCount ?? 0}
               icon={Clock}
               color="bg-orange-900/40 text-orange-400"
-              sub="Inside hostel now"
+              sub="In college campus now"
             />
             <StatCard
               label="Students"

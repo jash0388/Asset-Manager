@@ -188,6 +188,8 @@ function formatUser(u: any) {
     uniqueId: u.unique_id,
     role: u.role,
     createdAt: u.created_at,
+    section: u.section,
+    batch: u.batch,
   };
 }
 

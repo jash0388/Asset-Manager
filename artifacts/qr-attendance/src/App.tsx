@@ -13,6 +13,7 @@ import Login from "@/pages/Login";
 import SecurityApp from "@/pages/SecurityApp";
 import MentorApp from "@/pages/MentorApp";
 import Mentors from "@/pages/Mentors";
+import HodDashboard from "@/pages/HodDashboard";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -38,6 +39,20 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RequireHod({ children }: { children: React.ReactNode }) {
+  const { role } = useAuth();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (role !== "hod") {
+      navigate("/login");
+    }
+  }, [role, navigate]);
+
+  if (role !== "hod") return null;
+  return <>{children}</>;
+}
+
 function AppRouter() {
   return (
     <Switch>
@@ -47,6 +62,11 @@ function AppRouter() {
 
       {/* Mentor */}
       <Route path="/mentor" component={MentorApp} />
+
+      {/* HOD routes */}
+      <Route path="/hod-dashboard">
+        <RequireHod><HodDashboard /></RequireHod>
+      </Route>
 
       {/* Admin routes */}
       <Route path="/dashboard">

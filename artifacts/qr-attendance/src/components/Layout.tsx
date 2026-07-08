@@ -30,9 +30,13 @@ function joinBase(p: string) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { admin, logout } = useAuth();
+  const { admin, hod, role, logout } = useAuth();
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = role === "hod"
+    ? [{ href: "/hod-dashboard", label: "HOD Dashboard", icon: LayoutDashboard }]
+    : adminNavLinks;
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100">
@@ -60,8 +64,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         <nav className="flex-1 py-4 px-3 overflow-y-auto">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-2 mb-2">Navigation</p>
-          {adminNavLinks.map(({ href, label, icon: Icon }) => {
-            const isActive = location === href || (href !== "/dashboard" && location.startsWith(href));
+          {navLinks.map(({ href, label, icon: Icon }) => {
+            const isActive = location === href || (href !== "/dashboard" && href !== "/hod-dashboard" && location.startsWith(href));
             return (
               <Link key={href} href={href}>
                 <div
@@ -110,11 +114,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="px-3 py-4 border-t border-slate-800">
           <div className="flex items-center gap-3 px-3 py-2.5 mb-2">
             <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-              {admin?.name?.charAt(0).toUpperCase() ?? "A"}
+              {(role === "hod" ? hod?.name : admin?.name)?.charAt(0).toUpperCase() ?? "A"}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">{admin?.name ?? "Admin"}</p>
-              <p className="text-xs text-slate-400 truncate">{admin?.email ?? ""}</p>
+              <p className="text-sm font-medium text-white truncate">{role === "hod" ? hod?.name : admin?.name ?? "Admin"}</p>
+              <p className="text-xs text-slate-400 truncate">{role === "hod" ? hod?.email : admin?.email ?? ""}</p>
             </div>
           </div>
           <button

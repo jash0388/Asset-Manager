@@ -72,7 +72,10 @@ export default function MentorApp() {
     setLoading(true);
     setError(null);
     try {
-      const data = await customFetch<MentorStudent[]>("/api/mentor/students");
+      const url = mentor?.section 
+        ? `/api/mentor/students?section=${encodeURIComponent(mentor.section)}`
+        : "/api/mentor/students";
+      const data = await customFetch<MentorStudent[]>(url);
       setStudents(data);
     } catch (err: any) {
       setError(err?.data?.error ?? err?.message ?? "Failed to load students");
@@ -258,7 +261,7 @@ export default function MentorApp() {
                               : "bg-slate-700 text-slate-300"
                           }`}
                         >
-                          {r.status === "inside" ? "Inside" : "Left"}
+                          {r.status === "inside" ? "In Campus" : "Left Campus"}
                         </span>
                       </div>
                     ))
