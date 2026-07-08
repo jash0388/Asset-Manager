@@ -286,7 +286,7 @@ export default function HodDashboard() {
         {/* Header section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+            <h1 className="text-3xl font-extrabold text-slate-200 tracking-tight flex items-center gap-3">
               <GraduationCap className="w-8 h-8 text-blue-500" />
               HOD Dashboard
             </h1>
@@ -332,7 +332,7 @@ export default function HodDashboard() {
               <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Students</p>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-bold text-white">{overallTotalStudents}</span>
+                  <span className="text-3xl font-bold text-slate-200">{overallTotalStudents}</span>
                   <span className="text-xs text-slate-400">enrolled</span>
                 </div>
               </Card>
@@ -410,7 +410,7 @@ export default function HodDashboard() {
 
                               return (
                                 <tr key={s.sectionKey} className="hover:bg-slate-800/30 transition-colors group">
-                                  <td className="py-4 px-6 font-bold text-white text-base">{s.displayName}</td>
+                                  <td className="py-4 px-6 font-bold text-slate-200 text-base">{s.displayName}</td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("PR", s)}
@@ -458,7 +458,7 @@ export default function HodDashboard() {
                       
                       {/* Department level summary footer */}
                       <tr className="bg-slate-900 border-t border-slate-850">
-                        <td colSpan={4} className="py-6 px-6 font-black text-white text-lg tracking-wider text-right pr-12">
+                        <td colSpan={4} className="py-6 px-6 font-black text-slate-200 text-lg tracking-wider text-right pr-12">
                           Overall Department %
                         </td>
                         <td className="py-6 px-6 text-center font-mono font-black text-blue-400 text-xl border-l border-slate-850">
@@ -482,7 +482,7 @@ export default function HodDashboard() {
                     type="date"
                     value={logDate}
                     onChange={(e) => setLogDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
                   />
                 </div>
               </div>
@@ -492,7 +492,7 @@ export default function HodDashboard() {
                 <select
                   value={selectedSectionFilter}
                   onChange={(e) => setSelectedSectionFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-white focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold cursor-pointer"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold cursor-pointer"
                 >
                   <option value="All">All Sections</option>
                   <option value="2A">2A (Sophomore A)</option>
@@ -518,7 +518,7 @@ export default function HodDashboard() {
                     placeholder="Search name or roll number..."
                     value={logSearchQuery}
                     onChange={(e) => setLogSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
                   />
                 </div>
               </div>
@@ -564,7 +564,7 @@ export default function HodDashboard() {
                                     {user.name.charAt(0)}
                                   </div>
                                   <div>
-                                    <p className="text-sm font-semibold text-white">{user.name}</p>
+                                    <p className="text-sm font-semibold text-slate-200">{user.name}</p>
                                     <p className="text-xs text-slate-500 font-mono mt-0.5">{user.uniqueId}</p>
                                   </div>
                                 </div>
@@ -612,7 +612,7 @@ export default function HodDashboard() {
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
           <SheetContent className="w-full sm:max-w-xl bg-slate-900 border-l border-slate-800/80 p-0 flex flex-col h-full text-slate-100">
             <SheetHeader className="p-6 border-b border-slate-800">
-              <SheetTitle className="text-2xl font-bold text-white tracking-tight">
+              <SheetTitle className="text-2xl font-bold text-slate-200 tracking-tight">
                 {drawerConfig.title}
               </SheetTitle>
               <SheetDescription className="text-slate-400 text-sm mt-1">
@@ -631,7 +631,7 @@ export default function HodDashboard() {
                   placeholder="Search student name or roll number..."
                   value={studentSearchQuery}
                   onChange={(e) => setStudentSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
                 />
               </div>
             </div>
@@ -654,7 +654,7 @@ export default function HodDashboard() {
                           {s.name.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-white">{s.name}</p>
+                          <p className="text-sm font-semibold text-slate-200">{s.name}</p>
                           <p className="text-xs text-slate-550 font-mono mt-0.5">{s.uniqueId}</p>
                         </div>
                       </div>
