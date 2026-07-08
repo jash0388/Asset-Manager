@@ -428,17 +428,11 @@ export default function SecurityApp() {
 
         <div className="w-full mt-4 px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-xs text-slate-400">
           {cachedAt ? (
-            <>Student cache updated {formatAgo(cachedAt)} · 30-min duplicate cooldown enforced locally.</>
+            <>Student cache updated {formatAgo(cachedAt)} · 30-sec duplicate cooldown enforced locally.</>
           ) : (
             <>Student cache empty — refresh once with internet to enable offline scanning.</>
           )}
         </div>
-
-        <Link href="/login">
-          <span className="mt-6 text-xs text-slate-500 hover:text-blue-400 cursor-pointer">
-            Admin / Mentor login →
-          </span>
-        </Link>
       </div>
 
       {/* Pending queue modal */}
@@ -493,7 +487,7 @@ export default function SecurityApp() {
             </div>
             {lastSync && (
               <div className="px-4 py-2 border-t border-slate-800 text-xs text-slate-500 text-center">
-                Last sync {formatAgo(lastSync)} · auto-syncs every 10s when online
+                Last sync {formatAgo(lastSync)} · auto-syncs every 3s when online
               </div>
             )}
           </div>
