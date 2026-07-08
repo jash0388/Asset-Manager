@@ -150,6 +150,9 @@ function tryExtractFromString(raw: string): string | null {
   return trimmed;
 }
 
+// sentinel far-past timestamp used when entry_time is unknown (student leaving first)
+const SENTINEL_ENTRY = "1970-01-01T00:00:00.000Z";
+
 router.post("/scan/batch", async (req: any, res: any) => {
   const scans = req.body?.scans;
   if (!Array.isArray(scans) || scans.length === 0) {
@@ -215,7 +218,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
       if (current.status === "inside") {
         const { data: inserted, error: insertError } = await supabase
           .from("qr_attendance")
-          .insert({ user_id: user.id, date, exit_time: ts, entry_time: null, scan_count: 1, last_scan_at: ts })
+          .insert({ user_id: user.id, date, exit_time: ts, entry_time: SENTINEL_ENTRY, scan_count: 1, last_scan_at: ts })
           .select()
           .single();
         if (insertError) throw insertError;
@@ -286,13 +289,18 @@ router.post("/scan", async (req: any, res: any) => {
 
     if (currentStatus === "inside") {
       req.log.info({ userId: user.id, name: user.name }, "Student checked out / leaving campus");
+      // Use a sentinel far-past date for entry_time since DB may have NOT NULL constraint
+      const sentinelEntry = "1970-01-01T00:00:00.000Z";
       const { data: inserted, error: insertError } = await supabase
         .from("qr_attendance")
-        .insert({ user_id: user.id, date, exit_time: now, entry_time: null, scan_count: 1, last_scan_at: now })
+        .insert({ user_id: user.id, date, exit_time: now, entry_time: sentinelEntry, scan_count: 1, last_scan_at: now })
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        req.log.error({ insertError }, "Insert error on exit scan");
+        return res.status(500).json({ error: "DB error", detail: insertError.message, code: insertError.code });
+      }
 
       return res.json({
         success: true,
