@@ -15,8 +15,8 @@ type ScanReply =
   | { ok: true; action: "queued"; user: CachedUser; queued: number }
   | { ok: false; message: string };
 
-const POPUP_MS = 1800;
-const SYNC_INTERVAL_MS = 10_000;
+const POPUP_MS = 2500;
+const SYNC_INTERVAL_MS = 3_000; // sync every 3 seconds for near-real-time updates
 
 function formatAgo(ts: number | null): string {
   if (!ts) return "never";
@@ -201,8 +201,9 @@ export default function SecurityApp() {
     setQueue(newQueue);
     showPopup({ ok: true, action: "queued", user, queued: newQueue.length });
 
+    // Immediately sync to server when online—don't wait for the interval
     if (navigator.onLine) {
-      setTimeout(() => { runSync(); }, 200);
+      runSync();
     }
   };
 

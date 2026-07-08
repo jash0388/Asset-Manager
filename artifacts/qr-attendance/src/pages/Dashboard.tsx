@@ -65,8 +65,8 @@ function formatTime(iso: string | null | undefined) {
 }
 
 export default function Dashboard() {
-  const stats = useGetDashboardStats();
-  const inside = useGetCurrentlyInside();
+  const stats = useGetDashboardStats({ query: { refetchInterval: 5000 } as any });
+  const inside = useGetCurrentlyInside({ query: { refetchInterval: 5000 } as any });
 
   const data = stats.data;
   const insideList = inside.data ?? [];
