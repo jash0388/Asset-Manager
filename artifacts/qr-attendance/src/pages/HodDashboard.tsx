@@ -8,11 +8,12 @@ import {
   Search,
   CheckCircle,
   XCircle,
-  FileSpreadsheet,
   Clock,
-  MapPin,
   ArrowRightLeft,
-  GraduationCap
+  GraduationCap,
+  ListFilter,
+  Grid3X3,
+  ClipboardList
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -39,6 +40,8 @@ type AttendanceRecord = {
   entryTime: string | null;
   exitTime: string | null;
   status: "inside" | "left";
+  user?: StudentUser;
+  durationMinutes?: number | null;
 };
 
 type SectionStats = {
@@ -52,10 +55,16 @@ type SectionStats = {
 };
 
 export default function HodDashboard() {
+  const [activeTab, setActiveTab] = useState<"summary" | "logs">("summary");
+  
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date().toISOString().split("T")[0];
   });
   
+  const [logDate, setLogDate] = useState(() => {
+    return new Date().toISOString().split("T")[0];
+  });
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerConfig, setDrawerConfig] = useState<{
     title: string;
@@ -72,6 +81,8 @@ export default function HodDashboard() {
   });
 
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
+  const [logSearchQuery, setLogSearchQuery] = useState("");
+  const [selectedSectionFilter, setSelectedSectionFilter] = useState("All");
 
   // Fetch all students
   const { data: allUsers = [], isLoading: usersLoading } = useQuery<StudentUser[]>({
@@ -79,11 +90,18 @@ export default function HodDashboard() {
     queryFn: () => customFetch<StudentUser[]>("/api/users"),
   });
 
-  // Fetch today's attendance records
+  // Fetch today's summary attendance records
   const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery<AttendanceRecord[]>({
     queryKey: ["attendance-today", selectedDate],
     queryFn: () => customFetch<AttendanceRecord[]>("/api/attendance/today"),
-    refetchInterval: 5000, // auto-refresh every 5 seconds!
+    refetchInterval: 5000,
+  });
+
+  // Fetch custom date attendance logs
+  const { data: detailedLogs = [], isLoading: logsLoading } = useQuery<AttendanceRecord[]>({
+    queryKey: ["attendance-logs", logDate],
+    queryFn: () => customFetch<AttendanceRecord[]>(`/api/attendance?from=${logDate}&to=${logDate}`),
+    refetchInterval: activeTab === "logs" ? 5000 : undefined,
   });
 
   const studentsOnly = allUsers.filter(u => u.role === "student");
@@ -93,7 +111,7 @@ export default function HodDashboard() {
     if (!sectionStr) return { name: "Other", yearLabel: "Other" };
     
     const parts = sectionStr.split("/");
-    const sectionLetter = parts[parts.length - 1] || "A"; // e.g. "A"
+    const sectionLetter = parts[parts.length - 1] || "A";
     
     if (sectionStr.includes("IV")) {
       return { name: `4${sectionLetter}`, yearLabel: "4th Year" };
@@ -131,7 +149,7 @@ export default function HodDashboard() {
     sectionsMap.get(sec)!.totalStudents.push(s);
   });
 
-  // Map attendance to sections
+  // Map today's attendance to sections
   const attendanceByUserId = new Map<number, AttendanceRecord>();
   attendanceRecords.forEach(r => {
     attendanceByUserId.set(r.userId, r);
@@ -226,6 +244,25 @@ export default function HodDashboard() {
     return item.student.name.toLowerCase().includes(q) || item.student.uniqueId.toLowerCase().includes(q);
   });
 
+  // Filter logs list based on section filter and search query
+  const filteredLogs = detailedLogs.filter(log => {
+    const sUser = log.user;
+    if (!sUser) return false;
+    
+    // Filter section
+    if (selectedSectionFilter !== "All") {
+      const { name: dName } = getSectionDisplayName(sUser.section);
+      if (dName !== selectedSectionFilter) return false;
+    }
+    
+    // Filter search query
+    const q = logSearchQuery.toLowerCase().trim();
+    if (q) {
+      return sUser.name.toLowerCase().includes(q) || sUser.uniqueId.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
   const formatTime = (timeStr: string | null | undefined) => {
     if (!timeStr) return "—";
     try {
@@ -258,152 +295,317 @@ export default function HodDashboard() {
           
           <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 shadow-md">
             <Calendar className="w-5 h-5 text-blue-400" />
-            <span className="text-sm font-semibold text-slate-200">{selectedDate}</span>
+            <span className="text-sm font-semibold text-slate-200">{activeTab === "summary" ? selectedDate : logDate}</span>
           </div>
         </div>
 
-        {/* Quick summary stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Students</p>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-3xl font-bold text-white">{overallTotalStudents}</span>
-              <span className="text-xs text-slate-400">enrolled</span>
-            </div>
-          </Card>
-
-          <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Present Today</p>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-3xl font-bold text-green-400">{overallTotalPresent}</span>
-              <span className="text-xs text-slate-400">active</span>
-            </div>
-          </Card>
-
-          <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Absent Today</p>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-3xl font-bold text-red-400">{overallTotalAbsent}</span>
-              <span className="text-xs text-slate-400">missed</span>
-            </div>
-          </Card>
-
-          <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between border-l-4 border-l-blue-500">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Department %</p>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-3xl font-black text-blue-400">{overallDeptPercentage}%</span>
-              <span className="text-xs text-slate-450">attendance</span>
-            </div>
-          </Card>
+        {/* Tab Toggle buttons */}
+        <div className="flex bg-slate-900/60 border border-slate-850 p-1.5 rounded-2xl w-fit">
+          <button
+            onClick={() => setActiveTab("summary")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              activeTab === "summary"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Grid3X3 className="w-4 h-4" />
+            Summary Grid
+          </button>
+          <button
+            onClick={() => setActiveTab("logs")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              activeTab === "logs"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" />
+            Detailed Logs
+          </button>
         </div>
 
-        {/* Main Grid View */}
-        {usersLoading || attendanceLoading ? (
-          <div className="bg-slate-900 border border-slate-850 rounded-3xl p-20 flex flex-col items-center justify-center gap-4">
-            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm font-semibold text-slate-400">Loading student rosters & attendance records...</p>
-          </div>
+        {activeTab === "summary" ? (
+          <>
+            {/* Quick summary stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Students</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-3xl font-bold text-white">{overallTotalStudents}</span>
+                  <span className="text-xs text-slate-400">enrolled</span>
+                </div>
+              </Card>
+
+              <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Present Today</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-3xl font-bold text-green-400">{overallTotalPresent}</span>
+                  <span className="text-xs text-slate-400">active</span>
+                </div>
+              </Card>
+
+              <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Absent Today</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-3xl font-bold text-red-400">{overallTotalAbsent}</span>
+                  <span className="text-xs text-slate-400">missed</span>
+                </div>
+              </Card>
+
+              <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between border-l-4 border-l-blue-500">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Department %</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-3xl font-black text-blue-400">{overallDeptPercentage}%</span>
+                  <span className="text-xs text-slate-450">attendance</span>
+                </div>
+              </Card>
+            </div>
+
+            {/* Main Grid View */}
+            {usersLoading || attendanceLoading ? (
+              <div className="bg-slate-900 border border-slate-855 p-20 flex flex-col items-center justify-center gap-4">
+                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm font-semibold text-slate-400">Loading student rosters & attendance records...</p>
+              </div>
+            ) : (
+              <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
+                        <th className="py-4 px-6">DS (Section)</th>
+                        <th className="py-4 px-6 text-center">PR (Present)</th>
+                        <th className="py-4 px-6 text-center">AB (Absent)</th>
+                        <th className="py-4 px-6 text-center">Total</th>
+                        <th className="py-4 px-6 text-center">% of Present</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-855/60">
+                      {yearGroups.map(year => {
+                        const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
+                        if (sectionsInYear.length === 0) return null;
+
+                        // Compute year overall
+                        let yearPresent = 0;
+                        let yearAbsent = 0;
+                        let yearTotal = 0;
+
+                        sectionsInYear.forEach(s => {
+                          yearPresent += s.presentStudents.length;
+                          yearAbsent += s.absentStudents.length;
+                          yearTotal += s.totalStudents.length;
+                        });
+
+                        const yearPercentage = yearTotal > 0 
+                          ? ((yearPresent / yearTotal) * 100).toFixed(3) 
+                          : "0.000";
+
+                        return (
+                          <>
+                            {sectionsInYear.map(s => {
+                              const percent = s.totalStudents.length > 0 
+                                ? (s.presentStudents.length / s.totalStudents.length) * 100 
+                                : 0;
+
+                              return (
+                                <tr key={s.sectionKey} className="hover:bg-slate-800/30 transition-colors group">
+                                  <td className="py-4 px-6 font-bold text-white text-base">{s.displayName}</td>
+                                  
+                                  <td 
+                                    onClick={() => handleCellClick("PR", s)}
+                                    className="py-4 px-6 text-center text-green-400 font-semibold cursor-pointer hover:bg-green-500/10 active:scale-[0.98] transition-transform text-lg"
+                                  >
+                                    {s.presentStudents.length}
+                                  </td>
+                                  
+                                  <td 
+                                    onClick={() => handleCellClick("AB", s)}
+                                    className="py-4 px-6 text-center text-red-400 font-semibold cursor-pointer hover:bg-red-500/10 active:scale-[0.98] transition-transform text-lg"
+                                  >
+                                    {s.absentStudents.length}
+                                  </td>
+                                  
+                                  <td 
+                                    onClick={() => handleCellClick("Total", s)}
+                                    className="py-4 px-6 text-center text-slate-300 font-medium cursor-pointer hover:bg-slate-700/20 active:scale-[0.98] transition-transform text-lg"
+                                  >
+                                    {s.totalStudents.length}
+                                  </td>
+                                  
+                                  <td className="py-4 px-6 text-center font-mono">
+                                    <span className={getPercentageColor(percent)}>
+                                      {percent.toFixed(3)}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+
+                            {/* Overall row for this specific year */}
+                            <tr className="bg-blue-950/20 border-y border-slate-800">
+                              <td className="py-4 px-6 font-black text-blue-400 text-base italic">Overall ({year})</td>
+                              <td className="py-4 px-6 text-center text-green-400 font-bold text-lg">{yearPresent}</td>
+                              <td className="py-4 px-6 text-center text-red-400 font-bold text-lg">{yearAbsent}</td>
+                              <td className="py-4 px-6 text-center text-slate-200 font-bold text-lg">{yearTotal}</td>
+                              <td className="py-4 px-6 text-center font-mono font-black text-blue-400 text-lg">
+                                {yearPercentage}
+                              </td>
+                            </tr>
+                          </>
+                        );
+                      })}
+                      
+                      {/* Department level summary footer */}
+                      <tr className="bg-slate-900 border-t border-slate-850">
+                        <td colSpan={4} className="py-6 px-6 font-black text-white text-lg tracking-wider text-right pr-12">
+                          Overall Department %
+                        </td>
+                        <td className="py-6 px-6 text-center font-mono font-black text-blue-400 text-xl border-l border-slate-850">
+                          {overallDeptPercentage}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
+          </>
         ) : (
-          <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
-                    <th className="py-4 px-6">DS (Section)</th>
-                    <th className="py-4 px-6 text-center">PR (Present)</th>
-                    <th className="py-4 px-6 text-center">AB (Absent)</th>
-                    <th className="py-4 px-6 text-center">Total</th>
-                    <th className="py-4 px-6 text-center">% of Present</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-850/60">
-                  {yearGroups.map(year => {
-                    const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
-                    if (sectionsInYear.length === 0) return null;
+          <>
+            {/* Detailed logs filter toolbar */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Date Filter</label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={logDate}
+                    onChange={(e) => setLogDate(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                  />
+                </div>
+              </div>
 
-                    // Compute year overall
-                    let yearPresent = 0;
-                    let yearAbsent = 0;
-                    let yearTotal = 0;
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Section Filter</label>
+                <select
+                  value={selectedSectionFilter}
+                  onChange={(e) => setSelectedSectionFilter(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-white focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold cursor-pointer"
+                >
+                  <option value="All">All Sections</option>
+                  <option value="2A">2A (Sophomore A)</option>
+                  <option value="2B">2B (Sophomore B)</option>
+                  <option value="2C">2C (Sophomore C)</option>
+                  <option value="3A">3A (Junior A)</option>
+                  <option value="3B">3B (Junior B)</option>
+                  <option value="3C">3C (Junior C)</option>
+                  <option value="3D">3D (Junior D)</option>
+                  <option value="4A">4A (Senior A)</option>
+                  <option value="4B">4B (Senior B)</option>
+                </select>
+              </div>
 
-                    sectionsInYear.forEach(s => {
-                      yearPresent += s.presentStudents.length;
-                      yearAbsent += s.absentStudents.length;
-                      yearTotal += s.totalStudents.length;
-                    });
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Search Students</label>
+                <div className="relative group">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search name or roll number..."
+                    value={logSearchQuery}
+                    onChange={(e) => setLogSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
+                  />
+                </div>
+              </div>
+            </div>
 
-                    const yearPercentage = yearTotal > 0 
-                      ? ((yearPresent / yearTotal) * 100).toFixed(3) 
-                      : "0.000";
-
-                    return (
-                      <>
-                        {sectionsInYear.map(s => {
-                          const percent = s.totalStudents.length > 0 
-                            ? (s.presentStudents.length / s.totalStudents.length) * 100 
-                            : 0;
-
+            {/* Detailed Logs Table */}
+            {logsLoading ? (
+              <div className="bg-slate-900 border border-slate-855 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
+                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm font-semibold text-slate-400">Loading attendance log registry...</p>
+              </div>
+            ) : (
+              <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
+                        <th className="py-4 px-6">Student details</th>
+                        <th className="py-4 px-6 text-center">Class / Section</th>
+                        <th className="py-4 px-6 text-center">Status</th>
+                        <th className="py-4 px-6 text-center">Entry Time (In)</th>
+                        <th className="py-4 px-6 text-center">Exit Time (Out)</th>
+                        <th className="py-4 px-6 text-center">Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-855/60">
+                      {filteredLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center text-slate-500 text-sm">
+                            No attendance logs registered for this query selection.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredLogs.map((log) => {
+                          const user = log.user!;
+                          const { name: sDisplayName } = getSectionDisplayName(user.section);
+                          
                           return (
-                            <tr key={s.sectionKey} className="hover:bg-slate-800/30 transition-colors group">
-                              <td className="py-4 px-6 font-bold text-white text-base">{s.displayName}</td>
-                              
-                              <td 
-                                onClick={() => handleCellClick("PR", s)}
-                                className="py-4 px-6 text-center text-green-400 font-semibold cursor-pointer hover:bg-green-500/10 active:scale-[0.98] transition-transform text-lg"
-                              >
-                                {s.presentStudents.length}
+                            <tr key={log.id} className="hover:bg-slate-800/30 transition-colors">
+                              <td className="py-4 px-6">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 uppercase">
+                                    {user.name.charAt(0)}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-semibold text-white">{user.name}</p>
+                                    <p className="text-xs text-slate-500 font-mono mt-0.5">{user.uniqueId}</p>
+                                  </div>
+                                </div>
                               </td>
-                              
-                              <td 
-                                onClick={() => handleCellClick("AB", s)}
-                                className="py-4 px-6 text-center text-red-400 font-semibold cursor-pointer hover:bg-red-500/10 active:scale-[0.98] transition-transform text-lg"
-                              >
-                                {s.absentStudents.length}
+
+                              <td className="py-4 px-6 text-center font-bold text-slate-300">
+                                {sDisplayName}
                               </td>
-                              
-                              <td 
-                                onClick={() => handleCellClick("Total", s)}
-                                className="py-4 px-6 text-center text-slate-300 font-medium cursor-pointer hover:bg-slate-700/20 active:scale-[0.98] transition-transform text-lg"
-                              >
-                                {s.totalStudents.length}
-                              </td>
-                              
-                              <td className="py-4 px-6 text-center font-mono">
-                                <span className={getPercentageColor(percent)}>
-                                  {percent.toFixed(3)}
+
+                              <td className="py-4 px-6 text-center">
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                  log.status === "inside" 
+                                    ? "bg-green-950/60 text-green-400 border-green-900/40"
+                                    : "bg-slate-850/80 text-slate-400 border-slate-800"
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-green-400" : "bg-slate-500"}`} />
+                                  {log.status === "inside" ? "Still on Campus" : "Left Campus"}
                                 </span>
+                              </td>
+
+                              <td className="py-4 px-6 text-center text-slate-300 font-mono">
+                                {formatTime(log.entryTime)}
+                              </td>
+
+                              <td className="py-4 px-6 text-center text-slate-300 font-mono">
+                                {formatTime(log.exitTime)}
+                              </td>
+
+                              <td className="py-4 px-6 text-center text-slate-400 text-sm">
+                                {log.durationMinutes ? `${log.durationMinutes} mins` : "—"}
                               </td>
                             </tr>
                           );
-                        })}
-
-                        {/* Overall row for this specific year */}
-                        <tr className="bg-blue-950/20 border-y border-slate-800">
-                          <td className="py-4 px-6 font-black text-blue-400 text-base italic">Overall ({year})</td>
-                          <td className="py-4 px-6 text-center text-green-400 font-bold text-lg">{yearPresent}</td>
-                          <td className="py-4 px-6 text-center text-red-400 font-bold text-lg">{yearAbsent}</td>
-                          <td className="py-4 px-6 text-center text-slate-200 font-bold text-lg">{yearTotal}</td>
-                          <td className="py-4 px-6 text-center font-mono font-black text-blue-400 text-lg">
-                            {yearPercentage}
-                          </td>
-                        </tr>
-                      </>
-                    );
-                  })}
-                  
-                  {/* Department level summary footer */}
-                  <tr className="bg-slate-900 border-t border-slate-850">
-                    <td colSpan={4} className="py-6 px-6 font-black text-white text-lg tracking-wider text-right pr-12">
-                      Overall Department %
-                    </td>
-                    <td className="py-6 px-6 text-center font-mono font-black text-blue-400 text-xl border-l border-slate-850">
-                      {overallDeptPercentage}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </Card>
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
+          </>
         )}
 
         {/* Detailed student listing slide-over sheet */}
@@ -435,7 +637,7 @@ export default function HodDashboard() {
             </div>
 
             {/* Students list */}
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-850 p-2">
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-855 p-2">
               {filteredDrawerStudents.length === 0 ? (
                 <div className="py-20 text-center text-slate-500 text-sm">
                   No students match your query.
@@ -453,7 +655,7 @@ export default function HodDashboard() {
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-white">{s.name}</p>
-                          <p className="text-xs text-slate-500 font-mono mt-0.5">{s.uniqueId}</p>
+                          <p className="text-xs text-slate-550 font-mono mt-0.5">{s.uniqueId}</p>
                         </div>
                       </div>
 
