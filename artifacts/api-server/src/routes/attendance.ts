@@ -389,21 +389,13 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
     );
 
     const insideRecords = allUsers
-      .filter(u => !outUserIds.has(u.id))
-      .map(u => {
+      .filter(u => {
         const record = recordsByUserId.get(u.id);
-        if (record) return formatRecord(record, u);
-        return {
-          id: -u.id,
-          userId: u.id,
-          date: today,
-          entryTime: null,
-          exitTime: null,
-          scanCount: 0,
-          durationMinutes: null,
-          status: "inside",
-          user: { id: u.id, name: u.name, uniqueId: u.unique_id, role: u.role, createdAt: u.created_at }
-        };
+        return record && getRecordStatus(record) === "inside";
+      })
+      .map(u => {
+        const record = recordsByUserId.get(u.id)!;
+        return formatRecord(record, u);
       });
 
     req.log.info({ insideCount: insideRecords.length }, "Calculated currently-inside");
@@ -432,8 +424,7 @@ router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: 
     ]);
 
     const latestRecordsByUserId = getLatestRecordsByUser(todayRecords ?? []);
-    const leftUserIds = new Set(Array.from(latestRecordsByUserId.values()).filter((r: any) => getRecordStatus(r) === "left").map((r: any) => r.user_id));
-    const currentlyInsideCount = (totalUsers || 0) - leftUserIds.size;
+    const currentlyInsideCount = Array.from(latestRecordsByUserId.values()).filter((r: any) => getRecordStatus(r) === "inside").length;
 
     res.json({
       totalUsers: totalUsers || 0,
