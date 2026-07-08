@@ -21,18 +21,32 @@ export default defineConfig({
       injectRegister: "auto",
       includeAssets: ["favicon.svg", "security-icon.svg"],
       manifest: {
-        name: "QR Attendance — Security Scanner",
-        short_name: "Security Scanner",
-        description: "Offline-capable QR attendance scanner for security guards",
-        theme_color: "#EA580C",
+        name: "QR Attendance System",
+        short_name: "QR Attendance",
+        description: "QR attendance management for security guards, mentors, and admins",
+        theme_color: "#16a34a",
         background_color: "#020617",
         display: "standalone",
         orientation: "portrait",
-        start_url: "/security",
+        start_url: "/",
         scope: "/",
         icons: [
           { src: "/security-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
           { src: "/security-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
+        ],
+        shortcuts: [
+          {
+            name: "Security Scanner",
+            short_name: "Scanner",
+            description: "Open QR scanner",
+            url: "/security",
+          },
+          {
+            name: "Mentor Dashboard",
+            short_name: "Mentor",
+            description: "View my students attendance",
+            url: "/login",
+          },
         ],
       },
       workbox: {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 import {
   GraduationCap,
   LogOut,
@@ -10,6 +11,8 @@ import {
   History as HistoryIcon,
   ArrowLeft,
   Loader2,
+  Download,
+  X,
 } from "lucide-react";
 
 type MentorStudent = {
@@ -61,6 +64,8 @@ export default function MentorApp() {
   const [historyFor, setHistoryFor] = useState<MentorStudent | null>(null);
   const [history, setHistory] = useState<AttendanceHistory | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const { canInstall, install } = usePwaInstall();
+  const [showInstallBanner, setShowInstallBanner] = useState(true);
 
   useEffect(() => {
     if (role !== "mentor") {
@@ -127,6 +132,33 @@ export default function MentorApp() {
           </button>
         </div>
       </header>
+
+      {/* PWA Install Banner */}
+      {canInstall && showInstallBanner && (
+        <div className="bg-green-600 text-white px-4 py-3">
+          <div className="max-w-3xl mx-auto flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+              <Download className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold">Install Mentor App</p>
+              <p className="text-xs text-green-100 mt-0.5">Add to your home screen for quick access — works offline too!</p>
+            </div>
+            <button
+              onClick={install}
+              className="flex-shrink-0 px-4 py-2 rounded-lg bg-white text-green-700 text-xs font-bold hover:bg-green-50 transition-colors active:scale-[0.97]"
+            >
+              Install
+            </button>
+            <button
+              onClick={() => setShowInstallBanner(false)}
+              className="flex-shrink-0 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-3xl mx-auto p-4">
         {/* Today summary */}
