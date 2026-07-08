@@ -13,6 +13,7 @@ import {
   Loader2,
   Download,
   X,
+  Search,
 } from "lucide-react";
 
 type MentorStudent = {
@@ -66,6 +67,13 @@ export default function MentorApp() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const { canInstall, install } = usePwaInstall();
   const [showInstallBanner, setShowInstallBanner] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredStudents = students.filter(
+    (s) =>
+      s.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.user.uniqueId.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     if (role !== "mentor") {
@@ -195,8 +203,36 @@ export default function MentorApp() {
             </p>
           </div>
         ) : (
-          <div data-testid="mentor-students" className="bg-slate-950 border border-slate-850 rounded-xl divide-y divide-slate-850 overflow-hidden shadow-sm">
-            {students.map((s) => (
+          <>
+            {/* Search Bar */}
+            <div className="relative mb-4">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-slate-500" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by name or roll number..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-9 pr-10 py-2.5 bg-slate-950 border border-slate-850 rounded-xl text-slate-300 placeholder-slate-550 text-sm focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {filteredStudents.length === 0 ? (
+              <div className="bg-slate-950 border border-slate-850 rounded-xl p-8 text-center shadow-sm">
+                <p className="text-slate-400 text-sm">No students matching "{searchQuery}"</p>
+              </div>
+            ) : (
+              <div data-testid="mentor-students" className="bg-slate-950 border border-slate-850 rounded-xl divide-y divide-slate-850 overflow-hidden shadow-sm">
+                {filteredStudents.map((s) => (
               <div key={s.user.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-900/50 transition-colors">
                 <div className="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-sm font-bold text-slate-300 flex-shrink-0">
                   {s.user.name.charAt(0).toUpperCase()}
@@ -237,6 +273,8 @@ export default function MentorApp() {
               </div>
             ))}
           </div>
+        )}
+          </>
         )}
       </div>
 

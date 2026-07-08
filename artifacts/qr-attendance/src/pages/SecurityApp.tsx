@@ -45,6 +45,24 @@ export default function SecurityApp() {
   const popupTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const lastScanRef = useRef<{ text: string; at: number } | null>(null);
 
+  const [unlocked, setUnlocked] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("qr_scanner_unlocked") === "true";
+  });
+  const [passcode, setPasscode] = useState("");
+  const [passcodeError, setPasscodeError] = useState("");
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passcode === "038899") {
+      setUnlocked(true);
+      localStorage.setItem("qr_scanner_unlocked", "true");
+      setPasscodeError("");
+    } else {
+      setPasscodeError("Invalid passcode. Please try again.");
+    }
+  };
+
   const [online, setOnline] = useState<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [cachedCount, setCachedCount] = useState<number>(getCachedUsers().length);
   const [cachedAt, setCachedAt] = useState<number | null>(getCacheFetchedAt());
@@ -266,6 +284,50 @@ export default function SecurityApp() {
   };
 
   const queueLen = queue.length;
+
+  if (!unlocked) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center px-4 font-sans text-slate-100">
+        <div className="w-full max-w-md">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-orange-650/10 border border-orange-500/20 flex items-center justify-center mb-4">
+              <ShieldCheck className="w-8 h-8 text-orange-500" />
+            </div>
+            <h1 className="text-xl font-bold text-white text-center">Scanner Lock</h1>
+            <p className="text-xs text-slate-450 mt-1.5 text-center">
+              Please enter the passcode to access the security scanner.
+            </p>
+          </div>
+
+          <form onSubmit={handleUnlock} className="bg-slate-900 border border-slate-850 rounded-2xl p-6 shadow-xl">
+            <div className="mb-5">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Passcode
+              </label>
+              <input
+                type="password"
+                placeholder="••••••"
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-700 text-center font-mono tracking-widest text-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+                autoFocus
+              />
+              {passcodeError && (
+                <p className="text-red-500 text-xs font-semibold mt-2.5 text-center">{passcodeError}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm transition-colors active:scale-[0.98] shadow-lg shadow-orange-950/20"
+            >
+              Unlock Scanner
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col text-slate-100">
