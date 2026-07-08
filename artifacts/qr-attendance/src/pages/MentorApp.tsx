@@ -107,21 +107,21 @@ export default function MentorApp() {
   const cameCount = students.filter((s) => s.cameToday).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+    <div className="min-h-screen bg-slate-900 text-slate-350 font-sans">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-30 shadow-sm">
+      <header className="bg-slate-950 border-b border-slate-850 px-4 py-3 sticky top-0 z-30 shadow-sm">
         <div className="flex items-center gap-3 max-w-3xl mx-auto">
           <div className="w-9 h-9 rounded-lg bg-green-600 flex items-center justify-center shadow-md shadow-green-600/10">
             <GraduationCap className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-base font-bold text-slate-900 truncate">Mentor Dashboard</h1>
-            <p className="text-xs text-slate-500 truncate">{mentor?.name} · {mentor?.email}</p>
+            <h1 className="text-base font-bold text-slate-300 truncate">Mentor Dashboard</h1>
+            <p className="text-xs text-slate-400 truncate">{mentor?.name} · {mentor?.email}</p>
           </div>
           <button
             data-testid="mentor-logout"
             onClick={logout}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-250 text-xs font-semibold transition-all active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 hover:bg-red-900/20 text-slate-300 hover:text-red-600 border border-slate-800 text-xs font-semibold transition-all active:scale-[0.98]"
           >
             <LogOut className="w-4 h-4" /> Logout
           </button>
@@ -131,16 +131,16 @@ export default function MentorApp() {
       <div className="max-w-3xl mx-auto p-4">
         {/* Today summary */}
         <div className="grid grid-cols-3 gap-3 mb-5">
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-            <p className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Assigned</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{students.length}</p>
+          <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assigned</p>
+            <p className="text-2xl font-black text-slate-300 mt-1">{students.length}</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-            <p className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Came Today</p>
+          <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Came Today</p>
             <p className="text-2xl font-black text-green-600 mt-1">{cameCount}</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-            <p className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Absent</p>
+          <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 shadow-sm">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Absent</p>
             <p className="text-2xl font-black text-red-600 mt-1">{students.length - cameCount}</p>
           </div>
         </div>
@@ -156,22 +156,22 @@ export default function MentorApp() {
             <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
           </div>
         ) : students.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
-            <p className="text-slate-600 text-sm font-bold">No students assigned yet.</p>
-            <p className="text-slate-450 text-xs mt-2">
+          <div className="bg-slate-950 border border-slate-850 rounded-xl p-8 text-center shadow-sm">
+            <p className="text-slate-300 text-sm font-bold">No students assigned yet.</p>
+            <p className="text-slate-400 text-xs mt-2">
               Ask the admin to assign students to your account.
             </p>
           </div>
         ) : (
-          <div data-testid="mentor-students" className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden shadow-sm">
+          <div data-testid="mentor-students" className="bg-slate-950 border border-slate-850 rounded-xl divide-y divide-slate-850 overflow-hidden shadow-sm">
             {students.map((s) => (
-              <div key={s.user.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50/50 transition-colors">
-                <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700 flex-shrink-0">
+              <div key={s.user.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-900/50 transition-colors">
+                <div className="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-sm font-bold text-slate-300 flex-shrink-0">
                   {s.user.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900 truncate">{s.user.name}</p>
-                  <p className="text-xs text-slate-500 font-medium truncate mt-0.5">
+                  <p className="text-sm font-bold text-slate-300 truncate">{s.user.name}</p>
+                  <p className="text-xs text-slate-450 font-medium truncate mt-0.5">
                     {s.user.uniqueId}
                     {s.attendanceToday?.entryTime && ` · In ${formatTime(s.attendanceToday.entryTime)}`}
                     {s.attendanceToday?.exitTime && ` · Out ${formatTime(s.attendanceToday.exitTime)}`}
@@ -197,7 +197,7 @@ export default function MentorApp() {
                 <button
                   data-testid={`mentor-history-${s.user.id}`}
                   onClick={() => openHistory(s)}
-                  className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors"
+                  className="p-2 rounded-lg bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 transition-colors"
                   title="History"
                 >
                   <HistoryIcon className="w-4 h-4" />
@@ -211,18 +211,18 @@ export default function MentorApp() {
       {/* History modal */}
       {historyFor && (
         <div className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="w-full sm:max-w-lg sm:rounded-2xl bg-white border-t sm:border border-slate-200 max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
+          <div className="w-full sm:max-w-lg sm:rounded-2xl bg-slate-950 border-t sm:border border-slate-850 max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-850">
               <button
                 data-testid="close-mentor-history"
                 onClick={() => { setHistoryFor(null); setHistory(null); }}
-                className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors"
+                className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
               <div>
-                <h2 className="text-sm font-bold text-slate-900">{historyFor.user.name}</h2>
-                <p className="text-xs text-slate-500 mt-0.5">{historyFor.user.uniqueId}</p>
+                <h2 className="text-sm font-bold text-slate-300">{historyFor.user.name}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{historyFor.user.uniqueId}</p>
               </div>
             </div>
             {historyLoading || !history ? (
@@ -231,28 +231,28 @@ export default function MentorApp() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-2 px-4 py-3 border-b border-slate-100 text-center bg-slate-50/50">
+                <div className="grid grid-cols-3 gap-2 px-4 py-3 border-b border-slate-850 text-center bg-slate-900/50">
                   <div>
-                    <p className="text-[9px] font-bold text-slate-450 uppercase tracking-wider">Days</p>
-                    <p className="text-lg font-extrabold text-slate-900 mt-0.5">{history.summary.totalDaysPresent}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Days</p>
+                    <p className="text-lg font-extrabold text-slate-300 mt-0.5">{history.summary.totalDaysPresent}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold text-slate-450 uppercase tracking-wider">Avg min</p>
-                    <p className="text-lg font-extrabold text-slate-900 mt-0.5">{history.summary.averageMinutesSpent}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Avg min</p>
+                    <p className="text-lg font-extrabold text-slate-300 mt-0.5">{history.summary.averageMinutesSpent}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold text-slate-450 uppercase tracking-wider">Late</p>
-                    <p className="text-lg font-extrabold text-slate-900 mt-0.5">{history.summary.lateEntriesCount}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Late</p>
+                    <p className="text-lg font-extrabold text-slate-300 mt-0.5">{history.summary.lateEntriesCount}</p>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+                <div className="flex-1 overflow-y-auto divide-y divide-slate-850">
                   {history.records.length === 0 ? (
                     <div className="p-10 text-center text-sm text-slate-500 font-medium">No attendance records yet</div>
                   ) : (
                     history.records.map((r) => (
                       <div key={r.id} className="px-4 py-3 flex items-center gap-3">
-                        <div className="text-xs font-bold text-slate-700 w-24 flex-shrink-0">{r.date}</div>
-                        <div className="text-xs text-slate-550 flex-1">
+                        <div className="text-xs font-bold text-slate-300 w-24 flex-shrink-0">{r.date}</div>
+                        <div className="text-xs text-slate-450 flex-1">
                           In {formatTime(r.entryTime)} · Out {formatTime(r.exitTime)}
                           {r.durationMinutes !== null && ` · ${r.durationMinutes}m`}
                         </div>
@@ -260,7 +260,7 @@ export default function MentorApp() {
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                             r.status === "inside"
                               ? "bg-green-50 text-green-700 border-green-200"
-                              : "bg-slate-100 text-slate-600 border-slate-200"
+                              : "bg-slate-900 text-slate-400 border border-slate-800"
                           }`}
                         >
                           {r.status === "inside" ? "In Campus" : "Left Campus"}
