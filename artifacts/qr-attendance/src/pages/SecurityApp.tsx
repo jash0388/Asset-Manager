@@ -31,8 +31,8 @@ function formatAgo(ts: number | null): string {
 }
 
 function formatRemaining(ms: number): string {
-  const m = Math.ceil(ms / 60000);
-  return m <= 1 ? "1 min" : `${m} min`;
+  const s = Math.ceil(ms / 1000);
+  return `${s}s`;
 }
 
 export default function SecurityApp() {

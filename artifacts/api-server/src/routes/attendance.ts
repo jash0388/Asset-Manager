@@ -51,8 +51,8 @@ async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
 function getRecordStatus(record: any): "inside" | "left" {
   if (!record?.exit_time) return "inside";
   
-  // Handle the 9999-12-31 dummy date or null
-  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  // Handle the 9999-12-31 / 1970 sentinel dates or null
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999") && !record.entry_time.startsWith("1970");
   if (!hasEntry) return "left";
 
   const entryTime = new Date(record.entry_time).getTime();
@@ -71,7 +71,7 @@ function getLatestRecordsByUser(records: any[] = []): Map<number, any> {
 }
 
 function formatRecord(record: any, user?: any) {
-  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999") && !record.entry_time.startsWith("1970");
   const durationMinutes =
     hasEntry && record.exit_time
       ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 60000)
@@ -83,7 +83,7 @@ function formatRecord(record: any, user?: any) {
     id: record.id,
     userId: record.user_id,
     date: record.date,
-    entryTime: record.entry_time,
+    entryTime: hasEntry ? record.entry_time : null,
     exitTime: record.exit_time,
     scanCount: record.scan_count,
     durationMinutes,
