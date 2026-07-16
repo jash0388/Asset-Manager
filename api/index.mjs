@@ -64576,6 +64576,7 @@ function formatRecord(record, user) {
         name: user.name,
         uniqueId: user.unique_id,
         role: user.role,
+        section: user.section,
         createdAt: user.created_at
       }
     } : {}

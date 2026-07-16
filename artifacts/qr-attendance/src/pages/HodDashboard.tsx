@@ -533,15 +533,15 @@ export default function HodDashboard() {
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold cursor-pointer"
                 >
                   <option value="All">All Sections</option>
-                  <option value="2A">2A (Sophomore A)</option>
-                  <option value="2B">2B (Sophomore B)</option>
-                  <option value="2C">2C (Sophomore C)</option>
-                  <option value="3A">3A (Junior A)</option>
-                  <option value="3B">3B (Junior B)</option>
-                  <option value="3C">3C (Junior C)</option>
-                  <option value="3D">3D (Junior D)</option>
-                  <option value="4A">4A (Senior A)</option>
-                  <option value="4B">4B (Senior B)</option>
+                  <option value="2A">2A CSE Data Science</option>
+                  <option value="2B">2B CSE Data Science</option>
+                  <option value="2C">2C CSE Data Science</option>
+                  <option value="3A">3A CSE Data Science</option>
+                  <option value="3B">3B CSE Data Science</option>
+                  <option value="3C">3C CSE Data Science</option>
+                  <option value="3D">3D CSE Data Science</option>
+                  <option value="4A">4A CSE Data Science</option>
+                  <option value="4B">4B CSE Data Science</option>
                 </select>
               </div>
 
