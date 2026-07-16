@@ -615,6 +615,52 @@ router.delete("/admin/schedules/:id", authMiddleware, async (req: any, res: any)
   }
 });
 
+router.get("/admin/schedules-with-status", authMiddleware, async (req: any, res: any) => {
+  const date = req.query.date as string;
+  if (!date) {
+    res.status(400).json({ error: "Date parameter is required" });
+    return;
+  }
+
+  try {
+    // 1. Fetch all schedules
+    const { data: schedules, error: scheduleErr } = await supabase
+      .from("qr_schedules")
+      .select("*, qr_mentors(*)")
+      .order("start_time", { ascending: true });
+
+    if (scheduleErr) throw scheduleErr;
+
+    // 2. Fetch all sessions for this date
+    const { data: sessions, error: sessionErr } = await supabase
+      .from("qr_mentor_sessions")
+      .select("*")
+      .eq("date", date);
+
+    if (sessionErr) throw sessionErr;
+
+    // Map schedule status
+    const sessionMap = new Map();
+    (sessions || []).forEach((s: any) => {
+      sessionMap.set(s.schedule_id, s);
+    });
+
+    const mapped = (schedules || []).map((s: any) => {
+      const session = sessionMap.get(s.id);
+      return {
+        ...s,
+        status: session ? (session.ended_at ? "submitted" : "started") : "pending",
+        studentCount: session ? session.student_count : 0
+      };
+    });
+
+    res.json(mapped);
+  } catch (err: any) {
+    req.log.error({ err }, "Fetch schedules with status error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.get("/admin/hourly-attendance-submissions", authMiddleware, async (req: any, res: any) => {
   const scheduleId = parseInt(req.query.scheduleId);
   if (isNaN(scheduleId)) {
