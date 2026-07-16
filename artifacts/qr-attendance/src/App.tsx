@@ -54,6 +54,20 @@ function RequireHod({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RequireAdminOrHod({ children }: { children: React.ReactNode }) {
+  const { role } = useAuth();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (role !== "admin" && role !== "hod") {
+      navigate("/login");
+    }
+  }, [role, navigate]);
+
+  if (role !== "admin" && role !== "hod") return null;
+  return <>{children}</>;
+}
+
 function AppRouter() {
   return (
     <Switch>
@@ -86,7 +100,7 @@ function AppRouter() {
         <RequireAdmin><Attendance /></RequireAdmin>
       </Route>
       <Route path="/hourly-attendance">
-        <RequireAdmin><HourlyAttendance /></RequireAdmin>
+        <RequireAdminOrHod><HourlyAttendance /></RequireAdminOrHod>
       </Route>
       <Route path="/history/:userId">
         {(params) => <RequireAdmin><History /></RequireAdmin>}

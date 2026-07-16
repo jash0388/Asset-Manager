@@ -37,7 +37,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = role === "hod"
-    ? [{ href: "/hod-dashboard", label: "HOD Dashboard", icon: LayoutDashboard }]
+    ? [
+        { href: "/hod-dashboard", label: "HOD Dashboard", icon: LayoutDashboard },
+        { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
+      ]
     : adminNavLinks;
 
   return (
