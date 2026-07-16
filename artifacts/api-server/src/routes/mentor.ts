@@ -177,4 +177,438 @@ router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req:
   }
 });
 
+function getCurrentISTDateTime(): { day: string; time: string; date: string } {
+  const now = new Date();
+  
+  // Format to get time in 24h format: e.g. "14:30:15"
+  const timeStr = now.toLocaleTimeString("en-US", {
+    timeZone: "Asia/Kolkata",
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  // Format to get weekday: e.g. "Mon"
+  const weekday = now.toLocaleDateString("en-US", {
+    timeZone: "Asia/Kolkata",
+    weekday: "short"
+  }).toUpperCase();
+
+  const dayMap: Record<string, string> = {
+    "MON": "MON",
+    "TUE": "TUE",
+    "WED": "WED",
+    "THU": "THUR",
+    "FRI": "FRI",
+    "SAT": "SAT",
+    "SUN": "SUN"
+  };
+  const day = dayMap[weekday] || "SUN";
+
+  // Date format YYYY-MM-DD
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+  const parts = formatter.formatToParts(now);
+  const y = parts.find(p => p.type === "year")?.value || "";
+  const m = parts.find(p => p.type === "month")?.value || "";
+  const d = parts.find(p => p.type === "day")?.value || "";
+  const dateStr = `${y}-${m}-${d}`;
+
+  return { day, time: timeStr, date: dateStr };
+}
+
+// 1. Get active schedule for currently logged in mentor
+router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: any, res: any) => {
+  const mentorId = req.mentorId!;
+  try {
+    const { day, time, date } = getCurrentISTDateTime();
+    const { data: slots, error } = await supabase
+      .from("qr_schedules")
+      .select("*")
+      .eq("mentor_id", mentorId)
+      .eq("day_of_week", day)
+      .lte("start_time", time)
+      .gte("end_time", time);
+
+    if (error) throw error;
+
+    const activeSchedule = slots?.[0] || null;
+    if (!activeSchedule) {
+      res.json({ activeSchedule: null, session: null, serverTime: { day, time, date } });
+      return;
+    }
+
+    // Check if session already started today
+    const { data: sessions, error: sessionErr } = await supabase
+      .from("qr_mentor_sessions")
+      .select("*")
+      .eq("schedule_id", activeSchedule.id)
+      .eq("date", date)
+      .limit(1);
+
+    if (sessionErr) throw sessionErr;
+
+    res.json({
+      activeSchedule,
+      session: sessions?.[0] || null,
+      serverTime: { day, time, date }
+    });
+  } catch (err: any) {
+    req.log.error({ err }, "Get active schedule error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 2. Get students assigned to active schedule's section
+router.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (req: any, res: any) => {
+  const mentorId = req.mentorId!;
+  const scheduleIdRaw = req.query.scheduleId;
+  const scheduleId = parseInt(scheduleIdRaw);
+  if (isNaN(scheduleId)) {
+    res.status(400).json({ error: "Invalid schedule ID" });
+    return;
+  }
+
+  try {
+    const { date } = getCurrentISTDateTime();
+    
+    // Fetch schedule to get the section
+    const { data: schedules, error: scheduleErr } = await supabase
+      .from("qr_schedules")
+      .select("*")
+      .eq("id", scheduleId)
+      .limit(1);
+
+    if (scheduleErr) throw scheduleErr;
+    const schedule = schedules?.[0];
+    if (!schedule || (mentorId !== -3 && schedule.mentor_id !== mentorId)) {
+      res.status(404).json({ error: "Schedule not found or access denied" });
+      return;
+    }
+
+    // Fetch all students in this section
+    const { data: students, error: studentErr } = await supabase
+      .from("qr_users")
+      .select("*")
+      .eq("role", "student")
+      .eq("section", schedule.section)
+      .order("name");
+
+    if (studentErr) throw studentErr;
+
+    if (!students || students.length === 0) {
+      res.json([]);
+      return;
+    }
+
+    const studentIds = students.map((s: any) => s.id);
+
+    // Fetch daily gate attendance status
+    const { data: gateAttendance, error: gateErr } = await supabase
+      .from("qr_attendance")
+      .select("*")
+      .eq("date", date)
+      .in("user_id", studentIds);
+
+    if (gateErr) throw gateErr;
+
+    // Fetch hourly attendance logs for this schedule today
+    const { data: hourlyAttendance, error: hourlyErr } = await supabase
+      .from("qr_hourly_attendance")
+      .select("*")
+      .eq("schedule_id", scheduleId)
+      .eq("date", date);
+
+    if (hourlyErr) throw hourlyErr;
+
+    const gateMap = new Map<number, any>();
+    if (gateAttendance) {
+      for (const g of gateAttendance) gateMap.set(g.user_id, g);
+    }
+
+    const hourlyMap = new Map<number, any>();
+    if (hourlyAttendance) {
+      for (const h of hourlyAttendance) hourlyMap.set(h.user_id, h);
+    }
+
+    const result = students.map((s: any) => {
+      const gate = gateMap.get(s.id);
+      const hourly = hourlyMap.get(s.id);
+
+      const hasGateEntry = gate && gate.entry_time && !isSentinel(gate.entry_time);
+      const isMarkedPresent = hourly ? hourly.marked_present : false;
+
+      // Warning condition: student present in class but has no gate scan record today
+      const warningNotScanned = isMarkedPresent && !hasGateEntry;
+
+      return {
+        id: s.id,
+        name: s.name,
+        uniqueId: s.unique_id,
+        section: s.section,
+        scannedGate: !!hasGateEntry,
+        gateEntryTime: hasGateEntry ? gate.entry_time : null,
+        markedPresent: isMarkedPresent,
+        markedByTeacher: hourly ? hourly.marked_by_teacher : false,
+        scannedQr: hourly ? hourly.scanned_qr : false,
+        warningNotScanned
+      };
+    });
+
+    res.json(result);
+  } catch (err: any) {
+    req.log.error({ err }, "Get students by schedule error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 3. Start a new session log
+router.post("/mentor/start-session", authMiddleware, mentorOnly, async (req: any, res: any) => {
+  const mentorId = req.mentorId!;
+  const scheduleId = parseInt(req.body.scheduleId);
+  if (isNaN(scheduleId)) {
+    res.status(400).json({ error: "Invalid schedule ID" });
+    return;
+  }
+
+  try {
+    const { date } = getCurrentISTDateTime();
+
+    // Verify schedule belongs to mentor
+    const { data: schedules, error: scheduleErr } = await supabase
+      .from("qr_schedules")
+      .select("*")
+      .eq("id", scheduleId)
+      .limit(1);
+
+    if (scheduleErr) throw scheduleErr;
+    const schedule = schedules?.[0];
+    if (!schedule || (mentorId !== -3 && schedule.mentor_id !== mentorId)) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
+
+    // Insert or return existing session
+    const { data: existing, error: existErr } = await supabase
+      .from("qr_mentor_sessions")
+      .select("*")
+      .eq("schedule_id", scheduleId)
+      .eq("date", date)
+      .limit(1);
+
+    if (existErr) throw existErr;
+
+    if (existing && existing.length > 0) {
+      res.json(existing[0]);
+      return;
+    }
+
+    const { data: inserted, error: insertErr } = await supabase
+      .from("qr_mentor_sessions")
+      .insert({
+        mentor_id: mentorId,
+        schedule_id: scheduleId,
+        date: date,
+        started_at: new Date().toISOString(),
+        student_count: 0
+      })
+      .select()
+      .single();
+
+    if (insertErr) throw insertErr;
+
+    res.status(201).json(inserted);
+  } catch (err: any) {
+    req.log.error({ err }, "Start session error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 4. Submit attendance and close session
+router.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req: any, res: any) => {
+  const mentorId = req.mentorId!;
+  const scheduleId = parseInt(req.body.scheduleId);
+  const studentRecords = req.body.students; // array of { studentId: number, markedPresent: boolean }
+  if (isNaN(scheduleId) || !Array.isArray(studentRecords)) {
+    res.status(400).json({ error: "Invalid request body" });
+    return;
+  }
+
+  try {
+    const { date } = getCurrentISTDateTime();
+
+    // Verify schedule belongs to mentor
+    const { data: schedules, error: scheduleErr } = await supabase
+      .from("qr_schedules")
+      .select("*")
+      .eq("id", scheduleId)
+      .limit(1);
+
+    if (scheduleErr) throw scheduleErr;
+    const schedule = schedules?.[0];
+    if (!schedule || (mentorId !== -3 && schedule.mentor_id !== mentorId)) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
+
+    // Insert or update hourly attendance logs
+    let presentCount = 0;
+    for (const record of studentRecords) {
+      const isPresent = !!record.markedPresent;
+      if (isPresent) presentCount++;
+
+      // Upsert into qr_hourly_attendance
+      await supabase
+        .from("qr_hourly_attendance")
+        .upsert({
+          schedule_id: scheduleId,
+          user_id: record.studentId,
+          date: date,
+          marked_present: isPresent,
+          marked_by_teacher: true,
+          scanned_qr: false
+        }, {
+          onConflict: "schedule_id,user_id,date"
+        });
+    }
+
+    // Update session end time and student count
+    const { data: sessionRes, error: sessionErr } = await supabase
+      .from("qr_mentor_sessions")
+      .update({
+        ended_at: new Date().toISOString(),
+        student_count: presentCount
+      })
+      .eq("schedule_id", scheduleId)
+      .eq("date", date)
+      .select();
+
+    if (sessionErr) throw sessionErr;
+
+    res.json({ message: "Attendance submitted successfully", presentCount });
+  } catch (err: any) {
+    req.log.error({ err }, "Submit attendance error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 5. Admin Endpoint: Fetch all mentors and their sessions
+router.get("/admin/mentors-tracking", authMiddleware, async (req: any, res: any) => {
+  try {
+    // Fetch all mentors
+    const { data: mentors, error: mentorErr } = await supabase
+      .from("qr_mentors")
+      .select("*")
+      .order("name");
+
+    if (mentorErr) throw mentorErr;
+
+    // Fetch all sessions
+    const { data: sessions, error: sessionErr } = await supabase
+      .from("qr_mentor_sessions")
+      .select("*, qr_schedules(day_of_week, start_time, end_time, section, subject)");
+
+    if (sessionErr) throw sessionErr;
+
+    const result = mentors.map((m: any) => {
+      const mentorSessions = (sessions || []).filter((s: any) => s.mentor_id === m.id);
+      return {
+        id: m.id,
+        name: m.name,
+        email: m.email,
+        sessions: mentorSessions.map((s: any) => ({
+          id: s.id,
+          date: s.date,
+          startedAt: s.started_at,
+          endedAt: s.ended_at,
+          studentCount: s.student_count,
+          schedule: s.qr_schedules ? {
+            day: s.qr_schedules.day_of_week,
+            startTime: s.qr_schedules.start_time,
+            endTime: s.qr_schedules.end_time,
+            section: s.qr_schedules.section,
+            subject: s.qr_schedules.subject
+          } : null
+        }))
+      };
+    });
+
+    res.json(result);
+  } catch (err: any) {
+    req.log.error({ err }, "Get admin mentors tracking error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 6. Admin Endpoint: Manage Schedules
+router.get("/admin/schedules", authMiddleware, async (req: any, res: any) => {
+  try {
+    const { data: schedules, error } = await supabase
+      .from("qr_schedules")
+      .select("*, qr_mentors(name, email)")
+      .order("day_of_week")
+      .order("start_time");
+
+    if (error) throw error;
+    res.json(schedules);
+  } catch (err: any) {
+    req.log.error({ err }, "Get admin schedules error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/admin/schedules", authMiddleware, async (req: any, res: any) => {
+  const { mentorId, dayOfWeek, startTime, endTime, section, subject, year } = req.body;
+  if (!mentorId || !dayOfWeek || !startTime || !endTime || !section) {
+    res.status(400).json({ error: "Missing required fields" });
+    return;
+  }
+  try {
+    const { data: inserted, error } = await supabase
+      .from("qr_schedules")
+      .insert({
+        mentor_id: mentorId,
+        day_of_week: dayOfWeek,
+        start_time: startTime,
+        end_time: endTime,
+        section,
+        subject,
+        year
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json(inserted);
+  } catch (err: any) {
+    req.log.error({ err }, "Create admin schedule error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/admin/schedules/:id", authMiddleware, async (req: any, res: any) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid schedule ID" });
+    return;
+  }
+  try {
+    const { error } = await supabase
+      .from("qr_schedules")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    res.json({ message: "Schedule deleted successfully" });
+  } catch (err: any) {
+    req.log.error({ err }, "Delete admin schedule error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

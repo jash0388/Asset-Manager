@@ -165,7 +165,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
   }
 
   const results: any[] = [];
-  const batchStatusCache = new Map<number, { status: "inside" | "left"; recordId?: number; scanCount: number }>();
+  const batchStatusCache = new Map<number, { status: "inside" | "left"; recordId?: number; scanCount: number; lastScanAt?: string }>();
 
   for (const item of scans) {
     const clientScanId = String(item?.clientScanId ?? "");

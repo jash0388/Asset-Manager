@@ -37,7 +37,7 @@ router.post("/auth/login", async (req: any, res: any) => {
       return;
     }
 
-    const token = jwt.sign({ id: admin.id, email: admin.email, role: "admin" }, SESSION_SECRET, {
+    const token = jwt.sign({ adminId: admin.id, email: admin.email, role: "admin" }, SESSION_SECRET, {
       expiresIn: "24h",
     });
 
@@ -80,7 +80,7 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
       return;
     }
 
-    const token = jwt.sign({ id: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, {
+    const token = jwt.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, {
       expiresIn: "24h",
     });
 
