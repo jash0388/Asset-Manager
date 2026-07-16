@@ -65414,6 +65414,47 @@ router5.delete("/admin/schedules/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+router5.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, res) => {
+  const scheduleId = parseInt(req.query.scheduleId);
+  if (isNaN(scheduleId)) {
+    res.status(400).json({ error: "Invalid schedule ID" });
+    return;
+  }
+  const dateParam = req.query.date;
+  try {
+    const { data: datesRes, error: datesErr } = await supabase.from("qr_hourly_attendance").select("date").eq("schedule_id", scheduleId);
+    if (datesErr) throw datesErr;
+    const uniqueDates = Array.from(new Set((datesRes || []).map((d) => d.date))).sort().reverse();
+    if (uniqueDates.length === 0) {
+      res.json({ dates: [], date: null, records: [] });
+      return;
+    }
+    const date = dateParam && uniqueDates.includes(dateParam) ? dateParam : uniqueDates[0];
+    const { data: records, error: recordsErr } = await supabase.from("qr_hourly_attendance").select("*, qr_users(*)").eq("schedule_id", scheduleId).eq("date", date);
+    if (recordsErr) throw recordsErr;
+    const { data: gateScans, error: gateErr } = await supabase.from("qr_attendance").select("user_id, entry_time").eq("date", date);
+    const gateScannedUserIds = new Set((gateScans || []).map((g) => g.user_id));
+    const formattedRecords = (records || []).map((r) => {
+      const u = r.qr_users;
+      return {
+        id: r.id,
+        studentId: r.user_id,
+        name: u ? u.name : "Unknown Student",
+        uniqueId: u ? u.unique_id : "\u2014",
+        markedPresent: r.marked_present,
+        scannedGate: u ? gateScannedUserIds.has(u.id) : false
+      };
+    });
+    res.json({
+      dates: uniqueDates,
+      date,
+      records: formattedRecords
+    });
+  } catch (err) {
+    req.log.error({ err }, "Fetch hourly submissions error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 var mentor_default = router5;
 
 // src/routes/index.ts

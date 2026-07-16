@@ -14,6 +14,7 @@ import SecurityApp from "@/pages/SecurityApp";
 import MentorApp from "@/pages/MentorApp";
 import Mentors from "@/pages/Mentors";
 import HodDashboard from "@/pages/HodDashboard";
+import HourlyAttendance from "@/pages/HourlyAttendance";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -83,6 +84,9 @@ function AppRouter() {
       </Route>
       <Route path="/attendance">
         <RequireAdmin><Attendance /></RequireAdmin>
+      </Route>
+      <Route path="/hourly-attendance">
+        <RequireAdmin><HourlyAttendance /></RequireAdmin>
       </Route>
       <Route path="/history/:userId">
         {(params) => <RequireAdmin><History /></RequireAdmin>}

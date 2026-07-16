@@ -615,4 +615,71 @@ router.delete("/admin/schedules/:id", authMiddleware, async (req: any, res: any)
   }
 });
 
+router.get("/admin/hourly-attendance-submissions", authMiddleware, async (req: any, res: any) => {
+  const scheduleId = parseInt(req.query.scheduleId);
+  if (isNaN(scheduleId)) {
+    res.status(400).json({ error: "Invalid schedule ID" });
+    return;
+  }
+  const dateParam = req.query.date as string | undefined;
+
+  try {
+    // 1. Get all unique dates when attendance was submitted for this schedule
+    const { data: datesRes, error: datesErr } = await supabase
+      .from("qr_hourly_attendance")
+      .select("date")
+      .eq("schedule_id", scheduleId);
+
+    if (datesErr) throw datesErr;
+
+    const uniqueDates = Array.from(new Set((datesRes || []).map((d: any) => d.date))).sort().reverse();
+
+    if (uniqueDates.length === 0) {
+      res.json({ dates: [], date: null, records: [] });
+      return;
+    }
+
+    // Determine target date
+    const date = dateParam && uniqueDates.includes(dateParam) ? dateParam : uniqueDates[0];
+
+    // 2. Fetch the hourly attendance records for this date and schedule
+    const { data: records, error: recordsErr } = await supabase
+      .from("qr_hourly_attendance")
+      .select("*, qr_users(*)")
+      .eq("schedule_id", scheduleId)
+      .eq("date", date);
+
+    if (recordsErr) throw recordsErr;
+
+    // 3. Fetch gate scan records for this date to display gate status
+    const { data: gateScans, error: gateErr } = await supabase
+      .from("qr_attendance")
+      .select("user_id, entry_time")
+      .eq("date", date);
+
+    const gateScannedUserIds = new Set((gateScans || []).map((g: any) => g.user_id));
+
+    const formattedRecords = (records || []).map((r: any) => {
+      const u = r.qr_users;
+      return {
+        id: r.id,
+        studentId: r.user_id,
+        name: u ? u.name : "Unknown Student",
+        uniqueId: u ? u.unique_id : "—",
+        markedPresent: r.marked_present,
+        scannedGate: u ? gateScannedUserIds.has(u.id) : false
+      };
+    });
+
+    res.json({
+      dates: uniqueDates,
+      date,
+      records: formattedRecords
+    });
+  } catch (err: any) {
+    req.log.error({ err }, "Fetch hourly submissions error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

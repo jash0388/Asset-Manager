@@ -12,6 +12,7 @@ import {
   X,
   GraduationCap,
   ScanLine,
+  Clock,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,6 +21,7 @@ const adminNavLinks = [
   { href: "/users", label: "Users", icon: Users },
   { href: "/scanner", label: "QR Scanner", icon: QrCode },
   { href: "/attendance", label: "Attendance", icon: CalendarDays },
+  { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
   { href: "/history", label: "Student History", icon: History },
   { href: "/mentors", label: "Mentors", icon: GraduationCap },
 ];
@@ -83,32 +85,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
-
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-2 mt-6 mb-2">Open Apps</p>
-
-          <a
-            href={joinBase("security")}
-            data-testid="nav-security-app"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 text-orange-300 bg-orange-900/20 hover:bg-orange-900/30 transition-colors"
-          >
-            <ScanLine className="w-4 h-4 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold">Security App</p>
-              <p className="text-[10px] text-orange-400/80">Open scanner (no login)</p>
-            </div>
-          </a>
-
-          <a
-            href={joinBase("mentor")}
-            data-testid="nav-mentor-app"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 text-purple-300 bg-purple-900/20 hover:bg-purple-900/30 transition-colors"
-          >
-            <GraduationCap className="w-4 h-4 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold">Mentor App</p>
-              <p className="text-[10px] text-purple-400/80">Login as mentor</p>
-            </div>
-          </a>
         </nav>
 
         <div className="px-3 py-4 border-t border-slate-800">
