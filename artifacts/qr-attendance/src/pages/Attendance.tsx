@@ -21,7 +21,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function formatTime(iso: string | null | undefined) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
 }
 
 function formatDuration(mins: number | null | undefined) {

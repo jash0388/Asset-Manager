@@ -19,7 +19,7 @@ const KEY_QUEUE = "secapp.queue.v1";
 const KEY_COOLDOWN = "secapp.cooldown.v1";
 const KEY_LASTSYNC = "secapp.lastSyncAt.v1";
 
-const COOLDOWN_MS = 30 * 1000; // 30 seconds — prevents duplicate scans
+const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes — prevents duplicate scans for same student
 const USER_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function readJson<T>(key: string, fallback: T): T {

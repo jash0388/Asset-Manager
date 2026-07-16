@@ -45,10 +45,7 @@ export default function SecurityApp() {
   const popupTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const lastScanRef = useRef<{ text: string; at: number } | null>(null);
 
-  const [unlocked, setUnlocked] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("qr_scanner_unlocked") === "true";
-  });
+  const [unlocked, setUnlocked] = useState(false); // always locked on fresh open
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
 
@@ -56,7 +53,6 @@ export default function SecurityApp() {
     e.preventDefault();
     if (passcode === "038899") {
       setUnlocked(true);
-      localStorage.setItem("qr_scanner_unlocked", "true");
       setPasscodeError("");
     } else {
       setPasscodeError("Invalid passcode. Please try again.");
@@ -194,7 +190,7 @@ export default function SecurityApp() {
     if (!text) return;
 
     const last = lastScanRef.current;
-    if (last && last.text === text && Date.now() - last.at < 1200) return;
+    if (last && last.text === text && Date.now() - last.at < 10_000) return; // ignore same QR for 10s
     lastScanRef.current = { text, at: Date.now() };
 
     const uid = text;

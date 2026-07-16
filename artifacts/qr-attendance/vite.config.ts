@@ -28,7 +28,7 @@ export default defineConfig({
         background_color: "#020617",
         display: "standalone",
         orientation: "portrait",
-        start_url: "/",
+        start_url: "/security",
         scope: "/",
         icons: [
           { src: "/security-icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },

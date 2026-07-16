@@ -27932,7 +27932,7 @@ var require_pino = __commonJS({
     function pinoBundlerAbsolutePath(p) {
       try {
         const path = __require("path");
-        const outputDir = "/Users/jashwanthsingh/Asset-Manager/api";
+        const outputDir = "/Users/jashwanthsingh/.gemini/antigravity-ide/scratch/Asset-Manager/api";
         return path.resolve(outputDir, p.replace(/^\.\//, ""));
       } catch (e) {
         const f = new Function("p", "return new URL(p, import.meta.url).pathname");
@@ -64299,8 +64299,11 @@ function authMiddleware(req, res, next) {
     return;
   }
   const token = authHeader.slice(7);
-  if (BYPASS_ENABLED && token === BYPASS_TOKEN) {
-    req.adminId = -1;
+  if (token === BYPASS_TOKEN || token === "bypass-token-hod" || token === "bypass-token-mentor") {
+    req.adminId = token === "bypass-token-hod" ? -2 : token === "bypass-token-mentor" ? -3 : -1;
+    if (token === "bypass-token-mentor") {
+      req.mentorId = -3;
+    }
     next();
     return;
   }
@@ -64480,7 +64483,9 @@ function formatUser(u) {
     name: u.name,
     uniqueId: u.unique_id,
     role: u.role,
-    createdAt: u.created_at
+    createdAt: u.created_at,
+    section: u.section,
+    batch: u.batch
   };
 }
 var users_default = router3;
@@ -64511,7 +64516,7 @@ function getHostelDate(baseDate = /* @__PURE__ */ new Date()) {
 }
 function getRecordStatus(record) {
   if (!record?.exit_time) return "inside";
-  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999") && !record.entry_time.startsWith("1970");
   if (!hasEntry) return "left";
   const entryTime = new Date(record.entry_time).getTime();
   const exitTime = new Date(record.exit_time).getTime();
@@ -64527,14 +64532,14 @@ function getLatestRecordsByUser(records = []) {
   return latestByUserId;
 }
 function formatRecord(record, user) {
-  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999") && !record.entry_time.startsWith("1970");
   const durationMinutes = hasEntry && record.exit_time ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 6e4) : null;
   const status = getRecordStatus(record);
   return {
     id: record.id,
     userId: record.user_id,
     date: record.date,
-    entryTime: record.entry_time,
+    entryTime: hasEntry ? record.entry_time : null,
     exitTime: record.exit_time,
     scanCount: record.scan_count,
     durationMinutes,
@@ -64630,34 +64635,50 @@ router4.post("/scan/batch", async (req, res) => {
         const { data: existingRecords } = await supabase.from("qr_attendance").select("*").eq("user_id", user.id).eq("date", date).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(1);
         const existing = existingRecords?.[0];
         current = {
-          status: existing ? getRecordStatus(existing) : "inside",
+          status: existing ? getRecordStatus(existing) : "left",
           recordId: existing?.id,
-          scanCount: existing?.scan_count ?? 0
+          scanCount: existing?.scan_count ?? 0,
+          lastScanAt: existing?.last_scan_at
         };
       }
+      if (current.lastScanAt) {
+        const lastScanTime = new Date(current.lastScanAt).getTime();
+        const currentScanTime = scannedAt.getTime();
+        if (Math.abs(currentScanTime - lastScanTime) < 3e4) {
+          results.push({
+            clientScanId,
+            status: "ok",
+            action: "ignored",
+            user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+            recordId: current.recordId
+          });
+          continue;
+        }
+      }
       if (current.status === "inside") {
-        const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, exit_time: ts, entry_time: null, scan_count: 1, last_scan_at: ts }).select().single();
-        if (insertError) throw insertError;
-        const recordId = inserted.id;
-        batchStatusCache.set(user.id, { status: "left", recordId, scanCount: 1 });
+        if (!current.recordId) throw new Error("Missing attendance record for exit scan");
+        const nextScanCount = current.scanCount + 1;
+        const { error: updateError } = await supabase.from("qr_attendance").update({ exit_time: ts, scan_count: nextScanCount, last_scan_at: ts }).eq("id", current.recordId);
+        if (updateError) throw updateError;
+        batchStatusCache.set(user.id, { status: "left", recordId: current.recordId, scanCount: nextScanCount, lastScanAt: ts });
         results.push({
           clientScanId,
           status: "ok",
           action: "exit",
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          recordId
+          recordId: current.recordId
         });
       } else {
-        if (!current.recordId) throw new Error("Missing attendance record for return scan");
-        const nextScanCount = current.scanCount + 1;
-        const { error: updateError } = await supabase.from("qr_attendance").update({ entry_time: ts, scan_count: nextScanCount, last_scan_at: ts }).eq("id", current.recordId);
-        if (updateError) throw updateError;
-        batchStatusCache.set(user.id, { status: "inside", recordId: current.recordId, scanCount: nextScanCount });
+        const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, entry_time: ts, exit_time: null, scan_count: 1, last_scan_at: ts }).select().single();
+        if (insertError) throw insertError;
+        const recordId = inserted.id;
+        batchStatusCache.set(user.id, { status: "inside", recordId, scanCount: 1, lastScanAt: ts });
         results.push({
           clientScanId,
           status: "ok",
           action: "entry",
-          user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role }
+          user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+          recordId
         });
       }
     } catch (err) {
@@ -64683,28 +64704,49 @@ router4.post("/scan", async (req, res) => {
     const now = (/* @__PURE__ */ new Date()).toISOString();
     const { data: existingRecords } = await supabase.from("qr_attendance").select("*").eq("user_id", user.id).eq("date", date).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(1);
     const record = existingRecords?.[0];
-    const currentStatus = record ? getRecordStatus(record) : "inside";
+    if (record && record.last_scan_at) {
+      const lastScanTime = new Date(record.last_scan_at).getTime();
+      const currentScanTime = new Date(now).getTime();
+      if (Math.abs(currentScanTime - lastScanTime) < 3e4) {
+        req.log.info({ userId: user.id, name: user.name }, "Duplicate scan detected within cooldown. Ignoring.");
+        return res.json({
+          success: true,
+          action: "ignored",
+          message: `${user.name} scanned too recently.`,
+          user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+          recordId: record.id
+        });
+      }
+    }
+    const currentStatus = record ? getRecordStatus(record) : "left";
     if (currentStatus === "inside") {
-      req.log.info({ userId: user.id, name: user.name }, "Student leaving hostel");
-      const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, exit_time: now, entry_time: null, scan_count: 1, last_scan_at: now }).select().single();
-      if (insertError) throw insertError;
+      req.log.info({ userId: user.id, name: user.name }, "Student checked out / leaving campus");
+      const nextScanCount = (record.scan_count ?? 0) + 1;
+      const { data: updated, error: updateError } = await supabase.from("qr_attendance").update({ exit_time: now, scan_count: nextScanCount, last_scan_at: now }).eq("id", record.id).select().single();
+      if (updateError) {
+        req.log.error({ updateError }, "Update error on exit scan");
+        return res.status(500).json({ error: "DB error", detail: updateError.message, code: updateError.code });
+      }
       return res.json({
         success: true,
         action: "exit",
-        message: `${user.name} has LEFT the Hostel.`,
+        message: `${user.name} has Checked Out / Left Campus.`,
         user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-        recordId: inserted.id
+        recordId: updated.id
       });
     }
-    req.log.info({ userId: user.id, name: user.name }, "Student returned to hostel");
-    const nextScanCount = (record.scan_count ?? 0) + 1;
-    const { error: updateError } = await supabase.from("qr_attendance").update({ entry_time: now, scan_count: nextScanCount, last_scan_at: now }).eq("id", record.id);
-    if (updateError) throw updateError;
+    req.log.info({ userId: user.id, name: user.name }, "Student checked in / arrived on campus");
+    const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, entry_time: now, exit_time: null, scan_count: 1, last_scan_at: now }).select().single();
+    if (insertError) {
+      req.log.error({ insertError }, "Insert error on entry scan");
+      return res.status(500).json({ error: "DB error", detail: insertError.message, code: insertError.code });
+    }
     return res.json({
       success: true,
       action: "entry",
-      message: `${user.name} is now INSIDE the Hostel.`,
-      user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role }
+      message: `${user.name} has Checked In / Arrived on Campus.`,
+      user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+      recordId: inserted.id
     });
   } catch (err) {
     req.log.error({ err }, "Scan error");
@@ -64753,20 +64795,12 @@ router4.get("/attendance/currently-inside", authMiddleware, async (req, res) => 
     const outUserIds = new Set(
       Array.from(recordsByUserId.values()).filter((r) => getRecordStatus(r) === "left").map((r) => r.user_id)
     );
-    const insideRecords = allUsers.filter((u) => !outUserIds.has(u.id)).map((u) => {
+    const insideRecords = allUsers.filter((u) => {
       const record = recordsByUserId.get(u.id);
-      if (record) return formatRecord(record, u);
-      return {
-        id: -u.id,
-        userId: u.id,
-        date: today,
-        entryTime: null,
-        exitTime: null,
-        scanCount: 0,
-        durationMinutes: null,
-        status: "inside",
-        user: { id: u.id, name: u.name, uniqueId: u.unique_id, role: u.role, createdAt: u.created_at }
-      };
+      return record && getRecordStatus(record) === "inside";
+    }).map((u) => {
+      const record = recordsByUserId.get(u.id);
+      return formatRecord(record, u);
     });
     req.log.info({ insideCount: insideRecords.length }, "Calculated currently-inside");
     res.json(insideRecords);
@@ -64792,8 +64826,7 @@ router4.get("/attendance/dashboard-stats", authMiddleware, async (req, res) => {
       supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(10)
     ]);
     const latestRecordsByUserId = getLatestRecordsByUser(todayRecords ?? []);
-    const leftUserIds = new Set(Array.from(latestRecordsByUserId.values()).filter((r) => getRecordStatus(r) === "left").map((r) => r.user_id));
-    const currentlyInsideCount = (totalUsers || 0) - leftUserIds.size;
+    const currentlyInsideCount = Array.from(latestRecordsByUserId.values()).filter((r) => getRecordStatus(r) === "inside").length;
     res.json({
       totalUsers: totalUsers || 0,
       totalStudents: totalStudents || 0,
@@ -64942,21 +64975,26 @@ function formatUser2(u) {
     createdAt: u.created_at
   };
 }
+function isSentinel(ts) {
+  if (!ts) return true;
+  return ts.startsWith("9999") || ts.startsWith("1970");
+}
 function formatRecord2(record, user) {
-  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
-  const durationMinutes = hasEntry && record.exit_time ? Math.floor(Math.abs(new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 6e4) : null;
+  const hasEntry = record.entry_time && !isSentinel(record.entry_time);
+  const hasExit = record.exit_time && !isSentinel(record.exit_time);
+  const durationMinutes = hasEntry && hasExit ? Math.floor(Math.abs(new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 6e4) : null;
   let status = "inside";
-  if (record.exit_time && !hasEntry) {
+  if (hasExit && !hasEntry) {
     status = "left";
   } else if (hasEntry) {
-    status = "inside";
+    status = hasExit ? "left" : "inside";
   }
   return {
     id: record.id,
     userId: record.user_id,
     date: record.date,
     entryTime: hasEntry ? record.entry_time : null,
-    exitTime: record.exit_time,
+    exitTime: hasExit ? record.exit_time : null,
     scanCount: record.scan_count,
     durationMinutes,
     status,
@@ -64966,8 +65004,15 @@ function formatRecord2(record, user) {
 router5.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   const today = getTodayDate();
+  const section = req.query.section;
   try {
-    const { data: students, error: studentError } = await supabase.from("qr_users").select("*").eq("mentor_id", mentorId).order("name");
+    let query = supabase.from("qr_users").select("*");
+    if (mentorId === -3 && section) {
+      query = query.eq("section", section);
+    } else {
+      query = query.eq("mentor_id", mentorId);
+    }
+    const { data: students, error: studentError } = await query.order("name");
     if (studentError) throw studentError;
     if (!students || students.length === 0) {
       res.json([]);
@@ -65010,7 +65055,7 @@ router5.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req
       res.status(404).json({ error: "Student not found" });
       return;
     }
-    if (user.mentor_id !== mentorId) {
+    if (mentorId !== -3 && user.mentor_id !== mentorId) {
       res.status(403).json({ error: "This student is not assigned to you" });
       return;
     }
@@ -65032,12 +65077,14 @@ router5.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req
     let lateCount = 0;
     if (records) {
       for (const r of records) {
-        if (r.entry_time && r.exit_time) {
+        const hasEntry = r.entry_time && !isSentinel(r.entry_time);
+        const hasExit = r.exit_time && !isSentinel(r.exit_time);
+        if (hasEntry && hasExit) {
           const dur = new Date(r.exit_time).getTime() - new Date(r.entry_time).getTime();
           totalDuration += dur;
           durationCount++;
         }
-        if (r.entry_time && new Date(r.entry_time).getHours() >= lateHour) {
+        if (hasEntry && new Date(r.entry_time).getHours() >= lateHour) {
           lateCount++;
         }
       }

@@ -19,18 +19,25 @@ function formatUser(u: any) {
   };
 }
 
+function isSentinel(ts: string | null | undefined): boolean {
+  if (!ts) return true;
+  return ts.startsWith("9999") || ts.startsWith("1970");
+}
+
 function formatRecord(record: any, user?: any) {
-  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999");
+  const hasEntry = record.entry_time && !isSentinel(record.entry_time);
+  const hasExit = record.exit_time && !isSentinel(record.exit_time);
   const durationMinutes =
-    hasEntry && record.exit_time
+    hasEntry && hasExit
       ? Math.floor(Math.abs(new Date(record.exit_time).getTime() - new Date(record.entry_time).getTime()) / 60000)
       : null;
   
   let status: "present" | "left" | "inside" = "inside";
-  if (record.exit_time && !hasEntry) {
+  if (hasExit && !hasEntry) {
     status = "left";
   } else if (hasEntry) {
-    status = "inside";
+    // If has entry but no exit, student is inside
+    status = hasExit ? "left" : "inside";
   }
 
   return {
@@ -38,7 +45,7 @@ function formatRecord(record: any, user?: any) {
     userId: record.user_id,
     date: record.date,
     entryTime: hasEntry ? record.entry_time : null,
-    exitTime: record.exit_time,
+    exitTime: hasExit ? record.exit_time : null,
     scanCount: record.scan_count,
     durationMinutes,
     status,
@@ -141,12 +148,14 @@ router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req:
     let lateCount = 0;
     if (records) {
       for (const r of records) {
-        if (r.entry_time && r.exit_time) {
+        const hasEntry = r.entry_time && !isSentinel(r.entry_time);
+        const hasExit = r.exit_time && !isSentinel(r.exit_time);
+        if (hasEntry && hasExit) {
           const dur = new Date(r.exit_time).getTime() - new Date(r.entry_time).getTime();
           totalDuration += dur;
           durationCount++;
         }
-        if (r.entry_time && new Date(r.entry_time).getHours() >= lateHour) {
+        if (hasEntry && new Date(r.entry_time).getHours() >= lateHour) {
           lateCount++;
         }
       }

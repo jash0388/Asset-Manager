@@ -42,7 +42,7 @@ async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
     .limit(1);
 
   if (!records?.[0]) {
-    return "inside";
+    return "left";
   }
 
   return getRecordStatus(records[0]);
@@ -196,7 +196,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
       const date = getHostelDate(scannedAt);
       const ts = scannedAt.toISOString();
 
-      let current: { status: "inside" | "left"; recordId?: number; scanCount: number };
+      let current: { status: "inside" | "left"; recordId?: number; scanCount: number; lastScanAt?: string };
       if (batchStatusCache.has(user.id)) {
         current = batchStatusCache.get(user.id)!;
       } else {
@@ -209,42 +209,60 @@ router.post("/scan/batch", async (req: any, res: any) => {
           .limit(1);
         const existing = existingRecords?.[0];
         current = {
-          status: existing ? getRecordStatus(existing) : "inside",
+          status: existing ? getRecordStatus(existing) : "left",
           recordId: existing?.id,
           scanCount: existing?.scan_count ?? 0,
+          lastScanAt: existing?.last_scan_at,
         };
       }
 
+      // Server-side duplicate prevention check (30 seconds cooldown)
+      if (current.lastScanAt) {
+        const lastScanTime = new Date(current.lastScanAt).getTime();
+        const currentScanTime = scannedAt.getTime();
+        if (Math.abs(currentScanTime - lastScanTime) < 30000) {
+          results.push({
+            clientScanId,
+            status: "ok",
+            action: "ignored",
+            user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+            recordId: current.recordId,
+          });
+          continue;
+        }
+      }
+
       if (current.status === "inside") {
-        const { data: inserted, error: insertError } = await supabase
+        if (!current.recordId) throw new Error("Missing attendance record for exit scan");
+        const nextScanCount = current.scanCount + 1;
+        const { error: updateError } = await supabase
           .from("qr_attendance")
-          .insert({ user_id: user.id, date, exit_time: ts, entry_time: SENTINEL_ENTRY, scan_count: 1, last_scan_at: ts })
-          .select()
-          .single();
-        if (insertError) throw insertError;
-        const recordId = inserted.id;
-        batchStatusCache.set(user.id, { status: "left", recordId, scanCount: 1 });
+          .update({ exit_time: ts, scan_count: nextScanCount, last_scan_at: ts })
+          .eq("id", current.recordId);
+        if (updateError) throw updateError;
+        batchStatusCache.set(user.id, { status: "left", recordId: current.recordId, scanCount: nextScanCount, lastScanAt: ts });
         results.push({
           clientScanId,
           status: "ok",
           action: "exit",
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          recordId,
+          recordId: current.recordId,
         });
       } else {
-        if (!current.recordId) throw new Error("Missing attendance record for return scan");
-        const nextScanCount = current.scanCount + 1;
-        const { error: updateError } = await supabase
+        const { data: inserted, error: insertError } = await supabase
           .from("qr_attendance")
-          .update({ entry_time: ts, scan_count: nextScanCount, last_scan_at: ts })
-          .eq("id", current.recordId);
-        if (updateError) throw updateError;
-        batchStatusCache.set(user.id, { status: "inside", recordId: current.recordId, scanCount: nextScanCount });
+          .insert({ user_id: user.id, date, entry_time: ts, exit_time: null, scan_count: 1, last_scan_at: ts })
+          .select()
+          .single();
+        if (insertError) throw insertError;
+        const recordId = inserted.id;
+        batchStatusCache.set(user.id, { status: "inside", recordId, scanCount: 1, lastScanAt: ts });
         results.push({
           clientScanId,
           status: "ok",
           action: "entry",
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+          recordId,
         });
       }
     } catch (err: any) {
@@ -285,21 +303,38 @@ router.post("/scan", async (req: any, res: any) => {
       .limit(1);
 
     const record = existingRecords?.[0];
-    const currentStatus = record ? getRecordStatus(record) : "inside";
+
+    // Server-side duplicate prevention check (30 seconds cooldown)
+    if (record && record.last_scan_at) {
+      const lastScanTime = new Date(record.last_scan_at).getTime();
+      const currentScanTime = new Date(now).getTime();
+      if (Math.abs(currentScanTime - lastScanTime) < 30000) {
+        req.log.info({ userId: user.id, name: user.name }, "Duplicate scan detected within cooldown. Ignoring.");
+        return res.json({
+          success: true,
+          action: "ignored",
+          message: `${user.name} scanned too recently.`,
+          user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+          recordId: record.id,
+        });
+      }
+    }
+
+    const currentStatus = record ? getRecordStatus(record) : "left";
 
     if (currentStatus === "inside") {
       req.log.info({ userId: user.id, name: user.name }, "Student checked out / leaving campus");
-      // Use a sentinel far-past date for entry_time since DB may have NOT NULL constraint
-      const sentinelEntry = "1970-01-01T00:00:00.000Z";
-      const { data: inserted, error: insertError } = await supabase
+      const nextScanCount = (record.scan_count ?? 0) + 1;
+      const { data: updated, error: updateError } = await supabase
         .from("qr_attendance")
-        .insert({ user_id: user.id, date, exit_time: now, entry_time: sentinelEntry, scan_count: 1, last_scan_at: now })
+        .update({ exit_time: now, scan_count: nextScanCount, last_scan_at: now })
+        .eq("id", record.id)
         .select()
         .single();
 
-      if (insertError) {
-        req.log.error({ insertError }, "Insert error on exit scan");
-        return res.status(500).json({ error: "DB error", detail: insertError.message, code: insertError.code });
+      if (updateError) {
+        req.log.error({ updateError }, "Update error on exit scan");
+        return res.status(500).json({ error: "DB error", detail: updateError.message, code: updateError.code });
       }
 
       return res.json({
@@ -307,24 +342,28 @@ router.post("/scan", async (req: any, res: any) => {
         action: "exit",
         message: `${user.name} has Checked Out / Left Campus.`,
         user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-        recordId: inserted.id,
+        recordId: updated.id,
       });
     }
 
     req.log.info({ userId: user.id, name: user.name }, "Student checked in / arrived on campus");
-    const nextScanCount = (record.scan_count ?? 0) + 1;
-    const { error: updateError } = await supabase
+    const { data: inserted, error: insertError } = await supabase
       .from("qr_attendance")
-      .update({ entry_time: now, scan_count: nextScanCount, last_scan_at: now })
-      .eq("id", record.id);
+      .insert({ user_id: user.id, date, entry_time: now, exit_time: null, scan_count: 1, last_scan_at: now })
+      .select()
+      .single();
 
-    if (updateError) throw updateError;
+    if (insertError) {
+      req.log.error({ insertError }, "Insert error on entry scan");
+      return res.status(500).json({ error: "DB error", detail: insertError.message, code: insertError.code });
+    }
 
     return res.json({
       success: true,
       action: "entry",
       message: `${user.name} has Checked In / Arrived on Campus.`,
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+      recordId: inserted.id,
     });
   } catch (err: any) {
     req.log.error({ err }, "Scan error");
