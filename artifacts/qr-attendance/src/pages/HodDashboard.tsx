@@ -55,7 +55,7 @@ type SectionStats = {
 };
 
 export default function HodDashboard() {
-  const [activeTab, setActiveTab] = useState<"summary" | "logs">("summary");
+  const [activeTab, setActiveTab] = useState<"summary" | "logs" | "mentors" | "schedules">("summary");
   
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date().toISOString().split("T")[0];
@@ -82,6 +82,8 @@ export default function HodDashboard() {
 
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
   const [logSearchQuery, setLogSearchQuery] = useState("");
+  const [mentorsSearchQuery, setMentorsSearchQuery] = useState("");
+  const [schedulesSearchQuery, setSchedulesSearchQuery] = useState("");
   const [selectedSectionFilter, setSelectedSectionFilter] = useState("All");
 
   // Fetch all students
@@ -102,6 +104,20 @@ export default function HodDashboard() {
     queryKey: ["attendance-logs", logDate],
     queryFn: () => customFetch<AttendanceRecord[]>(`/api/attendance?from=${logDate}&to=${logDate}`),
     refetchInterval: activeTab === "logs" ? 5000 : undefined,
+  });
+
+  // Fetch mentors with keys for HOD Dashboard
+  const { data: mentorsTracking = [], isLoading: mentorsLoading } = useQuery<any[]>({
+    queryKey: ["admin-mentors-tracking"],
+    queryFn: () => customFetch<any[]>("/api/admin/mentors-tracking"),
+    enabled: activeTab === "mentors",
+  });
+
+  // Fetch timetables/schedules for HOD Dashboard
+  const { data: schedules = [], isLoading: schedulesLoading } = useQuery<any[]>({
+    queryKey: ["admin-schedules"],
+    queryFn: () => customFetch<any[]>("/api/admin/schedules"),
+    enabled: activeTab === "schedules",
   });
 
   const studentsOnly = allUsers.filter(u => u.role === "student");
@@ -323,6 +339,28 @@ export default function HodDashboard() {
             <ClipboardList className="w-4 h-4" />
             Detailed Logs
           </button>
+          <button
+            onClick={() => setActiveTab("mentors")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              activeTab === "mentors"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <GraduationCap className="w-4 h-4" />
+            Mentors & Keys
+          </button>
+          <button
+            onClick={() => setActiveTab("schedules")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              activeTab === "schedules"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            Schedules (Timetable)
+          </button>
         </div>
 
         {activeTab === "summary" ? (
@@ -471,7 +509,7 @@ export default function HodDashboard() {
               </Card>
             )}
           </>
-        ) : (
+        ) : activeTab === "logs" ? (
           <>
             {/* Detailed logs filter toolbar */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
@@ -565,7 +603,7 @@ export default function HodDashboard() {
                                   </div>
                                   <div>
                                     <p className="text-sm font-semibold text-slate-200">{user.name}</p>
-                                    <p className="text-xs text-slate-500 font-mono mt-0.5">{user.uniqueId}</p>
+                                    <p className="text-xs text-slate-550 font-mono mt-0.5">{user.uniqueId}</p>
                                   </div>
                                 </div>
                               </td>
@@ -599,6 +637,168 @@ export default function HodDashboard() {
                             </tr>
                           );
                         })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
+          </>
+        ) : activeTab === "mentors" ? (
+          <>
+            {/* Mentors Search Toolbar */}
+            <div className="flex items-center gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+              <div className="flex-1 min-w-0">
+                <div className="relative group">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search mentor name, email, or passkey..."
+                    value={mentorsSearchQuery}
+                    onChange={(e) => setMentorsSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Mentors Table */}
+            {mentorsLoading ? (
+              <div className="bg-slate-900 border border-slate-855 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
+                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm font-semibold text-slate-400">Loading department mentors registry...</p>
+              </div>
+            ) : (
+              <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
+                        <th className="py-4 px-6">Mentor / Teacher Name</th>
+                        <th className="py-4 px-6">Email Address</th>
+                        <th className="py-4 px-6 text-center">Mentor Passkey (Key)</th>
+                        <th className="py-4 px-6 text-center">Total Sessions Logged</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-855/60">
+                      {mentorsTracking.filter((m: any) => {
+                        const q = mentorsSearchQuery.toLowerCase().trim();
+                        if (!q) return true;
+                        return m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || (m.key && m.key.toLowerCase().includes(q));
+                      }).length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="py-12 text-center text-slate-500 text-sm">
+                            No mentors found matching your query.
+                          </td>
+                        </tr>
+                      ) : (
+                        mentorsTracking.filter((m: any) => {
+                          const q = mentorsSearchQuery.toLowerCase().trim();
+                          if (!q) return true;
+                          return m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || (m.key && m.key.toLowerCase().includes(q));
+                        }).map((m: any) => (
+                          <tr key={m.id} className="hover:bg-slate-800/30 transition-colors">
+                            <td className="py-4 px-6 font-semibold text-slate-200 text-base">{m.name}</td>
+                            <td className="py-4 px-6 text-slate-400 font-mono text-xs">{m.email}</td>
+                            <td className="py-4 px-6 text-center">
+                              <span className="inline-block px-3 py-1 rounded-xl bg-purple-950 border border-purple-800 text-purple-300 font-bold text-sm tracking-wider font-mono">
+                                {m.key || "—"}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 text-center font-bold text-slate-300">
+                              {m.sessions?.length || 0}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Timetable Schedules Search Toolbar */}
+            <div className="flex items-center gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+              <div className="flex-1 min-w-0">
+                <div className="relative group">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search subject, section, day or mentor..."
+                    value={schedulesSearchQuery}
+                    onChange={(e) => setSchedulesSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Timetable Schedules Table */}
+            {schedulesLoading ? (
+              <div className="bg-slate-900 border border-slate-855 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
+                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm font-semibold text-slate-400">Loading department timetables...</p>
+              </div>
+            ) : (
+              <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
+                        <th className="py-4 px-6">Mentor / Teacher</th>
+                        <th className="py-4 px-6">Day</th>
+                        <th className="py-4 px-6">Time Slot</th>
+                        <th className="py-4 px-6">Class / Section</th>
+                        <th className="py-4 px-6">Subject</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-855/60">
+                      {schedules.filter((s: any) => {
+                        const q = schedulesSearchQuery.toLowerCase().trim();
+                        if (!q) return true;
+                        return (
+                          (s.qr_mentors?.name || "").toLowerCase().includes(q) ||
+                          s.day_of_week.toLowerCase().includes(q) ||
+                          s.section.toLowerCase().includes(q) ||
+                          s.year.toLowerCase().includes(q) ||
+                          (s.subject || "").toLowerCase().includes(q)
+                        );
+                      }).length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-12 text-center text-slate-500 text-sm">
+                            No timetable slots found matching your query.
+                          </td>
+                        </tr>
+                      ) : (
+                        schedules.filter((s: any) => {
+                          const q = schedulesSearchQuery.toLowerCase().trim();
+                          if (!q) return true;
+                          return (
+                            (s.qr_mentors?.name || "").toLowerCase().includes(q) ||
+                            s.day_of_week.toLowerCase().includes(q) ||
+                            s.section.toLowerCase().includes(q) ||
+                            s.year.toLowerCase().includes(q) ||
+                            (s.subject || "").toLowerCase().includes(q)
+                          );
+                        }).map((s: any) => (
+                          <tr key={s.id} className="hover:bg-slate-800/30 transition-colors">
+                            <td className="py-4 px-6 font-semibold text-slate-200">{s.qr_mentors?.name || "Unknown"}</td>
+                            <td className="py-4 px-6 text-slate-300 font-bold">{s.day_of_week}</td>
+                            <td className="py-4 px-6 text-slate-405 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
+                            <td className="py-4 px-6">
+                              <span className="inline-block px-2.5 py-0.5 rounded-lg bg-purple-950 border border-purple-800 text-purple-300 font-bold text-xs">
+                                {s.year} Yr - {s.section}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 text-slate-300">{s.subject || "—"}</td>
+                          </tr>
+                        ))
                       )}
                     </tbody>
                   </table>

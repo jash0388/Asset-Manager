@@ -94,4 +94,39 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
   }
 });
 
+router.post("/auth/mentor-key-login", async (req: any, res: any) => {
+  const { key } = req.body;
+  if (!key) {
+    res.status(400).json({ error: "Mentor key is required" });
+    return;
+  }
+  try {
+    const { data: mentors, error } = await supabase
+      .from("qr_mentors")
+      .select("*")
+      .ilike("key", key.trim())
+      .limit(1);
+
+    if (error) throw error;
+
+    const mentor = mentors?.[0];
+    if (!mentor) {
+      res.status(401).json({ error: "Invalid mentor key" });
+      return;
+    }
+
+    const token = jwt.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.json({
+      token,
+      mentor: { id: mentor.id, email: mentor.email, name: mentor.name, key: mentor.key },
+    });
+  } catch (err: any) {
+    req.log.error({ err }, "Mentor key login error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

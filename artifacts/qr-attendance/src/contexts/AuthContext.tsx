@@ -24,6 +24,7 @@ interface AuthContextValue {
   loading: boolean;
   loginAdmin: (email: string, password: string) => Promise<void>;
   loginMentor: (email: string, password: string) => Promise<void>;
+  loginMentorKey: (key: string) => Promise<void>;
   loginBypass: (role?: AuthRole, section?: string) => void;
   logout: () => void;
 }
@@ -116,6 +117,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist]
   );
 
+  const loginMentorKey = useCallback(
+    async (key: string) => {
+      const res = await customFetch<{ token: string; mentor: AuthMentor }>(
+        "/api/auth/mentor-key-login",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ key }),
+        }
+      );
+      persist(res.token, "mentor", res.mentor);
+    },
+    [persist]
+  );
+
   const loginBypass = useCallback((role: AuthRole = "admin", section?: string) => {
     if (role === "hod") {
       const bypassHod: AuthHod = {
@@ -168,10 +184,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       loginAdmin,
       loginMentor,
+      loginMentorKey,
       loginBypass,
       logout,
     }),
-    [role, admin, mentor, hod, token, loading, loginAdmin, loginMentor, loginBypass, logout]
+    [role, admin, mentor, hod, token, loading, loginAdmin, loginMentor, loginMentorKey, loginBypass, logout]
   );
 
   // Keep token state in sync if another tab logs in/out.

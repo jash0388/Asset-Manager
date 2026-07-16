@@ -52,7 +52,7 @@ function formatTime(iso: string | null | undefined) {
 }
 
 export default function MentorApp() {
-  const { mentor, role, logout } = useAuth();
+  const { mentor, role, logout, loginMentorKey } = useAuth();
   const [, navigate] = useLocation();
   
   const [activeSchedule, setActiveSchedule] = useState<Schedule | null>(null);
@@ -67,12 +67,29 @@ export default function MentorApp() {
   const [searchQuery, setSearchQuery] = useState("");
   const { canInstall, install } = usePwaInstall();
   const [showInstallBanner, setShowInstallBanner] = useState(true);
+  
+  const [passkey, setPasskey] = useState("");
+  const [keySubmitting, setKeySubmitting] = useState(false);
 
   useEffect(() => {
-    if (role !== "mentor") {
-      navigate("/login");
+    if (role === "mentor") {
+      loadActiveSchedule();
     }
-  }, [role, navigate]);
+  }, [role]);
+
+  const handleKeyLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passkey.trim()) return;
+    setKeySubmitting(true);
+    setError(null);
+    try {
+      await loginMentorKey(passkey.trim());
+    } catch (err: any) {
+      setError(err?.data?.error ?? "Invalid mentor key");
+    } finally {
+      setKeySubmitting(false);
+    }
+  };
 
   const loadActiveSchedule = async () => {
     setLoading(true);
@@ -182,7 +199,57 @@ export default function MentorApp() {
 
   const isLocked = !!(session?.ended_at || isTimePast());
 
-  if (role !== "mentor") return null;
+  if (role !== "mentor") {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 text-slate-350 font-sans">
+        <div className="w-full max-w-md bg-slate-950 border border-slate-850 rounded-2xl p-6 shadow-2xl">
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-650/15 mb-4">
+              <GraduationCap className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-xl font-black text-slate-100">Mentor Portal</h1>
+            <p className="text-xs text-slate-400 mt-2 max-w-xs">
+              Enter your unique mentor passkey to unlock your active lecture class attendance checklist.
+            </p>
+          </div>
+
+          <form onSubmit={handleKeyLogin} className="mt-6 flex flex-col gap-4">
+            {error && (
+              <div className="px-3 py-2 rounded-lg bg-red-950/40 border border-red-800 text-red-200 text-xs font-semibold">
+                ⚠️ {error}
+              </div>
+            )}
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-400">Mentor Passkey</label>
+              <input
+                required
+                type="text"
+                placeholder="e.g. BALARAM"
+                value={passkey}
+                onChange={(e) => setPasskey(e.target.value.toUpperCase())}
+                className="px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 placeholder-slate-650 text-sm focus:outline-none focus:border-purple-500 font-bold text-center tracking-wider"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={keySubmitting}
+              className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 text-white font-bold text-sm shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2"
+            >
+              {keySubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Unlocking...
+                </>
+              ) : (
+                "Unlock Attendance"
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   // Filtered and sorted students:
   // Show warnings/flags, and allow filtering via search query

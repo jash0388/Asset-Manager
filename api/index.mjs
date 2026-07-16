@@ -64282,6 +64282,32 @@ router2.post("/auth/mentor-login", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+router2.post("/auth/mentor-key-login", async (req, res) => {
+  const { key } = req.body;
+  if (!key) {
+    res.status(400).json({ error: "Mentor key is required" });
+    return;
+  }
+  try {
+    const { data: mentors, error } = await supabase.from("qr_mentors").select("*").ilike("key", key.trim()).limit(1);
+    if (error) throw error;
+    const mentor = mentors?.[0];
+    if (!mentor) {
+      res.status(401).json({ error: "Invalid mentor key" });
+      return;
+    }
+    const token = import_jsonwebtoken.default.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, {
+      expiresIn: "7d"
+    });
+    res.json({
+      token,
+      mentor: { id: mentor.id, email: mentor.email, name: mentor.name, key: mentor.key }
+    });
+  } catch (err) {
+    req.log.error({ err }, "Mentor key login error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 var auth_default = router2;
 
 // src/routes/users.ts
@@ -65317,6 +65343,7 @@ router5.get("/admin/mentors-tracking", authMiddleware, async (req, res) => {
         id: m.id,
         name: m.name,
         email: m.email,
+        key: m.key,
         sessions: mentorSessions.map((s) => ({
           id: s.id,
           date: s.date,
