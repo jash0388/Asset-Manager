@@ -99,7 +99,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </a>
 
           <a
-            href={joinBase("login")}
+            href={joinBase("mentor")}
             data-testid="nav-mentor-app"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 text-purple-300 bg-purple-900/20 hover:bg-purple-900/30 transition-colors"
           >
