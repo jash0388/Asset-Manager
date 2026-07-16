@@ -291,12 +291,15 @@ router.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (re
       return;
     }
 
+    // Map year & section (e.g. 'II', 'A' -> 'DS II/I/A')
+    const dbSection = `DS ${schedule.year}/I/${schedule.section}`;
+
     // Fetch all students in this section
     const { data: students, error: studentErr } = await supabase
       .from("qr_users")
       .select("*")
       .eq("role", "student")
-      .eq("section", schedule.section)
+      .eq("section", dbSection)
       .order("name");
 
     if (studentErr) throw studentErr;

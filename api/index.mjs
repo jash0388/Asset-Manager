@@ -65181,7 +65181,8 @@ router5.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (r
       res.status(404).json({ error: "Schedule not found or access denied" });
       return;
     }
-    const { data: students, error: studentErr } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", schedule.section).order("name");
+    const dbSection = `DS ${schedule.year}/I/${schedule.section}`;
+    const { data: students, error: studentErr } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", dbSection).order("name");
     if (studentErr) throw studentErr;
     if (!students || students.length === 0) {
       res.json([]);
