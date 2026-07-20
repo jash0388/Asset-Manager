@@ -339,14 +339,16 @@ export default function MentorApp() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleInstallClick}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-100 border border-purple-300 hover:bg-purple-200 text-purple-900 text-xs font-black transition-all shadow-sm"
-              style={{ color: "#6b21a8" }}
-            >
-              <Smartphone className="w-4 h-4 text-purple-700" />
-              Install App
-            </button>
+            {!(typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true || document.referrer.includes("android-app://"))) && (
+              <button
+                onClick={handleInstallClick}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-100 border border-purple-300 hover:bg-purple-200 text-purple-900 text-xs font-black transition-all shadow-sm"
+                style={{ color: "#6b21a8" }}
+              >
+                <Smartphone className="w-4 h-4 text-purple-700" />
+                Install App
+              </button>
+            )}
 
             <button
               data-testid="mentor-logout"
