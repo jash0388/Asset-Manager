@@ -65134,37 +65134,16 @@ router5.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req
 });
 function getCurrentISTDateTime() {
   const now = /* @__PURE__ */ new Date();
-  const timeStr = now.toLocaleTimeString("en-US", {
-    timeZone: "Asia/Kolkata",
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
-  const weekday = now.toLocaleDateString("en-US", {
-    timeZone: "Asia/Kolkata",
-    weekday: "short"
-  }).toUpperCase();
-  const dayMap = {
-    "MON": "MON",
-    "TUE": "TUE",
-    "WED": "WED",
-    "THU": "THUR",
-    "FRI": "FRI",
-    "SAT": "SAT",
-    "SUN": "SUN"
-  };
-  const day = dayMap[weekday] || "SUN";
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  });
-  const parts = formatter.formatToParts(now);
-  const y = parts.find((p) => p.type === "year")?.value || "";
-  const m = parts.find((p) => p.type === "month")?.value || "";
-  const d = parts.find((p) => p.type === "day")?.value || "";
+  const istTime = new Date(now.getTime() + 5.5 * 60 * 60 * 1e3);
+  const hours = String(istTime.getUTCHours()).padStart(2, "0");
+  const minutes = String(istTime.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(istTime.getUTCSeconds()).padStart(2, "0");
+  const timeStr = `${hours}:${minutes}:${seconds}`;
+  const days = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+  const day = days[istTime.getUTCDay()];
+  const y = istTime.getUTCFullYear();
+  const m = String(istTime.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(istTime.getUTCDate()).padStart(2, "0");
   const dateStr = `${y}-${m}-${d}`;
   return { day, time: timeStr, date: dateStr };
 }
@@ -65172,18 +65151,28 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
   const mentorId = req.mentorId;
   try {
     const { day, time, date } = getCurrentISTDateTime();
-    const { data: slots, error } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", day).lte("start_time", time).gte("end_time", time);
-    if (error) throw error;
-    const activeSchedule = slots?.[0] || null;
-    if (!activeSchedule) {
-      res.json({ activeSchedule: null, session: null, serverTime: { day, time, date } });
-      return;
-    }
-    const { data: sessions, error: sessionErr } = await supabase.from("qr_mentor_sessions").select("*").eq("schedule_id", activeSchedule.id).eq("date", date).limit(1);
+    const { data: todaySchedules, error: schedulesErr } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", day).order("start_time");
+    if (schedulesErr) throw schedulesErr;
+    const activeSchedule = (todaySchedules || []).find((s) => s.start_time <= time && s.end_time >= time) || null;
+    const { data: sessions, error: sessionErr } = await supabase.from("qr_mentor_sessions").select("*").eq("mentor_id", mentorId).eq("date", date);
     if (sessionErr) throw sessionErr;
+    const sessionMap = /* @__PURE__ */ new Map();
+    (sessions || []).forEach((s) => {
+      sessionMap.set(s.schedule_id, s);
+    });
+    const activeSession = activeSchedule ? sessionMap.get(activeSchedule.id) || null : null;
+    const mappedTodaySchedules = (todaySchedules || []).map((s) => {
+      const session = sessionMap.get(s.id);
+      return {
+        ...s,
+        session: session || null,
+        status: session ? session.ended_at ? "submitted" : "started" : "pending"
+      };
+    });
     res.json({
       activeSchedule,
-      session: sessions?.[0] || null,
+      session: activeSession,
+      todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date }
     });
   } catch (err) {

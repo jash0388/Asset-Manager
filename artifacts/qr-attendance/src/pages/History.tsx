@@ -8,7 +8,7 @@ import {
 } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { BackButton } from "@/components/BackButton";
-import { Search, Download, Calendar, Clock, AlertCircle } from "lucide-react";
+import { Search, Download, Calendar, Clock, AlertCircle, XCircle } from "lucide-react";
 
 function formatTime(iso: string | null | undefined) {
   if (!iso) return "—";
@@ -22,7 +22,53 @@ function formatDuration(mins: number | null | undefined) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-function StatusBadge({ status }: { status: string }) {
+function isExitTimeOver(logDate: string | null | undefined, exitTime: string | null | undefined) {
+  if (exitTime) return false;
+  if (!logDate) return false;
+
+  try {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
+    
+    const parts = formatter.formatToParts(new Date());
+    const getPart = (type: string) => parts.find((part) => part.type === type)?.value || "";
+    
+    const year = getPart("year");
+    const month = getPart("month");
+    const day = getPart("day");
+    const hour = parseInt(getPart("hour"), 10);
+    const minute = parseInt(getPart("minute"), 10);
+    
+    const todayStr = `${year}-${month}-${day}`;
+    
+    if (logDate < todayStr) {
+      return true;
+    }
+    if (logDate === todayStr) {
+      return hour > 16 || (hour === 16 && minute >= 30);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return false;
+}
+
+function StatusBadge({ status, exitOver }: { status: string; exitOver?: boolean }) {
+  if (exitOver) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-950/60 text-red-400 border border-red-900/40">
+        <XCircle className="w-3.5 h-3.5 text-red-400" />
+        Not Scanned
+      </span>
+    );
+  }
   const map: Record<string, string> = {
     inside: "bg-green-900/40 text-green-400",
     left: "bg-slate-700 text-slate-300",
@@ -177,10 +223,19 @@ function HistoryPanel({ userId }: { userId: number }) {
                   <tr key={rec.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="px-5 py-3 text-sm text-white font-medium">{rec.date}</td>
                     <td className="px-5 py-3 text-sm text-slate-300">{formatTime(rec.entryTime)}</td>
-                    <td className="px-5 py-3 text-sm text-slate-300">{formatTime(rec.exitTime)}</td>
+                    <td className="px-5 py-3 text-sm text-slate-300">
+                      {isExitTimeOver(rec.date, rec.exitTime) ? (
+                        <span className="inline-flex items-center gap-1 text-red-400 font-semibold text-xs">
+                          <XCircle className="w-3.5 h-3.5 text-red-500" />
+                          Not Scanned
+                        </span>
+                      ) : (
+                        formatTime(rec.exitTime)
+                      )}
+                    </td>
                     <td className="px-5 py-3 text-sm text-slate-300">{formatDuration(rec.durationMinutes)}</td>
                     <td className="px-5 py-3">
-                      <StatusBadge status={rec.status} />
+                      <StatusBadge status={rec.status} exitOver={isExitTimeOver(rec.date, rec.exitTime)} />
                     </td>
                   </tr>
                 ))

@@ -289,6 +289,44 @@ export default function HodDashboard() {
     }
   };
 
+  const isExitTimeOver = (logDate: string | null | undefined, exitTime: string | null | undefined) => {
+    if (exitTime) return false;
+    if (!logDate) return false;
+
+    try {
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+      
+      const parts = formatter.formatToParts(new Date());
+      const getPart = (type: string) => parts.find((part) => part.type === type)?.value || "";
+      
+      const year = getPart("year");
+      const month = getPart("month");
+      const day = getPart("day");
+      const hour = parseInt(getPart("hour"), 10);
+      const minute = parseInt(getPart("minute"), 10);
+      
+      const todayStr = `${year}-${month}-${day}`;
+      
+      if (logDate < todayStr) {
+        return true;
+      }
+      if (logDate === todayStr) {
+        return hour > 16 || (hour === 16 && minute >= 30);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return false;
+  };
+
   const getPercentageColor = (percent: number) => {
     if (percent < 40) return "text-red-500 font-bold";
     if (percent < 60) return "text-orange-400 font-semibold";
@@ -613,14 +651,21 @@ export default function HodDashboard() {
                               </td>
 
                               <td className="py-4 px-6 text-center">
-                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
-                                  log.status === "inside" 
-                                    ? "bg-green-950/60 text-green-400 border-green-900/40"
-                                    : "bg-slate-850/80 text-slate-400 border-slate-800"
-                                }`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-green-400" : "bg-slate-500"}`} />
-                                  {log.status === "inside" ? "Still on Campus" : "Left Campus"}
-                                </span>
+                                {isExitTimeOver(log.date, log.exitTime) ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border bg-red-950/60 text-red-400 border-red-900/40">
+                                    <XCircle className="w-3 h-3 text-red-400" />
+                                    Not Scanned
+                                  </span>
+                                ) : (
+                                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                    log.status === "inside" 
+                                      ? "bg-green-950/60 text-green-400 border-green-900/40"
+                                      : "bg-slate-850/80 text-slate-400 border-slate-800"
+                                  }`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-green-400" : "bg-slate-500"}`} />
+                                    {log.status === "inside" ? "Still on Campus" : "Left Campus"}
+                                  </span>
+                                )}
                               </td>
 
                               <td className="py-4 px-6 text-center text-slate-300 font-mono">
@@ -628,7 +673,14 @@ export default function HodDashboard() {
                               </td>
 
                               <td className="py-4 px-6 text-center text-slate-300 font-mono">
-                                {formatTime(log.exitTime)}
+                                {isExitTimeOver(log.date, log.exitTime) ? (
+                                  <span className="inline-flex items-center justify-center gap-1 text-red-400 font-semibold text-xs">
+                                    <XCircle className="w-3.5 h-3.5 text-red-500" />
+                                    Not Scanned
+                                  </span>
+                                ) : (
+                                  formatTime(log.exitTime)
+                                )}
                               </td>
 
                               <td className="py-4 px-6 text-center text-slate-400 text-sm">
@@ -862,13 +914,29 @@ export default function HodDashboard() {
                       <div className="flex flex-col items-end gap-1.5 text-right">
                         {item.status === "present" ? (
                           <>
-                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-950/60 text-green-400 border border-green-900/40">
-                              <CheckCircle className="w-3 h-3" />
-                              {record?.exitTime ? "Left Campus" : "Still on Campus"}
+                            <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                              record && isExitTimeOver(record.date, record.exitTime)
+                                ? "bg-red-950/60 text-red-400 border border-red-900/40"
+                                : "bg-green-950/60 text-green-400 border border-green-900/40"
+                            }`}>
+                              {record && isExitTimeOver(record.date, record.exitTime) ? (
+                                <XCircle className="w-3 h-3 text-red-400" />
+                              ) : (
+                                <CheckCircle className="w-3 h-3" />
+                              )}
+                              {record?.exitTime
+                                ? "Left Campus"
+                                : record && isExitTimeOver(record.date, record.exitTime)
+                                  ? "Not Scanned"
+                                  : "Still on Campus"}
                             </span>
                             <div className="flex items-center gap-3 text-slate-500 text-[10px]">
-                              <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-blue-500" /> In: {formatTime(record?.entryTime)}</span>
-                              {record?.exitTime && <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-red-500" /> Out: {formatTime(record?.exitTime)}</span>}
+                              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-blue-500" /> In: {formatTime(record?.entryTime)}</span>
+                              {record?.exitTime ? (
+                                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-red-500" /> Out: {formatTime(record?.exitTime)}</span>
+                              ) : record && isExitTimeOver(record.date, record.exitTime) ? (
+                                <span className="flex items-center gap-1 text-red-400 font-semibold"><XCircle className="w-3.5 h-3.5 text-red-500" /> Out: Not Scanned</span>
+                              ) : null}
                             </div>
                           </>
                         ) : (

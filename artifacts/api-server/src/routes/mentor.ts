@@ -179,44 +179,19 @@ router.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req:
 
 function getCurrentISTDateTime(): { day: string; time: string; date: string } {
   const now = new Date();
-  
-  // Format to get time in 24h format: e.g. "14:30:15"
-  const timeStr = now.toLocaleTimeString("en-US", {
-    timeZone: "Asia/Kolkata",
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
+  const istTime = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
 
-  // Format to get weekday: e.g. "Mon"
-  const weekday = now.toLocaleDateString("en-US", {
-    timeZone: "Asia/Kolkata",
-    weekday: "short"
-  }).toUpperCase();
+  const hours = String(istTime.getUTCHours()).padStart(2, "0");
+  const minutes = String(istTime.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(istTime.getUTCSeconds()).padStart(2, "0");
+  const timeStr = `${hours}:${minutes}:${seconds}`;
 
-  const dayMap: Record<string, string> = {
-    "MON": "MON",
-    "TUE": "TUE",
-    "WED": "WED",
-    "THU": "THUR",
-    "FRI": "FRI",
-    "SAT": "SAT",
-    "SUN": "SUN"
-  };
-  const day = dayMap[weekday] || "SUN";
+  const days = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+  const day = days[istTime.getUTCDay()];
 
-  // Date format YYYY-MM-DD
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  });
-  const parts = formatter.formatToParts(now);
-  const y = parts.find(p => p.type === "year")?.value || "";
-  const m = parts.find(p => p.type === "month")?.value || "";
-  const d = parts.find(p => p.type === "day")?.value || "";
+  const y = istTime.getUTCFullYear();
+  const m = String(istTime.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(istTime.getUTCDate()).padStart(2, "0");
   const dateStr = `${y}-${m}-${d}`;
 
   return { day, time: timeStr, date: dateStr };
@@ -227,35 +202,50 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
   const mentorId = req.mentorId!;
   try {
     const { day, time, date } = getCurrentISTDateTime();
-    const { data: slots, error } = await supabase
+
+    // Fetch all schedules for this mentor for the current day
+    const { data: todaySchedules, error: schedulesErr } = await supabase
       .from("qr_schedules")
       .select("*")
       .eq("mentor_id", mentorId)
       .eq("day_of_week", day)
-      .lte("start_time", time)
-      .gte("end_time", time);
+      .order("start_time");
 
-    if (error) throw error;
+    if (schedulesErr) throw schedulesErr;
 
-    const activeSchedule = slots?.[0] || null;
-    if (!activeSchedule) {
-      res.json({ activeSchedule: null, session: null, serverTime: { day, time, date } });
-      return;
-    }
+    // Find the currently active schedule (where start_time <= time <= end_time)
+    const activeSchedule = (todaySchedules || []).find(s => s.start_time <= time && s.end_time >= time) || null;
 
-    // Check if session already started today
+    // Fetch all sessions for this mentor for today
     const { data: sessions, error: sessionErr } = await supabase
       .from("qr_mentor_sessions")
       .select("*")
-      .eq("schedule_id", activeSchedule.id)
-      .eq("date", date)
-      .limit(1);
+      .eq("mentor_id", mentorId)
+      .eq("date", date);
 
     if (sessionErr) throw sessionErr;
 
+    const sessionMap = new Map();
+    (sessions || []).forEach((s: any) => {
+      sessionMap.set(s.schedule_id, s);
+    });
+
+    const activeSession = activeSchedule ? sessionMap.get(activeSchedule.id) || null : null;
+
+    // Map today's schedules with their session status
+    const mappedTodaySchedules = (todaySchedules || []).map((s: any) => {
+      const session = sessionMap.get(s.id);
+      return {
+        ...s,
+        session: session || null,
+        status: session ? (session.ended_at ? "submitted" : "started") : "pending"
+      };
+    });
+
     res.json({
       activeSchedule,
-      session: sessions?.[0] || null,
+      session: activeSession,
+      todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date }
     });
   } catch (err: any) {
