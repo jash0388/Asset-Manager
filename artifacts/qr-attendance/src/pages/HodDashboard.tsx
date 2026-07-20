@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import {
@@ -13,7 +13,11 @@ import {
   GraduationCap,
   ListFilter,
   Grid3X3,
-  ClipboardList
+  ClipboardList,
+  UserPlus,
+  Plus,
+  UserCheck,
+  Loader2
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -106,11 +110,28 @@ export default function HodDashboard() {
     refetchInterval: activeTab === "logs" ? 5000 : undefined,
   });
 
+  const queryClient = useQueryClient();
+
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [scheduleToAssign, setScheduleToAssign] = useState<any | null>(null);
+  const [selectedMentorId, setSelectedMentorId] = useState<number | "">("");
+  const [assigning, setAssigning] = useState(false);
+  const [assignSuccessMsg, setAssignSuccessMsg] = useState("");
+
+  const [newClassModalOpen, setNewClassModalOpen] = useState(false);
+  const [newSubject, setNewSubject] = useState("");
+  const [newSection, setNewSection] = useState("A");
+  const [newYear, setNewYear] = useState("II");
+  const [newDay, setNewDay] = useState("MON");
+  const [newStartTime, setNewStartTime] = useState("09:00:00");
+  const [newEndTime, setNewEndTime] = useState("10:00:00");
+  const [newMentorId, setNewMentorId] = useState<number | "">("");
+  const [creatingClass, setCreatingClass] = useState(false);
+
   // Fetch mentors with keys for HOD Dashboard
   const { data: mentorsTracking = [], isLoading: mentorsLoading } = useQuery<any[]>({
     queryKey: ["admin-mentors-tracking"],
     queryFn: () => customFetch<any[]>("/api/admin/mentors-tracking"),
-    enabled: activeTab === "mentors",
   });
 
   // Fetch timetables/schedules for HOD Dashboard
@@ -119,6 +140,64 @@ export default function HodDashboard() {
     queryFn: () => customFetch<any[]>("/api/admin/schedules"),
     enabled: activeTab === "schedules",
   });
+
+  const handleOpenAssignModal = (schedule: any) => {
+    setScheduleToAssign(schedule);
+    setSelectedMentorId(schedule.mentor_id || (mentorsTracking[0]?.id ?? ""));
+    setAssignSuccessMsg("");
+    setAssignModalOpen(true);
+  };
+
+  const handleConfirmAssign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!scheduleToAssign || !selectedMentorId) return;
+    setAssigning(true);
+    try {
+      await customFetch(`/api/admin/schedules/${scheduleToAssign.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ mentorId: Number(selectedMentorId) }),
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules-list-status"] });
+      setAssignSuccessMsg("Faculty assigned successfully!");
+      setTimeout(() => {
+        setAssignModalOpen(false);
+        setAssignSuccessMsg("");
+      }, 800);
+    } catch (err: any) {
+      alert(err?.data?.error || "Failed to assign faculty");
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleCreateClass = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMentorId || !newSubject || !newSection || !newYear || !newDay) return;
+    setCreatingClass(true);
+    try {
+      await customFetch("/api/admin/schedules", {
+        method: "POST",
+        body: JSON.stringify({
+          mentorId: Number(newMentorId),
+          dayOfWeek: newDay,
+          startTime: newStartTime,
+          endTime: newEndTime,
+          section: newSection,
+          subject: newSubject,
+          year: newYear,
+        }),
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules-list-status"] });
+      setNewClassModalOpen(false);
+      setNewSubject("");
+    } catch (err: any) {
+      alert(err?.data?.error || "Failed to create class schedule");
+    } finally {
+      setCreatingClass(false);
+    }
+  };
 
   const studentsOnly = allUsers.filter(u => u.role === "student");
 
@@ -774,8 +853,8 @@ export default function HodDashboard() {
         ) : (
           <>
             {/* Timetable Schedules Search Toolbar */}
-            <div className="flex items-center gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-              <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+              <div className="flex-1 min-w-0 w-full">
                 <div className="relative group">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
                     <Search className="w-4 h-4" />
@@ -789,6 +868,14 @@ export default function HodDashboard() {
                   />
                 </div>
               </div>
+
+              <button
+                onClick={() => setNewClassModalOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-900/30 active:scale-[0.98] w-full sm:w-auto flex-shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Assign New Class
+              </button>
             </div>
 
             {/* Timetable Schedules Table */}
@@ -808,6 +895,7 @@ export default function HodDashboard() {
                         <th className="py-4 px-6">Time Slot</th>
                         <th className="py-4 px-6">Class / Section</th>
                         <th className="py-4 px-6">Subject</th>
+                        <th className="py-4 px-6 text-center">Assign Faculty</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-855/60">
@@ -823,7 +911,7 @@ export default function HodDashboard() {
                         );
                       }).length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-12 text-center text-slate-500 text-sm">
+                          <td colSpan={6} className="py-12 text-center text-slate-500 text-sm">
                             No timetable slots found matching your query.
                           </td>
                         </tr>
@@ -840,7 +928,7 @@ export default function HodDashboard() {
                           );
                         }).map((s: any) => (
                           <tr key={s.id} className="hover:bg-slate-800/30 transition-colors">
-                            <td className="py-4 px-6 font-semibold text-slate-200">{s.qr_mentors?.name || "Unknown"}</td>
+                            <td className="py-4 px-6 font-semibold text-slate-200">{s.qr_mentors?.name || "Unassigned"}</td>
                             <td className="py-4 px-6 text-slate-300 font-bold">{s.day_of_week}</td>
                             <td className="py-4 px-6 text-slate-405 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
                             <td className="py-4 px-6">
@@ -849,6 +937,15 @@ export default function HodDashboard() {
                               </span>
                             </td>
                             <td className="py-4 px-6 text-slate-300">{s.subject || "—"}</td>
+                            <td className="py-4 px-6 text-center">
+                              <button
+                                onClick={() => handleOpenAssignModal(s)}
+                                className="px-3 py-1.5 rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-800/80 font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm"
+                              >
+                                <UserPlus className="w-3.5 h-3.5" />
+                                Assign Faculty
+                              </button>
+                            </td>
                           </tr>
                         ))
                       )}
@@ -953,7 +1050,234 @@ export default function HodDashboard() {
             </div>
           </SheetContent>
         </Sheet>
-        
+
+        {/* Assign Faculty to Class Modal */}
+        {assignModalOpen && scheduleToAssign && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-bold text-white">Assign Class to Faculty</h3>
+                </div>
+                <button
+                  onClick={() => setAssignModalOpen(false)}
+                  className="text-slate-400 hover:text-white p-1"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="bg-slate-950 border border-slate-850 p-3 rounded-xl space-y-1 text-xs">
+                <p className="text-slate-300 font-bold">{scheduleToAssign.subject}</p>
+                <p className="text-slate-400">Class: {scheduleToAssign.year} Yr - {scheduleToAssign.section} | Day: {scheduleToAssign.day_of_week}</p>
+                <p className="text-slate-500 font-mono">{scheduleToAssign.start_time?.slice(0,5)} - {scheduleToAssign.end_time?.slice(0,5)}</p>
+              </div>
+
+              <form onSubmit={handleConfirmAssign} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Select Faculty / Teacher
+                  </label>
+                  <select
+                    value={selectedMentorId}
+                    onChange={(e) => setSelectedMentorId(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                    required
+                  >
+                    <option value="" disabled>-- Select Faculty --</option>
+                    {mentorsTracking.map((m: any) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} ({m.email}) — Key: {m.key || "No Key"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {assignSuccessMsg && (
+                  <div className="p-3 rounded-xl bg-green-950/60 border border-green-800 text-green-300 text-xs font-bold text-center flex items-center justify-center gap-2">
+                    <UserCheck className="w-4 h-4" />
+                    {assignSuccessMsg}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setAssignModalOpen(false)}
+                    className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={assigning || !selectedMentorId}
+                    className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-purple-950/40"
+                  >
+                    {assigning ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <UserCheck className="w-4 h-4" />
+                        Confirm Assign
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Create New Class Schedule Modal */}
+        {newClassModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-bold text-white">Assign New Class Schedule</h3>
+                </div>
+                <button
+                  onClick={() => setNewClassModalOpen(false)}
+                  className="text-slate-400 hover:text-white p-1"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateClass} className="space-y-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    Subject Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. DBMS, Computer Networks, AI"
+                    value={newSubject}
+                    onChange={(e) => setNewSubject(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Year</label>
+                    <select
+                      value={newYear}
+                      onChange={(e) => setNewYear(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                    >
+                      <option value="II">II Year</option>
+                      <option value="III">III Year</option>
+                      <option value="IV">IV Year</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Section</label>
+                    <select
+                      value={newSection}
+                      onChange={(e) => setNewSection(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                    >
+                      <option value="A">Section A</option>
+                      <option value="B">Section B</option>
+                      <option value="C">Section C</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Day</label>
+                    <select
+                      value={newDay}
+                      onChange={(e) => setNewDay(e.target.value)}
+                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                    >
+                      <option value="MON">Mon</option>
+                      <option value="TUE">Tue</option>
+                      <option value="WED">Wed</option>
+                      <option value="THUR">Thu</option>
+                      <option value="FRI">Fri</option>
+                      <option value="SAT">Sat</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Start Time</label>
+                    <input
+                      type="text"
+                      placeholder="09:00:00"
+                      value={newStartTime}
+                      onChange={(e) => setNewStartTime(e.target.value)}
+                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">End Time</label>
+                    <input
+                      type="text"
+                      placeholder="10:00:00"
+                      value={newEndTime}
+                      onChange={(e) => setNewEndTime(e.target.value)}
+                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    Assign Faculty / Teacher
+                  </label>
+                  <select
+                    value={newMentorId}
+                    onChange={(e) => setNewMentorId(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                    required
+                  >
+                    <option value="" disabled>-- Select Faculty --</option>
+                    {mentorsTracking.map((m: any) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} ({m.email}) — Key: {m.key || "No Key"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setNewClassModalOpen(false)}
+                    className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creatingClass || !newMentorId || !newSubject}
+                    className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-purple-950/40"
+                  >
+                    {creatingClass ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        Assign Class
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

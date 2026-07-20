@@ -585,6 +585,38 @@ router.post("/admin/schedules", authMiddleware, async (req: any, res: any) => {
   }
 });
 
+router.put("/admin/schedules/:id", authMiddleware, async (req: any, res: any) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid schedule ID" });
+    return;
+  }
+  const { mentorId, dayOfWeek, startTime, endTime, section, subject, year } = req.body;
+  try {
+    const updatePayload: any = {};
+    if (mentorId !== undefined) updatePayload.mentor_id = mentorId;
+    if (dayOfWeek !== undefined) updatePayload.day_of_week = dayOfWeek;
+    if (startTime !== undefined) updatePayload.start_time = startTime;
+    if (endTime !== undefined) updatePayload.end_time = endTime;
+    if (section !== undefined) updatePayload.section = section;
+    if (subject !== undefined) updatePayload.subject = subject;
+    if (year !== undefined) updatePayload.year = year;
+
+    const { data: updated, error } = await supabase
+      .from("qr_schedules")
+      .update(updatePayload)
+      .eq("id", id)
+      .select("*, qr_mentors(*)")
+      .single();
+
+    if (error) throw error;
+    res.json(updated);
+  } catch (err: any) {
+    req.log.error({ err }, "Update admin schedule error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.delete("/admin/schedules/:id", authMiddleware, async (req: any, res: any) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
