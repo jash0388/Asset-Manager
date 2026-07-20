@@ -9,7 +9,6 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  Download,
   X,
   Search,
   AlertTriangle,
@@ -23,7 +22,8 @@ import {
   RefreshCw,
   Users,
   ChevronRight,
-  ShieldCheck
+  Smartphone,
+  Share2
 } from "lucide-react";
 
 type Schedule = {
@@ -80,7 +80,7 @@ export default function MentorApp() {
   const [success, setSuccess] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { canInstall, install } = usePwaInstall();
-  const [showInstallBanner, setShowInstallBanner] = useState(true);
+  const [showInstallHelpModal, setShowInstallHelpModal] = useState(false);
   
   const [passkey, setPasskey] = useState("");
   const [keySubmitting, setKeySubmitting] = useState(false);
@@ -278,7 +278,6 @@ export default function MentorApp() {
     lastScanRef.current = { text: uid, at: now };
     isProcessingRef.current = true;
 
-    // Find student in current roster
     setStudents(prev => {
       const targetIndex = prev.findIndex(
         s => s.uniqueId.toLowerCase() === uid.toLowerCase() || String(s.id) === uid
@@ -419,6 +418,14 @@ export default function MentorApp() {
     }
   };
 
+  const handleInstallClick = () => {
+    if (canInstall) {
+      install();
+    } else {
+      setShowInstallHelpModal(true);
+    }
+  };
+
   const isTimePast = () => {
     if (!activeSchedule) return false;
     const now = new Date();
@@ -432,26 +439,25 @@ export default function MentorApp() {
 
   const isLocked = !!(session?.ended_at || isTimePast());
 
-  // ---------- Light Theme Lock / Passkey Screen ----------
+  // ---------- Passkey Lock Screen ----------
   if (role !== "mentor") {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 text-slate-900 font-sans relative overflow-hidden">
-        {/* Soft Background Accents */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-100 rounded-full blur-3xl opacity-60 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-60 pointer-events-none" />
-
-        <div className="w-full max-w-md bg-white border border-slate-200/80 rounded-[2rem] p-8 shadow-2xl relative z-10">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans relative">
+        <div className="w-full max-w-md bg-white border-2 border-slate-200 rounded-[2rem] p-8 shadow-2xl relative z-10">
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-emerald-600 flex items-center justify-center shadow-xl shadow-purple-600/20 mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-purple-600 flex items-center justify-center shadow-xl shadow-purple-600/30 mb-4">
               <GraduationCap className="w-9 h-9 text-white" />
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Faculty Scanner App</h1>
-            <p className="text-sm font-semibold text-slate-500 mt-1.5 max-w-xs">
+            {/* Explicit inline style #0f172a ensures dark black text regardless of CSS theme */}
+            <h1 className="text-2xl font-black tracking-tight" style={{ color: "#0f172a" }}>
+              Faculty Scanner App
+            </h1>
+            <p className="text-sm font-bold mt-1.5 max-w-xs" style={{ color: "#475569" }}>
               Enter your Faculty Passkey to access classes & live QR attendance scanner.
             </p>
           </div>
 
-          <form onSubmit={handleKeyLogin} className="mt-8 flex flex-col gap-5">
+          <form onSubmit={handleKeyLogin} className="mt-7 flex flex-col gap-5">
             {error && (
               <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold text-center flex items-center justify-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
@@ -460,16 +466,18 @@ export default function MentorApp() {
             )}
             
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-extrabold text-slate-600 uppercase tracking-wider text-center">
+              <label className="text-xs font-black uppercase tracking-wider text-center" style={{ color: "#1e293b" }}>
                 Faculty Passkey (Key)
               </label>
+              {/* type="text" removes bullet dots so key digits are 100% visible */}
               <input
                 required
-                type="password"
-                placeholder="••••••••"
+                type="text"
+                placeholder="e.g. 123"
                 value={passkey}
                 onChange={(e) => setPasskey(e.target.value.toUpperCase())}
-                className="px-4 py-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-2xl font-mono font-bold tracking-widest text-center focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-600/10 shadow-inner transition-all"
+                className="px-4 py-4 rounded-2xl border-2 border-purple-500 text-3xl font-mono font-black tracking-widest text-center focus:outline-none focus:ring-4 focus:ring-purple-600/20 shadow-inner"
+                style={{ color: "#0f172a", backgroundColor: "#f8fafc" }}
                 autoFocus
               />
             </div>
@@ -477,15 +485,15 @@ export default function MentorApp() {
             <button
               type="submit"
               disabled={keySubmitting}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-700 hover:to-emerald-700 disabled:opacity-50 text-white font-black text-sm shadow-xl shadow-purple-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider mt-1"
+              className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-black text-sm shadow-xl shadow-purple-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider mt-1"
             >
               {keySubmitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" /> Unlocking Portal...
+                  <Loader2 className="w-5 h-5 animate-spin text-white" /> Unlocking Portal...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5" /> Unlock Faculty App
+                  <Sparkles className="w-5 h-5 text-white" /> Unlock Faculty App
                 </>
               )}
             </button>
@@ -505,58 +513,43 @@ export default function MentorApp() {
   const warningsCount = students.filter((s) => s.warningNotScanned).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
+    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
       {/* Light Navbar */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3.5 sticky top-0 z-30 shadow-sm backdrop-blur-md">
+      <header className="bg-white border-b border-slate-200 px-4 py-3.5 sticky top-0 z-30 shadow-sm">
         <div className="flex items-center justify-between max-w-3xl mx-auto gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-emerald-600 flex items-center justify-center shadow-md shadow-purple-600/20 flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center shadow-md flex-shrink-0">
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base font-black text-slate-900 truncate">Faculty Scanner App</h1>
-              <p className="text-xs text-purple-700 font-bold truncate">{mentor?.name} · {mentor?.email}</p>
+              <h1 className="text-base font-black truncate" style={{ color: "#0f172a" }}>Faculty Scanner App</h1>
+              <p className="text-xs font-bold truncate" style={{ color: "#7e22ce" }}>{mentor?.name} · {mentor?.email}</p>
             </div>
           </div>
 
-          <button
-            data-testid="mentor-logout"
-            onClick={logout}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-700 border border-slate-200 text-xs font-bold transition-all active:scale-[0.97]"
-          >
-            <LogOut className="w-4 h-4" /> Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleInstallClick}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-100 border border-purple-300 hover:bg-purple-200 text-purple-900 text-xs font-black transition-all shadow-sm"
+              style={{ color: "#6b21a8" }}
+            >
+              <Smartphone className="w-4 h-4 text-purple-700" />
+              Install App
+            </button>
+
+            <button
+              data-testid="mentor-logout"
+              onClick={logout}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-800 hover:text-red-700 border border-slate-300 text-xs font-bold transition-all"
+              style={{ color: "#1e293b" }}
+            >
+              <LogOut className="w-4 h-4" /> Logout
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* PWA Install Banner */}
-      {canInstall && showInstallBanner && (
-        <div className="bg-gradient-to-r from-purple-600 to-emerald-600 text-white px-4 py-3 shadow-sm">
-          <div className="max-w-3xl mx-auto flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
-              <Download className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold uppercase tracking-wider">Install App</p>
-              <p className="text-xs text-purple-100 truncate">Add Faculty Scanner to home screen for offline camera scanning.</p>
-            </div>
-            <button
-              onClick={install}
-              className="flex-shrink-0 px-3 py-1.5 rounded-lg bg-white text-purple-900 text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm"
-            >
-              Install
-            </button>
-            <button
-              onClick={() => setShowInstallBanner(false)}
-              className="flex-shrink-0 p-1 text-white/80 hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Result Popup Overlay (1.0 Second Popup with Light High-Contrast Visuals) */}
+      {/* Result Popup Overlay (1.0 Second Popup) */}
       {scanPopup && (
         <div
           data-testid={scanPopup.success ? "scan-success" : "scan-error"}
@@ -570,7 +563,7 @@ export default function MentorApp() {
             <XCircle className="w-24 h-24 text-white mb-4" />
           )}
 
-          <p className="text-3xl font-extrabold mb-3 text-white uppercase tracking-wide">
+          <p className="text-3xl font-black mb-3 text-white uppercase tracking-wide">
             {scanPopup.success ? "PRESENT MARKED" : "SCAN ERROR"}
           </p>
 
@@ -583,7 +576,7 @@ export default function MentorApp() {
           )}
 
           {scanPopup.uniqueId && (
-            <p className="text-xl font-mono font-bold text-white/90 mb-2 tracking-wider">
+            <p className="text-xl font-mono font-bold text-white mb-2 tracking-wider">
               ID: {scanPopup.uniqueId}
             </p>
           )}
@@ -599,6 +592,47 @@ export default function MentorApp() {
               {scanPopup.scannedGate ? "✓ Gate Verified (On Campus)" : "⚠️ No Gate Scan"}
             </span>
           )}
+        </div>
+      )}
+
+      {/* App Install Instructions Modal */}
+      {showInstallHelpModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-white border-2 border-slate-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-purple-700" />
+                <h3 className="text-lg font-black" style={{ color: "#0f172a" }}>Install Faculty App</h3>
+              </div>
+              <button
+                onClick={() => setShowInstallHelpModal(false)}
+                className="text-slate-400 hover:text-slate-700 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs leading-relaxed" style={{ color: "#334155" }}>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                <p className="font-black text-purple-800 uppercase tracking-wider">For Android (Chrome / Edge):</p>
+                <p>1. Tap the 3 dots menu <span className="font-bold text-slate-900">⋮</span> in top right corner.</p>
+                <p>2. Tap <span className="font-bold text-slate-900">"Add to Home screen"</span> or <span className="font-bold text-slate-900">"Install app"</span>.</p>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                <p className="font-black text-purple-800 uppercase tracking-wider">For iPhone / iPad (Safari):</p>
+                <p>1. Tap the Share button <Share2 className="w-3.5 h-3.5 inline text-blue-600" /> at bottom of screen.</p>
+                <p>2. Scroll down and tap <span className="font-bold text-slate-900">"Add to Home Screen ➕"</span>.</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowInstallHelpModal(false)}
+              className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md"
+            >
+              Got It
+            </button>
+          </div>
         </div>
       )}
 
@@ -621,22 +655,23 @@ export default function MentorApp() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
-            <p className="text-xs font-bold text-slate-500">Loading active class timetable...</p>
+            <p className="text-xs font-bold" style={{ color: "#334155" }}>Loading active class timetable...</p>
           </div>
         ) : !activeSchedule ? (
           <div className="space-y-5">
             {/* No Active Class Card */}
-            <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center shadow-xl shadow-slate-200/50">
-              <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center mx-auto mb-4 shadow-inner">
+            <div className="bg-white border-2 border-slate-200 rounded-3xl p-8 text-center shadow-xl">
+              <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center mx-auto mb-4">
                 <GraduationCap className="w-8 h-8 text-purple-600" />
               </div>
-              <h2 className="text-slate-900 text-xl font-black">No Class Active Right Now</h2>
-              <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto leading-relaxed font-medium">
+              <h2 className="text-xl font-black" style={{ color: "#0f172a" }}>No Class Active Right Now</h2>
+              <p className="text-xs mt-2 max-w-sm mx-auto leading-relaxed font-bold" style={{ color: "#334155" }}>
                 Select any of your scheduled lecture classes below to launch the live QR camera scanner and take attendance.
               </p>
               <button
                 onClick={loadActiveSchedule}
-                className="mt-5 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition-all active:scale-[0.98] inline-flex items-center gap-2 shadow-sm"
+                className="mt-5 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold border border-slate-300 transition-all active:scale-[0.98] inline-flex items-center gap-2 shadow-sm"
+                style={{ color: "#0f172a" }}
               >
                 <RefreshCw className="w-4 h-4 text-purple-600" />
                 Refresh Timetable Check
@@ -646,7 +681,7 @@ export default function MentorApp() {
             {/* Today's Schedules List */}
             {todaySchedules.length > 0 ? (
               <div className="space-y-3">
-                <h3 className="text-xs font-extrabold text-purple-700 uppercase tracking-widest ml-1">
+                <h3 className="text-xs font-black uppercase tracking-widest ml-1" style={{ color: "#6b21a8" }}>
                   Your Classes Today
                 </h3>
                 <div className="grid grid-cols-1 gap-3">
@@ -654,22 +689,23 @@ export default function MentorApp() {
                     <div
                       key={sched.id}
                       onClick={() => handleSelectSchedule(sched)}
-                      className="bg-white border border-slate-200 hover:border-purple-400 p-4 rounded-2xl shadow-md shadow-slate-200/50 transition-all active:scale-[0.99] cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                      className="bg-white border-2 border-slate-200 hover:border-purple-500 p-4 rounded-2xl shadow-md transition-all active:scale-[0.99] cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center flex-shrink-0">
-                          <QrCode className="w-6 h-6 text-purple-600" />
+                        <div className="w-11 h-11 rounded-xl bg-purple-100 border border-purple-300 flex items-center justify-center flex-shrink-0">
+                          <QrCode className="w-6 h-6 text-purple-700" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2.5 py-0.5 rounded-lg bg-purple-100 border border-purple-200 text-purple-800 text-[10px] font-bold">
+                            <span className="px-2.5 py-0.5 rounded-lg bg-purple-100 border border-purple-300 font-bold text-[10px]" style={{ color: "#6b21a8" }}>
                               {sched.year} Yr · Section {sched.section}
                             </span>
-                            <span className="text-xs font-mono font-bold text-slate-500">
+                            <span className="text-xs font-mono font-bold" style={{ color: "#334155" }}>
                               {sched.start_time.slice(0, 5)} - {sched.end_time.slice(0, 5)}
                             </span>
                           </div>
-                          <h4 className="text-slate-900 font-bold text-base mt-1.5 group-hover:text-purple-600 transition-colors">
+                          {/* Subject Title 100% visible black text */}
+                          <h4 className="text-lg font-black mt-1.5 group-hover:text-purple-700 transition-colors" style={{ color: "#0f172a" }}>
                             {sched.subject || "Lecture Class"}
                           </h4>
                         </div>
@@ -677,21 +713,21 @@ export default function MentorApp() {
 
                       <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
                         {sched.status === "submitted" ? (
-                          <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          <span className="px-3 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
                             ✓ Submitted ({sched.session?.student_count} present)
                           </span>
                         ) : sched.status === "started" ? (
-                          <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                          <span className="px-3 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
                             ● Scan Active
                           </span>
                         ) : (
-                          <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200">
+                          <span className="px-3 py-1 rounded-full text-[10px] font-black bg-slate-100 text-slate-700 border border-slate-300">
                             Pending
                           </span>
                         )}
 
-                        <button className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/20 flex items-center gap-1.5">
-                          Start Scanner <ChevronRight className="w-4 h-4" />
+                        <button className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-md flex items-center gap-1.5">
+                          Start Scanner <ChevronRight className="w-4 h-4 text-white" />
                         </button>
                       </div>
                     </div>
@@ -699,7 +735,7 @@ export default function MentorApp() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm font-semibold">
+              <div className="bg-white border-2 border-slate-200 rounded-2xl p-8 text-center text-sm font-bold" style={{ color: "#334155" }}>
                 You have no classes scheduled for today.
               </div>
             )}
@@ -707,29 +743,30 @@ export default function MentorApp() {
         ) : (
           <>
             {/* Active Class Header Card */}
-            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xl shadow-slate-200/50">
+            <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 shadow-xl">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-lg bg-purple-100 text-purple-800 text-xs font-bold border border-purple-200">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-purple-100 text-xs font-black border border-purple-300" style={{ color: "#6b21a8" }}>
                       {activeSchedule.year} Yr - Section {activeSchedule.section}
                     </span>
-                    <span className="text-xs text-slate-500 font-mono font-bold">
+                    <span className="text-xs font-mono font-bold" style={{ color: "#334155" }}>
                       {activeSchedule.start_time.slice(0, 5)} - {activeSchedule.end_time.slice(0, 5)}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-black text-slate-900 mt-2">
+                  {/* Subject Name in Active Class 100% visible black text */}
+                  <h2 className="text-2xl font-black mt-2" style={{ color: "#0f172a" }}>
                     {activeSchedule.subject || "Lecture Class"}
                   </h2>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {isLocked ? (
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-100 border border-red-200 text-red-700 text-xs font-bold">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs font-bold">
                       <Lock className="w-4 h-4" /> Session Locked
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-extrabold animate-pulse">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-black animate-pulse">
                       ● Live Session
                     </span>
                   )}
@@ -740,7 +777,8 @@ export default function MentorApp() {
                         setSession(null);
                         setStudents([]);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-all active:scale-[0.97]"
+                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-xs border border-slate-300 transition-all active:scale-[0.97]"
+                      style={{ color: "#0f172a" }}
                     >
                       Change Class
                     </button>
@@ -749,7 +787,7 @@ export default function MentorApp() {
               </div>
 
               {isLocked && (
-                <div className="mt-4 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                <div className="mt-4 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold">
                   ⚠️ Attendance session for this lecture hour is locked. You cannot scan or modify records.
                 </div>
               )}
@@ -757,31 +795,32 @@ export default function MentorApp() {
 
             {/* Attendance Counters Bar */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Class</p>
-                <p className="text-2xl font-black text-slate-900 mt-1">{students.length}</p>
+              <div className="bg-white border-2 border-slate-200 rounded-2xl p-4 text-center shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "#475569" }}>Total Class</p>
+                <p className="text-2xl font-black mt-1" style={{ color: "#0f172a" }}>{students.length}</p>
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Present</p>
-                <p className="text-2xl font-black text-emerald-600 mt-1">{presentCount}</p>
+              <div className="bg-white border-2 border-slate-200 rounded-2xl p-4 text-center shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "#475569" }}>Present</p>
+                <p className="text-2xl font-black mt-1" style={{ color: "#15803d" }}>{presentCount}</p>
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">No Gate Scan</p>
-                <p className={`text-2xl font-black mt-1 ${warningsCount > 0 ? "text-amber-600" : "text-slate-400"}`}>
+              <div className="bg-white border-2 border-slate-200 rounded-2xl p-4 text-center shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: "#475569" }}>No Gate Scan</p>
+                <p className="text-2xl font-black mt-1" style={{ color: warningsCount > 0 ? "#b45309" : "#475569" }}>
                   {warningsCount}
                 </p>
               </div>
             </div>
 
             {/* View Mode Switcher */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-1.5 flex gap-2 shadow-sm">
+            <div className="bg-white border-2 border-slate-200 rounded-2xl p-1.5 flex gap-2 shadow-sm">
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex-1 py-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all ${
+                className={`flex-1 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all ${
                   viewMode === "list"
                     ? "bg-slate-900 text-white shadow-md"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                    : "bg-slate-100 text-slate-800 hover:bg-slate-200"
                 }`}
+                style={{ color: viewMode === "list" ? "#ffffff" : "#0f172a" }}
               >
                 <Users className="w-4 h-4" />
                 Class Roster List ({students.length})
@@ -789,11 +828,12 @@ export default function MentorApp() {
               <button
                 onClick={() => setViewMode("camera")}
                 disabled={isLocked}
-                className={`flex-1 py-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all ${
+                className={`flex-1 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all ${
                   viewMode === "camera"
-                    ? "bg-purple-600 text-white shadow-md shadow-purple-600/20"
-                    : "bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200"
+                    ? "bg-purple-600 text-white shadow-md"
+                    : "bg-purple-100 text-purple-900 border border-purple-300"
                 }`}
+                style={{ color: viewMode === "camera" ? "#ffffff" : "#6b21a8" }}
               >
                 <Camera className="w-4 h-4" />
                 Live QR Scanner
@@ -802,21 +842,21 @@ export default function MentorApp() {
 
             {/* Live Camera View Mode */}
             {viewMode === "camera" && (
-              <div className="bg-white border border-slate-200 rounded-3xl p-5 space-y-4 shadow-xl shadow-slate-200/50">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="bg-white border-2 border-slate-200 rounded-3xl p-5 space-y-4 shadow-xl">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                      <Camera className="w-4 h-4 text-purple-600" />
+                    <h3 className="text-sm font-black flex items-center gap-2" style={{ color: "#0f172a" }}>
+                      <Camera className="w-4 h-4 text-purple-700" />
                       Point Camera at Student QR Code
                     </h3>
-                    <p className="text-xs text-slate-500 font-semibold mt-0.5">Scanned students will automatically mark Present</p>
+                    <p className="text-xs font-bold mt-0.5" style={{ color: "#475569" }}>Scanned students will automatically mark Present</p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                     {presentCount} / {students.length} Present
                   </span>
                 </div>
 
-                <div className="w-full bg-slate-900 border border-slate-300 rounded-2xl overflow-hidden aspect-square max-w-sm mx-auto relative shadow-inner">
+                <div className="w-full bg-slate-950 border-2 border-slate-300 rounded-2xl overflow-hidden aspect-square max-w-sm mx-auto relative shadow-inner">
                   <div id="faculty-qr-reader" ref={scannerRef} className="w-full h-full" />
                 </div>
 
@@ -833,9 +873,9 @@ export default function MentorApp() {
                       onClick={() => setVolume(volume > 0 ? 0 : 0.7)}
                       className="text-slate-600 hover:text-slate-900"
                     >
-                      {volume > 0 ? <Volume2 className="w-4 h-4 text-purple-600" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
+                      {volume > 0 ? <Volume2 className="w-4 h-4 text-purple-700" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
                     </button>
-                    <span className="text-xs font-bold text-slate-700">Beep Audio</span>
+                    <span className="text-xs font-bold" style={{ color: "#0f172a" }}>Beep Audio</span>
                   </div>
                   <input
                     type="range"
@@ -862,7 +902,8 @@ export default function MentorApp() {
                     placeholder="Search student name or roll number..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="block w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-600/10 transition-colors font-bold shadow-sm"
+                    className="block w-full pl-10 pr-10 py-3 bg-white border-2 border-slate-200 rounded-2xl text-sm focus:outline-none focus:border-purple-600 font-bold shadow-sm"
+                    style={{ color: "#0f172a" }}
                   />
                   {searchQuery && (
                     <button
@@ -875,11 +916,11 @@ export default function MentorApp() {
                 </div>
 
                 {filteredStudents.length === 0 ? (
-                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm font-semibold">
+                  <div className="bg-white border-2 border-slate-200 rounded-2xl p-8 text-center text-sm font-bold" style={{ color: "#475569" }}>
                     No students matching "{searchQuery}"
                   </div>
                 ) : (
-                  <div className="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-md shadow-slate-200/50">
+                  <div className="bg-white border-2 border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-md">
                     {filteredStudents.map((s) => (
                       <div
                         key={s.id}
@@ -887,22 +928,24 @@ export default function MentorApp() {
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-bold text-slate-900 truncate">{s.name}</p>
+                            {/* Student Name 100% visible black text */}
+                            <p className="text-base font-black truncate" style={{ color: "#020617" }}>{s.name}</p>
                             {s.scannedGate ? (
-                              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold border border-emerald-300">
                                 Gate Verified
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] border border-slate-200 font-semibold">
+                              <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] border border-slate-300 font-bold">
                                 No Gate Scan
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-slate-500 font-mono font-semibold mt-0.5">{s.uniqueId}</p>
+                          {/* Roll number 100% visible dark text */}
+                          <p className="text-xs font-mono font-black mt-0.5" style={{ color: "#334155" }}>{s.uniqueId}</p>
                         </div>
 
                         {s.warningNotScanned && (
-                          <span className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                          <span className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 border border-amber-300 text-amber-800 text-[10px] font-black">
                             <AlertTriangle className="w-3 h-3 text-amber-600" /> No Gate Scan
                           </span>
                         )}
@@ -911,22 +954,24 @@ export default function MentorApp() {
                           <button
                             disabled={isLocked}
                             onClick={() => handleSetAttendance(s.id, true)}
-                            className={`px-3.5 py-1.5 rounded-xl border text-xs font-extrabold transition-all ${
+                            className={`px-3.5 py-1.5 rounded-xl border text-xs font-black transition-all ${
                               s.markedPresent
-                                ? "bg-emerald-600 border-emerald-500 text-white shadow-md shadow-emerald-600/20"
-                                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                ? "bg-emerald-600 border-emerald-500 text-white shadow-md"
+                                : "bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
                             }`}
+                            style={{ color: s.markedPresent ? "#ffffff" : "#0f172a" }}
                           >
                             Present
                           </button>
                           <button
                             disabled={isLocked}
                             onClick={() => handleSetAttendance(s.id, false)}
-                            className={`px-3.5 py-1.5 rounded-xl border text-xs font-extrabold transition-all ${
+                            className={`px-3.5 py-1.5 rounded-xl border text-xs font-black transition-all ${
                               !s.markedPresent
-                                ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/20"
-                                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                ? "bg-red-600 border-red-500 text-white shadow-md"
+                                : "bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
                             }`}
+                            style={{ color: !s.markedPresent ? "#ffffff" : "#0f172a" }}
                           >
                             Absent
                           </button>
@@ -943,15 +988,16 @@ export default function MentorApp() {
               <button
                 onClick={handleSubmitAttendance}
                 disabled={submitting}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white font-black text-base shadow-xl shadow-emerald-600/20 transition-all active:scale-[0.99] flex items-center justify-center gap-2 uppercase tracking-wide"
+                className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-black text-base shadow-xl transition-all active:scale-[0.99] flex items-center justify-center gap-2 uppercase tracking-wide"
+                style={{ color: "#ffffff" }}
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" /> Submitting Attendance...
+                    <Loader2 className="w-5 h-5 animate-spin text-white" /> Submitting Attendance...
                   </>
                 ) : (
                   <>
-                    <UserCheck className="w-5 h-5" /> Submit Class Attendance ({presentCount} Present)
+                    <UserCheck className="w-5 h-5 text-white" /> Submit Class Attendance ({presentCount} Present)
                   </>
                 )}
               </button>
