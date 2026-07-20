@@ -143,7 +143,7 @@ export default function Scanner() {
       isProcessingRef.current = false;
       resultTimeoutRef.current = null;
       safeResumeScanner();
-    }, r.success ? 1800 : 3500);
+    }, 400);
   };
 
   const handleScan = (decodedText: string) => {
@@ -289,19 +289,21 @@ export default function Scanner() {
             ) : (
               <XCircle className="w-20 h-20 text-red-400 mb-4" />
             )}
-            <p className={`text-3xl font-bold mb-3 ${result.success ? (result.action === "exit" ? "text-orange-400" : "text-green-400") : "text-red-400"}`}>
+            <p className={`text-3xl font-extrabold mb-3 uppercase tracking-wide ${result.success ? (result.action === "exit" ? "text-orange-400" : "text-green-400") : "text-amber-400"}`}>
               {result.success
                 ? result.action === "exit"
                   ? "Left Campus"
                   : result.action === "entry"
                   ? "On Campus"
                   : "Recorded"
-                : "Access Denied"}
+                : "Already Scanned"}
             </p>
             {result.userName && (
-              <p className="text-3xl font-extrabold text-white mb-2 text-center px-4 leading-tight">
-                {result.userName}
-              </p>
+              <div className="my-2 px-6 py-3 bg-slate-900/90 border-2 border-amber-400/80 rounded-2xl shadow-2xl text-center">
+                <p className="text-4xl sm:text-5xl font-black text-amber-300 tracking-wide leading-tight drop-shadow-lg uppercase">
+                  {result.userName}
+                </p>
+              </div>
             )}
             {result.uniqueId && (
               <p className="text-lg font-mono text-slate-200 mb-2 tracking-wider">

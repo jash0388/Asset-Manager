@@ -15,7 +15,7 @@ type ScanReply =
   | { ok: true; action: "queued"; user: CachedUser; queued: number }
   | { ok: false; message: string };
 
-const POPUP_MS = 2500;
+const POPUP_MS = 400; // 0.4 seconds display duration
 const SYNC_INTERVAL_MS = 3_000; // sync every 3 seconds for near-real-time updates
 
 function formatAgo(ts: number | null): string {
@@ -395,14 +395,18 @@ export default function SecurityApp() {
           ) : (
             <XCircle className="w-24 h-24 text-red-400 mb-4" />
           )}
-          <p className={`text-3xl font-bold mb-2 ${popup.ok ? "text-green-400" : "text-red-400"}`}>
-            {popup.ok ? "Access Granted" : "Denied"}
+          <p className={`text-3xl font-extrabold mb-2 uppercase tracking-wide ${popup.ok ? "text-green-400" : "text-amber-400"}`}>
+            {popup.ok ? "Access Granted" : "Already Scanned"}
           </p>
           {popup.ok && (
             <>
-              <p className="text-2xl font-semibold text-white">{popup.user.name}</p>
-              <p className="text-sm text-slate-300 mt-1">{popup.user.uniqueId} · {popup.user.role}</p>
-              <span className="mt-4 px-3 py-1 rounded-full text-xs font-semibold bg-blue-800 text-blue-200">
+              <div className="my-2 px-6 py-3 bg-slate-900/90 border-2 border-amber-400/80 rounded-2xl shadow-2xl text-center">
+                <p className="text-4xl sm:text-5xl font-black text-amber-300 tracking-wide leading-tight drop-shadow-lg uppercase">
+                  {popup.user.name}
+                </p>
+              </div>
+              <p className="text-base font-semibold text-slate-200 mt-1">{popup.user.uniqueId} · {popup.user.role}</p>
+              <span className="mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-800 text-blue-200">
                 Saved locally · {popup.queued} pending sync
               </span>
             </>
@@ -486,7 +490,7 @@ export default function SecurityApp() {
 
         <div className="w-full mt-4 px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-xs text-slate-400">
           {cachedAt ? (
-            <>Student cache updated {formatAgo(cachedAt)} · 30-sec duplicate cooldown enforced locally.</>
+            <>Student cache updated {formatAgo(cachedAt)} · 20-min duplicate cooldown enforced locally.</>
           ) : (
             <>Student cache empty — refresh once with internet to enable offline scanning.</>
           )}

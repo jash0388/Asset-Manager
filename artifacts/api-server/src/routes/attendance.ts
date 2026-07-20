@@ -70,10 +70,17 @@ function getLatestRecordsByUser(records: any[] = []): Map<number, any> {
   return latestByUserId;
 }
 
+function isSentinel(ts: string | null | undefined): boolean {
+  if (!ts) return true;
+  return ts.startsWith("9999") || ts.startsWith("1970") || ts.startsWith("0001");
+}
+
 function formatRecord(record: any, user?: any) {
-  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999") && !record.entry_time.startsWith("1970");
+  const hasRealEntry = !isSentinel(record.entry_time);
+  const hasRealExit = !isSentinel(record.exit_time);
+
   const durationMinutes =
-    hasEntry && record.exit_time
+    hasRealEntry && hasRealExit
       ? Math.floor(Math.abs(new Date(record.entry_time).getTime() - new Date(record.exit_time).getTime()) / 60000)
       : null;
 
@@ -83,8 +90,8 @@ function formatRecord(record: any, user?: any) {
     id: record.id,
     userId: record.user_id,
     date: record.date,
-    entryTime: hasEntry ? record.entry_time : null,
-    exitTime: record.exit_time,
+    entryTime: hasRealEntry ? record.entry_time : null,
+    exitTime: hasRealExit ? record.exit_time : null,
     scanCount: record.scan_count,
     durationMinutes,
     status,
@@ -94,7 +101,7 @@ function formatRecord(record: any, user?: any) {
         name: user.name,
         uniqueId: user.unique_id,
         role: user.role,
-        section: user.section,
+        section: user.section ?? null,
         createdAt: user.created_at,
       }
     } : {}),
@@ -217,53 +224,51 @@ router.post("/scan/batch", async (req: any, res: any) => {
         };
       }
 
-      // Server-side duplicate prevention check (30 seconds cooldown)
       if (current.lastScanAt) {
         const lastScanTime = new Date(current.lastScanAt).getTime();
-        const currentScanTime = scannedAt.getTime();
-        if (Math.abs(currentScanTime - lastScanTime) < 30000) {
+        const timeDiff = scannedAt.getTime() - lastScanTime;
+        if (timeDiff >= 0 && timeDiff < 20 * 60 * 1000) {
           results.push({
             clientScanId,
             status: "ok",
-            action: "ignored",
+            action: current.status === "inside" ? "entry" : "exit",
             user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-            recordId: current.recordId,
+            cooldown: true,
           });
           continue;
         }
       }
 
       if (current.status === "inside") {
-        if (!current.recordId) throw new Error("Missing attendance record for exit scan");
-        const nextScanCount = current.scanCount + 1;
-        const { error: updateError } = await supabase
+        const { data: inserted, error: insertError } = await supabase
           .from("qr_attendance")
-          .update({ exit_time: ts, scan_count: nextScanCount, last_scan_at: ts })
-          .eq("id", current.recordId);
-        if (updateError) throw updateError;
-        batchStatusCache.set(user.id, { status: "left", recordId: current.recordId, scanCount: nextScanCount, lastScanAt: ts });
+          .insert({ user_id: user.id, date, exit_time: ts, entry_time: SENTINEL_ENTRY, scan_count: 1, last_scan_at: ts })
+          .select()
+          .single();
+        if (insertError) throw insertError;
+        const recordId = inserted.id;
+        batchStatusCache.set(user.id, { status: "left", recordId, scanCount: 1, lastScanAt: ts });
         results.push({
           clientScanId,
           status: "ok",
           action: "exit",
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          recordId: current.recordId,
+          recordId,
         });
       } else {
-        const { data: inserted, error: insertError } = await supabase
+        if (!current.recordId) throw new Error("Missing attendance record for return scan");
+        const nextScanCount = current.scanCount + 1;
+        const { error: updateError } = await supabase
           .from("qr_attendance")
-          .insert({ user_id: user.id, date, entry_time: ts, exit_time: null, scan_count: 1, last_scan_at: ts })
-          .select()
-          .single();
-        if (insertError) throw insertError;
-        const recordId = inserted.id;
-        batchStatusCache.set(user.id, { status: "inside", recordId, scanCount: 1, lastScanAt: ts });
+          .update({ entry_time: ts, scan_count: nextScanCount, last_scan_at: ts })
+          .eq("id", current.recordId);
+        if (updateError) throw updateError;
+        batchStatusCache.set(user.id, { status: "inside", recordId: current.recordId, scanCount: nextScanCount, lastScanAt: ts });
         results.push({
           clientScanId,
           status: "ok",
           action: "entry",
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          recordId,
         });
       }
     } catch (err: any) {
@@ -305,23 +310,22 @@ router.post("/scan", async (req: any, res: any) => {
 
     const record = existingRecords?.[0];
 
-    // Server-side duplicate prevention check (30 seconds cooldown)
     if (record && record.last_scan_at) {
       const lastScanTime = new Date(record.last_scan_at).getTime();
-      const currentScanTime = new Date(now).getTime();
-      if (Math.abs(currentScanTime - lastScanTime) < 30000) {
-        req.log.info({ userId: user.id, name: user.name }, "Duplicate scan detected within cooldown. Ignoring.");
+      const timeDiff = Date.now() - lastScanTime;
+      if (timeDiff >= 0 && timeDiff < 20 * 60 * 1000) {
+        const currentStatus = getRecordStatus(record);
         return res.json({
           success: true,
-          action: "ignored",
-          message: `${user.name} scanned too recently.`,
+          action: currentStatus === "inside" ? "entry" : "exit",
+          message: `${user.name} is already scanned.`,
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          recordId: record.id,
+          cooldown: true,
         });
       }
     }
 
-    const currentStatus = record ? getRecordStatus(record) : "left";
+    const currentStatus = record ? getRecordStatus(record) : "inside";
 
     if (currentStatus === "inside") {
       req.log.info({ userId: user.id, name: user.name }, "Student checked out / leaving campus");
@@ -398,10 +402,15 @@ router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
       .from("qr_attendance")
       .select("*, qr_users(*)")
       .eq("date", today)
-      .order("entry_time", { ascending: false });
+      .order("last_scan_at", { ascending: false, nullsFirst: false });
 
     if (error) throw error;
-    res.json(records.map((r: any) => formatRecord(r, r.qr_users)));
+
+    // Deduplicate: keep only the latest record per user
+    const latestByUser = getLatestRecordsByUser(records ?? []);
+    const deduped = Array.from(latestByUser.values());
+
+    res.json(deduped.map((r: any) => formatRecord(r, r.qr_users)));
   } catch (err: any) {
     req.log.error({ err }, "Today attendance error");
     res.status(500).json({ error: "Internal server error" });
@@ -526,21 +535,26 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any
     let totalDuration = 0;
     let durationCount = 0;
     let lateCount = 0;
+    // Deduplicate records per date (keep latest per date)
+    const uniqueDates = new Set<string>();
     for (const r of records) {
-      if (r.entry_time && r.exit_time) {
+      uniqueDates.add(r.date);
+      const hasRealEntry = !isSentinel(r.entry_time);
+      const hasRealExit = !isSentinel(r.exit_time);
+      if (hasRealEntry && hasRealExit) {
         const dur = Math.abs(new Date(r.entry_time).getTime() - new Date(r.exit_time).getTime());
         totalDuration += dur;
         durationCount++;
       }
-      if (r.entry_time && new Date(r.entry_time).getHours() >= lateHour) {
+      if (hasRealEntry && new Date(r.entry_time).getHours() >= lateHour) {
         lateCount++;
       }
     }
     const summary = {
-      totalDaysPresent: records.length,
+      totalDaysPresent: uniqueDates.size,
       averageMinutesSpent: durationCount > 0 ? Math.floor(totalDuration / durationCount / 60000) : 0,
       lateEntriesCount: lateCount,
-      totalDaysChecked: records.length,
+      totalDaysChecked: uniqueDates.size,
     };
     res.json({
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
