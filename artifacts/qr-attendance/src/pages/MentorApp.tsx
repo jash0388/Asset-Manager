@@ -220,6 +220,19 @@ export default function MentorApp() {
     }
   };
 
+  const isNativeApp = () => {
+    if (typeof window === "undefined") return false;
+    return (
+      !!(window as any).Capacitor?.isNativePlatform?.() ||
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true ||
+      document.referrer.includes("android-app://") ||
+      window.location.search.includes("isApp=true") ||
+      window.navigator.userAgent.includes("Capacitor") ||
+      window.navigator.userAgent.includes("wv")
+    );
+  };
+
   const handleInstallClick = () => {
     if (canInstall) {
       install();
@@ -309,13 +322,15 @@ export default function MentorApp() {
               )}
             </button>
 
-            <a
-              href="/Faculty_Attendance.apk"
-              download="Faculty_Attendance.apk"
-              className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider text-center"
-            >
-              <Smartphone className="w-4 h-4 text-white" /> Download Faculty Android App (.apk)
-            </a>
+            {!isNativeApp() && (
+              <a
+                href="/Faculty_Attendance.apk"
+                download="Faculty_Attendance.apk"
+                className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider text-center"
+              >
+                <Smartphone className="w-4 h-4 text-white" /> Download Faculty Android App (.apk)
+              </a>
+            )}
           </form>
         </div>
       </div>
@@ -347,14 +362,16 @@ export default function MentorApp() {
           </div>
 
           <div className="flex items-center gap-2">
-            <a
-              href="/Faculty_Attendance.apk"
-              download="Faculty_Attendance.apk"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-md active:scale-95"
-            >
-              <Smartphone className="w-4 h-4 text-white" />
-              Download APK
-            </a>
+            {!isNativeApp() && (
+              <a
+                href="/Faculty_Attendance.apk"
+                download="Faculty_Attendance.apk"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-md active:scale-95"
+              >
+                <Smartphone className="w-4 h-4 text-white" />
+                Download APK
+              </a>
+            )}
 
             <button
               data-testid="mentor-logout"
