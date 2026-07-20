@@ -143,7 +143,7 @@ export default function Scanner() {
       isProcessingRef.current = false;
       resultTimeoutRef.current = null;
       safeResumeScanner();
-    }, 400);
+    }, 1000);
   };
 
   const handleScan = (decodedText: string) => {

@@ -15,7 +15,7 @@ type ScanReply =
   | { ok: true; action: "queued"; user: CachedUser; queued: number }
   | { ok: false; message: string };
 
-const POPUP_MS = 400; // 0.4 seconds display duration
+const POPUP_MS = 1000; // 1 second display duration
 const SYNC_INTERVAL_MS = 3_000; // sync every 3 seconds for near-real-time updates
 
 function formatAgo(ts: number | null): string {
