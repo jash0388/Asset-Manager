@@ -308,6 +308,14 @@ export default function MentorApp() {
                 </>
               )}
             </button>
+
+            <a
+              href="/Faculty_Attendance.apk"
+              download="Faculty_Attendance.apk"
+              className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider text-center"
+            >
+              <Smartphone className="w-4 h-4 text-white" /> Download Faculty Android App (.apk)
+            </a>
           </form>
         </div>
       </div>
@@ -339,16 +347,14 @@ export default function MentorApp() {
           </div>
 
           <div className="flex items-center gap-2">
-            {!(typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true || document.referrer.includes("android-app://"))) && (
-              <button
-                onClick={handleInstallClick}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-100 border border-purple-300 hover:bg-purple-200 text-purple-900 text-xs font-black transition-all shadow-sm"
-                style={{ color: "#6b21a8" }}
-              >
-                <Smartphone className="w-4 h-4 text-purple-700" />
-                Install App
-              </button>
-            )}
+            <a
+              href="/Faculty_Attendance.apk"
+              download="Faculty_Attendance.apk"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-md active:scale-95"
+            >
+              <Smartphone className="w-4 h-4 text-white" />
+              Download APK
+            </a>
 
             <button
               data-testid="mentor-logout"
