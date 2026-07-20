@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
@@ -14,6 +14,16 @@ import {
   Search,
   AlertTriangle,
   Lock,
+  Camera,
+  QrCode,
+  Volume2,
+  VolumeX,
+  Sparkles,
+  UserCheck,
+  RefreshCw,
+  Users,
+  ChevronRight,
+  ShieldCheck
 } from "lucide-react";
 
 type Schedule = {
@@ -46,10 +56,13 @@ type ScheduleStudent = {
   warningNotScanned: boolean;
 };
 
-function formatTime(iso: string | null | undefined) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
-}
+type ScanPopup = {
+  success: boolean;
+  studentName?: string;
+  uniqueId?: string;
+  message: string;
+  scannedGate?: boolean;
+};
 
 export default function MentorApp() {
   const { mentor, role, logout, loginMentorKey } = useAuth();
@@ -72,6 +85,89 @@ export default function MentorApp() {
   const [passkey, setPasskey] = useState("");
   const [keySubmitting, setKeySubmitting] = useState(false);
 
+  // ---------- Camera & Scanner States ----------
+  const [viewMode, setViewMode] = useState<"list" | "camera">("list");
+  const [scanning, setScanning] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  const [scanPopup, setScanPopup] = useState<ScanPopup | null>(null);
+  const scannerRef = useRef<HTMLDivElement>(null);
+  const scannerInstanceRef = useRef<any>(null);
+  const popupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastScanRef = useRef<{ text: string; at: number }>({ text: "", at: 0 });
+  const isProcessingRef = useRef(false);
+
+  // Audio state & volume
+  const [volume, setVolume] = useState<number>(0.7);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  const ensureAudio = () => {
+    if (audioCtxRef.current) return audioCtxRef.current;
+    try {
+      const Ctor = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!Ctor) return null;
+      audioCtxRef.current = new Ctor();
+      return audioCtxRef.current;
+    } catch {
+      return null;
+    }
+  };
+
+  const playTone = (
+    ctx: AudioContext,
+    freq: number,
+    durationMs: number,
+    startOffsetMs: number,
+    type: OscillatorType = "sine",
+    peakGain = 0.25,
+  ) => {
+    const startTime = ctx.currentTime + startOffsetMs / 1000;
+    const stopTime = startTime + durationMs / 1000;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(peakGain, startTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, stopTime);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(stopTime + 0.02);
+  };
+
+  const playBeep = (success: boolean) => {
+    if (volume <= 0) return;
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    try { if (ctx.state === "suspended") ctx.resume(); } catch {}
+    try {
+      if (success) {
+        playTone(ctx, 880, 120, 0, "sine", 0.3 * volume);
+        playTone(ctx, 1320, 180, 130, "sine", 0.3 * volume);
+      } else {
+        playTone(ctx, 220, 180, 0, "sawtooth", 0.25 * volume);
+        playTone(ctx, 180, 220, 200, "sawtooth", 0.25 * volume);
+      }
+    } catch {}
+  };
+
+  const showPopup = (p: ScanPopup) => {
+    if (popupTimeoutRef.current) clearTimeout(popupTimeoutRef.current);
+    setScanPopup(p);
+    playBeep(p.success);
+    if (p.success) {
+      try { window.navigator?.vibrate?.(150); } catch {}
+    } else {
+      try { window.navigator?.vibrate?.([80, 50, 80]); } catch {}
+    }
+    // Popup stays for 1.0 second (1000ms) as requested
+    popupTimeoutRef.current = setTimeout(() => {
+      setScanPopup(null);
+      isProcessingRef.current = false;
+      popupTimeoutRef.current = null;
+    }, 1000);
+  };
+
   useEffect(() => {
     if (role === "mentor") {
       loadActiveSchedule();
@@ -86,7 +182,7 @@ export default function MentorApp() {
     try {
       await loginMentorKey(passkey.trim());
     } catch (err: any) {
-      setError(err?.data?.error ?? "Invalid mentor key");
+      setError(err?.data?.error ?? "Invalid faculty key");
     } finally {
       setKeySubmitting(false);
     }
@@ -96,7 +192,6 @@ export default function MentorApp() {
     setLoading(true);
     setError(null);
     try {
-      // 1. Fetch current active schedule
       const res = await customFetch<{
         activeSchedule: Schedule | null;
         session: Session | null;
@@ -110,7 +205,6 @@ export default function MentorApp() {
       setServerTime(res.serverTime);
 
       if (res.activeSchedule) {
-        // 2. Start a session if not already started
         let currentSession = res.session;
         if (!currentSession) {
           currentSession = await customFetch<Session>("/api/mentor/start-session", {
@@ -121,10 +215,8 @@ export default function MentorApp() {
           setSession(currentSession);
         }
 
-        // 3. Fetch student list for this schedule
         const studentData = await customFetch<ScheduleStudent[]>(`/api/mentor/students-by-schedule?scheduleId=${res.activeSchedule.id}`);
         
-        // Auto-check students who already scanned at the gate on first load
         const mappedStudents = studentData.map(s => {
           if (!s.markedByTeacher && s.scannedGate) {
             return { ...s, markedPresent: true };
@@ -135,7 +227,7 @@ export default function MentorApp() {
         setStudents(mappedStudents);
       }
     } catch (err: any) {
-      setError(err?.data?.error ?? err?.message ?? "Failed to load active schedule");
+      setError(err?.data?.error ?? err?.message ?? "Failed to load active class schedule");
     } finally {
       setLoading(false);
     }
@@ -148,7 +240,6 @@ export default function MentorApp() {
     try {
       setActiveSchedule(sched);
       
-      // Start or retrieve session
       let currentSession = sched.session;
       if (!currentSession) {
         currentSession = await customFetch<Session>("/api/mentor/start-session", {
@@ -159,10 +250,8 @@ export default function MentorApp() {
       }
       setSession(currentSession);
 
-      // Fetch students list
       const studentData = await customFetch<ScheduleStudent[]>(`/api/mentor/students-by-schedule?scheduleId=${sched.id}`);
       
-      // Auto-check students who already scanned at the gate on first load
       const mappedStudents = studentData.map(s => {
         if (!s.markedByTeacher && s.scannedGate) {
           return { ...s, markedPresent: true };
@@ -172,15 +261,116 @@ export default function MentorApp() {
 
       setStudents(mappedStudents);
     } catch (err: any) {
-      setError(err?.data?.error ?? err?.message ?? "Failed to load schedule details");
+      setError(err?.data?.error ?? err?.message ?? "Failed to load class schedule details");
     } finally {
       setLoading(false);
     }
   };
 
+  // ---------- Live Camera Scanning Logic ----------
+  const handleScanCode = (decodedText: string) => {
+    if (isProcessingRef.current || isLocked) return;
+    const uid = (decodedText || "").trim();
+    if (!uid) return;
+
+    const now = Date.now();
+    if (lastScanRef.current.text === uid && now - lastScanRef.current.at < 1200) return;
+    lastScanRef.current = { text: uid, at: now };
+    isProcessingRef.current = true;
+
+    // Find student in current roster
+    setStudents(prev => {
+      const targetIndex = prev.findIndex(
+        s => s.uniqueId.toLowerCase() === uid.toLowerCase() || String(s.id) === uid
+      );
+
+      if (targetIndex !== -1) {
+        const targetStudent = prev[targetIndex];
+        showPopup({
+          success: true,
+          studentName: targetStudent.name,
+          uniqueId: targetStudent.uniqueId,
+          message: targetStudent.markedPresent ? "Already marked present!" : "Marked Present!",
+          scannedGate: targetStudent.scannedGate
+        });
+
+        const updated = [...prev];
+        updated[targetIndex] = {
+          ...targetStudent,
+          markedPresent: true,
+          scannedQr: true,
+          warningNotScanned: false
+        };
+        return updated;
+      } else {
+        showPopup({
+          success: false,
+          message: `Student (${uid}) not found in this class section!`
+        });
+        return prev;
+      }
+    });
+  };
+
+  const startScanner = async () => {
+    setCameraError("");
+    setScanning(true);
+    ensureAudio();
+
+    try {
+      const { Html5Qrcode } = await import("html5-qrcode");
+      if (!scannerRef.current) return;
+
+      const scanner = new Html5Qrcode("faculty-qr-reader");
+      scannerInstanceRef.current = scanner;
+
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras.length) {
+        setCameraError("No camera found on this device.");
+        setScanning(false);
+        return;
+      }
+
+      const cameraId = cameras.find((c) => c.label.toLowerCase().includes("back"))?.id ?? cameras[cameras.length - 1].id;
+
+      await scanner.start(
+        cameraId,
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        (text) => { handleScanCode(text); },
+        undefined
+      );
+    } catch (err) {
+      console.error(err);
+      setCameraError("Camera permission denied. Please allow camera access.");
+      setScanning(false);
+    }
+  };
+
+  const stopScanner = async () => {
+    try {
+      if (scannerInstanceRef.current) {
+        const state = typeof scannerInstanceRef.current.getState === "function" ? scannerInstanceRef.current.getState() : null;
+        if (state === 2 || state === 3) {
+          await scannerInstanceRef.current.stop();
+        }
+        scannerInstanceRef.current = null;
+      }
+    } catch {}
+    setScanning(false);
+    isProcessingRef.current = false;
+  };
+
   useEffect(() => {
-    if (role === "mentor") loadActiveSchedule();
-  }, [role]);
+    if (viewMode === "camera") {
+      startScanner();
+    } else {
+      stopScanner();
+    }
+    return () => {
+      stopScanner();
+      if (popupTimeoutRef.current) clearTimeout(popupTimeoutRef.current);
+    };
+  }, [viewMode]);
 
   const handleSetAttendance = (studentId: number, isPresent: boolean) => {
     if (isLocked) return;
@@ -221,7 +411,6 @@ export default function MentorApp() {
       });
 
       setSuccess(`Attendance submitted successfully! ${res.presentCount} students present.`);
-      // Refresh to lock state
       await loadActiveSchedule();
     } catch (err: any) {
       setError(err?.data?.error ?? "Failed to submit attendance");
@@ -230,7 +419,6 @@ export default function MentorApp() {
     }
   };
 
-  // Helper to determine if the class hour has passed
   const isTimePast = () => {
     if (!activeSchedule) return false;
     const now = new Date();
@@ -244,50 +432,61 @@ export default function MentorApp() {
 
   const isLocked = !!(session?.ended_at || isTimePast());
 
+  // ---------- Light Theme Lock / Passkey Screen ----------
   if (role !== "mentor") {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 text-slate-350 font-sans">
-        <div className="w-full max-w-md bg-slate-950 border border-slate-850 rounded-2xl p-6 shadow-2xl">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 text-slate-900 font-sans relative overflow-hidden">
+        {/* Soft Background Accents */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-100 rounded-full blur-3xl opacity-60 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-60 pointer-events-none" />
+
+        <div className="w-full max-w-md bg-white border border-slate-200/80 rounded-[2rem] p-8 shadow-2xl relative z-10">
           <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-650/15 mb-4">
-              <GraduationCap className="w-6 h-6 text-white" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-emerald-600 flex items-center justify-center shadow-xl shadow-purple-600/20 mb-4">
+              <GraduationCap className="w-9 h-9 text-white" />
             </div>
-            <h1 className="text-xl font-black text-slate-100">Mentor Portal</h1>
-            <p className="text-xs text-slate-400 mt-2 max-w-xs">
-              Enter your unique mentor passkey to unlock your active lecture class attendance checklist.
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Faculty Scanner App</h1>
+            <p className="text-sm font-semibold text-slate-500 mt-1.5 max-w-xs">
+              Enter your Faculty Passkey to access classes & live QR attendance scanner.
             </p>
           </div>
 
-          <form onSubmit={handleKeyLogin} className="mt-6 flex flex-col gap-4">
+          <form onSubmit={handleKeyLogin} className="mt-8 flex flex-col gap-5">
             {error && (
-              <div className="px-3 py-2 rounded-lg bg-red-950/40 border border-red-800 text-red-200 text-xs font-semibold">
-                ⚠️ {error}
+              <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold text-center flex items-center justify-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                {error}
               </div>
             )}
             
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-400">Mentor Passkey</label>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-extrabold text-slate-600 uppercase tracking-wider text-center">
+                Faculty Passkey (Key)
+              </label>
               <input
                 required
-                type="text"
-                placeholder="e.g. BALARAM"
+                type="password"
+                placeholder="••••••••"
                 value={passkey}
                 onChange={(e) => setPasskey(e.target.value.toUpperCase())}
-                className="px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 placeholder-slate-650 text-sm focus:outline-none focus:border-purple-500 font-bold text-center tracking-wider"
+                className="px-4 py-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-2xl font-mono font-bold tracking-widest text-center focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-600/10 shadow-inner transition-all"
+                autoFocus
               />
             </div>
 
             <button
               type="submit"
               disabled={keySubmitting}
-              className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 text-white font-bold text-sm shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-700 hover:to-emerald-700 disabled:opacity-50 text-white font-black text-sm shadow-xl shadow-purple-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider mt-1"
             >
               {keySubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Unlocking...
+                  <Loader2 className="w-5 h-5 animate-spin" /> Unlocking Portal...
                 </>
               ) : (
-                "Unlock Attendance"
+                <>
+                  <Sparkles className="w-5 h-5" /> Unlock Faculty App
+                </>
               )}
             </button>
           </form>
@@ -296,8 +495,6 @@ export default function MentorApp() {
     );
   }
 
-  // Filtered and sorted students:
-  // Show warnings/flags, and allow filtering via search query
   const filteredStudents = students.filter(
     (s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -308,21 +505,24 @@ export default function MentorApp() {
   const warningsCount = students.filter((s) => s.warningNotScanned).length;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-350 font-sans">
-      {/* Header */}
-      <header className="bg-slate-950 border-b border-slate-850 px-4 py-3 sticky top-0 z-30 shadow-sm">
-        <div className="flex items-center gap-3 max-w-3xl mx-auto">
-          <div className="w-9 h-9 rounded-lg bg-green-600 flex items-center justify-center shadow-md shadow-green-600/10">
-            <GraduationCap className="w-5 h-5 text-white" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
+      {/* Light Navbar */}
+      <header className="bg-white border-b border-slate-200 px-4 py-3.5 sticky top-0 z-30 shadow-sm backdrop-blur-md">
+        <div className="flex items-center justify-between max-w-3xl mx-auto gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-emerald-600 flex items-center justify-center shadow-md shadow-purple-600/20 flex-shrink-0">
+              <GraduationCap className="w-6 h-6 text-white" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-base font-black text-slate-900 truncate">Faculty Scanner App</h1>
+              <p className="text-xs text-purple-700 font-bold truncate">{mentor?.name} · {mentor?.email}</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-base font-bold text-slate-200 truncate">Mentor Hourly App</h1>
-            <p className="text-xs text-slate-400 truncate">{mentor?.name} · {mentor?.email}</p>
-          </div>
+
           <button
             data-testid="mentor-logout"
             onClick={logout}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 hover:bg-red-900/20 text-slate-300 hover:text-red-600 border border-slate-800 text-xs font-semibold transition-all active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-700 border border-slate-200 text-xs font-bold transition-all active:scale-[0.97]"
           >
             <LogOut className="w-4 h-4" /> Logout
           </button>
@@ -331,24 +531,24 @@ export default function MentorApp() {
 
       {/* PWA Install Banner */}
       {canInstall && showInstallBanner && (
-        <div className="bg-green-600 text-white px-4 py-3">
+        <div className="bg-gradient-to-r from-purple-600 to-emerald-600 text-white px-4 py-3 shadow-sm">
           <div className="max-w-3xl mx-auto flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
               <Download className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold">Install Mentor App</p>
-              <p className="text-xs text-green-100 mt-0.5">Add to your home screen for quick access — works offline too!</p>
+              <p className="text-xs font-bold uppercase tracking-wider">Install App</p>
+              <p className="text-xs text-purple-100 truncate">Add Faculty Scanner to home screen for offline camera scanning.</p>
             </div>
             <button
               onClick={install}
-              className="flex-shrink-0 px-4 py-2 rounded-lg bg-white text-green-700 text-xs font-bold hover:bg-green-50 transition-colors active:scale-[0.97]"
+              className="flex-shrink-0 px-3 py-1.5 rounded-lg bg-white text-purple-900 text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm"
             >
               Install
             </button>
             <button
               onClick={() => setShowInstallBanner(false)}
-              className="flex-shrink-0 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="flex-shrink-0 p-1 text-white/80 hover:text-white"
             >
               <X className="w-4 h-4" />
             </button>
@@ -356,42 +556,97 @@ export default function MentorApp() {
         </div>
       )}
 
-      <div className="max-w-3xl mx-auto p-4">
+      {/* Result Popup Overlay (1.0 Second Popup with Light High-Contrast Visuals) */}
+      {scanPopup && (
+        <div
+          data-testid={scanPopup.success ? "scan-success" : "scan-error"}
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-6 backdrop-blur-md transition-all ${
+            scanPopup.success ? "bg-emerald-600/95" : "bg-red-600/95"
+          }`}
+        >
+          {scanPopup.success ? (
+            <CheckCircle className="w-24 h-24 text-white mb-4 animate-bounce" />
+          ) : (
+            <XCircle className="w-24 h-24 text-white mb-4" />
+          )}
+
+          <p className="text-3xl font-extrabold mb-3 text-white uppercase tracking-wide">
+            {scanPopup.success ? "PRESENT MARKED" : "SCAN ERROR"}
+          </p>
+
+          {scanPopup.studentName && (
+            <div className="my-2 px-6 py-3.5 bg-amber-300 border-4 border-amber-400 rounded-2xl shadow-2xl text-center">
+              <p className="text-4xl sm:text-5xl font-black text-slate-950 tracking-wide leading-tight uppercase drop-shadow-md">
+                {scanPopup.studentName}
+              </p>
+            </div>
+          )}
+
+          {scanPopup.uniqueId && (
+            <p className="text-xl font-mono font-bold text-white/90 mb-2 tracking-wider">
+              ID: {scanPopup.uniqueId}
+            </p>
+          )}
+
+          <p className="text-sm font-extrabold text-white text-center mt-1">{scanPopup.message}</p>
+
+          {scanPopup.success && (
+            <span className={`mt-3 px-3 py-1 rounded-full text-xs font-black border ${
+              scanPopup.scannedGate
+                ? "bg-white text-emerald-800 border-emerald-300"
+                : "bg-amber-100 text-amber-900 border-amber-300"
+            }`}>
+              {scanPopup.scannedGate ? "✓ Gate Verified (On Campus)" : "⚠️ No Gate Scan"}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Main Container */}
+      <div className="max-w-3xl mx-auto p-4 flex-1 w-full space-y-5">
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-xl bg-red-900/30 border border-red-800 text-red-200 text-sm">
+          <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 px-4 py-3 rounded-xl bg-green-900/30 border border-green-800 text-green-200 text-sm">
+          <div className="px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             {success}
           </div>
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+            <p className="text-xs font-bold text-slate-500">Loading active class timetable...</p>
           </div>
         ) : !activeSchedule ? (
-          <div className="space-y-6">
-            <div className="bg-slate-950 border border-slate-850 rounded-2xl p-6 text-center shadow-md">
-              <GraduationCap className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-              <h2 className="text-slate-100 text-lg font-black">No Class Active Right Now</h2>
-              <p className="text-slate-400 text-xs mt-2 max-w-sm mx-auto">
-                There is no scheduled class at this exact time. However, you can select any of your classes for today below to start and mark attendance.
+          <div className="space-y-5">
+            {/* No Active Class Card */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center shadow-xl shadow-slate-200/50">
+              <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <GraduationCap className="w-8 h-8 text-purple-600" />
+              </div>
+              <h2 className="text-slate-900 text-xl font-black">No Class Active Right Now</h2>
+              <p className="text-slate-500 text-xs mt-2 max-w-sm mx-auto leading-relaxed font-medium">
+                Select any of your scheduled lecture classes below to launch the live QR camera scanner and take attendance.
               </p>
               <button
                 onClick={loadActiveSchedule}
-                className="mt-4 px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-850 text-slate-200 text-xs font-semibold border border-slate-800 transition-all active:scale-[0.98]"
+                className="mt-5 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition-all active:scale-[0.98] inline-flex items-center gap-2 shadow-sm"
               >
-                Refresh Time Check
+                <RefreshCw className="w-4 h-4 text-purple-600" />
+                Refresh Timetable Check
               </button>
             </div>
 
+            {/* Today's Schedules List */}
             {todaySchedules.length > 0 ? (
               <div className="space-y-3">
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider ml-1">
+                <h3 className="text-xs font-extrabold text-purple-700 uppercase tracking-widest ml-1">
                   Your Classes Today
                 </h3>
                 <div className="grid grid-cols-1 gap-3">
@@ -399,45 +654,44 @@ export default function MentorApp() {
                     <div
                       key={sched.id}
                       onClick={() => handleSelectSchedule(sched)}
-                      className="bg-slate-950 border border-slate-850 hover:border-purple-500/50 p-4 rounded-xl shadow-sm transition-all active:scale-[0.99] cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                      className="bg-white border border-slate-200 hover:border-purple-400 p-4 rounded-2xl shadow-md shadow-slate-200/50 transition-all active:scale-[0.99] cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <GraduationCap className="w-5 h-5 text-purple-400" />
+                        <div className="w-11 h-11 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center flex-shrink-0">
+                          <QrCode className="w-6 h-6 text-purple-600" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-0.5 rounded bg-purple-950/60 border border-purple-900/40 text-purple-300 text-[10px] font-bold">
-                              {sched.year} Yr · Sec {sched.section}
+                            <span className="px-2.5 py-0.5 rounded-lg bg-purple-100 border border-purple-200 text-purple-800 text-[10px] font-bold">
+                              {sched.year} Yr · Section {sched.section}
                             </span>
-                            <span className="text-[10px] font-mono font-semibold text-slate-500">
+                            <span className="text-xs font-mono font-bold text-slate-500">
                               {sched.start_time.slice(0, 5)} - {sched.end_time.slice(0, 5)}
                             </span>
                           </div>
-                          <h4 className="text-slate-200 font-bold text-sm mt-1.5 group-hover:text-purple-400 transition-colors">
-                            {sched.subject || "Lecture hour"}
+                          <h4 className="text-slate-900 font-bold text-base mt-1.5 group-hover:text-purple-600 transition-colors">
+                            {sched.subject || "Lecture Class"}
                           </h4>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between sm:justify-end gap-3">
-                        {/* Status Badge */}
+                      <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
                         {sched.status === "submitted" ? (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-950/80 text-green-400 border border-green-900/40">
+                          <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
                             ✓ Submitted ({sched.session?.student_count} present)
                           </span>
                         ) : sched.status === "started" ? (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-yellow-950/80 text-yellow-400 border border-yellow-900/40 animate-pulse">
-                            ● Scan Started
+                          <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                            ● Scan Active
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-900 text-slate-500 border border-slate-800">
+                          <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200">
                             Pending
                           </span>
                         )}
 
-                        <button className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-sm">
-                          Select
+                        <button className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-md shadow-purple-600/20 flex items-center gap-1.5">
+                          Start Scanner <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -445,35 +699,38 @@ export default function MentorApp() {
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-950 border border-slate-850 rounded-xl p-8 text-center">
-                <p className="text-slate-450 text-sm">You have no classes scheduled for today.</p>
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm font-semibold">
+                You have no classes scheduled for today.
               </div>
             )}
           </div>
         ) : (
           <>
-            {/* Active Class Header Info */}
-            <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 mb-5 shadow-sm">
-              <div className="flex items-start justify-between">
+            {/* Active Class Header Card */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xl shadow-slate-200/50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <span className="px-2 py-0.5 rounded-md bg-purple-900/40 text-purple-300 text-xs font-bold border border-purple-800">
-                    {activeSchedule.year} Yr - Section {activeSchedule.section}
-                  </span>
-                  <h2 className="text-lg font-black text-slate-100 mt-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-purple-100 text-purple-800 text-xs font-bold border border-purple-200">
+                      {activeSchedule.year} Yr - Section {activeSchedule.section}
+                    </span>
+                    <span className="text-xs text-slate-500 font-mono font-bold">
+                      {activeSchedule.start_time.slice(0, 5)} - {activeSchedule.end_time.slice(0, 5)}
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-black text-slate-900 mt-2">
                     {activeSchedule.subject || "Lecture Class"}
                   </h2>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Lecture hour: <span className="text-slate-200 font-semibold">{activeSchedule.start_time.slice(0,5)} - {activeSchedule.end_time.slice(0,5)}</span>
-                  </p>
                 </div>
-                <div className="flex flex-col items-end gap-2">
+
+                <div className="flex items-center gap-2">
                   {isLocked ? (
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-950 border border-red-800 text-red-400 text-xs font-bold">
-                      <Lock className="w-3.5 h-3.5" /> Locked
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-100 border border-red-200 text-red-700 text-xs font-bold">
+                      <Lock className="w-4 h-4" /> Session Locked
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-green-950 border border-green-800 text-green-400 text-xs font-bold animate-pulse">
-                      ● Active Now
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-extrabold animate-pulse">
+                      ● Live Session
                     </span>
                   )}
                   {todaySchedules.length > 0 && (
@@ -483,7 +740,7 @@ export default function MentorApp() {
                         setSession(null);
                         setStudents([]);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-350 hover:text-slate-200 text-[10px] font-bold transition-all active:scale-[0.97]"
+                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-all active:scale-[0.97]"
                     >
                       Change Class
                     </button>
@@ -492,116 +749,193 @@ export default function MentorApp() {
               </div>
 
               {isLocked && (
-                <div className="mt-4 px-3 py-2 rounded-lg bg-red-950/40 border border-red-800 text-red-200 text-xs">
-                  ⚠️ Attendance session for this lecture hour is locked. You cannot modify or submit attendance now.
+                <div className="mt-4 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+                  ⚠️ Attendance session for this lecture hour is locked. You cannot scan or modify records.
                 </div>
               )}
             </div>
 
-            {/* Attendance stats */}
-            <div className="grid grid-cols-3 gap-3 mb-5">
-              <div className="bg-slate-950 border border-slate-850 rounded-xl p-3 text-center">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Class</p>
-                <p className="text-xl font-black text-slate-200 mt-1">{students.length}</p>
+            {/* Attendance Counters Bar */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Class</p>
+                <p className="text-2xl font-black text-slate-900 mt-1">{students.length}</p>
               </div>
-              <div className="bg-slate-950 border border-slate-850 rounded-xl p-3 text-center">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Present</p>
-                <p className="text-xl font-black text-green-500 mt-1">{presentCount}</p>
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Present</p>
+                <p className="text-2xl font-black text-emerald-600 mt-1">{presentCount}</p>
               </div>
-              <div className="bg-slate-950 border border-slate-850 rounded-xl p-3 text-center">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">No Gate Scan</p>
-                <p className={`text-xl font-black mt-1 ${warningsCount > 0 ? "text-amber-500" : "text-slate-400"}`}>
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center shadow-sm">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">No Gate Scan</p>
+                <p className={`text-2xl font-black mt-1 ${warningsCount > 0 ? "text-amber-600" : "text-slate-400"}`}>
                   {warningsCount}
                 </p>
               </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative mb-4">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-slate-500" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search by student name or roll number..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-9 pr-10 py-2 bg-slate-950 border border-slate-850 rounded-xl text-slate-200 placeholder-slate-500 text-sm focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-250"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
+            {/* View Mode Switcher */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-1.5 flex gap-2 shadow-sm">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex-1 py-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all ${
+                  viewMode === "list"
+                    ? "bg-slate-900 text-white shadow-md"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                Class Roster List ({students.length})
+              </button>
+              <button
+                onClick={() => setViewMode("camera")}
+                disabled={isLocked}
+                className={`flex-1 py-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all ${
+                  viewMode === "camera"
+                    ? "bg-purple-600 text-white shadow-md shadow-purple-600/20"
+                    : "bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200"
+                }`}
+              >
+                <Camera className="w-4 h-4" />
+                Live QR Scanner
+              </button>
             </div>
 
-            {/* Student List */}
-            {filteredStudents.length === 0 ? (
-              <div className="bg-slate-950 border border-slate-850 rounded-xl p-8 text-center">
-                <p className="text-slate-450 text-sm">No students matching "{searchQuery}"</p>
+            {/* Live Camera View Mode */}
+            {viewMode === "camera" && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 space-y-4 shadow-xl shadow-slate-200/50">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-purple-600" />
+                      Point Camera at Student QR Code
+                    </h3>
+                    <p className="text-xs text-slate-500 font-semibold mt-0.5">Scanned students will automatically mark Present</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {presentCount} / {students.length} Present
+                  </span>
+                </div>
+
+                <div className="w-full bg-slate-900 border border-slate-300 rounded-2xl overflow-hidden aspect-square max-w-sm mx-auto relative shadow-inner">
+                  <div id="faculty-qr-reader" ref={scannerRef} className="w-full h-full" />
+                </div>
+
+                {cameraError && (
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold text-center">
+                    {cameraError}
+                  </div>
+                )}
+
+                {/* Volume Control */}
+                <div className="flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 p-3 rounded-2xl">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setVolume(volume > 0 ? 0 : 0.7)}
+                      className="text-slate-600 hover:text-slate-900"
+                    >
+                      {volume > 0 ? <Volume2 className="w-4 h-4 text-purple-600" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
+                    </button>
+                    <span className="text-xs font-bold text-slate-700">Beep Audio</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    value={volume}
+                    onChange={(e) => setVolume(parseFloat(e.target.value))}
+                    className="w-28 accent-purple-600 cursor-pointer"
+                  />
+                </div>
               </div>
-            ) : (
-              <div className="bg-slate-950 border border-slate-850 rounded-xl divide-y divide-slate-850 overflow-hidden shadow-sm mb-6">
-                {filteredStudents.map((s) => (
-                  <div
-                    key={s.id}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-slate-900/20 transition-colors"
-                  >
-                    {/* Student Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-slate-200 truncate">{s.name}</p>
-                        {s.scannedGate ? (
-                          <span className="px-1.5 py-0.5 rounded bg-green-950 text-green-400 text-[9px] font-bold border border-green-800">
-                            Gate Scanned
-                          </span>
-                        ) : (
-                          <span className="px-1.5 py-0.5 rounded bg-slate-850 text-slate-450 text-[9px] border border-slate-800">
-                            No Gate Scan
+            )}
+
+            {/* Class Roster Search & List */}
+            {viewMode === "list" && (
+              <>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search student name or roll number..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="block w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-600/10 transition-colors font-bold shadow-sm"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                {filteredStudents.length === 0 ? (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm font-semibold">
+                    No students matching "{searchQuery}"
+                  </div>
+                ) : (
+                  <div className="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100 overflow-hidden shadow-md shadow-slate-200/50">
+                    {filteredStudents.map((s) => (
+                      <div
+                        key={s.id}
+                        className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-slate-50 transition-colors"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-bold text-slate-900 truncate">{s.name}</p>
+                            {s.scannedGate ? (
+                              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                                Gate Verified
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] border border-slate-200 font-semibold">
+                                No Gate Scan
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 font-mono font-semibold mt-0.5">{s.uniqueId}</p>
+                        </div>
+
+                        {s.warningNotScanned && (
+                          <span className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                            <AlertTriangle className="w-3 h-3 text-amber-600" /> No Gate Scan
                           </span>
                         )}
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            disabled={isLocked}
+                            onClick={() => handleSetAttendance(s.id, true)}
+                            className={`px-3.5 py-1.5 rounded-xl border text-xs font-extrabold transition-all ${
+                              s.markedPresent
+                                ? "bg-emerald-600 border-emerald-500 text-white shadow-md shadow-emerald-600/20"
+                                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            }`}
+                          >
+                            Present
+                          </button>
+                          <button
+                            disabled={isLocked}
+                            onClick={() => handleSetAttendance(s.id, false)}
+                            className={`px-3.5 py-1.5 rounded-xl border text-xs font-extrabold transition-all ${
+                              !s.markedPresent
+                                ? "bg-red-600 border-red-500 text-white shadow-md shadow-red-600/20"
+                                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            }`}
+                          >
+                            Absent
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">{s.uniqueId}</p>
-                    </div>
-
-                    {/* Warning Flag */}
-                    {s.warningNotScanned && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950 border border-amber-800 text-amber-400 text-[9px] font-bold">
-                        <AlertTriangle className="w-3 h-3" /> Not scanned the QR code
-                      </span>
-                    )}
-
-                    {/* Present / Absent Buttons */}
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        disabled={isLocked}
-                        onClick={() => handleSetAttendance(s.id, true)}
-                        className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
-                          s.markedPresent
-                            ? "bg-green-600 border-green-500 text-white shadow-sm shadow-green-600/10"
-                            : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-850 hover:text-slate-200"
-                        }`}
-                      >
-                        Present
-                      </button>
-                      <button
-                        disabled={isLocked}
-                        onClick={() => handleSetAttendance(s.id, false)}
-                        className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
-                          !s.markedPresent
-                            ? "bg-red-900/65 border-red-800 text-red-200 shadow-sm shadow-red-900/10"
-                            : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-850 hover:text-slate-200"
-                        }`}
-                      >
-                        Absent
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
 
             {/* Submission Button */}
@@ -609,14 +943,16 @@ export default function MentorApp() {
               <button
                 onClick={handleSubmitAttendance}
                 disabled={submitting}
-                className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-500 disabled:bg-slate-800 text-white font-bold text-sm shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white font-black text-base shadow-xl shadow-emerald-600/20 transition-all active:scale-[0.99] flex items-center justify-center gap-2 uppercase tracking-wide"
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Submitting...
+                    <Loader2 className="w-5 h-5 animate-spin" /> Submitting Attendance...
                   </>
                 ) : (
-                  "Submit Hourly Attendance"
+                  <>
+                    <UserCheck className="w-5 h-5" /> Submit Class Attendance ({presentCount} Present)
+                  </>
                 )}
               </button>
             )}

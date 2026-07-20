@@ -75,8 +75,9 @@ function AppRouter() {
       <Route path="/security" component={SecurityApp} />
       <Route path="/login" component={Login} />
 
-      {/* Mentor */}
+      {/* Mentor & Faculty Scanner App */}
       <Route path="/mentor" component={MentorApp} />
+      <Route path="/faculty" component={MentorApp} />
 
       {/* HOD routes */}
       <Route path="/hod-dashboard">
