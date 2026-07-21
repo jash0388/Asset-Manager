@@ -239,37 +239,57 @@ router.post("/scan/batch", async (req: any, res: any) => {
         }
       }
 
-      if (current.status === "inside") {
+      if (current.status === "left") {
+        // Entry scan (student entering campus / checking in)
         const { data: inserted, error: insertError } = await supabase
           .from("qr_attendance")
-          .insert({ user_id: user.id, date, exit_time: ts, entry_time: SENTINEL_ENTRY, scan_count: 1, last_scan_at: ts })
+          .insert({ user_id: user.id, date, entry_time: ts, exit_time: null, scan_count: 1, last_scan_at: ts })
           .select()
           .single();
         if (insertError) throw insertError;
         const recordId = inserted.id;
-        batchStatusCache.set(user.id, { status: "left", recordId, scanCount: 1, lastScanAt: ts });
-        results.push({
-          clientScanId,
-          status: "ok",
-          action: "exit",
-          user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          recordId,
-        });
-      } else {
-        if (!current.recordId) throw new Error("Missing attendance record for return scan");
-        const nextScanCount = current.scanCount + 1;
-        const { error: updateError } = await supabase
-          .from("qr_attendance")
-          .update({ entry_time: ts, scan_count: nextScanCount, last_scan_at: ts })
-          .eq("id", current.recordId);
-        if (updateError) throw updateError;
-        batchStatusCache.set(user.id, { status: "inside", recordId: current.recordId, scanCount: nextScanCount, lastScanAt: ts });
+        batchStatusCache.set(user.id, { status: "inside", recordId, scanCount: 1, lastScanAt: ts });
         results.push({
           clientScanId,
           status: "ok",
           action: "entry",
           user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+          recordId,
         });
+      } else {
+        // Exit scan (student leaving campus / checking out)
+        if (current.recordId) {
+          const nextScanCount = current.scanCount + 1;
+          const { error: updateError } = await supabase
+            .from("qr_attendance")
+            .update({ exit_time: ts, scan_count: nextScanCount, last_scan_at: ts })
+            .eq("id", current.recordId);
+          if (updateError) throw updateError;
+          batchStatusCache.set(user.id, { status: "left", recordId: current.recordId, scanCount: nextScanCount, lastScanAt: ts });
+          results.push({
+            clientScanId,
+            status: "ok",
+            action: "exit",
+            user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+            recordId: current.recordId,
+          });
+        } else {
+          const { data: inserted, error: insertError } = await supabase
+            .from("qr_attendance")
+            .insert({ user_id: user.id, date, exit_time: ts, entry_time: SENTINEL_ENTRY, scan_count: 1, last_scan_at: ts })
+            .select()
+            .single();
+          if (insertError) throw insertError;
+          const recordId = inserted.id;
+          batchStatusCache.set(user.id, { status: "left", recordId, scanCount: 1, lastScanAt: ts });
+          results.push({
+            clientScanId,
+            status: "ok",
+            action: "exit",
+            user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+            recordId,
+          });
+        }
       }
     } catch (err: any) {
       results.push({ clientScanId, status: "error", error: "Server error processing scan" });
@@ -325,11 +345,31 @@ router.post("/scan", async (req: any, res: any) => {
       }
     }
 
-    const currentStatus = record ? getRecordStatus(record) : "inside";
+    const currentStatus = record ? getRecordStatus(record) : "left";
 
-    if (currentStatus === "inside") {
+    if (currentStatus === "left") {
+      req.log.info({ userId: user.id, name: user.name }, "Student checked in / arrived on campus");
+      const { data: inserted, error: insertError } = await supabase
+        .from("qr_attendance")
+        .insert({ user_id: user.id, date, entry_time: now, exit_time: null, scan_count: 1, last_scan_at: now })
+        .select()
+        .single();
+
+      if (insertError) {
+        req.log.error({ insertError }, "Insert error on entry scan");
+        return res.status(500).json({ error: "DB error", detail: insertError.message, code: insertError.code });
+      }
+
+      return res.json({
+        success: true,
+        action: "entry",
+        message: `${user.name} has Checked In / Arrived on Campus.`,
+        user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+        recordId: inserted.id,
+      });
+    } else {
       req.log.info({ userId: user.id, name: user.name }, "Student checked out / leaving campus");
-      const nextScanCount = (record.scan_count ?? 0) + 1;
+      const nextScanCount = (record?.scan_count ?? 0) + 1;
       const { data: updated, error: updateError } = await supabase
         .from("qr_attendance")
         .update({ exit_time: now, scan_count: nextScanCount, last_scan_at: now })
@@ -350,26 +390,6 @@ router.post("/scan", async (req: any, res: any) => {
         recordId: updated.id,
       });
     }
-
-    req.log.info({ userId: user.id, name: user.name }, "Student checked in / arrived on campus");
-    const { data: inserted, error: insertError } = await supabase
-      .from("qr_attendance")
-      .insert({ user_id: user.id, date, entry_time: now, exit_time: null, scan_count: 1, last_scan_at: now })
-      .select()
-      .single();
-
-    if (insertError) {
-      req.log.error({ insertError }, "Insert error on entry scan");
-      return res.status(500).json({ error: "DB error", detail: insertError.message, code: insertError.code });
-    }
-
-    return res.json({
-      success: true,
-      action: "entry",
-      message: `${user.name} has Checked In / Arrived on Campus.`,
-      user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-      recordId: inserted.id,
-    });
   } catch (err: any) {
     req.log.error({ err }, "Scan error");
     res.status(500).json({ error: "Internal server error" });

@@ -167,9 +167,18 @@ importers:
         specifier: ^4.3.2
         version: 4.3.2
     devDependencies:
+      '@esbuild/darwin-arm64':
+        specifier: 0.27.3
+        version: 0.27.3
+      '@esbuild/darwin-x64':
+        specifier: 0.27.3
+        version: 0.27.3
       '@rollup/rollup-darwin-arm64':
         specifier: ^4.60.2
         version: 4.60.2
+      esbuild:
+        specifier: 0.27.3
+        version: 0.27.3
       lightningcss-darwin-arm64:
         specifier: ^1.32.0
         version: 1.32.0
@@ -1221,6 +1230,18 @@ packages:
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
+
+  '@esbuild/darwin-arm64@0.27.3':
+    resolution: {integrity: sha512-Re491k7ByTVRy0t3EKWajdLIr0gz2kKKfzafkth4Q8A5n1xTHrkqZgLLjFEHVD+AXdUGgQMq+Godfq45mGpCKg==}
+    engines: {node: '>=18'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@esbuild/darwin-x64@0.27.3':
+    resolution: {integrity: sha512-vHk/hA7/1AckjGzRqi6wbo+jaShzRowYip6rt6q7VYEDX4LEy1pZfDpdxCBnGtl+A5zq8iXDcyuxwtv3hNtHFg==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [darwin]
 
   '@esbuild/linux-x64@0.27.3':
     resolution: {integrity: sha512-Czi8yzXUWIQYAtL/2y6vogER8pvcsOsk5cpwL4Gk5nJqH5UZiVByIY8Eorm5R13gq+DQKYg0+JyQoytLQas4dA==}
@@ -5323,6 +5344,10 @@ snapshots:
   '@date-fns/tz@1.4.1': {}
 
   '@drizzle-team/brocli@0.10.2': {}
+
+  '@esbuild/darwin-arm64@0.27.3': {}
+
+  '@esbuild/darwin-x64@0.27.3': {}
 
   '@esbuild/linux-x64@0.27.3':
     optional: true
