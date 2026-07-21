@@ -205,7 +205,9 @@ export async function syncQueue(): Promise<SyncResult> {
 
   for (const r of results) {
     if (!r || typeof r.clientScanId !== "string") continue;
-    acceptedIds.add(r.clientScanId);
+    if (r.status === "ok" || r.status === "user_not_found" || r.status === "duplicate") {
+      acceptedIds.add(r.clientScanId);
+    }
     if (r.status === "ok") {
       synced++;
     } else {
@@ -231,4 +233,8 @@ export async function syncQueue(): Promise<SyncResult> {
 
 export function clearQueue() {
   setQueue([]);
+}
+
+export function clearCooldowns() {
+  localStorage.removeItem(KEY_COOLDOWN);
 }
