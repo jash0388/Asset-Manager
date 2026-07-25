@@ -53,6 +53,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+app.use(router);
+
+// Catch-all route to handle unmatched paths with clean JSON response instead of HTML 404
+app.use((req, res) => {
+  res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
+});
 
 // seed().catch((err) => logger.error({ err }, "Seed failed"));
 

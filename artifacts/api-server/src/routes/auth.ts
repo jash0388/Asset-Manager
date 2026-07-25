@@ -94,6 +94,10 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
   }
 });
 
+router.get("/auth/mentor-key-login", (_req: any, res: any) => {
+  res.json({ status: "active", message: "Mentor key login endpoint is ready. Send a POST request with JSON body { \"key\": \"YOUR_KEY\" }." });
+});
+
 router.post("/auth/mentor-key-login", async (req: any, res: any) => {
   const { key } = req.body;
   if (!key) {

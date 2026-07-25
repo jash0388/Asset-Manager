@@ -11,6 +11,10 @@ export type PendingScan = {
   uniqueId: string;
   scannedAt: string;
   attempts: number;
+  hash?: string;
+  prevHash?: string;
+  seqNo?: number;
+  deviceId?: string;
 };
 
 const KEY_USERS = "secapp.users.v1";
@@ -18,9 +22,106 @@ const KEY_USERS_AT = "secapp.users.fetchedAt.v1";
 const KEY_QUEUE = "secapp.queue.v1";
 const KEY_COOLDOWN = "secapp.cooldown.v1";
 const KEY_LASTSYNC = "secapp.lastSyncAt.v1";
+const KEY_SEQ = "secapp.seq.v1";
+const KEY_DEVICE = "secapp.device.v1";
+const KEY_RECEIPT = "secapp.receipt.v1";
 
 const COOLDOWN_MS = 20 * 60 * 1000; // 20 minutes — prevents duplicate scans
 const USER_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const GENESIS_HASH = "GENESIS_HASH_00000000000000000000000000000000000000000000000000000000";
+
+export function getDeviceId(): string {
+  try {
+    let id = localStorage.getItem(KEY_DEVICE);
+    if (!id) {
+      id = "dev_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      localStorage.setItem(KEY_DEVICE, id);
+    }
+    return id;
+  } catch {
+    return "dev_anonymous";
+  }
+}
+
+// Synchronous SHA-256 implementation for tamper-evident hash chaining
+export function sha256Sync(ascii: string): string {
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let i: number, j: number;
+  let result = "";
+
+  const words: number[] = [];
+  const asciiLength = ascii.length * 8;
+
+  let hash = (sha256Sync as any).h = (sha256Sync as any).h || [];
+  let k = (sha256Sync as any).k = (sha256Sync as any).k || [];
+  let primeCounter = k.length;
+
+  const isPrime = (candidate: number) => {
+    for (let factor = 2; factor * factor <= candidate; factor++) {
+      if (candidate % factor === 0) return false;
+    }
+    return true;
+  };
+
+  const getFractionalBits = (n: number) => Math.floor((n - Math.floor(n)) * maxWord);
+
+  if (!primeCounter) {
+    for (let n = 2; primeCounter < 64; n++) {
+      if (isPrime(n)) {
+        if (primeCounter < 8) {
+          hash[primeCounter] = getFractionalBits(mathPow(n, 1 / 2));
+        }
+        k[primeCounter] = getFractionalBits(mathPow(n, 1 / 3));
+        primeCounter++;
+      }
+    }
+  }
+
+  hash = hash.slice(0);
+  ascii += "\x80";
+  while ((ascii.length % 64) - 56) ascii += "\x00";
+  for (i = 0; i < ascii.length; i++) {
+    j = ascii.charCodeAt(i);
+    if (j >> 8) return "";
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words.length] = (asciiLength / maxWord) | 0;
+  words[words.length] = asciiLength | 0;
+
+  for (j = 0; j < words.length; ) {
+    const w = words.slice(j, (j += 16));
+    const oldHash = hash.slice(0);
+
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const a = hash[0], e = hash[4];
+
+      const s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+      const s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+      const ch = (e & hash[5]) ^ (~e & hash[6]);
+      const temp1 = hash[7] + s1 + ch + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (((w15 >>> 7) | (w15 << 25)) ^ ((w15 >>> 18) | (w15 << 14)) ^ (w15 >>> 3)) + w[i - 7] + (((w2 >>> 17) | (w2 << 15)) ^ ((w2 >>> 19) | (w2 << 13)) ^ (w2 >>> 10))) | 0);
+      const maj = (a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]);
+      const temp2 = s0 + maj;
+
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+      hash.pop();
+    }
+
+    for (i = 0; i < 8; i++) {
+      hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+  }
+
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j >= 0; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += (b < 16 ? "0" : "") + b.toString(16);
+    }
+  }
+  return result;
+}
 
 function readJson<T>(key: string, fallback: T): T {
   try {
@@ -140,14 +241,39 @@ function setQueue(items: PendingScan[]) {
   writeJson(KEY_QUEUE, items);
 }
 
+function getNextSeqNo(): number {
+  try {
+    const raw = localStorage.getItem(KEY_SEQ);
+    const n = raw ? parseInt(raw, 10) : 0;
+    const next = (Number.isFinite(n) && n >= 0 ? n : 0) + 1;
+    localStorage.setItem(KEY_SEQ, String(next));
+    return next;
+  } catch {
+    return 1;
+  }
+}
+
 export function enqueueScan(uniqueId: string): PendingScan {
-  const scan: PendingScan = {
-    clientScanId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    uniqueId: uniqueId.trim(),
-    scannedAt: new Date().toISOString(),
-    attempts: 0,
-  };
   const q = getQueue();
+  const prevScan = q[q.length - 1];
+  const prevHash = prevScan?.hash || GENESIS_HASH;
+  const clientScanId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const scannedAt = new Date().toISOString();
+  const cleanId = uniqueId.trim();
+  const seqNo = getNextSeqNo();
+  const deviceId = getDeviceId();
+  const hash = sha256Sync(`${clientScanId}:${cleanId}:${scannedAt}:${seqNo}:${prevHash}`);
+
+  const scan: PendingScan = {
+    clientScanId,
+    uniqueId: cleanId,
+    scannedAt,
+    attempts: 0,
+    hash,
+    prevHash,
+    seqNo,
+    deviceId,
+  };
   q.push(scan);
   setQueue(q);
   return scan;
@@ -165,6 +291,7 @@ export type SyncResult = {
   synced: number;
   failed: number;
   skipped: number;
+  receipt?: string;
 };
 
 export async function syncQueue(): Promise<SyncResult> {
@@ -174,17 +301,26 @@ export async function syncQueue(): Promise<SyncResult> {
   }
 
   const batch = queue.slice(0, 200);
+  const deviceId = getDeviceId();
+  const batchId = `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
   const payload = {
+    batchId,
+    deviceId,
     scans: batch.map((s) => ({
       clientScanId: s.clientScanId,
       uniqueId: s.uniqueId,
       scannedAt: s.scannedAt,
+      hash: s.hash,
+      prevHash: s.prevHash,
+      seqNo: s.seqNo,
+      deviceId: s.deviceId || deviceId,
     })),
   };
 
   let response: any;
   try {
-    response = await customFetch<{ results: any[] }>("/api/scan/batch", {
+    response = await customFetch<{ results: any[]; syncReceipt?: string }>("/api/scan/batch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -196,6 +332,10 @@ export async function syncQueue(): Promise<SyncResult> {
     });
     setQueue(updated);
     return { attempted: batch.length, synced: 0, failed: batch.length, skipped: 0 };
+  }
+
+  if (typeof response?.syncReceipt === "string") {
+    try { localStorage.setItem(KEY_RECEIPT, response.syncReceipt); } catch {}
   }
 
   const results: any[] = Array.isArray(response?.results) ? response.results : [];

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
@@ -339,8 +339,59 @@ export default function HodDashboard() {
     return item.student.name.toLowerCase().includes(q) || item.student.uniqueId.toLowerCase().includes(q);
   });
 
+  // Deduplicate and consolidate detailed logs so each student appears only once per date
+  const consolidatedLogs = useMemo(() => {
+    const logsMap = new Map<number, AttendanceRecord>();
+
+    detailedLogs.forEach((log) => {
+      if (!log.userId) return;
+
+      const existing = logsMap.get(log.userId);
+      if (!existing) {
+        logsMap.set(log.userId, { ...log });
+      } else {
+        const earliestEntry = (() => {
+          if (!log.entryTime) return existing.entryTime;
+          if (!existing.entryTime) return log.entryTime;
+          return new Date(log.entryTime).getTime() < new Date(existing.entryTime).getTime()
+            ? log.entryTime
+            : existing.entryTime;
+        })();
+
+        const latestExit = (() => {
+          if (!log.exitTime) return existing.exitTime;
+          if (!existing.exitTime) return log.exitTime;
+          return new Date(log.exitTime).getTime() > new Date(existing.exitTime).getTime()
+            ? log.exitTime
+            : existing.exitTime;
+        })();
+
+        const isInside = existing.status === "inside" || log.status === "inside";
+        const finalStatus = isInside ? "inside" : "left";
+        const finalExitTime = isInside ? null : latestExit;
+
+        let durationMinutes: number | null = null;
+        if (earliestEntry && finalExitTime) {
+          durationMinutes = Math.floor(Math.abs(new Date(finalExitTime).getTime() - new Date(earliestEntry).getTime()) / 60000);
+        } else if (existing.durationMinutes || log.durationMinutes) {
+          durationMinutes = (existing.durationMinutes || 0) + (log.durationMinutes || 0);
+        }
+
+        logsMap.set(log.userId, {
+          ...existing,
+          entryTime: earliestEntry,
+          exitTime: finalExitTime,
+          status: finalStatus,
+          durationMinutes,
+        });
+      }
+    });
+
+    return Array.from(logsMap.values());
+  }, [detailedLogs]);
+
   // Filter logs list based on section filter and search query
-  const filteredLogs = detailedLogs.filter(log => {
+  const filteredLogs = consolidatedLogs.filter(log => {
     const sUser = log.user;
     if (!sUser) return false;
     

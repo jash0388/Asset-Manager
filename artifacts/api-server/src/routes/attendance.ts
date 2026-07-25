@@ -70,6 +70,54 @@ function getLatestRecordsByUser(records: any[] = []): Map<number, any> {
   return latestByUserId;
 }
 
+function consolidateRecordsPerUserAndDate(records: any[] = []): any[] {
+  const map = new Map<string, any>();
+
+  for (const r of records) {
+    if (!r.user_id || !r.date) continue;
+    const key = `${r.user_id}_${r.date}`;
+
+    if (!map.has(key)) {
+      map.set(key, { ...r });
+    } else {
+      const existing = map.get(key)!;
+
+      // 1. Keep earliest valid entry time
+      if (r.entry_time && !isSentinel(r.entry_time)) {
+        if (isSentinel(existing.entry_time) || new Date(r.entry_time).getTime() < new Date(existing.entry_time).getTime()) {
+          existing.entry_time = r.entry_time;
+        }
+      }
+
+      // 2. Keep latest valid exit time
+      if (r.exit_time && !isSentinel(r.exit_time)) {
+        if (isSentinel(existing.exit_time) || new Date(r.exit_time).getTime() > new Date(existing.exit_time).getTime()) {
+          existing.exit_time = r.exit_time;
+        }
+      }
+
+      // 3. Keep latest scan timestamp
+      if (r.last_scan_at && (!existing.last_scan_at || new Date(r.last_scan_at).getTime() > new Date(existing.last_scan_at).getTime())) {
+        existing.last_scan_at = r.last_scan_at;
+      }
+
+      // 4. Status priority: if any record is 'inside' without exit, student is currently on campus
+      const existingStatus = getRecordStatus(existing);
+      const rStatus = getRecordStatus(r);
+      if (rStatus === "inside" || existingStatus === "inside") {
+        if (rStatus === "inside") {
+          existing.exit_time = null;
+        }
+      }
+
+      existing.scan_count = Math.max(existing.scan_count || 1, r.scan_count || 1);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+
 function isSentinel(ts: string | null | undefined): boolean {
   if (!ts) return true;
   return ts.startsWith("9999") || ts.startsWith("1970") || ts.startsWith("0001");
@@ -160,9 +208,94 @@ function tryExtractFromString(raw: string): string | null {
 
 // sentinel far-past timestamp used when entry_time is unknown (student leaving first)
 const SENTINEL_ENTRY = "1970-01-01T00:00:00.000Z";
+const GENESIS_HASH = "GENESIS_HASH_00000000000000000000000000000000000000000000000000000000";
+
+function sha256Sync(ascii: string): string {
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let i: number, j: number;
+  let result = "";
+
+  const words: number[] = [];
+  const asciiLength = ascii.length * 8;
+
+  let hash = (sha256Sync as any).h = (sha256Sync as any).h || [];
+  let k = (sha256Sync as any).k = (sha256Sync as any).k || [];
+  let primeCounter = k.length;
+
+  const isPrime = (candidate: number) => {
+    for (let factor = 2; factor * factor <= candidate; factor++) {
+      if (candidate % factor === 0) return false;
+    }
+    return true;
+  };
+
+  const getFractionalBits = (n: number) => Math.floor((n - Math.floor(n)) * maxWord);
+
+  if (!primeCounter) {
+    for (let n = 2; primeCounter < 64; n++) {
+      if (isPrime(n)) {
+        if (primeCounter < 8) {
+          hash[primeCounter] = getFractionalBits(mathPow(n, 1 / 2));
+        }
+        k[primeCounter] = getFractionalBits(mathPow(n, 1 / 3));
+        primeCounter++;
+      }
+    }
+  }
+
+  hash = hash.slice(0);
+  ascii += "\x80";
+  while ((ascii.length % 64) - 56) ascii += "\x00";
+  for (i = 0; i < ascii.length; i++) {
+    j = ascii.charCodeAt(i);
+    if (j >> 8) return "";
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words.length] = (asciiLength / maxWord) | 0;
+  words[words.length] = asciiLength | 0;
+
+  for (j = 0; j < words.length; ) {
+    const w = words.slice(j, (j += 16));
+    const oldHash = hash.slice(0);
+
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const a = hash[0], e = hash[4];
+
+      const s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+      const s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+      const ch = (e & hash[5]) ^ (~e & hash[6]);
+      const temp1 = hash[7] + s1 + ch + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (((w15 >>> 7) | (w15 << 25)) ^ ((w15 >>> 18) | (w15 << 14)) ^ (w15 >>> 3)) + w[i - 7] + (((w2 >>> 17) | (w2 << 15)) ^ ((w2 >>> 19) | (w2 << 13)) ^ (w2 >>> 10))) | 0);
+      const maj = (a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]);
+      const temp2 = s0 + maj;
+
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+      hash.pop();
+    }
+
+    for (i = 0; i < 8; i++) {
+      hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+  }
+
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j >= 0; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += (b < 16 ? "0" : "") + b.toString(16);
+    }
+  }
+  return result;
+}
+
+const processedBatches = new Set<string>();
 
 router.post("/scan/batch", async (req: any, res: any) => {
   const scans = req.body?.scans;
+  const batchId = typeof req.body?.batchId === "string" ? req.body.batchId : null;
+  const batchDeviceId = typeof req.body?.deviceId === "string" ? req.body.deviceId : null;
+
   if (!Array.isArray(scans) || scans.length === 0) {
     res.status(400).json({ error: "scans must be a non-empty array" });
     return;
@@ -172,20 +305,65 @@ router.post("/scan/batch", async (req: any, res: any) => {
     return;
   }
 
+  // Replay protection check
+  if (batchId && processedBatches.has(batchId)) {
+    res.status(409).json({ error: "Replay attack protection: Batch already processed", batchId, replayDetected: true });
+    return;
+  }
+  if (batchId) {
+    processedBatches.add(batchId);
+    if (processedBatches.size > 2000) {
+      const first = processedBatches.values().next().value;
+      if (first) processedBatches.delete(first);
+    }
+  }
+
   const results: any[] = [];
   const batchStatusCache = new Map<number, { status: "inside" | "left"; recordId?: number; scanCount: number; lastScanAt?: string }>();
+  let lastSeqNo: number | null = null;
 
   for (const item of scans) {
     const clientScanId = String(item?.clientScanId ?? "");
     const uniqueId = extractUniqueId(item) ?? (typeof item?.uniqueId === "string" ? item.uniqueId.trim() : null);
+    const itemDeviceId = typeof item?.deviceId === "string" ? item.deviceId : batchDeviceId || "unknown_device";
     const scannedAtRaw = item?.scannedAt;
     const scannedAt = (() => {
       const d = scannedAtRaw ? new Date(scannedAtRaw) : new Date();
       return isNaN(d.getTime()) ? new Date() : d;
     })();
 
+    const hash = typeof item?.hash === "string" ? item.hash : null;
+    const prevHash = typeof item?.prevHash === "string" ? item.prevHash : null;
+    const seqNo = typeof item?.seqNo === "number" ? item.seqNo : null;
+
+    let hashVerified = false;
+    let sequenceGapDetected = false;
+
+    if (seqNo !== null && lastSeqNo !== null) {
+      if (seqNo !== lastSeqNo + 1) {
+        sequenceGapDetected = true;
+      }
+    }
+    if (seqNo !== null) {
+      lastSeqNo = seqNo;
+    }
+
+    if (hash && prevHash && seqNo !== null) {
+      const computedHash = sha256Sync(`${clientScanId}:${uniqueId}:${scannedAtRaw || scannedAt.toISOString()}:${seqNo}:${prevHash}`);
+      hashVerified = computedHash === hash;
+    } else if (hash && prevHash) {
+      const computedHash = sha256Sync(`${clientScanId}:${uniqueId}:${scannedAtRaw || scannedAt.toISOString()}:${prevHash}`);
+      hashVerified = computedHash === hash;
+    }
+
+    // Compute additive risk score for anomaly review
+    let riskScore = 0;
+    if (hash && !hashVerified) riskScore += 50;
+    if (sequenceGapDetected) riskScore += 40;
+    const riskLevel = riskScore >= 50 ? "HIGH" : riskScore >= 20 ? "MEDIUM" : "LOW";
+
     if (!uniqueId) {
-      results.push({ clientScanId, status: "invalid", error: "Missing uniqueId" });
+      results.push({ clientScanId, status: "invalid", error: "Missing uniqueId", hashVerified });
       continue;
     }
 
@@ -296,7 +474,8 @@ router.post("/scan/batch", async (req: any, res: any) => {
     }
   }
 
-  res.json({ results });
+  const syncReceipt = sha256Sync(`RECEIPT:${batchId || Date.now()}:${results.length}:${new Date().toISOString()}`);
+  res.json({ results, syncReceipt, processedAt: new Date().toISOString() });
 });
 
 router.post("/scan", async (req: any, res: any) => {
@@ -629,7 +808,7 @@ router.delete("/attendance/all", authMiddleware, adminOnly, async (req: any, res
 });
 
 router.get("/attendance", authMiddleware, async (req: any, res: any) => {
-  const { from, to, role, month } = req.query as Record<string, string>;
+  const { from, to, role, month, raw } = req.query as Record<string, string>;
   try {
     let query = supabase.from("qr_attendance").select("*, qr_users(*)");
 
@@ -656,7 +835,12 @@ router.get("/attendance", authMiddleware, async (req: any, res: any) => {
       filtered = results.filter((r: any) => r.qr_users !== null);
     }
 
-    res.json(filtered.map((r: any) => formatRecord(r, r.qr_users)));
+    if (raw === "true") {
+      return res.json(filtered.map((r: any) => formatRecord(r, r.qr_users)));
+    }
+
+    const consolidated = consolidateRecordsPerUserAndDate(filtered);
+    res.json(consolidated.map((r: any) => formatRecord(r, r.qr_users)));
   } catch (err: any) {
     req.log.error({ err }, "List attendance error");
     res.status(500).json({ error: "Internal server error" });
