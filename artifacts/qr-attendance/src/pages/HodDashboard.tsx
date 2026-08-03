@@ -2067,7 +2067,9 @@ export default function HodDashboard() {
 
                   <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
                     {(() => {
-                      const studentLogs = (todaysAttendance || []).filter((l: any) => l.userId === selectedStudentForDetails.id || l.user?.id === selectedStudentForDetails.id);
+                      const studentLogs = (detailedLogs || []).filter((l: any) => 
+                        l && (l.userId === selectedStudentForDetails?.id || l.user?.id === selectedStudentForDetails?.id || l.userId === selectedStudentForDetails?.user_id)
+                      );
                       if (studentLogs.length === 0) {
                         return (
                           <div className="p-6 text-center text-slate-500 text-xs italic">
