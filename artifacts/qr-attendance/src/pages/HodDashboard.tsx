@@ -430,6 +430,8 @@ export default function HodDashboard() {
       headerRow.push("Total Present (P)", "Total Absent (A)", "Attendance %");
       csvRows.push(headerRow);
 
+      const todayStr = formatDateLocal(new Date());
+
       targetStudents.forEach((student, idx) => {
         const secInfo = getSectionDisplayName(student.section);
         const studentDatesPresent = attendanceMap.get(student.id) || new Set<string>();
@@ -448,8 +450,11 @@ export default function HodDashboard() {
 
         dateList.forEach(d => {
           const isPresent = studentDatesPresent.has(d.dateStr);
+          const isFuture = d.dateStr > todayStr;
 
-          if (d.isSundayOrHoliday) {
+          if (isFuture) {
+            studentRow.push("");
+          } else if (d.isSundayOrHoliday) {
             if (isPresent) {
               studentRow.push("P");
               totalPresent++;
@@ -468,7 +473,7 @@ export default function HodDashboard() {
           }
         });
 
-        const calcDays = totalWorkingDays > 0 ? totalWorkingDays : dateList.length;
+        const calcDays = totalWorkingDays > 0 ? totalWorkingDays : 1;
         const percent = calcDays > 0 ? Math.floor((totalPresent / calcDays) * 100) : 0;
 
         studentRow.push(String(totalPresent), String(totalAbsent), `${percent}%`);
@@ -2129,6 +2134,8 @@ export default function HodDashboard() {
                       return `${y}-${m}-${day}`;
                     };
 
+                    const todayStr = formatDateLocal(new Date());
+
                     const studentAttendanceByDate = new Map<string, AttendanceRecord>();
                     (studentMonthlyRecords || []).forEach(r => {
                       if (!r.date) return;
@@ -2153,12 +2160,15 @@ export default function HodDashboard() {
                       const isSunday = dObj.getDay() === 0;
                       const isDeclaredHoliday = Boolean(holidays[dateStr]);
                       const isSundayOrHoliday = isSunday || isDeclaredHoliday;
+                      const isFuture = dateStr > todayStr;
                       
                       const record = studentAttendanceByDate.get(dateStr);
                       const isPresent = Boolean(record);
 
-                      let status: "P" | "A" | "*" = "A";
-                      if (isSundayOrHoliday) {
+                      let status: "P" | "A" | "*" | "—" = "A";
+                      if (isFuture) {
+                        status = "—";
+                      } else if (isSundayOrHoliday) {
                         if (isPresent) {
                           status = "P";
                           studentPresentCount++;
@@ -2183,13 +2193,14 @@ export default function HodDashboard() {
                         dayOfWeek,
                         status,
                         isSundayOrHoliday,
+                        isFuture,
                         holidayReason: isDeclaredHoliday ? holidays[dateStr] : isSunday ? "Sunday" : undefined,
                         record
                       });
                     }
 
-                    const calcWorkingDays = studentWorkingDaysCount > 0 ? studentWorkingDaysCount : sDaysInMonth;
-                    const studentMonthlyPercent = calcWorkingDays > 0 ? Math.floor((studentPresentCount / calcWorkingDays) * 100) : 0;
+                    const calcWorkingDays = studentWorkingDaysCount > 0 ? studentWorkingDaysCount : 1;
+                    const studentMonthlyPercent = Math.floor((studentPresentCount / calcWorkingDays) * 100);
 
                     return (
                       <div className="space-y-3">
@@ -2217,7 +2228,7 @@ export default function HodDashboard() {
                         <div>
                           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                             <span>Daily Register Grid (Click any date to view Entry/Exit times)</span>
-                            <span className="text-slate-500 font-normal">P = Present | A = Absent | * = Holiday</span>
+                            <span className="text-slate-500 font-normal">P = Present | A = Absent | * = Holiday | — = Future</span>
                           </p>
                           
                           <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-3 rounded-2xl border border-slate-850">
@@ -2236,6 +2247,8 @@ export default function HodDashboard() {
                                       ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-200"
                                       : d.status === "*"
                                       ? "bg-purple-950/50 border-purple-800/60 text-purple-200"
+                                      : d.status === "—"
+                                      ? "bg-slate-950/40 border-slate-850/80 text-slate-600 opacity-60"
                                       : "bg-red-950/40 border-red-900/40 text-red-300"
                                   }`}
                                 >
@@ -2247,6 +2260,8 @@ export default function HodDashboard() {
                                       ? "bg-emerald-500 text-slate-950"
                                       : d.status === "*"
                                       ? "bg-amber-400 text-slate-950"
+                                      : d.status === "—"
+                                      ? "bg-slate-800 text-slate-400"
                                       : "bg-red-500/80 text-white"
                                   }`}>
                                     {d.status}
@@ -2272,12 +2287,16 @@ export default function HodDashboard() {
                                   ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
                                   : selectedDayDetail.status === "*"
                                   ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                                  : selectedDayDetail.status === "—"
+                                  ? "bg-slate-800/50 text-slate-400 border border-slate-700/50"
                                   : "bg-red-500/20 text-red-300 border border-red-500/40"
                               }`}>
                                 {selectedDayDetail.status === "P"
                                   ? "🟢 PRESENT"
                                   : selectedDayDetail.status === "*"
                                   ? `🟨 HOLIDAY (${selectedDayDetail.holidayReason || "Sunday"})`
+                                  : selectedDayDetail.status === "—"
+                                  ? "🗓️ FUTURE DATE (Not Occurred Yet)"
                                   : "🔴 ABSENT"}
                               </span>
                             </div>
@@ -2311,13 +2330,15 @@ export default function HodDashboard() {
                               <p className="text-xs text-slate-400 italic pt-1">
                                 {selectedDayDetail.status === "*"
                                   ? `College was closed on this day (${selectedDayDetail.holidayReason || "Sunday"}). No attendance recorded.`
+                                  : selectedDayDetail.status === "—"
+                                  ? "This date is in the future. Attendance will be recorded when the student scans on this day."
                                   : "No QR scan records registered for this date (Absent)."}
                               </p>
                             )}
                           </div>
                         ) : (
                           <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-950 rounded-xl border border-slate-850">
-                            💡 Click on any date box above (P, A, or *) to view exact Entry & Exit scan timestamps for that day.
+                            💡 Click on any date box above (P, A, *, or —) to view exact Entry & Exit scan timestamps for that day.
                           </p>
                         )}
                       </div>
