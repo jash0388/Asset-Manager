@@ -96,10 +96,10 @@ export default function HodDashboard() {
     queryFn: () => customFetch<StudentUser[]>("/api/users"),
   });
 
-  // Fetch today's summary attendance records
+  // Fetch summary attendance records for selected date
   const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery<AttendanceRecord[]>({
-    queryKey: ["attendance-today", selectedDate],
-    queryFn: () => customFetch<AttendanceRecord[]>("/api/attendance/today"),
+    queryKey: ["attendance-summary", selectedDate],
+    queryFn: () => customFetch<AttendanceRecord[]>(`/api/attendance?from=${selectedDate}&to=${selectedDate}`),
     refetchInterval: 5000,
   });
 
@@ -289,8 +289,8 @@ export default function HodDashboard() {
   });
 
   const overallDeptPercentage = overallTotalStudents > 0 
-    ? ((overallTotalPresent / overallTotalStudents) * 100).toFixed(3) 
-    : "0.000";
+    ? Math.floor((overallTotalPresent / overallTotalStudents) * 100) 
+    : 0;
 
   // Handle cell click to open drill-down
   const handleCellClick = (type: "PR" | "AB" | "Total", sectionStats: SectionStats) => {
@@ -477,9 +477,19 @@ export default function HodDashboard() {
             <p className="text-slate-400 font-medium mt-1">Department of Data Science (DS)</p>
           </div>
           
-          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 shadow-md">
-            <Calendar className="w-5 h-5 text-blue-400" />
-            <span className="text-sm font-semibold text-slate-200">{activeTab === "summary" ? selectedDate : logDate}</span>
+          <div className="flex items-center gap-2.5 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 shadow-md hover:border-blue-500/50 transition-colors">
+            <Calendar className="w-4 h-4 text-blue-400 pointer-events-none" />
+            <input
+              type="date"
+              value={activeTab === "summary" ? selectedDate : logDate}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setSelectedDate(e.target.value);
+                  setLogDate(e.target.value);
+                }
+              }}
+              className="bg-transparent text-sm font-bold text-slate-200 outline-none cursor-pointer [color-scheme:dark]"
+            />
           </div>
         </div>
 
@@ -604,8 +614,8 @@ export default function HodDashboard() {
                         });
 
                         const yearPercentage = yearTotal > 0 
-                          ? ((yearPresent / yearTotal) * 100).toFixed(3) 
-                          : "0.000";
+                          ? Math.floor((yearPresent / yearTotal) * 100) 
+                          : 0;
 
                         return (
                           <>
@@ -641,7 +651,7 @@ export default function HodDashboard() {
                                   
                                   <td className="py-4 px-6 text-center font-mono">
                                     <span className={getPercentageColor(percent)}>
-                                      {percent.toFixed(3)}
+                                      {Math.floor(percent)}
                                     </span>
                                   </td>
                                 </tr>
