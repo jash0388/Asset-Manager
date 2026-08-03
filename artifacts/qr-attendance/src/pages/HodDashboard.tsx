@@ -2089,8 +2089,8 @@ export default function HodDashboard() {
                             {studentLogs.map((log: any) => (
                               <tr key={log.id} className="hover:bg-slate-900/40">
                                 <td className="py-2.5 px-4 font-mono text-slate-300 font-semibold">{log.date}</td>
-                                <td className="py-2.5 px-4 text-center font-semibold text-emerald-400">{log.entryTime ? formatTimeDisplay(log.entryTime) : "—"}</td>
-                                <td className="py-2.5 px-4 text-center font-semibold text-blue-400">{log.exitTime ? formatTimeDisplay(log.exitTime) : "—"}</td>
+                                <td className="py-2.5 px-4 text-center font-semibold text-emerald-400">{log.entryTime ? formatTime(log.entryTime) : "—"}</td>
+                                <td className="py-2.5 px-4 text-center font-semibold text-blue-400">{log.exitTime ? formatTime(log.exitTime) : "—"}</td>
                                 <td className="py-2.5 px-4 text-center">
                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                                     log.status === "inside"
