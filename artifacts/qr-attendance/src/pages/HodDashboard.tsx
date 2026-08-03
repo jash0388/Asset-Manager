@@ -268,13 +268,24 @@ export default function HodDashboard() {
         periodLabel = `${exportFromDate} TO ${exportToDate}`;
       }
 
-      // Generate date array between startDateStr and endDateStr (inclusive)
+      // Helper to format local date YYYY-MM-DD without UTC timezone shift
+      const formatDateLocal = (d: Date) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      };
+
+      // Generate date array between startDateStr and endDateStr (inclusive) using noon local time
       const dateList: { dateStr: string; dayNum: number; displayLabel: string }[] = [];
-      const curr = new Date(startDateStr + "T00:00:00");
-      const end = new Date(endDateStr + "T00:00:00");
+      const [startYear, startMonth, startDay] = startDateStr.split("-").map(Number);
+      const [endYear, endMonth, endDay] = endDateStr.split("-").map(Number);
+
+      const curr = new Date(startYear, startMonth - 1, startDay, 12, 0, 0);
+      const end = new Date(endYear, endMonth - 1, endDay, 12, 0, 0);
 
       while (curr <= end) {
-        const dateStr = curr.toISOString().split("T")[0];
+        const dateStr = formatDateLocal(curr);
         const dayNum = curr.getDate();
         const monthShort = curr.toLocaleString('default', { month: 'short' });
         const displayLabel = exportDateMode === "month" ? String(dayNum) : `${dayNum} ${monthShort}`;
@@ -286,11 +297,16 @@ export default function HodDashboard() {
 
       const attendanceMap = new Map<number, Set<string>>();
       (rangeRecords || []).forEach(r => {
-        if (!r.userId || !r.date) return;
-        if (!attendanceMap.has(r.userId)) {
-          attendanceMap.set(r.userId, new Set<string>());
+        const uId = r.userId || (r as any).user_id;
+        if (!uId || !r.date) return;
+
+        const rawDateStr = typeof r.date === "string" ? r.date.slice(0, 10) : formatDateLocal(new Date(r.date));
+        if (!rawDateStr) return;
+
+        if (!attendanceMap.has(uId)) {
+          attendanceMap.set(uId, new Set<string>());
         }
-        attendanceMap.get(r.userId)!.add(r.date);
+        attendanceMap.get(uId)!.add(rawDateStr);
       });
 
       let targetStudents = [...studentsOnly];
