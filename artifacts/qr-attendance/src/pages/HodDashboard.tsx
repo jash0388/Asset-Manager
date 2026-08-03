@@ -17,7 +17,10 @@ import {
   UserPlus,
   Plus,
   UserCheck,
-  Loader2
+  Loader2,
+  Download,
+  FileSpreadsheet,
+  FileText
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -125,8 +128,19 @@ export default function HodDashboard() {
   const [newDay, setNewDay] = useState("MON");
   const [newStartTime, setNewStartTime] = useState("09:00:00");
   const [newEndTime, setNewEndTime] = useState("10:00:00");
-  const [newMentorId, setNewMentorId] = useState<number | "">("");
   const [creatingClass, setCreatingClass] = useState(false);
+
+  // Export Monthly Attendance Register state
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportMonth, setExportMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+  const [exportType, setExportType] = useState<"department" | "year" | "section" | "student">("department");
+  const [exportYear, setExportYear] = useState("2nd Year");
+  const [exportSection, setExportSection] = useState("2A");
+  const [exportStudentId, setExportStudentId] = useState<number | "">("");
+  const [isExporting, setIsExporting] = useState(false);
 
   // Fetch mentors with keys for HOD Dashboard
   const { data: mentorsTracking = [], isLoading: mentorsLoading } = useQuery<any[]>({
@@ -219,6 +233,115 @@ export default function HodDashboard() {
     }
     
     return { name: sectionStr, yearLabel: "Other" };
+  };
+
+  // Generate and Download Monthly Attendance Register CSV
+  const handleGenerateCsv = async () => {
+    setIsExporting(true);
+    try {
+      const [yearStr, monthStr] = exportMonth.split("-");
+      const yearNum = parseInt(yearStr);
+      const monthNum = parseInt(monthStr);
+
+      const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+
+      const monthlyRecords = await customFetch<AttendanceRecord[]>(`/api/attendance?month=${exportMonth}`);
+
+      const attendanceMap = new Map<number, Set<number>>();
+      (monthlyRecords || []).forEach(r => {
+        if (!r.userId || !r.date) return;
+        const recDate = new Date(r.date);
+        const day = recDate.getDate();
+        if (!attendanceMap.has(r.userId)) {
+          attendanceMap.set(r.userId, new Set<number>());
+        }
+        attendanceMap.get(r.userId)!.add(day);
+      });
+
+      let targetStudents = [...studentsOnly];
+
+      if (exportType === "year") {
+        targetStudents = targetStudents.filter(s => getSectionDisplayName(s.section).yearLabel === exportYear);
+      } else if (exportType === "section") {
+        targetStudents = targetStudents.filter(s => getSectionDisplayName(s.section).name === exportSection);
+      } else if (exportType === "student") {
+        if (exportStudentId) {
+          targetStudents = targetStudents.filter(s => s.id === Number(exportStudentId));
+        }
+      }
+
+      targetStudents.sort((a, b) => {
+        const secA = getSectionDisplayName(a.section).name;
+        const secB = getSectionDisplayName(b.section).name;
+        if (secA !== secB) return secA.localeCompare(secB);
+        return a.name.localeCompare(b.name);
+      });
+
+      const monthName = new Date(yearNum, monthNum - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      const csvRows: string[][] = [];
+
+      csvRows.push([`MONTHLY ATTENDANCE REGISTER`]);
+      csvRows.push([`FOR THE MONTH OF: ${monthName.toUpperCase()}`, `SCOPE: ${exportType.toUpperCase()}`]);
+      csvRows.push([`LEGEND: P = Present, A = Absent`]);
+      csvRows.push([]);
+
+      const headerRow = ["Serial No.", "Roll No / Unique ID", "Student Name", "Year", "Section"];
+      for (let day = 1; day <= daysInMonth; day++) {
+        headerRow.push(String(day));
+      }
+      headerRow.push("Total Present (P)", "Total Absent (A)", "Attendance %");
+      csvRows.push(headerRow);
+
+      targetStudents.forEach((student, idx) => {
+        const secInfo = getSectionDisplayName(student.section);
+        const studentDaysPresent = attendanceMap.get(student.id) || new Set<number>();
+
+        let totalPresent = 0;
+        let totalAbsent = 0;
+
+        const studentRow = [
+          String(idx + 1),
+          `"${(student.uniqueId || "").replace(/"/g, '""')}"`,
+          `"${(student.name || "").replace(/"/g, '""')}"`,
+          secInfo.yearLabel,
+          secInfo.name
+        ];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          if (studentDaysPresent.has(day)) {
+            studentRow.push("P");
+            totalPresent++;
+          } else {
+            studentRow.push("A");
+            totalAbsent++;
+          }
+        }
+
+        const percent = daysInMonth > 0 ? Math.floor((totalPresent / daysInMonth) * 100) : 0;
+
+        studentRow.push(String(totalPresent), String(totalAbsent), `${percent}%`);
+        csvRows.push(studentRow);
+      });
+
+      const csvContent = csvRows.map(e => e.join(",")).join("\n");
+
+      const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      const scopeLabel = exportType === "section" ? exportSection : exportType === "year" ? exportYear : exportType === "student" ? "Individual" : "Department";
+      link.setAttribute("download", `Attendance_Register_${scopeLabel}_${exportMonth}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setExportModalOpen(false);
+    } catch (err: any) {
+      alert("Failed to export attendance register: " + (err.message || err));
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Compile section statistics
@@ -690,7 +813,7 @@ export default function HodDashboard() {
         ) : activeTab === "logs" ? (
           <>
             {/* Detailed logs filter toolbar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
               <div>
                 <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Date Filter</label>
                 <div className="relative">
@@ -698,7 +821,7 @@ export default function HodDashboard() {
                     type="date"
                     value={logDate}
                     onChange={(e) => setLogDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -737,6 +860,17 @@ export default function HodDashboard() {
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Export Register</label>
+                <button
+                  onClick={() => setExportModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-lg shadow-emerald-950/40 cursor-pointer"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  Download CSV
+                </button>
               </div>
             </div>
 
@@ -1336,6 +1470,164 @@ export default function HodDashboard() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Export Monthly Attendance Register Modal */}
+        {exportModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <FileSpreadsheet className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Download Monthly Register</h3>
+                    <p className="text-xs text-slate-400">Export attendance spreadsheet (P / A register format)</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setExportModalOpen(false)}
+                  className="text-slate-400 hover:text-white p-1"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Month Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Select Month
+                  </label>
+                  <input
+                    type="month"
+                    value={exportMonth}
+                    onChange={(e) => setExportMonth(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
+                    required
+                  />
+                </div>
+
+                {/* Scope Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Target Scope
+                  </label>
+                  <select
+                    value={exportType}
+                    onChange={(e) => setExportType(e.target.value as any)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                  >
+                    <option value="department">Full Department (All Students)</option>
+                    <option value="year">By Year (2nd, 3rd, or 4th Year)</option>
+                    <option value="section">By Section (e.g. 2A, 2B, 3A...)</option>
+                    <option value="student">Individual Student</option>
+                  </select>
+                </div>
+
+                {/* Year Selector */}
+                {exportType === "year" && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Select Year
+                    </label>
+                    <select
+                      value={exportYear}
+                      onChange={(e) => setExportYear(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    >
+                      <option value="2nd Year">2nd Year (DS II)</option>
+                      <option value="3rd Year">3rd Year (DS III)</option>
+                      <option value="4th Year">4th Year (DS IV)</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Section Selector */}
+                {exportType === "section" && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Select Section
+                    </label>
+                    <select
+                      value={exportSection}
+                      onChange={(e) => setExportSection(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    >
+                      <option value="2A">2A CSE Data Science</option>
+                      <option value="2B">2B CSE Data Science</option>
+                      <option value="2C">2C CSE Data Science</option>
+                      <option value="3A">3A CSE Data Science</option>
+                      <option value="3B">3B CSE Data Science</option>
+                      <option value="3C">3C CSE Data Science</option>
+                      <option value="3D">3D CSE Data Science</option>
+                      <option value="4A">4A CSE Data Science</option>
+                      <option value="4B">4B CSE Data Science</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Student Selector */}
+                {exportType === "student" && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Select Individual Student
+                    </label>
+                    <select
+                      value={exportStudentId}
+                      onChange={(e) => setExportStudentId(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    >
+                      <option value="">-- Select Student --</option>
+                      {studentsOnly.map(s => {
+                        const { name: secName } = getSectionDisplayName(s.section);
+                        return (
+                          <option key={s.id} value={s.id}>
+                            {s.name} ({s.uniqueId || "No ID"}) — Sec {secName}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
+
+                <div className="bg-slate-950/80 border border-slate-850 p-3.5 rounded-xl text-xs text-slate-400 space-y-1">
+                  <p className="font-semibold text-slate-300">📊 Register Format Preview:</p>
+                  <p>• Columns: S.No | Roll No | Student Name | Year | Section | Day 1..31 | Total P | Total A | Attendance %</p>
+                  <p>• Daily Status: <span className="text-emerald-400 font-bold">P</span> = Present, <span className="text-red-400 font-bold">A</span> = Absent</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setExportModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGenerateCsv}
+                  disabled={isExporting || (exportType === "student" && !exportStudentId)}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isExporting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Download Spreadsheet (.csv)
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )}
