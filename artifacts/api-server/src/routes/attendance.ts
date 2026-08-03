@@ -307,7 +307,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
 
   // Replay protection check
   if (batchId && processedBatches.has(batchId)) {
-    res.status(409).json({ error: "Replay attack protection: Batch already processed", batchId, replayDetected: true });
+    res.json({ results: [], syncReceipt: "ALREADY_PROCESSED", alreadyProcessed: true });
     return;
   }
   if (batchId) {
@@ -597,13 +597,22 @@ router.get("/attendance/recent", async (req: any, res: any) => {
 router.get("/attendance/today", authMiddleware, async (req: any, res: any) => {
   const today = getHostelDate();
   try {
-    const { data: records, error } = await supabase
-      .from("qr_attendance")
-      .select("*, qr_users(*)")
-      .eq("date", today)
-      .order("last_scan_at", { ascending: false, nullsFirst: false });
+    let records: any[] = [];
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from("qr_attendance")
+        .select("*, qr_users(*)")
+        .eq("date", today)
+        .order("last_scan_at", { ascending: false, nullsFirst: false })
+        .range(from, from + 999);
 
-    if (error) throw error;
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      records = records.concat(data);
+      if (data.length < 1000) break;
+      from += 1000;
+    }
 
     // Deduplicate: keep only the latest record per user
     const latestByUser = getLatestRecordsByUser(records ?? []);
@@ -632,12 +641,21 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
       from += 1000;
     }
 
-    const { data: todayRecords, error: outError } = await supabase
-      .from("qr_attendance")
-      .select("*")
-      .eq("date", today)
-      .order("last_scan_at", { ascending: false, nullsFirst: false });
-    if (outError) throw outError;
+    let todayRecords: any[] = [];
+    let fromRec = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from("qr_attendance")
+        .select("*")
+        .eq("date", today)
+        .order("last_scan_at", { ascending: false, nullsFirst: false })
+        .range(fromRec, fromRec + 999);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      todayRecords = todayRecords.concat(data);
+      if (data.length < 1000) break;
+      fromRec += 1000;
+    }
 
     const recordsByUserId = getLatestRecordsByUser(todayRecords ?? []);
     const outUserIds = new Set(
@@ -665,17 +683,31 @@ router.get("/attendance/currently-inside", authMiddleware, async (req: any, res:
 router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: any) => {
   const today = getHostelDate();
   try {
+    let todayRecords: any[] = [];
+    let fromRec = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from("qr_attendance")
+        .select("user_id, entry_time, exit_time, last_scan_at")
+        .eq("date", today)
+        .order("last_scan_at", { ascending: false, nullsFirst: false })
+        .range(fromRec, fromRec + 999);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      todayRecords = todayRecords.concat(data);
+      if (data.length < 1000) break;
+      fromRec += 1000;
+    }
+
     const [
       { count: totalUsers },
       { count: totalStudents },
       { count: totalStaff },
-      { data: todayRecords },
       { data: recentResult }
     ] = await Promise.all([
       supabase.from("qr_users").select("*", { count: "exact", head: true }),
       supabase.from("qr_users").select("*", { count: "exact", head: true }).eq("role", "student"),
       supabase.from("qr_users").select("*", { count: "exact", head: true }).eq("role", "staff"),
-      supabase.from("qr_attendance").select("user_id, entry_time, exit_time, last_scan_at").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }),
       supabase.from("qr_attendance").select("*, qr_users(*)").eq("date", today).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(10),
     ]);
 
@@ -686,7 +718,7 @@ router.get("/attendance/dashboard-stats", authMiddleware, async (req: any, res: 
       totalUsers: totalUsers || 0,
       totalStudents: totalStudents || 0,
       totalStaff: totalStaff || 0,
-      todayAttendanceCount: todayRecords?.length || 0,
+      todayAttendanceCount: latestRecordsByUserId.size,
       currentlyInsideCount,
       recentActivity: recentResult ? recentResult.map((r: any) => formatRecord(r, r.qr_users)) : [],
     });
@@ -810,29 +842,41 @@ router.delete("/attendance/all", authMiddleware, adminOnly, async (req: any, res
 router.get("/attendance", authMiddleware, async (req: any, res: any) => {
   const { from, to, role, month, raw } = req.query as Record<string, string>;
   try {
-    let query = supabase.from("qr_attendance").select("*, qr_users(*)");
+    let allResults: any[] = [];
+    let pageFrom = 0;
+    while (true) {
+      let query = supabase.from("qr_attendance").select("*, qr_users(*)");
 
-    if (from) query = query.gte("date", from);
-    if (to) query = query.lte("date", to);
-    if (month) {
-      const [year, mon] = month.split("-");
-      const start = `${year}-${mon}-01`;
-      const endDay = new Date(parseInt(year), parseInt(mon), 0).getDate();
-      const end = `${year}-${mon}-${String(endDay).padStart(2, "0")}`;
-      query = query.gte("date", start).lte("date", end);
+      if (from) query = query.gte("date", from);
+      if (to) query = query.lte("date", to.includes("T") ? to : `${to}T23:59:59`);
+      if (month) {
+        const [year, mon] = month.split("-");
+        const start = `${year}-${mon}-01`;
+        const endDay = new Date(parseInt(year), parseInt(mon), 0).getDate();
+        const end = `${year}-${mon}-${String(endDay).padStart(2, "0")}T23:59:59`;
+        query = query.gte("date", start).lte("date", end);
+      }
+
+      if (role) {
+        query = query.eq("qr_users.role", role);
+      }
+
+      const { data: results, error } = await query
+        .order("date", { ascending: false })
+        .order("entry_time", { ascending: false })
+        .range(pageFrom, pageFrom + 999);
+
+      if (error) throw error;
+      if (!results || results.length === 0) break;
+      allResults = allResults.concat(results);
+      if (results.length < 1000) break;
+      pageFrom += 1000;
     }
-
-    if (role) {
-      query = query.eq("qr_users.role", role);
-    }
-
-    const { data: results, error } = await query.order("date", { ascending: false }).order("entry_time", { ascending: false });
-    if (error) throw error;
 
     // Filter out records where join failed if role was provided
-    let filtered = results;
+    let filtered = allResults;
     if (role) {
-      filtered = results.filter((r: any) => r.qr_users !== null);
+      filtered = allResults.filter((r: any) => r.qr_users !== null);
     }
 
     if (raw === "true") {

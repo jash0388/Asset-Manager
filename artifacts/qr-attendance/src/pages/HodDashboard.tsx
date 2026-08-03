@@ -169,11 +169,25 @@ export default function HodDashboard() {
   } | null>(null);
 
   const { data: studentMonthlyRecords = [] } = useQuery<AttendanceRecord[]>({
-    queryKey: ["student-monthly-records", selectedStudentForDetails?.id, studentModalMonth],
+    queryKey: ["student-monthly-records", selectedStudentForDetails?.id, selectedStudentForDetails?.uniqueId, studentModalMonth],
     queryFn: async () => {
       if (!selectedStudentForDetails) return [];
-      const data = await customFetch<AttendanceRecord[]>(`/api/attendance?month=${studentModalMonth}`);
-      return (data || []).filter(r => (r.userId || (r as any).user_id) === selectedStudentForDetails.id);
+      const [yearStr, monthStr] = studentModalMonth.split("-");
+      const yearNum = parseInt(yearStr);
+      const monthNum = parseInt(monthStr);
+      const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+      const fromStr = `${yearStr}-${monthStr.padStart(2, "0")}-01`;
+      const toStr = `${yearStr}-${monthStr.padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+
+      const data = await customFetch<AttendanceRecord[]>(`/api/attendance?from=${fromStr}&to=${toStr}`);
+      const targetId = selectedStudentForDetails.id;
+      const targetRoll = (selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "").toLowerCase().trim();
+
+      return (data || []).filter((r: any) => {
+        const uId = r.userId || r.user_id || r.user?.id;
+        const rRoll = (r.user?.uniqueId || r.user?.unique_id || "").toLowerCase().trim();
+        return uId === targetId || (targetRoll && rRoll && targetRoll === rRoll);
+      });
     },
     enabled: Boolean(selectedStudentForDetails)
   });
