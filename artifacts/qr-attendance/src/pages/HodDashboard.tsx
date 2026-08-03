@@ -152,6 +152,50 @@ export default function HodDashboard() {
   const [exportRollQuery, setExportRollQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
 
+  // Selected student for detail view modal
+  const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
+
+  // Holiday Management State (persisted in localStorage)
+  const [holidays, setHolidays] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem("qr_hod_holidays");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      "2026-08-15": "Independence Day",
+      "2026-01-26": "Republic Day",
+      "2026-10-02": "Gandhi Jayanti",
+      "2026-12-25": "Christmas"
+    };
+  });
+  const [holidayModalOpen, setHolidayModalOpen] = useState(false);
+  const [newHolidayDate, setNewHolidayDate] = useState("");
+  const [newHolidayReason, setNewHolidayReason] = useState("");
+
+  const handleAddHoliday = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newHolidayDate) return;
+    const updated = {
+      ...holidays,
+      [newHolidayDate]: newHolidayReason || "Official Holiday"
+    };
+    setHolidays(updated);
+    try {
+      localStorage.setItem("qr_hod_holidays", JSON.stringify(updated));
+    } catch (e) {}
+    setNewHolidayDate("");
+    setNewHolidayReason("");
+  };
+
+  const handleRemoveHoliday = (dateKey: string) => {
+    const updated = { ...holidays };
+    delete updated[dateKey];
+    setHolidays(updated);
+    try {
+      localStorage.setItem("qr_hod_holidays", JSON.stringify(updated));
+    } catch (e) {}
+  };
+
   // Fetch mentors with keys for HOD Dashboard
   const { data: mentorsTracking = [], isLoading: mentorsLoading } = useQuery<any[]>({
     queryKey: ["admin-mentors-tracking"],
@@ -276,8 +320,10 @@ export default function HodDashboard() {
         return `${y}-${m}-${day}`;
       };
 
+      const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
       // Generate date array between startDateStr and endDateStr (inclusive) using noon local time
-      const dateList: { dateStr: string; dayNum: number; displayLabel: string }[] = [];
+      const dateList: { dateStr: string; dayNum: number; dayOfWeek: string; displayLabel: string; isSundayOrHoliday: boolean }[] = [];
       const [startYear, startMonth, startDay] = startDateStr.split("-").map(Number);
       const [endYear, endMonth, endDay] = endDateStr.split("-").map(Number);
 
@@ -287,9 +333,16 @@ export default function HodDashboard() {
       while (curr <= end) {
         const dateStr = formatDateLocal(curr);
         const dayNum = curr.getDate();
-        const monthShort = curr.toLocaleString('default', { month: 'short' });
-        const displayLabel = exportDateMode === "month" ? String(dayNum) : `${dayNum} ${monthShort}`;
-        dateList.push({ dateStr, dayNum, displayLabel });
+        const dayOfWeekStr = daysOfWeek[curr.getDay()];
+
+        const isSunday = curr.getDay() === 0;
+        const isDeclaredHoliday = Boolean(holidays[dateStr]);
+        const isSundayOrHoliday = isSunday || isDeclaredHoliday;
+
+        // Display label: e.g. "1 Sun", "2 Mon", "3 Tue"...
+        const displayLabel = `${dayNum} ${dayOfWeekStr}`;
+
+        dateList.push({ dateStr, dayNum, dayOfWeek: dayOfWeekStr, displayLabel, isSundayOrHoliday });
         curr.setDate(curr.getDate() + 1);
       }
 
@@ -332,7 +385,7 @@ export default function HodDashboard() {
 
       csvRows.push([`ATTENDANCE REGISTER`]);
       csvRows.push([`PERIOD: ${periodLabel}`, `SCOPE: ${exportType.toUpperCase()}`]);
-      csvRows.push([`LEGEND: P = Present, A = Absent`]);
+      csvRows.push([`LEGEND: P = Present, A = Absent, * = Sunday / Holiday`]);
       csvRows.push([]);
 
       const headerRow = ["Serial No.", "Roll No / Unique ID", "Student Name", "Year", "Section"];
@@ -340,14 +393,13 @@ export default function HodDashboard() {
       headerRow.push("Total Present (P)", "Total Absent (A)", "Attendance %");
       csvRows.push(headerRow);
 
-      const totalDays = dateList.length;
-
       targetStudents.forEach((student, idx) => {
         const secInfo = getSectionDisplayName(student.section);
         const studentDatesPresent = attendanceMap.get(student.id) || new Set<string>();
 
         let totalPresent = 0;
         let totalAbsent = 0;
+        let totalWorkingDays = 0;
 
         const studentRow = [
           String(idx + 1),
@@ -358,16 +410,29 @@ export default function HodDashboard() {
         ];
 
         dateList.forEach(d => {
-          if (studentDatesPresent.has(d.dateStr)) {
-            studentRow.push("P");
-            totalPresent++;
+          const isPresent = studentDatesPresent.has(d.dateStr);
+
+          if (d.isSundayOrHoliday) {
+            if (isPresent) {
+              studentRow.push("P");
+              totalPresent++;
+            } else {
+              studentRow.push("*");
+            }
           } else {
-            studentRow.push("A");
-            totalAbsent++;
+            totalWorkingDays++;
+            if (isPresent) {
+              studentRow.push("P");
+              totalPresent++;
+            } else {
+              studentRow.push("A");
+              totalAbsent++;
+            }
           }
         });
 
-        const percent = totalDays > 0 ? Math.floor((totalPresent / totalDays) * 100) : 0;
+        const calcDays = totalWorkingDays > 0 ? totalWorkingDays : dateList.length;
+        const percent = calcDays > 0 ? Math.floor((totalPresent / calcDays) * 100) : 0;
 
         studentRow.push(String(totalPresent), String(totalAbsent), `${percent}%`);
         csvRows.push(studentRow);
@@ -863,7 +928,7 @@ export default function HodDashboard() {
         ) : activeTab === "logs" ? (
           <>
             {/* Detailed logs filter toolbar */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
               <div>
                 <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Date Filter</label>
                 <div className="relative">
@@ -871,7 +936,7 @@ export default function HodDashboard() {
                     type="date"
                     value={logDate}
                     onChange={(e) => setLogDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold [color-scheme:dark]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -881,7 +946,7 @@ export default function HodDashboard() {
                 <select
                   value={selectedSectionFilter}
                   onChange={(e) => setSelectedSectionFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold cursor-pointer"
                 >
                   <option value="All">All Sections</option>
                   <option value="2A">2A CSE Data Science</option>
@@ -904,19 +969,30 @@ export default function HodDashboard() {
                   </div>
                   <input
                     type="text"
-                    placeholder="Search name or roll number..."
+                    placeholder="Search name or roll..."
                     value={logSearchQuery}
                     onChange={(e) => setLogSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Holidays</label>
+                <button
+                  onClick={() => setHolidayModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800/80 active:scale-[0.98] text-purple-200 font-bold text-xs border border-purple-700/50 transition-all shadow-md cursor-pointer"
+                >
+                  <Calendar className="w-4 h-4 text-purple-400" />
+                  Manage Holidays
+                </button>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Export Register</label>
                 <button
                   onClick={() => setExportModalOpen(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-lg shadow-emerald-950/40 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-xs transition-all shadow-lg shadow-emerald-950/40 cursor-pointer"
                 >
                   <FileSpreadsheet className="w-4 h-4" />
                   Download CSV
@@ -959,13 +1035,21 @@ export default function HodDashboard() {
                           return (
                             <tr key={log.id} className="hover:bg-slate-800/30 transition-colors">
                               <td className="py-4 px-6">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 uppercase">
+                                <div
+                                  onClick={() => setSelectedStudentForDetails(user)}
+                                  className="flex items-center gap-3 cursor-pointer group hover:opacity-90 transition-opacity"
+                                  title="Click to view full student details"
+                                >
+                                  <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 uppercase group-hover:border-blue-500 transition-colors">
                                     {user.name.charAt(0)}
                                   </div>
                                   <div>
-                                    <p className="text-sm font-semibold text-slate-200">{user.name}</p>
-                                    <p className="text-xs text-slate-550 font-mono mt-0.5">{user.uniqueId}</p>
+                                    <p className="text-sm font-bold text-slate-200 group-hover:text-blue-400 transition-colors underline decoration-blue-500/30 underline-offset-4">
+                                      {user.name}
+                                    </p>
+                                    <p className="text-xs text-slate-400 font-mono mt-0.5 group-hover:text-blue-300 transition-colors">
+                                      {user.uniqueId}
+                                    </p>
                                   </div>
                                 </div>
                               </td>
@@ -1803,6 +1887,236 @@ export default function HodDashboard() {
                       Download Spreadsheet (.csv)
                     </>
                   )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Manage Holidays Modal */}
+        {holidayModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-lg font-bold text-white">Declare / Manage Holidays</h3>
+                </div>
+                <button
+                  onClick={() => setHolidayModalOpen(false)}
+                  className="text-slate-400 hover:text-white p-1 cursor-pointer"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Add Holiday Form */}
+              <form onSubmit={handleAddHoliday} className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      Holiday Date
+                    </label>
+                    <input
+                      type="date"
+                      value={newHolidayDate}
+                      onChange={(e) => setNewHolidayDate(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500 [color-scheme:dark]"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      Reason / Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Independence Day"
+                      value={newHolidayReason}
+                      onChange={(e) => setNewHolidayReason(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500 placeholder-slate-600"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={!newHolidayDate}
+                  className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Holiday
+                </button>
+              </form>
+
+              {/* Declared Holidays List */}
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Declared Holidays ({Object.keys(holidays).length})
+                </p>
+                <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1">
+                  {Object.keys(holidays).length === 0 ? (
+                    <p className="text-xs text-slate-500 italic text-center py-3">No custom holidays declared yet.</p>
+                  ) : (
+                    Object.entries(holidays)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([dStr, reason]) => (
+                        <div key={dStr} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-850 text-xs">
+                          <div>
+                            <span className="font-mono font-bold text-purple-300">{dStr}</span>
+                            <span className="text-slate-400 ml-2 font-medium">— {reason}</span>
+                          </div>
+                          <button
+                            onClick={() => handleRemoveHoliday(dStr)}
+                            className="text-slate-500 hover:text-red-400 p-1 transition-colors cursor-pointer"
+                            title="Remove Holiday"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-900/40 text-[11px] text-purple-300/80 space-y-0.5">
+                <p className="font-bold text-purple-200">ℹ️ Automatic Rules:</p>
+                <p>• All <span className="font-bold text-purple-200">Sundays</span> are automatically marked with <span className="font-bold text-amber-400">*</span> in the register.</p>
+                <p>• Declared holidays above are also marked with <span className="font-bold text-amber-400">*</span> and not counted as absent days.</p>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Student Profile & Attendance Details Modal */}
+        {selectedStudentForDetails && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl p-6 space-y-5 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+              {/* Header */}
+              <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-xl font-black text-white shadow-lg">
+                    {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                      {selectedStudentForDetails.name}
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase">
+                        Student
+                      </span>
+                    </h3>
+                    <p className="text-sm text-blue-400 font-mono font-semibold">
+                      Roll No: {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Section: <span className="font-bold text-slate-200">{getSectionDisplayName(selectedStudentForDetails.section).name}</span> ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel}) • Dept of Data Science
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedStudentForDetails(null)}
+                  className="text-slate-400 hover:text-white p-1 cursor-pointer transition-colors"
+                >
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="overflow-y-auto space-y-4 pr-1">
+                {/* Quick Stats Grid */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
+                    <p className="text-[11px] font-bold text-slate-500 uppercase">Roll Number</p>
+                    <p className="text-sm font-bold text-slate-200 font-mono mt-1">
+                      {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
+                    </p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
+                    <p className="text-[11px] font-bold text-slate-500 uppercase">Section & Year</p>
+                    <p className="text-sm font-bold text-slate-200 mt-1">
+                      Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel})
+                    </p>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
+                    <p className="text-[11px] font-bold text-slate-500 uppercase">Department</p>
+                    <p className="text-sm font-bold text-blue-400 mt-1">
+                      CSE Data Science
+                    </p>
+                  </div>
+                </div>
+
+                {/* Attendance Activity History */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Today's Attendance Scan Details ({logDate})
+                    </h4>
+                    <button
+                      onClick={() => {
+                        const sId = selectedStudentForDetails.id;
+                        setSelectedStudentForDetails(null);
+                        setExportType("student");
+                        setExportStudentId(sId);
+                        setExportRollQuery(selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "");
+                        setExportModalOpen(true);
+                      }}
+                      className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      Download Register (.csv)
+                    </button>
+                  </div>
+
+                  <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
+                    {(() => {
+                      const studentLogs = (todaysAttendance || []).filter((l: any) => l.userId === selectedStudentForDetails.id || l.user?.id === selectedStudentForDetails.id);
+                      if (studentLogs.length === 0) {
+                        return (
+                          <div className="p-6 text-center text-slate-500 text-xs italic">
+                            No scan records registered for this student on {logDate}.
+                          </div>
+                        );
+                      }
+                      return (
+                        <table className="w-full text-left text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 font-bold uppercase">
+                              <th className="py-2.5 px-4">Date</th>
+                              <th className="py-2.5 px-4 text-center">Entry Time (In)</th>
+                              <th className="py-2.5 px-4 text-center">Exit Time (Out)</th>
+                              <th className="py-2.5 px-4 text-center">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-850">
+                            {studentLogs.map((log: any) => (
+                              <tr key={log.id} className="hover:bg-slate-900/40">
+                                <td className="py-2.5 px-4 font-mono text-slate-300 font-semibold">{log.date}</td>
+                                <td className="py-2.5 px-4 text-center font-semibold text-emerald-400">{log.entryTime ? formatTimeDisplay(log.entryTime) : "—"}</td>
+                                <td className="py-2.5 px-4 text-center font-semibold text-blue-400">{log.exitTime ? formatTimeDisplay(log.exitTime) : "—"}</td>
+                                <td className="py-2.5 px-4 text-center">
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                                    log.status === "inside"
+                                      ? "bg-green-950/60 text-green-400 border-green-900/40"
+                                      : "bg-slate-850 text-slate-400 border-slate-800"
+                                  }`}>
+                                    {log.status === "inside" ? "Still on Campus" : "Exited"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="pt-2 border-t border-slate-800 flex justify-end">
+                <button
+                  onClick={() => setSelectedStudentForDetails(null)}
+                  className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Close Profile
                 </button>
               </div>
             </div>
