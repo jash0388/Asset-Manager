@@ -154,6 +154,29 @@ export default function HodDashboard() {
 
   // Selected student for detail view modal
   const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
+  const [studentModalMonth, setStudentModalMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+  const [selectedDayDetail, setSelectedDayDetail] = useState<{
+    dateStr: string;
+    dayNum: number;
+    dayOfWeek: string;
+    status: "P" | "A" | "*";
+    record?: AttendanceRecord;
+    holidayReason?: string;
+  } | null>(null);
+
+  const { data: studentMonthlyRecords = [] } = useQuery<AttendanceRecord[]>({
+    queryKey: ["student-monthly-records", selectedStudentForDetails?.id, studentModalMonth],
+    queryFn: async () => {
+      if (!selectedStudentForDetails) return [];
+      const data = await customFetch<AttendanceRecord[]>(`/api/attendance?month=${studentModalMonth}`);
+      return (data || []).filter(r => (r.userId || (r as any).user_id) === selectedStudentForDetails.id);
+    },
+    enabled: Boolean(selectedStudentForDetails)
+  });
 
   // Holiday Management State (persisted in localStorage)
   const [holidays, setHolidays] = useState<Record<string, string>>(() => {
@@ -2043,12 +2066,24 @@ export default function HodDashboard() {
                   </div>
                 </div>
 
-                {/* Attendance Activity History */}
-                <div className="space-y-2">
+                {/* Interactive Monthly Attendance Register Grid & Day Details */}
+                <div className="space-y-3 pt-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Today's Attendance Scan Details ({logDate})
-                    </h4>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Select Month
+                      </label>
+                      <input
+                        type="month"
+                        value={studentModalMonth}
+                        onChange={(e) => {
+                          setStudentModalMonth(e.target.value);
+                          setSelectedDayDetail(null);
+                        }}
+                        className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-blue-500 [color-scheme:dark]"
+                      />
+                    </div>
+
                     <button
                       onClick={() => {
                         const sId = selectedStudentForDetails.id;
@@ -2056,59 +2091,224 @@ export default function HodDashboard() {
                         setExportType("student");
                         setExportStudentId(sId);
                         setExportRollQuery(selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "");
+                        setExportMonth(studentModalMonth);
                         setExportModalOpen(true);
                       }}
-                      className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer transition-colors"
+                      className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-800/60"
                     >
                       <FileSpreadsheet className="w-3.5 h-3.5" />
                       Download Register (.csv)
                     </button>
                   </div>
 
-                  <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
-                    {(() => {
-                      const studentLogs = (detailedLogs || []).filter((l: any) => 
-                        l && (l.userId === selectedStudentForDetails?.id || l.user?.id === selectedStudentForDetails?.id || l.userId === selectedStudentForDetails?.user_id)
-                      );
-                      if (studentLogs.length === 0) {
-                        return (
-                          <div className="p-6 text-center text-slate-500 text-xs italic">
-                            No scan records registered for this student on {logDate}.
-                          </div>
-                        );
+                  {/* Monthly Stats Summary Bar */}
+                  {(() => {
+                    const [sYearStr, sMonthStr] = studentModalMonth.split("-");
+                    const sYearNum = parseInt(sYearStr);
+                    const sMonthNum = parseInt(sMonthStr);
+                    const sDaysInMonth = new Date(sYearNum, sMonthNum, 0).getDate();
+
+                    const formatDateLocal = (d: Date) => {
+                      const y = d.getFullYear();
+                      const m = String(d.getMonth() + 1).padStart(2, "0");
+                      const day = String(d.getDate()).padStart(2, "0");
+                      return `${y}-${m}-${day}`;
+                    };
+
+                    const studentAttendanceByDate = new Map<string, AttendanceRecord>();
+                    (studentMonthlyRecords || []).forEach(r => {
+                      if (!r.date) return;
+                      const rawDateStr = typeof r.date === "string" ? r.date.slice(0, 10) : formatDateLocal(new Date(r.date));
+                      if (rawDateStr) {
+                        studentAttendanceByDate.set(rawDateStr, r);
                       }
-                      return (
-                        <table className="w-full text-left text-xs border-collapse">
-                          <thead>
-                            <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 font-bold uppercase">
-                              <th className="py-2.5 px-4">Date</th>
-                              <th className="py-2.5 px-4 text-center">Entry Time (In)</th>
-                              <th className="py-2.5 px-4 text-center">Exit Time (Out)</th>
-                              <th className="py-2.5 px-4 text-center">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-850">
-                            {studentLogs.map((log: any) => (
-                              <tr key={log.id} className="hover:bg-slate-900/40">
-                                <td className="py-2.5 px-4 font-mono text-slate-300 font-semibold">{log.date}</td>
-                                <td className="py-2.5 px-4 text-center font-semibold text-emerald-400">{log.entryTime ? formatTime(log.entryTime) : "—"}</td>
-                                <td className="py-2.5 px-4 text-center font-semibold text-blue-400">{log.exitTime ? formatTime(log.exitTime) : "—"}</td>
-                                <td className="py-2.5 px-4 text-center">
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                                    log.status === "inside"
-                                      ? "bg-green-950/60 text-green-400 border-green-900/40"
-                                      : "bg-slate-850 text-slate-400 border-slate-800"
-                                  }`}>
-                                    {log.status === "inside" ? "Still on Campus" : "Exited"}
+                    });
+
+                    const monthDaysList = [];
+                    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+                    let studentPresentCount = 0;
+                    let studentAbsentCount = 0;
+                    let studentHolidayCount = 0;
+                    let studentWorkingDaysCount = 0;
+
+                    for (let day = 1; day <= sDaysInMonth; day++) {
+                      const dObj = new Date(sYearNum, sMonthNum - 1, day, 12, 0, 0);
+                      const dateStr = formatDateLocal(dObj);
+                      const dayOfWeek = daysOfWeek[dObj.getDay()];
+                      const isSunday = dObj.getDay() === 0;
+                      const isDeclaredHoliday = Boolean(holidays[dateStr]);
+                      const isSundayOrHoliday = isSunday || isDeclaredHoliday;
+                      
+                      const record = studentAttendanceByDate.get(dateStr);
+                      const isPresent = Boolean(record);
+
+                      let status: "P" | "A" | "*" = "A";
+                      if (isSundayOrHoliday) {
+                        if (isPresent) {
+                          status = "P";
+                          studentPresentCount++;
+                        } else {
+                          status = "*";
+                          studentHolidayCount++;
+                        }
+                      } else {
+                        studentWorkingDaysCount++;
+                        if (isPresent) {
+                          status = "P";
+                          studentPresentCount++;
+                        } else {
+                          status = "A";
+                          studentAbsentCount++;
+                        }
+                      }
+
+                      monthDaysList.push({
+                        dayNum: day,
+                        dateStr,
+                        dayOfWeek,
+                        status,
+                        isSundayOrHoliday,
+                        holidayReason: isDeclaredHoliday ? holidays[dateStr] : isSunday ? "Sunday" : undefined,
+                        record
+                      });
+                    }
+
+                    const calcWorkingDays = studentWorkingDaysCount > 0 ? studentWorkingDaysCount : sDaysInMonth;
+                    const studentMonthlyPercent = calcWorkingDays > 0 ? Math.floor((studentPresentCount / calcWorkingDays) * 100) : 0;
+
+                    return (
+                      <div className="space-y-3">
+                        {/* Stats Row */}
+                        <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                          <div className="p-2 rounded-xl bg-green-950/40 border border-green-900/40">
+                            <p className="text-[10px] font-bold text-green-400 uppercase">Present (P)</p>
+                            <p className="text-base font-black text-green-300 mt-0.5">{studentPresentCount} days</p>
+                          </div>
+                          <div className="p-2 rounded-xl bg-red-950/40 border border-red-900/40">
+                            <p className="text-[10px] font-bold text-red-400 uppercase">Absent (A)</p>
+                            <p className="text-base font-black text-red-300 mt-0.5">{studentAbsentCount} days</p>
+                          </div>
+                          <div className="p-2 rounded-xl bg-purple-950/40 border border-purple-900/40">
+                            <p className="text-[10px] font-bold text-purple-400 uppercase">Holidays (*)</p>
+                            <p className="text-base font-black text-purple-300 mt-0.5">{studentHolidayCount} days</p>
+                          </div>
+                          <div className="p-2 rounded-xl bg-blue-950/40 border border-blue-900/40">
+                            <p className="text-[10px] font-bold text-blue-400 uppercase">Monthly %</p>
+                            <p className="text-base font-black text-blue-300 mt-0.5">{studentMonthlyPercent}%</p>
+                          </div>
+                        </div>
+
+                        {/* Daily Grid Badges */}
+                        <div>
+                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span>Daily Register Grid (Click any date to view Entry/Exit times)</span>
+                            <span className="text-slate-500 font-normal">P = Present | A = Absent | * = Holiday</span>
+                          </p>
+                          
+                          <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-3 rounded-2xl border border-slate-850">
+                            {monthDaysList.map((d) => {
+                              const isSelected = selectedDayDetail?.dateStr === d.dateStr;
+                              return (
+                                <button
+                                  key={d.dateStr}
+                                  onClick={() => setSelectedDayDetail(d)}
+                                  className={`p-2 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${
+                                    isSelected
+                                      ? "ring-2 ring-blue-400 scale-105 z-10 shadow-lg"
+                                      : "hover:scale-102"
+                                  } ${
+                                    d.status === "P"
+                                      ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-200"
+                                      : d.status === "*"
+                                      ? "bg-purple-950/50 border-purple-800/60 text-purple-200"
+                                      : "bg-red-950/40 border-red-900/40 text-red-300"
+                                  }`}
+                                >
+                                  <span className="text-[10px] font-mono font-semibold text-slate-400">
+                                    {d.dayNum} {d.dayOfWeek}
                                   </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      );
-                    })()}
-                  </div>
+                                  <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                                    d.status === "P"
+                                      ? "bg-emerald-500 text-slate-950"
+                                      : d.status === "*"
+                                      ? "bg-amber-400 text-slate-950"
+                                      : "bg-red-500/80 text-white"
+                                  }`}>
+                                    {d.status}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Selected Day Detail Card */}
+                        {selectedDayDetail ? (
+                          <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-800/60 space-y-2 animate-fadeIn">
+                            <div className="flex items-center justify-between border-b border-blue-900/60 pb-2">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-blue-400" />
+                                <h5 className="text-sm font-bold text-white">
+                                  Date: <span className="font-mono text-blue-300">{selectedDayDetail.dateStr}</span> ({selectedDayDetail.dayOfWeek})
+                                </h5>
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                selectedDayDetail.status === "P"
+                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                  : selectedDayDetail.status === "*"
+                                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                                  : "bg-red-500/20 text-red-300 border border-red-500/40"
+                              }`}>
+                                {selectedDayDetail.status === "P"
+                                  ? "🟢 PRESENT"
+                                  : selectedDayDetail.status === "*"
+                                  ? `🟨 HOLIDAY (${selectedDayDetail.holidayReason || "Sunday"})`
+                                  : "🔴 ABSENT"}
+                              </span>
+                            </div>
+
+                            {selectedDayDetail.record ? (
+                              <div className="grid grid-cols-3 gap-3 pt-1 text-xs">
+                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Entry Time (In)</p>
+                                  <p className="text-sm font-bold text-emerald-400 mt-0.5">
+                                    {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
+                                  </p>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Exit Time (Out)</p>
+                                  <p className="text-sm font-bold text-blue-400 mt-0.5">
+                                    {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
+                                  </p>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Duration / Status</p>
+                                  <p className="text-xs font-bold text-slate-200 mt-1">
+                                    {selectedDayDetail.record.durationMinutes
+                                      ? `${Math.floor(selectedDayDetail.record.durationMinutes / 60)}h ${selectedDayDetail.record.durationMinutes % 60}m`
+                                      : selectedDayDetail.record.status === "inside"
+                                      ? "Still on Campus"
+                                      : "Completed"}
+                                  </p>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-xs text-slate-400 italic pt-1">
+                                {selectedDayDetail.status === "*"
+                                  ? `College was closed on this day (${selectedDayDetail.holidayReason || "Sunday"}). No attendance recorded.`
+                                  : "No QR scan records registered for this date (Absent)."}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-950 rounded-xl border border-slate-850">
+                            💡 Click on any date box above (P, A, or *) to view exact Entry & Exit scan timestamps for that day.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
