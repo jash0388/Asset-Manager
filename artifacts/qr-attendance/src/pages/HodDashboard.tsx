@@ -132,14 +132,24 @@ export default function HodDashboard() {
 
   // Export Monthly Attendance Register state
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportDateMode, setExportDateMode] = useState<"month" | "range">("month");
   const [exportMonth, setExportMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+  const [exportFromDate, setExportFromDate] = useState(() => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    return firstDay.toISOString().split("T")[0];
+  });
+  const [exportToDate, setExportToDate] = useState(() => {
+    return new Date().toISOString().split("T")[0];
   });
   const [exportType, setExportType] = useState<"department" | "year" | "section" | "student">("department");
   const [exportYear, setExportYear] = useState("2nd Year");
   const [exportSection, setExportSection] = useState("2A");
   const [exportStudentId, setExportStudentId] = useState<number | "">("");
+  const [exportRollQuery, setExportRollQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
 
   // Fetch mentors with keys for HOD Dashboard
@@ -235,27 +245,52 @@ export default function HodDashboard() {
     return { name: sectionStr, yearLabel: "Other" };
   };
 
-  // Generate and Download Monthly Attendance Register CSV
+  // Generate and Download Attendance Register CSV (Month or Date Range)
   const handleGenerateCsv = async () => {
     setIsExporting(true);
     try {
-      const [yearStr, monthStr] = exportMonth.split("-");
-      const yearNum = parseInt(yearStr);
-      const monthNum = parseInt(monthStr);
+      let startDateStr = "";
+      let endDateStr = "";
+      let periodLabel = "";
 
-      const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+      if (exportDateMode === "month") {
+        const [yearStr, monthStr] = exportMonth.split("-");
+        const yearNum = parseInt(yearStr);
+        const monthNum = parseInt(monthStr);
+        const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+        startDateStr = `${yearStr}-${monthStr.padStart(2, "0")}-01`;
+        endDateStr = `${yearStr}-${monthStr.padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+        const monthName = new Date(yearNum, monthNum - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+        periodLabel = monthName.toUpperCase();
+      } else {
+        startDateStr = exportFromDate;
+        endDateStr = exportToDate;
+        periodLabel = `${exportFromDate} TO ${exportToDate}`;
+      }
 
-      const monthlyRecords = await customFetch<AttendanceRecord[]>(`/api/attendance?month=${exportMonth}`);
+      // Generate date array between startDateStr and endDateStr (inclusive)
+      const dateList: { dateStr: string; dayNum: number; displayLabel: string }[] = [];
+      const curr = new Date(startDateStr + "T00:00:00");
+      const end = new Date(endDateStr + "T00:00:00");
 
-      const attendanceMap = new Map<number, Set<number>>();
-      (monthlyRecords || []).forEach(r => {
+      while (curr <= end) {
+        const dateStr = curr.toISOString().split("T")[0];
+        const dayNum = curr.getDate();
+        const monthShort = curr.toLocaleString('default', { month: 'short' });
+        const displayLabel = exportDateMode === "month" ? String(dayNum) : `${dayNum} ${monthShort}`;
+        dateList.push({ dateStr, dayNum, displayLabel });
+        curr.setDate(curr.getDate() + 1);
+      }
+
+      const rangeRecords = await customFetch<AttendanceRecord[]>(`/api/attendance?from=${startDateStr}&to=${endDateStr}`);
+
+      const attendanceMap = new Map<number, Set<string>>();
+      (rangeRecords || []).forEach(r => {
         if (!r.userId || !r.date) return;
-        const recDate = new Date(r.date);
-        const day = recDate.getDate();
         if (!attendanceMap.has(r.userId)) {
-          attendanceMap.set(r.userId, new Set<number>());
+          attendanceMap.set(r.userId, new Set<string>());
         }
-        attendanceMap.get(r.userId)!.add(day);
+        attendanceMap.get(r.userId)!.add(r.date);
       });
 
       let targetStudents = [...studentsOnly];
@@ -277,25 +312,23 @@ export default function HodDashboard() {
         return a.name.localeCompare(b.name);
       });
 
-      const monthName = new Date(yearNum, monthNum - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-
       const csvRows: string[][] = [];
 
-      csvRows.push([`MONTHLY ATTENDANCE REGISTER`]);
-      csvRows.push([`FOR THE MONTH OF: ${monthName.toUpperCase()}`, `SCOPE: ${exportType.toUpperCase()}`]);
+      csvRows.push([`ATTENDANCE REGISTER`]);
+      csvRows.push([`PERIOD: ${periodLabel}`, `SCOPE: ${exportType.toUpperCase()}`]);
       csvRows.push([`LEGEND: P = Present, A = Absent`]);
       csvRows.push([]);
 
       const headerRow = ["Serial No.", "Roll No / Unique ID", "Student Name", "Year", "Section"];
-      for (let day = 1; day <= daysInMonth; day++) {
-        headerRow.push(String(day));
-      }
+      dateList.forEach(d => headerRow.push(d.displayLabel));
       headerRow.push("Total Present (P)", "Total Absent (A)", "Attendance %");
       csvRows.push(headerRow);
 
+      const totalDays = dateList.length;
+
       targetStudents.forEach((student, idx) => {
         const secInfo = getSectionDisplayName(student.section);
-        const studentDaysPresent = attendanceMap.get(student.id) || new Set<number>();
+        const studentDatesPresent = attendanceMap.get(student.id) || new Set<string>();
 
         let totalPresent = 0;
         let totalAbsent = 0;
@@ -308,17 +341,17 @@ export default function HodDashboard() {
           secInfo.name
         ];
 
-        for (let day = 1; day <= daysInMonth; day++) {
-          if (studentDaysPresent.has(day)) {
+        dateList.forEach(d => {
+          if (studentDatesPresent.has(d.dateStr)) {
             studentRow.push("P");
             totalPresent++;
           } else {
             studentRow.push("A");
             totalAbsent++;
           }
-        }
+        });
 
-        const percent = daysInMonth > 0 ? Math.floor((totalPresent / daysInMonth) * 100) : 0;
+        const percent = totalDays > 0 ? Math.floor((totalPresent / totalDays) * 100) : 0;
 
         studentRow.push(String(totalPresent), String(totalAbsent), `${percent}%`);
         csvRows.push(studentRow);
@@ -331,7 +364,8 @@ export default function HodDashboard() {
       const link = document.createElement("a");
       link.setAttribute("href", url);
       const scopeLabel = exportType === "section" ? exportSection : exportType === "year" ? exportYear : exportType === "student" ? "Individual" : "Department";
-      link.setAttribute("download", `Attendance_Register_${scopeLabel}_${exportMonth}.csv`);
+      const periodFileStr = exportDateMode === "month" ? exportMonth : `${exportFromDate}_to_${exportToDate}`;
+      link.setAttribute("download", `Attendance_Register_${scopeLabel}_${periodFileStr}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1497,19 +1531,80 @@ export default function HodDashboard() {
               </div>
 
               <div className="space-y-4">
-                {/* Month Selector */}
+                {/* Date Selection Mode Selector */}
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Select Month
+                    Date Range Type
                   </label>
-                  <input
-                    type="month"
-                    value={exportMonth}
-                    onChange={(e) => setExportMonth(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
-                    required
-                  />
+                  <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setExportDateMode("month")}
+                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                        exportDateMode === "month"
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      🗓️ By Month
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setExportDateMode("range")}
+                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                        exportDateMode === "range"
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      📅 Calendar Range (From - To)
+                    </button>
+                  </div>
                 </div>
+
+                {/* Month Picker */}
+                {exportDateMode === "month" ? (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Select Month
+                    </label>
+                    <input
+                      type="month"
+                      value={exportMonth}
+                      onChange={(e) => setExportMonth(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
+                      required
+                    />
+                  </div>
+                ) : (
+                  /* Custom From - To Calendar Date Pickers */
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                        From Date
+                      </label>
+                      <input
+                        type="date"
+                        value={exportFromDate}
+                        onChange={(e) => setExportFromDate(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                        To Date
+                      </label>
+                      <input
+                        type="date"
+                        value={exportToDate}
+                        onChange={(e) => setExportToDate(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Scope Selector */}
                 <div>
@@ -1570,27 +1665,93 @@ export default function HodDashboard() {
                   </div>
                 )}
 
-                {/* Student Selector */}
+                {/* Student Selector by Roll Number or Name */}
                 {exportType === "student" && (
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                      Select Individual Student
+                  <div className="space-y-2.5">
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Enter Roll Number or Search Student
                     </label>
+
+                    {/* Roll Number Search Input */}
+                    <div className="relative">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
+                        <Search className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Type Roll Number (e.g. 23N81A6701)..."
+                        value={exportRollQuery}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setExportRollQuery(val);
+                          const matched = studentsOnly.find(s => 
+                            s.uniqueId?.toLowerCase().trim() === val.toLowerCase().trim()
+                          );
+                          if (matched) {
+                            setExportStudentId(matched.id);
+                          } else if (!val) {
+                            setExportStudentId("");
+                          }
+                        }}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 placeholder-slate-600 font-mono"
+                      />
+                    </div>
+
+                    {/* Dropdown sorted by Roll Number first */}
                     <select
                       value={exportStudentId}
-                      onChange={(e) => setExportStudentId(Number(e.target.value))}
+                      onChange={(e) => {
+                        const id = Number(e.target.value);
+                        setExportStudentId(id);
+                        const s = studentsOnly.find(st => st.id === id);
+                        if (s) {
+                          setExportRollQuery(s.uniqueId || "");
+                        }
+                      }}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
                     >
-                      <option value="">-- Select Student --</option>
-                      {studentsOnly.map(s => {
-                        const { name: secName } = getSectionDisplayName(s.section);
-                        return (
-                          <option key={s.id} value={s.id}>
-                            {s.name} ({s.uniqueId || "No ID"}) — Sec {secName}
-                          </option>
-                        );
-                      })}
+                      <option value="">-- Select from Roll Number List --</option>
+                      {[...studentsOnly]
+                        .filter(s => {
+                          if (!exportRollQuery) return true;
+                          const q = exportRollQuery.toLowerCase().trim();
+                          return (s.uniqueId || "").toLowerCase().includes(q) || s.name.toLowerCase().includes(q);
+                        })
+                        .sort((a, b) => (a.uniqueId || "").localeCompare(b.uniqueId || ""))
+                        .map(s => {
+                          const { name: secName } = getSectionDisplayName(s.section);
+                          return (
+                            <option key={s.id} value={s.id}>
+                              {s.uniqueId ? `${s.uniqueId} — ` : ""}{s.name} (Sec {secName})
+                            </option>
+                          );
+                        })}
                     </select>
+
+                    {/* Selected Student Details Card */}
+                    {exportStudentId ? (
+                      (() => {
+                        const s = studentsOnly.find(st => st.id === Number(exportStudentId));
+                        if (!s) return null;
+                        const { name: secName, yearLabel } = getSectionDisplayName(s.section);
+                        return (
+                          <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-full bg-emerald-900/60 border border-emerald-700/50 flex items-center justify-center font-bold text-emerald-300">
+                                {s.name.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="font-bold text-emerald-200 text-sm">{s.name}</p>
+                                <p className="text-emerald-400/80 font-mono">Roll No: {s.uniqueId || "N/A"} | Sec {secName} ({yearLabel})</p>
+                              </div>
+                            </div>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              Selected
+                            </span>
+                          </div>
+                        );
+                      })()
+                    ) : null}
                   </div>
                 )}
 
