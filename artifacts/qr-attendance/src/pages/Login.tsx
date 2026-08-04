@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 
 const BYPASS_CODE = "038899";
 const HOD_BYPASS_CODE = "038811";
+const PRINCIPAL_BYPASS_CODE = "984201";
 
 const MENTOR_CODES: Record<string, { name: string; section: string }> = {
   "223311": { name: "2nd Year Section A Mentor", section: "DS II/I/A" },
@@ -38,6 +39,12 @@ export default function Login() {
     if (code === HOD_BYPASS_CODE) {
       loginBypass("hod");
       navigate("/hod-dashboard");
+      return;
+    }
+
+    if (code === PRINCIPAL_BYPASS_CODE) {
+      loginBypass("principal");
+      navigate("/principal-dashboard");
       return;
     }
 
@@ -111,8 +118,11 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-8 text-center text-slate-450 text-xs">
-            Use the 6-digit administrator or mentor access code.
+          <div className="mt-8 text-center text-slate-450 text-xs flex flex-col gap-1">
+            <p className="font-medium text-slate-400">Enter 6-digit administrator, HOD, or Principal access code.</p>
+            <p className="text-[11px] font-mono text-slate-400/80 mt-1">
+              HOD Key: <span className="font-bold text-blue-400">038811</span> • Principal Key: <span className="font-bold text-amber-400">984201</span>
+            </p>
           </div>
         </div>
       </div>

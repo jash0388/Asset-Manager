@@ -9,17 +9,19 @@ import {
 } from "react";
 import { customFetch } from "@workspace/api-client-react";
 
-export type AuthRole = "admin" | "mentor" | "hod";
+export type AuthRole = "admin" | "mentor" | "hod" | "principal";
 
 export type AuthAdmin = { id: number; email: string; name: string };
 export type AuthMentor = { id: number; email: string; name: string; section?: string };
 export type AuthHod = { id: number; email: string; name: string };
+export type AuthPrincipal = { id: number; email: string; name: string };
 
 interface AuthContextValue {
   role: AuthRole | null;
   admin: AuthAdmin | null;
   mentor: AuthMentor | null;
   hod: AuthHod | null;
+  principal: AuthPrincipal | null;
   token: string | null;
   loading: boolean;
   loginAdmin: (email: string, password: string) => Promise<void>;
@@ -53,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [role, setRole] = useState<AuthRole | null>(() => {
     const r = localStorage.getItem(ROLE_KEY);
-    return r === "admin" || r === "mentor" || r === "hod" ? r : null;
+    return r === "admin" || r === "mentor" || r === "hod" || r === "principal" ? (r as AuthRole) : null;
   });
   const [admin, setAdmin] = useState<AuthAdmin | null>(() =>
     localStorage.getItem(ROLE_KEY) === "admin" ? readStored<AuthAdmin>(PROFILE_KEY) : null
@@ -64,10 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [hod, setHod] = useState<AuthHod | null>(() =>
     localStorage.getItem(ROLE_KEY) === "hod" ? readStored<AuthHod>(PROFILE_KEY) : null
   );
+  const [principal, setPrincipal] = useState<AuthPrincipal | null>(() =>
+    localStorage.getItem(ROLE_KEY) === "principal" ? readStored<AuthPrincipal>(PROFILE_KEY) : null
+  );
   const [loading] = useState(false);
 
   const persist = useCallback(
-    (newToken: string, newRole: AuthRole, profile: AuthAdmin | AuthMentor | AuthHod) => {
+    (newToken: string, newRole: AuthRole, profile: AuthAdmin | AuthMentor | AuthHod | AuthPrincipal) => {
       localStorage.setItem(TOKEN_KEY, newToken);
       localStorage.setItem(ROLE_KEY, newRole);
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
@@ -77,14 +82,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAdmin(profile as AuthAdmin);
         setMentor(null);
         setHod(null);
+        setPrincipal(null);
       } else if (newRole === "mentor") {
         setMentor(profile as AuthMentor);
         setAdmin(null);
         setHod(null);
-      } else {
+        setPrincipal(null);
+      } else if (newRole === "hod") {
         setHod(profile as AuthHod);
         setAdmin(null);
         setMentor(null);
+        setPrincipal(null);
+      } else {
+        setPrincipal(profile as AuthPrincipal);
+        setAdmin(null);
+        setMentor(null);
+        setHod(null);
       }
     },
     []
@@ -133,7 +146,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const loginBypass = useCallback((role: AuthRole = "admin", section?: string) => {
-    if (role === "hod") {
+    if (role === "principal") {
+      const bypassPrincipal: AuthPrincipal = {
+        id: -4,
+        email: "principal@sphn.edu.in",
+        name: "Principal (Campus Admin)",
+      };
+      persist("bypass-token-principal", "principal", bypassPrincipal);
+    } else if (role === "hod") {
       const bypassHod: AuthHod = {
         id: -2,
         email: "hod.ds@local",
@@ -167,6 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAdmin(null);
     setMentor(null);
     setHod(null);
+    setPrincipal(null);
     // Hard redirect so any cached query state is reset.
     if (typeof window !== "undefined") {
       const base = (import.meta as any).env?.BASE_URL || "/";
@@ -180,6 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       admin,
       mentor,
       hod,
+      principal,
       token,
       loading,
       loginAdmin,
@@ -188,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginBypass,
       logout,
     }),
-    [role, admin, mentor, hod, token, loading, loginAdmin, loginMentor, loginMentorKey, loginBypass, logout]
+    [role, admin, mentor, hod, principal, token, loading, loginAdmin, loginMentor, loginMentorKey, loginBypass, logout]
   );
 
   // Keep token state in sync if another tab logs in/out.

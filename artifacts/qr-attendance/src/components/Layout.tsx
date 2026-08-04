@@ -32,11 +32,16 @@ function joinBase(p: string) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { admin, hod, role, logout } = useAuth();
+  const { admin, hod, principal, role, logout } = useAuth();
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const navLinks = role === "hod"
+  const navLinks = role === "principal"
+    ? [
+        { href: "/principal-dashboard", label: "Principal Portal", icon: LayoutDashboard },
+        { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
+      ]
+    : role === "hod"
     ? [
         { href: "/hod-dashboard", label: "HOD Dashboard", icon: LayoutDashboard },
         { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
@@ -93,11 +98,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="px-3 py-4 border-t border-slate-800">
           <div className="flex items-center gap-3 px-3 py-2.5 mb-2">
             <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-              {(role === "hod" ? hod?.name : admin?.name)?.charAt(0).toUpperCase() ?? "A"}
+              {(role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name)?.charAt(0).toUpperCase() ?? "P"}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">{role === "hod" ? hod?.name : admin?.name ?? "Admin"}</p>
-              <p className="text-xs text-slate-400 truncate">{role === "hod" ? hod?.email : admin?.email ?? ""}</p>
+              <p className="text-sm font-medium text-white truncate">{role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name ?? "Admin"}</p>
+              <p className="text-xs text-slate-400 truncate">{role === "principal" ? principal?.email : role === "hod" ? hod?.email : admin?.email ?? ""}</p>
             </div>
           </div>
           <button

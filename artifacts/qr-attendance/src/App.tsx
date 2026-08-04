@@ -14,6 +14,7 @@ import SecurityApp from "@/pages/SecurityApp";
 import MentorApp from "@/pages/MentorApp";
 import Mentors from "@/pages/Mentors";
 import HodDashboard from "@/pages/HodDashboard";
+import PrincipalDashboard from "@/pages/PrincipalDashboard";
 import HourlyAttendance from "@/pages/HourlyAttendance";
 import { useEffect } from "react";
 
@@ -54,17 +55,31 @@ function RequireHod({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RequirePrincipal({ children }: { children: React.ReactNode }) {
+  const { role } = useAuth();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (role !== "principal") {
+      navigate("/login");
+    }
+  }, [role, navigate]);
+
+  if (role !== "principal") return null;
+  return <>{children}</>;
+}
+
 function RequireAdminOrHod({ children }: { children: React.ReactNode }) {
   const { role } = useAuth();
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    if (role !== "admin" && role !== "hod") {
+    if (role !== "admin" && role !== "hod" && role !== "principal") {
       navigate("/login");
     }
   }, [role, navigate]);
 
-  if (role !== "admin" && role !== "hod") return null;
+  if (role !== "admin" && role !== "hod" && role !== "principal") return null;
   return <>{children}</>;
 }
 
@@ -82,6 +97,11 @@ function AppRouter() {
       {/* HOD routes */}
       <Route path="/hod-dashboard">
         <RequireHod><HodDashboard /></RequireHod>
+      </Route>
+
+      {/* Principal routes */}
+      <Route path="/principal-dashboard">
+        <RequirePrincipal><PrincipalDashboard /></RequirePrincipal>
       </Route>
 
       {/* Admin routes */}
