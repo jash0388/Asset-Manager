@@ -146,16 +146,29 @@ export default function MentorApp() {
   const [riskSectionFilter, setRiskSectionFilter] = useState<string>("ALL");
   const [riskSearchQuery, setRiskSearchQuery] = useState("");
   const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
-  const [studentModalMonth, setStudentModalMonth] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  });
 
   useEffect(() => {
     if (role === "mentor") {
       loadActiveSchedule();
     }
   }, [role]);
+
+  // Resolve current faculty profile from official dataset
+  const activeFaculty = useMemo(() => {
+    if (!mentor) return null;
+    return OFFICIAL_FACULTY_LIST.find(
+      (f) =>
+        f.key === mentor.key ||
+        f.email === mentor.email ||
+        f.section.toLowerCase() === (mentor.section || "").toLowerCase().replace(/[^a-z0-9]/g, "") ||
+        (mentor.section && mentor.section.includes(f.section))
+    ) || {
+      name: mentor.name || "Faculty Mentor",
+      role: "Class In-charge & Mentor",
+      yearLabel: "CSE Data Science",
+      section: mentor.section || "DS",
+    };
+  }, [mentor]);
 
   const handleKeyLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,40 +232,6 @@ export default function MentorApp() {
       }
     } catch (err: any) {
       setError(err?.data?.error ?? err?.message ?? "Failed to load active class schedule");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSelectSchedule = async (sched: Schedule & { status: "pending" | "started" | "submitted"; session: Session | null }) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      setActiveSchedule(sched);
-      let currentSession = sched.session;
-      if (!currentSession) {
-        currentSession = await customFetch<Session>("/api/mentor/start-session", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ scheduleId: sched.id }),
-        });
-        setSession(currentSession);
-      } else {
-        setSession(currentSession);
-      }
-
-      const studentData = await customFetch<ScheduleStudent[]>(`/api/mentor/students-by-schedule?scheduleId=${sched.id}`);
-      const mappedStudents = studentData.map(s => {
-        if (!s.markedByTeacher && s.scannedGate) {
-          return { ...s, markedPresent: true };
-        }
-        return s;
-      });
-
-      setStudents(mappedStudents);
-    } catch (err: any) {
-      setError(err?.data?.error ?? err?.message ?? "Failed to load selected schedule");
     } finally {
       setLoading(false);
     }
@@ -361,16 +340,16 @@ export default function MentorApp() {
       let label = "Safe Zone";
       let badgeColor = "bg-emerald-500 text-slate-950 font-black border border-emerald-400";
       let cardBorder = "border-l-4 border-l-emerald-500 border-slate-200";
-      let bannerBg = "bg-slate-50 border-emerald-300 text-slate-800";
+      let bannerBg = "bg-emerald-50 border-emerald-200 text-slate-900";
       let dotColor = "🟢";
       let tip = "Good Standing (≥ 75%). Attendance target met!";
 
       if (percent < 65) {
         flag = "RED";
         label = "Critical Risk (< 65%)";
-        badgeColor = "bg-rose-600 text-white font-extrabold border border-rose-400 shadow-xs";
+        badgeColor = "bg-rose-600 text-white font-extrabold border border-rose-500 shadow-xs";
         cardBorder = "border-l-4 border-l-rose-500 border-slate-200";
-        bannerBg = "bg-rose-50 border-rose-200 text-slate-800";
+        bannerBg = "bg-rose-50 border-rose-200 text-slate-900";
         dotColor = "🔴";
         tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
       } else if (percent < 75) {
@@ -378,7 +357,7 @@ export default function MentorApp() {
         label = "Warning (Recoverable)";
         badgeColor = "bg-amber-400 text-slate-950 font-black border border-amber-300 shadow-xs";
         cardBorder = "border-l-4 border-l-amber-400 border-slate-200";
-        bannerBg = "bg-amber-50 border-amber-200 text-slate-800";
+        bannerBg = "bg-amber-50 border-amber-200 text-slate-900";
         dotColor = "🟡";
         tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
       }
@@ -455,29 +434,29 @@ export default function MentorApp() {
   if (role !== "mentor") {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans relative">
-        <div className="w-full max-w-md bg-white border-2 border-slate-200 rounded-[2rem] p-8 shadow-2xl relative z-10">
+        <div className="w-full max-w-md bg-white border-2 border-slate-200 rounded-[2rem] p-8 shadow-xl relative z-10 space-y-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-2xl bg-purple-600 flex items-center justify-center shadow-xl shadow-purple-600/30 mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-600/30 mb-4">
               <GraduationCap className="w-9 h-9 text-white" />
             </div>
-            <h1 className="text-2xl font-black tracking-tight" style={{ color: "#0f172a" }}>
+            <h1 className="text-2xl font-black tracking-tight text-slate-900">
               Faculty & Mentor Portal
             </h1>
-            <p className="text-sm font-bold mt-1.5 max-w-xs" style={{ color: "#475569" }}>
-              Enter your Faculty Passkey to access class timetables, student risk flags & attendance registers.
+            <p className="text-xs font-bold text-slate-600 mt-2 max-w-xs leading-relaxed">
+              Enter your 4-Digit Faculty PIN to access class timetables, student risk flags & attendance registers.
             </p>
           </div>
 
-          <form onSubmit={handleKeyLogin} className="mt-7 flex flex-col gap-5">
+          <form onSubmit={handleKeyLogin} className="space-y-5">
             {error && (
-              <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold text-center flex items-center justify-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <div className="px-4 py-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold text-center flex items-center justify-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                 {error}
               </div>
             )}
 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-black uppercase tracking-wider text-center" style={{ color: "#1e293b" }}>
+            <div className="space-y-2 text-center">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-800">
                 Faculty 4-Digit PIN Key
               </label>
               <input
@@ -487,8 +466,7 @@ export default function MentorApp() {
                 placeholder="e.g. 4011"
                 value={passkey}
                 onChange={(e) => setPasskey(e.target.value.toUpperCase())}
-                className="px-4 py-4 rounded-2xl border-2 border-purple-500 text-3xl font-mono font-black tracking-widest text-center focus:outline-none focus:ring-4 focus:ring-purple-600/20 shadow-inner"
-                style={{ color: "#0f172a", backgroundColor: "#f8fafc" }}
+                className="w-full px-4 py-4 rounded-2xl bg-slate-50 border-2 border-purple-500 text-slate-900 text-3xl font-mono font-black tracking-widest text-center focus:outline-none focus:ring-4 focus:ring-purple-600/20 shadow-inner"
                 autoFocus
               />
             </div>
@@ -496,7 +474,7 @@ export default function MentorApp() {
             <button
               type="submit"
               disabled={keySubmitting}
-              className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-black text-sm shadow-xl shadow-purple-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider mt-1"
+              className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-black text-sm shadow-lg shadow-purple-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
             >
               {keySubmitting ? (
                 <>
@@ -511,15 +489,15 @@ export default function MentorApp() {
           </form>
 
           {/* Quick 4-Digit Passkeys Reference */}
-          <div className="mt-6 pt-5 border-t border-slate-200 text-center">
+          <div className="pt-5 border-t border-slate-200 text-center">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Sample 4-Digit Faculty PINs</p>
-            <div className="flex flex-wrap items-center justify-center gap-1.5 text-[10px] font-mono font-bold text-slate-600">
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">4011 (4A)</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">4012 (4B)</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">3011 (3A)</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">3012 (3C)</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">2011 (2A)</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">2012 (2B)</span>
+            <div className="flex flex-wrap items-center justify-center gap-1.5 text-[11px] font-mono font-bold text-slate-700">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">4011 (4A)</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">4012 (4B)</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">3011 (3A)</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">3012 (3C)</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">2011 (2A)</span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">2012 (2B)</span>
             </div>
           </div>
         </div>
@@ -529,41 +507,46 @@ export default function MentorApp() {
 
   // ---------- Logged-in Faculty Portal ----------
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       {/* Top Navigation Bar */}
-      <header className="bg-slate-900 border-b border-slate-800 text-white px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-white font-bold shadow-md shadow-purple-600/30">
+      <header className="bg-white border-b border-slate-200 text-slate-900 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-purple-600 flex items-center justify-center text-white font-bold shadow-md shadow-purple-600/30">
             <GraduationCap className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black text-white tracking-tight">
-              {mentor?.name || "Faculty Portal"}
-            </h1>
-            <p className="text-xs text-purple-300 font-medium">
-              Department of CSE - Data Science (DS) • Sphoorthy Engineering College
+            <div className="flex items-center gap-2">
+              <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                {activeFaculty?.name}
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 border border-purple-300">
+                {activeFaculty?.section} Faculty
+              </span>
+            </div>
+            <p className="text-xs text-purple-700 font-bold mt-0.5">
+              {activeFaculty?.role} • Department of CSE - Data Science (DS)
             </p>
           </div>
         </div>
 
         <button
           onClick={logout}
-          className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+          className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
         >
-          <LogOut className="w-4 h-4 text-slate-400" />
+          <LogOut className="w-4 h-4 text-slate-600" />
           Logout
         </button>
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 p-4 sm:p-6 max-w-5xl mx-auto w-full space-y-5">
+      <div className="flex-1 p-4 sm:p-6 max-w-5xl mx-auto w-full space-y-6">
         {/* Mode Switcher Tabs */}
-        <div className="flex bg-white border-2 border-slate-200 p-1.5 rounded-2xl w-fit shadow-md">
+        <div className="flex bg-white border border-slate-200 p-1.5 rounded-2xl w-fit shadow-sm">
           <button
             onClick={() => setPortalTab("session")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
               portalTab === "session"
-                ? "bg-purple-600 text-white shadow-md shadow-purple-600/20"
+                ? "bg-purple-600 text-white shadow-sm"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
@@ -572,9 +555,9 @@ export default function MentorApp() {
           </button>
           <button
             onClick={() => setPortalTab("analytics")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
               portalTab === "analytics"
-                ? "bg-purple-600 text-white shadow-md shadow-purple-600/20"
+                ? "bg-purple-600 text-white shadow-sm"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
@@ -593,8 +576,8 @@ export default function MentorApp() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <button
                 onClick={() => setRiskFlagFilter("RED")}
-                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-md ${
-                  riskFlagFilter === "RED" ? "border-rose-500 ring-2 ring-rose-500/20" : "border-slate-200"
+                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
+                  riskFlagFilter === "RED" ? "border-rose-500 ring-2 ring-rose-500/20" : "border-slate-200 hover:border-rose-300"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -607,13 +590,13 @@ export default function MentorApp() {
                   </span>
                 </div>
                 <p className="text-3xl font-black text-slate-900">{redCount} Students</p>
-                <p className="text-xs font-bold text-slate-500 mt-1">Shortage Risk • Requires Condonation / Parent Notice</p>
+                <p className="text-xs font-bold text-slate-600 mt-1">Shortage Risk • Requires Condonation / Parent Notice</p>
               </button>
 
               <button
                 onClick={() => setRiskFlagFilter("YELLOW")}
-                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-md ${
-                  riskFlagFilter === "YELLOW" ? "border-amber-500 ring-2 ring-amber-500/20" : "border-slate-200"
+                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
+                  riskFlagFilter === "YELLOW" ? "border-amber-500 ring-2 ring-amber-500/20" : "border-slate-200 hover:border-amber-300"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -626,13 +609,13 @@ export default function MentorApp() {
                   </span>
                 </div>
                 <p className="text-3xl font-black text-slate-900">{yellowCount} Students</p>
-                <p className="text-xs font-bold text-slate-500 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
+                <p className="text-xs font-bold text-slate-600 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
               </button>
 
               <button
                 onClick={() => setRiskFlagFilter("GREEN")}
-                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-md ${
-                  riskFlagFilter === "GREEN" ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-slate-200"
+                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
+                  riskFlagFilter === "GREEN" ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-slate-200 hover:border-emerald-300"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -645,12 +628,12 @@ export default function MentorApp() {
                   </span>
                 </div>
                 <p className="text-3xl font-black text-slate-900">{greenCount} Students</p>
-                <p className="text-xs font-bold text-slate-500 mt-1">Good Standing • Attendance Target Met</p>
+                <p className="text-xs font-bold text-slate-600 mt-1">Good Standing • Attendance Target Met</p>
               </button>
             </div>
 
             {/* Filter Toolbar */}
-            <div className="bg-white border-2 border-slate-200 rounded-2xl p-5 space-y-4 shadow-lg">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -704,7 +687,7 @@ export default function MentorApp() {
                     <div
                       key={item.student.id}
                       onClick={() => setSelectedStudentForDetails(item.student)}
-                      className={`bg-white border rounded-2xl p-4 transition-all cursor-pointer space-y-3 group shadow-sm hover:shadow-md ${item.cardBorder}`}
+                      className={`bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 transition-all cursor-pointer space-y-3 group shadow-sm ${item.cardBorder}`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3.5">
@@ -712,15 +695,15 @@ export default function MentorApp() {
                             {item.dotColor}
                           </div>
                           <div>
-                            <h4 className="text-sm font-extrabold text-slate-900 group-hover:text-purple-600 transition-colors">
+                            <h4 className="text-base font-extrabold text-slate-900 group-hover:text-purple-700 transition-colors">
                               {item.student.name}
                             </h4>
                             <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-600 font-mono font-bold">
                               <span>Roll: <strong className="text-emerald-700 font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
                               <span>•</span>
-                              <span>Year: <strong className="text-slate-800">{item.secInfo.yearLabel}</strong></span>
+                              <span>Year: <strong className="text-slate-800 font-bold">{item.secInfo.yearLabel}</strong></span>
                               <span>•</span>
-                              <span>Sec: <strong className="text-purple-700 font-extrabold">{item.secInfo.name}</strong></span>
+                              <span>Sec: <strong className="text-purple-700 font-bold">{item.secInfo.name}</strong></span>
                             </div>
                           </div>
                         </div>
@@ -745,7 +728,7 @@ export default function MentorApp() {
                         </div>
 
                         {item.classesNeededFor75 > 0 ? (
-                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white shrink-0 shadow-xs">
+                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-white border border-slate-300 text-slate-900 shrink-0 shadow-xs">
                             Target +{item.classesNeededFor75} Classes Needed
                           </span>
                         ) : (
@@ -764,24 +747,24 @@ export default function MentorApp() {
           /* CLASS SESSION & SCANNER VIEW */
           <>
             {loading ? (
-              <div className="bg-white border-2 border-slate-200 rounded-3xl p-16 flex flex-col items-center justify-center gap-4 text-center shadow-md">
+              <div className="bg-white border border-slate-200 rounded-3xl p-16 flex flex-col items-center justify-center gap-4 text-center shadow-sm">
                 <Loader2 className="w-10 h-10 text-purple-600 animate-spin" />
                 <p className="text-sm font-bold text-slate-600">Loading active classroom timetable & session...</p>
               </div>
             ) : !activeSchedule ? (
-              <div className="bg-white border-2 border-slate-200 rounded-3xl p-12 text-center space-y-4 shadow-md">
-                <div className="w-16 h-16 rounded-2xl bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-600 mx-auto">
+              <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-4 shadow-sm">
+                <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 mx-auto">
                   <Calendar className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-black text-slate-900">No Active Classroom Session Scheduled</h3>
-                <p className="text-xs font-bold text-slate-600 max-w-md mx-auto">
-                  There are no ongoing timetable classes for your faculty profile at this exact time. Switch to the <strong>Student Risk & Attendance Analytics</strong> tab above to view section rosters & attendance flags!
+                <h3 className="text-xl font-extrabold text-slate-900">No Active Classroom Session Scheduled</h3>
+                <p className="text-sm font-medium text-slate-600 max-w-md mx-auto leading-relaxed">
+                  There are no ongoing timetable classes for your faculty profile at this exact time. Switch to the <strong className="text-purple-700">Student Risk & Attendance Analytics</strong> tab above to view section rosters & attendance flags!
                 </p>
               </div>
             ) : (
               <>
                 {/* Active Session Banner */}
-                <div className="bg-white border-2 border-purple-200 rounded-3xl p-5 shadow-lg space-y-4">
+                <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                     <div>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 border border-purple-300 uppercase tracking-wider">
@@ -795,7 +778,7 @@ export default function MentorApp() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300">
+                      <span className="px-3.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300">
                         {presentCount} / {students.length} Marked Present
                       </span>
                     </div>
@@ -813,19 +796,19 @@ export default function MentorApp() {
                     />
                   </div>
 
-                  <div className="divide-y divide-slate-100 max-h-[50vh] overflow-y-auto pr-1">
+                  <div className="divide-y divide-slate-100 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar contain-paint">
                     {filteredStudents.map((s) => (
                       <div key={s.id} className="py-3 flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">{s.name}</p>
-                          <p className="text-[11px] font-mono font-bold text-slate-500">{s.uniqueId}</p>
+                          <p className="text-sm font-extrabold text-slate-900">{s.name}</p>
+                          <p className="text-xs font-mono font-bold text-slate-600 mt-0.5">{s.uniqueId}</p>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <button
                             disabled={isLocked}
                             onClick={() => handleSetAttendance(s.id, true)}
-                            className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
-                              s.markedPresent ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                              s.markedPresent ? "bg-emerald-600 text-white shadow-xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                             }`}
                           >
                             Present
@@ -833,8 +816,8 @@ export default function MentorApp() {
                           <button
                             disabled={isLocked}
                             onClick={() => handleSetAttendance(s.id, false)}
-                            className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
-                              !s.markedPresent ? "bg-red-600 text-white" : "bg-slate-100 text-slate-700"
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                              !s.markedPresent ? "bg-rose-600 text-white shadow-xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                             }`}
                           >
                             Absent
@@ -848,7 +831,7 @@ export default function MentorApp() {
                     <button
                       onClick={handleSubmitAttendance}
                       disabled={submitting}
-                      className="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2"
+                      className="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wide"
                     >
                       {submitting ? "Submitting..." : `Submit Attendance (${presentCount} Present)`}
                     </button>
@@ -860,10 +843,10 @@ export default function MentorApp() {
         )}
       </div>
 
-      {/* Student Monthly Attendance Register Modal */}
+      {/* Student Details Modal */}
       {selectedStudentForDetails && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-white border-2 border-slate-200 rounded-3xl w-full max-w-xl p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-xl p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
             <div className="flex items-start justify-between border-b border-slate-200 pb-3">
               <div>
                 <h3 className="text-lg font-black text-slate-900">{selectedStudentForDetails.name}</h3>
@@ -883,7 +866,7 @@ export default function MentorApp() {
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setSelectedStudentForDetails(null)}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs"
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer"
               >
                 Close Profile
               </button>
