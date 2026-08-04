@@ -348,7 +348,7 @@ export default function PrincipalDashboard() {
           </div>
           <div>
             <h1 className="text-lg font-extrabold text-white tracking-tight">QR Attendance System</h1>
-            <p className="text-xs text-blue-400 font-semibold">Office of the Principal • St. Peter's Engineering College (SPHN)</p>
+            <p className="text-xs text-blue-400 font-semibold">Office of the Principal • Sphoorthy Engineering College</p>
           </div>
         </div>
 
@@ -374,14 +374,14 @@ export default function PrincipalDashboard() {
               <div>
                 <div className="flex items-center gap-2.5">
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                    Principal Portal
+                    Dr. K. S. S. S. N. V. Prasad
                   </h1>
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 uppercase tracking-wider">
-                    Campus Admin
+                    Principal
                   </span>
                 </div>
                 <p className="text-slate-400 text-sm mt-1 font-medium">
-                  St. Peter's Engineering College (SPHN) • Institutional Campus Portal
+                  Sphoorthy Engineering College • Institutional Campus Portal
                 </p>
               </div>
             </div>
