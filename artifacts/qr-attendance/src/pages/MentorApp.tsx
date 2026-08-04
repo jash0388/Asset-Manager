@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
-import { useQuery } from "@tanstack/react-query";
 import {
   GraduationCap,
   LogOut,
@@ -23,12 +22,10 @@ import {
   Share2,
   Clock,
   BookOpen,
-  Flag,
-  AlertCircle,
-  TrendingUp,
-  FileSpreadsheet,
   Calendar,
-  Layers
+  Layers,
+  Check,
+  X as XIcon
 } from "lucide-react";
 
 type Schedule = {
@@ -62,27 +59,6 @@ type ScheduleStudent = {
   warningNotScanned: boolean;
 };
 
-type StudentUser = {
-  id: number;
-  name: string;
-  uniqueId: string;
-  unique_id?: string;
-  role: string;
-  section?: string;
-};
-
-type AttendanceRecord = {
-  id: number;
-  userId: number;
-  date: string;
-  entryTime: string | null;
-  exitTime: string | null;
-  durationMinutes: number | null;
-  status: "inside" | "exited";
-  user?: StudentUser;
-};
-
-// Official Faculty Mentors & Class Incharges Master List with 4-Digit PIN Keys
 export const OFFICIAL_FACULTY_LIST = [
   { id: 1, name: "Mrs. A. Sravanthi", email: "sravanthi.ds@sphoorthyengg.ac.in", key: "4011", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4A", rollRange: "23N81A6701 TO 23N81A6743", count: 42 },
   { id: 2, name: "Mrs. K. Sneha", email: "sneha.ds@sphoorthyengg.ac.in", key: "4012", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4B", rollRange: "23N81A6788 TO 23N81A67C8 + LE", count: 39 },
@@ -100,29 +76,9 @@ export const OFFICIAL_FACULTY_LIST = [
   { id: 14, name: "Mr. M. Srinivasulu", email: "srinivasulu.ds@sphoorthyengg.ac.in", key: "2015", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
 ];
 
-function getSectionDisplayName(sectionCode?: string): { name: string; yearLabel: string; yearNum: string } {
-  if (!sectionCode) return { name: "Other", yearLabel: "Department", yearNum: "Other" };
-  const str = sectionCode.trim();
-  const parts = str.split("/");
-  const sectionLetter = (parts[parts.length - 1] || "A").trim().toUpperCase();
-
-  if (str.includes("IV") || str.includes("4")) {
-    return { name: `4${sectionLetter}`, yearLabel: "4th Year", yearNum: "4" };
-  }
-  if (str.includes("III") || str.includes("3")) {
-    return { name: `3${sectionLetter}`, yearLabel: "3rd Year", yearNum: "3" };
-  }
-  if (str.includes("II") || str.includes("2")) {
-    return { name: `2${sectionLetter}`, yearLabel: "2nd Year", yearNum: "2" };
-  }
-  return { name: sectionCode, yearLabel: "Department", yearNum: "Other" };
-}
-
 export default function MentorApp() {
   const { mentor, role, logout, loginMentorKey, loginBypass } = useAuth();
   const [, navigate] = useLocation();
-
-  const [portalTab, setPortalTab] = useState<"session" | "analytics">("session");
 
   const [activeSchedule, setActiveSchedule] = useState<Schedule | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -135,17 +91,9 @@ export default function MentorApp() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const { canInstall, install } = usePwaInstall();
-  const [showInstallHelpModal, setShowInstallHelpModal] = useState(false);
 
   const [passkey, setPasskey] = useState("");
   const [keySubmitting, setKeySubmitting] = useState(false);
-
-  // Analytics tab state
-  const [riskFlagFilter, setRiskFlagFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
-  const [riskSectionFilter, setRiskSectionFilter] = useState<string>("ALL");
-  const [riskSearchQuery, setRiskSearchQuery] = useState("");
-  const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
 
   useEffect(() => {
     if (role === "mentor") {
@@ -163,8 +111,8 @@ export default function MentorApp() {
         f.section.toLowerCase() === (mentor.section || "").toLowerCase().replace(/[^a-z0-9]/g, "") ||
         (mentor.section && mentor.section.includes(f.section))
     ) || {
-      name: mentor.name || "Faculty Mentor",
-      role: "Class In-charge & Mentor",
+      name: mentor.name || "Faculty Teacher",
+      role: "Subject Faculty",
       yearLabel: "CSE Data Science",
       section: mentor.section || "DS",
     };
@@ -178,17 +126,14 @@ export default function MentorApp() {
     setError(null);
     try {
       await loginMentorKey(typed);
-      navigate("/incharge-dashboard");
     } catch (err: any) {
-      // Local fallback for 4-digit PIN keys
       const matched = OFFICIAL_FACULTY_LIST.find(
         (f) => f.key === typed || f.key.toLowerCase() === typed.toLowerCase() || f.section.toLowerCase() === typed.toLowerCase()
       );
       if (matched) {
         loginBypass("mentor", matched.section);
-        navigate("/incharge-dashboard");
       } else {
-        setError("Invalid 4-digit faculty key (e.g. 4011, 4012, 3011, 2011)");
+        setError("Invalid subject access key");
       }
     } finally {
       setKeySubmitting(false);
@@ -275,134 +220,6 @@ export default function MentorApp() {
     }
   };
 
-  // Fetch all students for Faculty Analytics
-  const { data: allUsers = [] } = useQuery<StudentUser[]>({
-    queryKey: ["mentor-users"],
-    queryFn: () => customFetch<StudentUser[]>("/api/users"),
-    enabled: role === "mentor"
-  });
-
-  const monthForFlags = useMemo(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  }, []);
-
-  const { data: monthlyAttendance = [] } = useQuery<AttendanceRecord[]>({
-    queryKey: ["mentor-monthly-attendance", monthForFlags],
-    queryFn: async () => {
-      const [yearStr, monthStr] = monthForFlags.split("-");
-      const yearNum = parseInt(yearStr);
-      const monthNum = parseInt(monthStr);
-      const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
-      const fromStr = `${yearStr}-${monthStr.padStart(2, "0")}-01`;
-      const toStr = `${yearStr}-${monthStr.padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-      return customFetch<AttendanceRecord[]>(`/api/attendance?from=${fromStr}&to=${toStr}`);
-    },
-    enabled: role === "mentor"
-  });
-
-  const totalMonthWorkingDays = useMemo(() => {
-    const [yStr, mStr] = monthForFlags.split("-");
-    const y = parseInt(yStr);
-    const m = parseInt(mStr);
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    let working = 0;
-    const daysInMonth = new Date(y, m, 0).getDate();
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dObj = new Date(y, m - 1, day, 12, 0, 0);
-      const dStr = `${y}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      if (dStr > todayStr) break;
-      if (dObj.getDay() !== 0) working++;
-    }
-    return Math.max(1, working);
-  }, [monthForFlags]);
-
-  const studentPresentCounts = useMemo(() => {
-    const map = new Map<number, number>();
-    (monthlyAttendance || []).forEach((r: any) => {
-      const uid = r.userId || r.user_id || r.user?.id;
-      if (uid) map.set(uid, (map.get(uid) || 0) + 1);
-    });
-    return map;
-  }, [monthlyAttendance]);
-
-  // Analytics Student List with Risk Flags
-  const mentorStudentAnalyticsList = useMemo(() => {
-    const studentList = allUsers.filter((u) => u.role === "student");
-    return studentList.map((student) => {
-      const presentDays = studentPresentCounts.get(student.id) || 0;
-      const calcWorking = totalMonthWorkingDays > 0 ? totalMonthWorkingDays : 1;
-      const percent = Math.min(100, Math.floor((presentDays / calcWorking) * 100));
-
-      const classesNeededFor75 = Math.max(0, 3 * totalMonthWorkingDays - 4 * presentDays);
-      const classesNeededFor65 = Math.max(0, Math.ceil((0.65 * totalMonthWorkingDays - presentDays) / 0.35));
-
-      let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
-      let label = "Safe Zone";
-      let badgeColor = "bg-emerald-500 text-slate-950 font-black border border-emerald-400";
-      let cardBorder = "border-l-4 border-l-emerald-500 border-slate-200";
-      let bannerBg = "bg-emerald-50 border-emerald-200 text-slate-900";
-      let dotColor = "🟢";
-      let tip = "Good Standing (≥ 75%). Attendance target met!";
-
-      if (percent < 65) {
-        flag = "RED";
-        label = "Critical Risk (< 65%)";
-        badgeColor = "bg-rose-600 text-white font-extrabold border border-rose-500 shadow-xs";
-        cardBorder = "border-l-4 border-l-rose-500 border-slate-200";
-        bannerBg = "bg-rose-50 border-rose-200 text-slate-900";
-        dotColor = "🔴";
-        tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
-      } else if (percent < 75) {
-        flag = "YELLOW";
-        label = "Warning (Recoverable)";
-        badgeColor = "bg-amber-400 text-slate-950 font-black border border-amber-300 shadow-xs";
-        cardBorder = "border-l-4 border-l-amber-400 border-slate-200";
-        bannerBg = "bg-amber-50 border-amber-200 text-slate-900";
-        dotColor = "🟡";
-        tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
-      }
-
-      const secInfo = getSectionDisplayName(student.section);
-      return {
-        student,
-        presentDays,
-        totalWorkingDays: totalMonthWorkingDays,
-        percent,
-        flag,
-        label,
-        badgeColor,
-        cardBorder,
-        bannerBg,
-        dotColor,
-        tip,
-        classesNeededFor75,
-        classesNeededFor65,
-        secInfo,
-      };
-    });
-  }, [allUsers, studentPresentCounts, totalMonthWorkingDays]);
-
-  const filteredMentorAnalyticsList = useMemo(() => {
-    return mentorStudentAnalyticsList.filter((item) => {
-      const q = riskSearchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !q ||
-        item.student.name.toLowerCase().includes(q) ||
-        (item.student.uniqueId || item.student.unique_id || "").toLowerCase().includes(q);
-
-      const matchesFlag = riskFlagFilter === "ALL" || item.flag === riskFlagFilter;
-      const matchesSection = riskSectionFilter === "ALL" || item.secInfo.name === riskSectionFilter;
-
-      return matchesSearch && matchesFlag && matchesSection;
-    });
-  }, [mentorStudentAnalyticsList, riskSearchQuery, riskFlagFilter, riskSectionFilter]);
-
-  const redCount = mentorStudentAnalyticsList.filter((s) => s.flag === "RED").length;
-  const yellowCount = mentorStudentAnalyticsList.filter((s) => s.flag === "YELLOW").length;
-  const greenCount = mentorStudentAnalyticsList.filter((s) => s.flag === "GREEN").length;
-
   const filteredStudents = useMemo(() => {
     if (!searchQuery.trim()) return students;
     const q = searchQuery.toLowerCase().trim();
@@ -435,40 +252,40 @@ export default function MentorApp() {
   // ---------- Passkey Lock Screen ----------
   if (role !== "mentor") {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans relative">
-        <div className="w-full max-w-md bg-white border-2 border-slate-200 rounded-[2rem] p-8 shadow-xl relative z-10 space-y-6">
+      <div style={{ backgroundColor: "#f8fafc", color: "#0f172a" }} className="min-h-screen flex flex-col items-center justify-center p-4 font-sans relative">
+        <div style={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1" }} className="w-full max-w-md border-2 rounded-[2rem] p-8 shadow-xl relative z-10 space-y-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-2xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-600/30 mb-4">
+            <div style={{ backgroundColor: "#2563eb" }} className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg mb-4">
               <GraduationCap className="w-9 h-9 text-white" />
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900">
-              Faculty & Mentor Portal
+            <h1 style={{ color: "#0f172a" }} className="text-2xl font-black tracking-tight">
+              Hourly Attendance Portal
             </h1>
-            <p className="text-xs font-bold text-slate-600 mt-2 max-w-xs leading-relaxed">
-              Enter your 4-Digit Faculty PIN to access class timetables, student risk flags & attendance registers.
+            <p style={{ color: "#475569" }} className="text-xs font-bold mt-2 max-w-xs leading-relaxed">
+              Enter your Subject Access Key to launch period attendance & QR scanner.
             </p>
           </div>
 
           <form onSubmit={handleKeyLogin} className="space-y-5">
             {error && (
-              <div className="px-4 py-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold text-center flex items-center justify-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div style={{ backgroundColor: "#fff1f2", borderColor: "#fecdd3", color: "#9f1239" }} className="px-4 py-3 rounded-xl border text-xs font-bold text-center flex items-center justify-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
                 {error}
               </div>
             )}
 
             <div className="space-y-2 text-center">
-              <label className="text-xs font-black uppercase tracking-wider text-slate-800">
-                Faculty 4-Digit PIN Key
+              <label style={{ color: "#0f172a" }} className="text-xs font-black uppercase tracking-wider">
+                Subject Access Key
               </label>
               <input
                 required
                 type="text"
-                maxLength={4}
-                placeholder="e.g. 4011"
+                placeholder="e.g. DS-2A"
                 value={passkey}
                 onChange={(e) => setPasskey(e.target.value.toUpperCase())}
-                className="w-full px-4 py-4 rounded-2xl bg-slate-50 border-2 border-purple-500 text-slate-900 text-3xl font-mono font-black tracking-widest text-center focus:outline-none focus:ring-4 focus:ring-purple-600/20 shadow-inner"
+                style={{ backgroundColor: "#f8fafc", borderColor: "#2563eb", color: "#0f172a" }}
+                className="w-full px-4 py-4 rounded-2xl border-2 text-3xl font-mono font-black tracking-widest text-center focus:outline-none shadow-inner"
                 autoFocus
               />
             </div>
@@ -476,64 +293,54 @@ export default function MentorApp() {
             <button
               type="submit"
               disabled={keySubmitting}
-              className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-black text-sm shadow-lg shadow-purple-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
+              style={{ backgroundColor: "#2563eb", color: "#ffffff" }}
+              className="w-full py-4 rounded-2xl disabled:opacity-50 font-black text-sm shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer hover:bg-blue-700"
             >
               {keySubmitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin text-white" /> Unlocking...
+                  <Loader2 className="w-5 h-5 animate-spin text-white" /> Accessing...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5 text-white" /> Unlock Faculty Portal
+                  <Sparkles className="w-5 h-5 text-white" /> Launch Class Attendance
                 </>
               )}
             </button>
           </form>
-
-          {/* Quick 4-Digit Passkeys Reference */}
-          <div className="pt-5 border-t border-slate-200 text-center">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Sample 4-Digit Faculty PINs</p>
-            <div className="flex flex-wrap items-center justify-center gap-1.5 text-[11px] font-mono font-bold text-slate-700">
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">4011 (4A)</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">4012 (4B)</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">3011 (3A)</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">3012 (3C)</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">2011 (2A)</span>
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200">2012 (2B)</span>
-            </div>
-          </div>
         </div>
       </div>
     );
   }
 
-  // ---------- Logged-in Faculty Portal ----------
+  // ---------- Logged-in Hourly Attendance Scanner ----------
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div style={{ backgroundColor: "#f8fafc", color: "#0f172a" }} className="min-h-screen flex flex-col font-sans">
       {/* Top Navigation Bar */}
-      <header className="bg-white border-b border-slate-200 text-slate-900 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+      <header style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border-b px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-purple-600 flex items-center justify-center text-white font-bold shadow-md shadow-purple-600/30">
-            <GraduationCap className="w-6 h-6 text-white" />
+          <div style={{ backgroundColor: "#2563eb" }} className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold shadow-md">
+            <Clock className="w-6 h-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+              {/* EXPLICIT 100% PITCH BLACK FACULTY NAME */}
+              <h1 style={{ color: "#0f172a" }} className="text-base sm:text-lg font-black tracking-tight">
                 {activeFaculty?.name}
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 border border-purple-300">
+              <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black border">
                 {activeFaculty?.section} Faculty
               </span>
             </div>
-            <p className="text-xs text-purple-700 font-bold mt-0.5">
-              {activeFaculty?.role} • Department of CSE - Data Science (DS)
+            <p style={{ color: "#1e40af" }} className="text-xs font-bold mt-0.5">
+              Hourly Attendance Scanner • Department of CSE - Data Science (DS)
             </p>
           </div>
         </div>
 
         <button
           onClick={logout}
-          className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
+          style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
+          className="px-4 py-2 rounded-xl font-bold text-xs border flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
         >
           <LogOut className="w-4 h-4 text-slate-600" />
           Logout
@@ -541,341 +348,106 @@ export default function MentorApp() {
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 p-4 sm:p-6 max-w-5xl mx-auto w-full space-y-6">
-        {/* Mode Switcher Tabs */}
-        <div className="flex bg-white border border-slate-200 p-1.5 rounded-2xl w-fit shadow-sm">
-          <button
-            onClick={() => setPortalTab("session")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
-              portalTab === "session"
-                ? "bg-purple-600 text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-            }`}
-          >
-            <Clock className="w-4 h-4" />
-            Class Session & Scanner
-          </button>
-          <button
-            onClick={() => setPortalTab("analytics")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
-              portalTab === "analytics"
-                ? "bg-purple-600 text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-            }`}
-          >
-            <Flag className="w-4 h-4 text-amber-500" />
-            Student Risk & Attendance Analytics
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300">
-              🔴 {redCount} | 🟡 {yellowCount}
-            </span>
-          </button>
-        </div>
-
-        {portalTab === "analytics" ? (
-          /* FACULTY STUDENT RISK & ATTENDANCE ANALYTICS VIEW */
-          <div className="space-y-5">
-            {/* Risk Flag Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <button
-                onClick={() => setRiskFlagFilter("RED")}
-                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
-                  riskFlagFilter === "RED" ? "border-rose-500 ring-2 ring-rose-500/20" : "border-slate-200 hover:border-rose-300"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <AlertCircle className="w-4 h-4 text-rose-600" />
-                    🔴 Red Flag (&lt; 65%)
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white">
-                    Critical
-                  </span>
-                </div>
-                <p className="text-3xl font-black text-slate-900">{redCount} Students</p>
-                <p className="text-xs font-bold text-slate-600 mt-1">Shortage Risk • Requires Condonation / Parent Notice</p>
-              </button>
-
-              <button
-                onClick={() => setRiskFlagFilter("YELLOW")}
-                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
-                  riskFlagFilter === "YELLOW" ? "border-amber-500 ring-2 ring-amber-500/20" : "border-slate-200 hover:border-amber-300"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    🟡 Yellow Flag (65%–74%)
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-950">
-                    Warning
-                  </span>
-                </div>
-                <p className="text-3xl font-black text-slate-900">{yellowCount} Students</p>
-                <p className="text-xs font-bold text-slate-600 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
-              </button>
-
-              <button
-                onClick={() => setRiskFlagFilter("GREEN")}
-                className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
-                  riskFlagFilter === "GREEN" ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-slate-200 hover:border-emerald-300"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    🟢 Green Flag (≥ 75%)
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500 text-slate-950">
-                    Safe
-                  </span>
-                </div>
-                <p className="text-3xl font-black text-slate-900">{greenCount} Students</p>
-                <p className="text-xs font-bold text-slate-600 mt-1">Good Standing • Attendance Target Met</p>
-              </button>
+      <div className="flex-1 p-4 sm:p-6 max-w-4xl mx-auto w-full space-y-6">
+        {loading ? (
+          <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-3xl p-16 flex flex-col items-center justify-center gap-4 text-center shadow-xs">
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+            <p style={{ color: "#475569" }} className="text-sm font-bold">Loading active classroom timetable & session...</p>
+          </div>
+        ) : !activeSchedule ? (
+          <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-3xl p-12 text-center space-y-4 shadow-xs">
+            <div style={{ backgroundColor: "#eff6ff", color: "#2563eb" }} className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
+              <Calendar className="w-8 h-8" />
             </div>
-
-            {/* Filter Toolbar */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search student name or roll number..."
-                    value={riskSearchQuery}
-                    onChange={(e) => setRiskSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs font-bold focus:outline-none focus:border-purple-600"
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <select
-                    value={riskFlagFilter}
-                    onChange={(e: any) => setRiskFlagFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold focus:outline-none"
-                  >
-                    <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
-                    <option value="RED">🔴 Red Flag (&lt; 65%)</option>
-                    <option value="YELLOW">🟡 Yellow Flag (65%–74%)</option>
-                    <option value="GREEN">🟢 Green Flag (≥ 75%)</option>
-                  </select>
-
-                  <select
-                    value={riskSectionFilter}
-                    onChange={(e) => setRiskSectionFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold focus:outline-none"
-                  >
-                    <option value="ALL">All Sections</option>
-                    <option value="2A">Section 2A</option>
-                    <option value="2B">Section 2B</option>
-                    <option value="2C">Section 2C</option>
-                    <option value="3A">Section 3A</option>
-                    <option value="3B">Section 3B</option>
-                    <option value="3C">Section 3C</option>
-                    <option value="4A">Section 4A</option>
-                    <option value="4B">Section 4B</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Student Flag Cards Container with Inner Scroll */}
-              <div className="space-y-3 pt-2 max-h-[58vh] overflow-y-auto pr-2 custom-scrollbar contain-paint">
-                {filteredMentorAnalyticsList.length === 0 ? (
-                  <div className="p-12 text-center text-slate-500 text-xs font-bold">
-                    No students found matching current risk filter.
-                  </div>
-                ) : (
-                  filteredMentorAnalyticsList.map((item) => (
-                    <div
-                      key={item.student.id}
-                      onClick={() => setSelectedStudentForDetails(item.student)}
-                      className={`bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 transition-all cursor-pointer space-y-3 group shadow-sm ${item.cardBorder}`}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-base">
-                            {item.dotColor}
-                          </div>
-                          <div>
-                            <h4 className="text-base font-extrabold text-slate-900 group-hover:text-purple-700 transition-colors">
-                              {item.student.name}
-                            </h4>
-                            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-600 font-mono font-bold">
-                              <span>Roll: <strong className="text-emerald-700 font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
-                              <span>•</span>
-                              <span>Year: <strong className="text-slate-800 font-bold">{item.secInfo.yearLabel}</strong></span>
-                              <span>•</span>
-                              <span>Sec: <strong className="text-purple-700 font-bold">{item.secInfo.name}</strong></span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            <span className={`px-3.5 py-1 rounded-full text-xs font-black shadow-xs inline-block ${item.badgeColor}`}>
-                              {item.label} ({item.percent}%)
-                            </span>
-                            <p className="text-xs text-slate-600 font-bold mt-1">
-                              {item.presentDays} / {item.totalWorkingDays} Working Days Attended
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Recovery Math Banner */}
-                      <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${item.bannerBg}`}>
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 shrink-0 text-slate-700" />
-                          <span className="font-bold text-slate-800">{item.tip}</span>
-                        </div>
-
-                        {item.classesNeededFor75 > 0 ? (
-                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-white border border-slate-300 text-slate-900 shrink-0 shadow-xs">
-                            Target +{item.classesNeededFor75} Classes Needed
-                          </span>
-                        ) : (
-                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-emerald-600 border border-emerald-500 text-white shrink-0 shadow-xs">
-                            ✓ Target Met
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <h3 style={{ color: "#0f172a" }} className="text-xl font-black">No Active Classroom Session Scheduled</h3>
+            <p style={{ color: "#475569" }} className="text-sm font-medium max-w-md mx-auto leading-relaxed">
+              There are no ongoing timetable classes for your faculty profile at this exact time ({getCurrentISTTimeStr()}). Please check back when your scheduled period starts!
+            </p>
           </div>
         ) : (
-          /* CLASS SESSION & SCANNER VIEW */
-          <>
-            {loading ? (
-              <div className="bg-white border border-slate-200 rounded-3xl p-16 flex flex-col items-center justify-center gap-4 text-center shadow-sm">
-                <Loader2 className="w-10 h-10 text-purple-600 animate-spin" />
-                <p className="text-sm font-bold text-slate-600">Loading active classroom timetable & session...</p>
-              </div>
-            ) : !activeSchedule ? (
-              <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center space-y-4 shadow-sm">
-                <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 mx-auto">
-                  <Calendar className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl font-extrabold text-slate-900">No Active Classroom Session Scheduled</h3>
-                <p className="text-sm font-medium text-slate-600 max-w-md mx-auto leading-relaxed">
-                  There are no ongoing timetable classes for your faculty profile at this exact time. Switch to the <strong className="text-purple-700">Student Risk & Attendance Analytics</strong> tab above to view section rosters & attendance flags!
+          <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-3xl p-6 shadow-xs space-y-5">
+            <div style={{ borderColor: "#f1f5f9" }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
+              <div>
+                <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border">
+                  Active Period Class
+                </span>
+                <h2 style={{ color: "#0f172a" }} className="text-xl font-black mt-1">
+                  {activeSchedule.subject} ({activeSchedule.year} Yr - Section {activeSchedule.section})
+                </h2>
+                <p style={{ color: "#64748b" }} className="text-xs font-bold mt-0.5">
+                  Scheduled Time: {activeSchedule.start_time} - {activeSchedule.end_time}
                 </p>
               </div>
-            ) : (
-              <>
-                {/* Active Session Banner */}
-                <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                    <div>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 border border-purple-300 uppercase tracking-wider">
-                        Active Class Session
-                      </span>
-                      <h2 className="text-xl font-black text-slate-900 mt-1">
-                        {activeSchedule.subject} ({activeSchedule.year} Yr - Section {activeSchedule.section})
-                      </h2>
-                      <p className="text-xs font-bold text-slate-500 mt-0.5">
-                        Schedule Time: {activeSchedule.start_time} - {activeSchedule.end_time}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-3.5 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300">
-                        {presentCount} / {students.length} Marked Present
-                      </span>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-2">
+                <span style={{ backgroundColor: "#ecfdf5", color: "#065f46", borderColor: "#a7f3d0" }} className="px-3.5 py-1.5 rounded-xl font-extrabold text-xs border">
+                  {presentCount} / {students.length} Marked Present
+                </span>
+              </div>
+            </div>
 
-                  {/* Student Search & List */}
-                  <div className="relative">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      placeholder="Search student name or roll number..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs font-bold focus:outline-none focus:border-purple-600"
-                    />
-                  </div>
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search student name or roll number..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ backgroundColor: "#f8fafc", borderColor: "#cbd5e1", color: "#0f172a" }}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs font-bold focus:outline-none"
+              />
+            </div>
 
-                  <div className="divide-y divide-slate-100 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar contain-paint">
-                    {filteredStudents.map((s) => (
-                      <div key={s.id} className="py-3 flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-extrabold text-slate-900">{s.name}</p>
-                          <p className="text-xs font-mono font-bold text-slate-600 mt-0.5">{s.uniqueId}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            disabled={isLocked}
-                            onClick={() => handleSetAttendance(s.id, true)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                              s.markedPresent ? "bg-emerald-600 text-white shadow-xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                            }`}
-                          >
-                            Present
-                          </button>
-                          <button
-                            disabled={isLocked}
-                            onClick={() => handleSetAttendance(s.id, false)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                              !s.markedPresent ? "bg-rose-600 text-white shadow-xs" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                            }`}
-                          >
-                            Absent
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+            {/* Student Roster List */}
+            <div style={{ borderColor: "#f1f5f9" }} className="divide-y max-h-[55vh] overflow-y-auto pr-1 custom-scrollbar contain-paint">
+              {filteredStudents.map((s) => (
+                <div key={s.id} className="py-3 flex items-center justify-between gap-3">
+                  <div>
+                    {/* EXPLICIT 100% PITCH BLACK STUDENT NAME */}
+                    <p style={{ color: "#0f172a" }} className="text-sm font-black">{s.name}</p>
+                    <p style={{ color: "#059669" }} className="text-xs font-mono font-bold mt-0.5">{s.uniqueId}</p>
                   </div>
-
-                  {!isLocked && (
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={handleSubmitAttendance}
-                      disabled={submitting}
-                      className="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wide"
+                      disabled={isLocked}
+                      onClick={() => handleSetAttendance(s.id, true)}
+                      style={{
+                        backgroundColor: s.markedPresent ? "#059669" : "#f1f5f9",
+                        color: s.markedPresent ? "#ffffff" : "#334155",
+                      }}
+                      className="px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
                     >
-                      {submitting ? "Submitting..." : `Submit Attendance (${presentCount} Present)`}
+                      Present
                     </button>
-                  )}
+                    <button
+                      disabled={isLocked}
+                      onClick={() => handleSetAttendance(s.id, false)}
+                      style={{
+                        backgroundColor: !s.markedPresent ? "#e11d48" : "#f1f5f9",
+                        color: !s.markedPresent ? "#ffffff" : "#334155",
+                      }}
+                      className="px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shadow-xs active:scale-95"
+                    >
+                      Absent
+                    </button>
+                  </div>
                 </div>
-              </>
+              ))}
+            </div>
+
+            {!isLocked && (
+              <button
+                onClick={handleSubmitAttendance}
+                disabled={submitting}
+                style={{ backgroundColor: "#2563eb", color: "#ffffff" }}
+                className="w-full py-4 rounded-xl font-black text-sm shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wide hover:bg-blue-700"
+              >
+                {submitting ? "Submitting..." : `Submit Class Attendance (${presentCount} Present)`}
+              </button>
             )}
-          </>
+          </div>
         )}
       </div>
-
-      {/* Student Details Modal */}
-      {selectedStudentForDetails && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-xl p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
-            <div className="flex items-start justify-between border-b border-slate-200 pb-3">
-              <div>
-                <h3 className="text-lg font-black text-slate-900">{selectedStudentForDetails.name}</h3>
-                <p className="text-xs font-mono font-bold text-purple-700 mt-0.5">
-                  Roll: {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id} • Sec {getSectionDisplayName(selectedStudentForDetails.section).name}
-                </p>
-              </div>
-              <button onClick={() => setSelectedStudentForDetails(null)} className="text-slate-400 hover:text-slate-800">
-                <XCircle className="w-6 h-6" />
-              </button>
-            </div>
-
-            <p className="text-xs font-bold text-slate-600">
-              Department of CSE Data Science • Sphoorthy Engineering College
-            </p>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => setSelectedStudentForDetails(null)}
-                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer"
-              >
-                Close Profile
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

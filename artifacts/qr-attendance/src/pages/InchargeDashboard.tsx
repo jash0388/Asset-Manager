@@ -275,7 +275,7 @@ export default function InchargeDashboard() {
       {/* Header Bar */}
       <header style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border-b px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-3.5">
-          <div style={{ backgroundColor: "#7c3aed" }} className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold shadow-md">
+          <div style={{ backgroundColor: "#2563eb" }} className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold shadow-md">
             <Award className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -283,11 +283,11 @@ export default function InchargeDashboard() {
               <h1 style={{ color: "#0f172a" }} className="text-base sm:text-lg font-black tracking-tight">
                 {activeAllocation.name}
               </h1>
-              <span style={{ backgroundColor: "#f3e8ff", color: "#6b21a8", borderColor: "#d8b4fe" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black border">
+              <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black border">
                 Sec {activeAllocation.section}
               </span>
             </div>
-            <p style={{ color: "#6b21a8" }} className="text-xs font-bold mt-0.5">
+            <p style={{ color: "#1e40af" }} className="text-xs font-bold mt-0.5">
               {activeAllocation.role} ({activeAllocation.yearLabel}) • CSE Data Science
             </p>
           </div>
@@ -308,7 +308,7 @@ export default function InchargeDashboard() {
         {/* Allocation Info Banner */}
         <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
           <div>
-            <span style={{ backgroundColor: "#f3e8ff", color: "#6b21a8", borderColor: "#d8b4fe" }} className="text-[10px] font-black uppercase tracking-wider border px-2.5 py-0.5 rounded-full">
+            <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="text-[10px] font-black uppercase tracking-wider border px-2.5 py-0.5 rounded-full">
               Assigned Mentoring Roster
             </span>
             <h2 style={{ color: "#0f172a" }} className="text-lg font-black mt-1">
@@ -326,7 +326,7 @@ export default function InchargeDashboard() {
               <button
                 onClick={() => setSelectedYearFilter("ALL")}
                 style={{
-                  backgroundColor: selectedYearFilter === "ALL" ? "#7c3aed" : "transparent",
+                  backgroundColor: selectedYearFilter === "ALL" ? "#2563eb" : "transparent",
                   color: selectedYearFilter === "ALL" ? "#ffffff" : "#475569",
                 }}
                 className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
@@ -336,7 +336,7 @@ export default function InchargeDashboard() {
               <button
                 onClick={() => setSelectedYearFilter("4")}
                 style={{
-                  backgroundColor: selectedYearFilter === "4" ? "#7c3aed" : "transparent",
+                  backgroundColor: selectedYearFilter === "4" ? "#2563eb" : "transparent",
                   color: selectedYearFilter === "4" ? "#ffffff" : "#475569",
                 }}
                 className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
@@ -346,7 +346,7 @@ export default function InchargeDashboard() {
               <button
                 onClick={() => setSelectedYearFilter("3")}
                 style={{
-                  backgroundColor: selectedYearFilter === "3" ? "#7c3aed" : "transparent",
+                  backgroundColor: selectedYearFilter === "3" ? "#2563eb" : "transparent",
                   color: selectedYearFilter === "3" ? "#ffffff" : "#475569",
                 }}
                 className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
@@ -356,7 +356,7 @@ export default function InchargeDashboard() {
               <button
                 onClick={() => setSelectedYearFilter("2")}
                 style={{
-                  backgroundColor: selectedYearFilter === "2" ? "#7c3aed" : "transparent",
+                  backgroundColor: selectedYearFilter === "2" ? "#2563eb" : "transparent",
                   color: selectedYearFilter === "2" ? "#ffffff" : "#475569",
                 }}
                 className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
@@ -368,7 +368,7 @@ export default function InchargeDashboard() {
             <button
               onClick={() => setViewScope("MENTORED")}
               style={{
-                backgroundColor: viewScope === "MENTORED" ? "#7c3aed" : "#f1f5f9",
+                backgroundColor: viewScope === "MENTORED" ? "#2563eb" : "#f1f5f9",
                 color: viewScope === "MENTORED" ? "#ffffff" : "#334155",
               }}
               className="px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border border-transparent shadow-xs"
@@ -378,7 +378,7 @@ export default function InchargeDashboard() {
             <button
               onClick={() => setViewScope("FULL_SECTION")}
               style={{
-                backgroundColor: viewScope === "FULL_SECTION" ? "#7c3aed" : "#f1f5f9",
+                backgroundColor: viewScope === "FULL_SECTION" ? "#2563eb" : "#f1f5f9",
                 color: viewScope === "FULL_SECTION" ? "#ffffff" : "#334155",
               }}
               className="px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border border-transparent shadow-xs"
