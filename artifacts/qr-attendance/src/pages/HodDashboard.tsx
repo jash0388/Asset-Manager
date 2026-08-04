@@ -190,20 +190,26 @@ export default function HodDashboard() {
 
       let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
       let label = "Safe Zone";
-      let badgeColor = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+      let badgeColor = "bg-emerald-500 text-slate-950 font-black border border-emerald-400";
+      let cardBorder = "border-l-4 border-l-emerald-500 border-slate-800";
+      let bannerBg = "bg-slate-950 border-emerald-500/30 text-slate-200";
       let dotColor = "🟢";
       let tip = "Good Standing (≥ 75%). Attendance target met!";
 
       if (percent < 65) {
         flag = "RED";
         label = "Critical Risk (< 65%)";
-        badgeColor = "bg-rose-500/20 text-rose-300 border-rose-500/40";
+        badgeColor = "bg-rose-600 text-white font-extrabold border border-rose-400 shadow-xs";
+        cardBorder = "border-l-4 border-l-rose-500 border-slate-800";
+        bannerBg = "bg-slate-950 border-rose-500/40 text-slate-200";
         dotColor = "🔴";
         tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
       } else if (percent < 75) {
         flag = "YELLOW";
         label = "Warning (Recoverable)";
-        badgeColor = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+        badgeColor = "bg-amber-400 text-slate-950 font-black border border-amber-300 shadow-xs";
+        cardBorder = "border-l-4 border-l-amber-400 border-slate-800";
+        bannerBg = "bg-slate-950 border-amber-500/40 text-slate-200";
         dotColor = "🟡";
         tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
       }
@@ -231,6 +237,8 @@ export default function HodDashboard() {
         flag,
         label,
         badgeColor,
+        cardBorder,
+        bannerBg,
         dotColor,
         tip,
         classesNeededFor75,
@@ -1636,7 +1644,7 @@ export default function HodDashboard() {
               </div>
 
               {/* Student Flag Cards */}
-              <div className="space-y-3 pt-2 max-h-[58vh] overflow-y-auto pr-2">
+              <div className="space-y-3 pt-2 max-h-[58vh] overflow-y-auto pr-2 custom-scrollbar contain-paint">
                 {filteredHodAnalyticsList.length === 0 ? (
                   <div className="p-12 text-center text-slate-500 text-xs font-medium">
                     No students found matching your categorised filter.
@@ -1646,39 +1654,33 @@ export default function HodDashboard() {
                     <div
                       key={item.student.id}
                       onClick={() => setSelectedStudentForDetails(item.student)}
-                      className="bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 transition-all cursor-pointer space-y-3 group shadow-md"
+                      className={`bg-slate-900 border rounded-2xl p-4 transition-colors cursor-pointer space-y-3 group ${item.cardBorder}`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3.5">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-base ${
-                            item.flag === "RED"
-                              ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
-                              : item.flag === "YELLOW"
-                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                              : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                          }`}>
+                          <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-black text-base">
                             {item.dotColor}
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
                               {item.student.name}
                             </h4>
-                            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400 font-mono font-medium">
-                              <span>Roll: <strong className="text-emerald-400">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
+                            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-300 font-mono font-medium">
+                              <span>Roll: <strong className="text-emerald-400 font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
                               <span>•</span>
                               <span>Year: <strong className="text-white">{item.secInfo.yearLabel}</strong></span>
                               <span>•</span>
-                              <span>Sec: <strong className="text-blue-400">{item.secInfo.name}</strong></span>
+                              <span>Sec: <strong className="text-blue-400 font-bold">{item.secInfo.name}</strong></span>
                             </div>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${item.badgeColor}`}>
+                            <span className={`px-3.5 py-1 rounded-full text-xs font-black shadow-xs inline-block ${item.badgeColor}`}>
                               {item.label} ({item.percent}%)
                             </span>
-                            <p className="text-[11px] text-slate-400 font-semibold mt-1">
+                            <p className="text-xs text-slate-300 font-bold mt-1">
                               {item.presentDays} / {item.totalWorkingDays} Working Days Attended
                             </p>
                           </div>
@@ -1686,24 +1688,18 @@ export default function HodDashboard() {
                       </div>
 
                       {/* Recovery Math Banner */}
-                      <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
-                        item.flag === "RED"
-                          ? "bg-rose-950/40 border-rose-900/50 text-rose-200"
-                          : item.flag === "YELLOW"
-                          ? "bg-amber-950/40 border-amber-900/50 text-amber-200"
-                          : "bg-emerald-950/40 border-emerald-900/50 text-emerald-200"
-                      }`}>
+                      <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${item.bannerBg}`}>
                         <div className="flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 shrink-0" />
-                          <span className="font-semibold">{item.tip}</span>
+                          <TrendingUp className="w-4 h-4 shrink-0 text-slate-300" />
+                          <span className="font-semibold text-slate-200">{item.tip}</span>
                         </div>
 
                         {item.classesNeededFor75 > 0 ? (
-                          <span className="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-white shrink-0">
+                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white shrink-0 shadow-xs">
                             Target +{item.classesNeededFor75} Classes Needed
                           </span>
                         ) : (
-                          <span className="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-emerald-900/60 border border-emerald-700 text-emerald-300 shrink-0">
+                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-emerald-950 border border-emerald-500 text-emerald-300 shrink-0 shadow-xs">
                             ✓ Target Met
                           </span>
                         )}
