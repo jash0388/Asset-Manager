@@ -14,7 +14,12 @@ import {
   Sparkles,
   Award,
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  AlertTriangle,
+  Flag,
+  AlertCircle,
+  TrendingUp,
+  Info
 } from "lucide-react";
 import { customFetch } from "@workspace/api-client-react";
 
@@ -65,10 +70,56 @@ function getSectionDisplayName(sectionCode?: string): { name: string; yearLabel:
   return { name: sectionCode, yearLabel: "Department" };
 }
 
+// Risk Flag Math helper
+function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
+  const calcWorking = totalWorkingDays > 0 ? totalWorkingDays : 1;
+  const percent = Math.min(100, Math.floor((presentDays / calcWorking) * 100));
+
+  // Additional consecutive classes needed to reach 75%: ceil((0.75*N - P) / 0.25) -> max(0, 3*N - 4*P)
+  const classesNeededFor75 = Math.max(0, 3 * totalWorkingDays - 4 * presentDays);
+  // Additional consecutive classes needed to reach 65%: ceil((0.65*N - P) / 0.35)
+  const classesNeededFor65 = Math.max(0, Math.ceil((0.65 * totalWorkingDays - presentDays) / 0.35));
+
+  if (percent >= 75) {
+    return {
+      flag: "GREEN" as const,
+      percent,
+      label: "Safe Zone",
+      badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+      dotColor: "🟢",
+      classesNeededFor75: 0,
+      classesNeededFor65: 0,
+      tip: "Good Standing (≥ 75%). Attendance target met!",
+    };
+  } else if (percent >= 65) {
+    return {
+      flag: "YELLOW" as const,
+      percent,
+      label: "Warning (Recoverable)",
+      badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+      dotColor: "🟡",
+      classesNeededFor75,
+      classesNeededFor65: 0,
+      tip: `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`,
+    };
+  } else {
+    return {
+      flag: "RED" as const,
+      percent,
+      label: "Critical Risk (< 65%)",
+      badgeColor: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+      dotColor: "🔴",
+      classesNeededFor75,
+      classesNeededFor65,
+      tip: `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`,
+    };
+  }
+}
+
 export default function PrincipalDashboard() {
   const { logout } = useAuth();
   const [selectedBranch, setSelectedBranch] = useState("DS");
-  const [activeTab, setActiveTab] = useState<"summary" | "detailed">("summary");
+  const [activeTab, setActiveTab] = useState<"summary" | "detailed" | "flags">("summary");
   const [logDate, setLogDate] = useState(() => {
     const d = new Date();
     const year = d.getFullYear();
@@ -79,6 +130,8 @@ export default function PrincipalDashboard() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [sectionFilter, setSectionFilter] = useState("ALL");
+  const [riskFilter, setRiskFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
+
   const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
 
   const [sectionModalData, setSectionModalData] = useState<{
@@ -126,6 +179,71 @@ export default function PrincipalDashboard() {
 
   const students = allUsers.filter((u) => u.role === "student");
 
+  // Fetch Monthly Attendance Records for Flag Calculations across the month
+  const [monthForFlags] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+  const { data: monthlyAttendanceForFlags = [] } = useQuery<AttendanceRecord[]>({
+    queryKey: ["attendance-month-flags", monthForFlags],
+    queryFn: async () => {
+      const [yearStr, monthStr] = monthForFlags.split("-");
+      const yearNum = parseInt(yearStr);
+      const monthNum = parseInt(monthStr);
+      const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+      const fromStr = `${yearStr}-${monthStr.padStart(2, "0")}-01`;
+      const toStr = `${yearStr}-${monthStr.padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+      return customFetch<AttendanceRecord[]>(`/api/attendance?from=${fromStr}&to=${toStr}`);
+    },
+  });
+
+  // Calculate Month Working Days elapsed
+  const totalMonthWorkingDays = (() => {
+    const [yStr, mStr] = monthForFlags.split("-");
+    const y = parseInt(yStr);
+    const m = parseInt(mStr);
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    let working = 0;
+    const daysInMonth = new Date(y, m, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dObj = new Date(y, m - 1, day, 12, 0, 0);
+      const dStr = `${y}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      if (dStr > todayStr) break;
+      if (dObj.getDay() !== 0) { // Not Sunday
+        working++;
+      }
+    }
+    return Math.max(1, working);
+  })();
+
+  // Map student IDs to monthly present count
+  const studentPresentCounts = new Map<number, number>();
+  (monthlyAttendanceForFlags || []).forEach((r: any) => {
+    const uid = r.userId || r.user_id || r.user?.id;
+    if (uid) {
+      studentPresentCounts.set(uid, (studentPresentCounts.get(uid) || 0) + 1);
+    }
+  });
+
+  // Calculate Student Analytics with Risk Flags
+  const studentAnalyticsList = students.map((student) => {
+    const presentDays = studentPresentCounts.get(student.id) || 0;
+    const flagInfo = getStudentFlagStatus(totalMonthWorkingDays, presentDays);
+    return {
+      student,
+      presentDays,
+      totalWorkingDays: totalMonthWorkingDays,
+      ...flagInfo,
+    };
+  });
+
+  // Red, Yellow, Green Counts
+  const redFlagCount = studentAnalyticsList.filter((s) => s.flag === "RED").length;
+  const yellowFlagCount = studentAnalyticsList.filter((s) => s.flag === "YELLOW").length;
+  const greenFlagCount = studentAnalyticsList.filter((s) => s.flag === "GREEN").length;
+
   // Fetch Daily Detailed Logs
   const { data: detailedLogs = [], isLoading: logsLoading } = useQuery<AttendanceRecord[]>({
     queryKey: ["attendance-detailed", logDate],
@@ -172,7 +290,7 @@ export default function PrincipalDashboard() {
   const campusAttendancePercent = campusTotalStudents > 0 ? Math.floor((campusPresentCount / campusTotalStudents) * 100) : 0;
 
   // Section Breakdown for DS
-  const sections = ["2A", "2B", "3A", "3B", "4A", "4B"];
+  const sections = ["2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B"];
   const sectionStats = sections.map((secKey) => {
     const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === secKey);
     const total = secStudents.length;
@@ -193,6 +311,18 @@ export default function PrincipalDashboard() {
     const secName = getSectionDisplayName(student.section).name;
     const matchesSection = sectionFilter === "ALL" || secName === sectionFilter;
     return matchesSearch && matchesSection;
+  });
+
+  // Filter Student Analytics List for Risk Flag Tab
+  const filteredAnalyticsList = studentAnalyticsList.filter((item) => {
+    const matchesSearch =
+      searchQuery === "" ||
+      item.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.student.uniqueId || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const secName = getSectionDisplayName(item.student.section).name;
+    const matchesSection = sectionFilter === "ALL" || secName === sectionFilter;
+    const matchesRisk = riskFilter === "ALL" || item.flag === riskFilter;
+    return matchesSearch && matchesSection && matchesRisk;
   });
 
   // Helper format time
@@ -284,7 +414,7 @@ export default function PrincipalDashboard() {
 
       const headerRow = ["S.No", "Roll Number", "Student Name", "Year", "Section"];
       dateList.forEach((d) => headerRow.push(`"${d.dayLabel}"`));
-      headerRow.push("Total Present (P)", "Total Absent (A)", "Attendance %");
+      headerRow.push("Total Present (P)", "Total Absent (A)", "Attendance %", "Risk Status", "Classes Needed for 75%");
       csvRows.push(headerRow);
 
       const todayStr = formatDateLocal(new Date());
@@ -332,8 +462,15 @@ export default function PrincipalDashboard() {
 
         const calcDays = totalWorkingDays > 0 ? totalWorkingDays : 1;
         const percent = calcDays > 0 ? Math.floor((totalPresent / calcDays) * 100) : 0;
+        const flagInfo = getStudentFlagStatus(calcDays, totalPresent);
 
-        studentRow.push(String(totalPresent), String(totalAbsent), `${percent}%`);
+        studentRow.push(
+          String(totalPresent),
+          String(totalAbsent),
+          `${percent}%`,
+          `"${flagInfo.label}"`,
+          String(flagInfo.classesNeededFor75)
+        );
         csvRows.push(studentRow);
       });
 
@@ -506,27 +643,46 @@ export default function PrincipalDashboard() {
         {/* Selected Branch Details */}
         {selectedBranch === "DS" ? (
           <div className="space-y-5">
-            {/* View Mode Navigation */}
-            <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+            {/* View Mode Navigation Tabs */}
+            <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
               <button
                 onClick={() => setActiveTab("summary")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "summary"
                     ? "bg-blue-600 text-white shadow-md"
                     : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
                 }`}
               >
+                <Layers className="w-4 h-4" />
                 Section Breakdown Grid
               </button>
+
               <button
                 onClick={() => setActiveTab("detailed")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "detailed"
                     ? "bg-blue-600 text-white shadow-md"
                     : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
                 }`}
               >
-                Detailed Student Logs ({filteredLogs.length})
+                <Users className="w-4 h-4" />
+                Detailed Daily Logs ({filteredLogs.length})
+              </button>
+
+              {/* DEDICATED STUDENT RISK FLAG ANALYTICS BUTTON */}
+              <button
+                onClick={() => setActiveTab("flags")}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                  activeTab === "flags"
+                    ? "bg-amber-600 text-white shadow-md ring-2 ring-amber-500/40"
+                    : "bg-slate-900 border border-amber-500/30 text-amber-300 hover:bg-slate-850"
+                }`}
+              >
+                <Flag className="w-4 h-4 text-amber-400" />
+                Student Risk Flag Analytics
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                  🔴 {redFlagCount} | 🟡 {yellowFlagCount}
+                </span>
               </button>
             </div>
 
@@ -636,6 +792,191 @@ export default function PrincipalDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            ) : activeTab === "flags" ? (
+              /* DEDICATED STUDENT RISK FLAG ANALYTICS TAB */
+              <div className="space-y-5">
+                {/* Risk Flag Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <button
+                    onClick={() => setRiskFilter("RED")}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                      riskFilter === "RED"
+                        ? "bg-rose-950/60 border-rose-500 ring-2 ring-rose-500/40 shadow-xl"
+                        : "bg-slate-900 border-slate-800 hover:border-rose-900/60"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-rose-500" />
+                        🔴 Red Flag (&lt; 65%)
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                        Critical
+                      </span>
+                    </div>
+                    <p className="text-2xl font-black text-white">{redFlagCount} Students</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Shortage Risk • Requires Condonation / Intimation</p>
+                  </button>
+
+                  <button
+                    onClick={() => setRiskFilter("YELLOW")}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                      riskFilter === "YELLOW"
+                        ? "bg-amber-950/60 border-amber-500 ring-2 ring-amber-500/40 shadow-xl"
+                        : "bg-slate-900 border-slate-800 hover:border-amber-900/60"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                        🟡 Yellow Flag (65%–74%)
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        Warning
+                      </span>
+                    </div>
+                    <p className="text-2xl font-black text-white">{yellowFlagCount} Students</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
+                  </button>
+
+                  <button
+                    onClick={() => setRiskFilter("GREEN")}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                      riskFilter === "GREEN"
+                        ? "bg-emerald-950/60 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl"
+                        : "bg-slate-900 border-slate-800 hover:border-emerald-900/60"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        🟢 Green Flag (≥ 75%)
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                        Safe
+                      </span>
+                    </div>
+                    <p className="text-2xl font-black text-white">{greenFlagCount} Students</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Good Standing • Target Met</p>
+                  </button>
+                </div>
+
+                {/* Filter and Search Bar */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="relative flex-1">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="Search student name or roll number..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <select
+                        value={riskFilter}
+                        onChange={(e: any) => setRiskFilter(e.target.value)}
+                        className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                      >
+                        <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
+                        <option value="RED">🔴 Red Flag (&lt; 65%)</option>
+                        <option value="YELLOW">🟡 Yellow Flag (65%–74%)</option>
+                        <option value="GREEN">🟢 Green Flag (≥ 75%)</option>
+                      </select>
+
+                      <select
+                        value={sectionFilter}
+                        onChange={(e) => setSectionFilter(e.target.value)}
+                        className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                      >
+                        <option value="ALL">All Sections</option>
+                        {sections.map((s) => (
+                          <option key={s} value={s}>Section {s}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Student Flag Cards */}
+                  <div className="space-y-3">
+                    {filteredAnalyticsList.length === 0 ? (
+                      <div className="p-8 text-center text-slate-500 text-xs font-medium">
+                        No students found matching current risk flag filter.
+                      </div>
+                    ) : (
+                      filteredAnalyticsList.map((item) => (
+                        <div
+                          key={item.student.id}
+                          onClick={() => setSelectedStudentForDetails(item.student)}
+                          className="bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 transition-all cursor-pointer space-y-3 group"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${
+                                item.flag === "RED"
+                                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                                  : item.flag === "YELLOW"
+                                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                                  : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                              }`}>
+                                {item.dotColor}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
+                                  {item.student.name}
+                                </h4>
+                                <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400 font-mono font-medium">
+                                  <span>Roll: <strong className="text-emerald-400">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
+                                  <span>•</span>
+                                  <span>Sec: <strong className="text-white">{getSectionDisplayName(item.student.section).name}</strong></span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${item.badgeColor}`}>
+                                  {item.label} ({item.percent}%)
+                                </span>
+                                <p className="text-[11px] text-slate-400 font-semibold mt-1">
+                                  {item.presentDays} / {item.totalWorkingDays} Working Days Attended
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Recovery Math & Action Advice */}
+                          <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                            item.flag === "RED"
+                              ? "bg-rose-950/40 border-rose-900/50 text-rose-200"
+                              : item.flag === "YELLOW"
+                              ? "bg-amber-950/40 border-amber-900/50 text-amber-200"
+                              : "bg-emerald-950/40 border-emerald-900/50 text-emerald-200"
+                          }`}>
+                            <div className="flex items-center gap-2">
+                              <TrendingUp className="w-4 h-4 shrink-0" />
+                              <span className="font-semibold">{item.tip}</span>
+                            </div>
+
+                            {item.classesNeededFor75 > 0 ? (
+                              <span className="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-white shrink-0">
+                                Target +{item.classesNeededFor75} Classes Needed
+                              </span>
+                            ) : (
+                              <span className="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-emerald-900/60 border border-emerald-700 text-emerald-300 shrink-0">
+                                ✓ Target Met
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
             ) : (
               /* Detailed Student Logs Table */
@@ -829,7 +1170,7 @@ export default function PrincipalDashboard() {
           </div>
         )}
 
-        {/* Student Detail Modal */}
+        {/* Student Detail Modal with Flag Recovery Analytics */}
         {selectedStudentForDetails && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-xs">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl p-6 space-y-5 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
@@ -978,7 +1319,8 @@ export default function PrincipalDashboard() {
                     }
 
                     const calcWorkingDays = studentWorkingDaysCount > 0 ? studentWorkingDaysCount : 1;
-                    const studentMonthlyPercent = Math.floor((studentPresentCount / calcWorkingDays) * 100);
+                    const studentMonthlyPercent = Math.min(100, Math.floor((studentPresentCount / calcWorkingDays) * 100));
+                    const studentFlagInfo = getStudentFlagStatus(calcWorkingDays, studentPresentCount);
 
                     return (
                       <div className="space-y-3">
@@ -999,6 +1341,31 @@ export default function PrincipalDashboard() {
                             <p className="text-[10px] font-bold text-blue-400 uppercase">Monthly %</p>
                             <p className="text-base font-black text-blue-300 mt-0.5">{studentMonthlyPercent}%</p>
                           </div>
+                        </div>
+
+                        {/* STUDENT RISK FLAG RECOVERY MATH BANNER */}
+                        <div className={`p-3.5 rounded-2xl border text-xs space-y-2 ${
+                          studentFlagInfo.flag === "RED"
+                            ? "bg-rose-950/40 border-rose-900/60 text-rose-200"
+                            : studentFlagInfo.flag === "YELLOW"
+                            ? "bg-amber-950/40 border-amber-900/60 text-amber-200"
+                            : "bg-emerald-950/40 border-emerald-900/60 text-emerald-200"
+                        }`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">{studentFlagInfo.dotColor}</span>
+                              <h5 className="font-extrabold text-white text-sm">
+                                Risk Status: {studentFlagInfo.label} ({studentMonthlyPercent}%)
+                              </h5>
+                            </div>
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${studentFlagInfo.badgeColor}`}>
+                              {studentFlagInfo.flag} FLAG
+                            </span>
+                          </div>
+
+                          <p className="text-xs font-medium leading-relaxed">
+                            {studentFlagInfo.tip}
+                          </p>
                         </div>
 
                         <div>
