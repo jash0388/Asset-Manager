@@ -527,127 +527,131 @@ export default function PrincipalDashboard() {
 
       {/* Main Content Area */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
-        {/* Executive Principal Header Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-slate-800">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
-                <Award className="w-9 h-9" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                    Dr. M. V. Ram Prasad
-                  </h1>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 uppercase tracking-wider">
-                    Principal
-                  </span>
+        {/* Executive Principal Header Card (only when NOT on Risk Flag Analytics tab) */}
+        {activeTab !== "flags" && (
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-slate-800">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+                  <Award className="w-9 h-9" />
                 </div>
-                <p className="text-slate-400 text-sm mt-1 font-medium">
-                  Sphoorthy Engineering College • Institutional Campus Portal
-                </p>
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                      Dr. M. V. Ram Prasad
+                    </h1>
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 uppercase tracking-wider">
+                      Principal
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-sm mt-1 font-medium">
+                    Sphoorthy Engineering College • Institutional Campus Portal
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div
-                onClick={(e) => {
-                  const input = e.currentTarget.querySelector("input");
-                  if (input && typeof (input as any).showPicker === "function") {
-                    (input as any).showPicker();
-                  }
-                }}
-                className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-4 py-2.5 rounded-2xl text-slate-200 font-semibold text-xs cursor-pointer hover:border-slate-700 transition-all"
-              >
-                <Calendar className="w-4 h-4 text-blue-400" />
-                <input
-                  type="date"
-                  value={logDate}
+              <div className="flex flex-wrap items-center gap-3">
+                <div
                   onClick={(e) => {
-                    e.stopPropagation();
-                    if (typeof (e.currentTarget as any).showPicker === "function") {
-                      (e.currentTarget as any).showPicker();
+                    const input = e.currentTarget.querySelector("input");
+                    if (input && typeof (input as any).showPicker === "function") {
+                      (input as any).showPicker();
                     }
                   }}
-                  onChange={(e) => setLogDate(e.target.value)}
-                  className="bg-transparent text-slate-200 focus:outline-none cursor-pointer [color-scheme:dark]"
-                />
-              </div>
-
-              <button
-                onClick={() => setExportModalOpen(true)}
-                className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition-all cursor-pointer active:scale-95"
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-                Export Register (.csv)
-              </button>
-            </div>
-          </div>
-
-          {/* Campus Overview KPI Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Campus Enrolled</p>
-              <p className="text-2xl font-black text-white mt-1">{campusTotalStudents} Students</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-              <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Present Today</p>
-              <p className="text-2xl font-black text-emerald-300 mt-1">{campusPresentCount} Students</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
-              <p className="text-xs font-bold text-rose-400 uppercase tracking-wider">Absent Today</p>
-              <p className="text-2xl font-black text-rose-300 mt-1">{campusAbsentCount} Students</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-              <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">Campus Attendance Rate</p>
-              <p className="text-2xl font-black text-blue-300 mt-1">{campusAttendancePercent}%</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Branch Switcher Tabs */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-blue-400" />
-              Engineering Departments & Branches
-            </h2>
-            <span className="text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
-              6 Departments
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {BRANCHES.map((b) => {
-              const isSelected = selectedBranch === b.code;
-              return (
-                <button
-                  key={b.id}
-                  onClick={() => setSelectedBranch(b.code)}
-                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-slate-900 border-blue-500 ring-2 ring-blue-500/40 shadow-xl"
-                      : "bg-slate-900/80 border-slate-800 hover:border-slate-700"
-                  }`}
+                  className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-4 py-2.5 rounded-2xl text-slate-200 font-semibold text-xs cursor-pointer hover:border-slate-700 transition-all"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-base font-black text-white">{b.code}</span>
-                    {b.code === "DS" ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
-                        LIVE
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-400 uppercase">
-                        Ready
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs font-semibold text-slate-400 truncate">{b.name}</p>
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                  <input
+                    type="date"
+                    value={logDate}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (typeof (e.currentTarget as any).showPicker === "function") {
+                        (e.currentTarget as any).showPicker();
+                      }
+                    }}
+                    onChange={(e) => setLogDate(e.target.value)}
+                    className="bg-transparent text-slate-200 focus:outline-none cursor-pointer [color-scheme:dark]"
+                  />
+                </div>
+
+                <button
+                  onClick={() => setExportModalOpen(true)}
+                  className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  Export Register (.csv)
                 </button>
-              );
-            })}
+              </div>
+            </div>
+
+            {/* Campus Overview KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Campus Enrolled</p>
+                <p className="text-2xl font-black text-white mt-1">{campusTotalStudents} Students</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Present Today</p>
+                <p className="text-2xl font-black text-emerald-300 mt-1">{campusPresentCount} Students</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
+                <p className="text-xs font-bold text-rose-400 uppercase tracking-wider">Absent Today</p>
+                <p className="text-2xl font-black text-rose-300 mt-1">{campusAbsentCount} Students</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">Campus Attendance Rate</p>
+                <p className="text-2xl font-black text-blue-300 mt-1">{campusAttendancePercent}%</p>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Branch Switcher Tabs (only when NOT on Risk Flag Analytics tab) */}
+        {activeTab !== "flags" && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-blue-400" />
+                Engineering Departments & Branches
+              </h2>
+              <span className="text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+                6 Departments
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {BRANCHES.map((b) => {
+                const isSelected = selectedBranch === b.code;
+                return (
+                  <button
+                    key={b.id}
+                    onClick={() => setSelectedBranch(b.code)}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-slate-900 border-blue-500 ring-2 ring-blue-500/40 shadow-xl"
+                        : "bg-slate-900/80 border-slate-800 hover:border-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-base font-black text-white">{b.code}</span>
+                      {b.code === "DS" ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+                          LIVE
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-400 uppercase">
+                          Ready
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs font-semibold text-slate-400 truncate">{b.name}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Selected Branch Details */}
         {selectedBranch === "DS" ? (
@@ -1151,79 +1155,82 @@ export default function PrincipalDashboard() {
           </div>
         )}
 
-        {/* Student Detail Modal with Flag Recovery Analytics */}
+        {/* Student Profile & Attendance Details Modal - FULL SCREEN REDESIGN */}
         {selectedStudentForDetails && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-xs">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl p-6 space-y-5 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-              <div className="flex items-start justify-between border-b border-slate-800 pb-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-lg font-black text-white shadow-md shadow-blue-600/20">
+          <div className="fixed inset-0 z-50 bg-slate-950 text-slate-100 flex flex-col p-6 sm:p-10 md:p-12 overflow-y-auto animate-fadeIn font-sans">
+            <div className="max-w-4xl mx-auto w-full space-y-8">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-slate-800 pb-6">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-white shadow-xl">
                     {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
                       {selectedStudentForDetails.name}
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
                         Student
                       </span>
-                    </h3>
-                    <p className="text-xs text-emerald-400 font-mono font-bold mt-0.5">
-                      Roll No: {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
+                    </h2>
+                    <p className="text-sm font-semibold text-slate-400 mt-1">
+                      {selectedStudentForDetails.email || `${selectedStudentForDetails.name.toLowerCase().replace(/[^a-z0-9]/g, "") || "student"}@sphoorthyengg.ac.in`} • Department of CSE Data Science
                     </p>
                   </div>
                 </div>
+                
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="text-slate-400 hover:text-white p-1 cursor-pointer transition-colors"
+                  className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
                 >
-                  <XCircle className="w-6 h-6" />
+                  <XCircle className="w-8 h-8" />
                 </button>
               </div>
 
-              {/* Modal Body */}
-              <div className="overflow-y-auto space-y-4 pr-1">
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase">Roll Number</p>
-                    <p className="text-xs font-bold text-white font-mono mt-1">
+              {/* Body */}
+              <div className="space-y-6">
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
+                    <p className="text-xs font-bold text-slate-500 uppercase">Roll Number</p>
+                    <p className="text-base font-bold text-slate-200 font-mono mt-1">
                       {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
                     </p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase">Section & Year</p>
-                    <p className="text-xs font-bold text-white mt-1">
+                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
+                    <p className="text-xs font-bold text-slate-500 uppercase">Section & Year</p>
+                    <p className="text-base font-bold text-slate-200 mt-1">
                       Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel})
                     </p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase">Department</p>
-                    <p className="text-xs font-bold text-blue-400 mt-1">
+                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
+                    <p className="text-xs font-bold text-slate-500 uppercase">Department</p>
+                    <p className="text-base font-bold text-blue-400 mt-1">
                       CSE Data Science
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                      Select Month
-                    </label>
-                    <input
-                      type="month"
-                      value={studentModalMonth}
-                      onClick={(e) => {
-                        if (typeof (e.currentTarget as any).showPicker === "function") {
-                          (e.currentTarget as any).showPicker();
-                        }
-                      }}
-                      onChange={(e) => {
-                        setStudentModalMonth(e.target.value);
-                        setSelectedDayDetail(null);
-                      }}
-                      className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none cursor-pointer [color-scheme:dark]"
-                    />
+                {/* Interactive Monthly Attendance Register Grid & Day Details */}
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                        Select Month
+                      </label>
+                      <input
+                        type="month"
+                        value={studentModalMonth}
+                        onClick={(e) => { try { (e.target as any).showPicker(); } catch (err) {} }}
+                        onChange={(e) => {
+                          setStudentModalMonth(e.target.value);
+                          setSelectedDayDetail(null);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-blue-500 [color-scheme:dark] cursor-pointer"
+                      />
+                    </div>
                   </div>
 
+                  {/* Monthly Stats Summary Bar */}
                   {(() => {
                     const [sYearStr, sMonthStr] = studentModalMonth.split("-");
                     const sYearNum = parseInt(sYearStr);
@@ -1240,7 +1247,7 @@ export default function PrincipalDashboard() {
                     const todayStr = formatDateLocal(new Date());
 
                     const studentAttendanceByDate = new Map<string, AttendanceRecord>();
-                    (studentMonthlyRecords || []).forEach((r) => {
+                    (studentMonthlyRecords || []).forEach(r => {
                       if (!r.date) return;
                       const rawDateStr = typeof r.date === "string" ? r.date.slice(0, 10) : formatDateLocal(new Date(r.date));
                       if (rawDateStr) {
@@ -1253,7 +1260,6 @@ export default function PrincipalDashboard() {
 
                     let studentPresentCount = 0;
                     let studentAbsentCount = 0;
-                    let studentHolidayCount = 0;
                     let studentWorkingDaysCount = 0;
 
                     for (let day = 1; day <= sDaysInMonth; day++) {
@@ -1261,21 +1267,22 @@ export default function PrincipalDashboard() {
                       const dateStr = formatDateLocal(dObj);
                       const dayOfWeek = daysOfWeek[dObj.getDay()];
                       const isSunday = dObj.getDay() === 0;
+                      const isDeclaredHoliday = Boolean(holidays[dateStr]);
+                      const isSundayOrHoliday = isSunday || isDeclaredHoliday;
                       const isFuture = dateStr > todayStr;
-
+                      
                       const record = studentAttendanceByDate.get(dateStr);
                       const isPresent = Boolean(record);
 
                       let status: "P" | "A" | "*" | "—" = "A";
                       if (isFuture) {
                         status = "—";
-                      } else if (isSunday) {
+                      } else if (isSundayOrHoliday) {
                         if (isPresent) {
                           status = "P";
                           studentPresentCount++;
                         } else {
                           status = "*";
-                          studentHolidayCount++;
                         }
                       } else {
                         studentWorkingDaysCount++;
@@ -1293,95 +1300,117 @@ export default function PrincipalDashboard() {
                         dateStr,
                         dayOfWeek,
                         status,
-                        isSunday,
+                        isSundayOrHoliday,
                         isFuture,
+                        holidayReason: isDeclaredHoliday ? holidays[dateStr] : isSunday ? "Sunday" : undefined,
                         record
                       });
                     }
 
                     const calcWorkingDays = studentWorkingDaysCount > 0 ? studentWorkingDaysCount : 1;
-                    const studentMonthlyPercent = Math.min(100, Math.floor((studentPresentCount / calcWorkingDays) * 100));
-                    const studentFlagInfo = getStudentFlagStatus(calcWorkingDays, studentPresentCount);
+                    const studentMonthlyPercent = Math.floor((studentPresentCount / calcWorkingDays) * 100);
+
+                    // Dynamic stay time math
+                    const presentDaysWithDuration = (studentMonthlyRecords || []).filter(r => r.durationMinutes && r.durationMinutes > 0);
+                    const totalDurationMinutes = presentDaysWithDuration.reduce((sum, r) => sum + (r.durationMinutes || 0), 0);
+                    const avgDurationMinutes = presentDaysWithDuration.length > 0 ? Math.round(totalDurationMinutes / presentDaysWithDuration.length) : 0;
+                    const avgDurationStr = avgDurationMinutes > 0 ? `${Math.floor(avgDurationMinutes / 60)}h ${avgDurationMinutes % 60}m` : "No checkout logs";
 
                     return (
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                          <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                            <p className="text-[10px] font-bold text-emerald-400 uppercase">Present (P)</p>
-                            <p className="text-base font-black text-emerald-300 mt-0.5">{studentPresentCount} days</p>
-                          </div>
-                          <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20">
-                            <p className="text-[10px] font-bold text-rose-400 uppercase">Absent (A)</p>
-                            <p className="text-base font-black text-rose-300 mt-0.5">{studentAbsentCount} days</p>
-                          </div>
-                          <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                            <p className="text-[10px] font-bold text-purple-400 uppercase">Holidays (*)</p>
-                            <p className="text-base font-black text-purple-300 mt-0.5">{studentHolidayCount} days</p>
-                          </div>
-                          <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                            <p className="text-[10px] font-bold text-blue-400 uppercase">Monthly %</p>
-                            <p className="text-base font-black text-blue-300 mt-0.5">{studentMonthlyPercent}%</p>
-                          </div>
-                        </div>
-
-                        {/* STUDENT RISK FLAG RECOVERY MATH BANNER */}
-                        <div className={`p-3.5 rounded-2xl border text-xs space-y-2 ${
-                          studentFlagInfo.flag === "RED"
-                            ? "bg-rose-950/40 border-rose-900/60 text-rose-200"
-                            : studentFlagInfo.flag === "YELLOW"
-                            ? "bg-amber-950/40 border-amber-900/60 text-amber-200"
-                            : "bg-emerald-950/40 border-emerald-900/60 text-emerald-200"
-                        }`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-base">{studentFlagInfo.dotColor}</span>
-                              <h5 className="font-extrabold text-white text-sm">
-                                Risk Status: {studentFlagInfo.label} ({studentMonthlyPercent}%)
-                              </h5>
+                      <div className="space-y-6">
+                        {/* Stats Row & Visual Pie Chart */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                          {/* Pie Chart Card */}
+                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center space-y-3">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attendance Breakdown</p>
+                            <div className="relative flex items-center justify-center">
+                              {/* Inline SVG Pie Chart */}
+                              <svg width="120" height="120" viewBox="0 0 36 36" className="transform -rotate-90">
+                                <path
+                                  className="text-slate-850"
+                                  strokeWidth="3"
+                                  stroke="currentColor"
+                                  fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                                <path
+                                  className={studentMonthlyPercent >= 75 ? "text-emerald-500" : studentMonthlyPercent >= 65 ? "text-amber-500" : "text-rose-500"}
+                                  strokeDasharray={`${studentMonthlyPercent}, 100`}
+                                  strokeWidth="3.2"
+                                  strokeLinecap="round"
+                                  stroke="currentColor"
+                                  fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                              </svg>
+                              <div className="absolute flex flex-col items-center justify-center">
+                                <span className="text-2xl font-black text-white">{studentMonthlyPercent}%</span>
+                                <span className="text-[9px] font-bold text-slate-400 uppercase">Monthly</span>
+                              </div>
                             </div>
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${studentFlagInfo.badgeColor}`}>
-                              {studentFlagInfo.flag} FLAG
-                            </span>
                           </div>
 
-                          <p className="text-xs font-medium leading-relaxed">
-                            {studentFlagInfo.tip}
-                          </p>
+                          {/* Present Days Card */}
+                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                            <p className="text-xs font-bold text-emerald-400 uppercase">Present Days (P)</p>
+                            <p className="text-3xl font-black text-white">{studentPresentCount} Days</p>
+                            <p className="text-[10px] text-slate-500 font-bold">Attended out of {calcWorkingDays} working days</p>
+                          </div>
+
+                          {/* Absent Days Card */}
+                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                            <p className="text-xs font-bold text-rose-400 uppercase">Absent Days (A)</p>
+                            <p className="text-3xl font-black text-white">{studentAbsentCount} Days</p>
+                            <p className="text-[10px] text-slate-500 font-bold">Missed classes</p>
+                          </div>
+
+                          {/* Average College stay time */}
+                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                            <p className="text-xs font-bold text-blue-400 uppercase">Avg Daily Campus Stay</p>
+                            <p className="text-3xl font-black text-white">{avgDurationStr}</p>
+                            <p className="text-[10px] text-slate-500 font-bold">Calculated from gate logs</p>
+                          </div>
                         </div>
 
+                        {/* Daily Register Grid */}
                         <div>
-                          <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-3 rounded-2xl border border-slate-850">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span>Daily Register Grid (Click any date to view Entry/Exit times)</span>
+                            <span className="text-slate-500 font-normal">P = Present | A = Absent | * = Holiday | — = Future</span>
+                          </p>
+                          
+                          <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-4 rounded-2xl border border-slate-850">
                             {monthDaysList.map((d) => {
                               const isSelected = selectedDayDetail?.dateStr === d.dateStr;
                               return (
                                 <button
                                   key={d.dateStr}
                                   onClick={() => setSelectedDayDetail(d)}
-                                  className={`p-2 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${
+                                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1.5 ${
                                     isSelected
-                                      ? "ring-2 ring-blue-400 scale-105 z-10 bg-slate-900"
+                                      ? "ring-2 ring-blue-500 scale-105 z-10 shadow-lg"
                                       : "hover:scale-102"
                                   } ${
                                     d.status === "P"
-                                      ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-200"
+                                      ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-250"
                                       : d.status === "*"
-                                      ? "bg-purple-500/20 border-purple-500/40 text-purple-200"
+                                      ? "bg-purple-950/50 border-purple-800/60 text-purple-250"
                                       : d.status === "—"
                                       ? "bg-slate-950/40 border-slate-850/80 text-slate-600 opacity-60"
-                                      : "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                                      : "bg-red-950/40 border-red-900/40 text-red-300"
                                   }`}
                                 >
                                   <span className="text-[10px] font-mono font-semibold text-slate-400">
                                     {d.dayNum} {d.dayOfWeek}
                                   </span>
-                                  <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
                                     d.status === "P"
                                       ? "bg-emerald-500 text-slate-950"
                                       : d.status === "*"
                                       ? "bg-amber-400 text-slate-950"
                                       : d.status === "—"
-                                      ? "bg-slate-800 text-slate-400"
-                                      : "bg-rose-500/80 text-white"
+                                      ? "bg-slate-800 text-slate-450"
+                                      : "bg-red-500/80 text-white"
                                   }`}>
                                     {d.status}
                                   </span>
@@ -1391,9 +1420,10 @@ export default function PrincipalDashboard() {
                           </div>
                         </div>
 
+                        {/* Selected Day Detail Card */}
                         {selectedDayDetail ? (
-                          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-2">
-                            <div className="flex items-center justify-between border-b border-blue-500/20 pb-2">
+                          <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-800/60 space-y-2 animate-fadeIn">
+                            <div className="flex items-center justify-between border-b border-blue-900/60 pb-2">
                               <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-blue-400" />
                                 <h5 className="text-sm font-bold text-white">
@@ -1407,14 +1437,14 @@ export default function PrincipalDashboard() {
                                   ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
                                   : selectedDayDetail.status === "—"
                                   ? "bg-slate-800/50 text-slate-400 border border-slate-700/50"
-                                  : "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                                  : "bg-red-500/20 text-red-300 border border-red-500/40"
                               }`}>
                                 {selectedDayDetail.status === "P"
                                   ? "🟢 PRESENT"
                                   : selectedDayDetail.status === "*"
-                                  ? "🟨 SUNDAY / HOLIDAY"
+                                  ? `🟨 HOLIDAY (${selectedDayDetail.holidayReason || "Sunday"})`
                                   : selectedDayDetail.status === "—"
-                                  ? "🗓️ FUTURE DATE"
+                                  ? "🗓️ FUTURE DATE (Not Occurred Yet)"
                                   : "🔴 ABSENT"}
                               </span>
                             </div>
@@ -1423,19 +1453,19 @@ export default function PrincipalDashboard() {
                               <div className="grid grid-cols-3 gap-3 pt-1 text-xs">
                                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase">Entry Time (In)</p>
-                                  <p className="text-xs font-bold text-emerald-400 mt-0.5">
+                                  <p className="text-sm font-bold text-emerald-400 mt-0.5">
                                     {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
                                   </p>
                                 </div>
                                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase">Exit Time (Out)</p>
-                                  <p className="text-xs font-bold text-blue-400 mt-0.5">
+                                  <p className="text-sm font-bold text-blue-400 mt-0.5">
                                     {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
                                   </p>
                                 </div>
                                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase">Duration / Status</p>
-                                  <p className="text-xs font-bold text-slate-200 mt-0.5">
+                                  <p className="text-xs font-bold text-slate-200 mt-1">
                                     {selectedDayDetail.record.durationMinutes
                                       ? `${Math.floor(selectedDayDetail.record.durationMinutes / 60)}h ${selectedDayDetail.record.durationMinutes % 60}m`
                                       : selectedDayDetail.record.status === "inside"
@@ -1461,10 +1491,11 @@ export default function PrincipalDashboard() {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800 flex justify-end">
+              {/* Footer */}
+              <div className="pt-4 border-t border-slate-800 flex justify-end">
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all cursor-pointer"
                 >
                   Close Profile
                 </button>

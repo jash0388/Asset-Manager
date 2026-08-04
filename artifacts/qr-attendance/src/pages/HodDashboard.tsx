@@ -927,79 +927,83 @@ export default function HodDashboard() {
     <Layout>
       <div className="p-6 max-w-5xl mx-auto space-y-8 font-sans">
         
-        {/* Header section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-200 tracking-tight flex items-center gap-3">
-              <GraduationCap className="w-8 h-8 text-blue-500" />
-              HOD Dashboard
-            </h1>
-            <p className="text-slate-400 font-medium mt-1">Department of Data Science (DS)</p>
+        {/* Header section (only show when NOT on Risk Flag Analytics tab) */}
+        {activeTab !== "flags" && (
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-extrabold text-slate-200 tracking-tight flex items-center gap-3">
+                <GraduationCap className="w-8 h-8 text-blue-500" />
+                HOD Dashboard
+              </h1>
+              <p className="text-slate-400 font-medium mt-1">Department of Data Science (DS)</p>
+            </div>
+            
+            <div className="flex items-center gap-2.5 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 shadow-md hover:border-blue-500/50 transition-colors">
+              <Calendar className="w-4 h-4 text-blue-400 pointer-events-none" />
+              <input
+                type="date"
+                value={activeTab === "summary" ? selectedDate : logDate}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setSelectedDate(e.target.value);
+                    setLogDate(e.target.value);
+                  }
+                }}
+                className="bg-transparent text-sm font-bold text-slate-200 outline-none cursor-pointer [color-scheme:dark]"
+              />
+            </div>
           </div>
-          
-          <div className="flex items-center gap-2.5 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 shadow-md hover:border-blue-500/50 transition-colors">
-            <Calendar className="w-4 h-4 text-blue-400 pointer-events-none" />
-            <input
-              type="date"
-              value={activeTab === "summary" ? selectedDate : logDate}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setSelectedDate(e.target.value);
-                  setLogDate(e.target.value);
-                }
-              }}
-              className="bg-transparent text-sm font-bold text-slate-200 outline-none cursor-pointer [color-scheme:dark]"
-            />
-          </div>
-        </div>
+        )}
 
-        {/* Tab Toggle buttons */}
-        <div className="flex bg-slate-900/60 border border-slate-850 p-1.5 rounded-2xl w-fit">
-          <button
-            onClick={() => setActiveTab("summary")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              activeTab === "summary"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Grid3X3 className="w-4 h-4" />
-            Summary Grid
-          </button>
-          <button
-            onClick={() => setActiveTab("logs")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              activeTab === "logs"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <ClipboardList className="w-4 h-4" />
-            Detailed Logs
-          </button>
-          <button
-            onClick={() => setActiveTab("mentors")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              activeTab === "mentors"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <GraduationCap className="w-4 h-4" />
-            Mentors & Keys
-          </button>
-          <button
-            onClick={() => setActiveTab("schedules")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              activeTab === "schedules"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Calendar className="w-4 h-4" />
-            Schedules (Timetable)
-          </button>
-        </div>
+        {/* Tab Toggle buttons (only show when NOT on Risk Flag Analytics tab) */}
+        {activeTab !== "flags" && (
+          <div className="flex bg-slate-900/60 border border-slate-850 p-1.5 rounded-2xl w-fit">
+            <button
+              onClick={() => setActiveTab("summary")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                activeTab === "summary"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Grid3X3 className="w-4 h-4" />
+              Summary Grid
+            </button>
+            <button
+              onClick={() => setActiveTab("logs")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                activeTab === "logs"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <ClipboardList className="w-4 h-4" />
+              Detailed Logs
+            </button>
+            <button
+              onClick={() => setActiveTab("mentors")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                activeTab === "mentors"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <GraduationCap className="w-4 h-4" />
+              Mentors & Keys
+            </button>
+            <button
+              onClick={() => setActiveTab("schedules")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                activeTab === "schedules"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              Schedules (Timetable)
+            </button>
+          </div>
+        )}
 
         {activeTab === "summary" ? (
           <>
@@ -2421,78 +2425,77 @@ export default function HodDashboard() {
             </div>
           </div>
         )}
-        {/* Student Profile & Attendance Details Modal */}
+        {/* Student Profile & Attendance Details Modal - FULL SCREEN REDESIGN */}
         {selectedStudentForDetails && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl p-6 space-y-5 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+          <div className="fixed inset-0 z-50 bg-slate-950 text-slate-100 flex flex-col p-6 sm:p-10 md:p-12 overflow-y-auto animate-fadeIn font-sans">
+            <div className="max-w-4xl mx-auto w-full space-y-8">
               {/* Header */}
-              <div className="flex items-start justify-between border-b border-slate-800 pb-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-xl font-black text-white shadow-lg">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-6">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-white shadow-xl">
                     {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
                       {selectedStudentForDetails.name}
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
                         Student
                       </span>
-                    </h3>
-                    <p className="text-sm text-blue-400 font-mono font-semibold">
-                      Roll No: {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Section: <span className="font-bold text-slate-200">{getSectionDisplayName(selectedStudentForDetails.section).name}</span> ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel}) • Dept of Data Science
+                    </h2>
+                    <p className="text-sm font-semibold text-slate-400 mt-1">
+                      {selectedStudentForDetails.email || `${selectedStudentForDetails.name.toLowerCase().replace(/[^a-z0-9]/g, "") || "student"}@sphoorthyengg.ac.in`} • Department of CSE Data Science
                     </p>
                   </div>
                 </div>
+                
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="text-slate-400 hover:text-white p-1 cursor-pointer transition-colors"
+                  className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
                 >
-                  <XCircle className="w-6 h-6" />
+                  <XCircle className="w-8 h-8" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="overflow-y-auto space-y-4 pr-1">
-                {/* Quick Stats Grid */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
-                    <p className="text-[11px] font-bold text-slate-500 uppercase">Roll Number</p>
-                    <p className="text-sm font-bold text-slate-200 font-mono mt-1">
+              <div className="space-y-6">
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
+                    <p className="text-xs font-bold text-slate-500 uppercase">Roll Number</p>
+                    <p className="text-base font-bold text-slate-200 font-mono mt-1">
                       {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
                     </p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
-                    <p className="text-[11px] font-bold text-slate-500 uppercase">Section & Year</p>
-                    <p className="text-sm font-bold text-slate-200 mt-1">
+                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
+                    <p className="text-xs font-bold text-slate-500 uppercase">Section & Year</p>
+                    <p className="text-base font-bold text-slate-200 mt-1">
                       Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel})
                     </p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-850">
-                    <p className="text-[11px] font-bold text-slate-500 uppercase">Department</p>
-                    <p className="text-sm font-bold text-blue-400 mt-1">
+                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
+                    <p className="text-xs font-bold text-slate-500 uppercase">Department</p>
+                    <p className="text-base font-bold text-blue-400 mt-1">
                       CSE Data Science
                     </p>
                   </div>
                 </div>
 
                 {/* Interactive Monthly Attendance Register Grid & Day Details */}
-                <div className="space-y-3 pt-1">
-                  <div className="flex items-center justify-between">
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">
                         Select Month
                       </label>
                       <input
                         type="month"
                         value={studentModalMonth}
+                        onClick={(e) => { try { (e.target as any).showPicker(); } catch (err) {} }}
                         onChange={(e) => {
                           setStudentModalMonth(e.target.value);
                           setSelectedDayDetail(null);
                         }}
-                        className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-blue-500 [color-scheme:dark]"
+                        className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-blue-500 [color-scheme:dark] cursor-pointer"
                       />
                     </div>
 
@@ -2506,9 +2509,9 @@ export default function HodDashboard() {
                         setExportMonth(studentModalMonth);
                         setExportModalOpen(true);
                       }}
-                      className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-3 py-1.5 rounded-xl border border-emerald-800/60"
+                      className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-800/60 shadow-xs"
                     >
-                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      <FileSpreadsheet className="w-4 h-4" />
                       Download Register (.csv)
                     </button>
                   </div>
@@ -2595,51 +2598,91 @@ export default function HodDashboard() {
                     const calcWorkingDays = studentWorkingDaysCount > 0 ? studentWorkingDaysCount : 1;
                     const studentMonthlyPercent = Math.floor((studentPresentCount / calcWorkingDays) * 100);
 
+                    // Dynamic stay time math
+                    const presentDaysWithDuration = (studentMonthlyRecords || []).filter(r => r.durationMinutes && r.durationMinutes > 0);
+                    const totalDurationMinutes = presentDaysWithDuration.reduce((sum, r) => sum + (r.durationMinutes || 0), 0);
+                    const avgDurationMinutes = presentDaysWithDuration.length > 0 ? Math.round(totalDurationMinutes / presentDaysWithDuration.length) : 0;
+                    const avgDurationStr = avgDurationMinutes > 0 ? `${Math.floor(avgDurationMinutes / 60)}h ${avgDurationMinutes % 60}m` : "No checkout logs";
+
                     return (
-                      <div className="space-y-3">
-                        {/* Stats Row */}
-                        <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                          <div className="p-2 rounded-xl bg-green-950/40 border border-green-900/40">
-                            <p className="text-[10px] font-bold text-green-400 uppercase">Present (P)</p>
-                            <p className="text-base font-black text-green-300 mt-0.5">{studentPresentCount} days</p>
+                      <div className="space-y-6">
+                        {/* Stats Row & Visual Pie Chart */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                          {/* Pie Chart Card */}
+                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center space-y-3">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attendance Breakdown</p>
+                            <div className="relative flex items-center justify-center">
+                              {/* Inline SVG Pie Chart */}
+                              <svg width="120" height="120" viewBox="0 0 36 36" className="transform -rotate-90">
+                                <path
+                                  className="text-slate-850"
+                                  strokeWidth="3"
+                                  stroke="currentColor"
+                                  fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                                <path
+                                  className={studentMonthlyPercent >= 75 ? "text-emerald-500" : studentMonthlyPercent >= 65 ? "text-amber-500" : "text-rose-500"}
+                                  strokeDasharray={`${studentMonthlyPercent}, 100`}
+                                  strokeWidth="3.2"
+                                  strokeLinecap="round"
+                                  stroke="currentColor"
+                                  fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                              </svg>
+                              <div className="absolute flex flex-col items-center justify-center">
+                                <span className="text-2xl font-black text-white">{studentMonthlyPercent}%</span>
+                                <span className="text-[9px] font-bold text-slate-400 uppercase">Monthly</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="p-2 rounded-xl bg-red-950/40 border border-red-900/40">
-                            <p className="text-[10px] font-bold text-red-400 uppercase">Absent (A)</p>
-                            <p className="text-base font-black text-red-300 mt-0.5">{studentAbsentCount} days</p>
+
+                          {/* Present Days Card */}
+                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                            <p className="text-xs font-bold text-emerald-400 uppercase">Present Days (P)</p>
+                            <p className="text-3xl font-black text-white">{studentPresentCount} Days</p>
+                            <p className="text-[10px] text-slate-500 font-bold">Attended out of {calcWorkingDays} working days</p>
                           </div>
-                          <div className="p-2 rounded-xl bg-purple-950/40 border border-purple-900/40">
-                            <p className="text-[10px] font-bold text-purple-400 uppercase">Holidays (*)</p>
-                            <p className="text-base font-black text-purple-300 mt-0.5">{studentHolidayCount} days</p>
+
+                          {/* Absent Days Card */}
+                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                            <p className="text-xs font-bold text-rose-400 uppercase">Absent Days (A)</p>
+                            <p className="text-3xl font-black text-white">{studentAbsentCount} Days</p>
+                            <p className="text-[10px] text-slate-500 font-bold">Missed classes</p>
                           </div>
-                          <div className="p-2 rounded-xl bg-blue-950/40 border border-blue-900/40">
-                            <p className="text-[10px] font-bold text-blue-400 uppercase">Monthly %</p>
-                            <p className="text-base font-black text-blue-300 mt-0.5">{studentMonthlyPercent}%</p>
+
+                          {/* Average College stay time */}
+                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                            <p className="text-xs font-bold text-blue-400 uppercase">Avg Daily Campus Stay</p>
+                            <p className="text-3xl font-black text-white">{avgDurationStr}</p>
+                            <p className="text-[10px] text-slate-500 font-bold">Calculated from gate logs</p>
                           </div>
                         </div>
 
-                        {/* Daily Grid Badges */}
+                        {/* Daily Register Grid */}
                         <div>
-                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                             <span>Daily Register Grid (Click any date to view Entry/Exit times)</span>
                             <span className="text-slate-500 font-normal">P = Present | A = Absent | * = Holiday | — = Future</span>
                           </p>
                           
-                          <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-3 rounded-2xl border border-slate-850">
+                          <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-4 rounded-2xl border border-slate-850">
                             {monthDaysList.map((d) => {
                               const isSelected = selectedDayDetail?.dateStr === d.dateStr;
                               return (
                                 <button
                                   key={d.dateStr}
                                   onClick={() => setSelectedDayDetail(d)}
-                                  className={`p-2 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${
+                                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1.5 ${
                                     isSelected
-                                      ? "ring-2 ring-blue-400 scale-105 z-10 shadow-lg"
+                                      ? "ring-2 ring-blue-500 scale-105 z-10 shadow-lg"
                                       : "hover:scale-102"
                                   } ${
                                     d.status === "P"
-                                      ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-200"
+                                      ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-250"
                                       : d.status === "*"
-                                      ? "bg-purple-950/50 border-purple-800/60 text-purple-200"
+                                      ? "bg-purple-950/50 border-purple-800/60 text-purple-250"
                                       : d.status === "—"
                                       ? "bg-slate-950/40 border-slate-850/80 text-slate-600 opacity-60"
                                       : "bg-red-950/40 border-red-900/40 text-red-300"
@@ -2648,13 +2691,13 @@ export default function HodDashboard() {
                                   <span className="text-[10px] font-mono font-semibold text-slate-400">
                                     {d.dayNum} {d.dayOfWeek}
                                   </span>
-                                  <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
+                                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
                                     d.status === "P"
                                       ? "bg-emerald-500 text-slate-950"
                                       : d.status === "*"
                                       ? "bg-amber-400 text-slate-950"
                                       : d.status === "—"
-                                      ? "bg-slate-800 text-slate-400"
+                                      ? "bg-slate-800 text-slate-450"
                                       : "bg-red-500/80 text-white"
                                   }`}>
                                     {d.status}
@@ -2730,7 +2773,7 @@ export default function HodDashboard() {
                             )}
                           </div>
                         ) : (
-                          <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-950 rounded-xl border border-slate-850">
+                          <p className="text-xs text-slate-400 italic text-center py-2.5 bg-slate-950 rounded-xl border border-slate-850">
                             💡 Click on any date box above (P, A, *, or —) to view exact Entry & Exit scan timestamps for that day.
                           </p>
                         )}
@@ -2741,10 +2784,10 @@ export default function HodDashboard() {
               </div>
 
               {/* Footer */}
-              <div className="pt-2 border-t border-slate-800 flex justify-end">
+              <div className="pt-4 border-t border-slate-800 flex justify-end">
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all cursor-pointer"
                 >
                   Close Profile
                 </button>
