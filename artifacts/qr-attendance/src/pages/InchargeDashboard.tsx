@@ -46,7 +46,7 @@ type AttendanceRecord = {
 export const MENTOR_ALLOCATIONS = [
   { id: 1, name: "Mrs. A. Sravanthi", email: "sravanthi.ds@sphoorthyengg.ac.in", key: "4011", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4A", startRoll: "23N81A6701", endRoll: "23N81A6743", rollRange: "23N81A6701 TO 23N81A6743", count: 42 },
   { id: 2, name: "Mrs. K. Sneha", email: "sneha.ds@sphoorthyengg.ac.in", key: "4012", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4B", startRoll: "23N81A6788", endRoll: "23N81A67C8", rollRange: "23N81A6788 TO 23N81A67C8 + LE", count: 39 },
-  { id: 3, name: "Mr. T. Shravan Kumar", email: "shravan.ds@sphoorthyengg.ac.in", key: "4013", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3B", startRoll: "23N81A6744", endRoll: "23N81A6787", rollRange: "23N81A6744 TO 23N81A6787", count: 42 },
+  { id: 3, name: "Mr. T. Shravan Kumar", email: "shravan.ds@sphoorthyengg.ac.in", key: "4013", role: "Class In-charge & Mentor (3rd & 4th Yr)", yearLabel: "3rd & 4th Year", section: "3B", startRoll: "23N81A6744", endRoll: "23N81A6787", rollRange: "23N81A6744 TO 23N81A6787", count: 42 },
   { id: 4, name: "Mrs. G. Sushma", email: "sushma.ds@sphoorthyengg.ac.in", key: "3011", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3A", startRoll: "24N81A6701", endRoll: "24N81A6731", rollRange: "24N81A6701 TO 24N81A6731", count: 29 },
   { id: 5, name: "Mr. M. Yadaiah", email: "yadaiah.ds@sphoorthyengg.ac.in", key: "3012", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3C", startRoll: "24N81A67A6", endRoll: "24N81A67D2", rollRange: "24N81A67A6 TO 24N81A67D2", count: 27 },
   { id: 6, name: "Ms. Priyusha", email: "priyusha.ds@sphoorthyengg.ac.in", key: "3013", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3A", startRoll: "24N81A6732", endRoll: "24N81A6752", rollRange: "24N81A6732 TO 24N81A6752 + LE", count: 26 },
@@ -84,10 +84,8 @@ function matchesRollRange(rollNumStr: string, startRoll: string, endRoll: string
   const cleanStart = startRoll.trim().toUpperCase();
   const cleanEnd = endRoll.trim().toUpperCase();
 
-  // Direct string compare
   if (cleanRoll >= cleanStart && cleanRoll <= cleanEnd) return true;
 
-  // Suffix numeric compare (e.g. 6701 to 6743)
   const rollSuffix = cleanRoll.slice(-4);
   const startSuffix = cleanStart.slice(-4);
   const endSuffix = cleanEnd.slice(-4);
@@ -106,6 +104,7 @@ export default function InchargeDashboard() {
   const [, navigate] = useLocation();
 
   const [riskFlagFilter, setRiskFlagFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
+  const [selectedYearFilter, setSelectedYearFilter] = useState<"ALL" | "4" | "3" | "2">("ALL");
   const [viewScope, setViewScope] = useState<"MENTORED" | "FULL_SECTION">("MENTORED");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
@@ -181,6 +180,11 @@ export default function InchargeDashboard() {
       const roll = (student.uniqueId || student.unique_id || "").trim().toUpperCase();
       const secInfo = getSectionDisplayName(student.section);
 
+      // Check year filter toggle
+      if (selectedYearFilter !== "ALL" && secInfo.yearNum !== selectedYearFilter) {
+        return false;
+      }
+
       if (viewScope === "FULL_SECTION") {
         return secInfo.name === activeAllocation.section;
       }
@@ -191,7 +195,7 @@ export default function InchargeDashboard() {
       }
       return secInfo.name === activeAllocation.section;
     });
-  }, [allUsers, activeAllocation, viewScope]);
+  }, [allUsers, activeAllocation, viewScope, selectedYearFilter]);
 
   // Student Analytics List
   const analyticsList = useMemo(() => {
@@ -205,26 +209,26 @@ export default function InchargeDashboard() {
 
       let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
       let label = "Safe Zone";
-      let badgeColor = "bg-emerald-500 text-slate-950 font-black border border-emerald-400";
+      let badgeStyle = { backgroundColor: "#10b981", color: "#ffffff" };
       let cardBorder = "border-l-4 border-l-emerald-500 border-slate-200";
-      let bannerBg = "bg-emerald-50 border-emerald-200 text-slate-900";
+      let bannerStyle = { backgroundColor: "#ecfdf5", borderColor: "#a7f3d0", color: "#065f46" };
       let dotColor = "🟢";
       let tip = "Good Standing (≥ 75%). Attendance target met!";
 
       if (percent < 65) {
         flag = "RED";
         label = "Critical Risk (< 65%)";
-        badgeColor = "bg-rose-600 text-white font-extrabold border border-rose-500 shadow-xs";
-        cardBorder = "border-l-4 border-l-rose-500 border-slate-200";
-        bannerBg = "bg-rose-50 border-rose-200 text-slate-900";
+        badgeStyle = { backgroundColor: "#e11d48", color: "#ffffff" };
+        cardBorder = "border-l-4 border-l-rose-600 border-slate-200";
+        bannerStyle = { backgroundColor: "#fff1f2", borderColor: "#fecdd3", color: "#9f1239" };
         dotColor = "🔴";
         tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
       } else if (percent < 75) {
         flag = "YELLOW";
         label = "Warning (Recoverable)";
-        badgeColor = "bg-amber-400 text-slate-950 font-black border border-amber-300 shadow-xs";
-        cardBorder = "border-l-4 border-l-amber-400 border-slate-200";
-        bannerBg = "bg-amber-50 border-amber-200 text-slate-900";
+        badgeStyle = { backgroundColor: "#f59e0b", color: "#000000" };
+        cardBorder = "border-l-4 border-l-amber-500 border-slate-200";
+        bannerStyle = { backgroundColor: "#fffbeb", borderColor: "#fde68a", color: "#92400e" };
         dotColor = "🟡";
         tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
       }
@@ -237,9 +241,9 @@ export default function InchargeDashboard() {
         percent,
         flag,
         label,
-        badgeColor,
+        badgeStyle,
         cardBorder,
-        bannerBg,
+        bannerStyle,
         dotColor,
         tip,
         classesNeededFor75,
@@ -267,23 +271,23 @@ export default function InchargeDashboard() {
   const greenCount = analyticsList.filter((s) => s.flag === "GREEN").length;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div style={{ backgroundColor: "#f8fafc", color: "#0f172a" }} className="min-h-screen flex flex-col font-sans">
       {/* Header Bar */}
-      <header className="bg-white border-b border-slate-200 text-slate-900 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+      <header style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border-b px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-purple-600 flex items-center justify-center text-white font-bold shadow-md shadow-purple-600/30">
+          <div style={{ backgroundColor: "#7c3aed" }} className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold shadow-md">
             <Award className="w-6 h-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+              <h1 style={{ color: "#0f172a" }} className="text-base sm:text-lg font-black tracking-tight">
                 {activeAllocation.name}
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 border border-purple-300">
+              <span style={{ backgroundColor: "#f3e8ff", color: "#6b21a8", borderColor: "#d8b4fe" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black border">
                 Sec {activeAllocation.section}
               </span>
             </div>
-            <p className="text-xs text-purple-700 font-bold mt-0.5">
+            <p style={{ color: "#6b21a8" }} className="text-xs font-bold mt-0.5">
               {activeAllocation.role} ({activeAllocation.yearLabel}) • CSE Data Science
             </p>
           </div>
@@ -291,7 +295,8 @@ export default function InchargeDashboard() {
 
         <button
           onClick={logout}
-          className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
+          style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
+          className="px-4 py-2 rounded-xl font-bold text-xs border flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
         >
           <LogOut className="w-4 h-4 text-slate-600" />
           Logout
@@ -301,39 +306,84 @@ export default function InchargeDashboard() {
       {/* Main Container */}
       <div className="flex-1 p-4 sm:p-6 max-w-5xl mx-auto w-full space-y-6">
         {/* Allocation Info Banner */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-100 border border-purple-300 px-2.5 py-0.5 rounded-full">
+            <span style={{ backgroundColor: "#f3e8ff", color: "#6b21a8", borderColor: "#d8b4fe" }} className="text-[10px] font-black uppercase tracking-wider border px-2.5 py-0.5 rounded-full">
               Assigned Mentoring Roster
             </span>
-            <h2 className="text-lg font-black text-slate-900 mt-1">
+            <h2 style={{ color: "#0f172a" }} className="text-lg font-black mt-1">
               Roll Range: {activeAllocation.rollRange}
             </h2>
-            <p className="text-xs text-slate-600 font-bold mt-0.5">
+            <p style={{ color: "#475569" }} className="text-xs font-bold mt-0.5">
               Assigned Mentored Capacity: {activeAllocation.count} Students
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Year & Scope Selectors */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Year Selector Tabs */}
+            <div style={{ backgroundColor: "#f1f5f9", borderColor: "#cbd5e1" }} className="flex p-1 rounded-xl border text-xs font-black">
+              <button
+                onClick={() => setSelectedYearFilter("ALL")}
+                style={{
+                  backgroundColor: selectedYearFilter === "ALL" ? "#7c3aed" : "transparent",
+                  color: selectedYearFilter === "ALL" ? "#ffffff" : "#475569",
+                }}
+                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              >
+                All Years
+              </button>
+              <button
+                onClick={() => setSelectedYearFilter("4")}
+                style={{
+                  backgroundColor: selectedYearFilter === "4" ? "#7c3aed" : "transparent",
+                  color: selectedYearFilter === "4" ? "#ffffff" : "#475569",
+                }}
+                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              >
+                4th Yr
+              </button>
+              <button
+                onClick={() => setSelectedYearFilter("3")}
+                style={{
+                  backgroundColor: selectedYearFilter === "3" ? "#7c3aed" : "transparent",
+                  color: selectedYearFilter === "3" ? "#ffffff" : "#475569",
+                }}
+                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              >
+                3rd Yr
+              </button>
+              <button
+                onClick={() => setSelectedYearFilter("2")}
+                style={{
+                  backgroundColor: selectedYearFilter === "2" ? "#7c3aed" : "transparent",
+                  color: selectedYearFilter === "2" ? "#ffffff" : "#475569",
+                }}
+                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              >
+                2nd Yr
+              </button>
+            </div>
+
             <button
               onClick={() => setViewScope("MENTORED")}
-              className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                viewScope === "MENTORED"
-                  ? "bg-purple-600 text-white shadow-xs"
-                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-              }`}
+              style={{
+                backgroundColor: viewScope === "MENTORED" ? "#7c3aed" : "#f1f5f9",
+                color: viewScope === "MENTORED" ? "#ffffff" : "#334155",
+              }}
+              className="px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border border-transparent shadow-xs"
             >
-              My Mentored Students ({analyticsList.length})
+              My Mentored ({analyticsList.length})
             </button>
             <button
               onClick={() => setViewScope("FULL_SECTION")}
-              className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                viewScope === "FULL_SECTION"
-                  ? "bg-purple-600 text-white shadow-xs"
-                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-              }`}
+              style={{
+                backgroundColor: viewScope === "FULL_SECTION" ? "#7c3aed" : "#f1f5f9",
+                color: viewScope === "FULL_SECTION" ? "#ffffff" : "#334155",
+              }}
+              className="px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border border-transparent shadow-xs"
             >
-              Full Section {activeAllocation.section}
+              Full Sec {activeAllocation.section}
             </button>
           </div>
         </div>
@@ -342,64 +392,73 @@ export default function InchargeDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <button
             onClick={() => setRiskFlagFilter("RED")}
-            className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
-              riskFlagFilter === "RED" ? "border-rose-500 ring-2 ring-rose-500/20" : "border-slate-200 hover:border-rose-300"
-            }`}
+            style={{
+              backgroundColor: "#ffffff",
+              borderColor: riskFlagFilter === "RED" ? "#e11d48" : "#e2e8f0",
+              boxShadow: riskFlagFilter === "RED" ? "0 0 0 2px rgba(225,29,72,0.2)" : "none",
+            }}
+            className="p-5 rounded-2xl border-2 text-left transition-all cursor-pointer shadow-xs"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
+              <span style={{ color: "#be123c" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
                 <AlertCircle className="w-4 h-4 text-rose-600" />
                 🔴 RED FLAG (&lt; 65%)
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white">
+              <span style={{ backgroundColor: "#e11d48", color: "#ffffff" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black">
                 Critical
               </span>
             </div>
-            <p className="text-3xl font-black text-slate-900">{redCount} Students</p>
-            <p className="text-xs font-bold text-slate-600 mt-1">Shortage Risk • Requires Condonation / Parent Notice</p>
+            <p style={{ color: "#0f172a" }} className="text-3xl font-black">{redCount} Students</p>
+            <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Shortage Risk • Requires Condonation / Parent Notice</p>
           </button>
 
           <button
             onClick={() => setRiskFlagFilter("YELLOW")}
-            className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
-              riskFlagFilter === "YELLOW" ? "border-amber-500 ring-2 ring-amber-500/20" : "border-slate-200 hover:border-amber-300"
-            }`}
+            style={{
+              backgroundColor: "#ffffff",
+              borderColor: riskFlagFilter === "YELLOW" ? "#f59e0b" : "#e2e8f0",
+              boxShadow: riskFlagFilter === "YELLOW" ? "0 0 0 2px rgba(245,158,11,0.2)" : "none",
+            }}
+            className="p-5 rounded-2xl border-2 text-left transition-all cursor-pointer shadow-xs"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
+              <span style={{ color: "#b45309" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-amber-600" />
                 🟡 YELLOW FLAG (65%–74%)
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-slate-950">
+              <span style={{ backgroundColor: "#fbbf24", color: "#000000" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black">
                 Warning
               </span>
             </div>
-            <p className="text-3xl font-black text-slate-900">{yellowCount} Students</p>
-            <p className="text-xs font-bold text-slate-600 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
+            <p style={{ color: "#0f172a" }} className="text-3xl font-black">{yellowCount} Students</p>
+            <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
           </button>
 
           <button
             onClick={() => setRiskFlagFilter("GREEN")}
-            className={`p-5 rounded-2xl border-2 text-left transition-all cursor-pointer bg-white shadow-sm ${
-              riskFlagFilter === "GREEN" ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-slate-200 hover:border-emerald-300"
-            }`}
+            style={{
+              backgroundColor: "#ffffff",
+              borderColor: riskFlagFilter === "GREEN" ? "#10b981" : "#e2e8f0",
+              boxShadow: riskFlagFilter === "GREEN" ? "0 0 0 2px rgba(16,185,129,0.2)" : "none",
+            }}
+            className="p-5 rounded-2xl border-2 text-left transition-all cursor-pointer shadow-xs"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+              <span style={{ color: "#047857" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
                 <CheckCircle className="w-4 h-4 text-emerald-600" />
                 🟢 GREEN FLAG (≥ 75%)
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500 text-slate-950">
+              <span style={{ backgroundColor: "#10b981", color: "#ffffff" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black">
                 Safe
               </span>
             </div>
-            <p className="text-3xl font-black text-slate-900">{greenCount} Students</p>
-            <p className="text-xs font-bold text-slate-600 mt-1">Good Standing • Attendance Target Met</p>
+            <p style={{ color: "#0f172a" }} className="text-3xl font-black">{greenCount} Students</p>
+            <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Good Standing • Attendance Target Met</p>
           </button>
         </div>
 
         {/* Toolbar & Student List */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
+        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-2xl p-5 space-y-4 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -408,7 +467,8 @@ export default function InchargeDashboard() {
                 placeholder="Search student name or roll number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs font-bold focus:outline-none focus:border-purple-600"
+                style={{ backgroundColor: "#f8fafc", borderColor: "#cbd5e1", color: "#0f172a" }}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs font-bold focus:outline-none"
               />
             </div>
 
@@ -416,7 +476,8 @@ export default function InchargeDashboard() {
               <select
                 value={riskFlagFilter}
                 onChange={(e: any) => setRiskFlagFilter(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold focus:outline-none"
+                style={{ backgroundColor: "#f8fafc", borderColor: "#cbd5e1", color: "#0f172a" }}
+                className="px-3 py-2 rounded-xl border text-xs font-bold focus:outline-none"
               >
                 <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
                 <option value="RED">🔴 Red Flag (&lt; 65%)</option>
@@ -429,7 +490,7 @@ export default function InchargeDashboard() {
           {/* Student Cards Inner Scroll */}
           <div className="space-y-3 pt-2 max-h-[58vh] overflow-y-auto pr-2 custom-scrollbar contain-paint">
             {filteredAnalyticsList.length === 0 ? (
-              <div className="p-12 text-center text-slate-500 text-xs font-bold">
+              <div style={{ color: "#64748b" }} className="p-12 text-center text-xs font-bold">
                 No students found matching your search or risk flag filter.
               </div>
             ) : (
@@ -437,34 +498,35 @@ export default function InchargeDashboard() {
                 <div
                   key={item.student.id}
                   onClick={() => setSelectedStudentForDetails(item.student)}
-                  className={`bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 transition-all cursor-pointer space-y-3 group shadow-sm ${item.cardBorder}`}
+                  style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
+                  className={`border rounded-2xl p-4 transition-all cursor-pointer space-y-3 group shadow-xs hover:border-purple-300 ${item.cardBorder}`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-base">
+                      <div style={{ backgroundColor: "#f1f5f9", borderColor: "#cbd5e1" }} className="w-10 h-10 rounded-xl border flex items-center justify-center font-black text-base">
                         {item.dotColor}
                       </div>
                       <div>
-                        {/* 100% PITCH BLACK BOLD STUDENT NAME */}
-                        <h4 className="text-base font-extrabold text-slate-900 group-hover:text-purple-700 transition-colors">
+                        {/* EXPLICIT 100% PITCH BLACK BOLD STUDENT NAME */}
+                        <h4 style={{ color: "#0f172a" }} className="text-base font-black tracking-tight group-hover:text-purple-700 transition-colors">
                           {item.student.name}
                         </h4>
-                        <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-600 font-mono font-bold">
-                          <span>Roll: <strong className="text-emerald-700 font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
-                          <span>•</span>
-                          <span>Year: <strong className="text-slate-800 font-bold">{item.secInfo.yearLabel}</strong></span>
-                          <span>•</span>
-                          <span>Sec: <strong className="text-purple-700 font-bold">{item.secInfo.name}</strong></span>
+                        <div className="flex items-center gap-2 mt-0.5 text-xs font-mono font-bold">
+                          <span style={{ color: "#334155" }}>Roll: <strong style={{ color: "#047857" }} className="font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
+                          <span style={{ color: "#cbd5e1" }}>•</span>
+                          <span style={{ color: "#334155" }}>Year: <strong style={{ color: "#0f172a" }} className="font-bold">{item.secInfo.yearLabel}</strong></span>
+                          <span style={{ color: "#cbd5e1" }}>•</span>
+                          <span style={{ color: "#334155" }}>Sec: <strong style={{ color: "#6b21a8" }} className="font-bold">{item.secInfo.name}</strong></span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <span className={`px-3.5 py-1 rounded-full text-xs font-black shadow-xs inline-block ${item.badgeColor}`}>
+                        <span style={item.badgeStyle} className="px-3.5 py-1 rounded-full text-xs font-black shadow-xs inline-block">
                           {item.label} ({item.percent}%)
                         </span>
-                        <p className="text-xs text-slate-600 font-bold mt-1">
+                        <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">
                           {item.presentDays} / {item.totalWorkingDays} Working Days Attended
                         </p>
                       </div>
@@ -472,18 +534,18 @@ export default function InchargeDashboard() {
                   </div>
 
                   {/* Recovery Math Banner */}
-                  <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${item.bannerBg}`}>
+                  <div style={item.bannerStyle} className="p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 shrink-0 text-slate-700" />
-                      <span className="font-bold text-slate-800">{item.tip}</span>
+                      <TrendingUp className="w-4 h-4 shrink-0" />
+                      <span className="font-bold">{item.tip}</span>
                     </div>
 
                     {item.classesNeededFor75 > 0 ? (
-                      <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-white border border-slate-300 text-slate-900 shrink-0 shadow-xs">
+                      <span style={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", color: "#0f172a" }} className="font-mono font-black text-xs px-3 py-1 rounded-lg border shrink-0 shadow-xs">
                         Target +{item.classesNeededFor75} Classes Needed
                       </span>
                     ) : (
-                      <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-emerald-600 border border-emerald-500 text-white shrink-0 shadow-xs">
+                      <span style={{ backgroundColor: "#059669", color: "#ffffff" }} className="font-mono font-black text-xs px-3 py-1 rounded-lg shrink-0 shadow-xs">
                         ✓ Target Met
                       </span>
                     )}
@@ -498,7 +560,7 @@ export default function InchargeDashboard() {
       {/* STUNNING STUDENT ANALYTICS PROFILE MODAL */}
       {selectedStudentForDetails && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl p-6 sm:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto font-sans">
+          <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-3xl w-full max-w-2xl p-6 sm:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto font-sans">
             {/* Modal Header */}
             {(() => {
               const item = analyticsList.find(a => a.student.id === selectedStudentForDetails.id);
@@ -519,18 +581,18 @@ export default function InchargeDashboard() {
 
               return (
                 <>
-                  <div className="flex items-start justify-between border-b border-slate-200 pb-4">
+                  <div style={{ borderColor: "#e2e8f0" }} className="flex items-start justify-between border-b pb-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-purple-600/30">
+                      <div style={{ backgroundColor: "#7c3aed" }} className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg">
                         {studentName.charAt(0)}
                       </div>
                       <div>
-                        <h3 className="text-xl font-black text-slate-900 tracking-tight">{studentName}</h3>
+                        <h3 style={{ color: "#0f172a" }} className="text-xl font-black tracking-tight">{studentName}</h3>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-extrabold bg-slate-100 text-slate-800 border border-slate-300">
+                          <span style={{ backgroundColor: "#f1f5f9", color: "#0f172a", borderColor: "#cbd5e1" }} className="px-2.5 py-0.5 rounded-full text-xs font-mono font-extrabold border">
                             Roll: {rollNum}
                           </span>
-                          <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-purple-100 text-purple-800 border border-purple-300">
+                          <span style={{ backgroundColor: "#f3e8ff", color: "#6b21a8", borderColor: "#d8b4fe" }} className="px-2.5 py-0.5 rounded-full text-xs font-extrabold border">
                             Sec: {secObj.name} ({secObj.yearLabel})
                           </span>
                         </div>
@@ -539,7 +601,8 @@ export default function InchargeDashboard() {
 
                     <button
                       onClick={() => setSelectedStudentForDetails(null)}
-                      className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                      style={{ backgroundColor: "#f1f5f9", color: "#64748b" }}
+                      className="p-1.5 rounded-xl hover:text-slate-900 transition-colors cursor-pointer"
                     >
                       <XCircle className="w-6 h-6" />
                     </button>
@@ -547,47 +610,47 @@ export default function InchargeDashboard() {
 
                   {/* Attendance Performance Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Attendance Rate</p>
-                      <p className="text-3xl font-black text-slate-900">{percent}%</p>
-                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black ${item?.badgeColor || ""}`}>
+                    <div style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }} className="p-4 rounded-2xl border text-center space-y-1">
+                      <p style={{ color: "#64748b" }} className="text-xs font-bold uppercase tracking-wider">Attendance Rate</p>
+                      <p style={{ color: "#0f172a" }} className="text-3xl font-black">{percent}%</p>
+                      <span style={item?.badgeStyle} className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black">
                         {item?.label}
                       </span>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Days Attended</p>
-                      <p className="text-3xl font-black text-slate-900">{presentDays} / {totalDays}</p>
-                      <p className="text-[10px] font-bold text-slate-500">Working Days This Month</p>
+                    <div style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }} className="p-4 rounded-2xl border text-center space-y-1">
+                      <p style={{ color: "#64748b" }} className="text-xs font-bold uppercase tracking-wider">Days Attended</p>
+                      <p style={{ color: "#0f172a" }} className="text-3xl font-black">{presentDays} / {totalDays}</p>
+                      <p style={{ color: "#64748b" }} className="text-[10px] font-bold">Working Days This Month</p>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Status</p>
+                    <div style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }} className="p-4 rounded-2xl border text-center space-y-1">
+                      <p style={{ color: "#64748b" }} className="text-xs font-bold uppercase tracking-wider">Target Status</p>
                       {classesFor75 > 0 ? (
                         <>
-                          <p className="text-3xl font-black text-amber-600">+{classesFor75}</p>
-                          <p className="text-[10px] font-bold text-slate-600">Consecutive Classes Needed</p>
+                          <p style={{ color: "#d97706" }} className="text-3xl font-black">+{classesFor75}</p>
+                          <p style={{ color: "#475569" }} className="text-[10px] font-bold">Consecutive Classes Needed</p>
                         </>
                       ) : (
                         <>
-                          <p className="text-3xl font-black text-emerald-600">✓ Safe</p>
-                          <p className="text-[10px] font-bold text-emerald-700">75% Target Achieved</p>
+                          <p style={{ color: "#059669" }} className="text-3xl font-black">✓ Safe</p>
+                          <p style={{ color: "#047857" }} className="text-[10px] font-bold">75% Target Achieved</p>
                         </>
                       )}
                     </div>
                   </div>
 
                   {/* Recovery Math Strategy Banner */}
-                  <div className={`p-4 rounded-2xl border ${item?.bannerBg || "bg-slate-50 border-slate-200"} space-y-2`}>
-                    <div className="flex items-center gap-2 font-black text-slate-900 text-sm">
+                  <div style={item?.bannerStyle} className="p-4 rounded-2xl border space-y-2">
+                    <div style={{ color: "#0f172a" }} className="flex items-center gap-2 font-black text-sm">
                       <TrendingUp className="w-5 h-5 text-purple-700" />
                       Academic Attendance Advisory & Recovery Math
                     </div>
-                    <p className="text-xs font-bold text-slate-800 leading-relaxed">
+                    <p style={{ color: "#1e293b" }} className="text-xs font-bold leading-relaxed">
                       {item?.tip}
                     </p>
                     {flag === "RED" && (
-                      <div className="pt-2 flex items-center justify-between text-xs font-extrabold text-rose-800 border-t border-rose-200 mt-2">
+                      <div style={{ borderColor: "#fecdd3", color: "#9f1239" }} className="pt-2 flex items-center justify-between text-xs font-extrabold border-t mt-2">
                         <span>Condonation Cutoff (65%): +{classesFor65} Classes</span>
                         <span>Safe Threshold (75%): +{classesFor75} Classes</span>
                       </div>
@@ -595,10 +658,10 @@ export default function InchargeDashboard() {
                   </div>
 
                   {/* Department & College Footer Details */}
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold text-slate-600">
+                  <div style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }} className="border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold">
                     <div>
-                      <p className="text-slate-900 font-extrabold">Department of CSE - Data Science (DS)</p>
-                      <p className="text-slate-500">Sphoorthy Engineering College • Academic Year 2026-2027</p>
+                      <p style={{ color: "#0f172a" }} className="font-extrabold">Department of CSE - Data Science (DS)</p>
+                      <p style={{ color: "#64748b" }}>Sphoorthy Engineering College • Academic Year 2026-2027</p>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -606,14 +669,16 @@ export default function InchargeDashboard() {
                         href={`https://wa.me/?text=${whatsappMessage}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                        style={{ backgroundColor: "#059669" }}
+                        className="px-4 py-2.5 rounded-xl text-white font-extrabold text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer hover:bg-emerald-700"
                       >
                         📱 Send WhatsApp Notice
                       </a>
 
                       <button
                         onClick={() => window.print()}
-                        className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                        style={{ backgroundColor: "#7c3aed" }}
+                        className="px-4 py-2.5 rounded-xl text-white font-extrabold text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer hover:bg-purple-700"
                       >
                         📄 Print Report
                       </button>
