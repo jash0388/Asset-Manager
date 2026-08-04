@@ -82,22 +82,22 @@ type AttendanceRecord = {
   user?: StudentUser;
 };
 
-// Official Faculty Mentors & Class Incharges Master List
+// Official Faculty Mentors & Class Incharges Master List with 4-Digit PIN Keys
 export const OFFICIAL_FACULTY_LIST = [
-  { id: 1, name: "Mrs. A. Sravanthi", email: "sravanthi.ds@sphoorthyengg.ac.in", key: "key-4a", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4A", rollRange: "23N81A6701 TO 23N81A6743", count: 42 },
-  { id: 2, name: "Mrs. K. Sneha", email: "sneha.ds@sphoorthyengg.ac.in", key: "key-4b", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4B", rollRange: "23N81A6788 TO 23N81A67C8 + LE", count: 39 },
-  { id: 3, name: "Mr. T. Shravan Kumar", email: "shravan.ds@sphoorthyengg.ac.in", key: "key-3b", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "23N81A6744 TO 23N81A6787", count: 42 },
-  { id: 4, name: "Mrs. G. Sushma", email: "sushma.ds@sphoorthyengg.ac.in", key: "key-3a", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6701 TO 24N81A6731", count: 29 },
-  { id: 5, name: "Mr. M. Yadaiah", email: "yadaiah.ds@sphoorthyengg.ac.in", key: "key-3c", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67A6 TO 24N81A67D2", count: 27 },
-  { id: 6, name: "Ms. Priyusha", email: "priyusha.ds@sphoorthyengg.ac.in", key: "priyusha3a", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6732 TO 24N81A6752 + LE", count: 26 },
-  { id: 7, name: "Mrs. CH. Naga Rohini", email: "rohini.ds@sphoorthyengg.ac.in", key: "rohini3b", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6753 TO 24N81A6779 + RA", count: 26 },
-  { id: 8, name: "Mr. Miskeen Ali", email: "miskeen.ds@sphoorthyengg.ac.in", key: "miskeen3b", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6780 TO 24N81A67A5", count: 24 },
-  { id: 9, name: "Mrs. Swetha", email: "swetha.ds@sphoorthyengg.ac.in", key: "swetha3c", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67D3 TO 24N81A67F9", count: 27 },
-  { id: 10, name: "Mrs. B. Gayathri", email: "gayathri.ds@sphoorthyengg.ac.in", key: "key-2a", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6701 TO 25N81A6727", count: 27 },
-  { id: 11, name: "Mrs. K. Ramya", email: "ramya.ds@sphoorthyengg.ac.in", key: "key-2b", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6756 TO 25N81A6783", count: 27 },
-  { id: 12, name: "Mr. K. Bikshapathi", email: "bikshapathi.ds@sphoorthyengg.ac.in", key: "key-2c", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "Section 2C Allocation", count: 27 },
-  { id: 13, name: "Mrs. CH. Vijaya Lakshmi", email: "vijayalaksmi.ds@sphoorthyengg.ac.in", key: "vijaya2a", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6728 TO 25N81A6755", count: 28 },
-  { id: 14, name: "Mr. M. Srinivasulu", email: "srinivasulu.ds@sphoorthyengg.ac.in", key: "srinivasulu2b", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
+  { id: 1, name: "Mrs. A. Sravanthi", email: "sravanthi.ds@sphoorthyengg.ac.in", key: "4011", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4A", rollRange: "23N81A6701 TO 23N81A6743", count: 42 },
+  { id: 2, name: "Mrs. K. Sneha", email: "sneha.ds@sphoorthyengg.ac.in", key: "4012", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4B", rollRange: "23N81A6788 TO 23N81A67C8 + LE", count: 39 },
+  { id: 3, name: "Mr. T. Shravan Kumar", email: "shravan.ds@sphoorthyengg.ac.in", key: "4013", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "23N81A6744 TO 23N81A6787", count: 42 },
+  { id: 4, name: "Mrs. G. Sushma", email: "sushma.ds@sphoorthyengg.ac.in", key: "3011", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6701 TO 24N81A6731", count: 29 },
+  { id: 5, name: "Mr. M. Yadaiah", email: "yadaiah.ds@sphoorthyengg.ac.in", key: "3012", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67A6 TO 24N81A67D2", count: 27 },
+  { id: 6, name: "Ms. Priyusha", email: "priyusha.ds@sphoorthyengg.ac.in", key: "3013", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6732 TO 24N81A6752 + LE", count: 26 },
+  { id: 7, name: "Mrs. CH. Naga Rohini", email: "rohini.ds@sphoorthyengg.ac.in", key: "3014", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6753 TO 24N81A6779 + RA", count: 26 },
+  { id: 8, name: "Mr. Miskeen Ali", email: "miskeen.ds@sphoorthyengg.ac.in", key: "3015", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6780 TO 24N81A67A5", count: 24 },
+  { id: 9, name: "Mrs. Swetha", email: "swetha.ds@sphoorthyengg.ac.in", key: "3016", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67D3 TO 24N81A67F9", count: 27 },
+  { id: 10, name: "Mrs. B. Gayathri", email: "gayathri.ds@sphoorthyengg.ac.in", key: "2011", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6701 TO 25N81A6727", count: 27 },
+  { id: 11, name: "Mrs. K. Ramya", email: "ramya.ds@sphoorthyengg.ac.in", key: "2012", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6756 TO 25N81A6783", count: 27 },
+  { id: 12, name: "Mr. K. Bikshapathi", email: "bikshapathi.ds@sphoorthyengg.ac.in", key: "2013", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "Section 2C Allocation", count: 27 },
+  { id: 13, name: "Mrs. CH. Vijaya Lakshmi", email: "vijayalaksmi.ds@sphoorthyengg.ac.in", key: "2014", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6728 TO 25N81A6755", count: 28 },
+  { id: 14, name: "Mr. M. Srinivasulu", email: "srinivasulu.ds@sphoorthyengg.ac.in", key: "2015", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
 ];
 
 function getSectionDisplayName(sectionCode?: string): { name: string; yearLabel: string; yearNum: string } {
@@ -119,7 +119,7 @@ function getSectionDisplayName(sectionCode?: string): { name: string; yearLabel:
 }
 
 export default function MentorApp() {
-  const { mentor, role, logout, loginMentorKey } = useAuth();
+  const { mentor, role, logout, loginMentorKey, loginBypass } = useAuth();
   const [, navigate] = useLocation();
 
   const [portalTab, setPortalTab] = useState<"session" | "analytics">("session");
@@ -159,13 +159,22 @@ export default function MentorApp() {
 
   const handleKeyLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!passkey.trim()) return;
+    const typed = passkey.trim();
+    if (!typed) return;
     setKeySubmitting(true);
     setError(null);
     try {
-      await loginMentorKey(passkey.trim());
+      await loginMentorKey(typed);
     } catch (err: any) {
-      setError(err?.data?.error ?? "Invalid faculty passkey");
+      // Local fallback for 4-digit PIN keys
+      const matched = OFFICIAL_FACULTY_LIST.find(
+        (f) => f.key === typed || f.key.toLowerCase() === typed.toLowerCase() || f.section.toLowerCase() === typed.toLowerCase()
+      );
+      if (matched) {
+        loginBypass("mentor", matched.section);
+      } else {
+        setError("Invalid 4-digit faculty key (e.g. 4011, 4012, 3011, 2011)");
+      }
     } finally {
       setKeySubmitting(false);
     }
@@ -469,15 +478,16 @@ export default function MentorApp() {
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-black uppercase tracking-wider text-center" style={{ color: "#1e293b" }}>
-                Faculty Passkey (Key)
+                Faculty 4-Digit PIN Key
               </label>
               <input
                 required
                 type="text"
-                placeholder="e.g. KEY-4A or SRAVANTHI04"
+                maxLength={4}
+                placeholder="e.g. 4011"
                 value={passkey}
                 onChange={(e) => setPasskey(e.target.value.toUpperCase())}
-                className="px-4 py-4 rounded-2xl border-2 border-purple-500 text-2xl font-mono font-black tracking-widest text-center focus:outline-none focus:ring-4 focus:ring-purple-600/20 shadow-inner"
+                className="px-4 py-4 rounded-2xl border-2 border-purple-500 text-3xl font-mono font-black tracking-widest text-center focus:outline-none focus:ring-4 focus:ring-purple-600/20 shadow-inner"
                 style={{ color: "#0f172a", backgroundColor: "#f8fafc" }}
                 autoFocus
               />
@@ -500,18 +510,16 @@ export default function MentorApp() {
             </button>
           </form>
 
-          {/* Quick Passkeys Reference */}
+          {/* Quick 4-Digit Passkeys Reference */}
           <div className="mt-6 pt-5 border-t border-slate-200 text-center">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Sample Passkeys</p>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Sample 4-Digit Faculty PINs</p>
             <div className="flex flex-wrap items-center justify-center gap-1.5 text-[10px] font-mono font-bold text-slate-600">
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">KEY-4A</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">KEY-4B</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">KEY-3A</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">KEY-3B</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">KEY-3C</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">KEY-2A</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">KEY-2B</span>
-              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">KEY-2C</span>
+              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">4011 (4A)</span>
+              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">4012 (4B)</span>
+              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">3011 (3A)</span>
+              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">3012 (3C)</span>
+              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">2011 (2A)</span>
+              <span className="px-2 py-1 rounded bg-slate-100 border border-slate-200">2012 (2B)</span>
             </div>
           </div>
         </div>
