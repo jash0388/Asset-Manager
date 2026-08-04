@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
@@ -76,6 +76,20 @@ export default function HodDashboard() {
   const [riskSectionFilter, setRiskSectionFilter] = useState("ALL");
   const [riskSearchQuery, setRiskSearchQuery] = useState("");
   const [riskSortOrder, setRiskSortOrder] = useState<"lowest" | "roll" | "name">("lowest");
+
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "flags") {
+        setActiveTab("flags");
+      } else if (!params.has("tab")) {
+        setActiveTab("summary");
+      }
+    };
+    handleUrlChange();
+    window.addEventListener("popstate", handleUrlChange);
+    return () => window.removeEventListener("popstate", handleUrlChange);
+  }, []);
   
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date().toISOString().split("T")[0];
@@ -976,20 +990,6 @@ export default function HodDashboard() {
             <Calendar className="w-4 h-4" />
             Schedules (Timetable)
           </button>
-          <button
-            onClick={() => setActiveTab("flags")}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              activeTab === "flags"
-                ? "bg-amber-600 text-white shadow-lg shadow-amber-600/20"
-                : "text-amber-400 hover:bg-slate-850"
-            }`}
-          >
-            <Flag className="w-4 h-4 text-amber-400" />
-            Risk Flag Analytics
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
-              🔴 {hodRedCount} | 🟡 {hodYellowCount}
-            </span>
-          </button>
         </div>
 
         {activeTab === "summary" ? (
@@ -1636,7 +1636,7 @@ export default function HodDashboard() {
               </div>
 
               {/* Student Flag Cards */}
-              <div className="space-y-3 pt-2">
+              <div className="space-y-3 pt-2 max-h-[58vh] overflow-y-auto pr-2">
                 {filteredHodAnalyticsList.length === 0 ? (
                   <div className="p-12 text-center text-slate-500 text-xs font-medium">
                     No students found matching your categorised filter.

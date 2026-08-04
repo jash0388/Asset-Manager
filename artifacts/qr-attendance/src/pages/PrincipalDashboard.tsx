@@ -671,22 +671,6 @@ export default function PrincipalDashboard() {
                 <Users className="w-4 h-4" />
                 Detailed Daily Logs ({filteredLogs.length})
               </button>
-
-              {/* DEDICATED STUDENT RISK FLAG ANALYTICS BUTTON */}
-              <button
-                onClick={() => setActiveTab("flags")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-                  activeTab === "flags"
-                    ? "bg-amber-600 text-white shadow-md ring-2 ring-amber-500/40"
-                    : "bg-slate-900 border border-amber-500/30 text-amber-300 hover:bg-slate-850"
-                }`}
-              >
-                <Flag className="w-4 h-4 text-amber-400" />
-                Student Risk Flag Analytics
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                  🔴 {redFlagCount} | 🟡 {yellowFlagCount}
-                </span>
-              </button>
             </div>
 
             {activeTab === "summary" ? (
@@ -905,7 +889,7 @@ export default function PrincipalDashboard() {
                   </div>
 
                   {/* Student Flag Cards */}
-                  <div className="space-y-3">
+                  <div className="space-y-3 max-h-[58vh] overflow-y-auto pr-2">
                     {filteredAnalyticsList.length === 0 ? (
                       <div className="p-8 text-center text-slate-500 text-xs font-medium">
                         No students found matching current risk flag filter.

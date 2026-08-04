@@ -78,15 +78,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 py-4 px-3 overflow-y-auto">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-2 mb-2">Navigation</p>
           {navLinks.map(({ href, label, icon: Icon }) => {
-            const isActive = location === href || (href !== "/dashboard" && href !== "/hod-dashboard" && location.startsWith(href));
+            const currentFull = window.location.pathname + window.location.search;
+            const isActive = href.includes("tab=flags")
+              ? currentFull.includes("tab=flags")
+              : currentFull === href ||
+                (href === "/hod-dashboard" && !currentFull.includes("tab=flags") && location.startsWith("/hod-dashboard")) ||
+                (href === "/principal-dashboard" && !currentFull.includes("tab=flags") && location.startsWith("/principal-dashboard"));
+
             return (
               <Link key={href} href={href}>
                 <div
                   data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (href.includes("tab=flags")) {
+                      window.history.pushState({}, "", href);
+                      window.dispatchEvent(new Event("popstate"));
+                    } else if (href === "/hod-dashboard" || href === "/principal-dashboard") {
+                      window.history.pushState({}, "", href);
+                      window.dispatchEvent(new Event("popstate"));
+                    }
+                  }}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 cursor-pointer transition-colors ${
                     isActive
-                      ? "bg-blue-600 text-white"
+                      ? "bg-blue-600 text-white font-bold"
                       : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
                   }`}
                 >
