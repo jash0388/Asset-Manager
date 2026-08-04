@@ -19,8 +19,8 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   }
   const token = authHeader.slice(7);
 
-  if (token === BYPASS_TOKEN || token === "bypass-token-hod" || token === "bypass-token-mentor") {
-    req.adminId = token === "bypass-token-hod" ? -2 : token === "bypass-token-mentor" ? -3 : -1;
+  if (token === BYPASS_TOKEN || token === "bypass-token-hod" || token === "bypass-token-mentor" || token === "bypass-token-principal") {
+    req.adminId = token === "bypass-token-hod" ? -2 : token === "bypass-token-mentor" ? -3 : token === "bypass-token-principal" ? -4 : -1;
     if (token === "bypass-token-mentor") {
       req.mentorId = -3;
     }

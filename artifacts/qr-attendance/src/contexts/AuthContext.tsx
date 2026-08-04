@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const bypassPrincipal: AuthPrincipal = {
         id: -4,
         email: "principal@sphn.edu.in",
-        name: "Principal (Campus Admin)",
+        name: "Dr. K. S. S. S. N. V. Prasad (Principal)",
       };
       persist("bypass-token-principal", "principal", bypassPrincipal);
     } else if (role === "hod") {

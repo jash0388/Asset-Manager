@@ -118,11 +118,8 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-8 text-center text-slate-450 text-xs flex flex-col gap-1">
-            <p className="font-medium text-slate-400">Enter 6-digit administrator, HOD, or Principal access code.</p>
-            <p className="text-[11px] font-mono text-slate-400/80 mt-1">
-              HOD Key: <span className="font-bold text-blue-400">038811</span> • Principal Key: <span className="font-bold text-amber-400">984201</span>
-            </p>
+          <div className="mt-8 text-center text-slate-450 text-xs">
+            Enter 6-digit administrator, HOD, or Principal access code.
           </div>
         </div>
       </div>
