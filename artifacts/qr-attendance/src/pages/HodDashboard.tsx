@@ -20,7 +20,11 @@ import {
   Loader2,
   Download,
   FileSpreadsheet,
-  FileText
+  FileText,
+  Flag,
+  AlertCircle,
+  AlertTriangle,
+  TrendingUp
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -62,7 +66,16 @@ type SectionStats = {
 };
 
 export default function HodDashboard() {
-  const [activeTab, setActiveTab] = useState<"summary" | "logs" | "mentors" | "schedules">("summary");
+  const [activeTab, setActiveTab] = useState<"summary" | "logs" | "mentors" | "schedules" | "flags">(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") === "flags" ? "flags" : "summary";
+  });
+
+  const [riskFlagFilter, setRiskFlagFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
+  const [riskYearFilter, setRiskYearFilter] = useState("ALL");
+  const [riskSectionFilter, setRiskSectionFilter] = useState("ALL");
+  const [riskSearchQuery, setRiskSearchQuery] = useState("");
+  const [riskSortOrder, setRiskSortOrder] = useState<"lowest" | "roll" | "name">("lowest");
   
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date().toISOString().split("T")[0];
@@ -98,6 +111,150 @@ export default function HodDashboard() {
     queryKey: ["users"],
     queryFn: () => customFetch<StudentUser[]>("/api/users"),
   });
+
+  // Fetch Monthly Attendance Records for Flag Calculations across the month
+  const [monthForFlags] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+  const { data: monthlyAttendanceForFlags = [] } = useQuery<AttendanceRecord[]>({
+    queryKey: ["hod-attendance-month-flags", monthForFlags],
+    queryFn: async () => {
+      const [yearStr, monthStr] = monthForFlags.split("-");
+      const yearNum = parseInt(yearStr);
+      const monthNum = parseInt(monthStr);
+      const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+      const fromStr = `${yearStr}-${monthStr.padStart(2, "0")}-01`;
+      const toStr = `${yearStr}-${monthStr.padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+      return customFetch<AttendanceRecord[]>(`/api/attendance?from=${fromStr}&to=${toStr}`);
+    },
+  });
+
+  const totalMonthWorkingDays = useMemo(() => {
+    const [yStr, mStr] = monthForFlags.split("-");
+    const y = parseInt(yStr);
+    const m = parseInt(mStr);
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    let working = 0;
+    const daysInMonth = new Date(y, m, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dObj = new Date(y, m - 1, day, 12, 0, 0);
+      const dStr = `${y}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      if (dStr > todayStr) break;
+      if (dObj.getDay() !== 0) {
+        working++;
+      }
+    }
+    return Math.max(1, working);
+  }, [monthForFlags]);
+
+  const studentPresentCounts = useMemo(() => {
+    const map = new Map<number, number>();
+    (monthlyAttendanceForFlags || []).forEach((r: any) => {
+      const uid = r.userId || r.user_id || r.user?.id;
+      if (uid) {
+        map.set(uid, (map.get(uid) || 0) + 1);
+      }
+    });
+    return map;
+  }, [monthlyAttendanceForFlags]);
+
+  const hodStudents = useMemo(() => {
+    return allUsers.filter((u) => u.role === "student");
+  }, [allUsers]);
+
+  const hodStudentAnalyticsList = useMemo(() => {
+    return hodStudents.map((student) => {
+      const presentDays = studentPresentCounts.get(student.id) || 0;
+      const calcWorking = totalMonthWorkingDays > 0 ? totalMonthWorkingDays : 1;
+      const percent = Math.min(100, Math.floor((presentDays / calcWorking) * 100));
+
+      const classesNeededFor75 = Math.max(0, 3 * totalMonthWorkingDays - 4 * presentDays);
+      const classesNeededFor65 = Math.max(0, Math.ceil((0.65 * totalMonthWorkingDays - presentDays) / 0.35));
+
+      let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
+      let label = "Safe Zone";
+      let badgeColor = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+      let dotColor = "🟢";
+      let tip = "Good Standing (≥ 75%). Attendance target met!";
+
+      if (percent < 65) {
+        flag = "RED";
+        label = "Critical Risk (< 65%)";
+        badgeColor = "bg-rose-500/20 text-rose-300 border-rose-500/40";
+        dotColor = "🔴";
+        tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
+      } else if (percent < 75) {
+        flag = "YELLOW";
+        label = "Warning (Recoverable)";
+        badgeColor = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+        dotColor = "🟡";
+        tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
+      }
+
+      const str = (student.section || "").trim();
+      const parts = str.split("/");
+      const sectionLetter = (parts[parts.length - 1] || "A").trim().toUpperCase();
+      let yearLabel = "Department";
+      let yearNum = "Other";
+      let secName = student.section || "A";
+
+      if (str.includes("IV") || str.includes("4")) {
+        yearLabel = "4th Year"; yearNum = "4"; secName = `4${sectionLetter}`;
+      } else if (str.includes("III") || str.includes("3")) {
+        yearLabel = "3rd Year"; yearNum = "3"; secName = `3${sectionLetter}`;
+      } else if (str.includes("II") || str.includes("2")) {
+        yearLabel = "2nd Year"; yearNum = "2"; secName = `2${sectionLetter}`;
+      }
+
+      return {
+        student,
+        presentDays,
+        totalWorkingDays: totalMonthWorkingDays,
+        percent,
+        flag,
+        label,
+        badgeColor,
+        dotColor,
+        tip,
+        classesNeededFor75,
+        classesNeededFor65,
+        secInfo: { name: secName, yearLabel, yearNum }
+      };
+    });
+  }, [hodStudents, studentPresentCounts, totalMonthWorkingDays]);
+
+  const hodRedCount = useMemo(() => hodStudentAnalyticsList.filter((s) => s.flag === "RED").length, [hodStudentAnalyticsList]);
+  const hodYellowCount = useMemo(() => hodStudentAnalyticsList.filter((s) => s.flag === "YELLOW").length, [hodStudentAnalyticsList]);
+  const hodGreenCount = useMemo(() => hodStudentAnalyticsList.filter((s) => s.flag === "GREEN").length, [hodStudentAnalyticsList]);
+
+  const filteredHodAnalyticsList = useMemo(() => {
+    let result = hodStudentAnalyticsList.filter((item) => {
+      const q = riskSearchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        item.student.name.toLowerCase().includes(q) ||
+        (item.student.uniqueId || item.student.unique_id || "").toLowerCase().includes(q);
+
+      const matchesFlag = riskFlagFilter === "ALL" || item.flag === riskFlagFilter;
+      const matchesYear = riskYearFilter === "ALL" || item.secInfo.yearNum === riskYearFilter;
+      const matchesSection = riskSectionFilter === "ALL" || item.secInfo.name === riskSectionFilter;
+
+      return matchesSearch && matchesFlag && matchesYear && matchesSection;
+    });
+
+    if (riskSortOrder === "lowest") {
+      result.sort((a, b) => a.percent - b.percent);
+    } else if (riskSortOrder === "roll") {
+      result.sort((a, b) => (a.student.uniqueId || "").localeCompare(b.student.uniqueId || ""));
+    } else if (riskSortOrder === "name") {
+      result.sort((a, b) => a.student.name.localeCompare(b.student.name));
+    }
+
+    return result;
+  }, [hodStudentAnalyticsList, riskSearchQuery, riskFlagFilter, riskYearFilter, riskSectionFilter, riskSortOrder]);
 
   // Fetch summary attendance records for selected date
   const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery<AttendanceRecord[]>({
@@ -819,6 +976,20 @@ export default function HodDashboard() {
             <Calendar className="w-4 h-4" />
             Schedules (Timetable)
           </button>
+          <button
+            onClick={() => setActiveTab("flags")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              activeTab === "flags"
+                ? "bg-amber-600 text-white shadow-lg shadow-amber-600/20"
+                : "text-amber-400 hover:bg-slate-850"
+            }`}
+          >
+            <Flag className="w-4 h-4 text-amber-400" />
+            Risk Flag Analytics
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
+              🔴 {hodRedCount} | 🟡 {hodYellowCount}
+            </span>
+          </button>
         </div>
 
         {activeTab === "summary" ? (
@@ -1221,7 +1392,7 @@ export default function HodDashboard() {
               </Card>
             )}
           </>
-        ) : (
+        ) : activeTab === "schedules" ? (
           <>
             {/* Timetable Schedules Search Toolbar */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
@@ -1326,6 +1497,223 @@ export default function HodDashboard() {
               </Card>
             )}
           </>
+        ) : (
+          /* DEDICATED HOD STUDENT RISK FLAG ANALYTICS VIEW */
+          <div className="space-y-5">
+            {/* Risk Flag Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <button
+                onClick={() => setRiskFlagFilter("RED")}
+                className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
+                  riskFlagFilter === "RED"
+                    ? "bg-rose-950/60 border-rose-500 ring-2 ring-rose-500/40 shadow-xl"
+                    : "bg-slate-900 border-slate-850 hover:border-rose-900/60"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-rose-500" />
+                    🔴 Red Flag (&lt; 65%)
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                    Critical
+                  </span>
+                </div>
+                <p className="text-3xl font-black text-white">{hodRedCount} Students</p>
+                <p className="text-xs text-slate-400 mt-1">Shortage Risk • Requires Condonation / Intimation</p>
+              </button>
+
+              <button
+                onClick={() => setRiskFlagFilter("YELLOW")}
+                className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
+                  riskFlagFilter === "YELLOW"
+                    ? "bg-amber-950/60 border-amber-500 ring-2 ring-amber-500/40 shadow-xl"
+                    : "bg-slate-900 border-slate-850 hover:border-amber-900/60"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-500" />
+                    🟡 Yellow Flag (65%–74%)
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    Warning
+                  </span>
+                </div>
+                <p className="text-3xl font-black text-white">{hodYellowCount} Students</p>
+                <p className="text-xs text-slate-400 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
+              </button>
+
+              <button
+                onClick={() => setRiskFlagFilter("GREEN")}
+                className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
+                  riskFlagFilter === "GREEN"
+                    ? "bg-emerald-950/60 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl"
+                    : "bg-slate-900 border-slate-850 hover:border-emerald-900/60"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    🟢 Green Flag (≥ 75%)
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    Safe
+                  </span>
+                </div>
+                <p className="text-3xl font-black text-white">{hodGreenCount} Students</p>
+                <p className="text-xs text-slate-400 mt-1">Good Standing • Target Met</p>
+              </button>
+            </div>
+
+            {/* Categorization & Filter Toolbar */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search student name or roll number..."
+                    value={riskSearchQuery}
+                    onChange={(e) => setRiskSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Flag Filter */}
+                  <select
+                    value={riskFlagFilter}
+                    onChange={(e: any) => setRiskFlagFilter(e.target.value)}
+                    className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                  >
+                    <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
+                    <option value="RED">🔴 Red Flag (&lt; 65%)</option>
+                    <option value="YELLOW">🟡 Yellow Flag (65%–74%)</option>
+                    <option value="GREEN">🟢 Green Flag (≥ 75%)</option>
+                  </select>
+
+                  {/* Year Filter */}
+                  <select
+                    value={riskYearFilter}
+                    onChange={(e) => setRiskYearFilter(e.target.value)}
+                    className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                  >
+                    <option value="ALL">All Academic Years</option>
+                    <option value="2">2nd Year (II)</option>
+                    <option value="3">3rd Year (III)</option>
+                    <option value="4">4th Year (IV)</option>
+                  </select>
+
+                  {/* Section Filter */}
+                  <select
+                    value={riskSectionFilter}
+                    onChange={(e) => setRiskSectionFilter(e.target.value)}
+                    className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                  >
+                    <option value="ALL">All Sections</option>
+                    <option value="2A">Section 2A</option>
+                    <option value="2B">Section 2B</option>
+                    <option value="2C">Section 2C</option>
+                    <option value="3A">Section 3A</option>
+                    <option value="3B">Section 3B</option>
+                    <option value="3C">Section 3C</option>
+                    <option value="4A">Section 4A</option>
+                    <option value="4B">Section 4B</option>
+                  </select>
+
+                  {/* Sort Order */}
+                  <select
+                    value={riskSortOrder}
+                    onChange={(e: any) => setRiskSortOrder(e.target.value)}
+                    className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                  >
+                    <option value="lowest">Sort: Lowest Attendance %</option>
+                    <option value="roll">Sort: Roll Number</option>
+                    <option value="name">Sort: Student Name</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Student Flag Cards */}
+              <div className="space-y-3 pt-2">
+                {filteredHodAnalyticsList.length === 0 ? (
+                  <div className="p-12 text-center text-slate-500 text-xs font-medium">
+                    No students found matching your categorised filter.
+                  </div>
+                ) : (
+                  filteredHodAnalyticsList.map((item) => (
+                    <div
+                      key={item.student.id}
+                      onClick={() => setSelectedStudentForDetails(item.student)}
+                      className="bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 transition-all cursor-pointer space-y-3 group shadow-md"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3.5">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-base ${
+                            item.flag === "RED"
+                              ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                              : item.flag === "YELLOW"
+                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                              : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                          }`}>
+                            {item.dotColor}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
+                              {item.student.name}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400 font-mono font-medium">
+                              <span>Roll: <strong className="text-emerald-400">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
+                              <span>•</span>
+                              <span>Year: <strong className="text-white">{item.secInfo.yearLabel}</strong></span>
+                              <span>•</span>
+                              <span>Sec: <strong className="text-blue-400">{item.secInfo.name}</strong></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${item.badgeColor}`}>
+                              {item.label} ({item.percent}%)
+                            </span>
+                            <p className="text-[11px] text-slate-400 font-semibold mt-1">
+                              {item.presentDays} / {item.totalWorkingDays} Working Days Attended
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Recovery Math Banner */}
+                      <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                        item.flag === "RED"
+                          ? "bg-rose-950/40 border-rose-900/50 text-rose-200"
+                          : item.flag === "YELLOW"
+                          ? "bg-amber-950/40 border-amber-900/50 text-amber-200"
+                          : "bg-emerald-950/40 border-emerald-900/50 text-emerald-200"
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 shrink-0" />
+                          <span className="font-semibold">{item.tip}</span>
+                        </div>
+
+                        {item.classesNeededFor75 > 0 ? (
+                          <span className="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-white shrink-0">
+                            Target +{item.classesNeededFor75} Classes Needed
+                          </span>
+                        ) : (
+                          <span className="font-mono font-black text-xs px-2.5 py-1 rounded-lg bg-emerald-900/60 border border-emerald-700 text-emerald-300 shrink-0">
+                            ✓ Target Met
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Detailed student listing slide-over sheet */}

@@ -13,6 +13,7 @@ import {
   GraduationCap,
   ScanLine,
   Clock,
+  Flag,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -39,11 +40,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const navLinks = role === "principal"
     ? [
         { href: "/principal-dashboard", label: "Principal Portal", icon: LayoutDashboard },
+        { href: "/principal-dashboard?tab=flags", label: "Risk Flag Analytics", icon: Flag },
         { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
       ]
     : role === "hod"
     ? [
         { href: "/hod-dashboard", label: "HOD Dashboard", icon: LayoutDashboard },
+        { href: "/hod-dashboard?tab=flags", label: "Risk Flag Analytics", icon: Flag },
         { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
       ]
     : adminNavLinks;

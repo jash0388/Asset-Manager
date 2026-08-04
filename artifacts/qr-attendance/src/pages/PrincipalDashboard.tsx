@@ -119,7 +119,10 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
 export default function PrincipalDashboard() {
   const { logout } = useAuth();
   const [selectedBranch, setSelectedBranch] = useState("DS");
-  const [activeTab, setActiveTab] = useState<"summary" | "detailed" | "flags">("summary");
+  const [activeTab, setActiveTab] = useState<"summary" | "detailed" | "flags">(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") === "flags" ? "flags" : "summary";
+  });
   const [logDate, setLogDate] = useState(() => {
     const d = new Date();
     const year = d.getFullYear();
