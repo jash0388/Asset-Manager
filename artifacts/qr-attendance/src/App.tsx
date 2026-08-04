@@ -16,6 +16,7 @@ import Mentors from "@/pages/Mentors";
 import HodDashboard from "@/pages/HodDashboard";
 import PrincipalDashboard from "@/pages/PrincipalDashboard";
 import HourlyAttendance from "@/pages/HourlyAttendance";
+import InchargeDashboard from "@/pages/InchargeDashboard";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -93,6 +94,7 @@ function AppRouter() {
       {/* Mentor & Faculty Scanner App */}
       <Route path="/mentor" component={MentorApp} />
       <Route path="/faculty" component={MentorApp} />
+      <Route path="/incharge-dashboard" component={InchargeDashboard} />
 
       {/* HOD routes */}
       <Route path="/hod-dashboard">

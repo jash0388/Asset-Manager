@@ -178,6 +178,7 @@ export default function MentorApp() {
     setError(null);
     try {
       await loginMentorKey(typed);
+      navigate("/incharge-dashboard");
     } catch (err: any) {
       // Local fallback for 4-digit PIN keys
       const matched = OFFICIAL_FACULTY_LIST.find(
@@ -185,6 +186,7 @@ export default function MentorApp() {
       );
       if (matched) {
         loginBypass("mentor", matched.section);
+        navigate("/incharge-dashboard");
       } else {
         setError("Invalid 4-digit faculty key (e.g. 4011, 4012, 3011, 2011)");
       }

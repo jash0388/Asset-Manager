@@ -51,16 +51,25 @@ export default function Login() {
     setSubmitting(true);
     try {
       await loginMentorKey(code);
-      navigate("/mentor");
+      if (/^\d{4}$/.test(code)) {
+        navigate("/incharge-dashboard");
+      } else {
+        navigate("/mentor");
+      }
       return;
     } catch (err) {
+      if (/^\d{4}$/.test(code)) {
+        loginBypass("mentor", `DS-${code}`);
+        navigate("/incharge-dashboard");
+        return;
+      }
       if (MENTOR_CODES[code]) {
         const mentorInfo = MENTOR_CODES[code];
         loginBypass("mentor", mentorInfo.section);
         navigate("/mentor");
         return;
       }
-      setError("Invalid code. Please try again.");
+      setError("Invalid access key or 4-digit faculty PIN.");
     } finally {
       setSubmitting(false);
     }
