@@ -47,15 +47,21 @@ const BRANCHES = [
   { id: "ECE", name: "Electronics & Comm", code: "ECE", active: false },
 ];
 
-function getSectionDisplayName(sectionCode?: string) {
-  if (!sectionCode) return { name: "3B", yearLabel: "3rd Year" };
-  const upper = sectionCode.toUpperCase().replace(/\s+/g, "");
-  if (upper.includes("2A") || upper.includes("II/I/A")) return { name: "2A", yearLabel: "2nd Year" };
-  if (upper.includes("2B") || upper.includes("II/I/B")) return { name: "2B", yearLabel: "2nd Year" };
-  if (upper.includes("3A") || upper.includes("III/I/A")) return { name: "3A", yearLabel: "3rd Year" };
-  if (upper.includes("3B") || upper.includes("III/I/B")) return { name: "3B", yearLabel: "3rd Year" };
-  if (upper.includes("4A") || upper.includes("IV/I/A")) return { name: "4A", yearLabel: "4th Year" };
-  if (upper.includes("4B") || upper.includes("IV/I/B")) return { name: "4B", yearLabel: "4th Year" };
+function getSectionDisplayName(sectionCode?: string): { name: string; yearLabel: string } {
+  if (!sectionCode) return { name: "Other", yearLabel: "Department" };
+  const str = sectionCode.trim();
+  const parts = str.split("/");
+  const sectionLetter = (parts[parts.length - 1] || "A").trim();
+
+  if (str.includes("IV") || str.includes("4")) {
+    return { name: `4${sectionLetter}`, yearLabel: "4th Year" };
+  }
+  if (str.includes("III") || str.includes("3")) {
+    return { name: `3${sectionLetter}`, yearLabel: "3rd Year" };
+  }
+  if (str.includes("II") || str.includes("2")) {
+    return { name: `2${sectionLetter}`, yearLabel: "2nd Year" };
+  }
   return { name: sectionCode, yearLabel: "Department" };
 }
 
@@ -74,6 +80,17 @@ export default function PrincipalDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sectionFilter, setSectionFilter] = useState("ALL");
   const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
+
+  const [sectionModalData, setSectionModalData] = useState<{
+    title: string;
+    subtitle: string;
+    students: {
+      student: StudentUser;
+      isPresent: boolean;
+      entryTime?: string | null;
+      exitTime?: string | null;
+    }[];
+  } | null>(null);
 
   const [studentModalMonth, setStudentModalMonth] = useState(() => {
     const now = new Date();
@@ -387,13 +404,27 @@ export default function PrincipalDashboard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-4 py-2.5 rounded-2xl text-slate-200 font-semibold text-xs">
+              <div
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector("input");
+                  if (input && typeof (input as any).showPicker === "function") {
+                    (input as any).showPicker();
+                  }
+                }}
+                className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-4 py-2.5 rounded-2xl text-slate-200 font-semibold text-xs cursor-pointer hover:border-slate-700 transition-all"
+              >
                 <Calendar className="w-4 h-4 text-blue-400" />
                 <input
                   type="date"
                   value={logDate}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (typeof (e.currentTarget as any).showPicker === "function") {
+                      (e.currentTarget as any).showPicker();
+                    }
+                  }}
                   onChange={(e) => setLogDate(e.target.value)}
-                  className="bg-transparent text-slate-200 focus:outline-none [color-scheme:dark]"
+                  className="bg-transparent text-slate-200 focus:outline-none cursor-pointer [color-scheme:dark]"
                 />
               </div>
 
@@ -413,15 +444,15 @@ export default function PrincipalDashboard() {
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Campus Enrolled</p>
               <p className="text-2xl font-black text-white mt-1">{campusTotalStudents} Students</p>
             </div>
-            <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-800/60">
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
               <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Present Today</p>
               <p className="text-2xl font-black text-emerald-300 mt-1">{campusPresentCount} Students</p>
             </div>
-            <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-900/60">
+            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
               <p className="text-xs font-bold text-rose-400 uppercase tracking-wider">Absent Today</p>
               <p className="text-2xl font-black text-rose-300 mt-1">{campusAbsentCount} Students</p>
             </div>
-            <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-800/60">
+            <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
               <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">Campus Attendance Rate</p>
               <p className="text-2xl font-black text-blue-300 mt-1">{campusAttendancePercent}%</p>
             </div>
@@ -504,32 +535,104 @@ export default function PrincipalDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sectionStats.map((st) => (
                   <div key={st.section} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-lg hover:border-slate-700 transition-all">
-                    <div className="flex items-center justify-between">
+                    <div
+                      onClick={() => {
+                        const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
+                        setSectionModalData({
+                          title: `Section ${st.section} Roster`,
+                          subtitle: `All ${st.total} Enrolled Students in Data Science Dept (${st.present} Present, ${st.absent} Absent)`,
+                          students: secStudents.map((s) => {
+                            const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
+                            return {
+                              student: s,
+                              isPresent: dsPresentSet.has(s.id),
+                              entryTime: log?.entryTime,
+                              exitTime: log?.exitTime,
+                            };
+                          }),
+                        });
+                      }}
+                      className="flex items-center justify-between cursor-pointer group"
+                    >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center font-black text-blue-400 text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center font-black text-blue-400 text-sm group-hover:scale-105 transition-transform">
                           {st.section}
                         </div>
                         <div>
-                          <h4 className="text-base font-bold text-white">Section {st.section}</h4>
-                          <p className="text-xs font-medium text-slate-400">Data Science Dept</p>
+                          <h4 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors">Section {st.section}</h4>
+                          <p className="text-xs font-medium text-slate-400">Data Science Dept • Click for Roster</p>
                         </div>
                       </div>
                       <span className="text-base font-black text-blue-400">{st.percent}%</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
-                      <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-850">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Enrolled</p>
-                        <p className="text-sm font-bold text-white mt-0.5">{st.total}</p>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-900/40">
-                        <p className="text-[10px] font-bold text-emerald-400 uppercase">Present</p>
-                        <p className="text-sm font-bold text-emerald-300 mt-0.5">{st.present}</p>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-rose-950/40 border border-rose-900/40">
-                        <p className="text-[10px] font-bold text-rose-400 uppercase">Absent</p>
-                        <p className="text-sm font-bold text-rose-300 mt-0.5">{st.absent}</p>
-                      </div>
+                      {/* Enrolled Button */}
+                      <button
+                        onClick={() => {
+                          const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
+                          setSectionModalData({
+                            title: `Section ${st.section} — Enrolled Roster`,
+                            subtitle: `Total ${st.total} Students Enrolled`,
+                            students: secStudents.map((s) => {
+                              const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
+                              return {
+                                student: s,
+                                isPresent: dsPresentSet.has(s.id),
+                                entryTime: log?.entryTime,
+                                exitTime: log?.exitTime,
+                              };
+                            }),
+                          });
+                        }}
+                        className="p-3 rounded-xl bg-slate-950 hover:bg-slate-850 border border-slate-800/80 transition-all cursor-pointer text-center active:scale-95"
+                      >
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Enrolled</p>
+                        <p className="text-base font-black text-white mt-1">{st.total}</p>
+                      </button>
+
+                      {/* Present Button */}
+                      <button
+                        onClick={() => {
+                          const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && dsPresentSet.has(s.id));
+                          setSectionModalData({
+                            title: `Section ${st.section} — Present Students`,
+                            subtitle: `${st.present} Students Present on ${logDate}`,
+                            students: secStudents.map((s) => {
+                              const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
+                              return {
+                                student: s,
+                                isPresent: true,
+                                entryTime: log?.entryTime,
+                                exitTime: log?.exitTime,
+                              };
+                            }),
+                          });
+                        }}
+                        className="p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all cursor-pointer text-center active:scale-95"
+                      >
+                        <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Present</p>
+                        <p className="text-base font-black text-emerald-300 mt-1">{st.present}</p>
+                      </button>
+
+                      {/* Absent Button */}
+                      <button
+                        onClick={() => {
+                          const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && !dsPresentSet.has(s.id));
+                          setSectionModalData({
+                            title: `Section ${st.section} — Absent Students`,
+                            subtitle: `${st.absent} Students Absent on ${logDate}`,
+                            students: secStudents.map((s) => ({
+                              student: s,
+                              isPresent: false,
+                            })),
+                          });
+                        }}
+                        className="p-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all cursor-pointer text-center active:scale-95"
+                      >
+                        <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Absent</p>
+                        <p className="text-base font-black text-rose-300 mt-1">{st.absent}</p>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -621,8 +724,8 @@ export default function PrincipalDashboard() {
                               <td className="py-3 px-4 text-center">
                                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                                   log.status === "inside"
-                                    ? "bg-green-950/60 text-green-400 border-green-900/40"
-                                    : "bg-slate-850 text-slate-400 border-slate-800"
+                                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                                    : "bg-slate-800 text-slate-400 border-slate-750"
                                 }`}>
                                   {log.status === "inside" ? "Still on Campus" : "Exited"}
                                 </span>
@@ -649,6 +752,80 @@ export default function PrincipalDashboard() {
             <p className="text-slate-400 text-sm max-w-md mx-auto font-medium">
               Department infrastructure configured. Currently 0 students are registered under this department. Live scanning active for Data Science (DS).
             </p>
+          </div>
+        )}
+
+        {/* Section Interactive Roster Modal */}
+        {sectionModalData && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-xs">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl p-6 space-y-4 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+              <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    {sectionModalData.title}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5 font-medium">{sectionModalData.subtitle}</p>
+                </div>
+                <button onClick={() => setSectionModalData(null)} className="text-slate-400 hover:text-white p-1">
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="overflow-y-auto space-y-2 pr-1 flex-1 border border-slate-800 rounded-xl bg-slate-950 p-2">
+                {sectionModalData.students.length === 0 ? (
+                  <div className="p-8 text-center text-slate-500 text-xs italic">No students match this section view.</div>
+                ) : (
+                  sectionModalData.students.map((item, idx) => (
+                    <div
+                      key={item.student.id}
+                      onClick={() => {
+                        setSelectedStudentForDetails(item.student);
+                        setSectionModalData(null);
+                      }}
+                      className="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 flex items-center justify-between transition-all cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 font-bold text-xs flex items-center justify-center font-mono">
+                          {idx + 1}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">
+                            {item.student.name}
+                          </p>
+                          <p className="text-[11px] font-mono text-emerald-400 font-semibold">
+                            Roll: {item.student.uniqueId || item.student.unique_id || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {item.entryTime ? (
+                          <span className="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-900/40">
+                            In: {formatTime(item.entryTime)}
+                          </span>
+                        ) : null}
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                          item.isPresent
+                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                            : "bg-rose-500/10 text-rose-300 border-rose-500/20"
+                        }`}>
+                          {item.isPresent ? "🟢 PRESENT" : "🔴 ABSENT"}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="pt-2 border-t border-slate-800 flex justify-end">
+                <button
+                  onClick={() => setSectionModalData(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold cursor-pointer"
+                >
+                  Close Roster
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -712,11 +889,16 @@ export default function PrincipalDashboard() {
                     <input
                       type="month"
                       value={studentModalMonth}
+                      onClick={(e) => {
+                        if (typeof (e.currentTarget as any).showPicker === "function") {
+                          (e.currentTarget as any).showPicker();
+                        }
+                      }}
                       onChange={(e) => {
                         setStudentModalMonth(e.target.value);
                         setSelectedDayDetail(null);
                       }}
-                      className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none [color-scheme:dark]"
+                      className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none cursor-pointer [color-scheme:dark]"
                     />
                   </div>
 
@@ -801,19 +983,19 @@ export default function PrincipalDashboard() {
                     return (
                       <div className="space-y-3">
                         <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                          <div className="p-2 rounded-xl bg-green-950/40 border border-green-900/40">
-                            <p className="text-[10px] font-bold text-green-400 uppercase">Present (P)</p>
-                            <p className="text-base font-black text-green-300 mt-0.5">{studentPresentCount} days</p>
+                          <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                            <p className="text-[10px] font-bold text-emerald-400 uppercase">Present (P)</p>
+                            <p className="text-base font-black text-emerald-300 mt-0.5">{studentPresentCount} days</p>
                           </div>
-                          <div className="p-2 rounded-xl bg-red-950/40 border border-red-900/40">
-                            <p className="text-[10px] font-bold text-red-400 uppercase">Absent (A)</p>
-                            <p className="text-base font-black text-red-300 mt-0.5">{studentAbsentCount} days</p>
+                          <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20">
+                            <p className="text-[10px] font-bold text-rose-400 uppercase">Absent (A)</p>
+                            <p className="text-base font-black text-rose-300 mt-0.5">{studentAbsentCount} days</p>
                           </div>
-                          <div className="p-2 rounded-xl bg-purple-950/40 border border-purple-900/40">
+                          <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20">
                             <p className="text-[10px] font-bold text-purple-400 uppercase">Holidays (*)</p>
                             <p className="text-base font-black text-purple-300 mt-0.5">{studentHolidayCount} days</p>
                           </div>
-                          <div className="p-2 rounded-xl bg-blue-950/40 border border-blue-900/40">
+                          <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
                             <p className="text-[10px] font-bold text-blue-400 uppercase">Monthly %</p>
                             <p className="text-base font-black text-blue-300 mt-0.5">{studentMonthlyPercent}%</p>
                           </div>
@@ -833,12 +1015,12 @@ export default function PrincipalDashboard() {
                                       : "hover:scale-102"
                                   } ${
                                     d.status === "P"
-                                      ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-200"
+                                      ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-200"
                                       : d.status === "*"
-                                      ? "bg-purple-950/50 border-purple-800/60 text-purple-200"
+                                      ? "bg-purple-500/20 border-purple-500/40 text-purple-200"
                                       : d.status === "—"
                                       ? "bg-slate-950/40 border-slate-850/80 text-slate-600 opacity-60"
-                                      : "bg-red-950/40 border-red-900/40 text-red-300"
+                                      : "bg-rose-500/10 border-rose-500/20 text-rose-300"
                                   }`}
                                 >
                                   <span className="text-[10px] font-mono font-semibold text-slate-400">
@@ -851,7 +1033,7 @@ export default function PrincipalDashboard() {
                                       ? "bg-amber-400 text-slate-950"
                                       : d.status === "—"
                                       ? "bg-slate-800 text-slate-400"
-                                      : "bg-red-500/80 text-white"
+                                      : "bg-rose-500/80 text-white"
                                   }`}>
                                     {d.status}
                                   </span>
@@ -862,8 +1044,8 @@ export default function PrincipalDashboard() {
                         </div>
 
                         {selectedDayDetail ? (
-                          <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-800/60 space-y-2">
-                            <div className="flex items-center justify-between border-b border-blue-900/60 pb-2">
+                          <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-2">
+                            <div className="flex items-center justify-between border-b border-blue-500/20 pb-2">
                               <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-blue-400" />
                                 <h5 className="text-sm font-bold text-white">
@@ -877,7 +1059,7 @@ export default function PrincipalDashboard() {
                                   ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
                                   : selectedDayDetail.status === "—"
                                   ? "bg-slate-800/50 text-slate-400 border border-slate-700/50"
-                                  : "bg-red-500/20 text-red-300 border border-red-500/40"
+                                  : "bg-rose-500/20 text-rose-300 border border-rose-500/40"
                               }`}>
                                 {selectedDayDetail.status === "P"
                                   ? "🟢 PRESENT"
@@ -960,12 +1142,28 @@ export default function PrincipalDashboard() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Select Month</label>
-                  <input
-                    type="month"
-                    value={exportMonth}
-                    onChange={(e) => setExportMonth(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none [color-scheme:dark]"
-                  />
+                  <div
+                    onClick={(e) => {
+                      const input = e.currentTarget.querySelector("input");
+                      if (input && typeof (input as any).showPicker === "function") {
+                        (input as any).showPicker();
+                      }
+                    }}
+                    className="relative cursor-pointer"
+                  >
+                    <input
+                      type="month"
+                      value={exportMonth}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (typeof (e.currentTarget as any).showPicker === "function") {
+                          (e.currentTarget as any).showPicker();
+                        }
+                      }}
+                      onChange={(e) => setExportMonth(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none cursor-pointer [color-scheme:dark]"
+                    />
+                  </div>
                 </div>
 
                 <div>
