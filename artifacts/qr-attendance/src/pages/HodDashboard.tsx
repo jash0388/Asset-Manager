@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
+import { OFFICIAL_FACULTY_LIST } from "./MentorApp";
 import {
   Calendar,
   Users,
@@ -1356,44 +1357,52 @@ export default function HodDashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
-                        <th className="py-4 px-6">Mentor / Teacher Name</th>
-                        <th className="py-4 px-6">Email Address</th>
-                        <th className="py-4 px-6 text-center">Mentor Passkey (Key)</th>
-                        <th className="py-4 px-6 text-center">Total Sessions Logged</th>
+                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-bold uppercase tracking-wider">
+                        <th className="py-4 px-6">Faculty / Mentor Name</th>
+                        <th className="py-4 px-6">Role & Year</th>
+                        <th className="py-4 px-6">Assigned Section / Roll Range</th>
+                        <th className="py-4 px-6 text-center">Mentored Students</th>
+                        <th className="py-4 px-6 text-center">Faculty Passkey (Key)</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-855/60">
-                      {mentorsTracking.filter((m: any) => {
+                    <tbody className="divide-y divide-slate-850/60">
+                      {OFFICIAL_FACULTY_LIST.filter((m) => {
                         const q = mentorsSearchQuery.toLowerCase().trim();
                         if (!q) return true;
-                        return m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || (m.key && m.key.toLowerCase().includes(q));
-                      }).length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="py-12 text-center text-slate-500 text-sm">
-                            No mentors found matching your query.
+                        return (
+                          m.name.toLowerCase().includes(q) ||
+                          m.email.toLowerCase().includes(q) ||
+                          m.role.toLowerCase().includes(q) ||
+                          m.section.toLowerCase().includes(q) ||
+                          m.key.toLowerCase().includes(q)
+                        );
+                      }).map((m) => (
+                        <tr key={m.id} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="py-4 px-6">
+                            <p className="font-extrabold text-slate-100 text-sm">{m.name}</p>
+                            <p className="text-xs text-slate-400 font-mono mt-0.5">{m.email}</p>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="inline-block px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 font-bold text-xs">
+                              {m.role} ({m.yearLabel})
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <p className="text-xs font-mono font-bold text-emerald-400">Sec {m.section}</p>
+                            <p className="text-[11px] text-slate-400 font-mono mt-0.5">{m.rollRange}</p>
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <span className="inline-block px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 font-mono font-black text-xs">
+                              {m.count} Students
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <span className="inline-block px-3 py-1 rounded-xl bg-purple-950 border border-purple-800 text-purple-300 font-extrabold text-xs tracking-wider font-mono">
+                              {m.key}
+                            </span>
                           </td>
                         </tr>
-                      ) : (
-                        mentorsTracking.filter((m: any) => {
-                          const q = mentorsSearchQuery.toLowerCase().trim();
-                          if (!q) return true;
-                          return m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || (m.key && m.key.toLowerCase().includes(q));
-                        }).map((m: any) => (
-                          <tr key={m.id} className="hover:bg-slate-800/30 transition-colors">
-                            <td className="py-4 px-6 font-semibold text-slate-200 text-base">{m.name}</td>
-                            <td className="py-4 px-6 text-slate-400 font-mono text-xs">{m.email}</td>
-                            <td className="py-4 px-6 text-center">
-                              <span className="inline-block px-3 py-1 rounded-xl bg-purple-950 border border-purple-800 text-purple-300 font-bold text-sm tracking-wider font-mono">
-                                {m.key || "—"}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-center font-bold text-slate-300">
-                              {m.sessions?.length || 0}
-                            </td>
-                          </tr>
-                        ))
-                      )}
+                      ))}
                     </tbody>
                   </table>
                 </div>
