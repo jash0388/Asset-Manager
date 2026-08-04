@@ -391,7 +391,7 @@ export default function PrincipalDashboard() {
               <div>
                 <div className="flex items-center gap-2.5">
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                    Dr. K. S. S. S. N. V. Prasad
+                    Dr. M. V. Ram Prasad
                   </h1>
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 uppercase tracking-wider">
                     Principal
@@ -800,7 +800,7 @@ export default function PrincipalDashboard() {
 
                       <div className="flex items-center gap-3">
                         {item.entryTime ? (
-                          <span className="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-900/40">
+                          <span className="text-xs font-mono font-extrabold text-emerald-400 bg-slate-950 px-3 py-1 rounded-lg border border-emerald-500/50 shadow-xs">
                             In: {formatTime(item.entryTime)}
                           </span>
                         ) : null}
