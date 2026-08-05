@@ -351,16 +351,16 @@ export default function HourlyAttendance() {
         <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 shadow-sm">
           {/* Year Filter Tabs */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider w-24 flex-shrink-0">Year:</span>
+            <span className="text-xs font-black text-slate-900 uppercase tracking-wider w-24 flex-shrink-0">Year:</span>
             <div className="flex flex-wrap gap-2">
               {(["All", "4th Year", "3rd Year", "2nd Year"] as const).map((y) => (
                 <button
                   key={y}
                   onClick={() => setSelectedYear(y)}
-                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     selectedYear === y
                       ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-750 border border-slate-700/60"
+                      : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300"
                   }`}
                 >
                   {y === "All" ? "All Years" : y}
@@ -371,7 +371,7 @@ export default function HourlyAttendance() {
 
           {/* Section Filter Tabs */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3 border-t border-slate-800/80">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider w-24 flex-shrink-0">Section:</span>
+            <span className="text-xs font-black text-slate-900 uppercase tracking-wider w-24 flex-shrink-0">Section:</span>
             <div className="flex flex-wrap gap-2">
               {[
                 { label: "All Sections", val: "All" },
@@ -382,10 +382,10 @@ export default function HourlyAttendance() {
                 <button
                   key={s.val}
                   onClick={() => setSelectedSection(s.val)}
-                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     selectedSection === s.val
                       ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30 scale-[1.02]"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-750 border border-slate-700/60"
+                      : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300"
                   }`}
                 >
                   {s.label}
@@ -405,7 +405,7 @@ export default function HourlyAttendance() {
                 placeholder="Search by subject or teacher name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-sans"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
               />
             </div>
           </div>
@@ -414,18 +414,18 @@ export default function HourlyAttendance() {
         {/* Timetable view */}
         {schedulesLoading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-4">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-            <p className="text-sm text-slate-450">Loading scheduled timetable lectures...</p>
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <p className="text-sm text-slate-700 font-semibold">Loading scheduled timetable lectures...</p>
           </div>
         ) : schedulesErr ? (
-          <div className="bg-red-950/20 border border-red-800 text-red-200 p-5 rounded-xl text-center text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-800 p-5 rounded-xl text-center text-sm font-semibold">
             Failed to load schedules: {schedulesErr instanceof Error ? schedulesErr.message : "Unknown error"}
           </div>
         ) : activeDayOfWeek === "SUN" ? (
           <div className="bg-slate-900 border border-slate-800 p-12 rounded-2xl text-center space-y-3">
             <Calendar className="w-12 h-12 text-slate-500 mx-auto" />
-            <h3 className="text-slate-200 font-bold text-lg">Sunday - No Classes Scheduled</h3>
-            <p className="text-xs text-slate-400 max-w-xs mx-auto">Please select a weekday to view scheduled lectures and check attendance.</p>
+            <h3 className="text-slate-900 font-bold text-lg">Sunday - No Classes Scheduled</h3>
+            <p className="text-xs text-slate-600 max-w-xs mx-auto">Please select a weekday to view scheduled lectures and check attendance.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -435,8 +435,8 @@ export default function HourlyAttendance() {
                 return (
                   <div className="bg-slate-900 border border-slate-800 p-12 rounded-2xl text-center space-y-3">
                     <AlertTriangle className="w-12 h-12 text-slate-500 mx-auto" />
-                    <h3 className="text-slate-200 font-bold text-lg">No Classes Found</h3>
-                    <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                    <h3 className="text-slate-900 font-bold text-lg">No Classes Found</h3>
+                    <p className="text-xs text-slate-600 max-w-xs mx-auto">
                       No classes are scheduled on {daysFullNames[activeDayOfWeek]} matching your search filters ({selectedYear}, {selectedSection === "All" ? "All Sections" : `Sec ${selectedSection}`}).
                     </p>
                   </div>
@@ -445,8 +445,8 @@ export default function HourlyAttendance() {
 
               return (
                 <div className="space-y-3">
-                  <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2 px-1">
-                    <Calendar className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-lg font-black text-slate-900 flex items-center gap-2 px-1">
+                    <Calendar className="w-5 h-5 text-blue-600" />
                     {daysFullNames[activeDayOfWeek]} Lectures ({selectedDateFilter})
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -454,33 +454,33 @@ export default function HourlyAttendance() {
                       <Card
                         key={s.id}
                         onClick={() => handleSlotClick(s)}
-                        className="bg-slate-900 border-slate-800 hover:border-blue-500/50 p-4 shadow-sm rounded-xl cursor-pointer hover:bg-slate-850/40 active:scale-[0.99] transition-all flex flex-col justify-between group"
+                        className="bg-slate-900 border-slate-800 hover:border-blue-500 p-4 shadow-sm rounded-xl cursor-pointer hover:bg-blue-50/30 active:scale-[0.99] transition-all flex flex-col justify-between group"
                       >
                         <div>
                           <div className="flex items-start justify-between gap-2">
-                            <span className="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 text-[10px] font-extrabold uppercase">
+                            <span className="px-2.5 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-900 text-[10px] font-black uppercase">
                               {s.year} Yr - {s.section}
                             </span>
-                            <span className="text-[10px] font-mono font-semibold text-slate-400 flex items-center gap-1">
+                            <span className="text-[10px] font-mono font-bold text-slate-700 flex items-center gap-1">
                               <Clock className="w-3 h-3 text-slate-500" />
                               {s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}
                             </span>
                           </div>
                           
-                          <h4 className="text-slate-100 font-extrabold text-sm mt-3 group-hover:text-blue-400 transition-colors">
+                          <h4 className="text-slate-900 font-black text-sm mt-3 group-hover:text-blue-600 transition-colors">
                             {s.subject || "Lecture hour"}
                           </h4>
-                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/60">
-                            <p className="text-xs text-slate-400">
-                              Teacher: <span className="text-slate-200 font-semibold">{s.qr_mentors?.name || "Unassigned"}</span>
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-200">
+                            <p className="text-xs text-slate-600 font-medium">
+                              Teacher: <span className="text-slate-900 font-bold">{s.qr_mentors?.name || "Unassigned"}</span>
                             </p>
                             {(role === "hod" || role === "admin") && (
                               <button
                                 onClick={(e) => handleOpenAssignModal(e, s)}
-                                className="px-2 py-1 rounded-lg bg-blue-950 hover:bg-blue-900 text-blue-200 text-[10px] font-bold flex items-center gap-1 transition-colors border border-blue-800/60"
+                                className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 text-[10px] font-bold flex items-center gap-1 transition-colors border border-blue-300"
                                 title="Assign or change faculty for this class"
                               >
-                                <UserPlus className="w-3 h-3 text-blue-300" />
+                                <UserPlus className="w-3 h-3 text-blue-700" />
                                 Assign Faculty
                               </button>
                             )}
