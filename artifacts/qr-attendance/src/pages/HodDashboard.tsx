@@ -1878,7 +1878,7 @@ export default function HodDashboard() {
                 className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
                   riskFlagFilter === "RED"
                     ? "bg-rose-50 border-rose-400 ring-2 ring-rose-400/40 shadow-xl"
-                    : "bg-slate-900 border-slate-800 hover:border-rose-300"
+                    : "bg-white border-slate-200 hover:border-rose-300 shadow-sm hover:shadow-md"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -1891,7 +1891,7 @@ export default function HodDashboard() {
                   </span>
                 </div>
                 <p className="text-3xl font-black text-slate-900">{hodRedCount} Students</p>
-                <p className="text-xs text-slate-700 font-semibold mt-1">Shortage Risk • Requires Condonation / Intimation</p>
+                <p className="text-xs text-slate-700 font-bold mt-1">Shortage Risk • Requires Condonation / Intimation</p>
               </button>
 
               <button
@@ -1899,7 +1899,7 @@ export default function HodDashboard() {
                 className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
                   riskFlagFilter === "YELLOW"
                     ? "bg-amber-50 border-amber-400 ring-2 ring-amber-400/40 shadow-xl"
-                    : "bg-slate-900 border-slate-800 hover:border-amber-300"
+                    : "bg-white border-slate-200 hover:border-amber-300 shadow-sm hover:shadow-md"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -1912,7 +1912,7 @@ export default function HodDashboard() {
                   </span>
                 </div>
                 <p className="text-3xl font-black text-slate-900">{hodYellowCount} Students</p>
-                <p className="text-xs text-slate-700 font-semibold mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
+                <p className="text-xs text-slate-700 font-bold mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
               </button>
 
               <button
@@ -1920,7 +1920,7 @@ export default function HodDashboard() {
                 className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
                   riskFlagFilter === "GREEN"
                     ? "bg-emerald-50 border-emerald-400 ring-2 ring-emerald-400/40 shadow-xl"
-                    : "bg-slate-900 border-slate-800 hover:border-emerald-300"
+                    : "bg-white border-slate-200 hover:border-emerald-300 shadow-sm hover:shadow-md"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -1933,12 +1933,12 @@ export default function HodDashboard() {
                   </span>
                 </div>
                 <p className="text-3xl font-black text-slate-900">{hodGreenCount} Students</p>
-                <p className="text-xs text-slate-700 font-semibold mt-1">Good Standing • Target Met</p>
+                <p className="text-xs text-slate-700 font-bold mt-1">Good Standing • Target Met</p>
               </button>
             </div>
 
             {/* Categorization & Filter Toolbar */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-md">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -2017,7 +2017,7 @@ export default function HodDashboard() {
                     <div
                       key={item.student.id}
                       onClick={() => setSelectedStudentForDetails(item.student)}
-                      className={`bg-slate-900 border rounded-2xl p-4 transition-colors cursor-pointer space-y-3 group ${item.cardBorder}`}
+                      className={`bg-white border rounded-2xl p-4 transition-all hover:shadow-md cursor-pointer space-y-3 group ${item.cardBorder}`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3.5">
@@ -2781,24 +2781,24 @@ export default function HodDashboard() {
             </div>
           </div>
         )}
-        {/* Student Profile & Attendance Details Modal - FULL SCREEN REDESIGN */}
+        {/* Student Profile & Attendance Details Modal - LIGHT MODE REDESIGN */}
         {selectedStudentForDetails && (
-          <div className="fixed inset-0 z-50 bg-slate-950 text-slate-100 flex flex-col p-6 sm:p-10 md:p-12 overflow-y-auto animate-fadeIn font-sans">
-            <div className="max-w-4xl mx-auto w-full space-y-8">
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex flex-col p-4 sm:p-8 md:p-10 overflow-y-auto animate-fadeIn font-sans">
+            <div className="max-w-4xl mx-auto w-full space-y-6 bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 my-auto">
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-800 pb-6">
-                <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-white shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-600 border border-blue-400 flex items-center justify-center text-2xl font-black text-white shadow-md">
                     {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
                   </div>
                   <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
-                      {selectedStudentForDetails.name}
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
-                        Student
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+                      {selectedStudentForDetails.name || (selectedStudentForDetails as any).full_name || (selectedStudentForDetails as any).username || selectedStudentForDetails.uniqueId || "Student"}
+                      <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900 border border-blue-300 uppercase tracking-wider">
+                        Student Profile
                       </span>
                     </h2>
-                    <p className="text-sm font-semibold text-slate-400 mt-1">
+                    <p className="text-sm font-bold text-slate-700 mt-1">
                       Department of CSE Data Science
                     </p>
                   </div>
@@ -2806,9 +2806,9 @@ export default function HodDashboard() {
                 
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
+                  className="p-2 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-xs"
                 >
-                  <XCircle className="w-8 h-8" />
+                  <XCircle className="w-7 h-7" />
                 </button>
               </div>
 
@@ -2816,21 +2816,21 @@ export default function HodDashboard() {
               <div className="space-y-6">
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                    <p className="text-xs font-bold text-slate-500 uppercase">Roll Number</p>
-                    <p className="text-base font-bold text-slate-200 font-mono mt-1">
+                  <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300">
+                    <p className="text-xs font-black text-slate-700 uppercase">Roll Number</p>
+                    <p className="text-base font-black text-slate-900 font-mono mt-1">
                       {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
                     </p>
                   </div>
-                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                    <p className="text-xs font-bold text-slate-500 uppercase">Section & Year</p>
-                    <p className="text-base font-bold text-slate-200 mt-1">
+                  <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300">
+                    <p className="text-xs font-black text-slate-700 uppercase">Section & Year</p>
+                    <p className="text-base font-black text-slate-900 mt-1">
                       Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel})
                     </p>
                   </div>
-                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                    <p className="text-xs font-bold text-slate-500 uppercase">Department</p>
-                    <p className="text-base font-bold text-blue-400 mt-1">
+                  <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300">
+                    <p className="text-xs font-black text-slate-700 uppercase">Department</p>
+                    <p className="text-base font-black text-blue-700 mt-1">
                       CSE Data Science
                     </p>
                   </div>
@@ -2840,8 +2840,8 @@ export default function HodDashboard() {
                 <div className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                      <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-                        Select Month
+                      <label className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        Select Month:
                       </label>
                       <CustomMonthSelector
                         value={studentModalMonth}
@@ -2854,7 +2854,7 @@ export default function HodDashboard() {
 
                     <button
                       onClick={() => handleDirectCSVDownload(selectedStudentForDetails.name, studentModalMonth, studentMonthlyRecords)}
-                      className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-800/60 shadow-xs"
+                      className="text-xs font-black text-emerald-800 hover:text-emerald-900 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-300 shadow-xs"
                     >
                       <FileSpreadsheet className="w-4 h-4" />
                       Download Register (.csv)
@@ -2959,20 +2959,20 @@ export default function HodDashboard() {
                         {/* Stats Row & Visual Pie Chart */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                           {/* Pie Chart Card */}
-                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attendance Breakdown</p>
+                          <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 flex flex-col items-center justify-center space-y-3">
+                            <p className="text-xs font-black text-slate-800 uppercase tracking-wider">Attendance Breakdown</p>
                             <div className="relative flex items-center justify-center">
                               {/* Inline SVG Pie Chart */}
                               <svg width="120" height="120" viewBox="0 0 36 36" className="transform -rotate-90">
                                 <path
-                                  className="text-slate-850"
+                                  className="text-slate-300"
                                   strokeWidth="3"
                                   stroke="currentColor"
                                   fill="none"
                                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                 />
                                 <path
-                                  className={studentMonthlyPercent >= 75 ? "text-emerald-500" : studentMonthlyPercent >= 65 ? "text-amber-500" : "text-rose-500"}
+                                  className={studentMonthlyPercent >= 75 ? "text-emerald-600" : studentMonthlyPercent >= 65 ? "text-amber-600" : "text-rose-600"}
                                   strokeDasharray={`${studentMonthlyPercent}, 100`}
                                   strokeWidth="3.2"
                                   strokeLinecap="round"
@@ -2982,42 +2982,42 @@ export default function HodDashboard() {
                                 />
                               </svg>
                               <div className="absolute flex flex-col items-center justify-center">
-                                <span className="text-2xl font-black text-white">{studentMonthlyPercent}%</span>
-                                <span className="text-[9px] font-bold text-slate-400 uppercase">Monthly</span>
+                                <span className="text-2xl font-black text-slate-900">{studentMonthlyPercent}%</span>
+                                <span className="text-[9px] font-black text-slate-700 uppercase">Monthly</span>
                               </div>
                             </div>
                           </div>
 
                           {/* Present Days Card */}
-                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
-                            <p className="text-xs font-bold text-emerald-400 uppercase">Present Days (P)</p>
-                            <p className="text-3xl font-black text-white">{studentPresentCount} Days</p>
-                            <p className="text-[10px] text-slate-500 font-bold">Attended out of {calcWorkingDays} working days</p>
+                          <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 text-center space-y-2">
+                            <p className="text-xs font-black text-emerald-800 uppercase">Present Days (P)</p>
+                            <p className="text-3xl font-black text-slate-900">{studentPresentCount} Days</p>
+                            <p className="text-xs text-slate-700 font-extrabold">Attended out of {calcWorkingDays} working days</p>
                           </div>
 
                           {/* Absent Days Card */}
-                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
-                            <p className="text-xs font-bold text-rose-400 uppercase">Absent Days (A)</p>
-                            <p className="text-3xl font-black text-white">{studentAbsentCount} Days</p>
-                            <p className="text-[10px] text-slate-500 font-bold">Missed classes</p>
+                          <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 text-center space-y-2">
+                            <p className="text-xs font-black text-rose-800 uppercase">Absent Days (A)</p>
+                            <p className="text-3xl font-black text-slate-900">{studentAbsentCount} Days</p>
+                            <p className="text-xs text-slate-700 font-extrabold">Missed classes</p>
                           </div>
 
                           {/* Average College stay time */}
-                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
-                            <p className="text-xs font-bold text-blue-400 uppercase">Avg Daily Campus Stay</p>
-                            <p className="text-3xl font-black text-white">{avgDurationStr}</p>
-                            <p className="text-[10px] text-slate-500 font-bold">Calculated from gate logs</p>
+                          <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 text-center space-y-2">
+                            <p className="text-xs font-black text-blue-800 uppercase">Avg Daily Campus Stay</p>
+                            <p className="text-3xl font-black text-slate-900">{avgDurationStr}</p>
+                            <p className="text-xs text-slate-700 font-extrabold">Calculated from gate logs</p>
                           </div>
                         </div>
 
                         {/* Daily Register Grid */}
                         <div>
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <p className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
                             <span>Daily Register Grid (Click any date to view Entry/Exit times)</span>
-                            <span className="text-slate-500 font-normal">P = Present | A = Absent | * = Holiday | — = Future</span>
+                            <span className="text-slate-700 font-bold">P = Present | A = Absent | * = Holiday | — = Future</span>
                           </p>
                           
-                          <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-4 rounded-2xl border border-slate-850">
+                          <div className="grid grid-cols-7 gap-1.5 bg-slate-100 p-4 rounded-2xl border border-slate-300">
                             {monthDaysList.map((d) => {
                               const isSelected = selectedDayDetail?.dateStr === d.dateStr;
                               return (
@@ -3030,25 +3030,25 @@ export default function HodDashboard() {
                                       : "hover:scale-102"
                                   } ${
                                     d.status === "P"
-                                      ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-250"
+                                      ? "bg-emerald-100 border-emerald-300 text-emerald-950"
                                       : d.status === "*"
-                                      ? "bg-purple-950/50 border-purple-800/60 text-purple-250"
+                                      ? "bg-purple-100 border-purple-300 text-purple-950"
                                       : d.status === "—"
-                                      ? "bg-slate-950/40 border-slate-850/80 text-slate-600 opacity-60"
-                                      : "bg-red-950/40 border-red-900/40 text-red-300"
+                                      ? "bg-slate-200 border-slate-300 text-slate-600 opacity-80"
+                                      : "bg-rose-100 border-rose-300 text-rose-950"
                                   }`}
                                 >
-                                  <span className="text-[10px] font-mono font-semibold text-slate-400">
+                                  <span className="text-[10px] font-mono font-bold text-slate-700">
                                     {d.dayNum} {d.dayOfWeek}
                                   </span>
-                                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+                                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black ${
                                     d.status === "P"
-                                      ? "bg-emerald-500 text-slate-950"
+                                      ? "bg-emerald-600 text-white shadow-xs"
                                       : d.status === "*"
-                                      ? "bg-amber-400 text-slate-950"
+                                      ? "bg-amber-500 text-slate-950 shadow-xs"
                                       : d.status === "—"
-                                      ? "bg-slate-800 text-slate-450"
-                                      : "bg-red-500/80 text-white"
+                                      ? "bg-slate-300 text-slate-800"
+                                      : "bg-rose-600 text-white shadow-xs"
                                   }`}>
                                     {d.status}
                                   </span>
@@ -3060,22 +3060,22 @@ export default function HodDashboard() {
 
                         {/* Selected Day Detail Card */}
                         {selectedDayDetail ? (
-                          <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-800/60 space-y-2 animate-fadeIn">
-                            <div className="flex items-center justify-between border-b border-blue-900/60 pb-2">
+                          <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-900 space-y-2 animate-fadeIn shadow-xs">
+                            <div className="flex items-center justify-between border-b border-blue-200 pb-2">
                               <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-400" />
-                                <h5 className="text-sm font-bold text-white">
-                                  Date: <span className="font-mono text-blue-300">{selectedDayDetail.dateStr}</span> ({selectedDayDetail.dayOfWeek})
+                                <Calendar className="w-4 h-4 text-blue-600" />
+                                <h5 className="text-sm font-black text-slate-900">
+                                  Date: <span className="font-mono text-blue-900">{selectedDayDetail.dateStr}</span> ({selectedDayDetail.dayOfWeek})
                                 </h5>
                               </div>
-                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
                                 selectedDayDetail.status === "P"
-                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                  ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
                                   : selectedDayDetail.status === "*"
-                                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                                  ? "bg-purple-100 text-purple-900 border border-purple-300"
                                   : selectedDayDetail.status === "—"
-                                  ? "bg-slate-800/50 text-slate-400 border border-slate-700/50"
-                                  : "bg-red-500/20 text-red-300 border border-red-500/40"
+                                  ? "bg-slate-200 text-slate-800 border border-slate-300"
+                                  : "bg-rose-100 text-rose-900 border border-rose-300"
                               }`}>
                                 {selectedDayDetail.status === "P"
                                   ? "🟢 PRESENT"
