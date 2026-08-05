@@ -29,11 +29,10 @@ function timingSafeStringEqual(a: string, b: string): boolean {
 // ─── Rate Limiting ───────────────────────────────────────────────────────────
 
 const ipLoginAttempts = new Map<string, { count: number; resetTime: number }>();
+const MAX_FAILED_ATTEMPTS = 5;
 
 function enforceLoginRateLimit(ip: string): { allowed: boolean; retryAfterSec: number } {
   const now = Date.now();
-  const WINDOW_MS = 15 * 60 * 1000; // 15-minute window
-  const MAX_FAILED_ATTEMPTS = 10;
 
   const record = ipLoginAttempts.get(ip);
 
@@ -49,15 +48,20 @@ function enforceLoginRateLimit(ip: string): { allowed: boolean; retryAfterSec: n
   return { allowed: true, retryAfterSec: 0 };
 }
 
-function recordFailedAttempt(ip: string) {
+function recordFailedAttempt(ip: string): { remaining: number; resetMin: number } {
   const now = Date.now();
   const WINDOW_MS = 15 * 60 * 1000;
-  const record = ipLoginAttempts.get(ip);
+  let record = ipLoginAttempts.get(ip);
   if (!record || now > record.resetTime) {
-    ipLoginAttempts.set(ip, { count: 1, resetTime: now + WINDOW_MS });
+    record = { count: 1, resetTime: now + WINDOW_MS };
   } else {
     record.count += 1;
   }
+  ipLoginAttempts.set(ip, record);
+
+  const remaining = Math.max(0, MAX_FAILED_ATTEMPTS - record.count);
+  const resetMin = Math.ceil((record.resetTime - now) / 60000);
+  return { remaining, resetMin };
 }
 
 function resetLoginRateLimit(ip: string) {
@@ -198,8 +202,9 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
     });
   }
 
-  recordFailedAttempt(ip);
-  res.status(401).json({ error: "Invalid PIN" });
+  const { remaining } = recordFailedAttempt(ip);
+  const remText = remaining > 0 ? ` (${remaining} attempt${remaining > 1 ? "s" : ""} remaining)` : "";
+  res.status(401).json({ error: `Invalid access code${remText}` });
 });
 
 // ─── Mentor Key Login (Faculty 3/4-digit keys) ───────────────────────────────
@@ -226,14 +231,14 @@ const FACULTY_PIN_MAP: Record<string, { id: number; name: string; email: string;
   "114": { id: 14, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", key: "114", section: "DS II/I/C", bcryptHash: bcrypt.hashSync("114", 10) },
   "115": { id: 15, name: "Ms. Priyusha", email: "msspriyusha@gmail.com", key: "115", section: "DS III/I/A", bcryptHash: bcrypt.hashSync("115", 10) },
   // 4-digit incharge PINs
-  "4011": { id: 9,  name: "Mrs A Sravanthi",    email: "mrsasravanthi@gmail.com",   key: "4011", section: "DS IV/I/A",  bcryptHash: bcrypt.hashSync("4011", 10) },
-  "4012": { id: 10, name: "Mrs K Sneha",         email: "mrsksneha@gmail.com",       key: "4012", section: "DS IV/I/B",  bcryptHash: bcrypt.hashSync("4012", 10) },
-  "3012": { id: 6,  name: "Mr T Shravan Kumar",  email: "mrtshravankumar@gmail.com", key: "3012", section: "DS IV/I/B",  bcryptHash: bcrypt.hashSync("3012", 10) },
-  "3011": { id: 8,  name: "Mrs G Sushma",        email: "mrsgsushma@gmail.com",      key: "3011", section: "DS III/I/A", bcryptHash: bcrypt.hashSync("3011", 10) },
-  "3013": { id: 4,  name: "Mr M Yadaiah",        email: "mrmyadaiah@gmail.com",      key: "3013", section: "DS III/I/C", bcryptHash: bcrypt.hashSync("3013", 10) },
-  "2011": { id: 11, name: "Mrs B Gayathri",      email: "mrsbgayathri@gmail.com",    key: "2011", section: "DS II/I/A",  bcryptHash: bcrypt.hashSync("2011", 10) },
-  "2012": { id: 12, name: "Mrs K Ramya",         email: "mrskramya@gmail.com",       key: "2012", section: "DS II/I/B",  bcryptHash: bcrypt.hashSync("2012", 10) },
-  "2013": { id: 7,  name: "Mr K Bikshapathi",    email: "mrkbikshapathi@gmail.com",  key: "2013", section: "DS II/I/C",  bcryptHash: bcrypt.hashSync("2013", 10) },
+  "4011": { id: 9, name: "Mrs A Sravanthi", email: "mrsasravanthi@gmail.com", key: "4011", section: "DS IV/I/A", bcryptHash: bcrypt.hashSync("4011", 10) },
+  "4012": { id: 10, name: "Mrs K Sneha", email: "mrsksneha@gmail.com", key: "4012", section: "DS IV/I/B", bcryptHash: bcrypt.hashSync("4012", 10) },
+  "3012": { id: 6, name: "Mr T Shravan Kumar", email: "mrtshravankumar@gmail.com", key: "3012", section: "DS IV/I/B", bcryptHash: bcrypt.hashSync("3012", 10) },
+  "3011": { id: 8, name: "Mrs G Sushma", email: "mrsgsushma@gmail.com", key: "3011", section: "DS III/I/A", bcryptHash: bcrypt.hashSync("3011", 10) },
+  "3013": { id: 4, name: "Mr M Yadaiah", email: "mrmyadaiah@gmail.com", key: "3013", section: "DS III/I/C", bcryptHash: bcrypt.hashSync("3013", 10) },
+  "2011": { id: 11, name: "Mrs B Gayathri", email: "mrsbgayathri@gmail.com", key: "2011", section: "DS II/I/A", bcryptHash: bcrypt.hashSync("2011", 10) },
+  "2012": { id: 12, name: "Mrs K Ramya", email: "mrskramya@gmail.com", key: "2012", section: "DS II/I/B", bcryptHash: bcrypt.hashSync("2012", 10) },
+  "2013": { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "2013", section: "DS II/I/C", bcryptHash: bcrypt.hashSync("2013", 10) },
 };
 
 router.post("/auth/mentor-key-login", async (req: any, res: any) => {
@@ -268,8 +273,9 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
     }
 
     if (!mentor) {
-      recordFailedAttempt(ip);
-      res.status(401).json({ error: "Invalid faculty key" });
+      const { remaining } = recordFailedAttempt(ip);
+      const remText = remaining > 0 ? ` (${remaining} attempt${remaining > 1 ? "s" : ""} remaining)` : "";
+      res.status(401).json({ error: `Invalid faculty key${remText}` });
       return;
     }
 
