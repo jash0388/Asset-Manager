@@ -1190,17 +1190,6 @@ export default function HodDashboard() {
               <Calendar className="w-4 h-4" />
               Schedules (Timetable)
             </button>
-            <button
-              onClick={() => setActiveTab("student-analytics")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                activeTab === "student-analytics"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              Student Analytics
-            </button>
           </div>
         )}
 
@@ -1761,7 +1750,7 @@ export default function HodDashboard() {
                           : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300"
                       }`}
                     >
-                      {y === "ALL" ? "All Years" : `${y}nd/rd/th Year`}
+                      {y === "ALL" ? "All Years" : `${y}${y === "2" ? "nd" : y === "3" ? "rd" : "th"} Year`}
                     </button>
                   ))}
                 </div>
