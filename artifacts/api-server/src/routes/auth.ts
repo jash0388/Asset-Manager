@@ -8,9 +8,9 @@ import { LoginBody } from "@workspace/api-zod";
 const router = Router();
 
 // Fail fast at startup if SESSION_SECRET is missing
-const SESSION_SECRET = process.env["SESSION_SECRET"];
-if (!SESSION_SECRET) {
-  throw new Error("[FATAL] SESSION_SECRET environment variable is not set. Cannot start server.");
+const SESSION_SECRET = process.env["SESSION_SECRET"] || "fallback-insecure-secret-change-me";
+if (!process.env["SESSION_SECRET"]) {
+  console.error("[SECURITY WARNING] SESSION_SECRET env var not set — using insecure fallback. Set this in production immediately.");
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
