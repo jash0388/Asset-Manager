@@ -1553,40 +1553,40 @@ export default function HodDashboard() {
                     m.section.toLowerCase().includes(q)
                   );
                 }).map((m) => (
-                  <div key={m.id} className="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-slate-700 transition-colors shadow-lg">
+                  <div key={m.id} className="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-slate-700 transition-colors shadow-lg min-w-0 overflow-hidden">
                     {/* Header */}
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-sm font-black text-slate-300 uppercase flex-shrink-0">
                           {m.name.split(" ").slice(-1)[0]?.charAt(0) || m.name.charAt(0)}
                         </div>
-                        <div>
-                          <p className="font-extrabold text-slate-100 text-sm leading-tight">{m.name}</p>
-                          <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate max-w-[170px]">{m.email}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-extrabold text-slate-100 text-sm leading-tight truncate">{m.name}</p>
+                          <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate w-full block">{m.email}</p>
                         </div>
                       </div>
                       <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border ${
-                        m.yearLabel?.includes("4") ? "bg-orange-950/60 border-orange-800/50 text-orange-300"
-                        : m.yearLabel?.includes("3") ? "bg-blue-950/60 border-blue-800/50 text-blue-300"
-                        : "bg-emerald-950/60 border-emerald-800/50 text-emerald-300"
+                        m.yearLabel?.includes("4") ? "bg-orange-950/60 border-orange-800/50 text-orange-400"
+                        : m.yearLabel?.includes("3") ? "bg-blue-950/60 border-blue-800/50 text-blue-400"
+                        : "bg-emerald-950/60 border-emerald-800/50 text-emerald-400"
                       }`}>
                         {m.yearLabel}
                       </span>
                     </div>
 
                     {/* Section & Roll Range */}
-                    <div className="bg-slate-800/50 rounded-xl px-4 py-3 border border-slate-700/50">
+                    <div className="bg-slate-800/50 rounded-xl px-4 py-3 border border-slate-700/50 min-w-0 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Assigned Section</span>
                         <span className="text-xs font-black text-emerald-400 font-mono">Sec {m.section}</span>
                       </div>
-                      <p className="text-[11px] text-slate-300 font-mono mt-1 pt-1.5 border-t border-slate-700/40">{m.rollRange}</p>
+                      <p className="text-[11px] text-slate-300 font-mono mt-1 pt-1.5 border-t border-slate-700/40 break-words leading-relaxed">{m.rollRange}</p>
                     </div>
 
                     {/* Role & Students Count */}
                     <div className="flex items-center justify-between bg-slate-800/30 rounded-xl px-3.5 py-2.5 border border-slate-700/30">
-                      <span className="text-xs font-bold text-slate-400">{m.role}</span>
-                      <span className="text-xs font-black text-slate-200 font-mono bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">{m.count} Students</span>
+                      <span className="text-xs font-bold text-slate-400 truncate">{m.role}</span>
+                      <span className="text-xs font-black text-slate-200 font-mono bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700 flex-shrink-0">{m.count} Students</span>
                     </div>
                   </div>
                 ))}
