@@ -248,10 +248,10 @@ export default function Attendance() {
 
         {/* Table */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table data-testid="attendance-table" className="w-full">
-              <thead>
-                <tr className="border-b border-slate-800">
+          <div className="overflow-x-auto max-h-[620px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+            <table data-testid="attendance-table" className="w-full relative">
+              <thead className="sticky top-0 z-20 bg-slate-900 shadow-md">
+                <tr className="border-b border-slate-800 bg-slate-900">
                   <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"

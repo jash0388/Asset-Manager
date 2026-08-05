@@ -62,6 +62,7 @@ type SubmissionResponse = {
 export default function HourlyAttendance() {
   const { role } = useAuth();
   const [, navigate] = useLocation();
+  const [selectedYear, setSelectedYear] = useState<"All" | "4th Year" | "3rd Year" | "2nd Year">("All");
   const [selectedSection, setSelectedSection] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -247,10 +248,18 @@ export default function HourlyAttendance() {
   const filterAndSearchSchedules = (day: string) => {
     return schedules.filter(s => {
       if (s.day_of_week !== day) return false;
-      
-      // Mapped Section check
-      const dName = `DS ${s.year}/I/${s.section}`;
-      if (selectedSection !== "All" && dName !== selectedSection) return false;
+
+      // Year filter
+      if (selectedYear === "4th Year" && s.year !== "IV" && s.year !== "4th") return false;
+      if (selectedYear === "3rd Year" && s.year !== "III" && s.year !== "3rd") return false;
+      if (selectedYear === "2nd Year" && s.year !== "II" && s.year !== "2nd") return false;
+
+      // Section filter
+      if (selectedSection !== "All") {
+        const sSec = s.section.replace(/[^A-C]/gi, "").toUpperCase();
+        const selSec = selectedSection.replace(/[^A-C]/gi, "").toUpperCase();
+        if (sSec && selSec && sSec !== selSec) return false;
+      }
 
       // Search match
       const q = searchQuery.toLowerCase().trim();
@@ -265,7 +274,7 @@ export default function HourlyAttendance() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-5xl mx-auto space-y-6 text-slate-350 font-sans">
+      <div className="p-6 max-w-6xl mx-auto space-y-6 text-slate-300 font-sans">
         {role === "mentor" ? (
           /* Navigation Switcher Tabs for Mentors */
           <div style={{ backgroundColor: "#1e293b", borderColor: "#334155" }} className="border p-2 rounded-2xl flex flex-wrap gap-2 shadow-xs mb-4">
@@ -287,7 +296,7 @@ export default function HourlyAttendance() {
             </button>
             <button
               onClick={() => navigate("/hourly-attendance")}
-              style={{ backgroundColor: "#8b5cf6", color: "#ffffff" }}
+              style={{ backgroundColor: "#2563eb", color: "#ffffff" }}
               className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
             >
               <BookOpen className="w-3.5 h-3.5 text-white" />
@@ -302,7 +311,7 @@ export default function HourlyAttendance() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-              <BookOpen className="w-8 h-8 text-purple-500" />
+              <BookOpen className="w-8 h-8 text-blue-500" />
               Hourly Lecture Attendance
             </h1>
             <p className="text-sm text-slate-400 mt-1">View scheduled lectures and check hourly attendance submitted by mentors</p>
@@ -311,7 +320,7 @@ export default function HourlyAttendance() {
           {(role === "hod" || role === "admin") && (
             <button
               onClick={() => setNewClassModalOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-900/30 active:scale-[0.98] self-start md:self-auto"
+              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/30 active:scale-[0.98] self-start md:self-auto"
             >
               <Plus className="w-4 h-4" />
               Assign New Class
@@ -322,7 +331,7 @@ export default function HourlyAttendance() {
         {/* Prominent Date View */}
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
           <div>
-            <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Active Date View</span>
+            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Active Date View</span>
             <h2 className="text-2xl font-black text-white mt-1">
               {getFormattedDate(selectedDateFilter)}
             </h2>
@@ -333,17 +342,62 @@ export default function HourlyAttendance() {
               type="date"
               value={selectedDateFilter}
               onChange={(e) => setSelectedDateFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 focus:outline-none focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 text-sm font-bold cursor-pointer font-sans"
+              className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 text-sm font-bold cursor-pointer font-sans"
             />
           </div>
         </div>
 
-        {/* Filters Panel */}
-        <div className="flex flex-col md:flex-row md:items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-          <div className="flex-1 min-w-0">
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Search Timetable</label>
+        {/* Filter Buttons Toolbar */}
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 shadow-sm">
+          {/* Year Filter Tabs */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider w-24 flex-shrink-0">Year:</span>
+            <div className="flex flex-wrap gap-2">
+              {(["All", "4th Year", "3rd Year", "2nd Year"] as const).map((y) => (
+                <button
+                  key={y}
+                  onClick={() => setSelectedYear(y)}
+                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    selectedYear === y
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]"
+                      : "bg-slate-800 text-slate-300 hover:bg-slate-750 border border-slate-700/60"
+                  }`}
+                >
+                  {y === "All" ? "All Years" : y}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Section Filter Tabs */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3 border-t border-slate-800/80">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider w-24 flex-shrink-0">Section:</span>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: "All Sections", val: "All" },
+                { label: "Sec A", val: "A" },
+                { label: "Sec B", val: "B" },
+                { label: "Sec C", val: "C" },
+              ].map((s) => (
+                <button
+                  key={s.val}
+                  onClick={() => setSelectedSection(s.val)}
+                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    selectedSection === s.val
+                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30 scale-[1.02]"
+                      : "bg-slate-800 text-slate-300 hover:bg-slate-750 border border-slate-700/60"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Search Box */}
+          <div className="pt-3 border-t border-slate-800/80">
             <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
                 <Search className="w-4 h-4" />
               </div>
               <input
@@ -351,35 +405,16 @@ export default function HourlyAttendance() {
                 placeholder="Search by subject or teacher name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-sans"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-sans"
               />
             </div>
-          </div>
-
-          <div className="w-full md:w-64">
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Section Filter</label>
-            <select
-              value={selectedSection}
-              onChange={(e) => setSelectedSection(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 focus:outline-none focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-semibold cursor-pointer font-sans"
-            >
-              <option value="All">All Sections</option>
-              <option value="DS II/I/A">2A CSE Data Science</option>
-              <option value="DS II/I/B">2B CSE Data Science</option>
-              <option value="DS II/I/C">2C CSE Data Science</option>
-              <option value="DS III/I/A">3A CSE Data Science</option>
-              <option value="DS III/I/B">3B CSE Data Science</option>
-              <option value="DS III/I/C">3C CSE Data Science</option>
-              <option value="DS IV/I/A">4A CSE Data Science</option>
-              <option value="DS IV/I/B">4B CSE Data Science</option>
-            </select>
           </div>
         </div>
 
         {/* Timetable view */}
         {schedulesLoading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-4">
-            <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
             <p className="text-sm text-slate-450">Loading scheduled timetable lectures...</p>
           </div>
         ) : schedulesErr ? (
@@ -402,7 +437,7 @@ export default function HourlyAttendance() {
                     <AlertTriangle className="w-12 h-12 text-slate-500 mx-auto" />
                     <h3 className="text-slate-200 font-bold text-lg">No Classes Found</h3>
                     <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                      No classes are scheduled on {daysFullNames[activeDayOfWeek]} matching your search filters.
+                      No classes are scheduled on {daysFullNames[activeDayOfWeek]} matching your search filters ({selectedYear}, {selectedSection === "All" ? "All Sections" : `Sec ${selectedSection}`}).
                     </p>
                   </div>
                 );
@@ -411,7 +446,7 @@ export default function HourlyAttendance() {
               return (
                 <div className="space-y-3">
                   <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2 px-1">
-                    <Calendar className="w-5 h-5 text-purple-400" />
+                    <Calendar className="w-5 h-5 text-blue-400" />
                     {daysFullNames[activeDayOfWeek]} Lectures ({selectedDateFilter})
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -419,20 +454,20 @@ export default function HourlyAttendance() {
                       <Card
                         key={s.id}
                         onClick={() => handleSlotClick(s)}
-                        className="bg-slate-900 border-slate-800 hover:border-purple-500/50 p-4 shadow-sm rounded-xl cursor-pointer hover:bg-slate-850/40 active:scale-[0.99] transition-all flex flex-col justify-between group"
+                        className="bg-slate-900 border-slate-800 hover:border-blue-500/50 p-4 shadow-sm rounded-xl cursor-pointer hover:bg-slate-850/40 active:scale-[0.99] transition-all flex flex-col justify-between group"
                       >
                         <div>
                           <div className="flex items-start justify-between gap-2">
-                            <span className="px-2 py-0.5 rounded bg-purple-950 border border-purple-800 text-purple-300 text-[10px] font-bold">
+                            <span className="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 text-[10px] font-extrabold uppercase">
                               {s.year} Yr - {s.section}
                             </span>
-                            <span className="text-[10px] font-mono font-semibold text-slate-455 flex items-center gap-1">
+                            <span className="text-[10px] font-mono font-semibold text-slate-400 flex items-center gap-1">
                               <Clock className="w-3 h-3 text-slate-500" />
                               {s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}
                             </span>
                           </div>
                           
-                          <h4 className="text-slate-100 font-bold text-sm mt-3 group-hover:text-purple-400 transition-colors">
+                          <h4 className="text-slate-100 font-extrabold text-sm mt-3 group-hover:text-blue-400 transition-colors">
                             {s.subject || "Lecture hour"}
                           </h4>
                           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/60">
@@ -442,10 +477,10 @@ export default function HourlyAttendance() {
                             {(role === "hod" || role === "admin") && (
                               <button
                                 onClick={(e) => handleOpenAssignModal(e, s)}
-                                className="px-2 py-1 rounded-lg bg-purple-900/60 hover:bg-purple-800 text-purple-200 text-[10px] font-bold flex items-center gap-1 transition-colors border border-purple-700/50"
+                                className="px-2 py-1 rounded-lg bg-blue-950 hover:bg-blue-900 text-blue-200 text-[10px] font-bold flex items-center gap-1 transition-colors border border-blue-800/60"
                                 title="Assign or change faculty for this class"
                               >
-                                <UserPlus className="w-3 h-3 text-purple-300" />
+                                <UserPlus className="w-3 h-3 text-blue-300" />
                                 Assign Faculty
                               </button>
                             )}
@@ -455,20 +490,20 @@ export default function HourlyAttendance() {
                         <div className="mt-4 flex items-center justify-between">
                           {/* Attendance Status Badge */}
                           {s.status === "submitted" ? (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-950 text-green-400 border border-green-900/40">
+                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-900/40">
                               ✓ Submitted ({s.studentCount} present)
                             </span>
                           ) : s.status === "started" ? (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-yellow-950 text-yellow-400 border border-yellow-900/40 animate-pulse">
+                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-950 text-amber-400 border border-amber-900/40 animate-pulse">
                               ● Scan Started
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-950 text-slate-500 border border-slate-850">
+                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-950 text-slate-500 border border-slate-800">
                               Pending
                             </span>
                           )}
                           
-                          <div className="flex items-center text-[10px] text-purple-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center text-[10px] text-blue-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                             View <ChevronRight className="w-3.5 h-3.5" />
                           </div>
                         </div>
@@ -489,7 +524,7 @@ export default function HourlyAttendance() {
                 <SheetHeader className="p-6 border-b border-slate-800 bg-slate-950">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-purple-950 border border-purple-900 text-purple-300 text-[10px] font-bold">
+                      <span className="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 text-[10px] font-extrabold uppercase">
                         {selectedSchedule.year} Yr - {selectedSchedule.section}
                       </span>
                       <span className="text-xs text-slate-400 font-mono">
@@ -607,7 +642,7 @@ export default function HourlyAttendance() {
             <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-purple-400" />
+                  <UserPlus className="w-5 h-5 text-blue-400" />
                   <h3 className="text-lg font-bold text-white">Assign Class to Faculty</h3>
                 </div>
                 <button
@@ -632,7 +667,7 @@ export default function HourlyAttendance() {
                   <select
                     value={selectedMentorId}
                     onChange={(e) => setSelectedMentorId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -662,7 +697,7 @@ export default function HourlyAttendance() {
                   <button
                     type="submit"
                     disabled={assigning || !selectedMentorId}
-                    className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-purple-950/40"
+                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-950/40"
                   >
                     {assigning ? (
                       <>
@@ -688,7 +723,7 @@ export default function HourlyAttendance() {
             <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
-                  <Plus className="w-5 h-5 text-purple-400" />
+                  <Plus className="w-5 h-5 text-blue-400" />
                   <h3 className="text-lg font-bold text-white">Assign New Class Schedule</h3>
                 </div>
                 <button
@@ -709,7 +744,7 @@ export default function HourlyAttendance() {
                     placeholder="e.g. DBMS, Computer Networks, AI"
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-blue-500"
                     required
                   />
                 </div>
@@ -786,13 +821,13 @@ export default function HourlyAttendance() {
                   <select
                     value={newMentorId}
                     onChange={(e) => setNewMentorId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
                     {mentors.map((m: any) => (
                       <option key={m.id} value={m.id}>
-                        {m.name} ({m.email}) — Key: {m.key || "No Key"}
+                        {m.name} ({m.email})
                       </option>
                     ))}
                   </select>
@@ -809,7 +844,7 @@ export default function HourlyAttendance() {
                   <button
                     type="submit"
                     disabled={creatingClass || !newMentorId || !newSubject}
-                    className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-purple-950/40"
+                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-950/40"
                   >
                     {creatingClass ? (
                       <>
