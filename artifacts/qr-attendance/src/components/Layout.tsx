@@ -41,18 +41,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
     ? [
         { href: "/principal-dashboard", label: "Principal Portal", icon: LayoutDashboard },
         { href: "/principal-dashboard?tab=flags", label: "Risk Flag Analytics", icon: Flag },
+        { href: "/hod-dashboard?tab=student-analytics", label: "Student Analytics", icon: Users },
         { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
       ]
     : role === "hod"
     ? [
         { href: "/hod-dashboard", label: "HOD Dashboard", icon: LayoutDashboard },
         { href: "/hod-dashboard?tab=flags", label: "Risk Flag Analytics", icon: Flag },
+        { href: "/hod-dashboard?tab=student-analytics", label: "Student Analytics", icon: Users },
         { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
       ]
     : role === "mentor"
     ? [
         { href: "/incharge-dashboard", label: "Class Incharge Portal", icon: LayoutDashboard },
         { href: "/mentor", label: "Take Class Attendance", icon: QrCode },
+        { href: "/hod-dashboard?tab=student-analytics", label: "Student Analytics", icon: Users },
         { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
       ]
     : adminNavLinks;
@@ -87,9 +90,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
             const currentFull = window.location.pathname + window.location.search;
             const isActive = href.includes("tab=flags")
               ? currentFull.includes("tab=flags")
+              : href.includes("tab=student-analytics")
+              ? currentFull.includes("tab=student-analytics")
               : currentFull === href ||
-                (href === "/hod-dashboard" && !currentFull.includes("tab=flags") && location.startsWith("/hod-dashboard")) ||
-                (href === "/principal-dashboard" && !currentFull.includes("tab=flags") && location.startsWith("/principal-dashboard"));
+                (href === "/hod-dashboard" && !currentFull.includes("tab=") && location.startsWith("/hod-dashboard")) ||
+                (href === "/principal-dashboard" && !currentFull.includes("tab=") && location.startsWith("/principal-dashboard"));
 
             return (
               <Link key={href} href={href}>
@@ -97,7 +102,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
                   onClick={() => {
                     setMobileOpen(false);
-                    if (href.includes("tab=flags")) {
+                    if (href.includes("tab=")) {
                       window.history.pushState({}, "", href);
                       window.dispatchEvent(new Event("popstate"));
                     } else if (href === "/hod-dashboard" || href === "/principal-dashboard") {
