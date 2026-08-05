@@ -541,7 +541,27 @@ router.get("/admin/mentors-tracking", authMiddleware, async (req: any, res: any)
     res.status(500).json({ error: "Internal server error" });
   }
 });
+const SECURE_FACULTY_KEYS = [
+  { id: 1, name: "Mrs A Sravanthi", email: "mrsasravanthi@gmail.com", key: "109", inchargeKey: "4011", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4A", rollRange: "23N81A6701 TO 23N81A6743", count: 42 },
+  { id: 3, name: "Mr T Shravan Kumar", email: "mrtshravankumar@gmail.com", key: "106", inchargeKey: "3012", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "23N81A6744 TO 23N81A6787", count: 42 },
+  { id: 2, name: "Mrs K Sneha", email: "mrsksneha@gmail.com", key: "110", inchargeKey: "4012", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4B", rollRange: "23N81A6788 TO 23N81A67C8 + LE-3, LE-4", count: 39 },
+  { id: 4, name: "Mrs G Sushma", email: "mrsgsushma@gmail.com", key: "108", inchargeKey: "3011", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6701 TO 24N81A6731", count: 29 },
+  { id: 15, name: "Ms. Priyusha", email: "msspriyusha@gmail.com", key: "115", inchargeKey: null, role: "Faculty Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6732 TO 24N81A6752 + LE-3 to LE-8", count: 26 },
+  { id: 6, name: "Mrs. CH. Naga Rohini", email: "mrschnagarohini@gmail.com", key: "101", inchargeKey: null, role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6753 TO 24N81A6779 + RA-33, A9", count: 26 },
+  { id: 8, name: "Mr Miskeen Ali", email: "mrmiskeenali@gmail.com", key: "103", inchargeKey: null, role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6780 TO 24N81A67A5", count: 24 },
+  { id: 5, name: "Mr M Yadaiah", email: "mrmyadaiah@gmail.com", key: "104", inchargeKey: "3013", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67A6 TO 24N81A67D2", count: 27 },
+  { id: 9, name: "Mrs. Swetha", email: "mrsswetha@gmail.com", key: "102", inchargeKey: null, role: "Faculty Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67D3 TO 24N81A67F9", count: 27 },
+  { id: 10, name: "Mrs B Gayathri", email: "mrsbgayathri@gmail.com", key: "111", inchargeKey: "2011", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6701 TO 25N81A6727", count: 27 },
+  { id: 13, name: "Mrs Ch Vijaya Lakshmi", email: "mrschvijayalakshmi@gmail.com", key: "113", inchargeKey: null, role: "Faculty Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6728 TO 25N81A6755", count: 28 },
+  { id: 11, name: "Mrs K Ramya", email: "mrskramya@gmail.com", key: "112", inchargeKey: "2012", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6756 TO 25N81A6783", count: 27 },
+  { id: 14, name: "Mr M Srinivasulu", email: "mrmsrinivasulu@gmail.com", key: "105", inchargeKey: null, role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
+  { id: 12, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", key: "114", inchargeKey: null, role: "Faculty Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67B4 TO 25N81A67D9", count: 26 },
+  { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "107", inchargeKey: "2013", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67E0 TO 25N81A67G0", count: 19 }
+];
 
+router.get("/admin/faculty-keys", authMiddleware, async (_req: any, res: any) => {
+  res.json(SECURE_FACULTY_KEYS);
+});
 // 6. Admin Endpoint: Manage Schedules
 router.get("/admin/schedules", authMiddleware, async (req: any, res: any) => {
   try {
