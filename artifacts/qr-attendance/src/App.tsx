@@ -17,6 +17,7 @@ import HodDashboard from "@/pages/HodDashboard";
 import PrincipalDashboard from "@/pages/PrincipalDashboard";
 import HourlyAttendance from "@/pages/HourlyAttendance";
 import InchargeDashboard from "@/pages/InchargeDashboard";
+import { Analytics } from "@vercel/analytics/react";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient({
@@ -149,6 +150,7 @@ function App() {
             <AppRouter />
           </WouterRouter>
           <Toaster />
+          <Analytics />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
