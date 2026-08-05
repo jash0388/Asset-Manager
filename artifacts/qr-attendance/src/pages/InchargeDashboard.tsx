@@ -588,14 +588,6 @@ export default function InchargeDashboard() {
             <Clock className="w-3.5 h-3.5 text-slate-550" />
             Take Class Attendance
           </button>
-          <button
-            onClick={() => navigate("/hourly-attendance")}
-            style={{ backgroundColor: "#f1f5f9", color: "#334155" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-200"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-slate-550" />
-            Hourly Attendance
-          </button>
         </div>
 
         {/* Allocation Info Banner */}

@@ -33,12 +33,11 @@ const ipLoginAttempts = new Map<string, { count: number; resetTime: number }>();
 function enforceLoginRateLimit(ip: string): { allowed: boolean; retryAfterSec: number } {
   const now = Date.now();
   const WINDOW_MS = 15 * 60 * 1000; // 15-minute window
-  const MAX_FAILED_ATTEMPTS = 5;
+  const MAX_FAILED_ATTEMPTS = 10;
 
   const record = ipLoginAttempts.get(ip);
 
   if (!record || now > record.resetTime) {
-    ipLoginAttempts.set(ip, { count: 1, resetTime: now + WINDOW_MS });
     return { allowed: true, retryAfterSec: 0 };
   }
 
@@ -47,7 +46,6 @@ function enforceLoginRateLimit(ip: string): { allowed: boolean; retryAfterSec: n
     return { allowed: false, retryAfterSec };
   }
 
-  record.count += 1;
   return { allowed: true, retryAfterSec: 0 };
 }
 

@@ -1475,18 +1475,18 @@ export default function HodDashboard() {
 
                               <td className="py-4 px-6 text-center">
                                 {isExitTimeOver(log.date, log.exitTime) ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border bg-red-950/60 text-red-400 border-red-900/40">
-                                    <XCircle className="w-3 h-3 text-red-400" />
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-800/80 text-slate-400 border border-slate-700/60">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                                     Not Scanned
                                   </span>
                                 ) : (
-                                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
-                                    log.status === "inside" 
-                                      ? "bg-green-950/60 text-green-400 border-green-900/40"
-                                      : "bg-slate-850/80 text-slate-400 border-slate-800"
+                                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold ${
+                                    log.status === "inside"
+                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/25"
+                                      : "bg-slate-800/60 text-slate-400 border border-slate-700/50"
                                   }`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-green-400" : "bg-slate-500"}`} />
-                                    {log.status === "inside" ? "Still on Campus" : "Left Campus"}
+                                    <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-emerald-400" : "bg-slate-500"}`} />
+                                    {log.status === "inside" ? "On Campus" : "Left"}
                                   </span>
                                 )}
                               </td>
@@ -1504,9 +1504,9 @@ export default function HodDashboard() {
 
                               <td className="py-4 px-6 text-center text-slate-300 font-mono">
                                 {isExitTimeOver(log.date, log.exitTime) ? (
-                                  <span className="inline-flex items-center justify-center gap-1 text-red-400 font-semibold text-xs">
-                                    <XCircle className="w-3.5 h-3.5 text-red-500" />
-                                    Not Scanned
+                                  <span className="inline-flex items-center justify-center gap-1.5 text-slate-500 text-xs font-medium">
+                                    <span className="w-4 h-[1.5px] bg-slate-600 rounded-full inline-block" />
+                                    —
                                   </span>
                                 ) : (
                                   formatTime(log.exitTime)
@@ -1546,77 +1546,84 @@ export default function HodDashboard() {
               </div>
             </div>
 
-            {/* Mentors Table */}
+            {/* Mentors Grid */}
             {mentorsLoading ? (
-              <div className="bg-slate-900 border border-slate-855 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
+              <div className="bg-slate-900 border border-slate-800 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-slate-400">Loading department mentors registry...</p>
+                <p className="text-sm font-semibold text-slate-400">Loading faculty registry...</p>
               </div>
             ) : (
-              <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-bold uppercase tracking-wider">
-                        <th className="py-4 px-6">Faculty / Mentor Name</th>
-                        <th className="py-4 px-6">Role & Year</th>
-                        <th className="py-4 px-6">Assigned Section / Roll Range</th>
-                        <th className="py-4 px-6 text-center">Mentored Students</th>
-                        <th className="py-4 px-6 text-center">Faculty Passkey (Key)</th>
-                        <th className="py-4 px-6 text-center">Mentor Passkey (Dashboard)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-850/60">
-                      {OFFICIAL_FACULTY_LIST.filter((m) => {
-                        const q = mentorsSearchQuery.toLowerCase().trim();
-                        if (!q) return true;
-                        return (
-                          m.name.toLowerCase().includes(q) ||
-                          m.email.toLowerCase().includes(q) ||
-                          m.role.toLowerCase().includes(q) ||
-                          m.section.toLowerCase().includes(q) ||
-                          m.key.toLowerCase().includes(q)
-                        );
-                      }).map((m) => (
-                        <tr key={m.id} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="py-4 px-6">
-                            <p className="font-extrabold text-slate-100 text-sm">{m.name}</p>
-                            <p className="text-xs text-slate-400 font-mono mt-0.5">{m.email}</p>
-                          </td>
-                          <td className="py-4 px-6">
-                            <span className="inline-block px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 font-bold text-xs">
-                              {m.role} ({m.yearLabel})
-                            </span>
-                          </td>
-                          <td className="py-4 px-6">
-                            <p className="text-xs font-mono font-bold text-emerald-400">Sec {m.section}</p>
-                            <p className="text-[11px] text-slate-400 font-mono mt-0.5">{m.rollRange}</p>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            <span className="inline-block px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 font-mono font-black text-xs">
-                              {m.count} Students
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            <span className="inline-block px-3 py-1 rounded-xl bg-purple-950 border border-purple-800 text-purple-300 font-extrabold text-xs tracking-wider font-mono">
-                              {m.key}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            {INCHARGE_KEYS[m.key] ? (
-                              <span className="inline-block px-3 py-1 rounded-xl bg-blue-950 border border-blue-800 text-blue-300 font-extrabold text-xs tracking-wider font-mono">
-                                {INCHARGE_KEYS[m.key]}
-                              </span>
-                            ) : (
-                              <span className="text-xs text-slate-500 font-mono">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {OFFICIAL_FACULTY_LIST.filter((m) => {
+                  const q = mentorsSearchQuery.toLowerCase().trim();
+                  if (!q) return true;
+                  return (
+                    m.name.toLowerCase().includes(q) ||
+                    m.email.toLowerCase().includes(q) ||
+                    m.role.toLowerCase().includes(q) ||
+                    m.section.toLowerCase().includes(q) ||
+                    m.key.toLowerCase().includes(q)
+                  );
+                }).map((m) => (
+                  <div key={m.id} className="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 flex flex-col gap-4 hover:border-slate-700 transition-colors shadow-lg">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-sm font-black text-slate-300 uppercase flex-shrink-0">
+                          {m.name.split(" ").slice(-1)[0]?.charAt(0) || m.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-extrabold text-slate-100 text-sm leading-tight">{m.name}</p>
+                          <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate max-w-[160px]">{m.email}</p>
+                        </div>
+                      </div>
+                      <span className={`flex-shrink-0 inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${
+                        m.yearLabel?.includes("4") ? "bg-orange-950/60 border-orange-800/50 text-orange-300"
+                        : m.yearLabel?.includes("3") ? "bg-blue-950/60 border-blue-800/50 text-blue-300"
+                        : "bg-emerald-950/60 border-emerald-800/50 text-emerald-300"
+                      }`}>
+                        {m.yearLabel}
+                      </span>
+                    </div>
+
+                    {/* Section & Roll Range */}
+                    <div className="bg-slate-800/50 rounded-xl px-4 py-3 border border-slate-700/50">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Section &amp; Roll Range</p>
+                      <p className="text-sm font-extrabold text-emerald-400 font-mono">Sec {m.section}</p>
+                      <p className="text-[11px] text-slate-400 font-mono mt-0.5">{m.rollRange}</p>
+                    </div>
+
+                    {/* Stats + Keys row */}
+                    <div className="flex items-center gap-2">
+                      {/* Students count */}
+                      <div className="flex-1 bg-slate-800/50 rounded-xl px-3 py-2.5 border border-slate-700/40 text-center">
+                        <p className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">Students</p>
+                        <p className="text-lg font-black text-slate-200 mt-0.5">{m.count}</p>
+                      </div>
+
+                      {/* Faculty key */}
+                      <div className="flex-1 bg-violet-950/50 rounded-xl px-3 py-2.5 border border-violet-800/40 text-center">
+                        <p className="text-[10px] font-bold uppercase text-violet-400 tracking-wider">Hourly Key</p>
+                        <p className="text-lg font-black text-violet-300 font-mono mt-0.5">{m.key}</p>
+                      </div>
+
+                      {/* Dashboard key */}
+                      <div className={`flex-1 rounded-xl px-3 py-2.5 border text-center ${
+                        INCHARGE_KEYS[m.key]
+                          ? "bg-blue-950/50 border-blue-800/40"
+                          : "bg-slate-800/30 border-slate-700/30"
+                      }`}>
+                        <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                          INCHARGE_KEYS[m.key] ? "text-blue-400" : "text-slate-600"
+                        }`}>Dashboard</p>
+                        <p className={`text-lg font-black font-mono mt-0.5 ${
+                          INCHARGE_KEYS[m.key] ? "text-blue-300" : "text-slate-600"
+                        }`}>{INCHARGE_KEYS[m.key] || "—"}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </>
         ) : activeTab === "schedules" ? (

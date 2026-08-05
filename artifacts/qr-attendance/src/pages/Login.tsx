@@ -20,25 +20,25 @@ export default function Login() {
 
     setSubmitting(true);
     try {
-      // First try mentor/faculty key login (3-digit or 4-digit keys: 101-115, 3011, etc.)
+      // 6-digit codes are Admin / HOD / Principal PINs
+      if (/^\d{6}$/.test(code)) {
+        const role = await loginPin(code);
+        if (role === "hod") navigate("/hod-dashboard");
+        else if (role === "principal") navigate("/principal-dashboard");
+        else navigate("/dashboard");
+        return;
+      }
+
+      // 3 or 4-digit codes are Faculty / Incharge keys
       await loginMentorKey(code);
       if (/^\d{4}$/.test(code)) {
         navigate("/incharge-dashboard");
       } else {
         navigate("/mentor");
       }
-      return;
-    } catch {
-      // Not a mentor key — try PIN login (admin / HOD / principal — verified server-side)
-      try {
-        const role = await loginPin(code);
-        if (role === "hod") navigate("/hod-dashboard");
-        else if (role === "principal") navigate("/principal-dashboard");
-        else navigate("/dashboard");
-        return;
-      } catch {
-        setError("Invalid access code. Please try again.");
-      }
+    } catch (err: any) {
+      const msg = err?.message || err?.error || "Invalid access code. Please try again.";
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
