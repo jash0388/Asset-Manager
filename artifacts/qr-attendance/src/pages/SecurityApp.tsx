@@ -46,6 +46,7 @@ export default function SecurityApp() {
   const lastScanRef = useRef<{ text: string; at: number } | null>(null);
 
   const [unlocked, setUnlocked] = useState(false); // always locked on fresh open
+  const [isLateEntryMode, setIsLateEntryMode] = useState(false);
   const [passcode, setPasscode] = useState("");
   const [passcodeError, setPasscodeError] = useState("");
 
@@ -209,7 +210,7 @@ export default function SecurityApp() {
       return;
     }
 
-    enqueueScan(uid);
+    enqueueScan(uid, isLateEntryMode);
     markScannedLocally(uid);
     const newQueue = getQueue();
     setQueue(newQueue);
@@ -440,11 +441,37 @@ export default function SecurityApp() {
           )}
         </div>
 
+        {isLateEntryMode && (
+          <div className="w-full mb-3 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black flex items-center justify-center gap-2 animate-pulse">
+            ⚠️ LATE ENTRY MODE IS ACTIVE
+          </div>
+        )}
+
         {cameraError && (
           <div className="w-full mb-4 px-4 py-2 rounded-lg bg-red-900/30 border border-red-800 text-red-300 text-sm text-center">
             {cameraError}
           </div>
         )}
+
+        {/* Late Entry Mode Toggle */}
+        <div className="w-full mb-4 bg-slate-905/70 border border-slate-800 rounded-xl px-4 py-3 flex items-center justify-between shadow-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-white tracking-wide">Late Entry Mode</span>
+            <span className="text-xs text-slate-450 font-medium">Flag scanned student as late entry</span>
+          </div>
+          <button
+            onClick={() => setIsLateEntryMode(prev => !prev)}
+            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 cursor-pointer flex items-center ${
+              isLateEntryMode ? "bg-amber-500" : "bg-slate-800 border border-slate-700"
+            }`}
+          >
+            <div
+              className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                isLateEntryMode ? "translate-x-5.5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
 
         <div className="w-full flex gap-3">
           {!scanning ? (

@@ -291,7 +291,7 @@ function sha256Sync(ascii: string): string {
 
 const processedBatches = new Set<string>();
 
-router.post("/scan/batch", async (req: any, res: any) => {
+router.post("/scan/batch", authMiddleware, async (req: any, res: any) => {
   const scans = req.body?.scans;
   const batchId = typeof req.body?.batchId === "string" ? req.body.batchId : null;
   const batchDeviceId = typeof req.body?.deviceId === "string" ? req.body.deviceId : null;
@@ -335,6 +335,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
     const hash = typeof item?.hash === "string" ? item.hash : null;
     const prevHash = typeof item?.prevHash === "string" ? item.prevHash : null;
     const seqNo = typeof item?.seqNo === "number" ? item.seqNo : null;
+    const isLateEntry = item?.isLateEntry === true || item?.is_late_entry === true;
 
     let hashVerified = false;
     let sequenceGapDetected = false;
@@ -419,9 +420,16 @@ router.post("/scan/batch", async (req: any, res: any) => {
 
       if (current.status === "left") {
         // Entry scan (student entering campus / checking in)
+        let entryTime = ts;
+        if (isLateEntry) {
+          const d = new Date(ts);
+          d.setSeconds(59);
+          d.setMilliseconds(999);
+          entryTime = d.toISOString();
+        }
         const { data: inserted, error: insertError } = await supabase
           .from("qr_attendance")
-          .insert({ user_id: user.id, date, entry_time: ts, exit_time: null, scan_count: 1, last_scan_at: ts })
+          .insert({ user_id: user.id, date, entry_time: entryTime, exit_time: null, scan_count: 1, last_scan_at: ts })
           .select()
           .single();
         if (insertError) throw insertError;
@@ -478,7 +486,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
   res.json({ results, syncReceipt, processedAt: new Date().toISOString() });
 });
 
-router.post("/scan", async (req: any, res: any) => {
+router.post("/scan", authMiddleware, async (req: any, res: any) => {
   const uniqueId = extractUniqueId(req.body);
   if (!uniqueId) {
     res.status(400).json({ error: "Invalid QR code — missing identifier" });
@@ -525,12 +533,23 @@ router.post("/scan", async (req: any, res: any) => {
     }
 
     const currentStatus = record ? getRecordStatus(record) : "left";
+    const isLateEntry = req.body.isLateEntry === true || req.body.is_late_entry === true;
 
     if (currentStatus === "left") {
-      req.log.info({ userId: user.id, name: user.name }, "Student checked in / arrived on campus");
+      req.log.info({ userId: user.id, name: user.name, isLateEntry }, "Student checked in / arrived on campus");
+      
+      let entryTime = now;
+      if (isLateEntry) {
+        // Set seconds to 59 and milliseconds to 999 as a late entry marker
+        const d = new Date(now);
+        d.setSeconds(59);
+        d.setMilliseconds(999);
+        entryTime = d.toISOString();
+      }
+
       const { data: inserted, error: insertError } = await supabase
         .from("qr_attendance")
-        .insert({ user_id: user.id, date, entry_time: now, exit_time: null, scan_count: 1, last_scan_at: now })
+        .insert({ user_id: user.id, date, entry_time: entryTime, exit_time: null, scan_count: 1, last_scan_at: now })
         .select()
         .single();
 
@@ -542,7 +561,7 @@ router.post("/scan", async (req: any, res: any) => {
       return res.json({
         success: true,
         action: "entry",
-        message: `${user.name} has Checked In / Arrived on Campus.`,
+        message: `${user.name} has Checked In / Arrived on Campus${isLateEntry ? " (Late Entry)" : ""}.`,
         user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
         recordId: inserted.id,
       });
@@ -762,6 +781,24 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any
     const { data: records, error: recordError } = await query.order("date", { ascending: false });
     if (recordError) throw recordError;
 
+    // Fetch student's hourly attendance for the same query parameters
+    let hourlyQuery = supabase
+      .from("qr_hourly_attendance")
+      .select("*, qr_schedules(*)")
+      .eq("user_id", userId);
+
+    if (from) hourlyQuery = hourlyQuery.gte("date", from);
+    if (to) hourlyQuery = hourlyQuery.lte("date", to);
+    if (month) {
+      const [year, mon] = month.split("-");
+      const start = `${year}-${mon}-01`;
+      const endDay = new Date(parseInt(year), parseInt(mon), 0).getDate();
+      const end = `${year}-${mon}-${String(endDay).padStart(2, "0")}`;
+      hourlyQuery = hourlyQuery.gte("date", start).lte("date", end);
+    }
+    const { data: hourlyRecords, error: hourlyError } = await hourlyQuery.order("date", { ascending: false });
+    if (hourlyError) throw hourlyError;
+
     const lateHour = 21; // Assuming 9 PM is late for returning to the hostel
     let totalDuration = 0;
     let durationCount = 0;
@@ -790,6 +827,7 @@ router.get("/attendance/user/:userId", authMiddleware, async (req: any, res: any
     res.json({
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
       records: records.map((r: any) => formatRecord(r, user)),
+      hourlyRecords: hourlyRecords || [],
       summary,
     });
   } catch (err: any) {

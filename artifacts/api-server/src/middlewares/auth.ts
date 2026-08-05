@@ -3,13 +3,13 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.SESSION_SECRET || "fallback-dev-secret";
 
+// Bypass is ONLY allowed when explicitly enabled in env (for local dev, never production)
+const BYPASS_ENABLED = process.env.ALLOW_BYPASS_TOKEN === "true";
+
 export interface AuthRequest extends Request {
   adminId?: number;
   mentorId?: number;
 }
-
-const BYPASS_TOKEN = "bypass-token";
-const BYPASS_ENABLED = process.env.ALLOW_BYPASS_TOKEN === "true";
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -19,12 +19,32 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   }
   const token = authHeader.slice(7);
 
-  if (token === BYPASS_TOKEN || token === "bypass-token-hod" || token === "bypass-token-mentor" || token === "bypass-token-principal") {
-    req.adminId = token === "bypass-token-hod" ? -2 : token === "bypass-token-mentor" ? -3 : token === "bypass-token-principal" ? -4 : -1;
-    if (token === "bypass-token-mentor") {
-      req.mentorId = -3;
+  // Only allow bypass tokens when BYPASS_ENABLED is explicitly true (local dev only)
+  if (BYPASS_ENABLED) {
+    if (token === "bypass-token" || token === "bypass-token-hod" || token === "bypass-token-principal" || token.startsWith("bypass-token-mentor")) {
+      req.adminId = token === "bypass-token-hod" ? -2 : token.startsWith("bypass-token-mentor") ? -3 : token === "bypass-token-principal" ? -4 : -1;
+      if (token.startsWith("bypass-token-mentor")) {
+        const key = token.replace("bypass-token-mentor-", "");
+        const keyToIdMap: Record<string, number> = {
+          "101": 1, "102": 2, "103": 3, "104": 4, "105": 5, "106": 6, "107": 7, "108": 8, "109": 9,
+          "110": 10, "111": 11, "112": 12, "113": 13, "114": 14, "115": 15,
+          "4011": 9, "4012": 10, "3012": 6, "3011": 8, "3013": 4, "2011": 11, "2012": 12, "2013": 7
+        };
+        req.mentorId = keyToIdMap[key] || -3;
+      }
+      next();
+      return;
     }
-    next();
+  }
+
+  // Reject bypass tokens when BYPASS_ENABLED is false (production)
+  if (
+    token === "bypass-token" ||
+    token === "bypass-token-hod" ||
+    token === "bypass-token-principal" ||
+    token.startsWith("bypass-token-mentor")
+  ) {
+    res.status(401).json({ error: "Invalid token" });
     return;
   }
 
@@ -32,10 +52,11 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     const decoded = jwt.verify(token, JWT_SECRET) as {
       adminId?: number;
       mentorId?: number;
+      role?: string;
     };
-    if (decoded.adminId) req.adminId = decoded.adminId;
-    if (decoded.mentorId) req.mentorId = decoded.mentorId;
-    if (!decoded.adminId && !decoded.mentorId) {
+    if (decoded.adminId !== undefined) req.adminId = decoded.adminId;
+    if (decoded.mentorId !== undefined) req.mentorId = decoded.mentorId;
+    if (decoded.adminId === undefined && decoded.mentorId === undefined) {
       res.status(401).json({ error: "Invalid token" });
       return;
     }
@@ -46,7 +67,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
 }
 
 export function adminOnly(req: AuthRequest, res: Response, next: NextFunction) {
-  if (!req.adminId) {
+  if (req.adminId === undefined || req.adminId === null) {
     res.status(403).json({ error: "Admin access required" });
     return;
   }

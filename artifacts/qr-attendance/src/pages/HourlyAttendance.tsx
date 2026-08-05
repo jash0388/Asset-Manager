@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { Layout } from "@/components/Layout";
 import { BackButton } from "@/components/BackButton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,6 +61,7 @@ type SubmissionResponse = {
 
 export default function HourlyAttendance() {
   const { role } = useAuth();
+  const [, navigate] = useLocation();
   const [selectedSection, setSelectedSection] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -264,7 +266,37 @@ export default function HourlyAttendance() {
   return (
     <Layout>
       <div className="p-6 max-w-5xl mx-auto space-y-6 text-slate-350 font-sans">
-        <BackButton to={role === "hod" ? "/hod-dashboard" : "/dashboard"} />
+        {role === "mentor" ? (
+          /* Navigation Switcher Tabs for Mentors */
+          <div style={{ backgroundColor: "#1e293b", borderColor: "#334155" }} className="border p-2 rounded-2xl flex flex-wrap gap-2 shadow-xs mb-4">
+            <button
+              onClick={() => navigate("/incharge-dashboard")}
+              style={{ backgroundColor: "#334155", color: "#f8fafc" }}
+              className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-700"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
+              Class Incharge Portal
+            </button>
+            <button
+              onClick={() => navigate("/mentor")}
+              style={{ backgroundColor: "#334155", color: "#f8fafc" }}
+              className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-700"
+            >
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
+              Take Class Attendance
+            </button>
+            <button
+              onClick={() => navigate("/hourly-attendance")}
+              style={{ backgroundColor: "#8b5cf6", color: "#ffffff" }}
+              className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-white" />
+              Hourly Attendance
+            </button>
+          </div>
+        ) : (
+          <BackButton to={role === "hod" ? "/hod-dashboard" : "/dashboard"} />
+        )}
         
         {/* Title */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

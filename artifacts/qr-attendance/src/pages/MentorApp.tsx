@@ -60,20 +60,26 @@ type ScheduleStudent = {
 };
 
 export const OFFICIAL_FACULTY_LIST = [
-  { id: 1, name: "Mrs. A. Sravanthi", email: "sravanthi.ds@sphoorthyengg.ac.in", key: "4011", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4A", rollRange: "23N81A6701 TO 23N81A6743", count: 42 },
-  { id: 2, name: "Mrs. K. Sneha", email: "sneha.ds@sphoorthyengg.ac.in", key: "4012", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4B", rollRange: "23N81A6788 TO 23N81A67C8 + LE", count: 39 },
-  { id: 3, name: "Mr. T. Shravan Kumar", email: "shravan.ds@sphoorthyengg.ac.in", key: "4013", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "23N81A6744 TO 23N81A6787", count: 42 },
-  { id: 4, name: "Mrs. G. Sushma", email: "sushma.ds@sphoorthyengg.ac.in", key: "3011", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6701 TO 24N81A6731", count: 29 },
-  { id: 5, name: "Mr. M. Yadaiah", email: "yadaiah.ds@sphoorthyengg.ac.in", key: "3012", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67A6 TO 24N81A67D2", count: 27 },
-  { id: 6, name: "Ms. Priyusha", email: "priyusha.ds@sphoorthyengg.ac.in", key: "3013", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6732 TO 24N81A6752 + LE", count: 26 },
-  { id: 7, name: "Mrs. CH. Naga Rohini", email: "rohini.ds@sphoorthyengg.ac.in", key: "3014", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6753 TO 24N81A6779 + RA", count: 26 },
-  { id: 8, name: "Mr. Miskeen Ali", email: "miskeen.ds@sphoorthyengg.ac.in", key: "3015", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6780 TO 24N81A67A5", count: 24 },
-  { id: 9, name: "Mrs. Swetha", email: "swetha.ds@sphoorthyengg.ac.in", key: "3016", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67D3 TO 24N81A67F9", count: 27 },
-  { id: 10, name: "Mrs. B. Gayathri", email: "gayathri.ds@sphoorthyengg.ac.in", key: "2011", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6701 TO 25N81A6727", count: 27 },
-  { id: 11, name: "Mrs. K. Ramya", email: "ramya.ds@sphoorthyengg.ac.in", key: "2012", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6756 TO 25N81A6783", count: 27 },
-  { id: 12, name: "Mr. K. Bikshapathi", email: "bikshapathi.ds@sphoorthyengg.ac.in", key: "2013", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "Section 2C Allocation", count: 27 },
-  { id: 13, name: "Mrs. CH. Vijaya Lakshmi", email: "vijayalaksmi.ds@sphoorthyengg.ac.in", key: "2014", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6728 TO 25N81A6755", count: 28 },
-  { id: 14, name: "Mr. M. Srinivasulu", email: "srinivasulu.ds@sphoorthyengg.ac.in", key: "2015", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
+  // IV Year
+  { id: 1, name: "Mrs A Sravanthi", email: "mrsasravanthi@gmail.com", key: "109", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4A", rollRange: "23N81A6701 TO 23N81A6743", count: 42 },
+  { id: 3, name: "Mr T Shravan Kumar", email: "mrtshravankumar@gmail.com", key: "106", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "23N81A6744 TO 23N81A6787", count: 42 },
+  { id: 2, name: "Mrs K Sneha", email: "mrsksneha@gmail.com", key: "110", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4B", rollRange: "23N81A6788 TO 23N81A67C8 + LE-3, LE-4", count: 39 },
+
+  // III Year
+  { id: 4, name: "Mrs G Sushma", email: "mrsgsushma@gmail.com", key: "108", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6701 TO 24N81A6731", count: 29 },
+  { id: 15, name: "Ms. Priyusha", email: "msspriyusha@gmail.com", key: "115", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6732 TO 24N81A6752 + LE-3 to LE-8", count: 26 },
+  { id: 6, name: "Mrs. CH. Naga Rohini", email: "mrschnagarohini@gmail.com", key: "101", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6753 TO 24N81A6779 + RA-33, A9", count: 26 },
+  { id: 8, name: "Mr Miskeen Ali", email: "mrmiskeenali@gmail.com", key: "103", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6780 TO 24N81A67A5", count: 24 },
+  { id: 5, name: "Mr M Yadaiah", email: "mrmyadaiah@gmail.com", key: "104", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67A6 TO 24N81A67D2", count: 27 },
+  { id: 9, name: "Mrs. Swetha", email: "mrsswetha@gmail.com", key: "102", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67D3 TO 24N81A67F9", count: 27 },
+
+  // II Year
+  { id: 10, name: "Mrs B Gayathri", email: "mrsbgayathri@gmail.com", key: "111", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6701 TO 25N81A6727", count: 27 },
+  { id: 13, name: "Mrs Ch Vijaya Lakshmi", email: "mrschvijayalakshmi@gmail.com", key: "113", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6728 TO 25N81A6755", count: 28 },
+  { id: 11, name: "Mrs K Ramya", email: "mrskramya@gmail.com", key: "112", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6756 TO 25N81A6783", count: 27 },
+  { id: 14, name: "Mr M Srinivasulu", email: "mrmsrinivasulu@gmail.com", key: "105", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
+  { id: 12, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", key: "114", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67B4 TO 25N81A67D9", count: 26 },
+  { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "107", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67E0 TO 25N81A67G0", count: 19 }
 ];
 
 export default function MentorApp() {
@@ -205,8 +211,11 @@ export default function MentorApp() {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          sessionId: session.id,
-          records,
+          scheduleId: activeSchedule.id,
+          students: students.map((s) => ({
+            studentId: s.id,
+            markedPresent: s.markedPresent,
+          })),
         }),
       });
 
@@ -316,39 +325,72 @@ export default function MentorApp() {
   return (
     <div style={{ backgroundColor: "#f8fafc", color: "#0f172a" }} className="min-h-screen flex flex-col font-sans">
       {/* Top Navigation Bar */}
-      <header style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border-b px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xs">
-        <div className="flex items-center gap-3.5">
-          <div style={{ backgroundColor: "#2563eb" }} className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold shadow-md">
+      <header style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border-b px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between sticky top-0 z-40 shadow-xs gap-4 sm:gap-0">
+        <div className="flex items-center gap-3.5 w-full sm:w-auto">
+          <div style={{ backgroundColor: "#2563eb" }} className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold shadow-md shrink-0">
             <Clock className="w-6 h-6 text-white" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* EXPLICIT 100% PITCH BLACK FACULTY NAME */}
               <h1 style={{ color: "#0f172a" }} className="text-base sm:text-lg font-black tracking-tight">
                 {activeFaculty?.name}
               </h1>
-              <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black border">
+              <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black border shrink-0">
                 {activeFaculty?.section} Faculty
               </span>
             </div>
-            <p style={{ color: "#1e40af" }} className="text-xs font-bold mt-0.5">
-              Hourly Attendance Scanner • Department of CSE - Data Science (DS)
+            <p style={{ color: "#1e40af" }} className="text-[10px] sm:text-xs font-bold mt-0.5">
+              Hourly Attendance Scanner • Department of CSE - DS
             </p>
           </div>
         </div>
 
-        <button
-          onClick={logout}
-          style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
-          className="px-4 py-2 rounded-xl font-bold text-xs border flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
-        >
-          <LogOut className="w-4 h-4 text-slate-600" />
-          Logout
-        </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          {activeFaculty?.role?.includes("In-charge") && (
+            <button
+              onClick={() => navigate("/incharge-dashboard")}
+              style={{ backgroundColor: "#2563eb", color: "#ffffff", borderColor: "#2563eb" }}
+              className="px-3 py-2 rounded-xl font-bold text-[10px] sm:text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 flex-1 sm:flex-none justify-center"
+            >
+              <Users className="w-3.5 h-3.5 text-white" />
+              Incharge Dashboard
+            </button>
+          )}
+
+          <button
+            onClick={logout}
+            style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
+            className="px-3 py-2 rounded-xl font-bold text-[10px] sm:text-xs border flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 flex-1 sm:flex-none justify-center"
+          >
+            <LogOut className="w-4 h-4 text-slate-600" />
+            Logout
+          </button>
+        </div>
       </header>
 
       {/* Main Container */}
       <div className="flex-1 p-4 sm:p-6 max-w-4xl mx-auto w-full space-y-6">
+        {/* Navigation Switcher Tabs */}
+        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border p-2 rounded-2xl flex flex-wrap gap-2 shadow-xs mb-2">
+          <button
+            onClick={() => navigate("/incharge-dashboard")}
+            style={{ backgroundColor: "#f1f5f9", color: "#334155" }}
+            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-200"
+          >
+            <Users className="w-3.5 h-3.5 text-slate-550" />
+            Class Incharge Portal
+          </button>
+          <button
+            onClick={() => navigate("/mentor")}
+            style={{ backgroundColor: "#2563eb", color: "#ffffff" }}
+            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+          >
+            <Clock className="w-3.5 h-3.5 text-white" />
+            Take Class Attendance
+          </button>
+        </div>
+
         {loading ? (
           <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-3xl p-16 flex flex-col items-center justify-center gap-4 text-center shadow-xs">
             <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />

@@ -15,6 +15,7 @@ export type PendingScan = {
   prevHash?: string;
   seqNo?: number;
   deviceId?: string;
+  isLateEntry?: boolean;
 };
 
 const KEY_USERS = "secapp.users.v1";
@@ -253,7 +254,7 @@ function getNextSeqNo(): number {
   }
 }
 
-export function enqueueScan(uniqueId: string): PendingScan {
+export function enqueueScan(uniqueId: string, isLateEntry?: boolean): PendingScan {
   const q = getQueue();
   const prevScan = q[q.length - 1];
   const prevHash = prevScan?.hash || GENESIS_HASH;
@@ -273,6 +274,7 @@ export function enqueueScan(uniqueId: string): PendingScan {
     prevHash,
     seqNo,
     deviceId,
+    isLateEntry,
   };
   q.push(scan);
   setQueue(q);
@@ -315,6 +317,7 @@ export async function syncQueue(): Promise<SyncResult> {
       prevHash: s.prevHash,
       seqNo: s.seqNo,
       deviceId: s.deviceId || deviceId,
+      isLateEntry: s.isLateEntry || false,
     })),
   };
 

@@ -95,7 +95,7 @@ router.get("/users/:id", authMiddleware, async (req: any, res: any) => {
   }
 });
 
-router.delete("/users/:id", authMiddleware, async (req: any, res: any) => {
+router.delete("/users/:id", authMiddleware, adminOnly, async (req: any, res: any) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid user ID" });

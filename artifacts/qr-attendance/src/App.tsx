@@ -75,12 +75,12 @@ function RequireAdminOrHod({ children }: { children: React.ReactNode }) {
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    if (role !== "admin" && role !== "hod" && role !== "principal") {
+    if (role !== "admin" && role !== "hod" && role !== "principal" && role !== "mentor") {
       navigate("/login");
     }
   }, [role, navigate]);
 
-  if (role !== "admin" && role !== "hod" && role !== "principal") return null;
+  if (role !== "admin" && role !== "hod" && role !== "principal" && role !== "mentor") return null;
   return <>{children}</>;
 }
 

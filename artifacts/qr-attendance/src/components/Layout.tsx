@@ -49,6 +49,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         { href: "/hod-dashboard?tab=flags", label: "Risk Flag Analytics", icon: Flag },
         { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
       ]
+    : role === "mentor"
+    ? [
+        { href: "/incharge-dashboard", label: "Class Incharge Portal", icon: LayoutDashboard },
+        { href: "/mentor", label: "Take Class Attendance", icon: QrCode },
+        { href: "/hourly-attendance", label: "Hourly Attendance", icon: Clock },
+      ]
     : adminNavLinks;
 
   return (

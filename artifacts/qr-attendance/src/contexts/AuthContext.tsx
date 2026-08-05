@@ -12,7 +12,7 @@ import { customFetch } from "@workspace/api-client-react";
 export type AuthRole = "admin" | "mentor" | "hod" | "principal";
 
 export type AuthAdmin = { id: number; email: string; name: string };
-export type AuthMentor = { id: number; email: string; name: string; section?: string };
+export type AuthMentor = { id: number; email: string; name: string; section?: string; key?: string };
 export type AuthHod = { id: number; email: string; name: string };
 export type AuthPrincipal = { id: number; email: string; name: string };
 
@@ -27,6 +27,7 @@ interface AuthContextValue {
   loginAdmin: (email: string, password: string) => Promise<void>;
   loginMentor: (email: string, password: string) => Promise<void>;
   loginMentorKey: (key: string) => Promise<void>;
+  loginPin: (pin: string) => Promise<AuthRole>;
   loginBypass: (role?: AuthRole, section?: string) => void;
   logout: () => void;
 }
@@ -145,6 +146,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persist]
   );
 
+  // Server-side PIN login for Admin / HOD / Principal (codes live ONLY in server env vars)
+  const loginPin = useCallback(
+    async (pin: string): Promise<AuthRole> => {
+      const res = await customFetch<{ token: string; role: string; profile: AuthAdmin | AuthHod | AuthPrincipal }>(
+        "/api/auth/pin-login",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ pin }),
+        }
+      );
+      const role = res.role as AuthRole;
+      persist(res.token, role, res.profile);
+      return role;
+    },
+    [persist]
+  );
+
   const loginBypass = useCallback((role: AuthRole = "admin", section?: string) => {
     if (role === "principal") {
       const bypassPrincipal: AuthPrincipal = {
@@ -161,13 +180,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       persist("bypass-token-hod", "hod", bypassHod);
     } else if (role === "mentor") {
+      const cleanKey = section?.replace("DS-", "") || "3011";
       const bypassMentor: AuthMentor = {
         id: -3,
-        email: `mentor.${section?.toLowerCase().replace(/[^a-z0-9]/g, "") || "ds"}@local`,
-        name: `${section || "DS"} Mentor`,
-        section: section || "DS II/I/A",
+        email: `mentor.${cleanKey.toLowerCase()}@local`,
+        name: `Faculty Mentor`,
+        section: `DS-${cleanKey}`,
+        key: cleanKey,
       };
-      persist("bypass-token-mentor", "mentor", bypassMentor);
+      persist(`bypass-token-mentor-${cleanKey}`, "mentor", bypassMentor);
     } else {
       const bypassAdmin: AuthAdmin = {
         id: -1,
@@ -207,10 +228,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginAdmin,
       loginMentor,
       loginMentorKey,
+      loginPin,
       loginBypass,
       logout,
     }),
-    [role, admin, mentor, hod, principal, token, loading, loginAdmin, loginMentor, loginMentorKey, loginBypass, logout]
+    [role, admin, mentor, hod, principal, token, loading, loginAdmin, loginMentor, loginMentorKey, loginPin, loginBypass, logout]
   );
 
   // Keep token state in sync if another tab logs in/out.

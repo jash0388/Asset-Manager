@@ -3,23 +3,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ShieldCheck, Lock, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 
-const BYPASS_CODE = "038899";
-const HOD_BYPASS_CODE = "038811";
-const PRINCIPAL_BYPASS_CODE = "984201";
-
-const MENTOR_CODES: Record<string, { name: string; section: string }> = {
-  "223311": { name: "2nd Year Section A Mentor", section: "DS II/I/A" },
-  "223312": { name: "2nd Year Section B Mentor", section: "DS II/I/B" },
-  "223313": { name: "2nd Year Section C Mentor", section: "DS II/I/C" },
-  "223321": { name: "3rd Year Section A Mentor", section: "DS III/I/A" },
-  "223322": { name: "3rd Year Section B Mentor", section: "DS III/I/B" },
-  "223323": { name: "3rd Year Section C Mentor", section: "DS III/I/C" },
-  "223331": { name: "4th Year Section A Mentor", section: "DS IV/I/A" },
-  "223332": { name: "4th Year Section B Mentor", section: "DS IV/I/B" },
-};
+// NO hardcoded codes here. All verification is done on the server.
 
 export default function Login() {
-  const { loginBypass, loginMentorKey } = useAuth();
+  const { loginMentorKey, loginPin } = useAuth();
   const [, navigate] = useLocation();
   const [adminCode, setAdminCode] = useState("");
   const [error, setError] = useState("");
@@ -29,27 +16,11 @@ export default function Login() {
     e.preventDefault();
     setError("");
     const code = adminCode.trim();
-
-    if (code === BYPASS_CODE) {
-      loginBypass("admin");
-      navigate("/dashboard");
-      return;
-    }
-
-    if (code === HOD_BYPASS_CODE) {
-      loginBypass("hod");
-      navigate("/hod-dashboard");
-      return;
-    }
-
-    if (code === PRINCIPAL_BYPASS_CODE) {
-      loginBypass("principal");
-      navigate("/principal-dashboard");
-      return;
-    }
+    if (!code) return;
 
     setSubmitting(true);
     try {
+      // First try mentor/faculty key login (3-digit or 4-digit keys: 101-115, 3011, etc.)
       await loginMentorKey(code);
       if (/^\d{4}$/.test(code)) {
         navigate("/incharge-dashboard");
@@ -57,19 +28,17 @@ export default function Login() {
         navigate("/mentor");
       }
       return;
-    } catch (err) {
-      if (/^\d{4}$/.test(code)) {
-        loginBypass("mentor", `DS-${code}`);
-        navigate("/incharge-dashboard");
+    } catch {
+      // Not a mentor key — try PIN login (admin / HOD / principal — verified server-side)
+      try {
+        const role = await loginPin(code);
+        if (role === "hod") navigate("/hod-dashboard");
+        else if (role === "principal") navigate("/principal-dashboard");
+        else navigate("/dashboard");
         return;
+      } catch {
+        setError("Invalid access code. Please try again.");
       }
-      if (MENTOR_CODES[code]) {
-        const mentorInfo = MENTOR_CODES[code];
-        loginBypass("mentor", mentorInfo.section);
-        navigate("/mentor");
-        return;
-      }
-      setError("Invalid access key or 4-digit faculty PIN.");
     } finally {
       setSubmitting(false);
     }
@@ -128,7 +97,7 @@ export default function Login() {
           </form>
 
           <div className="mt-8 text-center text-slate-450 text-xs">
-            Enter 6-digit administrator, HOD, or Principal access code.
+            Enter your access code to continue.
           </div>
         </div>
       </div>

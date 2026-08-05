@@ -19,6 +19,7 @@ export default function Scanner() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [cameraError, setCameraError] = useState("");
+  const [isLateEntryMode, setIsLateEntryMode] = useState(false);
   const [volume, setVolume] = useState<number>(() => {
     if (typeof window === "undefined") return 0.7;
     const saved = window.localStorage.getItem("qr_scanner_volume");
@@ -161,7 +162,7 @@ export default function Scanner() {
     safePauseScanner();
 
     scanMutation.mutate(
-      { data: { uniqueId: uid } },
+      { data: { uniqueId: uid, isLateEntry: isLateEntryMode } as any },
       {
         onSuccess: (data: any) => {
           showResult({
@@ -334,8 +335,14 @@ export default function Scanner() {
           </div>
         )}
 
+        {isLateEntryMode && (
+          <div className="w-full mb-3 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black flex items-center justify-center gap-2 animate-pulse">
+            ⚠️ LATE ENTRY MODE IS ACTIVE
+          </div>
+        )}
+
         {/* Scanner viewport */}
-        <div className="w-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden mb-6">
+        <div className="w-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden mb-4">
           <div
             id="qr-reader"
             ref={scannerRef}
@@ -358,6 +365,26 @@ export default function Scanner() {
             {cameraError}
           </div>
         )}
+
+        {/* Late Entry Mode Toggle */}
+        <div className="w-full mb-4 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 flex items-center justify-between shadow-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-white tracking-wide">Late Entry Mode</span>
+            <span className="text-xs text-slate-550 font-medium">Flag scanned student as late entry</span>
+          </div>
+          <button
+            onClick={() => setIsLateEntryMode(prev => !prev)}
+            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 cursor-pointer flex items-center ${
+              isLateEntryMode ? "bg-amber-500" : "bg-slate-850 border border-slate-800"
+            }`}
+          >
+            <div
+              className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                isLateEntryMode ? "translate-x-5.5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
 
         {/* Controls */}
         <div className="w-full flex gap-3">

@@ -3,6 +3,17 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { OFFICIAL_FACULTY_LIST } from "./MentorApp";
+
+const INCHARGE_KEYS: Record<string, string> = {
+  "109": "4011", // Mrs A Sravanthi
+  "110": "4012", // Mrs K Sneha
+  "106": "3012", // Mr T Shravan Kumar
+  "108": "3011", // Mrs G Sushma
+  "104": "3013", // Mr M Yadaiah
+  "111": "2011", // Mrs B Gayathri
+  "112": "2012", // Mrs K Ramya
+  "107": "2013", // Mr K Bikshapathi
+};
 import {
   Calendar,
   Users,
@@ -65,6 +76,81 @@ type SectionStats = {
   presentStudents: { student: StudentUser; record: AttendanceRecord }[];
   absentStudents: StudentUser[];
 };
+
+function CustomMonthSelector({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [year, month] = value.split("-").map(Number);
+  const [currentYear, setCurrentYear] = useState(year);
+
+  const monthNames = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+
+  const handleSelectMonth = (monthIndex: number) => {
+    const formattedMonth = String(monthIndex + 1).padStart(2, "0");
+    onChange(`${currentYear}-${formattedMonth}`);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative inline-block text-left z-20">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="px-4 py-2.5 rounded-xl bg-white border border-slate-250 hover:bg-slate-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+      >
+        <Calendar className="w-4 h-4 text-blue-600" />
+        <span>{monthNames[month - 1]} {year}</span>
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white border border-slate-200 p-4 shadow-2xl z-30 animate-in fade-in duration-100">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+              <button
+                type="button"
+                onClick={() => setCurrentYear(prev => prev - 1)}
+                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                &larr;
+              </button>
+              <span className="text-sm font-bold text-slate-800 font-mono">{currentYear}</span>
+              <button
+                type="button"
+                onClick={() => setCurrentYear(prev => prev + 1)}
+                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                &rarr;
+              </button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {monthNames.map((mName, idx) => {
+                const isSelected = currentYear === year && (idx + 1) === month;
+                return (
+                  <button
+                    key={mName}
+                    type="button"
+                    onClick={() => handleSelectMonth(idx)}
+                    className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isSelected 
+                        ? "bg-blue-600 text-white shadow-sm" 
+                        : "bg-slate-50 border border-slate-150 hover:bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {mName}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function HodDashboard() {
   const [activeTab, setActiveTab] = useState<"summary" | "logs" | "mentors" | "schedules" | "flags">(() => {
@@ -259,7 +345,7 @@ export default function HodDashboard() {
       const matchesSearch =
         !q ||
         item.student.name.toLowerCase().includes(q) ||
-        (item.student.uniqueId || item.student.unique_id || "").toLowerCase().includes(q);
+        (item.student.uniqueId || "").toLowerCase().includes(q);
 
       const matchesFlag = riskFlagFilter === "ALL" || item.flag === riskFlagFilter;
       const matchesYear = riskYearFilter === "ALL" || item.secInfo.yearNum === riskYearFilter;
@@ -303,6 +389,7 @@ export default function HodDashboard() {
 
   const [newClassModalOpen, setNewClassModalOpen] = useState(false);
   const [newSubject, setNewSubject] = useState("");
+  const [newMentorId, setNewMentorId] = useState<number | "">("");
   const [newSection, setNewSection] = useState("A");
   const [newYear, setNewYear] = useState("II");
   const [newDay, setNewDay] = useState("MON");
@@ -343,34 +430,22 @@ export default function HodDashboard() {
     dateStr: string;
     dayNum: number;
     dayOfWeek: string;
-    status: "P" | "A" | "*";
+    status: "P" | "A" | "*" | "—";
     record?: AttendanceRecord;
     holidayReason?: string;
   } | null>(null);
 
-  const { data: studentMonthlyRecords = [] } = useQuery<AttendanceRecord[]>({
+  const { data: studentMonthlyData } = useQuery<{ records: AttendanceRecord[], hourlyRecords: any[] }>({
     queryKey: ["student-monthly-records", selectedStudentForDetails?.id, selectedStudentForDetails?.uniqueId, studentModalMonth],
     queryFn: async () => {
-      if (!selectedStudentForDetails) return [];
-      const [yearStr, monthStr] = studentModalMonth.split("-");
-      const yearNum = parseInt(yearStr);
-      const monthNum = parseInt(monthStr);
-      const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
-      const fromStr = `${yearStr}-${monthStr.padStart(2, "0")}-01`;
-      const toStr = `${yearStr}-${monthStr.padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
-
-      const data = await customFetch<AttendanceRecord[]>(`/api/attendance?from=${fromStr}&to=${toStr}`);
-      const targetId = selectedStudentForDetails.id;
-      const targetRoll = (selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "").toLowerCase().trim();
-
-      return (data || []).filter((r: any) => {
-        const uId = r.userId || r.user_id || r.user?.id;
-        const rRoll = (r.user?.uniqueId || r.user?.unique_id || "").toLowerCase().trim();
-        return uId === targetId || (targetRoll && rRoll && targetRoll === rRoll);
-      });
+      if (!selectedStudentForDetails) return { records: [], hourlyRecords: [] };
+      return customFetch<{ records: AttendanceRecord[], hourlyRecords: any[] }>(`/api/attendance/user/${selectedStudentForDetails.id}?month=${studentModalMonth}`);
     },
     enabled: Boolean(selectedStudentForDetails)
   });
+
+  const studentMonthlyRecords = studentMonthlyData?.records || [];
+  const studentHourlyRecords = studentMonthlyData?.hourlyRecords || [];
 
   // Holiday Management State (persisted in localStorage)
   const [holidays, setHolidays] = useState<Record<string, string>>(() => {
@@ -879,6 +954,120 @@ export default function HodDashboard() {
     }
   };
 
+  const isLateTime = (timeStr: string | null | undefined) => {
+    if (!timeStr) return false;
+    try {
+      const d = new Date(timeStr);
+      const hours = d.getHours();
+      const minutes = d.getMinutes();
+      const seconds = d.getSeconds();
+      const ms = d.getMilliseconds();
+      return (seconds === 59 && ms === 999) || (hours === 22 && minutes === 0) || (hours === 3 && minutes === 30);
+    } catch {
+      return false;
+    }
+  };
+
+  const handleDirectCSVDownload = (studentName: string, month: string, records: AttendanceRecord[]) => {
+    const [sYearStr, sMonthStr] = month.split("-");
+    const sYearNum = parseInt(sYearStr);
+    const sMonthNum = parseInt(sMonthStr);
+    const sDaysInMonth = new Date(sYearNum, sMonthNum, 0).getDate();
+
+    const formatDateLocal = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    };
+
+    const todayStr = formatDateLocal(new Date());
+
+    const studentAttendanceByDate = new Map<string, AttendanceRecord>();
+    (records || []).forEach(r => {
+      if (!r.date) return;
+      const rawDateStr = typeof r.date === "string" ? r.date.slice(0, 10) : formatDateLocal(new Date(r.date));
+      if (rawDateStr) {
+        studentAttendanceByDate.set(rawDateStr, r);
+      }
+    });
+
+    const monthDaysList = [];
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    for (let day = 1; day <= sDaysInMonth; day++) {
+      const dObj = new Date(sYearNum, sMonthNum - 1, day, 12, 0, 0);
+      const dateStr = formatDateLocal(dObj);
+      const dayOfWeek = daysOfWeek[dObj.getDay()];
+      const isSunday = dObj.getDay() === 0;
+      const isDeclaredHoliday = Boolean(holidays[dateStr]);
+      const isSundayOrHoliday = isSunday || isDeclaredHoliday;
+      const isFuture = dateStr > todayStr;
+      
+      const record = studentAttendanceByDate.get(dateStr);
+      const isPresent = Boolean(record);
+
+      let status = "Absent";
+      if (isFuture) {
+        status = "Future Date";
+      } else if (isSundayOrHoliday) {
+        if (isPresent) {
+          status = "Present";
+        } else {
+          status = `Holiday (${isDeclaredHoliday ? holidays[dateStr] : "Sunday"})`;
+        }
+      } else {
+        if (isPresent) {
+          status = "Present";
+        } else {
+          status = "Absent";
+        }
+      }
+
+      monthDaysList.push({
+        dateStr,
+        dayOfWeek,
+        status,
+        record
+      });
+    }
+
+    const csvRows = [];
+    csvRows.push([`CAMPUS ATTENDANCE REGISTER — ${studentName} (${month})`]);
+    csvRows.push(["Date", "Day", "Status", "Entry Time (In)", "Exit Time (Out)", "Stay Duration"]);
+
+    monthDaysList.forEach((d) => {
+      const entryTimeStr = d.record?.entryTime ? formatTime(d.record.entryTime) : "—";
+      const exitTimeStr = d.record?.exitTime ? formatTime(d.record.exitTime) : "—";
+      let durationStr = "—";
+      if (d.record?.durationMinutes) {
+        durationStr = `${Math.floor(d.record.durationMinutes / 60)}h ${d.record.durationMinutes % 60}m`;
+      } else if (d.record?.status === "inside") {
+        durationStr = "Still on Campus";
+      }
+
+      csvRows.push([
+        d.dateStr,
+        d.dayOfWeek,
+        d.status,
+        entryTimeStr,
+        exitTimeStr,
+        durationStr
+      ]);
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + csvRows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${studentName}_Attendance_${month}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const isExitTimeOver = (logDate: string | null | undefined, exitTime: string | null | undefined) => {
     if (exitTime) return false;
     if (!logDate) return false;
@@ -1303,7 +1492,14 @@ export default function HodDashboard() {
                               </td>
 
                               <td className="py-4 px-6 text-center text-slate-300 font-mono">
-                                {formatTime(log.entryTime)}
+                                <div className="flex flex-col items-center justify-center gap-0.5">
+                                  <span>{formatTime(log.entryTime)}</span>
+                                  {isLateTime(log.entryTime) && (
+                                    <span className="inline-block px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-wider scale-95">
+                                      Late Entry
+                                    </span>
+                                  )}
+                                </div>
                               </td>
 
                               <td className="py-4 px-6 text-center text-slate-300 font-mono">
@@ -1367,6 +1563,7 @@ export default function HodDashboard() {
                         <th className="py-4 px-6">Assigned Section / Roll Range</th>
                         <th className="py-4 px-6 text-center">Mentored Students</th>
                         <th className="py-4 px-6 text-center">Faculty Passkey (Key)</th>
+                        <th className="py-4 px-6 text-center">Mentor Passkey (Dashboard)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-850/60">
@@ -1404,6 +1601,15 @@ export default function HodDashboard() {
                             <span className="inline-block px-3 py-1 rounded-xl bg-purple-950 border border-purple-800 text-purple-300 font-extrabold text-xs tracking-wider font-mono">
                               {m.key}
                             </span>
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            {INCHARGE_KEYS[m.key] ? (
+                              <span className="inline-block px-3 py-1 rounded-xl bg-blue-950 border border-blue-800 text-blue-300 font-extrabold text-xs tracking-wider font-mono">
+                                {INCHARGE_KEYS[m.key]}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-slate-500 font-mono">—</span>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -1679,7 +1885,7 @@ export default function HodDashboard() {
                               {item.student.name}
                             </h4>
                             <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-300 font-mono font-medium">
-                              <span>Roll: <strong className="text-emerald-400 font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
+                              <span>Roll: <strong className="text-emerald-400 font-extrabold">{item.student.uniqueId || "N/A"}</strong></span>
                               <span>•</span>
                               <span>Year: <strong className="text-white">{item.secInfo.yearLabel}</strong></span>
                               <span>•</span>
@@ -1796,7 +2002,13 @@ export default function HodDashboard() {
                                   : "Still on Campus"}
                             </span>
                             <div className="flex items-center gap-3 text-slate-500 text-[10px]">
-                              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-blue-500" /> In: {formatTime(record?.entryTime)}</span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5 text-blue-500" /> 
+                                In: {formatTime(record?.entryTime)}
+                                {isLateTime(record?.entryTime) && (
+                                  <span className="ml-1.5 px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider">LATE</span>
+                                )}
+                              </span>
                               {record?.exitTime ? (
                                 <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-red-500" /> Out: {formatTime(record?.exitTime)}</span>
                               ) : record && isExitTimeOver(record.date, record.exitTime) ? (
@@ -2443,7 +2655,7 @@ export default function HodDashboard() {
                       </span>
                     </h2>
                     <p className="text-sm font-semibold text-slate-400 mt-1">
-                      {selectedStudentForDetails.email || `${selectedStudentForDetails.name.toLowerCase().replace(/[^a-z0-9]/g, "") || "student"}@sphoorthyengg.ac.in`} • Department of CSE Data Science
+                      Department of CSE Data Science
                     </p>
                   </div>
                 </div>
@@ -2487,28 +2699,17 @@ export default function HodDashboard() {
                       <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">
                         Select Month
                       </label>
-                      <input
-                        type="month"
+                      <CustomMonthSelector
                         value={studentModalMonth}
-                        onClick={(e) => { try { (e.target as any).showPicker(); } catch (err) {} }}
-                        onChange={(e) => {
-                          setStudentModalMonth(e.target.value);
+                        onChange={(val) => {
+                          setStudentModalMonth(val);
                           setSelectedDayDetail(null);
                         }}
-                        className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-blue-500 [color-scheme:dark] cursor-pointer"
                       />
                     </div>
 
                     <button
-                      onClick={() => {
-                        const sId = selectedStudentForDetails.id;
-                        setSelectedStudentForDetails(null);
-                        setExportType("student");
-                        setExportStudentId(sId);
-                        setExportRollQuery(selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "");
-                        setExportMonth(studentModalMonth);
-                        setExportModalOpen(true);
-                      }}
+                      onClick={() => handleDirectCSVDownload(selectedStudentForDetails.name, studentModalMonth, studentMonthlyRecords)}
                       className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-800/60 shadow-xs"
                     >
                       <FileSpreadsheet className="w-4 h-4" />
@@ -2603,6 +2804,11 @@ export default function HodDashboard() {
                     const totalDurationMinutes = presentDaysWithDuration.reduce((sum, r) => sum + (r.durationMinutes || 0), 0);
                     const avgDurationMinutes = presentDaysWithDuration.length > 0 ? Math.round(totalDurationMinutes / presentDaysWithDuration.length) : 0;
                     const avgDurationStr = avgDurationMinutes > 0 ? `${Math.floor(avgDurationMinutes / 60)}h ${avgDurationMinutes % 60}m` : "No checkout logs";
+
+                    const hourlyForSelectedDay = (studentHourlyRecords || []).filter((hr: any) => {
+                      if (!hr.date || !selectedDayDetail) return false;
+                      return hr.date.slice(0, 10) === selectedDayDetail.dateStr;
+                    });
 
                     return (
                       <div className="space-y-6">
@@ -2740,7 +2946,12 @@ export default function HodDashboard() {
                             {selectedDayDetail.record ? (
                               <div className="grid grid-cols-3 gap-3 pt-1 text-xs">
                                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Entry Time (In)</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center justify-between">
+                                    <span>Entry Time (In)</span>
+                                    {isLateTime(selectedDayDetail.record.entryTime) && (
+                                      <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider animate-pulse">LATE</span>
+                                    )}
+                                  </p>
                                   <p className="text-sm font-bold text-emerald-400 mt-0.5">
                                     {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
                                   </p>
@@ -2771,6 +2982,41 @@ export default function HodDashboard() {
                                   : "No QR scan records registered for this date (Absent)."}
                               </p>
                             )}
+
+                             {/* Hourly Period Attendance */}
+                             <div className="space-y-2 pt-2.5 border-t border-slate-800/80">
+                               <h6 className="text-[11px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+                                 <Clock className="w-3.5 h-3.5 text-blue-400" />
+                                 Hourly Period Attendance
+                               </h6>
+                               {hourlyForSelectedDay.length > 0 ? (
+                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1">
+                                   {hourlyForSelectedDay.map((hr: any) => (
+                                     <div key={hr.id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 border border-slate-850">
+                                       <div className="space-y-0.5">
+                                         <p className="text-xs font-bold text-white">
+                                           {hr.qr_schedules?.subject || "Unknown Subject"}
+                                         </p>
+                                         <p className="text-[10px] text-slate-500 font-medium font-mono">
+                                           Period: {hr.qr_schedules?.start_time?.slice(0, 5)} - {hr.qr_schedules?.end_time?.slice(0, 5)}
+                                         </p>
+                                       </div>
+                                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${
+                                         hr.marked_present
+                                           ? "bg-emerald-950/80 text-emerald-400 border-emerald-900/30"
+                                           : "bg-red-950/80 text-red-400 border-red-900/30"
+                                       }`}>
+                                         {hr.marked_present ? "PRESENT" : "ABSENT"}
+                                       </span>
+                                     </div>
+                                   ))}
+                                 </div>
+                               ) : (
+                                 <p className="text-xs text-slate-500 italic">
+                                   No period-wise attendance records for this date.
+                                 </p>
+                               )}
+                             </div>
                           </div>
                         ) : (
                           <p className="text-xs text-slate-400 italic text-center py-2.5 bg-slate-950 rounded-xl border border-slate-850">
