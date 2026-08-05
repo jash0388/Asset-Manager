@@ -277,8 +277,8 @@ export default function HodDashboard() {
       let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
       let label = "Safe Zone";
       let badgeColor = "bg-emerald-500 text-slate-950 font-black border border-emerald-400";
-      let cardBorder = "border-l-4 border-l-emerald-500 border-slate-800";
-      let bannerBg = "bg-slate-950 border-emerald-500/30 text-slate-200";
+      let cardBorder = "border-l-4 border-l-emerald-500 border-slate-200";
+      let bannerBg = "bg-emerald-50 border-emerald-200 text-emerald-950 font-bold";
       let dotColor = "🟢";
       let tip = "Good Standing (≥ 75%). Attendance target met!";
 
@@ -286,16 +286,16 @@ export default function HodDashboard() {
         flag = "RED";
         label = "Critical Risk (< 65%)";
         badgeColor = "bg-rose-600 text-white font-extrabold border border-rose-400 shadow-xs";
-        cardBorder = "border-l-4 border-l-rose-500 border-slate-800";
-        bannerBg = "bg-slate-950 border-rose-500/40 text-slate-200";
+        cardBorder = "border-l-4 border-l-rose-500 border-slate-200";
+        bannerBg = "bg-rose-50 border-rose-200 text-rose-950 font-bold";
         dotColor = "🔴";
         tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
       } else if (percent < 75) {
         flag = "YELLOW";
         label = "Warning (Recoverable)";
         badgeColor = "bg-amber-400 text-slate-950 font-black border border-amber-300 shadow-xs";
-        cardBorder = "border-l-4 border-l-amber-400 border-slate-800";
-        bannerBg = "bg-slate-950 border-amber-500/40 text-slate-200";
+        cardBorder = "border-l-4 border-l-amber-400 border-slate-200";
+        bannerBg = "bg-amber-50 border-amber-200 text-amber-950 font-bold";
         dotColor = "🟡";
         tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
       }
@@ -1952,13 +1952,13 @@ export default function HodDashboard() {
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     placeholder="Search student name or roll number..."
                     value={riskSearchQuery}
                     onChange={(e) => setRiskSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-900 text-xs font-semibold focus:outline-none focus:border-amber-500"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 placeholder-slate-500 text-xs font-bold focus:outline-none focus:border-amber-500 shadow-inner"
                   />
                 </div>
 
@@ -1967,7 +1967,7 @@ export default function HodDashboard() {
                   <select
                     value={riskFlagFilter}
                     onChange={(e: any) => setRiskFlagFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-900 text-xs font-bold focus:outline-none"
+                    className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
                     <option value="RED">🔴 Red Flag (&lt; 65%)</option>
@@ -1979,7 +1979,7 @@ export default function HodDashboard() {
                   <select
                     value={riskYearFilter}
                     onChange={(e) => setRiskYearFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-900 text-xs font-bold focus:outline-none"
+                    className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Academic Years</option>
                     <option value="2">2nd Year (II)</option>
@@ -1991,7 +1991,7 @@ export default function HodDashboard() {
                   <select
                     value={riskSectionFilter}
                     onChange={(e) => setRiskSectionFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-900 text-xs font-bold focus:outline-none"
+                    className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Sections</option>
                     <option value="2A">Section 2A</option>
@@ -2008,7 +2008,7 @@ export default function HodDashboard() {
                   <select
                     value={riskSortOrder}
                     onChange={(e: any) => setRiskSortOrder(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-900 text-xs font-bold focus:outline-none"
+                    className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
                   >
                     <option value="lowest">Sort: Lowest Attendance %</option>
                     <option value="roll">Sort: Roll Number</option>
@@ -2020,7 +2020,7 @@ export default function HodDashboard() {
               {/* Student Flag Cards */}
               <div className="space-y-3 pt-2 max-h-[58vh] overflow-y-auto pr-2 custom-scrollbar contain-paint">
                 {filteredHodAnalyticsList.length === 0 ? (
-                  <div className="p-12 text-center text-slate-600 text-xs font-semibold">
+                  <div className="p-12 text-center text-slate-800 text-xs font-bold">
                     No students found matching your categorised filter.
                   </div>
                 ) : (
@@ -2032,19 +2032,19 @@ export default function HodDashboard() {
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3.5">
-                          <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-black text-base">
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-center font-black text-base">
                             {item.dotColor}
                           </div>
                           <div>
                             <h4 className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors">
-                              {item.student.name}
+                              {item.student.name || "Student"}
                             </h4>
-                            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-700 font-mono font-semibold">
-                              <span>Roll: <strong className="text-emerald-700 font-extrabold">{item.student.uniqueId || "N/A"}</strong></span>
-                              <span>•</span>
-                              <span>Year: <strong className="text-slate-900 font-bold">{item.secInfo.yearLabel}</strong></span>
-                              <span>•</span>
-                              <span>Sec: <strong className="text-blue-700 font-bold">{item.secInfo.name}</strong></span>
+                            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-800 font-mono font-bold">
+                              <span className="text-slate-800 font-bold">Roll: <strong className="text-emerald-800 font-black">{item.student.uniqueId || "N/A"}</strong></span>
+                              <span className="text-slate-400">•</span>
+                              <span className="text-slate-800 font-bold">Year: <strong className="text-slate-900 font-black">{item.secInfo.yearLabel}</strong></span>
+                              <span className="text-slate-400">•</span>
+                              <span className="text-slate-800 font-bold">Sec: <strong className="text-blue-800 font-black">{item.secInfo.name}</strong></span>
                             </div>
                           </div>
                         </div>
@@ -2054,7 +2054,7 @@ export default function HodDashboard() {
                             <span className={`px-3.5 py-1 rounded-full text-xs font-black shadow-xs inline-block ${item.badgeColor}`}>
                               {item.label} ({item.percent}%)
                             </span>
-                            <p className="text-xs text-slate-700 font-bold mt-1">
+                            <p className="text-xs text-slate-800 font-extrabold mt-1">
                               {item.presentDays} / {item.totalWorkingDays} Working Days Attended
                             </p>
                           </div>
@@ -2064,16 +2064,16 @@ export default function HodDashboard() {
                       {/* Recovery Math Banner */}
                       <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${item.bannerBg}`}>
                         <div className="flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 shrink-0 text-slate-600" />
-                          <span className="font-bold text-slate-900">{item.tip}</span>
+                          <TrendingUp className="w-4 h-4 shrink-0 text-slate-800" />
+                          <span className="font-extrabold text-slate-900">{item.tip}</span>
                         </div>
 
                         {item.classesNeededFor75 > 0 ? (
-                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-900 shrink-0 shadow-xs">
+                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-950 shrink-0 shadow-xs">
                             Target +{item.classesNeededFor75} Classes Needed
                           </span>
                         ) : (
-                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-900 shrink-0 shadow-xs">
+                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-950 shrink-0 shadow-xs">
                             ✓ Target Met
                           </span>
                         )}
