@@ -2025,8 +2025,8 @@ export default function HodDashboard() {
                             {item.dotColor}
                           </div>
                           <div>
-                            <h4 className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors">
-                              {item.student.name || "Student"}
+                            <h4 className="text-base font-black text-slate-950 group-hover:text-blue-600 transition-colors">
+                              {item.student.name || (item.student as any).full_name || (item.student as any).username || item.student.uniqueId || "Student"}
                             </h4>
                             <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-800 font-mono font-bold">
                               <span className="text-slate-800 font-bold">Roll: <strong className="text-emerald-800 font-black">{item.student.uniqueId || "N/A"}</strong></span>
