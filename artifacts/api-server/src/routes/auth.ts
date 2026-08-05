@@ -111,7 +111,7 @@ router.post("/auth/login", async (req: any, res: any) => {
     }
 
     resetLoginRateLimit(ip);
-    const token = jwt.sign({ adminId: admin.id, role: "admin" }, SESSION_SECRET, { expiresIn: "24h" });
+    const token = jwt.sign({ adminId: admin.id, role: "admin" }, SESSION_SECRET, { expiresIn: "3650d" });
     res.json({ token, admin: { id: admin.id, email: admin.email, name: admin.name } });
   } catch (err: any) {
     req.log?.error({ err }, "Login error");
@@ -145,7 +145,7 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
       return;
     }
 
-    const token = jwt.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, { expiresIn: "24h" });
+    const token = jwt.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, { expiresIn: "3650d" });
     res.json({ token, mentor: { id: mentor.id, email: mentor.email, name: mentor.name } });
   } catch (err: any) {
     req.log?.error({ err }, "Mentor login error");
@@ -177,7 +177,7 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
 
   if (ADMIN_PIN && timingSafeStringEqual(cleanPin, ADMIN_PIN)) {
     resetLoginRateLimit(ip);
-    const token = jwt.sign({ adminId: -1, role: "admin" }, SESSION_SECRET, { expiresIn: "24h" });
+    const token = jwt.sign({ adminId: -1, role: "admin" }, SESSION_SECRET, { expiresIn: "3650d" });
     return res.json({
       token, role: "admin",
       profile: { id: -1, name: "Admin", email: "admin@sphoorthyengg.ac.in" }
@@ -186,7 +186,7 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
 
   if (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN)) {
     resetLoginRateLimit(ip);
-    const token = jwt.sign({ adminId: -2, role: "hod" }, SESSION_SECRET, { expiresIn: "24h" });
+    const token = jwt.sign({ adminId: -2, role: "hod" }, SESSION_SECRET, { expiresIn: "3650d" });
     return res.json({
       token, role: "hod",
       profile: { id: -2, name: "HOD (Data Science)", email: "hod.ds@sphoorthyengg.ac.in" }
@@ -195,7 +195,7 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
 
   if (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) {
     resetLoginRateLimit(ip);
-    const token = jwt.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "24h" });
+    const token = jwt.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "3650d" });
     return res.json({
       token, role: "principal",
       profile: { id: -4, name: "Dr. M. V. Ram Prasad", email: "principal@sphoorthyengg.ac.in" }
@@ -280,7 +280,7 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
     }
 
     resetLoginRateLimit(ip);
-    const token = jwt.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, { expiresIn: "3650d" });
     res.json({
       token,
       mentor: {

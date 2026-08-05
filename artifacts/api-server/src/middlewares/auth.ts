@@ -83,9 +83,9 @@ export function mentorOnly(req: AuthRequest, res: Response, next: NextFunction) 
 }
 
 export function signToken(adminId: number): string {
-  return jwt.sign({ adminId }, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ adminId }, JWT_SECRET, { expiresIn: "3650d" });
 }
 
 export function signMentorToken(mentorId: number): string {
-  return jwt.sign({ mentorId }, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ mentorId }, JWT_SECRET, { expiresIn: "3650d" });
 }
