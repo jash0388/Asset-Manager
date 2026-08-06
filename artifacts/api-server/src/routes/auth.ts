@@ -146,7 +146,7 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
     const cleanPin = pin.trim();
     const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
     const HOD_PIN = process.env["HOD_PIN"] || "038811";
-    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "999999";
+    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
 
     // HOD Check (supports 998226, 038811, or 038899)
     if (
@@ -163,12 +163,11 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
       });
     }
 
-    // Admin Check (supports 038899, 998226 or 123456)
+    // Admin Check (supports 038899 or 998226)
     if (
       (ADMIN_PIN && timingSafeStringEqual(cleanPin, ADMIN_PIN)) ||
       timingSafeStringEqual(cleanPin, "998226") ||
-      timingSafeStringEqual(cleanPin, "038899") ||
-      timingSafeStringEqual(cleanPin, "123456")
+      timingSafeStringEqual(cleanPin, "038899")
     ) {
       resetLoginRateLimit(ip);
       const token = jwt.sign({ adminId: -1, role: "admin" }, SESSION_SECRET, { expiresIn: "3650d" });
@@ -178,11 +177,8 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
       });
     }
 
-    // Principal Check (supports 999999)
-    if (
-      (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) ||
-      timingSafeStringEqual(cleanPin, "999999")
-    ) {
+    // Principal Check
+    if (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) {
       resetLoginRateLimit(ip);
       const token = jwt.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "3650d" });
       return res.json({
