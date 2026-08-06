@@ -275,6 +275,11 @@ function setQueue(items: PendingScan[]) {
   writeJson(KEY_QUEUE, items);
 }
 
+export function clearLocalQueue() {
+  setQueue([]);
+  try { localStorage.setItem(KEY_LASTSYNC, String(Date.now())); } catch {}
+}
+
 function getNextSeqNo(): number {
   try {
     const raw = localStorage.getItem(KEY_SEQ);

@@ -7,7 +7,7 @@ import {
 import {
   refreshUserCache, findUserLocal, getCachedUsers, getCacheFetchedAt,
   getCooldownMsRemaining, markScannedLocally, extractCleanId,
-  enqueueScan, getQueue, syncQueue, getLastSyncAt,
+  enqueueScan, getQueue, syncQueue, getLastSyncAt, clearLocalQueue,
   type CachedUser, type PendingScan,
 } from "../lib/offlineScanner";
 
@@ -551,14 +551,29 @@ export default function SecurityApp() {
         </div>
 
         {queueLen > 0 && (
-          <button
-            onClick={downloadQueueJson}
-            data-testid="download-scans-json"
-            className="w-full mt-3 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-transform active:scale-98"
-          >
-            <Download className="w-4 h-4 text-slate-950 stroke-[3]" />
-            Download Offline Scans File ({queueLen} items .json)
-          </button>
+          <div className="w-full mt-3 flex flex-col gap-2">
+            <button
+              onClick={downloadQueueJson}
+              data-testid="download-scans-json"
+              className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-transform active:scale-98"
+            >
+              <Download className="w-4 h-4 text-slate-950 stroke-[3]" />
+              Download Offline Scans File ({queueLen} items .json)
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm("Clear pending queue items from phone? (Already ingested in database)")) {
+                  clearLocalQueue();
+                  setQueue([]);
+                  setSyncStatusMsg("Local queue cleared.");
+                  setTimeout(() => setSyncStatusMsg(""), 3000);
+                }
+              }}
+              className="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer"
+            >
+              Clear Pending Queue ({queueLen})
+            </button>
+          </div>
         )}
 
         <div className="w-full mt-4 px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-xs text-slate-400">
