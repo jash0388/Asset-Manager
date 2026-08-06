@@ -141,24 +141,38 @@ export default function SecurityApp() {
   };
 
   // ---------- Background sync loop ----------
-  const runSync = useCallback(async () => {
-    if (!navigator.onLine) return;
-    if (getQueue().length === 0) return;
+  const [syncStatusMsg, setSyncStatusMsg] = useState<string>("");
+
+  const runSync = useCallback(async (manual = false) => {
+    const qLen = getQueue().length;
+    if (qLen === 0) {
+      if (manual) setSyncStatusMsg("No pending scans in queue.");
+      return;
+    }
     setSyncing(true);
+    setSyncStatusMsg("Syncing pending scans...");
     try {
-      await syncQueue();
+      const res = await syncQueue();
       setQueue(getQueue());
       setLastSync(getLastSyncAt());
+      if (res.synced > 0 || res.attempted > 0) {
+        setSyncStatusMsg(`Successfully synced ${res.synced} scans (${getQueue().length} remaining).`);
+      } else {
+        setSyncStatusMsg("Server network error — will retry automatically.");
+      }
+    } catch {
+      setSyncStatusMsg("Sync failed — network unavailable.");
     } finally {
       setSyncing(false);
+      setTimeout(() => setSyncStatusMsg(""), 5000);
     }
   }, []);
 
   useEffect(() => {
-    const id = setInterval(() => { runSync(); }, SYNC_INTERVAL_MS);
-    const onOnline = () => { runSync(); };
+    const id = setInterval(() => { runSync(false); }, SYNC_INTERVAL_MS);
+    const onOnline = () => { runSync(false); };
     window.addEventListener("online", onOnline);
-    runSync();
+    runSync(false);
     return () => {
       clearInterval(id);
       window.removeEventListener("online", onOnline);
@@ -494,23 +508,29 @@ export default function SecurityApp() {
           )}
         </div>
 
+        {syncStatusMsg && (
+          <div className="w-full mt-3 px-4 py-2 rounded-xl bg-blue-950/80 border border-blue-600/50 text-blue-200 text-xs font-bold text-center animate-fadeIn shadow-md">
+            {syncStatusMsg}
+          </div>
+        )}
+
         <div className="w-full mt-4 grid grid-cols-2 gap-3">
           <button
             onClick={refreshCacheNow}
-            disabled={refreshing || !online}
+            disabled={refreshing}
             data-testid="refresh-students"
-            className="py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-semibold text-slate-200 flex items-center justify-center gap-2"
+            className="py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-semibold text-slate-200 flex items-center justify-center gap-2 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
             Refresh student list
           </button>
           <button
-            onClick={runSync}
-            disabled={syncing || queueLen === 0 || !online}
+            onClick={() => runSync(true)}
+            disabled={syncing || queueLen === 0}
             data-testid="sync-now"
-            className="py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-semibold text-slate-200 flex items-center justify-center gap-2"
+            className="py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:opacity-50 text-xs font-bold text-white flex items-center justify-center gap-2 cursor-pointer shadow-md"
           >
-            <CloudUpload className={`w-3.5 h-3.5 ${syncing ? "animate-pulse text-blue-400" : ""}`} />
+            <CloudUpload className={`w-3.5 h-3.5 ${syncing ? "animate-pulse text-white" : ""}`} />
             Sync now ({queueLen})
           </button>
         </div>
@@ -540,9 +560,9 @@ export default function SecurityApp() {
                 <h2 className="text-sm font-semibold text-white">Pending sync ({queueLen})</h2>
               </div>
               <button
-                onClick={runSync}
-                disabled={syncing || queueLen === 0 || !online}
-                className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                onClick={() => runSync(true)}
+                disabled={syncing || queueLen === 0}
+                className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50 cursor-pointer font-bold"
               >
                 {syncing ? "Syncing…" : "Sync now"}
               </button>

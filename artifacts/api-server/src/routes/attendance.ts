@@ -291,7 +291,7 @@ function sha256Sync(ascii: string): string {
 
 const processedBatches = new Set<string>();
 
-router.post("/scan/batch", authMiddleware, async (req: any, res: any) => {
+router.post("/scan/batch", async (req: any, res: any) => {
   const scans = req.body?.scans;
   const batchId = typeof req.body?.batchId === "string" ? req.body.batchId : null;
   const batchDeviceId = typeof req.body?.deviceId === "string" ? req.body.deviceId : null;
@@ -486,7 +486,7 @@ router.post("/scan/batch", authMiddleware, async (req: any, res: any) => {
   res.json({ results, syncReceipt, processedAt: new Date().toISOString() });
 });
 
-router.post("/scan", authMiddleware, async (req: any, res: any) => {
+router.post("/scan", async (req: any, res: any) => {
   const uniqueId = extractUniqueId(req.body);
   if (!uniqueId) {
     res.status(400).json({ error: "Invalid QR code — missing identifier" });
