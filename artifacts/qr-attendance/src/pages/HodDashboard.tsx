@@ -1624,10 +1624,10 @@ export default function HodDashboard() {
                           <p className="text-[11px] text-gray-400 font-mono mt-0.5 truncate w-full block">{m.email}</p>
                         </div>
                       </div>
-                      <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border ${
-                        m.yearLabel?.includes("4") ? "bg-orange-950/60 border-orange-800/50 text-orange-700"
-                        : m.yearLabel?.includes("3") ? "bg-blue-950/60 border-blue-800/50 text-blue-700"
-                        : "bg-emerald-950/60 border-emerald-800/50 text-emerald-700"
+                      <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
+                        m.yearLabel?.includes("4") ? "bg-orange-50 border-orange-200 text-orange-700"
+                        : m.yearLabel?.includes("3") ? "bg-blue-50 border-blue-200 text-blue-700"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-700"
                       }`}>
                         {m.yearLabel}
                       </span>
@@ -1647,6 +1647,28 @@ export default function HodDashboard() {
                       <span className="text-xs font-bold text-gray-500 truncate">{m.role}</span>
                       <span className="text-xs font-black text-gray-800 font-mono bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-300 flex-shrink-0">{m.count} Students</span>
                     </div>
+
+                    {/* Login Key from DB */}
+                    {(() => {
+                      const dbMentor = mentorsTracking.find((mt: any) =>
+                        mt.email?.toLowerCase() === m.email?.toLowerCase() ||
+                        mt.name?.toLowerCase() === m.name?.toLowerCase()
+                      );
+                      const key = dbMentor?.key || dbMentor?.passkey;
+                      return key ? (
+                        <div className="flex items-center justify-between bg-blue-50 rounded-xl px-3.5 py-2.5 border border-blue-100">
+                          <span className="text-xs font-bold text-blue-500 flex items-center gap-1.5">
+                            🔑 Login Key
+                          </span>
+                          <span className="text-sm font-black text-blue-800 font-mono tracking-[0.2em] bg-white px-2.5 py-1 rounded-lg border border-blue-200 select-all">{key}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5 border border-gray-200">
+                          <span className="text-xs font-bold text-gray-400 flex items-center gap-1.5">🔑 Login Key</span>
+                          <span className="text-xs font-mono text-gray-400 italic">Not set in DB</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
@@ -1880,15 +1902,15 @@ export default function HodDashboard() {
                           </div>
                           
                           <span
-                            className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider border shrink-0 ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border shrink-0 ${
                               isSafe
-                                ? "bg-emerald-100 text-emerald-900 border-emerald-300"
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                                 : isWarning
-                                ? "bg-amber-100 text-amber-900 border-amber-300"
-                                : "bg-rose-100 text-rose-900 border-rose-300"
+                                ? "bg-amber-100 text-amber-800 border-amber-300"
+                                : "bg-rose-100 text-rose-800 border-rose-300"
                             }`}
                           >
-                            {item.percent}% ({isSafe ? "Safe" : isWarning ? "Warning" : "Critical"})
+                            {item.percent}% {isSafe ? "✅ Safe" : isWarning ? "⚠️ Warning" : "🔴 Critical"}
                           </span>
                         </div>
 
