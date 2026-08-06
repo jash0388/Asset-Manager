@@ -408,20 +408,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
         };
       }
 
-      if (current.lastScanAt) {
-        const lastScanTime = new Date(current.lastScanAt).getTime();
-        const timeDiff = scannedAt.getTime() - lastScanTime;
-        if (timeDiff >= 0 && timeDiff < 20 * 60 * 1000) {
-          results.push({
-            clientScanId,
-            status: "ok",
-            action: current.status === "inside" ? "entry" : "exit",
-            user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-            cooldown: true,
-          });
-          continue;
-        }
-      }
+
 
       if (current.status === "left") {
         // Entry scan (student entering campus / checking in)
@@ -522,20 +509,7 @@ router.post("/scan", async (req: any, res: any) => {
 
     const record = existingRecords?.[0];
 
-    if (record && record.last_scan_at) {
-      const lastScanTime = new Date(record.last_scan_at).getTime();
-      const timeDiff = Date.now() - lastScanTime;
-      if (timeDiff >= 0 && timeDiff < 20 * 60 * 1000) {
-        const currentStatus = getRecordStatus(record);
-        return res.json({
-          success: true,
-          action: currentStatus === "inside" ? "entry" : "exit",
-          message: `${user.name} is already scanned.`,
-          user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          cooldown: true,
-        });
-      }
-    }
+
 
     const currentStatus = record ? getRecordStatus(record) : "left";
     const isLateEntry = req.body.isLateEntry === true || req.body.is_late_entry === true;

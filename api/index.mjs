@@ -65097,20 +65097,6 @@ router4.post("/scan/batch", async (req, res) => {
           lastScanAt: existing?.last_scan_at
         };
       }
-      if (current.lastScanAt) {
-        const lastScanTime = new Date(current.lastScanAt).getTime();
-        const timeDiff = scannedAt.getTime() - lastScanTime;
-        if (timeDiff >= 0 && timeDiff < 20 * 60 * 1e3) {
-          results.push({
-            clientScanId,
-            status: "ok",
-            action: current.status === "inside" ? "entry" : "exit",
-            user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-            cooldown: true
-          });
-          continue;
-        }
-      }
       if (current.status === "left") {
         let entryTime = ts;
         if (isLateEntry) {
@@ -65181,20 +65167,6 @@ router4.post("/scan", async (req, res) => {
     const now = (/* @__PURE__ */ new Date()).toISOString();
     const { data: existingRecords } = await supabase.from("qr_attendance").select("*").eq("user_id", user.id).eq("date", date).order("last_scan_at", { ascending: false, nullsFirst: false }).limit(1);
     const record = existingRecords?.[0];
-    if (record && record.last_scan_at) {
-      const lastScanTime = new Date(record.last_scan_at).getTime();
-      const timeDiff = Date.now() - lastScanTime;
-      if (timeDiff >= 0 && timeDiff < 20 * 60 * 1e3) {
-        const currentStatus2 = getRecordStatus(record);
-        return res.json({
-          success: true,
-          action: currentStatus2 === "inside" ? "entry" : "exit",
-          message: `${user.name} is already scanned.`,
-          user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
-          cooldown: true
-        });
-      }
-    }
     const currentStatus = record ? getRecordStatus(record) : "left";
     const isLateEntry = req.body.isLateEntry === true || req.body.is_late_entry === true;
     if (currentStatus === "left") {
