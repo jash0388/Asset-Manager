@@ -158,10 +158,34 @@ export function getCacheFetchedAt(): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+export function extractCleanId(raw: string): string {
+  const trimmed = (raw || "").trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    try {
+      const obj = JSON.parse(trimmed);
+      if (obj && typeof obj.uniqueId === "string") return obj.uniqueId.trim().toUpperCase();
+    } catch {}
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const u = new URL(trimmed);
+      const q = u.searchParams.get("uniqueId") || u.searchParams.get("uid");
+      if (q) return q.trim().toUpperCase();
+      const last = u.pathname.split("/").filter(Boolean).pop();
+      if (last) return decodeURIComponent(last).trim().toUpperCase();
+    } catch {}
+  }
+  return trimmed.toUpperCase();
+}
+
 function buildIndex(users: CachedUser[]): Map<string, CachedUser> {
   const map = new Map<string, CachedUser>();
   for (const u of users) {
-    if (u && u.uniqueId) map.set(u.uniqueId.trim(), u);
+    if (u && u.uniqueId) {
+      map.set(extractCleanId(u.uniqueId), u);
+      map.set(u.uniqueId.trim().toUpperCase(), u);
+    }
   }
   return map;
 }
@@ -174,7 +198,9 @@ function getIndex(): Map<string, CachedUser> {
 }
 
 export function findUserLocal(uniqueId: string): CachedUser | undefined {
-  return getIndex().get(uniqueId.trim());
+  if (!uniqueId) return undefined;
+  const clean = extractCleanId(uniqueId);
+  return getIndex().get(clean) || getIndex().get(uniqueId.trim().toUpperCase());
 }
 
 export async function refreshUserCache(force = false): Promise<{ count: number; fromNetwork: boolean }> {

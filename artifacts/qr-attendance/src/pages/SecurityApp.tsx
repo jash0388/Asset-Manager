@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import {
   refreshUserCache, findUserLocal, getCachedUsers, getCacheFetchedAt,
-  getCooldownMsRemaining, markScannedLocally,
+  getCooldownMsRemaining, markScannedLocally, extractCleanId,
   enqueueScan, getQueue, syncQueue, getLastSyncAt,
   type CachedUser, type PendingScan,
 } from "../lib/offlineScanner";
@@ -201,19 +201,17 @@ export default function SecurityApp() {
 
   // ---------- LOCAL scan handling (instant, no network) ----------
   const handleScan = (decodedText: string) => {
-    const text = decodedText.trim();
-    if (!text) return;
+    const raw = decodedText.trim();
+    if (!raw) return;
+
+    const uid = extractCleanId(raw);
+    if (!uid) return;
 
     const last = lastScanRef.current;
-    if (last && last.text === text && Date.now() - last.at < 10_000) return; // ignore same QR for 10s
-    lastScanRef.current = { text, at: Date.now() };
+    if (last && (last.text === raw || last.text === uid) && Date.now() - last.at < 5_000) return; // 5s debouncer
+    lastScanRef.current = { text: uid, at: Date.now() };
 
-    const uid = text;
-    const user = findUserLocal(uid);
-    if (!user) {
-      showPopup({ ok: false, message: `Unknown QR code: ${uid}` });
-      return;
-    }
+    const user = findUserLocal(uid) || { id: 0, name: uid, uniqueId: uid, role: "student" };
 
     const cdRemaining = getCooldownMsRemaining(uid);
     if (cdRemaining > 0) {
