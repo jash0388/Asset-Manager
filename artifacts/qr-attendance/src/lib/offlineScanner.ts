@@ -356,36 +356,38 @@ export async function syncQueue(): Promise<SyncResult> {
 
   let response: any;
   let fetchError = "";
-  const endpoints = [
-    "/api/scan/batch",
-    `${window.location.origin}/api/scan/batch`,
-  ];
 
-  for (const ep of endpoints) {
+  try {
+    const token = localStorage.getItem("qr_token") || localStorage.getItem("token");
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    response = await customFetch<{ results: any[]; syncReceipt?: string }>("/api/scan/batch", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+  } catch (err: any) {
+    fetchError = String(err?.message || err || "");
+    console.warn("customFetch failed, trying direct window.fetch:", fetchError);
     try {
-      const res = await window.fetch(ep, {
+      const token = localStorage.getItem("qr_token") || localStorage.getItem("token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await window.fetch("/api/scan/batch", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        headers,
         body: JSON.stringify(payload),
       });
-      const text = await res.text();
-      if (!res.ok) {
-        fetchError = `HTTP ${res.status}: ${text.slice(0, 100)}`;
-        continue;
+      if (res.ok) {
+        response = await res.json();
+        fetchError = "";
+      } else {
+        fetchError = `Direct fetch HTTP ${res.status}: ${await res.text()}`;
       }
-      try {
-        response = JSON.parse(text);
-        if (response && Array.isArray(response.results)) {
-          fetchError = "";
-          break; // Success!
-        } else {
-          fetchError = `Invalid JSON response: ${text.slice(0, 100)}`;
-        }
-      } catch (pErr: any) {
-        fetchError = `JSON parse error: ${pErr.message} on text: ${text.slice(0, 50)}`;
-      }
-    } catch (netErr: any) {
-      fetchError = `Network fetch error: ${netErr.message || String(netErr)}`;
+    } catch (directErr: any) {
+      fetchError = `Direct fetch error: ${directErr?.message || String(directErr)}`;
     }
   }
 
