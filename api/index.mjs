@@ -28920,12 +28920,12 @@ var require_jwa = __commonJS({
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto2 ? function timingSafeEqual2(a, b) {
+    var timingSafeEqual2 = "timingSafeEqual" in crypto2 ? function timingSafeEqual3(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
       return crypto2.timingSafeEqual(a, b);
-    } : function timingSafeEqual2(a, b) {
+    } : function timingSafeEqual3(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
       }
@@ -28934,7 +28934,7 @@ var require_jwa = __commonJS({
     function createHmacVerifier(bits) {
       return function verify(thing, signature, secret) {
         var computedSig = createHmacSigner(bits)(thing, secret);
-        return timingSafeEqual(Buffer2.from(signature), Buffer2.from(computedSig));
+        return timingSafeEqual2(Buffer2.from(signature), Buffer2.from(computedSig));
       };
     }
     function createKeySigner(bits) {
@@ -55728,6 +55728,7 @@ var bcryptjs_default = {
 
 // src/routes/auth.ts
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
+import { timingSafeEqual, createHash } from "crypto";
 
 // ../../node_modules/.pnpm/@supabase+supabase-js@2.105.1/node_modules/@supabase/supabase-js/dist/index.mjs
 var dist_exports = {};
@@ -64331,7 +64332,53 @@ var supabase = createClient(supabaseUrl, supabaseServiceKey, {
 
 // src/routes/auth.ts
 var router2 = (0, import_express2.Router)();
-var SESSION_SECRET = process.env["SESSION_SECRET"] || "fallback-dev-secret";
+var SESSION_SECRET = process.env["SESSION_SECRET"] || "fallback-insecure-secret-change-me";
+if (!process.env["SESSION_SECRET"]) {
+  console.error("[SECURITY WARNING] SESSION_SECRET env var not set \u2014 using insecure fallback. Set this in production immediately.");
+}
+function timingSafeStringEqual(a, b) {
+  try {
+    const ha = createHash("sha256").update(a).digest();
+    const hb = createHash("sha256").update(b).digest();
+    return timingSafeEqual(ha, hb);
+  } catch {
+    return false;
+  }
+}
+var ipLoginAttempts = /* @__PURE__ */ new Map();
+var MAX_FAILED_ATTEMPTS = 5;
+function enforceLoginRateLimit(ip) {
+  const now = Date.now();
+  const record = ipLoginAttempts.get(ip);
+  if (!record || now > record.resetTime) {
+    return { allowed: true, retryAfterSec: 0 };
+  }
+  if (record.count >= MAX_FAILED_ATTEMPTS) {
+    const retryAfterSec = Math.ceil((record.resetTime - now) / 1e3);
+    return { allowed: false, retryAfterSec };
+  }
+  return { allowed: true, retryAfterSec: 0 };
+}
+function recordFailedAttempt(ip) {
+  const now = Date.now();
+  const WINDOW_MS = 15 * 60 * 1e3;
+  let record = ipLoginAttempts.get(ip);
+  if (!record || now > record.resetTime) {
+    record = { count: 1, resetTime: now + WINDOW_MS };
+  } else {
+    record.count += 1;
+  }
+  ipLoginAttempts.set(ip, record);
+  const remaining = Math.max(0, MAX_FAILED_ATTEMPTS - record.count);
+  const resetMin = Math.ceil((record.resetTime - now) / 6e4);
+  return { remaining, resetMin };
+}
+function resetLoginRateLimit(ip) {
+  ipLoginAttempts.delete(ip);
+}
+function getClientIp(req) {
+  return (req.headers["x-forwarded-for"] || req.ip || "127.0.0.1").toString().split(",")[0].trim();
+}
 router2.post("/auth/login", async (req, res) => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
@@ -64339,30 +64386,28 @@ router2.post("/auth/login", async (req, res) => {
     return;
   }
   const { email, password } = parsed.data;
+  const ip = getClientIp(req);
+  const rateCheck = enforceLoginRateLimit(ip);
+  if (!rateCheck.allowed) {
+    res.status(429).json({ error: `Too many attempts. Try again in ${Math.ceil(rateCheck.retryAfterSec / 60)} minutes.` });
+    return;
+  }
   try {
-    const { data: admins, error } = await supabase.from("qr_admins").select("*").eq("email", email).limit(1);
+    const { data: admins, error } = await supabase.from("qr_admins").select("id, email, name, password_hash").eq("email", email).limit(1);
     if (error) throw error;
     const admin = admins?.[0];
-    if (!admin) {
+    const isValid2 = admin ? await bcryptjs_default.compare(password, admin.password_hash) : false;
+    if (!admin || !isValid2) {
+      recordFailedAttempt(ip);
       res.status(401).json({ error: "Invalid email or password" });
       return;
     }
-    const isValid2 = await bcryptjs_default.compare(password, admin.password_hash);
-    if (!isValid2) {
-      res.status(401).json({ error: "Invalid email or password" });
-      return;
-    }
-    const token = import_jsonwebtoken.default.sign({ adminId: admin.id, email: admin.email, role: "admin" }, SESSION_SECRET, {
-      expiresIn: "24h"
-    });
-    res.json({
-      token,
-      admin: { id: admin.id, email: admin.email, name: admin.name }
-    });
+    resetLoginRateLimit(ip);
+    const token = import_jsonwebtoken.default.sign({ adminId: admin.id, role: "admin" }, SESSION_SECRET, { expiresIn: "3650d" });
+    res.json({ token, admin: { id: admin.id, email: admin.email, name: admin.name } });
   } catch (err) {
-    console.error("[Login API] Fatal error:", err);
-    req.log.error({ err }, "Login error");
-    res.status(500).json({ error: "Internal server error: " + (err instanceof Error ? err.message : "Unknown error") });
+    req.log?.error({ err }, "Login error");
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 router2.post("/auth/mentor-login", async (req, res) => {
@@ -64373,56 +64418,139 @@ router2.post("/auth/mentor-login", async (req, res) => {
   }
   const { email, password } = parsed.data;
   try {
-    const { data: mentors, error } = await supabase.from("qr_mentors").select("*").eq("email", email).limit(1);
+    const { data: mentors, error } = await supabase.from("qr_mentors").select("id, email, name, password_hash").eq("email", email).limit(1);
     if (error) throw error;
     const mentor = mentors?.[0];
-    if (!mentor) {
+    const valid = mentor ? await bcryptjs_default.compare(password, mentor.password_hash) : false;
+    if (!mentor || !valid) {
       res.status(401).json({ error: "Invalid credentials" });
       return;
     }
-    const valid = await bcryptjs_default.compare(password, mentor.password_hash);
-    if (!valid) {
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
-    }
-    const token = import_jsonwebtoken.default.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, {
-      expiresIn: "24h"
-    });
-    res.json({
-      token,
-      mentor: { id: mentor.id, email: mentor.email, name: mentor.name }
-    });
+    const token = import_jsonwebtoken.default.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, { expiresIn: "3650d" });
+    res.json({ token, mentor: { id: mentor.id, email: mentor.email, name: mentor.name } });
   } catch (err) {
-    req.log.error({ err }, "Mentor login error");
+    req.log?.error({ err }, "Mentor login error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router2.get("/auth/mentor-key-login", (_req, res) => {
-  res.json({ status: "active", message: 'Mentor key login endpoint is ready. Send a POST request with JSON body { "key": "YOUR_KEY" }.' });
+router2.post("/auth/pin-login", async (req, res) => {
+  const ip = getClientIp(req);
+  const rateCheck = enforceLoginRateLimit(ip);
+  if (!rateCheck.allowed) {
+    res.status(429).json({ error: `Too many attempts. Try again in ${Math.ceil(rateCheck.retryAfterSec / 60)} minutes.` });
+    return;
+  }
+  const { pin } = req.body;
+  if (!pin || typeof pin !== "string") {
+    res.status(400).json({ error: "PIN is required" });
+    return;
+  }
+  const cleanPin = pin.trim();
+  const ADMIN_PIN = process.env["ADMIN_PIN"] || "";
+  const HOD_PIN = process.env["HOD_PIN"] || "";
+  const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
+  if (ADMIN_PIN && timingSafeStringEqual(cleanPin, ADMIN_PIN)) {
+    resetLoginRateLimit(ip);
+    const token = import_jsonwebtoken.default.sign({ adminId: -1, role: "admin" }, SESSION_SECRET, { expiresIn: "3650d" });
+    return res.json({
+      token,
+      role: "admin",
+      profile: { id: -1, name: "Admin", email: "admin@sphoorthyengg.ac.in" }
+    });
+  }
+  if (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN)) {
+    resetLoginRateLimit(ip);
+    const token = import_jsonwebtoken.default.sign({ adminId: -2, role: "hod" }, SESSION_SECRET, { expiresIn: "3650d" });
+    return res.json({
+      token,
+      role: "hod",
+      profile: { id: -2, name: "HOD (Data Science)", email: "hod.ds@sphoorthyengg.ac.in" }
+    });
+  }
+  if (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) {
+    resetLoginRateLimit(ip);
+    const token = import_jsonwebtoken.default.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "3650d" });
+    return res.json({
+      token,
+      role: "principal",
+      profile: { id: -4, name: "Dr. M. V. Ram Prasad", email: "principal@sphoorthyengg.ac.in" }
+    });
+  }
+  const { remaining } = recordFailedAttempt(ip);
+  const remText = remaining > 0 ? ` (${remaining} attempt${remaining > 1 ? "s" : ""} remaining)` : "";
+  res.status(401).json({ error: `Invalid access code${remText}` });
 });
+router2.get("/auth/mentor-key-login", (_req, res) => {
+  res.json({ status: "active", message: 'Send POST with JSON body { "key": "YOUR_KEY" }' });
+});
+var FACULTY_PIN_MAP = {
+  "101": { id: 1, name: "Mrs. CH. Naga Rohini", email: "mrschnagarohini@gmail.com", key: "101", section: "DS III/I/B", bcryptHash: bcryptjs_default.hashSync("101", 10) },
+  "102": { id: 2, name: "Mrs. Swetha", email: "mrsswetha@gmail.com", key: "102", section: "DS III/I/C", bcryptHash: bcryptjs_default.hashSync("102", 10) },
+  "103": { id: 3, name: "Mr Miskeen Ali", email: "mrmiskeenali@gmail.com", key: "103", section: "DS III/I/B", bcryptHash: bcryptjs_default.hashSync("103", 10) },
+  "104": { id: 4, name: "Mr M Yadaiah", email: "mrmyadaiah@gmail.com", key: "104", section: "DS III/I/C", bcryptHash: bcryptjs_default.hashSync("104", 10) },
+  "105": { id: 5, name: "Mr M Srinivasulu", email: "mrmsrinivasulu@gmail.com", key: "105", section: "DS II/I/B", bcryptHash: bcryptjs_default.hashSync("105", 10) },
+  "106": { id: 6, name: "Mr T Shravan Kumar", email: "mrtshravankumar@gmail.com", key: "106", section: "DS IV/I/B", bcryptHash: bcryptjs_default.hashSync("106", 10) },
+  "107": { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "107", section: "DS II/I/C", bcryptHash: bcryptjs_default.hashSync("107", 10) },
+  "108": { id: 8, name: "Mrs G Sushma", email: "mrsgsushma@gmail.com", key: "108", section: "DS III/I/A", bcryptHash: bcryptjs_default.hashSync("108", 10) },
+  "109": { id: 9, name: "Mrs A Sravanthi", email: "mrsasravanthi@gmail.com", key: "109", section: "DS IV/I/A", bcryptHash: bcryptjs_default.hashSync("109", 10) },
+  "110": { id: 10, name: "Mrs K Sneha", email: "mrsksneha@gmail.com", key: "110", section: "DS IV/I/B", bcryptHash: bcryptjs_default.hashSync("110", 10) },
+  "111": { id: 11, name: "Mrs B Gayathri", email: "mrsbgayathri@gmail.com", key: "111", section: "DS II/I/A", bcryptHash: bcryptjs_default.hashSync("111", 10) },
+  "112": { id: 12, name: "Mrs K Ramya", email: "mrskramya@gmail.com", key: "112", section: "DS II/I/B", bcryptHash: bcryptjs_default.hashSync("112", 10) },
+  "113": { id: 13, name: "Mrs Ch Vijaya Lakshmi", email: "mrschvijayalakshmi@gmail.com", key: "113", section: "DS II/I/A", bcryptHash: bcryptjs_default.hashSync("113", 10) },
+  "114": { id: 14, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", key: "114", section: "DS II/I/C", bcryptHash: bcryptjs_default.hashSync("114", 10) },
+  "115": { id: 15, name: "Ms. Priyusha", email: "msspriyusha@gmail.com", key: "115", section: "DS III/I/A", bcryptHash: bcryptjs_default.hashSync("115", 10) },
+  // 4-digit incharge PINs
+  "4011": { id: 9, name: "Mrs A Sravanthi", email: "mrsasravanthi@gmail.com", key: "4011", section: "DS IV/I/A", bcryptHash: bcryptjs_default.hashSync("4011", 10) },
+  "4012": { id: 10, name: "Mrs K Sneha", email: "mrsksneha@gmail.com", key: "4012", section: "DS IV/I/B", bcryptHash: bcryptjs_default.hashSync("4012", 10) },
+  "3012": { id: 6, name: "Mr T Shravan Kumar", email: "mrtshravankumar@gmail.com", key: "3012", section: "DS IV/I/B", bcryptHash: bcryptjs_default.hashSync("3012", 10) },
+  "3011": { id: 8, name: "Mrs G Sushma", email: "mrsgsushma@gmail.com", key: "3011", section: "DS III/I/A", bcryptHash: bcryptjs_default.hashSync("3011", 10) },
+  "3013": { id: 4, name: "Mr M Yadaiah", email: "mrmyadaiah@gmail.com", key: "3013", section: "DS III/I/C", bcryptHash: bcryptjs_default.hashSync("3013", 10) },
+  "2011": { id: 11, name: "Mrs B Gayathri", email: "mrsbgayathri@gmail.com", key: "2011", section: "DS II/I/A", bcryptHash: bcryptjs_default.hashSync("2011", 10) },
+  "2012": { id: 12, name: "Mrs K Ramya", email: "mrskramya@gmail.com", key: "2012", section: "DS II/I/B", bcryptHash: bcryptjs_default.hashSync("2012", 10) },
+  "2013": { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "2013", section: "DS II/I/C", bcryptHash: bcryptjs_default.hashSync("2013", 10) }
+};
 router2.post("/auth/mentor-key-login", async (req, res) => {
+  const ip = getClientIp(req);
+  const rateCheck = enforceLoginRateLimit(ip);
+  if (!rateCheck.allowed) {
+    res.status(429).json({ error: `Too many attempts. Try again in ${Math.ceil(rateCheck.retryAfterSec / 60)} minutes.` });
+    return;
+  }
   const { key } = req.body;
   if (!key) {
     res.status(400).json({ error: "Mentor key is required" });
     return;
   }
+  const cleanKey = String(key).trim().toUpperCase();
   try {
-    const { data: mentors, error } = await supabase.from("qr_mentors").select("*").ilike("key", key.trim()).limit(1);
-    if (error) throw error;
-    const mentor = mentors?.[0];
+    const { data: mentors } = await supabase.from("qr_mentors").select("id, email, name, key, section").ilike("key", cleanKey).limit(1);
+    let mentor = mentors?.[0];
     if (!mentor) {
-      res.status(401).json({ error: "Invalid mentor key" });
+      const pinEntry = FACULTY_PIN_MAP[cleanKey];
+      if (pinEntry && pinEntry.key === cleanKey) {
+        mentor = pinEntry;
+      }
+    }
+    if (!mentor) {
+      const { remaining } = recordFailedAttempt(ip);
+      const remText = remaining > 0 ? ` (${remaining} attempt${remaining > 1 ? "s" : ""} remaining)` : "";
+      res.status(401).json({ error: `Invalid faculty key${remText}` });
       return;
     }
-    const token = import_jsonwebtoken.default.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, {
-      expiresIn: "7d"
-    });
+    resetLoginRateLimit(ip);
+    const token = import_jsonwebtoken.default.sign({ mentorId: mentor.id, email: mentor.email, role: "mentor" }, SESSION_SECRET, { expiresIn: "3650d" });
     res.json({
       token,
-      mentor: { id: mentor.id, email: mentor.email, name: mentor.name, key: mentor.key }
+      mentor: {
+        id: mentor.id,
+        email: mentor.email,
+        name: mentor.name,
+        key: mentor.key,
+        section: mentor.section || "DS II/I/A"
+      }
     });
   } catch (err) {
-    req.log.error({ err }, "Mentor key login error");
+    req.log?.error({ err }, "Mentor key login error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -64434,7 +64562,6 @@ var import_express3 = __toESM(require_express2(), 1);
 // src/middlewares/auth.ts
 var import_jsonwebtoken2 = __toESM(require_jsonwebtoken(), 1);
 var JWT_SECRET = process.env.SESSION_SECRET || "fallback-dev-secret";
-var BYPASS_TOKEN = "bypass-token";
 var BYPASS_ENABLED = process.env.ALLOW_BYPASS_TOKEN === "true";
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -64443,19 +64570,51 @@ function authMiddleware(req, res, next) {
     return;
   }
   const token = authHeader.slice(7);
-  if (token === BYPASS_TOKEN || token === "bypass-token-hod" || token === "bypass-token-mentor" || token === "bypass-token-principal") {
-    req.adminId = token === "bypass-token-hod" ? -2 : token === "bypass-token-mentor" ? -3 : token === "bypass-token-principal" ? -4 : -1;
-    if (token === "bypass-token-mentor") {
-      req.mentorId = -3;
+  if (BYPASS_ENABLED) {
+    if (token === "bypass-token" || token === "bypass-token-hod" || token === "bypass-token-principal" || token.startsWith("bypass-token-mentor")) {
+      req.adminId = token === "bypass-token-hod" ? -2 : token.startsWith("bypass-token-mentor") ? -3 : token === "bypass-token-principal" ? -4 : -1;
+      if (token.startsWith("bypass-token-mentor")) {
+        const key = token.replace("bypass-token-mentor-", "");
+        const keyToIdMap = {
+          "101": 1,
+          "102": 2,
+          "103": 3,
+          "104": 4,
+          "105": 5,
+          "106": 6,
+          "107": 7,
+          "108": 8,
+          "109": 9,
+          "110": 10,
+          "111": 11,
+          "112": 12,
+          "113": 13,
+          "114": 14,
+          "115": 15,
+          "4011": 9,
+          "4012": 10,
+          "3012": 6,
+          "3011": 8,
+          "3013": 4,
+          "2011": 11,
+          "2012": 12,
+          "2013": 7
+        };
+        req.mentorId = keyToIdMap[key] || -3;
+      }
+      next();
+      return;
     }
-    next();
+  }
+  if (token === "bypass-token" || token === "bypass-token-hod" || token === "bypass-token-principal" || token.startsWith("bypass-token-mentor")) {
+    res.status(401).json({ error: "Invalid token" });
     return;
   }
   try {
     const decoded = import_jsonwebtoken2.default.verify(token, JWT_SECRET);
-    if (decoded.adminId) req.adminId = decoded.adminId;
-    if (decoded.mentorId) req.mentorId = decoded.mentorId;
-    if (!decoded.adminId && !decoded.mentorId) {
+    if (decoded.adminId !== void 0) req.adminId = decoded.adminId;
+    if (decoded.mentorId !== void 0) req.mentorId = decoded.mentorId;
+    if (decoded.adminId === void 0 && decoded.mentorId === void 0) {
       res.status(401).json({ error: "Invalid token" });
       return;
     }
@@ -64465,7 +64624,7 @@ function authMiddleware(req, res, next) {
   }
 }
 function adminOnly(req, res, next) {
-  if (!req.adminId) {
+  if (req.adminId === void 0 || req.adminId === null) {
     res.status(403).json({ error: "Admin access required" });
     return;
   }
@@ -64554,7 +64713,7 @@ router3.get("/users/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router3.delete("/users/:id", authMiddleware, async (req, res) => {
+router3.delete("/users/:id", authMiddleware, adminOnly, async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid user ID" });
@@ -64885,6 +65044,7 @@ router4.post("/scan/batch", async (req, res) => {
     const hash2 = typeof item?.hash === "string" ? item.hash : null;
     const prevHash = typeof item?.prevHash === "string" ? item.prevHash : null;
     const seqNo = typeof item?.seqNo === "number" ? item.seqNo : null;
+    const isLateEntry = item?.isLateEntry === true || item?.is_late_entry === true;
     let hashVerified = false;
     let sequenceGapDetected = false;
     if (seqNo !== null && lastSeqNo !== null) {
@@ -64947,7 +65107,14 @@ router4.post("/scan/batch", async (req, res) => {
         }
       }
       if (current.status === "left") {
-        const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, entry_time: ts, exit_time: null, scan_count: 1, last_scan_at: ts }).select().single();
+        let entryTime = ts;
+        if (isLateEntry) {
+          const d = new Date(ts);
+          d.setSeconds(59);
+          d.setMilliseconds(999);
+          entryTime = d.toISOString();
+        }
+        const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, entry_time: entryTime, exit_time: null, scan_count: 1, last_scan_at: ts }).select().single();
         if (insertError) throw insertError;
         const recordId = inserted.id;
         batchStatusCache.set(user.id, { status: "inside", recordId, scanCount: 1, lastScanAt: ts });
@@ -65024,9 +65191,17 @@ router4.post("/scan", async (req, res) => {
       }
     }
     const currentStatus = record ? getRecordStatus(record) : "left";
+    const isLateEntry = req.body.isLateEntry === true || req.body.is_late_entry === true;
     if (currentStatus === "left") {
-      req.log.info({ userId: user.id, name: user.name }, "Student checked in / arrived on campus");
-      const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, entry_time: now, exit_time: null, scan_count: 1, last_scan_at: now }).select().single();
+      req.log.info({ userId: user.id, name: user.name, isLateEntry }, "Student checked in / arrived on campus");
+      let entryTime = now;
+      if (isLateEntry) {
+        const d = new Date(now);
+        d.setSeconds(59);
+        d.setMilliseconds(999);
+        entryTime = d.toISOString();
+      }
+      const { data: inserted, error: insertError } = await supabase.from("qr_attendance").insert({ user_id: user.id, date, entry_time: entryTime, exit_time: null, scan_count: 1, last_scan_at: now }).select().single();
       if (insertError) {
         req.log.error({ insertError }, "Insert error on entry scan");
         return res.status(500).json({ error: "DB error", detail: insertError.message, code: insertError.code });
@@ -65034,7 +65209,7 @@ router4.post("/scan", async (req, res) => {
       return res.json({
         success: true,
         action: "entry",
-        message: `${user.name} has Checked In / Arrived on Campus.`,
+        message: `${user.name} has Checked In / Arrived on Campus${isLateEntry ? " (Late Entry)" : ""}.`,
         user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
         recordId: inserted.id
       });
@@ -65197,6 +65372,18 @@ router4.get("/attendance/user/:userId", authMiddleware, async (req, res) => {
     }
     const { data: records, error: recordError } = await query.order("date", { ascending: false });
     if (recordError) throw recordError;
+    let hourlyQuery = supabase.from("qr_hourly_attendance").select("*, qr_schedules(*)").eq("user_id", userId);
+    if (from) hourlyQuery = hourlyQuery.gte("date", from);
+    if (to) hourlyQuery = hourlyQuery.lte("date", to);
+    if (month) {
+      const [year, mon] = month.split("-");
+      const start = `${year}-${mon}-01`;
+      const endDay = new Date(parseInt(year), parseInt(mon), 0).getDate();
+      const end = `${year}-${mon}-${String(endDay).padStart(2, "0")}`;
+      hourlyQuery = hourlyQuery.gte("date", start).lte("date", end);
+    }
+    const { data: hourlyRecords, error: hourlyError } = await hourlyQuery.order("date", { ascending: false });
+    if (hourlyError) throw hourlyError;
     const lateHour = 21;
     let totalDuration = 0;
     let durationCount = 0;
@@ -65224,6 +65411,7 @@ router4.get("/attendance/user/:userId", authMiddleware, async (req, res) => {
     res.json({
       user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role, createdAt: user.created_at },
       records: records.map((r) => formatRecord(r, user)),
+      hourlyRecords: hourlyRecords || [],
       summary
     });
   } catch (err) {
@@ -65617,19 +65805,23 @@ router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req
       return;
     }
     let presentCount = 0;
-    for (const record of studentRecords) {
+    const upsertRecords = studentRecords.map((record) => {
       const isPresent = !!record.markedPresent;
       if (isPresent) presentCount++;
-      await supabase.from("qr_hourly_attendance").upsert({
+      return {
         schedule_id: scheduleId,
         user_id: record.studentId,
         date,
         marked_present: isPresent,
         marked_by_teacher: true,
         scanned_qr: false
-      }, {
+      };
+    });
+    if (upsertRecords.length > 0) {
+      const { error: upsertErr } = await supabase.from("qr_hourly_attendance").upsert(upsertRecords, {
         onConflict: "schedule_id,user_id,date"
       });
+      if (upsertErr) throw upsertErr;
     }
     const { data: sessionRes, error: sessionErr } = await supabase.from("qr_mentor_sessions").update({
       ended_at: (/* @__PURE__ */ new Date()).toISOString(),
@@ -65676,6 +65868,26 @@ router5.get("/admin/mentors-tracking", authMiddleware, async (req, res) => {
     req.log.error({ err }, "Get admin mentors tracking error");
     res.status(500).json({ error: "Internal server error" });
   }
+});
+var SECURE_FACULTY_KEYS = [
+  { id: 1, name: "Mrs A Sravanthi", email: "mrsasravanthi@gmail.com", key: "109", inchargeKey: "4011", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4A", rollRange: "23N81A6701 TO 23N81A6743", count: 42 },
+  { id: 3, name: "Mr T Shravan Kumar", email: "mrtshravankumar@gmail.com", key: "106", inchargeKey: "3012", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "23N81A6744 TO 23N81A6787", count: 42 },
+  { id: 2, name: "Mrs K Sneha", email: "mrsksneha@gmail.com", key: "110", inchargeKey: "4012", role: "Class In-charge & Mentor", yearLabel: "4th Year", section: "4B", rollRange: "23N81A6788 TO 23N81A67C8 + LE-3, LE-4", count: 39 },
+  { id: 4, name: "Mrs G Sushma", email: "mrsgsushma@gmail.com", key: "108", inchargeKey: "3011", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6701 TO 24N81A6731", count: 29 },
+  { id: 15, name: "Ms. Priyusha", email: "msspriyusha@gmail.com", key: "115", inchargeKey: null, role: "Faculty Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6732 TO 24N81A6752 + LE-3 to LE-8", count: 26 },
+  { id: 6, name: "Mrs. CH. Naga Rohini", email: "mrschnagarohini@gmail.com", key: "101", inchargeKey: null, role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6753 TO 24N81A6779 + RA-33, A9", count: 26 },
+  { id: 8, name: "Mr Miskeen Ali", email: "mrmiskeenali@gmail.com", key: "103", inchargeKey: null, role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6780 TO 24N81A67A5", count: 24 },
+  { id: 5, name: "Mr M Yadaiah", email: "mrmyadaiah@gmail.com", key: "104", inchargeKey: "3013", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67A6 TO 24N81A67D2", count: 27 },
+  { id: 9, name: "Mrs. Swetha", email: "mrsswetha@gmail.com", key: "102", inchargeKey: null, role: "Faculty Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67D3 TO 24N81A67F9", count: 27 },
+  { id: 10, name: "Mrs B Gayathri", email: "mrsbgayathri@gmail.com", key: "111", inchargeKey: "2011", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6701 TO 25N81A6727", count: 27 },
+  { id: 13, name: "Mrs Ch Vijaya Lakshmi", email: "mrschvijayalakshmi@gmail.com", key: "113", inchargeKey: null, role: "Faculty Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6728 TO 25N81A6755", count: 28 },
+  { id: 11, name: "Mrs K Ramya", email: "mrskramya@gmail.com", key: "112", inchargeKey: "2012", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6756 TO 25N81A6783", count: 27 },
+  { id: 14, name: "Mr M Srinivasulu", email: "mrmsrinivasulu@gmail.com", key: "105", inchargeKey: null, role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
+  { id: 12, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", key: "114", inchargeKey: null, role: "Faculty Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67B4 TO 25N81A67D9", count: 26 },
+  { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "107", inchargeKey: "2013", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67E0 TO 25N81A67G0", count: 19 }
+];
+router5.get("/admin/faculty-keys", authMiddleware, async (_req, res) => {
+  res.json(SECURE_FACULTY_KEYS);
 });
 router5.get("/admin/schedules", authMiddleware, async (req, res) => {
   try {
@@ -65851,20 +66063,30 @@ var logger = (0, import_pino.default)({
 // src/app.ts
 var pinoHttp2 = pinoHttpModule.default ?? pinoHttpModule.pinoHttp ?? pinoHttpModule;
 var app = (0, import_express7.default)();
+var ALLOWED_ORIGINS = [
+  "https://qr-attendance-app-eight.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:4173"
+];
 app.use((0, import_cors.default)({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: Origin '${origin}' not allowed`));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.options(/.*/, (req, res) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
+  const origin = req.headers.origin || "";
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
+  }
   res.sendStatus(204);
 });
 app.use(
