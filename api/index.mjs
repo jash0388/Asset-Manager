@@ -65019,7 +65019,12 @@ router4.post("/scan/batch", async (req, res) => {
     return;
   }
   if (batchId && processedBatches.has(batchId)) {
-    res.json({ results: [], syncReceipt: "ALREADY_PROCESSED", alreadyProcessed: true });
+    const duplicateResults = scans.map((s) => ({
+      clientScanId: String(s?.clientScanId ?? ""),
+      status: "duplicate",
+      message: "Batch already processed by server"
+    }));
+    res.json({ results: duplicateResults, syncReceipt: "ALREADY_PROCESSED", alreadyProcessed: true });
     return;
   }
   if (batchId) {

@@ -305,9 +305,14 @@ router.post("/scan/batch", async (req: any, res: any) => {
     return;
   }
 
-  // Replay protection check
+  // Replay protection check: if batch was already processed, return duplicate status so client clears queue cleanly
   if (batchId && processedBatches.has(batchId)) {
-    res.json({ results: [], syncReceipt: "ALREADY_PROCESSED", alreadyProcessed: true });
+    const duplicateResults = scans.map((s: any) => ({
+      clientScanId: String(s?.clientScanId ?? ""),
+      status: "duplicate",
+      message: "Batch already processed by server",
+    }));
+    res.json({ results: duplicateResults, syncReceipt: "ALREADY_PROCESSED", alreadyProcessed: true });
     return;
   }
   if (batchId) {

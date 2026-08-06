@@ -422,24 +422,17 @@ export async function syncQueue(): Promise<SyncResult> {
   for (const r of results) {
     if (!r) continue;
     const cid = String(r.clientScanId || "").trim();
-    const uid = String(r.user?.uniqueId || r.uniqueId || "").trim().toUpperCase();
-
     if (cid) acceptedClientIds.add(cid);
-    if (uid) acceptedUniqueIds.add(uid);
 
-    if (r.status === "ok" || r.status === "duplicate" || r.status === "user_not_found" || r.action) {
+    if (r.status === "ok" || r.status === "duplicate" || r.status === "user_not_found" || r.status === "max_reached" || r.status === "invalid" || r.action) {
       synced++;
     } else {
       skipped++;
     }
   }
 
-  // Filter out any scans matched by clientScanId OR uniqueId
-  const remaining = queue.filter((s) => {
-    if (s.clientScanId && acceptedClientIds.has(s.clientScanId)) return false;
-    if (s.uniqueId && acceptedUniqueIds.has(s.uniqueId.trim().toUpperCase())) return false;
-    return true;
-  });
+  // Filter out scans sent in batch that were accepted/processed by server
+  const remaining = queue.filter((s) => !acceptedClientIds.has(s.clientScanId));
 
   setQueue(remaining);
   localStorage.setItem(KEY_LASTSYNC, String(Date.now()));
