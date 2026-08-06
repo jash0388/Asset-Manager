@@ -235,7 +235,14 @@ export function markScannedLocally(uniqueId: string, at: number = Date.now()) {
 // ---------- Local scan queue ----------
 
 export function getQueue(): PendingScan[] {
-  return readJson<PendingScan[]>(KEY_QUEUE, []);
+  const rawQueue = readJson<PendingScan[]>(KEY_QUEUE, []);
+  // Ensure every item in queue has a valid, non-empty clientScanId for reliable server sync matching
+  return rawQueue.map((s, idx) => ({
+    ...s,
+    clientScanId: (s.clientScanId && s.clientScanId.trim())
+      ? s.clientScanId.trim()
+      : `scan_${s.scannedAt || Date.now()}_${s.uniqueId || idx}_${Math.random().toString(36).slice(2, 6)}`,
+  }));
 }
 
 function setQueue(items: PendingScan[]) {
@@ -258,7 +265,7 @@ export function enqueueScan(uniqueId: string, isLateEntry?: boolean): PendingSca
   const q = getQueue();
   const prevScan = q[q.length - 1];
   const prevHash = prevScan?.hash || GENESIS_HASH;
-  const clientScanId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const clientScanId = `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const scannedAt = new Date().toISOString();
   const cleanId = uniqueId.trim();
   const seqNo = getNextSeqNo();
@@ -323,12 +330,19 @@ export async function syncQueue(): Promise<SyncResult> {
 
   let response: any;
   try {
-    response = await customFetch<{ results: any[]; syncReceipt?: string }>("/api/scan/batch", {
+    const res = await window.fetch("/api/scan/batch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-  } catch (err) {
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Batch sync HTTP error:", res.status, errText);
+      throw new Error(`HTTP ${res.status}: ${errText}`);
+    }
+    response = await res.json();
+  } catch (err: any) {
+    console.error("syncQueue network error:", err);
     const updated = queue.map((s) => {
       const inBatch = batch.find((b) => b.clientScanId === s.clientScanId);
       return inBatch ? { ...s, attempts: s.attempts + 1 } : s;
@@ -347,9 +361,10 @@ export async function syncQueue(): Promise<SyncResult> {
   let skipped = 0;
 
   for (const r of results) {
-    if (!r || typeof r.clientScanId !== "string") continue;
-    if (r.status === "ok" || r.status === "user_not_found" || r.status === "duplicate") {
-      acceptedIds.add(r.clientScanId);
+    if (!r) continue;
+    const cid = String(r.clientScanId || "").trim();
+    if (cid) {
+      acceptedIds.add(cid);
     }
     if (r.status === "ok") {
       synced++;
@@ -358,12 +373,13 @@ export async function syncQueue(): Promise<SyncResult> {
     }
   }
 
-  const remaining = queue.filter((s) => !acceptedIds.has(s.clientScanId));
-  const updated = remaining.map((s) => {
-    const inBatch = batch.find((b) => b.clientScanId === s.clientScanId);
-    return inBatch ? { ...s, attempts: s.attempts + 1 } : s;
+  // Also accept scans whose uniqueId was processed if clientScanId missing
+  const remaining = queue.filter((s) => {
+    if (acceptedIds.has(s.clientScanId)) return false;
+    return true;
   });
-  setQueue(updated);
+
+  setQueue(remaining);
   localStorage.setItem(KEY_LASTSYNC, String(Date.now()));
 
   return {
