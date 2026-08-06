@@ -64818,12 +64818,11 @@ function getHostelDate(baseDate = /* @__PURE__ */ new Date()) {
   return hostelDay.toISOString().slice(0, 10);
 }
 function getRecordStatus(record) {
-  if (!record?.exit_time) return "inside";
-  const hasEntry = record.entry_time && !record.entry_time.startsWith("9999") && !record.entry_time.startsWith("1970");
-  if (!hasEntry) return "left";
+  if (!record?.exit_time || isSentinel(record.exit_time)) return "inside";
+  if (!record?.entry_time || isSentinel(record.entry_time)) return "left";
   const entryTime = new Date(record.entry_time).getTime();
   const exitTime = new Date(record.exit_time).getTime();
-  return entryTime >= exitTime ? "inside" : "left";
+  return exitTime >= entryTime ? "left" : "inside";
 }
 function getLatestRecordsByUser(records = []) {
   const latestByUserId = /* @__PURE__ */ new Map();
