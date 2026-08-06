@@ -277,7 +277,7 @@ export default function HodDashboard() {
 
       let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
       let label = "Safe Zone";
-      let badgeColor = "bg-emerald-500 text-slate-950 font-black border border-emerald-400";
+      let badgeColor = "bg-emerald-500 text-white font-black border border-emerald-400";
       let cardBorder = "border-l-4 border-l-emerald-500 border-gray-200";
       let bannerBg = "bg-emerald-50 border-emerald-200 text-emerald-950 font-bold";
       let dotColor = "🟢";
@@ -294,7 +294,7 @@ export default function HodDashboard() {
       } else if (percent < 75) {
         flag = "YELLOW";
         label = "Warning (Recoverable)";
-        badgeColor = "bg-amber-400 text-slate-950 font-black border border-amber-300 shadow-xs";
+        badgeColor = "bg-amber-400 text-gray-900 font-black border border-amber-300 shadow-xs";
         cardBorder = "border-l-4 border-l-amber-400 border-gray-200";
         bannerBg = "bg-amber-50 border-amber-200 text-amber-950 font-bold";
         dotColor = "🟡";
@@ -1360,7 +1360,7 @@ export default function HodDashboard() {
                             })}
 
                             {/* Overall row for this specific year */}
-                            <tr className="bg-blue-950/20 border-y border-gray-200">
+                            <tr className="bg-blue-50 border-y border-gray-200">
                               <td className="py-4 px-6 font-black text-blue-700 text-base italic">Overall ({year})</td>
                               <td className="py-4 px-6 text-center text-green-700 font-bold text-lg">{yearPresent}</td>
                               <td className="py-4 px-6 text-center text-red-700 font-bold text-lg">{yearAbsent}</td>
@@ -1756,7 +1756,7 @@ export default function HodDashboard() {
                             <td className="py-4 px-6 text-gray-700 font-bold">{s.day_of_week}</td>
                             <td className="py-4 px-6 text-slate-405 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
                             <td className="py-4 px-6">
-                              <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-950 border border-blue-800 text-blue-700 font-bold text-xs">
+                              <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 font-bold text-xs">
                                 {s.year} Yr - {s.section}
                               </span>
                             </td>
@@ -1764,7 +1764,7 @@ export default function HodDashboard() {
                             <td className="py-4 px-6 text-center">
                               <button
                                 onClick={() => handleOpenAssignModal(s)}
-                                className="px-3 py-1.5 rounded-xl bg-blue-950 hover:bg-blue-900 text-blue-700 border border-blue-800/80 font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm"
+                                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm"
                               >
                                 <UserPlus className="w-3.5 h-3.5" />
                                 Assign Faculty
@@ -2290,7 +2290,7 @@ export default function HodDashboard() {
                 </div>
 
                 {assignSuccessMsg && (
-                  <div className="p-3 rounded-xl bg-green-950/60 border border-green-800 text-green-700 text-xs font-bold text-center flex items-center justify-center gap-2">
+                  <div className="p-3 rounded-xl bg-green-100 border border-green-300 text-green-800 text-xs font-bold text-center flex items-center justify-center gap-2">
                     <UserCheck className="w-4 h-4" />
                     {assignSuccessMsg}
                   </div>
@@ -2307,7 +2307,7 @@ export default function HodDashboard() {
                   <button
                     type="submit"
                     disabled={assigning || !selectedMentorId}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-950/40"
+                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
                   >
                     {assigning ? (
                       <>
@@ -2454,7 +2454,7 @@ export default function HodDashboard() {
                   <button
                     type="submit"
                     disabled={creatingClass || !newMentorId || !newSubject}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-950/40"
+                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
                   >
                     {creatingClass ? (
                       <>

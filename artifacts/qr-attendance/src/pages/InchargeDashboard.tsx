@@ -1063,7 +1063,7 @@ export default function InchargeDashboard() {
 
                         <button
                           onClick={handleDirectCSVDownload}
-                          className="text-xs font-bold text-emerald-700 hover:text-emerald-700 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-800/60 shadow-xs"
+                          className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-300 shadow-xs"
                         >
                           <FileSpreadsheet className="w-4 h-4" />
                           Download Register (.csv)
@@ -1171,12 +1171,12 @@ export default function InchargeDashboard() {
                                     : "hover:scale-102"
                                 } ${
                                   d.status === "P"
-                                    ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-250"
+                                    ? "bg-emerald-100 border-emerald-300 text-emerald-800"
                                     : d.status === "*"
-                                    ? "bg-purple-950/50 border-purple-800/60 text-purple-250"
+                                    ? "bg-purple-100 border-purple-300 text-purple-800"
                                     : d.status === "—"
                                     ? "bg-gray-50/40 border-gray-200/80 text-slate-600 opacity-60"
-                                    : "bg-red-950/40 border-red-900/40 text-red-700"
+                                    : "bg-red-50 border-red-200 text-red-700"
                                 }`}
                               >
                                 <span className="text-[10px] font-mono font-extrabold" style={{ color: "#ffffff" }}>
@@ -1184,9 +1184,9 @@ export default function InchargeDashboard() {
                                 </span>
                                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
                                   d.status === "P"
-                                    ? "bg-emerald-500 text-slate-950"
+                                    ? "bg-emerald-500 text-white"
                                     : d.status === "*"
-                                    ? "bg-amber-400 text-slate-950"
+                                    ? "bg-amber-400 text-gray-900"
                                     : d.status === "—"
                                     ? "bg-gray-100 text-gray-500"
                                     : "bg-red-500 text-white"
