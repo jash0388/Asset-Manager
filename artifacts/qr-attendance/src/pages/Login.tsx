@@ -37,7 +37,10 @@ export default function Login() {
         navigate("/mentor");
       }
     } catch (err: any) {
-      const msg = err?.message || err?.error || "Invalid access code. Please try again.";
+      let msg = err?.message || err?.error || "Invalid access code. Please try again.";
+      if (typeof msg === "string" && (msg.includes("<") || msg.includes("<!DOCTYPE") || msg.includes("html"))) {
+        msg = "Invalid access code. Please try again.";
+      }
       setError(msg);
     } finally {
       setSubmitting(false);

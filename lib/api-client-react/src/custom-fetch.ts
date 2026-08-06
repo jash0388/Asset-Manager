@@ -164,6 +164,9 @@ function buildErrorMessage(response: Response, data: unknown): string {
 
   if (typeof data === "string") {
     const text = data.trim();
+    if (text.includes("<!DOCTYPE") || text.includes("<html") || text.includes("<head")) {
+      return `${prefix}: Server returned unexpected HTML response`;
+    }
     return text ? `${prefix}: ${truncate(text)}` : prefix;
   }
 
