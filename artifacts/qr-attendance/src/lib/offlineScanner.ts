@@ -355,20 +355,43 @@ export async function syncQueue(): Promise<SyncResult> {
   };
 
   let response: any;
-  try {
-    const res = await window.fetch("/api/scan/batch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("Batch sync HTTP error:", res.status, errText);
-      throw new Error(`HTTP ${res.status}: ${errText}`);
+  let fetchError = "";
+  const endpoints = [
+    "/api/scan/batch",
+    `${window.location.origin}/api/scan/batch`,
+  ];
+
+  for (const ep of endpoints) {
+    try {
+      const res = await window.fetch(ep, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const text = await res.text();
+      if (!res.ok) {
+        fetchError = `HTTP ${res.status}: ${text.slice(0, 100)}`;
+        continue;
+      }
+      try {
+        response = JSON.parse(text);
+        if (response && Array.isArray(response.results)) {
+          fetchError = "";
+          break; // Success!
+        } else {
+          fetchError = `Invalid JSON response: ${text.slice(0, 100)}`;
+        }
+      } catch (pErr: any) {
+        fetchError = `JSON parse error: ${pErr.message} on text: ${text.slice(0, 50)}`;
+      }
+    } catch (netErr: any) {
+      fetchError = `Network fetch error: ${netErr.message || String(netErr)}`;
     }
-    response = await res.json();
-  } catch (err: any) {
-    console.error("syncQueue network error:", err);
+  }
+
+  if (!response || !Array.isArray(response.results)) {
+    console.error("syncQueue failed on all endpoints:", fetchError);
+    try { localStorage.setItem("qr_last_sync_error", fetchError); } catch {}
     const updated = queue.map((s) => {
       const inBatch = batch.find((b) => b.clientScanId === s.clientScanId);
       return inBatch ? { ...s, attempts: s.attempts + 1 } : s;
@@ -377,21 +400,26 @@ export async function syncQueue(): Promise<SyncResult> {
     return { attempted: batch.length, synced: 0, failed: batch.length, skipped: 0 };
   }
 
+  try { localStorage.removeItem("qr_last_sync_error"); } catch {}
+
   if (typeof response?.syncReceipt === "string") {
     try { localStorage.setItem(KEY_RECEIPT, response.syncReceipt); } catch {}
   }
 
-  const results: any[] = Array.isArray(response?.results) ? response.results : [];
-  const acceptedIds = new Set<string>();
+  const results: any[] = response.results;
+  const acceptedClientIds = new Set<string>();
+  const acceptedUniqueIds = new Set<string>();
   let synced = 0;
   let skipped = 0;
 
   for (const r of results) {
     if (!r) continue;
     const cid = String(r.clientScanId || "").trim();
-    if (cid) {
-      acceptedIds.add(cid);
-    }
+    const uid = String(r.user?.uniqueId || r.uniqueId || "").trim().toUpperCase();
+
+    if (cid) acceptedClientIds.add(cid);
+    if (uid) acceptedUniqueIds.add(uid);
+
     if (r.status === "ok" || r.status === "duplicate" || r.status === "user_not_found" || r.action) {
       synced++;
     } else {
@@ -399,9 +427,10 @@ export async function syncQueue(): Promise<SyncResult> {
     }
   }
 
-  // Also accept scans whose uniqueId was processed if clientScanId missing
+  // Filter out any scans matched by clientScanId OR uniqueId
   const remaining = queue.filter((s) => {
-    if (acceptedIds.has(s.clientScanId)) return false;
+    if (s.clientScanId && acceptedClientIds.has(s.clientScanId)) return false;
+    if (s.uniqueId && acceptedUniqueIds.has(s.uniqueId.trim().toUpperCase())) return false;
     return true;
   });
 

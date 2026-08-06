@@ -4,5 +4,9 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist/public",
   "framework": "vite",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.mjs" },
+    { "source": "/api", "destination": "/api/index.mjs" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
