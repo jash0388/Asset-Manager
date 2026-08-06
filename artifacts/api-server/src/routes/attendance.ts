@@ -405,7 +405,20 @@ router.post("/scan/batch", async (req: any, res: any) => {
         };
       }
 
-
+      if (current.lastScanAt) {
+        const lastScanTime = new Date(current.lastScanAt).getTime();
+        const timeDiff = scannedAt.getTime() - lastScanTime;
+        if (timeDiff >= 0 && timeDiff < 60 * 1000) {
+          results.push({
+            clientScanId,
+            status: "duplicate",
+            error: "Duplicate scan within 60 seconds",
+            user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+            recordId: current.recordId,
+          });
+          continue;
+        }
+      }
 
       if (current.status === "left") {
         // Entry scan (student entering campus / checking in)

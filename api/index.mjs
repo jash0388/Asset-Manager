@@ -65096,6 +65096,20 @@ router4.post("/scan/batch", async (req, res) => {
           lastScanAt: existing?.last_scan_at
         };
       }
+      if (current.lastScanAt) {
+        const lastScanTime = new Date(current.lastScanAt).getTime();
+        const timeDiff = scannedAt.getTime() - lastScanTime;
+        if (timeDiff >= 0 && timeDiff < 60 * 1e3) {
+          results.push({
+            clientScanId,
+            status: "duplicate",
+            error: "Duplicate scan within 60 seconds",
+            user: { id: user.id, name: user.name, uniqueId: user.unique_id, role: user.role },
+            recordId: current.recordId
+          });
+          continue;
+        }
+      }
       if (current.status === "left") {
         let entryTime = ts;
         if (isLateEntry) {
