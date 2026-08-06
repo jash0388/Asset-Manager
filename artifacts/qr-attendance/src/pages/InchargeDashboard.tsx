@@ -130,7 +130,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2.5 rounded-xl bg-white border border-slate-250 hover:bg-slate-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+        className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
       >
         <Calendar className="w-4 h-4 text-blue-600" />
         <span>{monthNames[month - 1]} {year}</span>
@@ -139,12 +139,12 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white border border-slate-200 p-4 shadow-2xl z-30 animate-in fade-in duration-100">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white border border-gray-200 p-4 shadow-2xl z-30 animate-in fade-in duration-100">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &larr;
               </button>
@@ -152,7 +152,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &rarr;
               </button>
@@ -169,7 +169,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSelected 
                         ? "bg-blue-600 text-white shadow-sm" 
-                        : "bg-slate-50 border border-slate-150 hover:bg-slate-100 text-slate-700"
+                        : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-slate-700"
                     }`}
                   >
                     {mName}
@@ -464,7 +464,7 @@ export default function InchargeDashboard() {
       let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
       let label = "Safe Zone";
       let badgeStyle = { backgroundColor: "#10b981", color: "#ffffff" };
-      let cardBorder = "border-l-4 border-l-emerald-500 border-slate-200";
+      let cardBorder = "border-l-4 border-l-emerald-500 border-gray-200";
       let bannerStyle = { backgroundColor: "#ecfdf5", borderColor: "#a7f3d0", color: "#065f46" };
       let dotColor = "🟢";
       let tip = "Good Standing (≥ 75%). Attendance target met!";
@@ -473,7 +473,7 @@ export default function InchargeDashboard() {
         flag = "RED";
         label = "Critical Risk (< 65%)";
         badgeStyle = { backgroundColor: "#e11d48", color: "#ffffff" };
-        cardBorder = "border-l-4 border-l-rose-600 border-slate-200";
+        cardBorder = "border-l-4 border-l-rose-600 border-gray-200";
         bannerStyle = { backgroundColor: "#fff1f2", borderColor: "#fecdd3", color: "#9f1239" };
         dotColor = "🔴";
         tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
@@ -481,7 +481,7 @@ export default function InchargeDashboard() {
         flag = "YELLOW";
         label = "Warning (Recoverable)";
         badgeStyle = { backgroundColor: "#f59e0b", color: "#000000" };
-        cardBorder = "border-l-4 border-l-amber-500 border-slate-200";
+        cardBorder = "border-l-4 border-l-amber-500 border-gray-200";
         bannerStyle = { backgroundColor: "#fffbeb", borderColor: "#fde68a", color: "#92400e" };
         dotColor = "🟡";
         tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
@@ -583,7 +583,7 @@ export default function InchargeDashboard() {
           <button
             onClick={() => navigate("/mentor")}
             style={{ backgroundColor: "#f1f5f9", color: "#334155" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-200"
+            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-gray-200"
           >
             <Clock className="w-3.5 h-3.5 text-slate-550" />
             Take Class Attendance
@@ -746,7 +746,7 @@ export default function InchargeDashboard() {
         <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-2xl p-5 space-y-4 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search student name or roll number..."
@@ -844,7 +844,7 @@ export default function InchargeDashboard() {
 
       {/* STUNNING STUDENT ANALYTICS PROFILE MODAL - REDESIGNED FULL SCREEN */}
       {selectedStudentForDetails && (
-        <div className="fixed inset-0 z-50 bg-slate-950 text-slate-100 flex flex-col p-6 sm:p-10 md:p-12 overflow-y-auto animate-fadeIn font-sans">
+        <div className="fixed inset-0 z-50 bg-gray-50 text-gray-900 flex flex-col p-6 sm:p-10 md:p-12 overflow-y-auto animate-fadeIn font-sans">
           <div className="max-w-4xl mx-auto w-full space-y-8">
             {/* Modal Header */}
             {(() => {
@@ -996,7 +996,7 @@ export default function InchargeDashboard() {
 
               return (
                 <>
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-6">
+                  <div className="flex items-center justify-between border-b border-gray-200 pb-6">
                     <div className="flex items-center gap-5">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-white shadow-xl">
                         {studentName.charAt(0)}
@@ -1008,7 +1008,7 @@ export default function InchargeDashboard() {
                             Student
                           </span>
                         </h2>
-                        <p className="text-sm font-semibold text-slate-400 mt-1">
+                        <p className="text-sm font-semibold text-gray-500 mt-1">
                           Department of CSE Data Science
                         </p>
                       </div>
@@ -1016,7 +1016,7 @@ export default function InchargeDashboard() {
                     
                     <button
                       onClick={() => setSelectedStudentForDetails(null)}
-                      className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
+                      className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-all cursor-pointer"
                     >
                       <XCircle className="w-8 h-8" />
                     </button>
@@ -1025,20 +1025,20 @@ export default function InchargeDashboard() {
                   {/* Body Details */}
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                        <p className="text-xs font-bold text-slate-500 uppercase">Roll Number</p>
-                        <p className="text-base font-bold text-slate-200 font-mono mt-1">
+                      <div className="p-4.5 rounded-2xl bg-white border border-gray-200">
+                        <p className="text-xs font-bold text-gray-400 uppercase">Roll Number</p>
+                        <p className="text-base font-bold text-gray-800 font-mono mt-1">
                           {rollNum}
                         </p>
                       </div>
-                      <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                        <p className="text-xs font-bold text-slate-500 uppercase">Section & Year</p>
-                        <p className="text-base font-bold text-slate-200 mt-1">
+                      <div className="p-4.5 rounded-2xl bg-white border border-gray-200">
+                        <p className="text-xs font-bold text-gray-400 uppercase">Section & Year</p>
+                        <p className="text-base font-bold text-gray-800 mt-1">
                           Sec {secObj.name} ({secObj.yearLabel})
                         </p>
                       </div>
-                      <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                        <p className="text-xs font-bold text-slate-500 uppercase">Department</p>
+                      <div className="p-4.5 rounded-2xl bg-white border border-gray-200">
+                        <p className="text-xs font-bold text-gray-400 uppercase">Department</p>
                         <p className="text-base font-bold text-blue-400 mt-1">
                           CSE Data Science
                         </p>
@@ -1049,7 +1049,7 @@ export default function InchargeDashboard() {
                     <div className="space-y-6">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
-                          <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                          <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">
                             Select Month
                           </label>
                           <CustomMonthSelector
@@ -1073,8 +1073,8 @@ export default function InchargeDashboard() {
                       {/* Stats cards & Pie Chart */}
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                         {/* Pie Chart Card */}
-                        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attendance Breakdown</p>
+                        <div className="p-5 rounded-2xl bg-white border border-gray-200 flex flex-col items-center justify-center space-y-3">
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Attendance Breakdown</p>
                           <div className="relative flex items-center justify-center">
                             <svg width="120" height="120" viewBox="0 0 36 36" className="transform -rotate-90">
                               <path
@@ -1096,35 +1096,35 @@ export default function InchargeDashboard() {
                             </svg>
                             <div className="absolute flex flex-col items-center justify-center">
                               <span className="text-2xl font-black text-white">{studentMonthlyPercent}%</span>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase">Monthly</span>
+                              <span className="text-[9px] font-bold text-gray-500 uppercase">Monthly</span>
                             </div>
                           </div>
                         </div>
 
                         {/* Present Days Card */}
-                        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
                           <p className="text-xs font-bold text-emerald-400 uppercase">Present Days (P)</p>
                           <p className="text-3xl font-black text-white">{calcPresentCount} Days</p>
-                          <p className="text-[10px] text-slate-500 font-bold">Attended out of {calcWorkingDays} working days</p>
+                          <p className="text-[10px] text-gray-400 font-bold">Attended out of {calcWorkingDays} working days</p>
                         </div>
 
                         {/* Absent Days Card */}
-                        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
                           <p className="text-xs font-bold text-rose-400 uppercase">Absent Days (A)</p>
                           <p className="text-3xl font-black text-white">{calcAbsentCount} Days</p>
-                          <p className="text-[10px] text-slate-500 font-bold">Missed classes</p>
+                          <p className="text-[10px] text-gray-400 font-bold">Missed classes</p>
                         </div>
 
                         {/* Average College stay time */}
-                        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
                           <p className="text-xs font-bold text-blue-400 uppercase">Avg Daily Campus Stay</p>
                           <p className="text-3xl font-black text-white">{avgDurationStr}</p>
-                          <p className="text-[10px] text-slate-500 font-bold">Calculated from gate logs</p>
+                          <p className="text-[10px] text-gray-400 font-bold">Calculated from gate logs</p>
                         </div>
                       </div>
 
                       {/* Flag Math Strategy card */}
-                      <div className={`p-4.5 rounded-2xl border-y border-r border-l-4 space-y-2 bg-slate-900 border-slate-800/80 shadow-lg ${
+                      <div className={`p-4.5 rounded-2xl border-y border-r border-l-4 space-y-2 bg-white border-gray-200 shadow-lg ${
                         flag === "RED"
                           ? "border-l-rose-500 text-rose-200"
                           : flag === "YELLOW"
@@ -1140,7 +1140,7 @@ export default function InchargeDashboard() {
                             {flag} Flag
                           </span>
                         </div>
-                        <p className="text-xs font-semibold leading-relaxed text-slate-350">
+                        <p className="text-xs font-semibold leading-relaxed text-gray-600">
                           {item?.tip}
                         </p>
                         {flag === "RED" && (
@@ -1153,12 +1153,12 @@ export default function InchargeDashboard() {
 
                       {/* Daily Grid */}
                       <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center justify-between">
                           <span>Daily Register Grid (Click any date to view Entry/Exit times)</span>
-                          <span className="text-slate-500 font-normal">P = Present | A = Absent | * = Holiday | — = Future</span>
+                          <span className="text-gray-400 font-normal">P = Present | A = Absent | * = Holiday | — = Future</span>
                         </p>
                         
-                        <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-4 rounded-2xl border border-slate-850">
+                        <div className="grid grid-cols-7 gap-1.5 bg-gray-50 p-4 rounded-2xl border border-gray-200">
                           {monthDaysList.map((d) => {
                             const isSelected = selectedDayDetail?.dateStr === d.dateStr;
                             return (
@@ -1175,7 +1175,7 @@ export default function InchargeDashboard() {
                                     : d.status === "*"
                                     ? "bg-purple-950/50 border-purple-800/60 text-purple-250"
                                     : d.status === "—"
-                                    ? "bg-slate-950/40 border-slate-850/80 text-slate-600 opacity-60"
+                                    ? "bg-gray-50/40 border-gray-200/80 text-slate-600 opacity-60"
                                     : "bg-red-950/40 border-red-900/40 text-red-300"
                                 }`}
                               >
@@ -1188,7 +1188,7 @@ export default function InchargeDashboard() {
                                     : d.status === "*"
                                     ? "bg-amber-400 text-slate-950"
                                     : d.status === "—"
-                                    ? "bg-slate-800 text-slate-400"
+                                    ? "bg-gray-100 text-gray-500"
                                     : "bg-red-500 text-white"
                                 }`}>
                                   {d.status}
@@ -1201,8 +1201,8 @@ export default function InchargeDashboard() {
 
                       {/* Selected Day Detail Card */}
                       {selectedDayDetail ? (
-                        <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800 space-y-4 animate-fadeIn">
-                          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <div className="p-4 rounded-2xl bg-white border border-gray-200 space-y-4 animate-fadeIn">
+                          <div className="flex items-center justify-between border-b border-gray-200 pb-2">
                             <div className="flex items-center gap-2">
                               <Calendar className="w-4 h-4 text-blue-400" />
                               <h5 className="text-sm font-bold text-white">
@@ -1215,7 +1215,7 @@ export default function InchargeDashboard() {
                                 : selectedDayDetail.status === "*"
                                 ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
                                 : selectedDayDetail.status === "—"
-                                ? "bg-slate-800/50 text-slate-400 border border-slate-700/50"
+                                ? "bg-gray-100 text-gray-500 border border-gray-200"
                                 : "bg-red-500/20 text-red-300 border border-red-500/40"
                             }`}>
                               {selectedDayDetail.status === "P"
@@ -1230,13 +1230,13 @@ export default function InchargeDashboard() {
 
                           {/* Gateway Logs Sub-section */}
                           <div className="space-y-2">
-                            <h6 className="text-[11px] font-black uppercase text-slate-400 tracking-wider">
+                            <h6 className="text-[11px] font-black uppercase text-gray-500 tracking-wider">
                               Gateway Scan Details
                             </h6>
                             {selectedDayDetail.record ? (
                               <div className="grid grid-cols-3 gap-3 text-xs">
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-850">
-                                  <p className="text-[10px] font-bold text-slate-500 uppercase flex items-center justify-between">
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase flex items-center justify-between">
                                     <span>Entry Time (In)</span>
                                     {isLateTime(selectedDayDetail.record.entryTime) && (
                                       <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider animate-pulse">LATE</span>
@@ -1246,15 +1246,15 @@ export default function InchargeDashboard() {
                                     {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
                                   </p>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-850">
-                                  <p className="text-[10px] font-bold text-slate-500 uppercase">Exit Time (Out)</p>
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase">Exit Time (Out)</p>
                                   <p className="text-sm font-bold text-blue-400 mt-0.5">
                                     {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
                                   </p>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-850">
-                                  <p className="text-[10px] font-bold text-slate-500 uppercase">Duration / Status</p>
-                                  <p className="text-xs font-bold text-slate-200 mt-1">
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase">Duration / Status</p>
+                                  <p className="text-xs font-bold text-gray-800 mt-1">
                                     {selectedDayDetail.record.durationMinutes
                                       ? `${Math.floor(selectedDayDetail.record.durationMinutes / 60)}h ${selectedDayDetail.record.durationMinutes % 60}m`
                                       : selectedDayDetail.record.status === "inside"
@@ -1264,7 +1264,7 @@ export default function InchargeDashboard() {
                                 </div>
                               </div>
                             ) : (
-                              <p className="text-xs text-slate-400 italic font-medium">
+                              <p className="text-xs text-gray-500 italic font-medium">
                                 {selectedDayDetail.status === "*"
                                   ? `College was closed on this day (${selectedDayDetail.holidayReason || "Sunday"}). No attendance recorded.`
                                   : selectedDayDetail.status === "—"
@@ -1282,8 +1282,8 @@ export default function InchargeDashboard() {
                             });
 
                             return (
-                              <div className="pt-2 border-t border-slate-800 space-y-2">
-                                <h6 className="text-[11px] font-black uppercase text-slate-400 tracking-wider">
+                              <div className="pt-2 border-t border-gray-200 space-y-2">
+                                <h6 className="text-[11px] font-black uppercase text-gray-500 tracking-wider">
                                   Hourly Class Attendance (Lectures)
                                 </h6>
                                 {hourlyForDay.length > 0 ? (
@@ -1292,12 +1292,12 @@ export default function InchargeDashboard() {
                                       const sched = h.qr_schedules || {};
                                       const isPresent = h.marked_present;
                                       return (
-                                        <div key={h.id} className="p-3 rounded-xl bg-slate-950 border border-slate-850 flex items-center justify-between gap-3 text-xs">
+                                        <div key={h.id} className="p-3 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-between gap-3 text-xs">
                                           <div className="space-y-0.5">
-                                            <p className="font-extrabold text-slate-200">
+                                            <p className="font-extrabold text-gray-800">
                                               {sched.subject || "Elective/Subject"}
                                             </p>
-                                            <p className="text-[10px] text-slate-500 font-bold font-mono">
+                                            <p className="text-[10px] text-gray-400 font-bold font-mono">
                                               {sched.start_time || "—"} - {sched.end_time || "—"}
                                             </p>
                                           </div>
@@ -1309,7 +1309,7 @@ export default function InchargeDashboard() {
                                             }`}>
                                               {isPresent ? "Present" : "Absent"}
                                             </span>
-                                            <span className="text-[9px] text-slate-500 font-semibold">
+                                            <span className="text-[9px] text-gray-400 font-semibold">
                                               {h.scanned_qr ? "Scanned QR" : h.marked_by_teacher ? "By Teacher" : "System"}
                                             </span>
                                           </div>
@@ -1318,7 +1318,7 @@ export default function InchargeDashboard() {
                                     })}
                                   </div>
                                 ) : (
-                                  <p className="text-xs text-slate-500 italic">
+                                  <p className="text-xs text-gray-400 italic">
                                     {selectedDayDetail.status === "*" 
                                       ? "College closed. No lectures scheduled."
                                       : selectedDayDetail.status === "—"
@@ -1331,16 +1331,16 @@ export default function InchargeDashboard() {
                           })()}
                         </div>
                       ) : (
-                        <p className="text-xs text-slate-400 italic text-center py-2.5 bg-slate-950 rounded-xl border border-slate-850">
+                        <p className="text-xs text-gray-500 italic text-center py-2.5 bg-gray-50 rounded-xl border border-gray-200">
                           💡 Click on any date box above (P, A, *, or —) to view exact Entry & Exit scan timestamps for that day.
                         </p>
                       )}
 
                       {/* WhatsApp Notice Share footer */}
-                      <div className="border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold bg-slate-900 mt-4">
+                      <div className="border border-gray-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold bg-white mt-4">
                         <div>
-                          <p className="font-extrabold text-slate-200">Department of CSE - Data Science (DS)</p>
-                          <p className="text-slate-400">Sphoorthy Engineering College • Academic Year 2026-2027</p>
+                          <p className="font-extrabold text-gray-800">Department of CSE - Data Science (DS)</p>
+                          <p className="text-gray-500">Sphoorthy Engineering College • Academic Year 2026-2027</p>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -1365,10 +1365,10 @@ export default function InchargeDashboard() {
                   </div>
 
                   {/* Footer */}
-                  <div className="pt-4 border-t border-slate-800 flex justify-end">
+                  <div className="pt-4 border-t border-gray-200 flex justify-end">
                     <button
                       onClick={() => setSelectedStudentForDetails(null)}
-                      className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all cursor-pointer"
+                      className="px-6 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold transition-all cursor-pointer"
                     >
                       Close Profile
                     </button>

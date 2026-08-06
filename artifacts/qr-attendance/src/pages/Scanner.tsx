@@ -304,14 +304,14 @@ export default function Scanner() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-slate-900 border-b border-slate-800 px-4 py-4">
+      <div className="bg-white border-b border-gray-200 px-4 py-4">
         <div className="flex items-center gap-3 max-w-md mx-auto">
           <Link href="/dashboard">
             <button
               data-testid="back-button"
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors border border-gray-300"
               title="Back to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -322,7 +322,7 @@ export default function Scanner() {
           </div>
           <div>
             <h1 className="text-base font-bold text-white">QR Scanner</h1>
-            <p className="text-xs text-slate-400">Scan student ID card to mark attendance</p>
+            <p className="text-xs text-gray-500">Scan student ID card to mark attendance</p>
           </div>
         </div>
       </div>
@@ -356,14 +356,14 @@ export default function Scanner() {
                 : "Already Scanned"}
             </p>
             {result.userName && (
-              <div className="my-2 px-6 py-3 bg-slate-900/90 border-2 border-amber-400/80 rounded-2xl shadow-2xl text-center">
+              <div className="my-2 px-6 py-3 bg-white/90 border-2 border-amber-400/80 rounded-2xl shadow-2xl text-center">
                 <p className="text-4xl sm:text-5xl font-black text-amber-300 tracking-wide leading-tight drop-shadow-lg uppercase">
                   {result.userName}
                 </p>
               </div>
             )}
             {result.uniqueId && (
-              <p className="text-lg font-mono text-slate-200 mb-2 tracking-wider">
+              <p className="text-lg font-mono text-gray-800 mb-2 tracking-wider">
                 ID: {result.uniqueId}
               </p>
             )}
@@ -374,10 +374,10 @@ export default function Scanner() {
                 {result.role}
               </span>
             )}
-            <p className="text-sm text-slate-300 text-center mt-1 px-4">{result.message}</p>
+            <p className="text-sm text-gray-700 text-center mt-1 px-4">{result.message}</p>
             {result.action && (
               <span className={`mt-4 px-4 py-1.5 rounded-full text-sm font-semibold ${
-                result.action === "entry" ? "bg-green-800 text-green-200" : result.action === "exit" ? "bg-orange-800 text-orange-200" : "bg-slate-800 text-slate-200"
+                result.action === "entry" ? "bg-green-800 text-green-200" : result.action === "exit" ? "bg-orange-800 text-orange-200" : "bg-gray-100 text-gray-800"
               }`}>
                 {result.action === "entry" ? "✓ Checked In" : result.action === "exit" ? "✓ Checked Out" : "Recorded"}
               </span>
@@ -398,18 +398,18 @@ export default function Scanner() {
         )}
 
         {/* Scanner viewport */}
-        <div className="w-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden mb-4">
+        <div className="w-full bg-white border border-gray-200 rounded-2xl overflow-hidden mb-4">
           <div
             id="qr-reader"
             ref={scannerRef}
             className={`w-full aspect-square ${scanning ? "" : "hidden"}`}
           />
           {!scanning && (
-            <div className="w-full aspect-square flex flex-col items-center justify-center bg-slate-800/50">
-              <div className="w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center mb-4">
-                <Camera className="w-12 h-12 text-slate-400" />
+            <div className="w-full aspect-square flex flex-col items-center justify-center bg-gray-100">
+              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                <Camera className="w-12 h-12 text-gray-500" />
               </div>
-              <p className="text-sm text-slate-400 text-center px-6">
+              <p className="text-sm text-gray-500 text-center px-6">
                 Camera is off. Press Start to begin scanning.
               </p>
             </div>
@@ -423,7 +423,7 @@ export default function Scanner() {
         )}
 
         {/* Late Entry Mode Toggle */}
-        <div className="w-full mb-4 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 flex items-center justify-between shadow-lg">
+        <div className="w-full mb-4 bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between shadow-lg">
           <div className="flex flex-col">
             <span className="text-sm font-bold text-white tracking-wide">Late Entry Mode</span>
             <span className="text-xs text-slate-550 font-medium">Flag scanned student as late entry</span>
@@ -431,7 +431,7 @@ export default function Scanner() {
           <button
             onClick={() => setIsLateEntryMode(prev => !prev)}
             className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 cursor-pointer flex items-center ${
-              isLateEntryMode ? "bg-amber-500" : "bg-slate-850 border border-slate-800"
+              isLateEntryMode ? "bg-amber-500" : "bg-gray-50 border border-gray-200"
             }`}
           >
             <div
@@ -457,7 +457,7 @@ export default function Scanner() {
             <button
               data-testid="stop-scanner"
               onClick={stopScanner}
-              className="flex-1 py-4 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-base font-bold flex items-center justify-center gap-3 transition-colors"
+              className="flex-1 py-4 rounded-xl bg-gray-200 hover:bg-gray-300 text-white text-base font-bold flex items-center justify-center gap-3 transition-colors"
             >
               Stop Scanner
             </button>
@@ -465,20 +465,20 @@ export default function Scanner() {
         </div>
 
         {/* Volume control */}
-        <div className="mt-6 w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3">
+        <div className="mt-6 w-full bg-white border border-gray-200 rounded-xl px-4 py-3">
           <div className="flex items-center gap-3 mb-2">
             <button
               onClick={() => handleVolumeChange(volume > 0 ? 0 : 0.7)}
-              className="text-slate-300 hover:text-white transition-colors"
+              className="text-gray-700 hover:text-gray-900 transition-colors"
               title={volume > 0 ? "Mute" : "Unmute"}
               data-testid="toggle-mute"
             >
-              {volume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5 text-slate-500" />}
+              {volume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5 text-gray-400" />}
             </button>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-slate-400">Beep volume</span>
-                <span className="text-xs font-mono text-slate-500">{Math.round(volume * 100)}%</span>
+                <span className="text-xs font-medium text-gray-500">Beep volume</span>
+                <span className="text-xs font-mono text-gray-400">{Math.round(volume * 100)}%</span>
               </div>
               <input
                 type="range"
@@ -493,7 +493,7 @@ export default function Scanner() {
             </div>
             <button
               onClick={testSound}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold transition-colors border border-gray-300"
               title="Play test beep"
               data-testid="test-sound"
             >
@@ -510,11 +510,11 @@ export default function Scanner() {
             "Hold steady until scan is detected",
             "Scan again after the confirmation to mark the student inside",
           ].map((tip, i) => (
-            <div key={i} className="flex items-start gap-3 px-4 py-3 rounded-lg bg-slate-900/60 border border-slate-800">
+            <div key={i} className="flex items-start gap-3 px-4 py-3 rounded-lg bg-white border border-gray-200">
               <span className="w-5 h-5 rounded-full bg-blue-900/60 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </span>
-              <p className="text-sm text-slate-400">{tip}</p>
+              <p className="text-sm text-gray-500">{tip}</p>
             </div>
           ))}
         </div>

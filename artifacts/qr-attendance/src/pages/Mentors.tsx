@@ -228,25 +228,25 @@ export default function Mentors() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-5xl mx-auto text-slate-350">
+      <div className="p-6 max-w-5xl mx-auto text-gray-600">
         <BackButton />
         
         {/* Title */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Mentors Panel</h1>
-            <p className="text-sm text-slate-400 mt-1">Manage mentors, timetables, and view active scanning logs</p>
+            <p className="text-sm text-gray-500 mt-1">Manage mentors, timetables, and view active scanning logs</p>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-800 mb-6 gap-2">
+        <div className="flex border-b border-gray-200 mb-6 gap-2">
           <button
             onClick={() => setActiveTab("mentors")}
             className={`px-4 py-2 border-b-2 font-semibold text-sm transition-all ${
               activeTab === "mentors"
                 ? "border-purple-500 text-white"
-                : "border-transparent text-slate-400 hover:text-white"
+                : "border-transparent text-gray-500 hover:text-gray-900"
             }`}
           >
             Mentors & Assignments
@@ -256,7 +256,7 @@ export default function Mentors() {
             className={`px-4 py-2 border-b-2 font-semibold text-sm transition-all ${
               activeTab === "schedules"
                 ? "border-purple-500 text-white"
-                : "border-transparent text-slate-400 hover:text-white"
+                : "border-transparent text-gray-500 hover:text-gray-900"
             }`}
           >
             Timetable Schedules
@@ -266,7 +266,7 @@ export default function Mentors() {
             className={`px-4 py-2 border-b-2 font-semibold text-sm transition-all ${
               activeTab === "tracking"
                 ? "border-purple-500 text-white"
-                : "border-transparent text-slate-400 hover:text-white"
+                : "border-transparent text-gray-500 hover:text-gray-900"
             }`}
           >
             Mentor Scan Logs
@@ -295,7 +295,7 @@ export default function Mentors() {
             {showForm && (
               <form
                 onSubmit={createMentor}
-                className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6 grid sm:grid-cols-3 gap-3"
+                className="bg-white border border-gray-200 rounded-xl p-5 mb-6 grid sm:grid-cols-3 gap-3"
               >
                 <input
                   data-testid="mentor-name"
@@ -303,7 +303,7 @@ export default function Mentors() {
                   placeholder="Name"
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                  className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                  className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                 />
                 <input
                   data-testid="mentor-email"
@@ -312,7 +312,7 @@ export default function Mentors() {
                   placeholder="email@example.com"
                   value={form.email}
                   onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                  className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                  className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                 />
                 <input
                   data-testid="mentor-password"
@@ -322,13 +322,13 @@ export default function Mentors() {
                   placeholder="Password (min 4 chars)"
                   value={form.password}
                   onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                  className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                  className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                 />
                 <div className="sm:col-span-3 flex gap-2 justify-end">
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
-                    className="px-3 py-2 rounded-lg bg-slate-700 text-white text-sm"
+                    className="px-3 py-2 rounded-lg bg-gray-200 text-white text-sm"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -346,18 +346,18 @@ export default function Mentors() {
 
             {loading ? (
               <div className="py-20 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-slate-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
               </div>
             ) : (
               <div className="grid lg:grid-cols-2 gap-5">
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
-                  <div className="px-5 py-3 border-b border-slate-800 flex items-center gap-2">
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                  <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
                     <GraduationCap className="w-4 h-4 text-purple-400" />
                     <h2 className="text-sm font-semibold text-white">Mentors ({mentors.length})</h2>
                   </div>
-                  <div className="divide-y divide-slate-800">
+                  <div className="divide-y divide-gray-200">
                     {mentors.length === 0 ? (
-                      <div className="p-6 text-center text-sm text-slate-500">No mentors yet</div>
+                      <div className="p-6 text-center text-sm text-gray-400">No mentors yet</div>
                     ) : (
                       mentors.map((m) => {
                         const count = students.filter((s) => s.mentorId === m.id).length;
@@ -368,9 +368,9 @@ export default function Mentors() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-white truncate">{m.name}</p>
-                              <p className="text-xs text-slate-400 truncate">{m.email}</p>
+                              <p className="text-xs text-gray-500 truncate">{m.email}</p>
                             </div>
-                            <span className="px-2 py-0.5 rounded-full bg-slate-850 text-slate-300 text-xs border border-slate-800">
+                            <span className="px-2 py-0.5 rounded-full bg-gray-50 text-gray-700 text-xs border border-gray-200">
                               {count} {count === 1 ? "student" : "students"}
                             </span>
                           </div>
@@ -380,20 +380,20 @@ export default function Mentors() {
                   </div>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
-                  <div className="px-5 py-3 border-b border-slate-800 flex items-center gap-2">
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                  <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
                     <UserCheck className="w-4 h-4 text-blue-400" />
                     <h2 className="text-sm font-semibold text-white">Assign students</h2>
                   </div>
-                  <div className="max-h-[60vh] overflow-y-auto divide-y divide-slate-800">
+                  <div className="max-h-[60vh] overflow-y-auto divide-y divide-gray-200">
                     {students.length === 0 ? (
-                      <div className="p-6 text-center text-sm text-slate-500">No students</div>
+                      <div className="p-6 text-center text-sm text-gray-400">No students</div>
                     ) : (
                       students.map((s) => (
                         <div key={s.id} className="px-4 py-2.5 flex items-center gap-3">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-white truncate">{s.name}</p>
-                            <p className="text-xs text-slate-400 truncate">{s.uniqueId}</p>
+                            <p className="text-xs text-gray-500 truncate">{s.uniqueId}</p>
                           </div>
                           <select
                             data-testid={`assign-mentor-${s.id}`}
@@ -404,7 +404,7 @@ export default function Mentors() {
                                 e.target.value ? Number(e.target.value) : null
                               )
                             }
-                            className="px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-purple-500"
+                            className="px-2 py-1.5 rounded-lg bg-gray-100 border border-gray-300 text-white text-xs focus:outline-none focus:border-purple-500"
                           >
                             <option value="">— None —</option>
                             {mentors.map((m) => (
@@ -436,16 +436,16 @@ export default function Mentors() {
             {showScheduleForm && (
               <form
                 onSubmit={createSchedule}
-                className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6 grid sm:grid-cols-3 gap-3"
+                className="bg-white border border-gray-200 rounded-xl p-5 mb-6 grid sm:grid-cols-3 gap-3"
               >
                 {/* Mentor Dropdown */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-slate-400">Mentor / Teacher</label>
+                  <label className="text-xs font-semibold text-gray-500">Mentor / Teacher</label>
                   <select
                     required
                     value={scheduleForm.mentorId}
                     onChange={(e) => setScheduleForm(p => ({ ...p, mentorId: e.target.value }))}
-                    className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                   >
                     <option value="">— Select Mentor —</option>
                     {mentors.map(m => (
@@ -456,11 +456,11 @@ export default function Mentors() {
 
                 {/* Day of Week */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-slate-400">Day of Week</label>
+                  <label className="text-xs font-semibold text-gray-500">Day of Week</label>
                   <select
                     value={scheduleForm.dayOfWeek}
                     onChange={(e) => setScheduleForm(p => ({ ...p, dayOfWeek: e.target.value }))}
-                    className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                   >
                     <option value="MON">Monday</option>
                     <option value="TUE">Tuesday</option>
@@ -473,48 +473,48 @@ export default function Mentors() {
 
                 {/* Subject name */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-slate-400">Subject Name</label>
+                  <label className="text-xs font-semibold text-gray-500">Subject Name</label>
                   <input
                     required
                     placeholder="e.g. OOP THROUGH JAVA"
                     value={scheduleForm.subject}
                     onChange={(e) => setScheduleForm(p => ({ ...p, subject: e.target.value }))}
-                    className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                   />
                 </div>
 
                 {/* Start Time */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-slate-400">Start Time</label>
+                  <label className="text-xs font-semibold text-gray-500">Start Time</label>
                   <input
                     type="time"
                     required
                     value={scheduleForm.startTime.slice(0,5)}
                     onChange={(e) => setScheduleForm(p => ({ ...p, startTime: e.target.value + ":00" }))}
-                    className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                   />
                 </div>
 
                 {/* End Time */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-slate-400">End Time</label>
+                  <label className="text-xs font-semibold text-gray-500">End Time</label>
                   <input
                     type="time"
                     required
                     value={scheduleForm.endTime.slice(0,5)}
                     onChange={(e) => setScheduleForm(p => ({ ...p, endTime: e.target.value + ":00" }))}
-                    className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                   />
                 </div>
 
                 {/* Section & Year */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-slate-400">Section & Year</label>
+                  <label className="text-xs font-semibold text-gray-500">Section & Year</label>
                   <div className="flex gap-2">
                     <select
                       value={scheduleForm.year}
                       onChange={(e) => setScheduleForm(p => ({ ...p, year: e.target.value }))}
-                      className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500"
+                      className="flex-1 px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500"
                     >
                       <option value="II">II Yr</option>
                       <option value="III">III Yr</option>
@@ -525,7 +525,7 @@ export default function Mentors() {
                       placeholder="Sec"
                       value={scheduleForm.section}
                       onChange={(e) => setScheduleForm(p => ({ ...p, section: e.target.value.toUpperCase() }))}
-                      className="w-20 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-purple-500 text-center"
+                      className="w-20 px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-purple-500 text-center"
                     />
                   </div>
                 </div>
@@ -534,7 +534,7 @@ export default function Mentors() {
                   <button
                     type="button"
                     onClick={() => setShowScheduleForm(false)}
-                    className="px-3 py-2 rounded-lg bg-slate-750 text-white text-sm border border-slate-700"
+                    className="px-3 py-2 rounded-lg bg-gray-100 text-white text-sm border border-gray-300"
                   >
                     Cancel
                   </button>
@@ -551,18 +551,18 @@ export default function Mentors() {
 
             {schedulesLoading ? (
               <div className="py-20 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-slate-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
               </div>
             ) : (
-              <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="px-5 py-3 border-b border-slate-800 flex items-center gap-2">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-purple-400" />
                   <h2 className="text-sm font-semibold text-white">Active Timetable Schedules ({schedules.length})</h2>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-800 text-xs font-bold text-slate-400 bg-slate-950">
+                      <tr className="border-b border-gray-200 text-xs font-bold text-gray-500 bg-gray-50">
                         <th className="px-4 py-2.5">Mentor</th>
                         <th className="px-4 py-2.5">Day</th>
                         <th className="px-4 py-2.5">Time Slot</th>
@@ -571,29 +571,29 @@ export default function Mentors() {
                         <th className="px-4 py-2.5 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800 text-sm">
+                    <tbody className="divide-y divide-gray-200 text-sm">
                       {schedules.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                          <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                             No class schedules defined. Click the button to add.
                           </td>
                         </tr>
                       ) : (
                         schedules.map((s) => (
-                          <tr key={s.id} className="hover:bg-slate-850/30">
-                            <td className="px-4 py-2.5 font-semibold text-slate-200">{s.qr_mentors?.name || "Unknown"}</td>
+                          <tr key={s.id} className="hover:bg-gray-50/30">
+                            <td className="px-4 py-2.5 font-semibold text-gray-800">{s.qr_mentors?.name || "Unknown"}</td>
                             <td className="px-4 py-2.5">{s.day_of_week}</td>
-                            <td className="px-4 py-2.5 text-slate-300 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
+                            <td className="px-4 py-2.5 text-gray-700 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
                             <td className="px-4 py-2.5">
-                              <span className="px-2 py-0.5 rounded bg-slate-800 text-purple-300 text-xs font-semibold border border-slate-750">
+                              <span className="px-2 py-0.5 rounded bg-gray-100 text-purple-300 text-xs font-semibold border border-gray-200">
                                 {s.year} Yr - {s.section}
                               </span>
                             </td>
-                            <td className="px-4 py-2.5 text-slate-400 max-w-[200px] truncate" title={s.subject}>{s.subject || "—"}</td>
+                            <td className="px-4 py-2.5 text-gray-500 max-w-[200px] truncate" title={s.subject}>{s.subject || "—"}</td>
                             <td className="px-4 py-2.5 text-center">
                               <button
                                 onClick={() => deleteSchedule(s.id)}
-                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-red-950/30 text-slate-400 hover:text-red-500 border border-slate-750 transition-colors"
+                                className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-950/30 text-gray-500 hover:text-red-500 border border-gray-200 transition-colors"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -613,19 +613,19 @@ export default function Mentors() {
         {activeTab === "tracking" && (
           <div className="grid md:grid-cols-3 gap-5">
             {/* Mentor List Selection */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm h-fit">
-              <div className="px-5 py-3 border-b border-slate-800 flex items-center gap-2">
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm h-fit">
+              <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
                 <List className="w-4 h-4 text-purple-400" />
                 <h2 className="text-sm font-semibold text-white">Mentors ({trackingData.length})</h2>
               </div>
               {trackingLoading && trackingData.length === 0 ? (
                 <div className="p-10 flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+                  <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
                 </div>
               ) : (
-                <div className="divide-y divide-slate-800 max-h-[70vh] overflow-y-auto">
+                <div className="divide-y divide-gray-200 max-h-[70vh] overflow-y-auto">
                   {trackingData.length === 0 ? (
-                    <div className="p-6 text-center text-sm text-slate-500">No mentors found</div>
+                    <div className="p-6 text-center text-sm text-gray-400">No mentors found</div>
                   ) : (
                     trackingData.map((m) => (
                       <div
@@ -634,13 +634,13 @@ export default function Mentors() {
                         className={`px-4 py-3 cursor-pointer transition-colors ${
                           selectedMentorTracking?.id === m.id
                             ? "bg-purple-950/20 text-white border-l-4 border-purple-500"
-                            : "hover:bg-slate-850/40"
+                            : "hover:bg-gray-50/40"
                         }`}
                       >
-                        <p className="text-sm font-bold text-slate-200">{m.name}</p>
-                        <p className="text-xs text-slate-400 mt-0.5 truncate">{m.email}</p>
-                        <p className="text-[10px] text-slate-450 mt-1">
-                          Scanned sessions: <span className="font-semibold text-slate-350">{m.sessions.length}</span>
+                        <p className="text-sm font-bold text-gray-800">{m.name}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 truncate">{m.email}</p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          Scanned sessions: <span className="font-semibold text-gray-600">{m.sessions.length}</span>
                         </p>
                       </div>
                     ))
@@ -650,8 +650,8 @@ export default function Mentors() {
             </div>
 
             {/* Mentor Scan History Logs */}
-            <div className="md:col-span-2 bg-slate-900 border border-slate-880 rounded-xl overflow-hidden shadow-sm">
-              <div className="px-5 py-3 border-b border-slate-800 flex items-center gap-2 bg-slate-950">
+            <div className="md:col-span-2 bg-white border border-slate-880 rounded-xl overflow-hidden shadow-sm">
+              <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2 bg-gray-50">
                 <Clock className="w-4 h-4 text-purple-400" />
                 <h2 className="text-sm font-semibold text-white">
                   {selectedMentorTracking
@@ -661,14 +661,14 @@ export default function Mentors() {
               </div>
 
               {!selectedMentorTracking ? (
-                <div className="p-20 text-center text-sm text-slate-500 font-medium">
+                <div className="p-20 text-center text-sm text-gray-400 font-medium">
                   Select a mentor from the sidebar list to inspect their hourly start/end scanning sessions.
                 </div>
               ) : (
                 <div className="overflow-x-auto divide-y divide-slate-850">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-800 text-xs font-bold text-slate-400 bg-slate-950/60">
+                      <tr className="border-b border-gray-200 text-xs font-bold text-gray-500 bg-gray-50/60">
                         <th className="px-4 py-2.5">Date</th>
                         <th className="px-4 py-2.5">Subject & Class</th>
                         <th className="px-4 py-2.5">Start Scan</th>
@@ -676,29 +676,29 @@ export default function Mentors() {
                         <th className="px-4 py-2.5 text-center">Students</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800 text-sm">
+                    <tbody className="divide-y divide-gray-200 text-sm">
                       {selectedMentorTracking.sessions.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                          <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
                             No recorded scan sessions for this mentor today.
                           </td>
                         </tr>
                       ) : (
                         selectedMentorTracking.sessions.map((s) => (
-                          <tr key={s.id} className="hover:bg-slate-850/20">
-                            <td className="px-4 py-2.5 font-medium text-slate-200">{s.date}</td>
+                          <tr key={s.id} className="hover:bg-gray-50/20">
+                            <td className="px-4 py-2.5 font-medium text-gray-800">{s.date}</td>
                             <td className="px-4 py-2.5">
                               {s.schedule ? (
                                 <div className="text-xs">
-                                  <p className="font-bold text-slate-200">{s.schedule.subject}</p>
-                                  <p className="text-slate-400 mt-0.5">Section: {s.schedule.section} · {s.schedule.day}</p>
+                                  <p className="font-bold text-gray-800">{s.schedule.subject}</p>
+                                  <p className="text-gray-500 mt-0.5">Section: {s.schedule.section} · {s.schedule.day}</p>
                                 </div>
                               ) : (
-                                <span className="text-slate-500">Deleted Slot</span>
+                                <span className="text-gray-400">Deleted Slot</span>
                               )}
                             </td>
-                            <td className="px-4 py-2.5 font-mono text-xs text-slate-350">{formatDateTime(s.startedAt)}</td>
-                            <td className="px-4 py-2.5 font-mono text-xs text-slate-350">{formatDateTime(s.endedAt)}</td>
+                            <td className="px-4 py-2.5 font-mono text-xs text-gray-600">{formatDateTime(s.startedAt)}</td>
+                            <td className="px-4 py-2.5 font-mono text-xs text-gray-600">{formatDateTime(s.endedAt)}</td>
                             <td className="px-4 py-2.5 text-center font-bold text-green-500">{s.studentCount}</td>
                           </tr>
                         ))

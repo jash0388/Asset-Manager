@@ -87,8 +87,8 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
       percent,
       label: "Safe Zone",
       badgeColor: "bg-emerald-500 text-slate-950 font-black border border-emerald-400",
-      cardBorder: "border-l-4 border-l-emerald-500 border-slate-800",
-      bannerBg: "bg-slate-950 border-emerald-500/30 text-slate-200",
+      cardBorder: "border-l-4 border-l-emerald-500 border-gray-200",
+      bannerBg: "bg-gray-50 border-emerald-500/30 text-gray-800",
       dotColor: "🟢",
       classesNeededFor75: 0,
       classesNeededFor65: 0,
@@ -100,8 +100,8 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
       percent,
       label: "Warning (Recoverable)",
       badgeColor: "bg-amber-400 text-slate-950 font-black border border-amber-300 shadow-xs",
-      cardBorder: "border-l-4 border-l-amber-400 border-slate-800",
-      bannerBg: "bg-slate-950 border-amber-500/40 text-slate-200",
+      cardBorder: "border-l-4 border-l-amber-400 border-gray-200",
+      bannerBg: "bg-gray-50 border-amber-500/40 text-gray-800",
       dotColor: "🟡",
       classesNeededFor75,
       classesNeededFor65: 0,
@@ -113,8 +113,8 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
       percent,
       label: "Critical Risk (< 65%)",
       badgeColor: "bg-rose-600 text-white font-extrabold border border-rose-400 shadow-xs",
-      cardBorder: "border-l-4 border-l-rose-500 border-slate-800",
-      bannerBg: "bg-slate-950 border-rose-500/40 text-slate-200",
+      cardBorder: "border-l-4 border-l-rose-500 border-gray-200",
+      bannerBg: "bg-gray-50 border-rose-500/40 text-gray-800",
       dotColor: "🔴",
       classesNeededFor75,
       classesNeededFor65,
@@ -144,7 +144,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2.5 rounded-xl bg-white border border-slate-250 hover:bg-slate-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+        className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
       >
         <Calendar className="w-4 h-4 text-blue-600" />
         <span>{monthNames[month - 1]} {year}</span>
@@ -153,12 +153,12 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white border border-slate-200 p-4 shadow-2xl z-30 animate-in fade-in duration-100">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white border border-gray-200 p-4 shadow-2xl z-30 animate-in fade-in duration-100">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &larr;
               </button>
@@ -166,7 +166,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &rarr;
               </button>
@@ -183,7 +183,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSelected 
                         ? "bg-blue-600 text-white shadow-sm" 
-                        : "bg-slate-50 border border-slate-150 hover:bg-slate-100 text-slate-700"
+                        : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-slate-700"
                     }`}
                   >
                     {mName}
@@ -695,9 +695,9 @@ export default function PrincipalDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col font-sans">
       {/* Top Header Navigation Bar */}
-      <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-lg">
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-lg">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold shadow-md shadow-blue-600/30 border border-blue-400/30">
             <ShieldCheck className="w-6 h-6 text-white" />
@@ -722,8 +722,8 @@ export default function PrincipalDashboard() {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* Executive Principal Header Card (only when NOT on Risk Flag Analytics tab) */}
         {activeTab !== "flags" && (
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-slate-800">
+          <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-gray-200">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
                   <Award className="w-9 h-9" />
@@ -737,7 +737,7 @@ export default function PrincipalDashboard() {
                       Principal
                     </span>
                   </div>
-                  <p className="text-slate-400 text-sm mt-1 font-medium">
+                  <p className="text-gray-500 text-sm mt-1 font-medium">
                     Sphoorthy Engineering College • Institutional Campus Portal
                   </p>
                 </div>
@@ -751,7 +751,7 @@ export default function PrincipalDashboard() {
                       (input as any).showPicker();
                     }
                   }}
-                  className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-4 py-2.5 rounded-2xl text-slate-200 font-semibold text-xs cursor-pointer hover:border-slate-700 transition-all"
+                  className="flex items-center gap-2 bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-2xl text-gray-800 font-semibold text-xs cursor-pointer hover:border-gray-300 transition-all"
                 >
                   <Calendar className="w-4 h-4 text-blue-400" />
                   <input
@@ -764,7 +764,7 @@ export default function PrincipalDashboard() {
                       }
                     }}
                     onChange={(e) => setLogDate(e.target.value)}
-                    className="bg-transparent text-slate-200 focus:outline-none cursor-pointer [color-scheme:dark]"
+                    className="bg-transparent text-gray-800 focus:outline-none cursor-pointer [color-scheme:light]"
                   />
                 </div>
 
@@ -780,8 +780,8 @@ export default function PrincipalDashboard() {
 
             {/* Campus Overview KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Campus Enrolled</p>
+              <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Campus Enrolled</p>
                 <p className="text-2xl font-black text-white mt-1">{campusTotalStudents} Students</p>
               </div>
               <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
@@ -808,7 +808,7 @@ export default function PrincipalDashboard() {
                 <Building2 className="w-5 h-5 text-blue-400" />
                 Engineering Departments & Branches
               </h2>
-              <span className="text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+              <span className="text-xs font-bold text-gray-500 bg-white border border-gray-200 px-3 py-1 rounded-full">
                 6 Departments
               </span>
             </div>
@@ -822,8 +822,8 @@ export default function PrincipalDashboard() {
                     onClick={() => setSelectedBranch(b.code)}
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer min-w-[175px] flex-shrink-0 snap-start ${
                       isSelected
-                        ? "bg-slate-900 border-blue-500 ring-2 ring-blue-500/40 shadow-xl"
-                        : "bg-slate-900/80 border-slate-800 hover:border-slate-700"
+                        ? "bg-white border-blue-500 ring-2 ring-blue-500/40 shadow-xl"
+                        : "bg-white/80 border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -833,12 +833,12 @@ export default function PrincipalDashboard() {
                            LIVE
                          </span>
                        ) : (
-                         <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-400 uppercase">
+                         <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-500 uppercase">
                            Ready
                          </span>
                        )}
                      </div>
-                     <p className="text-xs font-semibold text-slate-400 truncate">{b.name}</p>
+                     <p className="text-xs font-semibold text-gray-500 truncate">{b.name}</p>
                    </button>
                  );
                })}
@@ -850,13 +850,13 @@ export default function PrincipalDashboard() {
         {selectedBranch === "DS" ? (
           <div className="space-y-5">
             {/* View Mode Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
+            <div className="flex items-center gap-2 border-b border-gray-200 pb-3 overflow-x-auto">
               <button
                 onClick={() => setActiveTab("summary")}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "summary"
                     ? "bg-blue-600 text-white shadow-md"
-                    : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+                    : "bg-white border border-gray-200 text-gray-500 hover:text-gray-900"
                 }`}
               >
                 <Layers className="w-4 h-4" />
@@ -868,7 +868,7 @@ export default function PrincipalDashboard() {
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "detailed"
                     ? "bg-blue-600 text-white shadow-md"
-                    : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+                    : "bg-white border border-gray-200 text-gray-500 hover:text-gray-900"
                 }`}
               >
                 <Users className="w-4 h-4" />
@@ -880,7 +880,7 @@ export default function PrincipalDashboard() {
               /* DS Section Cards */
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sectionStats.map((st) => (
-                  <div key={st.section} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-lg hover:border-slate-700 transition-all">
+                  <div key={st.section} className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-lg hover:border-gray-300 transition-all">
                     <div
                       onClick={() => {
                         const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
@@ -906,7 +906,7 @@ export default function PrincipalDashboard() {
                         </div>
                         <div>
                           <h4 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors">Section {st.section}</h4>
-                          <p className="text-xs font-medium text-slate-400">Data Science Dept • Click for Roster</p>
+                          <p className="text-xs font-medium text-gray-500">Data Science Dept • Click for Roster</p>
                         </div>
                       </div>
                       <span className="text-base font-black text-blue-400">{st.percent}%</span>
@@ -931,9 +931,9 @@ export default function PrincipalDashboard() {
                             }),
                           });
                         }}
-                        className="p-3 rounded-xl bg-slate-950 hover:bg-slate-850 border border-slate-800/80 transition-all cursor-pointer text-center active:scale-95"
+                        className="p-3 rounded-xl bg-gray-50 hover:bg-gray-50 border border-gray-200 transition-all cursor-pointer text-center active:scale-95"
                       >
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Enrolled</p>
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Enrolled</p>
                         <p className="text-base font-black text-white mt-1">{st.total}</p>
                       </button>
 
@@ -993,7 +993,7 @@ export default function PrincipalDashboard() {
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                       riskFilter === "RED"
                         ? "bg-rose-950/60 border-rose-500 ring-2 ring-rose-500/40 shadow-xl"
-                        : "bg-slate-900 border-slate-800 hover:border-rose-900/60"
+                        : "bg-white border-gray-200 hover:border-rose-900/60"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -1006,7 +1006,7 @@ export default function PrincipalDashboard() {
                       </span>
                     </div>
                     <p className="text-2xl font-black text-white">{redFlagCount} Students</p>
-                    <p className="text-[11px] text-slate-400 mt-1">Shortage Risk • Requires Condonation / Intimation</p>
+                    <p className="text-[11px] text-gray-500 mt-1">Shortage Risk • Requires Condonation / Intimation</p>
                   </button>
 
                   <button
@@ -1014,7 +1014,7 @@ export default function PrincipalDashboard() {
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                       riskFilter === "YELLOW"
                         ? "bg-amber-950/60 border-amber-500 ring-2 ring-amber-500/40 shadow-xl"
-                        : "bg-slate-900 border-slate-800 hover:border-amber-900/60"
+                        : "bg-white border-gray-200 hover:border-amber-900/60"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -1027,7 +1027,7 @@ export default function PrincipalDashboard() {
                       </span>
                     </div>
                     <p className="text-2xl font-black text-white">{yellowFlagCount} Students</p>
-                    <p className="text-[11px] text-slate-400 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
+                    <p className="text-[11px] text-gray-500 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
                   </button>
 
                   <button
@@ -1035,7 +1035,7 @@ export default function PrincipalDashboard() {
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                       riskFilter === "GREEN"
                         ? "bg-emerald-950/60 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl"
-                        : "bg-slate-900 border-slate-800 hover:border-emerald-900/60"
+                        : "bg-white border-gray-200 hover:border-emerald-900/60"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -1048,21 +1048,21 @@ export default function PrincipalDashboard() {
                       </span>
                     </div>
                     <p className="text-2xl font-black text-white">{greenFlagCount} Students</p>
-                    <p className="text-[11px] text-slate-400 mt-1">Good Standing • Target Met</p>
+                    <p className="text-[11px] text-gray-500 mt-1">Good Standing • Target Met</p>
                   </button>
                 </div>
 
                 {/* Filter and Search Bar */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+                <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-xl">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="relative flex-1">
-                      <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         placeholder="Search student name or roll number..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-amber-500"
+                        className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 border border-gray-200 text-white text-xs focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
@@ -1070,7 +1070,7 @@ export default function PrincipalDashboard() {
                       <select
                         value={riskFilter}
                         onChange={(e: any) => setRiskFilter(e.target.value)}
-                        className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                        className="px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none"
                       >
                         <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
                         <option value="RED">🔴 Red Flag (&lt; 65%)</option>
@@ -1081,7 +1081,7 @@ export default function PrincipalDashboard() {
                       <select
                         value={sectionFilter}
                         onChange={(e) => setSectionFilter(e.target.value)}
-                        className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                        className="px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none"
                       >
                         <option value="ALL">All Sections</option>
                         {sections.map((s) => (
@@ -1094,7 +1094,7 @@ export default function PrincipalDashboard() {
                   {/* Student Flag Cards */}
                   <div className="space-y-3 max-h-[58vh] overflow-y-auto pr-2 custom-scrollbar contain-paint">
                     {filteredAnalyticsList.length === 0 ? (
-                      <div className="p-8 text-center text-slate-500 text-xs font-medium">
+                      <div className="p-8 text-center text-gray-400 text-xs font-medium">
                         No students found matching current risk flag filter.
                       </div>
                     ) : (
@@ -1102,18 +1102,18 @@ export default function PrincipalDashboard() {
                         <div
                           key={item.student.id}
                           onClick={() => setSelectedStudentForDetails(item.student)}
-                          className={`bg-slate-900 border rounded-2xl p-4 transition-colors cursor-pointer space-y-3 group ${item.cardBorder}`}
+                          className={`bg-white border rounded-2xl p-4 transition-colors cursor-pointer space-y-3 group ${item.cardBorder}`}
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-black text-sm">
+                              <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center font-black text-sm">
                                 {item.dotColor}
                               </div>
                               <div>
                                 <h4 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
                                   {item.student.name}
                                 </h4>
-                                <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-300 font-mono font-medium">
+                                <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-700 font-mono font-medium">
                                   <span>Roll: <strong className="text-emerald-400 font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
                                   <span>•</span>
                                   <span>Sec: <strong className="text-blue-400 font-bold">{getSectionDisplayName(item.student.section).name}</strong></span>
@@ -1126,7 +1126,7 @@ export default function PrincipalDashboard() {
                                 <span className={`px-3.5 py-1 rounded-full text-xs font-black shadow-xs inline-block ${item.badgeColor}`}>
                                   {item.label} ({item.percent}%)
                                 </span>
-                                <p className="text-xs text-slate-300 font-bold mt-1">
+                                <p className="text-xs text-gray-700 font-bold mt-1">
                                   {item.presentDays} / {item.totalWorkingDays} Working Days Attended
                                 </p>
                               </div>
@@ -1136,12 +1136,12 @@ export default function PrincipalDashboard() {
                           {/* Recovery Math & Action Advice */}
                           <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${item.bannerBg}`}>
                             <div className="flex items-center gap-2">
-                              <TrendingUp className="w-4 h-4 shrink-0 text-slate-300" />
-                              <span className="font-semibold text-slate-200">{item.tip}</span>
+                              <TrendingUp className="w-4 h-4 shrink-0 text-gray-700" />
+                              <span className="font-semibold text-gray-800">{item.tip}</span>
                             </div>
 
                             {item.classesNeededFor75 > 0 ? (
-                              <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white shrink-0 shadow-xs">
+                              <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-white border border-gray-300 text-white shrink-0 shadow-xs">
                                 Target +{item.classesNeededFor75} Classes Needed
                               </span>
                             ) : (
@@ -1158,16 +1158,16 @@ export default function PrincipalDashboard() {
               </div>
             ) : (
               /* Detailed Student Logs Table */
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+              <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="relative flex-1">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       placeholder="Search student name or roll number..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 border border-gray-200 text-white text-xs focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
@@ -1175,7 +1175,7 @@ export default function PrincipalDashboard() {
                     <select
                       value={sectionFilter}
                       onChange={(e) => setSectionFilter(e.target.value)}
-                      className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                      className="px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none"
                     >
                       <option value="ALL">All Sections</option>
                       {sections.map((s) => (
@@ -1185,15 +1185,15 @@ export default function PrincipalDashboard() {
                   </div>
                 </div>
 
-                <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
+                <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
                   {logsLoading ? (
-                    <div className="p-8 text-center text-slate-400 text-xs font-medium">Loading attendance records...</div>
+                    <div className="p-8 text-center text-gray-500 text-xs font-medium">Loading attendance records...</div>
                   ) : filteredLogs.length === 0 ? (
-                    <div className="p-8 text-center text-slate-400 text-xs font-medium">No scan records found for date {logDate}.</div>
+                    <div className="p-8 text-center text-gray-500 text-xs font-medium">No scan records found for date {logDate}.</div>
                   ) : (
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-800 bg-slate-900 text-slate-400 font-bold uppercase">
+                        <tr className="border-b border-gray-200 bg-white text-gray-500 font-bold uppercase">
                           <th className="py-3 px-4">Student</th>
                           <th className="py-3 px-4">Roll Number</th>
                           <th className="py-3 px-4 text-center">Section</th>
@@ -1206,7 +1206,7 @@ export default function PrincipalDashboard() {
                         {filteredLogs.map((log: any) => {
                           const student = log.user || students.find((s) => s.id === log.userId);
                           return (
-                            <tr key={log.id} className="hover:bg-slate-900/60">
+                            <tr key={log.id} className="hover:bg-white">
                               <td className="py-3 px-4 font-bold text-white">
                                 {student ? (
                                   <button
@@ -1219,7 +1219,7 @@ export default function PrincipalDashboard() {
                                   "Unknown"
                                 )}
                               </td>
-                              <td className="py-3 px-4 font-mono text-slate-300">
+                              <td className="py-3 px-4 font-mono text-gray-700">
                                 {student ? (
                                   <button
                                     onClick={() => setSelectedStudentForDetails(student)}
@@ -1231,7 +1231,7 @@ export default function PrincipalDashboard() {
                                   "—"
                                 )}
                               </td>
-                              <td className="py-3 px-4 text-center text-slate-300 font-semibold">
+                              <td className="py-3 px-4 text-center text-gray-700 font-semibold">
                                 {student ? getSectionDisplayName(student.section).name : "—"}
                               </td>
                               <td className="py-3 px-4 text-center font-bold text-emerald-400">
@@ -1251,7 +1251,7 @@ export default function PrincipalDashboard() {
                                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                                   log.status === "inside"
                                     ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                                    : "bg-slate-800 text-slate-400 border-slate-750"
+                                    : "bg-gray-100 text-gray-500 border-gray-200"
                                 }`}>
                                   {log.status === "inside" ? "Still on Campus" : "Exited"}
                                 </span>
@@ -1268,14 +1268,14 @@ export default function PrincipalDashboard() {
           </div>
         ) : (
           /* Non-DS Branch Setup Card */
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-4 shadow-xl">
+          <div className="bg-white border border-gray-200 rounded-3xl p-8 sm:p-12 text-center space-y-4 shadow-xl">
             <div className="w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mx-auto">
               <Building2 className="w-8 h-8" />
             </div>
             <h3 className="text-xl font-bold text-white">
               {BRANCHES.find((b) => b.code === selectedBranch)?.name} ({selectedBranch})
             </h3>
-            <p className="text-slate-400 text-sm max-w-md mx-auto font-medium">
+            <p className="text-gray-500 text-sm max-w-md mx-auto font-medium">
               Department infrastructure configured. Currently 0 students are registered under this department. Live scanning active for Data Science (DS).
             </p>
           </div>
@@ -1284,22 +1284,22 @@ export default function PrincipalDashboard() {
         {/* Section Interactive Roster Modal */}
         {sectionModalData && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-xs">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl p-6 space-y-4 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
-              <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-2xl p-6 space-y-4 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+              <div className="flex items-start justify-between border-b border-gray-200 pb-3">
                 <div>
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     {sectionModalData.title}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5 font-medium">{sectionModalData.subtitle}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 font-medium">{sectionModalData.subtitle}</p>
                 </div>
-                <button onClick={() => setSectionModalData(null)} className="text-slate-400 hover:text-white p-1">
+                <button onClick={() => setSectionModalData(null)} className="text-gray-500 hover:text-gray-900 p-1">
                   <XCircle className="w-6 h-6" />
                 </button>
               </div>
 
-              <div className="overflow-y-auto space-y-2 pr-1 flex-1 border border-slate-800 rounded-xl bg-slate-950 p-2">
+              <div className="overflow-y-auto space-y-2 pr-1 flex-1 border border-gray-200 rounded-xl bg-gray-50 p-2">
                 {sectionModalData.students.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500 text-xs italic">No students match this section view.</div>
+                  <div className="p-8 text-center text-gray-400 text-xs italic">No students match this section view.</div>
                 ) : (
                   sectionModalData.students.map((item, idx) => (
                     <div
@@ -1308,7 +1308,7 @@ export default function PrincipalDashboard() {
                         setSelectedStudentForDetails(item.student);
                         setSectionModalData(null);
                       }}
-                      className="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 flex items-center justify-between transition-all cursor-pointer group"
+                      className="p-3 rounded-xl bg-white border border-gray-200 hover:border-blue-500/50 flex items-center justify-between transition-all cursor-pointer group"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 font-bold text-xs flex items-center justify-center font-mono">
@@ -1326,7 +1326,7 @@ export default function PrincipalDashboard() {
 
                       <div className="flex items-center gap-3">
                         {item.entryTime ? (
-                          <span className="text-xs font-mono font-extrabold text-emerald-400 bg-slate-950 px-3 py-1 rounded-lg border border-emerald-500/50 shadow-xs flex items-center gap-1.5">
+                          <span className="text-xs font-mono font-extrabold text-emerald-400 bg-gray-50 px-3 py-1 rounded-lg border border-emerald-500/50 shadow-xs flex items-center gap-1.5">
                             In: {formatTime(item.entryTime)}
                             {isLateTime(item.entryTime) && (
                               <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider">LATE</span>
@@ -1346,10 +1346,10 @@ export default function PrincipalDashboard() {
                 )}
               </div>
 
-              <div className="pt-2 border-t border-slate-800 flex justify-end">
+              <div className="pt-2 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={() => setSectionModalData(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold cursor-pointer"
                 >
                   Close Roster
                 </button>
@@ -1360,10 +1360,10 @@ export default function PrincipalDashboard() {
 
         {/* Student Profile & Attendance Details Modal - FULL SCREEN REDESIGN */}
         {selectedStudentForDetails && (
-          <div className="fixed inset-0 z-50 bg-slate-950 text-slate-100 flex flex-col p-6 sm:p-10 md:p-12 overflow-y-auto animate-fadeIn font-sans">
+          <div className="fixed inset-0 z-50 bg-gray-50 text-gray-900 flex flex-col p-6 sm:p-10 md:p-12 overflow-y-auto animate-fadeIn font-sans">
             <div className="max-w-4xl mx-auto w-full space-y-8">
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-800 pb-6">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-6">
                 <div className="flex items-center gap-5">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-white shadow-xl">
                     {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
@@ -1375,7 +1375,7 @@ export default function PrincipalDashboard() {
                         Student
                       </span>
                     </h2>
-                    <p className="text-sm font-semibold text-slate-400 mt-1">
+                    <p className="text-sm font-semibold text-gray-500 mt-1">
                       Department of CSE Data Science
                     </p>
                   </div>
@@ -1383,7 +1383,7 @@ export default function PrincipalDashboard() {
                 
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer"
+                  className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-all cursor-pointer"
                 >
                   <XCircle className="w-8 h-8" />
                 </button>
@@ -1393,20 +1393,20 @@ export default function PrincipalDashboard() {
               <div className="space-y-6">
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                    <p className="text-xs font-bold text-slate-500 uppercase">Roll Number</p>
-                    <p className="text-base font-bold text-slate-200 font-mono mt-1">
+                  <div className="p-4.5 rounded-2xl bg-white border border-gray-200">
+                    <p className="text-xs font-bold text-gray-400 uppercase">Roll Number</p>
+                    <p className="text-base font-bold text-gray-800 font-mono mt-1">
                       {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
                     </p>
                   </div>
-                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                    <p className="text-xs font-bold text-slate-500 uppercase">Section & Year</p>
-                    <p className="text-base font-bold text-slate-200 mt-1">
+                  <div className="p-4.5 rounded-2xl bg-white border border-gray-200">
+                    <p className="text-xs font-bold text-gray-400 uppercase">Section & Year</p>
+                    <p className="text-base font-bold text-gray-800 mt-1">
                       Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel})
                     </p>
                   </div>
-                  <div className="p-4.5 rounded-2xl bg-slate-900 border border-slate-800">
-                    <p className="text-xs font-bold text-slate-500 uppercase">Department</p>
+                  <div className="p-4.5 rounded-2xl bg-white border border-gray-200">
+                    <p className="text-xs font-bold text-gray-400 uppercase">Department</p>
                     <p className="text-base font-bold text-blue-400 mt-1">
                       CSE Data Science
                     </p>
@@ -1510,7 +1510,7 @@ export default function PrincipalDashboard() {
                       <div className="space-y-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div className="flex items-center gap-2">
-                            <label className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+                            <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">
                               Select Month
                             </label>
                             <CustomMonthSelector
@@ -1534,8 +1534,8 @@ export default function PrincipalDashboard() {
                         {/* Stats Row & Visual Pie Chart */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                           {/* Pie Chart Card */}
-                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center space-y-3">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attendance Breakdown</p>
+                          <div className="p-5 rounded-2xl bg-white border border-gray-200 flex flex-col items-center justify-center space-y-3">
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Attendance Breakdown</p>
                             <div className="relative flex items-center justify-center">
                               {/* Inline SVG Pie Chart */}
                               <svg width="120" height="120" viewBox="0 0 36 36" className="transform -rotate-90">
@@ -1558,41 +1558,41 @@ export default function PrincipalDashboard() {
                               </svg>
                               <div className="absolute flex flex-col items-center justify-center">
                                 <span className="text-2xl font-black text-white">{studentMonthlyPercent}%</span>
-                                <span className="text-[9px] font-bold text-slate-400 uppercase">Monthly</span>
+                                <span className="text-[9px] font-bold text-gray-500 uppercase">Monthly</span>
                               </div>
                             </div>
                           </div>
 
                           {/* Present Days Card */}
-                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                          <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
                             <p className="text-xs font-bold text-emerald-400 uppercase">Present Days (P)</p>
                             <p className="text-3xl font-black text-white">{studentPresentCount} Days</p>
-                            <p className="text-[10px] text-slate-500 font-bold">Attended out of {calcWorkingDays} working days</p>
+                            <p className="text-[10px] text-gray-400 font-bold">Attended out of {calcWorkingDays} working days</p>
                           </div>
 
                           {/* Absent Days Card */}
-                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                          <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
                             <p className="text-xs font-bold text-rose-400 uppercase">Absent Days (A)</p>
                             <p className="text-3xl font-black text-white">{studentAbsentCount} Days</p>
-                            <p className="text-[10px] text-slate-500 font-bold">Missed classes</p>
+                            <p className="text-[10px] text-gray-400 font-bold">Missed classes</p>
                           </div>
 
                           {/* Average College stay time */}
-                          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-2">
+                          <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
                             <p className="text-xs font-bold text-blue-400 uppercase">Avg Daily Campus Stay</p>
                             <p className="text-3xl font-black text-white">{avgDurationStr}</p>
-                            <p className="text-[10px] text-slate-500 font-bold">Calculated from gate logs</p>
+                            <p className="text-[10px] text-gray-400 font-bold">Calculated from gate logs</p>
                           </div>
                         </div>
 
                         {/* Daily Register Grid */}
                         <div>
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center justify-between">
                             <span>Daily Register Grid (Click any date to view Entry/Exit times)</span>
-                            <span className="text-slate-500 font-normal">P = Present | A = Absent | * = Holiday | — = Future</span>
+                            <span className="text-gray-400 font-normal">P = Present | A = Absent | * = Holiday | — = Future</span>
                           </p>
                           
-                          <div className="grid grid-cols-7 gap-1.5 bg-slate-950 p-4 rounded-2xl border border-slate-850">
+                          <div className="grid grid-cols-7 gap-1.5 bg-gray-50 p-4 rounded-2xl border border-gray-200">
                             {monthDaysList.map((d) => {
                               const isSelected = selectedDayDetail?.dateStr === d.dateStr;
                               return (
@@ -1609,11 +1609,11 @@ export default function PrincipalDashboard() {
                                       : d.status === "*"
                                       ? "bg-purple-950/50 border-purple-800/60 text-purple-250"
                                       : d.status === "—"
-                                      ? "bg-slate-950/40 border-slate-850/80 text-slate-600 opacity-60"
+                                      ? "bg-gray-50/40 border-gray-200/80 text-slate-600 opacity-60"
                                       : "bg-red-950/40 border-red-900/40 text-red-300"
                                   }`}
                                 >
-                                  <span className="text-[10px] font-mono font-semibold text-slate-400">
+                                  <span className="text-[10px] font-mono font-semibold text-gray-500">
                                     {d.dayNum} {d.dayOfWeek}
                                   </span>
                                   <span className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
@@ -1622,7 +1622,7 @@ export default function PrincipalDashboard() {
                                       : d.status === "*"
                                       ? "bg-amber-400 text-slate-950"
                                       : d.status === "—"
-                                      ? "bg-slate-800 text-slate-450"
+                                      ? "bg-gray-100 text-gray-400"
                                       : "bg-red-500/80 text-white"
                                   }`}>
                                     {d.status}
@@ -1649,7 +1649,7 @@ export default function PrincipalDashboard() {
                                   : selectedDayDetail.status === "*"
                                   ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
                                   : selectedDayDetail.status === "—"
-                                  ? "bg-slate-800/50 text-slate-400 border border-slate-700/50"
+                                  ? "bg-gray-100 text-gray-500 border border-gray-200"
                                   : "bg-red-500/20 text-red-300 border border-red-500/40"
                               }`}>
                                 {selectedDayDetail.status === "P"
@@ -1664,8 +1664,8 @@ export default function PrincipalDashboard() {
 
                             {selectedDayDetail.record ? (
                               <div className="grid grid-cols-3 gap-3 pt-1 text-xs">
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center justify-between">
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase flex items-center justify-between">
                                     <span>Entry Time (In)</span>
                                     {isLateTime(selectedDayDetail.record.entryTime) && (
                                       <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider animate-pulse">LATE</span>
@@ -1675,15 +1675,15 @@ export default function PrincipalDashboard() {
                                     {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
                                   </p>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Exit Time (Out)</p>
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase">Exit Time (Out)</p>
                                   <p className="text-sm font-bold text-blue-400 mt-0.5">
                                     {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
                                   </p>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Duration / Status</p>
-                                  <p className="text-xs font-bold text-slate-200 mt-1">
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase">Duration / Status</p>
+                                  <p className="text-xs font-bold text-gray-800 mt-1">
                                     {selectedDayDetail.record.durationMinutes
                                       ? `${Math.floor(selectedDayDetail.record.durationMinutes / 60)}h ${selectedDayDetail.record.durationMinutes % 60}m`
                                       : selectedDayDetail.record.status === "inside"
@@ -1693,7 +1693,7 @@ export default function PrincipalDashboard() {
                                 </div>
                               </div>
                             ) : (
-                              <p className="text-xs text-slate-400 italic pt-1 font-medium">
+                              <p className="text-xs text-gray-500 italic pt-1 font-medium">
                                 {selectedDayDetail.status === "*"
                                   ? "Sunday / College Holiday. No attendance recorded."
                                   : selectedDayDetail.status === "—"
@@ -1702,20 +1702,20 @@ export default function PrincipalDashboard() {
                               </p>
                             )}
                             {/* Hourly Period Attendance */}
-                            <div className="space-y-2 pt-2.5 border-t border-slate-800/80">
-                              <h6 className="text-[11px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+                            <div className="space-y-2 pt-2.5 border-t border-gray-200">
+                              <h6 className="text-[11px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
                                 <Clock className="w-3.5 h-3.5 text-blue-400" />
                                 Hourly Period Attendance
                               </h6>
                               {hourlyForSelectedDay.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1">
                                   {hourlyForSelectedDay.map((hr: any) => (
-                                    <div key={hr.id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 border border-slate-850">
+                                    <div key={hr.id} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/60 border border-gray-200">
                                       <div className="space-y-0.5">
                                         <p className="text-xs font-bold text-white">
                                           {hr.qr_schedules?.subject || "Unknown Subject"}
                                         </p>
-                                        <p className="text-[10px] text-slate-500 font-medium font-mono">
+                                        <p className="text-[10px] text-gray-400 font-medium font-mono">
                                           Period: {hr.qr_schedules?.start_time?.slice(0, 5)} - {hr.qr_schedules?.end_time?.slice(0, 5)}
                                         </p>
                                       </div>
@@ -1730,7 +1730,7 @@ export default function PrincipalDashboard() {
                                   ))}
                                 </div>
                               ) : (
-                                <p className="text-xs text-slate-500 italic">
+                                <p className="text-xs text-gray-400 italic">
                                   No period-wise attendance records for this date.
                                 </p>
                               )}
@@ -1744,10 +1744,10 @@ export default function PrincipalDashboard() {
               </div>
 
               {/* Footer */}
-              <div className="pt-4 border-t border-slate-800 flex justify-end">
+              <div className="pt-4 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold transition-all cursor-pointer"
                 >
                   Close Profile
                 </button>
@@ -1759,20 +1759,20 @@ export default function PrincipalDashboard() {
         {/* CSV Export Modal */}
         {exportModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-xs">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
                   Export Campus Register (.csv)
                 </h3>
-                <button onClick={() => setExportModalOpen(false)} className="text-slate-400 hover:text-white">
+                <button onClick={() => setExportModalOpen(false)} className="text-gray-500 hover:text-gray-900">
                   <XCircle className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Select Month</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Select Month</label>
                   <div
                     onClick={(e) => {
                       const input = e.currentTarget.querySelector("input");
@@ -1792,17 +1792,17 @@ export default function PrincipalDashboard() {
                         }
                       }}
                       onChange={(e) => setExportMonth(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none cursor-pointer [color-scheme:dark]"
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-white text-xs font-semibold focus:outline-none cursor-pointer [color-scheme:light]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Export Scope</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Export Scope</label>
                   <select
                     value={exportType}
                     onChange={(e: any) => setExportType(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none"
                   >
                     <option value="all">Entire Campus (All Sections)</option>
                     <option value="section">Specific Section</option>
@@ -1811,11 +1811,11 @@ export default function PrincipalDashboard() {
 
                 {exportType === "section" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Section</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Section</label>
                     <select
                       value={exportSection}
                       onChange={(e) => setExportSection(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none"
                     >
                       {sections.map((s) => (
                         <option key={s} value={s}>Section {s}</option>
@@ -1825,17 +1825,17 @@ export default function PrincipalDashboard() {
                 )}
               </div>
 
-              <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
+              <div className="pt-3 border-t border-gray-200 flex items-center justify-end gap-3">
                 <button
                   onClick={() => setExportModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold"
+                  className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleGenerateCsv}
                   disabled={isExporting}
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-200 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20"
                 >
                   {isExporting ? "Generating CSV..." : "Download Register (.csv)"}
                 </button>

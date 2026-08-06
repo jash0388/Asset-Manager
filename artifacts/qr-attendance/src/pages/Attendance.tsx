@@ -8,20 +8,20 @@ import { Download, Filter, Trash2, AlertTriangle, XCircle } from "lucide-react";
 function StatusBadge({ status, exitOver }: { status: string; exitOver?: boolean }) {
   if (exitOver) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700/60">
-        <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
         Not Scanned
       </span>
     );
   }
   const map: Record<string, string> = {
     inside: "bg-emerald-900/40 text-emerald-400 border border-emerald-800/40",
-    left: "bg-slate-800/60 text-slate-400 border border-slate-700/40",
+    left: "bg-gray-100 text-gray-500 border border-gray-300/40",
     present: "bg-blue-900/40 text-blue-400 border border-blue-800/40",
   };
   const labels: Record<string, string> = { inside: "On Campus", left: "Left", present: "Present" };
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${map[status] ?? "bg-slate-800 text-slate-400"}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${map[status] ?? "bg-gray-100 text-gray-500"}`}>
       <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
       {labels[status] ?? status}
     </span>
@@ -170,7 +170,7 @@ export default function Attendance() {
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-white">Attendance Records</h1>
-            <p className="text-sm text-slate-400 mt-1">{records.length} records found</p>
+            <p className="text-sm text-gray-500 mt-1">{records.length} records found</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -186,7 +186,7 @@ export default function Attendance() {
               data-testid="export-csv"
               onClick={exportCsv}
               disabled={!records.length}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
             >
               <Download className="w-4 h-4" />
               Export CSV
@@ -195,39 +195,39 @@ export default function Attendance() {
         </div>
 
         {/* Filters */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-4 h-4 text-slate-400" />
-            <h2 className="text-sm font-semibold text-slate-300">Filters</h2>
+            <Filter className="w-4 h-4 text-gray-500" />
+            <h2 className="text-sm font-semibold text-gray-700">Filters</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">From date</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">From date</label>
               <input
                 data-testid="filter-from"
                 type="date"
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">To date</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">To date</label>
               <input
                 data-testid="filter-to"
                 type="date"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Role</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">Role</label>
               <select
                 data-testid="filter-role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as "" | "student" | "staff")}
-                className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
               >
                 <option value="">All roles</option>
                 <option value="student">Students</option>
@@ -247,11 +247,11 @@ export default function Attendance() {
         </div>
 
         {/* Table */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto max-h-[620px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
             <table data-testid="attendance-table" className="w-full relative">
-              <thead className="sticky top-0 z-20 bg-slate-900 shadow-md">
-                <tr className="border-b border-slate-800 bg-slate-900">
+              <thead className="sticky top-0 z-20 bg-white shadow-md">
+                <tr className="border-b border-gray-200 bg-white">
                   <th className="px-5 py-3 w-10">
                     <input
                       type="checkbox"
@@ -259,33 +259,33 @@ export default function Attendance() {
                       checked={allSelected}
                       onChange={toggleAll}
                       disabled={!records.length}
-                      className="h-4 w-4 rounded bg-slate-800 border-slate-600 accent-blue-500"
+                      className="h-4 w-4 rounded bg-gray-100 border-gray-300 accent-blue-500"
                     />
                   </th>
-                  <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Name</th>
-                  <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">ID</th>
-                  <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Role</th>
-                  <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Date</th>
-                  <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Entry</th>
-                  <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Exit</th>
-                  <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Duration</th>
-                  <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Status</th>
+                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Name</th>
+                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">ID</th>
+                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Role</th>
+                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Date</th>
+                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Entry</th>
+                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Exit</th>
+                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Duration</th>
+                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-gray-200">
                 {isLoading ? (
                   [...Array(5)].map((_, i) => (
                     <tr key={i}>
                       {[...Array(9)].map((_, j) => (
                         <td key={j} className="px-5 py-3">
-                          <div className="h-4 bg-slate-800 rounded animate-pulse" />
+                          <div className="h-4 bg-gray-100 rounded animate-pulse" />
                         </td>
                       ))}
                     </tr>
                   ))
                 ) : !records.length ? (
                   <tr>
-                    <td colSpan={9} className="px-5 py-10 text-center text-sm text-slate-500">
+                    <td colSpan={9} className="px-5 py-10 text-center text-sm text-gray-400">
                       No records found for this period
                     </td>
                   </tr>
@@ -293,7 +293,7 @@ export default function Attendance() {
                   records.map((rec: any) => (
                     <tr
                       key={rec.id}
-                      className={`hover:bg-slate-800/40 transition-colors ${selected.has(rec.id) ? "bg-blue-950/30" : ""}`}
+                      className={`hover:bg-gray-100/40 transition-colors ${selected.has(rec.id) ? "bg-blue-950/30" : ""}`}
                     >
                       <td className="px-5 py-3">
                         <input
@@ -301,33 +301,33 @@ export default function Attendance() {
                           data-testid={`select-row-${rec.id}`}
                           checked={selected.has(rec.id)}
                           onChange={() => toggleOne(rec.id)}
-                          className="h-4 w-4 rounded bg-slate-800 border-slate-600 accent-blue-500"
+                          className="h-4 w-4 rounded bg-gray-100 border-gray-300 accent-blue-500"
                         />
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
                             {rec.user?.name?.charAt(0).toUpperCase()}
                           </div>
                           <span className="text-sm font-medium text-white">{rec.user?.name}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3 font-mono text-sm text-slate-400">{rec.user?.uniqueId}</td>
+                      <td className="px-5 py-3 font-mono text-sm text-gray-500">{rec.user?.uniqueId}</td>
                       <td className="px-5 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${rec.user?.role === "student" ? "bg-blue-900/40 text-blue-400" : "bg-purple-900/40 text-purple-400"}`}>
                           {rec.user?.role}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-sm text-slate-300">{rec.date}</td>
-                      <td className="px-5 py-3 text-sm text-slate-300">{formatTime(rec.entryTime)}</td>
-                      <td className="px-5 py-3 text-sm text-slate-300">
+                      <td className="px-5 py-3 text-sm text-gray-700">{rec.date}</td>
+                      <td className="px-5 py-3 text-sm text-gray-700">{formatTime(rec.entryTime)}</td>
+                      <td className="px-5 py-3 text-sm text-gray-700">
                         {isExitTimeOver(rec.date, rec.exitTime) ? (
-                          <span className="text-slate-500 text-xs font-medium">—</span>
+                          <span className="text-gray-400 text-xs font-medium">—</span>
                         ) : (
                           formatTime(rec.exitTime)
                         )}
                       </td>
-                      <td className="px-5 py-3 text-sm text-slate-300">{formatDuration(rec.durationMinutes)}</td>
+                      <td className="px-5 py-3 text-sm text-gray-700">{formatDuration(rec.durationMinutes)}</td>
                       <td className="px-5 py-3">
                         <StatusBadge status={rec.status} exitOver={isExitTimeOver(rec.date, rec.exitTime)} />
                       </td>
@@ -347,7 +347,7 @@ export default function Attendance() {
           onClick={() => !deleteMutation.isPending && setConfirmOpen(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-xl"
+            className="bg-white border border-gray-300 rounded-2xl p-6 max-w-md w-full shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3 mb-4">
@@ -356,7 +356,7 @@ export default function Attendance() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white">Delete attendance records?</h3>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-gray-500 mt-1">
                   This will permanently remove <span className="font-bold text-white">{selected.size}</span> record{selected.size === 1 ? "" : "s"}. This action cannot be undone.
                 </p>
               </div>
@@ -370,7 +370,7 @@ export default function Attendance() {
               <button
                 onClick={() => setConfirmOpen(false)}
                 disabled={deleteMutation.isPending}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition-colors disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>

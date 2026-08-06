@@ -11,9 +11,9 @@ import {
   Menu,
   X,
   GraduationCap,
-  ScanLine,
   Clock,
   Flag,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -27,15 +27,51 @@ const adminNavLinks = [
   { href: "/mentors", label: "Mentors", icon: GraduationCap },
 ];
 
-const baseUrl = (import.meta as any).env?.BASE_URL || "/";
-function joinBase(p: string) {
-  return `${baseUrl}${p}`.replace(/\/+/g, "/");
-}
+const MASTER_PASSCODE = "038899";
+const PASSCODE_KEY = "secapp.passcode.v1";
+const getStoredPasscode = () => {
+  try { return localStorage.getItem(PASSCODE_KEY) || MASTER_PASSCODE; } catch { return MASTER_PASSCODE; }
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { admin, hod, principal, role, logout } = useAuth();
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // ---- Settings modal ----
+  const [showSettings, setShowSettings] = useState(false);
+  const [settingsStep, setSettingsStep] = useState<"verify" | "change">("verify");
+  const [settingsCurrentPwd, setSettingsCurrentPwd] = useState("");
+  const [settingsNewPwd, setSettingsNewPwd] = useState("");
+  const [settingsConfirmPwd, setSettingsConfirmPwd] = useState("");
+  const [settingsError, setSettingsError] = useState("");
+  const [settingsSuccess, setSettingsSuccess] = useState("");
+
+  const openSettings = () => {
+    setSettingsStep("verify");
+    setSettingsCurrentPwd(""); setSettingsNewPwd(""); setSettingsConfirmPwd("");
+    setSettingsError(""); setSettingsSuccess("");
+    setShowSettings(true);
+  };
+
+  const handleVerifyForSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    const stored = getStoredPasscode();
+    if (settingsCurrentPwd === stored || settingsCurrentPwd === MASTER_PASSCODE) {
+      setSettingsStep("change"); setSettingsError("");
+    } else { setSettingsError("Incorrect passcode."); }
+  };
+
+  const handleChangePasscode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (settingsNewPwd.length < 4) { setSettingsError("Min 4 characters."); return; }
+    if (settingsNewPwd !== settingsConfirmPwd) { setSettingsError("Passcodes don't match."); return; }
+    try {
+      localStorage.setItem(PASSCODE_KEY, settingsNewPwd);
+      setSettingsSuccess("✅ Passcode updated!"); setSettingsError("");
+      setTimeout(() => setShowSettings(false), 1500);
+    } catch { setSettingsError("Storage unavailable."); }
+  };
 
   const navLinks = role === "principal"
     ? [
@@ -60,32 +96,41 @@ export function Layout({ children }: { children: React.ReactNode }) {
       ]
     : adminNavLinks;
 
+  const userDisplayName = role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name ?? "Admin";
+  const userEmail = role === "principal" ? principal?.email : role === "hod" ? hod?.email : admin?.email ?? "";
+
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100">
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col transform transition-transform duration-200 lg:relative lg:translate-x-0 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+    <div style={{ display: "flex", height: "100vh", background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}>
+
+      {/* ══════════ SIDEBAR ══════════ */}
+      <aside style={{
+        position: "fixed", inset: "0 auto 0 0", zIndex: 50,
+        width: "240px",
+        background: "linear-gradient(160deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%)",
+        display: "flex", flexDirection: "column",
+        transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
+        transition: "transform 0.2s ease",
+        boxShadow: "4px 0 24px rgba(37,99,235,0.25)",
+      }}
+        className="lg:relative lg:translate-x-0"
       >
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-800">
-          <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
-            <ShieldCheck className="w-5 h-5 text-white" />
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "20px 16px 18px", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
+          <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ShieldCheck style={{ width: "20px", height: "20px", color: "#ffffff" }} />
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white truncate">QR Attendance</p>
-            <p className="text-xs text-slate-400 truncate">Campus Control System</p>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>QR Attendance</p>
+            <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Campus Control System</p>
           </div>
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="lg:hidden text-slate-400 hover:text-white"
-          >
-            <X className="w-5 h-5" />
+          <button onClick={() => setMobileOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", display: "flex" }} className="lg:hidden">
+            <X style={{ width: "20px", height: "20px" }} />
           </button>
         </div>
 
-        <nav className="flex-1 py-4 px-3 overflow-y-auto">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider px-2 mb-2">Navigation</p>
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
+          <p style={{ fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", padding: "0 8px", marginBottom: "8px" }}>Navigation</p>
           {navLinks.map(({ href, label, icon: Icon }) => {
             const currentFull = window.location.pathname + window.location.search;
             const isActive = href.includes("tab=flags")
@@ -102,76 +147,150 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
                   onClick={() => {
                     setMobileOpen(false);
-                    if (href.includes("tab=")) {
-                      window.history.pushState({}, "", href);
-                      window.dispatchEvent(new Event("popstate"));
-                    } else if (href === "/hod-dashboard" || href === "/principal-dashboard") {
+                    if (href.includes("tab=") || href === "/hod-dashboard" || href === "/principal-dashboard") {
                       window.history.pushState({}, "", href);
                       window.dispatchEvent(new Event("popstate"));
                     }
                   }}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 cursor-pointer transition-colors ${
-                    isActive
-                      ? "bg-blue-600 text-white font-bold"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
-                  }`}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "10px",
+                    padding: "9px 12px", borderRadius: "10px", marginBottom: "2px",
+                    cursor: "pointer", transition: "all 0.15s ease",
+                    background: isActive ? "rgba(255,255,255,0.2)" : "transparent",
+                    boxShadow: isActive ? "inset 0 0 0 1px rgba(255,255,255,0.25)" : "none",
+                    color: isActive ? "#ffffff" : "rgba(255,255,255,0.75)",
+                    fontWeight: isActive ? "700" : "500",
+                  }}
+                  onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.1)"; }}
+                  onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
                 >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">{label}</span>
+                  <Icon style={{ width: "16px", height: "16px", flexShrink: 0 }} />
+                  <span style={{ fontSize: "13px" }}>{label}</span>
                 </div>
               </Link>
             );
           })}
         </nav>
 
-        <div className="px-3 py-4 border-t border-slate-800">
-          <div className="flex items-center gap-3 px-3 py-2.5 mb-2">
-            <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-              {(role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name)?.charAt(0).toUpperCase() ?? "P"}
+        {/* Bottom: user + settings + logout */}
+        <div style={{ padding: "10px", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+          {/* User info */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 10px 8px" }}>
+            <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "rgba(255,255,255,0.25)", border: "2px solid rgba(255,255,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "800", color: "#ffffff", flexShrink: 0 }}>
+              {userDisplayName?.charAt(0).toUpperCase() ?? "U"}
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">{role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name ?? "Admin"}</p>
-              <p className="text-xs text-slate-400 truncate">{role === "principal" ? principal?.email : role === "hod" ? hod?.email : admin?.email ?? ""}</p>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontSize: "12px", fontWeight: "700", color: "#ffffff", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userDisplayName}</p>
+              <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</p>
             </div>
           </div>
+
+          {/* Settings */}
+          {(role === "hod" || role === "principal" || role === "admin") && (
+            <button
+              data-testid="sidebar-settings"
+              onClick={openSettings}
+              style={{ width: "100%", display: "flex", alignItems: "center", gap: "10px", padding: "9px 12px", borderRadius: "10px", background: "transparent", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.75)", transition: "background 0.15s", marginBottom: "2px" }}
+              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)"}
+              onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
+            >
+              <Settings style={{ width: "16px", height: "16px" }} />
+              <span style={{ fontSize: "13px", fontWeight: "500" }}>Settings</span>
+            </button>
+          )}
+
+          {/* Logout */}
           <button
             data-testid="logout-button"
             onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-red-900/40 hover:text-red-400 transition-colors"
+            style={{ width: "100%", display: "flex", alignItems: "center", gap: "10px", padding: "9px 12px", borderRadius: "10px", background: "transparent", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.75)", transition: "background 0.15s" }}
+            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,100,100,0.2)"}
+            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
           >
-            <LogOut className="w-4 h-4" />
-            <span className="text-sm font-medium">Logout</span>
+            <LogOut style={{ width: "16px", height: "16px" }} />
+            <span style={{ fontSize: "13px", fontWeight: "500" }}>Logout</span>
           </button>
         </div>
       </aside>
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
+        <div style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(0,0,0,0.4)" }} onClick={() => setMobileOpen(false)} className="lg:hidden" />
       )}
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        {/* Top bar */}
-        <header className="flex items-center gap-4 px-4 py-3 border-b border-slate-800 bg-slate-900 lg:hidden">
-          <button
-            data-testid="mobile-menu-button"
-            onClick={() => setMobileOpen(true)}
-            className="text-slate-400 hover:text-white"
-          >
-            <Menu className="w-6 h-6" />
+      {/* ══════════ MAIN CONTENT ══════════ */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
+        {/* Mobile top bar */}
+        <header style={{ display: "flex", alignItems: "center", gap: "16px", padding: "12px 16px", borderBottom: "1px solid #E5E7EB", background: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }} className="lg:hidden">
+          <button data-testid="mobile-menu-button" onClick={() => setMobileOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", display: "flex" }}>
+            <Menu style={{ width: "24px", height: "24px" }} />
           </button>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-blue-500" />
-            <span className="text-sm font-semibold text-white">QR Attendance</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <ShieldCheck style={{ width: "20px", height: "20px", color: "#2563EB" }} />
+            <span style={{ fontSize: "14px", fontWeight: "700", color: "#111827" }}>QR Attendance</span>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main style={{ flex: 1, overflowY: "auto" }}>{children}</main>
       </div>
+
+      {/* ══════════ SETTINGS MODAL ══════════ */}
+      {showSettings && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+          <div style={{ width: "100%", maxWidth: "360px", background: "#ffffff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
+            <div style={{ padding: "18px 20px", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Settings style={{ width: "18px", height: "18px", color: "#2563EB" }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: "14px", fontWeight: "800", color: "#111827", margin: 0 }}>Scanner Settings</p>
+                  <p style={{ fontSize: "11px", color: "#6B7280", margin: 0 }}>{settingsStep === "verify" ? "Verify identity to continue" : "Set your new passcode"}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowSettings(false)} style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#F3F4F6", border: "none", cursor: "pointer", fontSize: "16px", color: "#6B7280", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
+            </div>
+
+            {settingsStep === "verify" && (
+              <form onSubmit={handleVerifyForSettings} style={{ padding: "20px" }}>
+                <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Current Passcode</label>
+                <input type="password" placeholder="••••••" value={settingsCurrentPwd}
+                  onChange={e => { setSettingsCurrentPwd(e.target.value); setSettingsError(""); }}
+                  style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
+                  onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
+                {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
+                <button type="submit" style={{ width: "100%", marginTop: "14px", padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Continue →</button>
+              </form>
+            )}
+
+            {settingsStep === "change" && (
+              <form onSubmit={handleChangePasscode} style={{ padding: "20px" }}>
+                <div style={{ marginBottom: "14px" }}>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>New Passcode</label>
+                  <input type="password" placeholder="Min 4 characters" value={settingsNewPwd}
+                    onChange={e => { setSettingsNewPwd(e.target.value); setSettingsError(""); }}
+                    style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
+                    onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Confirm Passcode</label>
+                  <input type="password" placeholder="Repeat passcode" value={settingsConfirmPwd}
+                    onChange={e => { setSettingsConfirmPwd(e.target.value); setSettingsError(""); }}
+                    style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
+                    onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
+                </div>
+                {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
+                {settingsSuccess && <p style={{ color: "#059669", fontSize: "13px", fontWeight: "700", textAlign: "center", marginTop: "8px" }}>{settingsSuccess}</p>}
+                <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+                  <button type="button" onClick={() => setSettingsStep("verify")} style={{ flex: 1, padding: "12px", borderRadius: "12px", background: "#F3F4F6", border: "1px solid #E5E7EB", color: "#374151", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>← Back</button>
+                  <button type="submit" style={{ flex: 2, padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Save Passcode</button>
+                </div>
+                <p style={{ fontSize: "11px", color: "#9CA3AF", textAlign: "center", marginTop: "12px" }}>Master override always works as backup.</p>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

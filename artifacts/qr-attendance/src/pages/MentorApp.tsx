@@ -368,7 +368,7 @@ export default function MentorApp() {
           <button
             onClick={() => navigate("/incharge-dashboard")}
             style={{ backgroundColor: "#f1f5f9", color: "#334155" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-200"
+            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-gray-200"
           >
             <Users className="w-3.5 h-3.5 text-slate-550" />
             Class Incharge Portal
@@ -421,7 +421,7 @@ export default function MentorApp() {
 
             {/* Search Bar */}
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search student name or roll number..."

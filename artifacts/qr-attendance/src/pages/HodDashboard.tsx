@@ -87,7 +87,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2.5 rounded-xl bg-white border border-slate-250 hover:bg-slate-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+        className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
       >
         <Calendar className="w-4 h-4 text-blue-600" />
         <span>{monthNames[month - 1]} {year}</span>
@@ -96,12 +96,12 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white border border-slate-200 p-4 shadow-2xl z-30 animate-in fade-in duration-100">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white border border-gray-200 p-4 shadow-2xl z-30 animate-in fade-in duration-100">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &larr;
               </button>
@@ -109,7 +109,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &rarr;
               </button>
@@ -126,7 +126,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSelected 
                         ? "bg-blue-600 text-white shadow-sm" 
-                        : "bg-slate-50 border border-slate-150 hover:bg-slate-100 text-slate-700"
+                        : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-slate-700"
                     }`}
                   >
                     {mName}
@@ -277,7 +277,7 @@ export default function HodDashboard() {
       let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
       let label = "Safe Zone";
       let badgeColor = "bg-emerald-500 text-slate-950 font-black border border-emerald-400";
-      let cardBorder = "border-l-4 border-l-emerald-500 border-slate-200";
+      let cardBorder = "border-l-4 border-l-emerald-500 border-gray-200";
       let bannerBg = "bg-emerald-50 border-emerald-200 text-emerald-950 font-bold";
       let dotColor = "🟢";
       let tip = "Good Standing (≥ 75%). Attendance target met!";
@@ -286,7 +286,7 @@ export default function HodDashboard() {
         flag = "RED";
         label = "Critical Risk (< 65%)";
         badgeColor = "bg-rose-600 text-white font-extrabold border border-rose-400 shadow-xs";
-        cardBorder = "border-l-4 border-l-rose-500 border-slate-200";
+        cardBorder = "border-l-4 border-l-rose-500 border-gray-200";
         bannerBg = "bg-rose-50 border-rose-200 text-rose-950 font-bold";
         dotColor = "🔴";
         tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
@@ -294,7 +294,7 @@ export default function HodDashboard() {
         flag = "YELLOW";
         label = "Warning (Recoverable)";
         badgeColor = "bg-amber-400 text-slate-950 font-black border border-amber-300 shadow-xs";
-        cardBorder = "border-l-4 border-l-amber-400 border-slate-200";
+        cardBorder = "border-l-4 border-l-amber-400 border-gray-200";
         bannerBg = "bg-amber-50 border-amber-200 text-amber-950 font-bold";
         dotColor = "🟡";
         tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
@@ -1119,14 +1119,14 @@ export default function HodDashboard() {
         {activeTab !== "flags" && (
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-extrabold text-slate-200 tracking-tight flex items-center gap-3">
+              <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight flex items-center gap-3">
                 <GraduationCap className="w-8 h-8 text-blue-500" />
                 HOD Dashboard
               </h1>
-              <p className="text-slate-400 font-medium mt-1">Department of Data Science (DS)</p>
+              <p className="text-gray-500 font-medium mt-1">Department of Data Science (DS)</p>
             </div>
             
-            <div className="flex items-center gap-2.5 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 shadow-md hover:border-blue-500/50 transition-colors">
+            <div className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 shadow-md hover:border-blue-500/50 transition-colors">
               <Calendar className="w-4 h-4 text-blue-400 pointer-events-none" />
               <input
                 type="date"
@@ -1137,7 +1137,7 @@ export default function HodDashboard() {
                     setLogDate(e.target.value);
                   }
                 }}
-                className="bg-transparent text-sm font-bold text-slate-200 outline-none cursor-pointer [color-scheme:dark]"
+                className="bg-transparent text-sm font-bold text-gray-800 outline-none cursor-pointer [color-scheme:light]"
               />
             </div>
           </div>
@@ -1145,13 +1145,13 @@ export default function HodDashboard() {
 
         {/* Tab Toggle buttons (only show when NOT on Risk Flag Analytics tab) */}
         {activeTab !== "flags" && (
-          <div className="flex bg-slate-900/60 border border-slate-850 p-1.5 rounded-2xl w-fit">
+          <div className="flex bg-white border border-gray-200 p-1.5 rounded-2xl w-fit">
             <button
               onClick={() => setActiveTab("summary")}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                 activeTab === "summary"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-gray-500 hover:text-gray-800"
               }`}
             >
               <Grid3X3 className="w-4 h-4" />
@@ -1162,7 +1162,7 @@ export default function HodDashboard() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                 activeTab === "logs"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-gray-500 hover:text-gray-800"
               }`}
             >
               <ClipboardList className="w-4 h-4" />
@@ -1173,7 +1173,7 @@ export default function HodDashboard() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                 activeTab === "mentors"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-gray-500 hover:text-gray-800"
               }`}
             >
               <GraduationCap className="w-4 h-4" />
@@ -1184,7 +1184,7 @@ export default function HodDashboard() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                 activeTab === "schedules"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-gray-500 hover:text-gray-800"
               }`}
             >
               <Calendar className="w-4 h-4" />
@@ -1197,51 +1197,51 @@ export default function HodDashboard() {
           <>
             {/* Quick summary stats */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Students</p>
+              <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Students</p>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-bold text-slate-200">{overallTotalStudents}</span>
-                  <span className="text-xs text-slate-400">enrolled</span>
+                  <span className="text-3xl font-bold text-gray-800">{overallTotalStudents}</span>
+                  <span className="text-xs text-gray-500">enrolled</span>
                 </div>
               </Card>
 
-              <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Present Today</p>
+              <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Present Today</p>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="text-3xl font-bold text-green-400">{overallTotalPresent}</span>
-                  <span className="text-xs text-slate-400">active</span>
+                  <span className="text-xs text-gray-500">active</span>
                 </div>
               </Card>
 
-              <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Absent Today</p>
+              <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Absent Today</p>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="text-3xl font-bold text-red-400">{overallTotalAbsent}</span>
-                  <span className="text-xs text-slate-400">missed</span>
+                  <span className="text-xs text-gray-500">missed</span>
                 </div>
               </Card>
 
-              <Card className="bg-slate-900 border-slate-850 p-5 shadow-xl rounded-2xl flex flex-col justify-between border-l-4 border-l-blue-500">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Department %</p>
+              <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between border-l-4 border-l-blue-500">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Department %</p>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="text-3xl font-black text-blue-400">{overallDeptPercentage}%</span>
-                  <span className="text-xs text-slate-450">attendance</span>
+                  <span className="text-xs text-gray-400">attendance</span>
                 </div>
               </Card>
             </div>
 
             {/* Main Grid View */}
             {usersLoading || attendanceLoading ? (
-              <div className="bg-slate-900 border border-slate-855 p-20 flex flex-col items-center justify-center gap-4">
+              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-slate-400">Loading student rosters & attendance records...</p>
+                <p className="text-sm font-semibold text-gray-500">Loading student rosters & attendance records...</p>
               </div>
             ) : (
-              <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
+              <Card className="bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
+                      <tr className="border-b border-gray-200 bg-white text-gray-600 text-xs font-semibold uppercase tracking-wider">
                         <th className="py-4 px-6">DS (Section)</th>
                         <th className="py-4 px-6 text-center">PR (Present)</th>
                         <th className="py-4 px-6 text-center">AB (Absent)</th>
@@ -1277,8 +1277,8 @@ export default function HodDashboard() {
                                 : 0;
 
                               return (
-                                <tr key={s.sectionKey} className="hover:bg-slate-800/30 transition-colors group">
-                                  <td className="py-4 px-6 font-bold text-slate-200 text-base">{s.displayName}</td>
+                                <tr key={s.sectionKey} className="hover:bg-gray-50 transition-colors group">
+                                  <td className="py-4 px-6 font-bold text-gray-800 text-base">{s.displayName}</td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("PR", s)}
@@ -1296,7 +1296,7 @@ export default function HodDashboard() {
                                   
                                   <td 
                                     onClick={() => handleCellClick("Total", s)}
-                                    className="py-4 px-6 text-center text-slate-300 font-medium cursor-pointer hover:bg-slate-700/20 active:scale-[0.98] transition-transform text-lg"
+                                    className="py-4 px-6 text-center text-gray-700 font-medium cursor-pointer hover:bg-gray-200/20 active:scale-[0.98] transition-transform text-lg"
                                   >
                                     {s.totalStudents.length}
                                   </td>
@@ -1311,11 +1311,11 @@ export default function HodDashboard() {
                             })}
 
                             {/* Overall row for this specific year */}
-                            <tr className="bg-blue-950/20 border-y border-slate-800">
+                            <tr className="bg-blue-950/20 border-y border-gray-200">
                               <td className="py-4 px-6 font-black text-blue-400 text-base italic">Overall ({year})</td>
                               <td className="py-4 px-6 text-center text-green-400 font-bold text-lg">{yearPresent}</td>
                               <td className="py-4 px-6 text-center text-red-400 font-bold text-lg">{yearAbsent}</td>
-                              <td className="py-4 px-6 text-center text-slate-200 font-bold text-lg">{yearTotal}</td>
+                              <td className="py-4 px-6 text-center text-gray-800 font-bold text-lg">{yearTotal}</td>
                               <td className="py-4 px-6 text-center font-mono font-black text-blue-400 text-lg">
                                 {yearPercentage}
                               </td>
@@ -1325,11 +1325,11 @@ export default function HodDashboard() {
                       })}
                       
                       {/* Department level summary footer */}
-                      <tr className="bg-slate-900 border-t border-slate-850">
-                        <td colSpan={4} className="py-6 px-6 font-black text-slate-200 text-lg tracking-wider text-right pr-12">
+                      <tr className="bg-white border-t border-gray-200">
+                        <td colSpan={4} className="py-6 px-6 font-black text-gray-800 text-lg tracking-wider text-right pr-12">
                           Overall Department %
                         </td>
-                        <td className="py-6 px-6 text-center font-mono font-black text-blue-400 text-xl border-l border-slate-850">
+                        <td className="py-6 px-6 text-center font-mono font-black text-blue-400 text-xl border-l border-gray-200">
                           {overallDeptPercentage}
                         </td>
                       </tr>
@@ -1342,25 +1342,25 @@ export default function HodDashboard() {
         ) : activeTab === "logs" ? (
           <>
             {/* Detailed logs filter toolbar */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 bg-white border border-gray-200 p-5 rounded-2xl">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Date Filter</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Date Filter</label>
                 <div className="relative">
                   <input
                     type="date"
                     value={logDate}
                     onChange={(e) => setLogDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold [color-scheme:dark]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold [color-scheme:light]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Section Filter</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Section Filter</label>
                 <select
                   value={selectedSectionFilter}
                   onChange={(e) => setSelectedSectionFilter(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold cursor-pointer"
                 >
                   <option value="All">All Sections</option>
                   <option value="2A">2A CSE Data Science</option>
@@ -1376,9 +1376,9 @@ export default function HodDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Search Students</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Search Students</label>
                 <div className="relative group">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                     <Search className="w-4 h-4" />
                   </div>
                   <input
@@ -1386,13 +1386,13 @@ export default function HodDashboard() {
                     placeholder="Search name or roll..."
                     value={logSearchQuery}
                     onChange={(e) => setLogSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Holidays</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Holidays</label>
                 <button
                   onClick={() => setHolidayModalOpen(true)}
                   className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-900/60 hover:bg-blue-800/80 active:scale-[0.98] text-blue-200 font-bold text-xs border border-blue-700/50 transition-all shadow-md cursor-pointer"
@@ -1403,7 +1403,7 @@ export default function HodDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 ml-1">Export Register</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Export Register</label>
                 <button
                   onClick={() => setExportModalOpen(true)}
                   className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-xs transition-all shadow-lg shadow-emerald-950/40 cursor-pointer"
@@ -1416,16 +1416,16 @@ export default function HodDashboard() {
 
             {/* Detailed Logs Table */}
             {logsLoading ? (
-              <div className="bg-slate-900 border border-slate-855 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
+              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-slate-400">Loading attendance log registry...</p>
+                <p className="text-sm font-semibold text-gray-500">Loading attendance log registry...</p>
               </div>
             ) : (
-              <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
+              <Card className="bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
                 <div className="overflow-x-auto max-h-[620px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                   <table className="w-full text-left border-collapse relative">
-                    <thead className="sticky top-0 z-20 bg-slate-900 shadow-md">
-                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
+                    <thead className="sticky top-0 z-20 bg-white shadow-md">
+                      <tr className="border-b border-gray-200 bg-white text-gray-600 text-xs font-semibold uppercase tracking-wider">
                         <th className="py-4 px-6">Student details</th>
                         <th className="py-4 px-6 text-center">Class / Section</th>
                         <th className="py-4 px-6 text-center">Status</th>
@@ -1437,7 +1437,7 @@ export default function HodDashboard() {
                     <tbody className="divide-y divide-slate-855/60">
                       {filteredLogs.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center text-slate-500 text-sm">
+                          <td colSpan={6} className="py-12 text-center text-gray-400 text-sm">
                             No attendance logs registered for this query selection.
                           </td>
                         </tr>
@@ -1447,50 +1447,50 @@ export default function HodDashboard() {
                           const { name: sDisplayName } = getSectionDisplayName(user.section);
                           
                           return (
-                            <tr key={log.id} className="hover:bg-slate-800/30 transition-colors">
+                            <tr key={log.id} className="hover:bg-gray-50 transition-colors">
                               <td className="py-4 px-6">
                                 <div
                                   onClick={() => setSelectedStudentForDetails(user)}
                                   className="flex items-center gap-3 cursor-pointer group hover:opacity-90 transition-opacity"
                                   title="Click to view full student details"
                                 >
-                                  <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 uppercase group-hover:border-blue-500 transition-colors">
+                                  <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 uppercase group-hover:border-blue-500 transition-colors">
                                     {user.name.charAt(0)}
                                   </div>
                                   <div>
-                                    <p className="text-sm font-bold text-slate-200 group-hover:text-blue-400 transition-colors underline decoration-blue-500/30 underline-offset-4">
+                                    <p className="text-sm font-bold text-gray-800 group-hover:text-blue-400 transition-colors underline decoration-blue-500/30 underline-offset-4">
                                       {user.name}
                                     </p>
-                                    <p className="text-xs text-slate-400 font-mono mt-0.5 group-hover:text-blue-300 transition-colors">
+                                    <p className="text-xs text-gray-500 font-mono mt-0.5 group-hover:text-blue-300 transition-colors">
                                       {user.uniqueId}
                                     </p>
                                   </div>
                                 </div>
                               </td>
 
-                              <td className="py-4 px-6 text-center font-bold text-slate-300">
+                              <td className="py-4 px-6 text-center font-bold text-gray-700">
                                 {sDisplayName}
                               </td>
 
                               <td className="py-4 px-6 text-center">
                                 {isExitTimeOver(log.date, log.exitTime) ? (
-                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-800/80 text-slate-400 border border-slate-700/60">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
                                     Not Scanned
                                   </span>
                                 ) : (
                                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold ${
                                     log.status === "inside"
                                       ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/25"
-                                      : "bg-slate-800/60 text-slate-400 border border-slate-700/50"
+                                      : "bg-gray-100 text-gray-500 border border-gray-200"
                                   }`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-emerald-400" : "bg-slate-500"}`} />
+                                    <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-emerald-400" : "bg-gray-300"}`} />
                                     {log.status === "inside" ? "On Campus" : "Left"}
                                   </span>
                                 )}
                               </td>
 
-                              <td className="py-4 px-6 text-center text-slate-300 font-mono">
+                              <td className="py-4 px-6 text-center text-gray-700 font-mono">
                                 <div className="flex flex-col items-center justify-center gap-0.5">
                                   <span>{formatTime(log.entryTime)}</span>
                                   {isLateTime(log.entryTime) && (
@@ -1501,10 +1501,10 @@ export default function HodDashboard() {
                                 </div>
                               </td>
 
-                              <td className="py-4 px-6 text-center text-slate-300 font-mono">
+                              <td className="py-4 px-6 text-center text-gray-700 font-mono">
                                 {isExitTimeOver(log.date, log.exitTime) ? (
-                                  <span className="inline-flex items-center justify-center gap-1.5 text-slate-500 text-xs font-medium">
-                                    <span className="w-4 h-[1.5px] bg-slate-600 rounded-full inline-block" />
+                                  <span className="inline-flex items-center justify-center gap-1.5 text-gray-400 text-xs font-medium">
+                                    <span className="w-4 h-[1.5px] bg-gray-300 rounded-full inline-block" />
                                     —
                                   </span>
                                 ) : (
@@ -1512,7 +1512,7 @@ export default function HodDashboard() {
                                 )}
                               </td>
 
-                              <td className="py-4 px-6 text-center text-slate-400 text-sm">
+                              <td className="py-4 px-6 text-center text-gray-500 text-sm">
                                 {log.durationMinutes ? `${log.durationMinutes} mins` : "—"}
                               </td>
                             </tr>
@@ -1528,10 +1528,10 @@ export default function HodDashboard() {
         ) : activeTab === "mentors" ? (
           <>
             {/* Mentors Search Toolbar */}
-            <div className="flex items-center gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div className="flex items-center gap-4 bg-white border border-gray-200 p-5 rounded-2xl">
               <div className="flex-1 min-w-0">
                 <div className="relative group">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                     <Search className="w-4 h-4" />
                   </div>
                   <input
@@ -1539,7 +1539,7 @@ export default function HodDashboard() {
                     placeholder="Search mentor name, email, or passkey..."
                     value={mentorsSearchQuery}
                     onChange={(e) => setMentorsSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold"
                   />
                 </div>
               </div>
@@ -1547,9 +1547,9 @@ export default function HodDashboard() {
 
             {/* Mentors Grid */}
             {mentorsLoading ? (
-              <div className="bg-slate-900 border border-slate-800 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
+              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-slate-400">Loading faculty registry...</p>
+                <p className="text-sm font-semibold text-gray-500">Loading faculty registry...</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -1563,16 +1563,16 @@ export default function HodDashboard() {
                     m.section.toLowerCase().includes(q)
                   );
                 }).map((m) => (
-                  <div key={m.id} className="bg-slate-900 border border-slate-800/80 rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-slate-700 transition-colors shadow-lg min-w-0 overflow-hidden">
+                  <div key={m.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-gray-300 transition-colors shadow-lg min-w-0 overflow-hidden">
                     {/* Header */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-sm font-black text-slate-300 uppercase flex-shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-300 flex items-center justify-center text-sm font-black text-gray-700 uppercase flex-shrink-0">
                           {m.name.split(" ").slice(-1)[0]?.charAt(0) || m.name.charAt(0)}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-extrabold text-slate-100 text-sm leading-tight truncate">{m.name}</p>
-                          <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate w-full block">{m.email}</p>
+                          <p className="font-extrabold text-gray-900 text-sm leading-tight truncate">{m.name}</p>
+                          <p className="text-[11px] text-gray-400 font-mono mt-0.5 truncate w-full block">{m.email}</p>
                         </div>
                       </div>
                       <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border ${
@@ -1585,18 +1585,18 @@ export default function HodDashboard() {
                     </div>
 
                     {/* Section & Roll Range */}
-                    <div className="bg-slate-800/50 rounded-xl px-4 py-3 border border-slate-700/50 min-w-0 overflow-hidden">
+                    <div className="bg-gray-100 rounded-xl px-4 py-3 border border-gray-200 min-w-0 overflow-hidden">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Assigned Section</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Assigned Section</span>
                         <span className="text-xs font-black text-emerald-400 font-mono">Sec {m.section}</span>
                       </div>
-                      <p className="text-[11px] text-slate-300 font-mono mt-1 pt-1.5 border-t border-slate-700/40 break-words leading-relaxed">{m.rollRange}</p>
+                      <p className="text-[11px] text-gray-700 font-mono mt-1 pt-1.5 border-t border-gray-300/40 break-words leading-relaxed">{m.rollRange}</p>
                     </div>
 
                     {/* Role & Students Count */}
-                    <div className="flex items-center justify-between bg-slate-800/30 rounded-xl px-3.5 py-2.5 border border-slate-700/30">
-                      <span className="text-xs font-bold text-slate-400 truncate">{m.role}</span>
-                      <span className="text-xs font-black text-slate-200 font-mono bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700 flex-shrink-0">{m.count} Students</span>
+                    <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5 border border-gray-200">
+                      <span className="text-xs font-bold text-gray-500 truncate">{m.role}</span>
+                      <span className="text-xs font-black text-gray-800 font-mono bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-300 flex-shrink-0">{m.count} Students</span>
                     </div>
                   </div>
                 ))}
@@ -1606,10 +1606,10 @@ export default function HodDashboard() {
         ) : activeTab === "schedules" ? (
           <>
             {/* Timetable Schedules Search Toolbar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-gray-200 p-5 rounded-2xl">
               <div className="flex-1 min-w-0 w-full">
                 <div className="relative group">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                     <Search className="w-4 h-4" />
                   </div>
                   <input
@@ -1617,7 +1617,7 @@ export default function HodDashboard() {
                     placeholder="Search subject, section, day or mentor..."
                     value={schedulesSearchQuery}
                     onChange={(e) => setSchedulesSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold"
                   />
                 </div>
               </div>
@@ -1633,16 +1633,16 @@ export default function HodDashboard() {
 
             {/* Timetable Schedules Table */}
             {schedulesLoading ? (
-              <div className="bg-slate-900 border border-slate-855 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
+              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-slate-400">Loading department timetables...</p>
+                <p className="text-sm font-semibold text-gray-500">Loading department timetables...</p>
               </div>
             ) : (
-              <Card className="bg-slate-900/50 border border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
+              <Card className="bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
                 <div className="overflow-x-auto max-h-[620px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                   <table className="w-full text-left border-collapse relative">
-                    <thead className="sticky top-0 z-20 bg-slate-900 shadow-md">
-                      <tr className="border-b border-slate-800/80 bg-slate-900 text-slate-350 text-xs font-semibold uppercase tracking-wider">
+                    <thead className="sticky top-0 z-20 bg-white shadow-md">
+                      <tr className="border-b border-gray-200 bg-white text-gray-600 text-xs font-semibold uppercase tracking-wider">
                         <th className="py-4 px-6">Mentor / Teacher</th>
                         <th className="py-4 px-6">Day</th>
                         <th className="py-4 px-6">Time Slot</th>
@@ -1664,7 +1664,7 @@ export default function HodDashboard() {
                         );
                       }).length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center text-slate-500 text-sm">
+                          <td colSpan={6} className="py-12 text-center text-gray-400 text-sm">
                             No timetable slots found matching your query.
                           </td>
                         </tr>
@@ -1680,16 +1680,16 @@ export default function HodDashboard() {
                             (s.subject || "").toLowerCase().includes(q)
                           );
                         }).map((s: any) => (
-                          <tr key={s.id} className="hover:bg-slate-800/30 transition-colors">
-                            <td className="py-4 px-6 font-semibold text-slate-200">{s.qr_mentors?.name || "Unassigned"}</td>
-                            <td className="py-4 px-6 text-slate-300 font-bold">{s.day_of_week}</td>
+                          <tr key={s.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="py-4 px-6 font-semibold text-gray-800">{s.qr_mentors?.name || "Unassigned"}</td>
+                            <td className="py-4 px-6 text-gray-700 font-bold">{s.day_of_week}</td>
                             <td className="py-4 px-6 text-slate-405 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
                             <td className="py-4 px-6">
                               <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 font-bold text-xs">
                                 {s.year} Yr - {s.section}
                               </span>
                             </td>
-                            <td className="py-4 px-6 text-slate-300">{s.subject || "—"}</td>
+                            <td className="py-4 px-6 text-gray-700">{s.subject || "—"}</td>
                             <td className="py-4 px-6 text-center">
                               <button
                                 onClick={() => handleOpenAssignModal(s)}
@@ -1711,7 +1711,7 @@ export default function HodDashboard() {
         ) : activeTab === "student-analytics" ? (
           <div className="space-y-6">
             {/* Student Analytics Search & Filter Header */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
@@ -1726,18 +1726,18 @@ export default function HodDashboard() {
 
               {/* Prominent Search Bar */}
               <div className="relative">
-                <Search className="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Type student name or roll number (e.g. 23N81A6701, Jashwanth)..."
                   value={analyticsSearchQuery}
                   onChange={(e) => setAnalyticsSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-900 font-bold placeholder-slate-500 text-sm focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
+                  className="w-full pl-12 pr-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-slate-900 font-bold placeholder-gray-400 text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all shadow-inner"
                 />
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-gray-200">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-black text-slate-900 uppercase tracking-wider mr-1">Year:</span>
                   {["ALL", "2", "3", "4"].map((y) => (
@@ -1747,7 +1747,7 @@ export default function HodDashboard() {
                       className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                         analyticsYearFilter === y
                           ? "bg-blue-600 text-white shadow-md"
-                          : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300"
+                          : "bg-gray-100 text-slate-800 hover:bg-gray-200 border border-gray-300"
                       }`}
                     >
                       {y === "ALL" ? "All Years" : `${y}${y === "2" ? "nd" : y === "3" ? "rd" : "th"} Year`}
@@ -1764,7 +1764,7 @@ export default function HodDashboard() {
                       className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                         analyticsSectionFilter === sec
                           ? "bg-emerald-600 text-white shadow-md"
-                          : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300"
+                          : "bg-gray-100 text-slate-800 hover:bg-gray-200 border border-gray-300"
                       }`}
                     >
                       {sec === "ALL" ? "All Sections" : `Sec ${sec}`}
@@ -1796,8 +1796,8 @@ export default function HodDashboard() {
 
                 if (filtered.length === 0) {
                   return (
-                    <div className="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-2">
-                      <Users className="w-12 h-12 text-slate-500 mx-auto" />
+                    <div className="col-span-full bg-white border border-gray-200 rounded-2xl p-12 text-center space-y-2">
+                      <Users className="w-12 h-12 text-gray-400 mx-auto" />
                       <h4 className="text-slate-900 font-bold text-base">No Students Found</h4>
                       <p className="text-xs text-slate-700 font-semibold">No student matches your search query or selected filters.</p>
                     </div>
@@ -1812,7 +1812,7 @@ export default function HodDashboard() {
                   return (
                     <div
                       key={s.id}
-                      className="bg-slate-900 border border-slate-800 hover:border-blue-500 rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between space-y-4 group min-w-0"
+                      className="bg-white border border-gray-200 hover:border-blue-500 rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between space-y-4 group min-w-0"
                     >
                       <div className="space-y-3">
                         <div className="flex items-start justify-between gap-3">
@@ -1843,7 +1843,7 @@ export default function HodDashboard() {
                           </span>
                         </div>
 
-                        <div className="bg-slate-850 rounded-xl p-3 border border-slate-200 text-xs space-y-1">
+                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 text-xs space-y-1">
                           <div className="flex items-center justify-between text-slate-700 font-semibold">
                             <span>Class / Section:</span>
                             <span className="font-bold text-slate-900">{item.secInfo.yearLabel} - Sec {item.secInfo.name}</span>
@@ -1878,7 +1878,7 @@ export default function HodDashboard() {
                 className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
                   riskFlagFilter === "RED"
                     ? "bg-rose-50 border-rose-400 ring-2 ring-rose-400/40 shadow-xl"
-                    : "bg-white border-slate-200 hover:border-rose-300 shadow-sm hover:shadow-md"
+                    : "bg-white border-gray-200 hover:border-rose-300 shadow-sm hover:shadow-md"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -1899,7 +1899,7 @@ export default function HodDashboard() {
                 className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
                   riskFlagFilter === "YELLOW"
                     ? "bg-amber-50 border-amber-400 ring-2 ring-amber-400/40 shadow-xl"
-                    : "bg-white border-slate-200 hover:border-amber-300 shadow-sm hover:shadow-md"
+                    : "bg-white border-gray-200 hover:border-amber-300 shadow-sm hover:shadow-md"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -1920,7 +1920,7 @@ export default function HodDashboard() {
                 className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
                   riskFlagFilter === "GREEN"
                     ? "bg-emerald-50 border-emerald-400 ring-2 ring-emerald-400/40 shadow-xl"
-                    : "bg-white border-slate-200 hover:border-emerald-300 shadow-sm hover:shadow-md"
+                    : "bg-white border-gray-200 hover:border-emerald-300 shadow-sm hover:shadow-md"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -1938,7 +1938,7 @@ export default function HodDashboard() {
             </div>
 
             {/* Categorization & Filter Toolbar */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-md">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-md">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1947,7 +1947,7 @@ export default function HodDashboard() {
                     placeholder="Search student name or roll number..."
                     value={riskSearchQuery}
                     onChange={(e) => setRiskSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 placeholder-slate-500 text-xs font-bold focus:outline-none focus:border-amber-500 shadow-inner"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 placeholder-gray-400 text-xs font-bold focus:outline-none focus:border-amber-500 shadow-inner"
                   />
                 </div>
 
@@ -1956,7 +1956,7 @@ export default function HodDashboard() {
                   <select
                     value={riskFlagFilter}
                     onChange={(e: any) => setRiskFlagFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
+                    className="px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
                     <option value="RED">🔴 Red Flag (&lt; 65%)</option>
@@ -1968,7 +1968,7 @@ export default function HodDashboard() {
                   <select
                     value={riskYearFilter}
                     onChange={(e) => setRiskYearFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
+                    className="px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Academic Years</option>
                     <option value="2">2nd Year (II)</option>
@@ -1980,7 +1980,7 @@ export default function HodDashboard() {
                   <select
                     value={riskSectionFilter}
                     onChange={(e) => setRiskSectionFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
+                    className="px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Sections</option>
                     <option value="2A">Section 2A</option>
@@ -1997,7 +1997,7 @@ export default function HodDashboard() {
                   <select
                     value={riskSortOrder}
                     onChange={(e: any) => setRiskSortOrder(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
+                    className="px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
                   >
                     <option value="lowest">Sort: Lowest Attendance %</option>
                     <option value="roll">Sort: Roll Number</option>
@@ -2021,7 +2021,7 @@ export default function HodDashboard() {
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-3.5">
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-300 flex items-center justify-center font-black text-base">
+                          <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-300 flex items-center justify-center font-black text-base">
                             {item.dotColor}
                           </div>
                           <div>
@@ -2030,9 +2030,9 @@ export default function HodDashboard() {
                             </h4>
                             <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-800 font-mono font-bold">
                               <span className="text-slate-800 font-bold">Roll: <strong className="text-emerald-800 font-black">{item.student.uniqueId || "N/A"}</strong></span>
-                              <span className="text-slate-400">•</span>
+                              <span className="text-gray-500">•</span>
                               <span className="text-slate-800 font-bold">Year: <strong className="text-slate-900 font-black">{item.secInfo.yearLabel}</strong></span>
-                              <span className="text-slate-400">•</span>
+                              <span className="text-gray-500">•</span>
                               <span className="text-slate-800 font-bold">Sec: <strong className="text-blue-800 font-black">{item.secInfo.name}</strong></span>
                             </div>
                           </div>
@@ -2077,20 +2077,20 @@ export default function HodDashboard() {
 
         {/* Detailed student listing slide-over sheet */}
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <SheetContent className="w-full sm:max-w-xl bg-slate-900 border-l border-slate-800/80 p-0 flex flex-col h-full text-slate-100">
-            <SheetHeader className="p-6 border-b border-slate-800">
-              <SheetTitle className="text-2xl font-bold text-slate-200 tracking-tight">
+          <SheetContent className="w-full sm:max-w-xl bg-white border-l border-gray-200 p-0 flex flex-col h-full text-gray-900">
+            <SheetHeader className="p-6 border-b border-gray-200">
+              <SheetTitle className="text-2xl font-bold text-gray-800 tracking-tight">
                 {drawerConfig.title}
               </SheetTitle>
-              <SheetDescription className="text-slate-400 text-sm mt-1">
+              <SheetDescription className="text-gray-500 text-sm mt-1">
                 {drawerConfig.description}
               </SheetDescription>
             </SheetHeader>
 
             {/* Search filter */}
-            <div className="px-6 py-4 border-b border-slate-800/50 bg-slate-900/50">
+            <div className="px-6 py-4 border-b border-gray-200 bg-white">
               <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                   <Search className="w-4 h-4" />
                 </div>
                 <input
@@ -2098,7 +2098,7 @@ export default function HodDashboard() {
                   placeholder="Search student name or roll number..."
                   value={studentSearchQuery}
                   onChange={(e) => setStudentSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-850 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
                 />
               </div>
             </div>
@@ -2106,7 +2106,7 @@ export default function HodDashboard() {
             {/* Students list */}
             <div className="flex-1 overflow-y-auto divide-y divide-slate-855 p-2">
               {filteredDrawerStudents.length === 0 ? (
-                <div className="py-20 text-center text-slate-500 text-sm">
+                <div className="py-20 text-center text-gray-400 text-sm">
                   No students match your query.
                 </div>
               ) : (
@@ -2115,13 +2115,13 @@ export default function HodDashboard() {
                   const record = item.record;
                   
                   return (
-                    <div key={s.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-800/20 rounded-xl transition-all">
+                    <div key={s.id} className="p-4 flex items-center justify-between gap-4 hover:bg-gray-50 rounded-xl transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-200 uppercase">
+                        <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-800 uppercase">
                           {s.name.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-200">{s.name}</p>
+                          <p className="text-sm font-semibold text-gray-800">{s.name}</p>
                           <p className="text-xs text-slate-550 font-mono mt-0.5">{s.uniqueId}</p>
                         </div>
                       </div>
@@ -2145,7 +2145,7 @@ export default function HodDashboard() {
                                   ? "Not Scanned"
                                   : "Still on Campus"}
                             </span>
-                            <div className="flex items-center gap-3 text-slate-500 text-[10px]">
+                            <div className="flex items-center gap-3 text-gray-400 text-[10px]">
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3.5 h-3.5 text-blue-500" /> 
                                 In: {formatTime(record?.entryTime)}
@@ -2178,35 +2178,35 @@ export default function HodDashboard() {
         {/* Assign Faculty to Class Modal */}
         {assignModalOpen && scheduleToAssign && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
                   <UserPlus className="w-5 h-5 text-purple-400" />
                   <h3 className="text-lg font-bold text-white">Assign Class to Faculty</h3>
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
-                  className="text-slate-400 hover:text-white p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="bg-slate-950 border border-slate-850 p-3 rounded-xl space-y-1 text-xs">
-                <p className="text-slate-300 font-bold">{scheduleToAssign.subject}</p>
-                <p className="text-slate-400">Class: {scheduleToAssign.year} Yr - {scheduleToAssign.section} | Day: {scheduleToAssign.day_of_week}</p>
-                <p className="text-slate-500 font-mono">{scheduleToAssign.start_time?.slice(0,5)} - {scheduleToAssign.end_time?.slice(0,5)}</p>
+              <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-1 text-xs">
+                <p className="text-gray-700 font-bold">{scheduleToAssign.subject}</p>
+                <p className="text-gray-500">Class: {scheduleToAssign.year} Yr - {scheduleToAssign.section} | Day: {scheduleToAssign.day_of_week}</p>
+                <p className="text-gray-400 font-mono">{scheduleToAssign.start_time?.slice(0,5)} - {scheduleToAssign.end_time?.slice(0,5)}</p>
               </div>
 
               <form onSubmit={handleConfirmAssign} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                     Select Faculty / Teacher
                   </label>
                   <select
                     value={selectedMentorId}
                     onChange={(e) => setSelectedMentorId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -2229,7 +2229,7 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setAssignModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
                   >
                     Cancel
                   </button>
@@ -2259,15 +2259,15 @@ export default function HodDashboard() {
         {/* Create New Class Schedule Modal */}
         {newClassModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
                   <Plus className="w-5 h-5 text-purple-400" />
                   <h3 className="text-lg font-bold text-white">Assign New Class Schedule</h3>
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}
-                  className="text-slate-400 hover:text-white p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -2275,7 +2275,7 @@ export default function HodDashboard() {
 
               <form onSubmit={handleCreateClass} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
                     Subject Name
                   </label>
                   <input
@@ -2283,18 +2283,18 @@ export default function HodDashboard() {
                     placeholder="e.g. DBMS, Computer Networks, AI"
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-purple-500"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Year</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Year</label>
                     <select
                       value={newYear}
                       onChange={(e) => setNewYear(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
                     >
                       <option value="II">II Year</option>
                       <option value="III">III Year</option>
@@ -2302,11 +2302,11 @@ export default function HodDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Section</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Section</label>
                     <select
                       value={newSection}
                       onChange={(e) => setNewSection(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
                     >
                       <option value="A">Section A</option>
                       <option value="B">Section B</option>
@@ -2317,11 +2317,11 @@ export default function HodDashboard() {
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Day</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Day</label>
                     <select
                       value={newDay}
                       onChange={(e) => setNewDay(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
                     >
                       <option value="MON">Mon</option>
                       <option value="TUE">Tue</option>
@@ -2332,35 +2332,35 @@ export default function HodDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Start Time</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Start Time</label>
                     <input
                       type="text"
                       placeholder="09:00:00"
                       value={newStartTime}
                       onChange={(e) => setNewStartTime(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono"
+                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">End Time</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">End Time</label>
                     <input
                       type="text"
                       placeholder="10:00:00"
                       value={newEndTime}
                       onChange={(e) => setNewEndTime(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono"
+                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
                     Assign Faculty / Teacher
                   </label>
                   <select
                     value={newMentorId}
                     onChange={(e) => setNewMentorId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -2376,7 +2376,7 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setNewClassModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
                   >
                     Cancel
                   </button>
@@ -2406,20 +2406,20 @@ export default function HodDashboard() {
         {/* Export Monthly Attendance Register Modal */}
         {exportModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <FileSpreadsheet className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-white">Download Monthly Register</h3>
-                    <p className="text-xs text-slate-400">Export attendance spreadsheet (P / A register format)</p>
+                    <p className="text-xs text-gray-500">Export attendance spreadsheet (P / A register format)</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setExportModalOpen(false)}
-                  className="text-slate-400 hover:text-white p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -2428,17 +2428,17 @@ export default function HodDashboard() {
               <div className="space-y-4">
                 {/* Date Selection Mode Selector */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                     Date Range Type
                   </label>
-                  <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                  <div className="grid grid-cols-2 gap-2 bg-gray-50 p-1 rounded-xl border border-gray-200">
                     <button
                       type="button"
                       onClick={() => setExportDateMode("month")}
                       className={`py-2 rounded-lg text-xs font-bold transition-all ${
                         exportDateMode === "month"
                           ? "bg-emerald-600 text-white shadow-md"
-                          : "text-slate-400 hover:text-slate-200"
+                          : "text-gray-500 hover:text-gray-800"
                       }`}
                     >
                       🗓️ By Month
@@ -2449,7 +2449,7 @@ export default function HodDashboard() {
                       className={`py-2 rounded-lg text-xs font-bold transition-all ${
                         exportDateMode === "range"
                           ? "bg-emerald-600 text-white shadow-md"
-                          : "text-slate-400 hover:text-slate-200"
+                          : "text-gray-500 hover:text-gray-800"
                       }`}
                     >
                       📅 Calendar Range (From - To)
@@ -2460,14 +2460,14 @@ export default function HodDashboard() {
                 {/* Month Picker */}
                 {exportDateMode === "month" ? (
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                       Select Month
                     </label>
                     <input
                       type="month"
                       value={exportMonth}
                       onChange={(e) => setExportMonth(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:light]"
                       required
                     />
                   </div>
@@ -2475,26 +2475,26 @@ export default function HodDashboard() {
                   /* Custom From - To Calendar Date Pickers */
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                         From Date
                       </label>
                       <input
                         type="date"
                         value={exportFromDate}
                         onChange={(e) => setExportFromDate(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:light]"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                         To Date
                       </label>
                       <input
                         type="date"
                         value={exportToDate}
                         onChange={(e) => setExportToDate(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:dark]"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:light]"
                         required
                       />
                     </div>
@@ -2503,13 +2503,13 @@ export default function HodDashboard() {
 
                 {/* Scope Selector */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                     Target Scope
                   </label>
                   <select
                     value={exportType}
                     onChange={(e) => setExportType(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     <option value="department">Full Department (All Students)</option>
                     <option value="year">By Year (2nd, 3rd, or 4th Year)</option>
@@ -2521,13 +2521,13 @@ export default function HodDashboard() {
                 {/* Year Selector */}
                 {exportType === "year" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                       Select Year
                     </label>
                     <select
                       value={exportYear}
                       onChange={(e) => setExportYear(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
                     >
                       <option value="2nd Year">2nd Year (DS II)</option>
                       <option value="3rd Year">3rd Year (DS III)</option>
@@ -2539,13 +2539,13 @@ export default function HodDashboard() {
                 {/* Section Selector */}
                 {exportType === "section" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                       Select Section
                     </label>
                     <select
                       value={exportSection}
                       onChange={(e) => setExportSection(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
                     >
                       <option value="2A">2A CSE Data Science</option>
                       <option value="2B">2B CSE Data Science</option>
@@ -2563,13 +2563,13 @@ export default function HodDashboard() {
                 {/* Student Selector by Roll Number or Name */}
                 {exportType === "student" && (
                   <div className="space-y-2.5">
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Enter Roll Number or Search Student
                     </label>
 
                     {/* Roll Number Search Input */}
                     <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
                         <Search className="w-4 h-4 text-emerald-400" />
                       </div>
                       <input
@@ -2588,7 +2588,7 @@ export default function HodDashboard() {
                             setExportStudentId("");
                           }
                         }}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 placeholder-slate-600 font-mono"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 placeholder-gray-400 font-mono"
                       />
                     </div>
 
@@ -2603,7 +2603,7 @@ export default function HodDashboard() {
                           setExportRollQuery(s.uniqueId || "");
                         }
                       }}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
                     >
                       <option value="">-- Select from Roll Number List --</option>
                       {[...studentsOnly]
@@ -2650,8 +2650,8 @@ export default function HodDashboard() {
                   </div>
                 )}
 
-                <div className="bg-slate-950/80 border border-slate-850 p-3.5 rounded-xl text-xs text-slate-400 space-y-1">
-                  <p className="font-semibold text-slate-300">📊 Register Format Preview:</p>
+                <div className="bg-gray-50/80 border border-gray-200 p-3.5 rounded-xl text-xs text-gray-500 space-y-1">
+                  <p className="font-semibold text-gray-700">📊 Register Format Preview:</p>
                   <p>• Columns: S.No | Roll No | Student Name | Year | Section | Day 1..31 | Total P | Total A | Attendance %</p>
                   <p>• Daily Status: <span className="text-emerald-400 font-bold">P</span> = Present, <span className="text-red-400 font-bold">A</span> = Absent</p>
                 </div>
@@ -2661,7 +2661,7 @@ export default function HodDashboard() {
                 <button
                   type="button"
                   onClick={() => setExportModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
                 >
                   Cancel
                 </button>
@@ -2691,15 +2691,15 @@ export default function HodDashboard() {
         {/* Manage Holidays Modal */}
         {holidayModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-purple-400" />
                   <h3 className="text-lg font-bold text-white">Declare / Manage Holidays</h3>
                 </div>
                 <button
                   onClick={() => setHolidayModalOpen(false)}
-                  className="text-slate-400 hover:text-white p-1 cursor-pointer"
+                  className="text-gray-500 hover:text-gray-900 p-1 cursor-pointer"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -2709,19 +2709,19 @@ export default function HodDashboard() {
               <form onSubmit={handleAddHoliday} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
                       Holiday Date
                     </label>
                     <input
                       type="date"
                       value={newHolidayDate}
                       onChange={(e) => setNewHolidayDate(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500 [color-scheme:dark]"
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-purple-500 [color-scheme:light]"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
                       Reason / Name
                     </label>
                     <input
@@ -2729,7 +2729,7 @@ export default function HodDashboard() {
                       placeholder="e.g. Independence Day"
                       value={newHolidayReason}
                       onChange={(e) => setNewHolidayReason(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500 placeholder-slate-600"
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-purple-500 placeholder-gray-400"
                     />
                   </div>
                 </div>
@@ -2745,24 +2745,24 @@ export default function HodDashboard() {
 
               {/* Declared Holidays List */}
               <div className="space-y-2">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                   Declared Holidays ({Object.keys(holidays).length})
                 </p>
                 <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1">
                   {Object.keys(holidays).length === 0 ? (
-                    <p className="text-xs text-slate-500 italic text-center py-3">No custom holidays declared yet.</p>
+                    <p className="text-xs text-gray-400 italic text-center py-3">No custom holidays declared yet.</p>
                   ) : (
                     Object.entries(holidays)
                       .sort(([a], [b]) => a.localeCompare(b))
                       .map(([dStr, reason]) => (
-                        <div key={dStr} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-850 text-xs">
+                        <div key={dStr} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs">
                           <div>
                             <span className="font-mono font-bold text-purple-300">{dStr}</span>
-                            <span className="text-slate-400 ml-2 font-medium">— {reason}</span>
+                            <span className="text-gray-500 ml-2 font-medium">— {reason}</span>
                           </div>
                           <button
                             onClick={() => handleRemoveHoliday(dStr)}
-                            className="text-slate-500 hover:text-red-400 p-1 transition-colors cursor-pointer"
+                            className="text-gray-400 hover:text-red-400 p-1 transition-colors cursor-pointer"
                             title="Remove Holiday"
                           >
                             <XCircle className="w-4 h-4" />
@@ -2783,10 +2783,10 @@ export default function HodDashboard() {
         )}
         {/* Student Profile & Attendance Details Modal - LIGHT MODE REDESIGN */}
         {selectedStudentForDetails && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex flex-col p-4 sm:p-8 md:p-10 overflow-y-auto animate-fadeIn font-sans">
-            <div className="max-w-4xl mx-auto w-full space-y-6 bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 my-auto">
+          <div className="fixed inset-0 z-50 bg-white backdrop-blur-sm flex flex-col p-4 sm:p-8 md:p-10 overflow-y-auto animate-fadeIn font-sans">
+            <div className="max-w-4xl mx-auto w-full space-y-6 bg-white border border-gray-300 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 my-auto">
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-6">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-2xl bg-blue-600 border border-blue-400 flex items-center justify-center text-2xl font-black text-white shadow-md">
                     {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
@@ -2806,7 +2806,7 @@ export default function HodDashboard() {
                 
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="p-2 rounded-xl bg-slate-100 border border-slate-300 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-xs"
+                  className="p-2 rounded-xl bg-gray-100 border border-gray-300 hover:bg-gray-200 text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-xs"
                 >
                   <XCircle className="w-7 h-7" />
                 </button>
@@ -2816,19 +2816,19 @@ export default function HodDashboard() {
               <div className="space-y-6">
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300">
+                  <div className="p-4 rounded-2xl bg-gray-100 border border-gray-300">
                     <p className="text-xs font-black text-slate-700 uppercase">Roll Number</p>
                     <p className="text-base font-black text-slate-900 font-mono mt-1">
                       {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
                     </p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300">
+                  <div className="p-4 rounded-2xl bg-gray-100 border border-gray-300">
                     <p className="text-xs font-black text-slate-700 uppercase">Section & Year</p>
                     <p className="text-base font-black text-slate-900 mt-1">
                       Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel})
                     </p>
                   </div>
-                  <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300">
+                  <div className="p-4 rounded-2xl bg-gray-100 border border-gray-300">
                     <p className="text-xs font-black text-slate-700 uppercase">Department</p>
                     <p className="text-base font-black text-blue-700 mt-1">
                       CSE Data Science
@@ -2959,13 +2959,13 @@ export default function HodDashboard() {
                         {/* Stats Row & Visual Pie Chart */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                           {/* Pie Chart Card */}
-                          <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 flex flex-col items-center justify-center space-y-3">
+                          <div className="p-5 rounded-2xl bg-gray-100 border border-gray-300 flex flex-col items-center justify-center space-y-3">
                             <p className="text-xs font-black text-slate-800 uppercase tracking-wider">Attendance Breakdown</p>
                             <div className="relative flex items-center justify-center">
                               {/* Inline SVG Pie Chart */}
                               <svg width="120" height="120" viewBox="0 0 36 36" className="transform -rotate-90">
                                 <path
-                                  className="text-slate-300"
+                                  className="text-gray-700"
                                   strokeWidth="3"
                                   stroke="currentColor"
                                   fill="none"
@@ -2989,21 +2989,21 @@ export default function HodDashboard() {
                           </div>
 
                           {/* Present Days Card */}
-                          <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 text-center space-y-2">
+                          <div className="p-5 rounded-2xl bg-gray-100 border border-gray-300 text-center space-y-2">
                             <p className="text-xs font-black text-emerald-800 uppercase">Present Days (P)</p>
                             <p className="text-3xl font-black text-slate-900">{studentPresentCount} Days</p>
                             <p className="text-xs text-slate-700 font-extrabold">Attended out of {calcWorkingDays} working days</p>
                           </div>
 
                           {/* Absent Days Card */}
-                          <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 text-center space-y-2">
+                          <div className="p-5 rounded-2xl bg-gray-100 border border-gray-300 text-center space-y-2">
                             <p className="text-xs font-black text-rose-800 uppercase">Absent Days (A)</p>
                             <p className="text-3xl font-black text-slate-900">{studentAbsentCount} Days</p>
                             <p className="text-xs text-slate-700 font-extrabold">Missed classes</p>
                           </div>
 
                           {/* Average College stay time */}
-                          <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 text-center space-y-2">
+                          <div className="p-5 rounded-2xl bg-gray-100 border border-gray-300 text-center space-y-2">
                             <p className="text-xs font-black text-blue-800 uppercase">Avg Daily Campus Stay</p>
                             <p className="text-3xl font-black text-slate-900">{avgDurationStr}</p>
                             <p className="text-xs text-slate-700 font-extrabold">Calculated from gate logs</p>
@@ -3017,7 +3017,7 @@ export default function HodDashboard() {
                             <span className="text-slate-700 font-bold">P = Present | A = Absent | * = Holiday | — = Future</span>
                           </p>
                           
-                          <div className="grid grid-cols-7 gap-1.5 bg-slate-100 p-4 rounded-2xl border border-slate-300">
+                          <div className="grid grid-cols-7 gap-1.5 bg-gray-100 p-4 rounded-2xl border border-gray-300">
                             {monthDaysList.map((d) => {
                               const isSelected = selectedDayDetail?.dateStr === d.dateStr;
                               return (
@@ -3034,7 +3034,7 @@ export default function HodDashboard() {
                                       : d.status === "*"
                                       ? "bg-purple-100 border-purple-300 text-purple-950"
                                       : d.status === "—"
-                                      ? "bg-slate-200 border-slate-300 text-slate-600 opacity-80"
+                                      ? "bg-gray-200 border-gray-300 text-slate-600 opacity-80"
                                       : "bg-rose-100 border-rose-300 text-rose-950"
                                   }`}
                                 >
@@ -3047,7 +3047,7 @@ export default function HodDashboard() {
                                       : d.status === "*"
                                       ? "bg-amber-500 text-slate-950 shadow-xs"
                                       : d.status === "—"
-                                      ? "bg-slate-300 text-slate-800"
+                                      ? "bg-gray-300 text-slate-800"
                                       : "bg-rose-600 text-white shadow-xs"
                                   }`}>
                                     {d.status}
@@ -3074,7 +3074,7 @@ export default function HodDashboard() {
                                   : selectedDayDetail.status === "*"
                                   ? "bg-purple-100 text-purple-900 border border-purple-300"
                                   : selectedDayDetail.status === "—"
-                                  ? "bg-slate-200 text-slate-800 border border-slate-300"
+                                  ? "bg-gray-200 text-slate-800 border border-gray-300"
                                   : "bg-rose-100 text-rose-900 border border-rose-300"
                               }`}>
                                 {selectedDayDetail.status === "P"
@@ -3089,8 +3089,8 @@ export default function HodDashboard() {
 
                             {selectedDayDetail.record ? (
                               <div className="grid grid-cols-3 gap-3 pt-1 text-xs">
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center justify-between">
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase flex items-center justify-between">
                                     <span>Entry Time (In)</span>
                                     {isLateTime(selectedDayDetail.record.entryTime) && (
                                       <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider animate-pulse">LATE</span>
@@ -3100,15 +3100,15 @@ export default function HodDashboard() {
                                     {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
                                   </p>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Exit Time (Out)</p>
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase">Exit Time (Out)</p>
                                   <p className="text-sm font-bold text-blue-400 mt-0.5">
                                     {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
                                   </p>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Duration / Status</p>
-                                  <p className="text-xs font-bold text-slate-200 mt-1">
+                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                  <p className="text-[10px] font-bold text-gray-500 uppercase">Duration / Status</p>
+                                  <p className="text-xs font-bold text-gray-800 mt-1">
                                     {selectedDayDetail.record.durationMinutes
                                       ? `${Math.floor(selectedDayDetail.record.durationMinutes / 60)}h ${selectedDayDetail.record.durationMinutes % 60}m`
                                       : selectedDayDetail.record.status === "inside"
@@ -3118,7 +3118,7 @@ export default function HodDashboard() {
                                 </div>
                               </div>
                             ) : (
-                              <p className="text-xs text-slate-400 italic pt-1">
+                              <p className="text-xs text-gray-500 italic pt-1">
                                 {selectedDayDetail.status === "*"
                                   ? `College was closed on this day (${selectedDayDetail.holidayReason || "Sunday"}). No attendance recorded.`
                                   : selectedDayDetail.status === "—"
@@ -3128,20 +3128,20 @@ export default function HodDashboard() {
                             )}
 
                              {/* Hourly Period Attendance */}
-                             <div className="space-y-2 pt-2.5 border-t border-slate-800/80">
-                               <h6 className="text-[11px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+                             <div className="space-y-2 pt-2.5 border-t border-gray-200">
+                               <h6 className="text-[11px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
                                  <Clock className="w-3.5 h-3.5 text-blue-400" />
                                  Hourly Period Attendance
                                </h6>
                                {hourlyForSelectedDay.length > 0 ? (
                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1">
                                    {hourlyForSelectedDay.map((hr: any) => (
-                                     <div key={hr.id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 border border-slate-850">
+                                     <div key={hr.id} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/60 border border-gray-200">
                                        <div className="space-y-0.5">
                                          <p className="text-xs font-bold text-white">
                                            {hr.qr_schedules?.subject || "Unknown Subject"}
                                          </p>
-                                         <p className="text-[10px] text-slate-500 font-medium font-mono">
+                                         <p className="text-[10px] text-gray-400 font-medium font-mono">
                                            Period: {hr.qr_schedules?.start_time?.slice(0, 5)} - {hr.qr_schedules?.end_time?.slice(0, 5)}
                                          </p>
                                        </div>
@@ -3156,14 +3156,14 @@ export default function HodDashboard() {
                                    ))}
                                  </div>
                                ) : (
-                                 <p className="text-xs text-slate-500 italic">
+                                 <p className="text-xs text-gray-400 italic">
                                    No period-wise attendance records for this date.
                                  </p>
                                )}
                              </div>
                           </div>
                         ) : (
-                          <p className="text-xs text-slate-400 italic text-center py-2.5 bg-slate-950 rounded-xl border border-slate-850">
+                          <p className="text-xs text-gray-500 italic text-center py-2.5 bg-gray-50 rounded-xl border border-gray-200">
                             💡 Click on any date box above (P, A, *, or —) to view exact Entry & Exit scan timestamps for that day.
                           </p>
                         )}
@@ -3174,10 +3174,10 @@ export default function HodDashboard() {
               </div>
 
               {/* Footer */}
-              <div className="pt-4 border-t border-slate-800 flex justify-end">
+              <div className="pt-4 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
-                  className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold transition-all cursor-pointer"
                 >
                   Close Profile
                 </button>

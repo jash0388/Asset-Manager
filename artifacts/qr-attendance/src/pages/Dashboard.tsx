@@ -17,14 +17,14 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+    <div className="bg-white border border-gray-200 rounded-xl p-5">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{label}</p>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{label}</p>
           <p data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-3xl font-bold text-white mt-2">
             {value}
           </p>
-          {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
+          {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
         </div>
         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
           <Icon className="w-5 h-5" />
@@ -45,7 +45,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (status === "left") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 text-xs font-medium">
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 text-xs font-medium">
         <Circle className="w-2 h-2 fill-current" />
         Left Campus
       </span>
@@ -76,7 +76,7 @@ export default function Dashboard() {
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </p>
         </div>
@@ -85,9 +85,9 @@ export default function Dashboard() {
         {stats.isLoading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-5 animate-pulse">
-                <div className="h-4 bg-slate-700 rounded w-2/3 mb-3" />
-                <div className="h-8 bg-slate-700 rounded w-1/2" />
+              <div key={i} className="bg-white border border-gray-200 rounded-xl p-5 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
+                <div className="h-8 bg-gray-200 rounded w-1/2" />
               </div>
             ))}
           </div>
@@ -126,8 +126,8 @@ export default function Dashboard() {
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Recent Activity */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
               <h2 className="text-sm font-semibold text-white">Recent Activity</h2>
               <Link href="/attendance">
                 <span className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer">
@@ -135,34 +135,34 @@ export default function Dashboard() {
                 </span>
               </Link>
             </div>
-            <div data-testid="recent-activity-table" className="divide-y divide-slate-800">
+            <div data-testid="recent-activity-table" className="divide-y divide-gray-200">
               {stats.isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <div key={i} className="flex items-center gap-3 px-5 py-3 animate-pulse">
-                    <div className="w-8 h-8 rounded-full bg-slate-700" />
+                    <div className="w-8 h-8 rounded-full bg-gray-200" />
                     <div className="flex-1">
-                      <div className="h-3 bg-slate-700 rounded w-1/2 mb-2" />
-                      <div className="h-2 bg-slate-800 rounded w-1/3" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
+                      <div className="h-2 bg-gray-100 rounded w-1/3" />
                     </div>
                   </div>
                 ))
               ) : !data?.recentActivity?.length ? (
-                <div className="px-5 py-8 text-center text-sm text-slate-500">No activity today yet</div>
+                <div className="px-5 py-8 text-center text-sm text-gray-400">No activity today yet</div>
               ) : (
                 data.recentActivity.map((rec) => (
                   <div key={rec.id} className="flex items-center gap-3 px-5 py-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
                       {rec.user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">{rec.user?.name}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-gray-500">
                         {rec.user?.role === "student" ? "Student" : "Staff"} · {rec.user?.uniqueId}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <StatusBadge status={rec.status} />
-                      <span className="text-xs text-slate-500">{formatTime(rec.entryTime)}</span>
+                      <span className="text-xs text-gray-400">{formatTime(rec.entryTime)}</span>
                     </div>
                   </div>
                 ))
@@ -171,8 +171,8 @@ export default function Dashboard() {
           </div>
 
           {/* Currently Inside */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                 <h2 className="text-sm font-semibold text-white">Currently On Campus</h2>
@@ -181,19 +181,19 @@ export default function Dashboard() {
                 {insideList.length} inside
               </span>
             </div>
-            <div data-testid="currently-inside-list" className="divide-y divide-slate-800">
+            <div data-testid="currently-inside-list" className="divide-y divide-gray-200">
               {inside.isLoading ? (
                 [...Array(3)].map((_, i) => (
                   <div key={i} className="flex items-center gap-3 px-5 py-3 animate-pulse">
-                    <div className="w-8 h-8 rounded-full bg-slate-700" />
+                    <div className="w-8 h-8 rounded-full bg-gray-200" />
                     <div className="flex-1">
-                      <div className="h-3 bg-slate-700 rounded w-1/2 mb-2" />
-                      <div className="h-2 bg-slate-800 rounded w-1/3" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
+                      <div className="h-2 bg-gray-100 rounded w-1/3" />
                     </div>
                   </div>
                 ))
               ) : !insideList.length ? (
-                <div className="px-5 py-8 text-center text-sm text-slate-500">No one currently on campus</div>
+                <div className="px-5 py-8 text-center text-sm text-gray-400">No one currently on campus</div>
               ) : (
                 insideList.map((rec) => (
                   <div key={rec.id} className="flex items-center gap-3 px-5 py-3">
@@ -202,10 +202,10 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">{rec.user?.name}</p>
-                      <p className="text-xs text-slate-400">{rec.user?.role} · Entered {formatTime(rec.entryTime)}</p>
+                      <p className="text-xs text-gray-500">{rec.user?.role} · Entered {formatTime(rec.entryTime)}</p>
                     </div>
                     <Link href={`/history/${rec.userId}`}>
-                      <span className="text-xs text-slate-500 hover:text-blue-400 cursor-pointer">
+                      <span className="text-xs text-gray-400 hover:text-blue-400 cursor-pointer">
                         <ArrowRight className="w-4 h-4" />
                       </span>
                     </Link>

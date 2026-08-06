@@ -71,12 +71,12 @@ function StatusBadge({ status, exitOver }: { status: string; exitOver?: boolean 
   }
   const map: Record<string, string> = {
     inside: "bg-green-900/40 text-green-400",
-    left: "bg-slate-700 text-slate-300",
+    left: "bg-gray-200 text-gray-700",
     present: "bg-blue-900/40 text-blue-400",
   };
   const labels: Record<string, string> = { inside: "Inside", left: "Left", present: "Present" };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${map[status] ?? "bg-slate-700 text-slate-300"}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${map[status] ?? "bg-gray-200 text-gray-700"}`}>
       {labels[status] ?? status}
     </span>
   );
@@ -127,14 +127,14 @@ function HistoryPanel({ userId }: { userId: number }) {
   return (
     <div>
       {/* User info */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-4">
+      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-blue-900/40 flex items-center justify-center text-2xl font-bold text-blue-300 flex-shrink-0">
             {user.name.charAt(0).toUpperCase()}
           </div>
           <div>
             <h2 className="text-lg font-bold text-white">{user.name}</h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-gray-500">
               {user.role === "student" ? "Student" : "Staff"} · ID: {user.uniqueId}
             </p>
           </div>
@@ -149,10 +149,10 @@ function HistoryPanel({ userId }: { userId: number }) {
           { label: "Late Entries", value: summary.lateEntriesCount, icon: AlertCircle, color: "text-orange-400" },
           { label: "Total Records", value: summary.totalDaysChecked, icon: Calendar, color: "text-purple-400" },
         ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div key={label} className="bg-white border border-gray-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <Icon className={`w-4 h-4 ${color}`} />
-              <p className="text-xs text-slate-400">{label}</p>
+              <p className="text-xs text-gray-500">{label}</p>
             </div>
             <p className={`text-xl font-bold ${color}`}>{value}</p>
           </div>
@@ -160,24 +160,24 @@ function HistoryPanel({ userId }: { userId: number }) {
       </div>
 
       {/* Date filter */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-4">
+      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-slate-400 mb-1">From</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
             <input
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-medium text-slate-400 mb-1">To</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
             <input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
             />
           </div>
           <div className="flex items-end gap-2">
@@ -190,7 +190,7 @@ function HistoryPanel({ userId }: { userId: number }) {
             <button
               onClick={exportCsv}
               disabled={!records.length}
-              className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
             </button>
@@ -199,31 +199,31 @@ function HistoryPanel({ userId }: { userId: number }) {
       </div>
 
       {/* History table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table data-testid="history-table" className="w-full">
             <thead>
-              <tr className="border-b border-slate-800">
-                <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Date</th>
-                <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Entry</th>
-                <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Exit</th>
-                <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Duration</th>
-                <th className="text-left text-xs font-medium text-slate-400 px-5 py-3">Status</th>
+              <tr className="border-b border-gray-200">
+                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Date</th>
+                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Entry</th>
+                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Exit</th>
+                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Duration</th>
+                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-gray-200">
               {!records.length ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-slate-500">
+                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-gray-400">
                     No attendance records found
                   </td>
                 </tr>
               ) : (
                 records.map((rec) => (
-                  <tr key={rec.id} className="hover:bg-slate-800/40 transition-colors">
+                  <tr key={rec.id} className="hover:bg-gray-100/40 transition-colors">
                     <td className="px-5 py-3 text-sm text-white font-medium">{rec.date}</td>
-                    <td className="px-5 py-3 text-sm text-slate-300">{formatTime(rec.entryTime)}</td>
-                    <td className="px-5 py-3 text-sm text-slate-300">
+                    <td className="px-5 py-3 text-sm text-gray-700">{formatTime(rec.entryTime)}</td>
+                    <td className="px-5 py-3 text-sm text-gray-700">
                       {isExitTimeOver(rec.date, rec.exitTime) ? (
                         <span className="inline-flex items-center gap-1 text-red-400 font-semibold text-xs">
                           <XCircle className="w-3.5 h-3.5 text-red-500" />
@@ -233,7 +233,7 @@ function HistoryPanel({ userId }: { userId: number }) {
                         formatTime(rec.exitTime)
                       )}
                     </td>
-                    <td className="px-5 py-3 text-sm text-slate-300">{formatDuration(rec.durationMinutes)}</td>
+                    <td className="px-5 py-3 text-sm text-gray-700">{formatDuration(rec.durationMinutes)}</td>
                     <td className="px-5 py-3">
                       <StatusBadge status={rec.status} exitOver={isExitTimeOver(rec.date, rec.exitTime)} />
                     </td>
@@ -269,43 +269,43 @@ export default function History() {
         <BackButton />
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-white">Student History</h1>
-          <p className="text-sm text-slate-400 mt-1">Search and view complete attendance history</p>
+          <p className="text-sm text-gray-500 mt-1">Search and view complete attendance history</p>
         </div>
 
         {/* Search */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input
               data-testid="history-search"
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name or ID..."
-              className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-blue-500"
+              className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
             />
           </div>
 
           {query.length >= 2 && (
-            <div className="mt-3 border border-slate-700 rounded-lg overflow-hidden">
+            <div className="mt-3 border border-gray-300 rounded-lg overflow-hidden">
               {searching ? (
-                <div className="px-4 py-3 text-sm text-slate-400">Searching...</div>
+                <div className="px-4 py-3 text-sm text-gray-500">Searching...</div>
               ) : !searchResults.length ? (
-                <div className="px-4 py-3 text-sm text-slate-400">No users found</div>
+                <div className="px-4 py-3 text-sm text-gray-500">No users found</div>
               ) : (
                 searchResults.map((user) => (
                   <button
                     data-testid={`search-result-${user.id}`}
                     key={user.id}
                     onClick={() => { setSelectedUserId(user.id); setQuery(""); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-700/50 text-left border-b border-slate-800 last:border-0 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-200/50 text-left border-b border-gray-200 last:border-0 transition-colors"
                   >
                     <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-xs font-bold text-blue-300 flex-shrink-0">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white">{user.name}</p>
-                      <p className="text-xs text-slate-400">{user.role} · {user.uniqueId}</p>
+                      <p className="text-xs text-gray-500">{user.role} · {user.uniqueId}</p>
                     </div>
                   </button>
                 ))
@@ -319,10 +319,10 @@ export default function History() {
           <HistoryPanel userId={selectedUserId} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-              <Search className="w-8 h-8 text-slate-500" />
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <Search className="w-8 h-8 text-gray-400" />
             </div>
-            <p className="text-slate-400 text-sm">Search for a student or staff member to view their attendance history</p>
+            <p className="text-gray-500 text-sm">Search for a student or staff member to view their attendance history</p>
           </div>
         )}
       </div>

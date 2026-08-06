@@ -274,24 +274,24 @@ export default function HourlyAttendance() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-6xl mx-auto space-y-6 text-slate-300 font-sans">
+      <div className="p-6 max-w-6xl mx-auto space-y-6 text-gray-700 font-sans">
         {role === "mentor" ? (
           /* Navigation Switcher Tabs for Mentors */
           <div style={{ backgroundColor: "#1e293b", borderColor: "#334155" }} className="border p-2 rounded-2xl flex flex-wrap gap-2 shadow-xs mb-4">
             <button
               onClick={() => navigate("/incharge-dashboard")}
               style={{ backgroundColor: "#334155", color: "#f8fafc" }}
-              className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-700"
+              className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-gray-200"
             >
-              <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
+              <GraduationCap className="w-3.5 h-3.5 text-gray-500" />
               Class Incharge Portal
             </button>
             <button
               onClick={() => navigate("/mentor")}
               style={{ backgroundColor: "#334155", color: "#f8fafc" }}
-              className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-slate-700"
+              className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-gray-200"
             >
-              <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <Clock className="w-3.5 h-3.5 text-gray-500" />
               Take Class Attendance
             </button>
             <button
@@ -314,7 +314,7 @@ export default function HourlyAttendance() {
               <BookOpen className="w-8 h-8 text-blue-500" />
               Hourly Lecture Attendance
             </h1>
-            <p className="text-sm text-slate-400 mt-1">View scheduled lectures and check hourly attendance submitted by mentors</p>
+            <p className="text-sm text-gray-500 mt-1">View scheduled lectures and check hourly attendance submitted by mentors</p>
           </div>
 
           {(role === "hod" || role === "admin") && (
@@ -329,7 +329,7 @@ export default function HourlyAttendance() {
         </div>
 
         {/* Prominent Date View */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+        <div className="bg-white border border-gray-200 p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
           <div>
             <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Active Date View</span>
             <h2 className="text-2xl font-black text-white mt-1">
@@ -337,18 +337,18 @@ export default function HourlyAttendance() {
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-slate-400">Change Date:</span>
+            <span className="text-sm font-semibold text-gray-500">Change Date:</span>
             <input
               type="date"
               value={selectedDateFilter}
               onChange={(e) => setSelectedDateFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 text-sm font-bold cursor-pointer font-sans"
+              className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 text-sm font-bold cursor-pointer font-sans"
             />
           </div>
         </div>
 
         {/* Filter Buttons Toolbar */}
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 shadow-sm">
+        <div className="bg-white border border-gray-200 p-5 rounded-2xl space-y-4 shadow-sm">
           {/* Year Filter Tabs */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <span className="text-xs font-black text-slate-900 uppercase tracking-wider w-24 flex-shrink-0">Year:</span>
@@ -360,7 +360,7 @@ export default function HourlyAttendance() {
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     selectedYear === y
                       ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-[1.02]"
-                      : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300"
+                      : "bg-gray-100 text-slate-800 hover:bg-gray-200 border border-gray-300"
                   }`}
                 >
                   {y === "All" ? "All Years" : y}
@@ -370,7 +370,7 @@ export default function HourlyAttendance() {
           </div>
 
           {/* Section Filter Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3 border-t border-slate-800/80">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3 border-t border-gray-200">
             <span className="text-xs font-black text-slate-900 uppercase tracking-wider w-24 flex-shrink-0">Section:</span>
             <div className="flex flex-wrap gap-2">
               {[
@@ -385,7 +385,7 @@ export default function HourlyAttendance() {
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     selectedSection === s.val
                       ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30 scale-[1.02]"
-                      : "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300"
+                      : "bg-gray-100 text-slate-800 hover:bg-gray-200 border border-gray-300"
                   }`}
                 >
                   {s.label}
@@ -395,9 +395,9 @@ export default function HourlyAttendance() {
           </div>
 
           {/* Search Box */}
-          <div className="pt-3 border-t border-slate-800/80">
+          <div className="pt-3 border-t border-gray-200">
             <div className="relative">
-              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
                 <Search className="w-4 h-4" />
               </div>
               <input
@@ -405,7 +405,7 @@ export default function HourlyAttendance() {
                 placeholder="Search by subject or teacher name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-slate-900 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold"
               />
             </div>
           </div>
@@ -422,8 +422,8 @@ export default function HourlyAttendance() {
             Failed to load schedules: {schedulesErr instanceof Error ? schedulesErr.message : "Unknown error"}
           </div>
         ) : activeDayOfWeek === "SUN" ? (
-          <div className="bg-slate-900 border border-slate-800 p-12 rounded-2xl text-center space-y-3">
-            <Calendar className="w-12 h-12 text-slate-500 mx-auto" />
+          <div className="bg-white border border-gray-200 p-12 rounded-2xl text-center space-y-3">
+            <Calendar className="w-12 h-12 text-gray-400 mx-auto" />
             <h3 className="text-slate-900 font-bold text-lg">Sunday - No Classes Scheduled</h3>
             <p className="text-xs text-slate-600 max-w-xs mx-auto">Please select a weekday to view scheduled lectures and check attendance.</p>
           </div>
@@ -433,8 +433,8 @@ export default function HourlyAttendance() {
               const daySlots = filterAndSearchSchedules(activeDayOfWeek);
               if (daySlots.length === 0) {
                 return (
-                  <div className="bg-slate-900 border border-slate-800 p-12 rounded-2xl text-center space-y-3">
-                    <AlertTriangle className="w-12 h-12 text-slate-500 mx-auto" />
+                  <div className="bg-white border border-gray-200 p-12 rounded-2xl text-center space-y-3">
+                    <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto" />
                     <h3 className="text-slate-900 font-bold text-lg">No Classes Found</h3>
                     <p className="text-xs text-slate-600 max-w-xs mx-auto">
                       No classes are scheduled on {daysFullNames[activeDayOfWeek]} matching your search filters ({selectedYear}, {selectedSection === "All" ? "All Sections" : `Sec ${selectedSection}`}).
@@ -454,7 +454,7 @@ export default function HourlyAttendance() {
                       <Card
                         key={s.id}
                         onClick={() => handleSlotClick(s)}
-                        className="bg-slate-900 border-slate-800 hover:border-blue-500 p-4 shadow-sm rounded-xl cursor-pointer hover:bg-blue-50/30 active:scale-[0.99] transition-all flex flex-col justify-between group"
+                        className="bg-white border-gray-200 hover:border-blue-500 p-4 shadow-sm rounded-xl cursor-pointer hover:bg-blue-50/30 active:scale-[0.99] transition-all flex flex-col justify-between group"
                       >
                         <div>
                           <div className="flex items-start justify-between gap-2">
@@ -462,7 +462,7 @@ export default function HourlyAttendance() {
                               {s.year} Yr - {s.section}
                             </span>
                             <span className="text-[10px] font-mono font-bold text-slate-700 flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-slate-500" />
+                              <Clock className="w-3 h-3 text-gray-400" />
                               {s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}
                             </span>
                           </div>
@@ -470,7 +470,7 @@ export default function HourlyAttendance() {
                           <h4 className="text-slate-900 font-black text-sm mt-3 group-hover:text-blue-600 transition-colors">
                             {s.subject || "Lecture hour"}
                           </h4>
-                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-200">
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200">
                             <p className="text-xs text-slate-600 font-medium">
                               Teacher: <span className="text-slate-900 font-bold">{s.qr_mentors?.name || "Unassigned"}</span>
                             </p>
@@ -498,7 +498,7 @@ export default function HourlyAttendance() {
                               ● Scan Started
                             </span>
                           ) : (
-                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-slate-950 text-slate-500 border border-slate-800">
+                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-gray-50 text-gray-400 border border-gray-200">
                               Pending
                             </span>
                           )}
@@ -518,16 +518,16 @@ export default function HourlyAttendance() {
 
         {/* Detailed Attendance Log Sheet */}
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <SheetContent className="w-full sm:max-w-xl bg-slate-900 border-l border-slate-800/80 p-0 flex flex-col h-full text-slate-100">
+          <SheetContent className="w-full sm:max-w-xl bg-white border-l border-gray-200 p-0 flex flex-col h-full text-gray-900">
             {selectedSchedule && (
               <>
-                <SheetHeader className="p-6 border-b border-slate-800 bg-slate-950">
+                <SheetHeader className="p-6 border-b border-gray-200 bg-gray-50">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 text-[10px] font-extrabold uppercase">
                         {selectedSchedule.year} Yr - {selectedSchedule.section}
                       </span>
-                      <span className="text-xs text-slate-400 font-mono">
+                      <span className="text-xs text-gray-500 font-mono">
                         {selectedSchedule.start_time.slice(0,5)} - {selectedSchedule.end_time.slice(0,5)}
                       </span>
                     </div>
@@ -542,35 +542,35 @@ export default function HourlyAttendance() {
                       </button>
                     )}
                   </div>
-                  <SheetTitle className="text-xl font-black text-slate-100 mt-2 truncate">
+                  <SheetTitle className="text-xl font-black text-gray-900 mt-2 truncate">
                     {selectedSchedule.subject}
                   </SheetTitle>
-                  <SheetDescription className="text-slate-400 text-xs mt-1">
-                    Teacher: <span className="text-slate-200 font-semibold">{selectedSchedule.qr_mentors?.name || "Unassigned"}</span>
+                  <SheetDescription className="text-gray-500 text-xs mt-1">
+                    Teacher: <span className="text-gray-800 font-semibold">{selectedSchedule.qr_mentors?.name || "Unassigned"}</span>
                   </SheetDescription>
                 </SheetHeader>
 
                 {/* Toolbar inside drawer */}
-                <div className="px-6 py-4 border-b border-slate-850 bg-slate-900/60 flex items-center justify-between gap-4">
+                <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between gap-4">
                   <div className="flex-1 flex items-center gap-2 min-w-0">
-                    <label className="text-xs font-bold text-slate-400 flex-shrink-0">Select Date:</label>
+                    <label className="text-xs font-bold text-gray-500 flex-shrink-0">Select Date:</label>
                     {availableDates.length > 0 ? (
                       <select
                         value={selectedDate}
                         onChange={(e) => handleDateChange(e.target.value)}
-                        className="flex-1 max-w-[160px] px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                        className="flex-1 max-w-[160px] px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
                       >
                         {availableDates.map(d => (
                           <option key={d} value={d}>{d}</option>
                         ))}
                       </select>
                     ) : (
-                      <span className="text-xs text-slate-500 font-medium">No dates recorded</span>
+                      <span className="text-xs text-gray-400 font-medium">No dates recorded</span>
                     )}
                   </div>
                   
                   {detailRecords.length > 0 && (
-                    <div className="text-xs font-bold text-slate-300 bg-slate-950 border border-slate-850 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <div className="text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
                       Present: <span className="text-green-400 font-extrabold">{detailRecords.filter(r => r.markedPresent).length}</span> / {detailRecords.length}
                     </div>
                   )}
@@ -581,7 +581,7 @@ export default function HourlyAttendance() {
                   {detailsLoading ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-3">
                       <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                      <p className="text-xs text-slate-400">Loading student attendance checklist...</p>
+                      <p className="text-xs text-gray-500">Loading student attendance checklist...</p>
                     </div>
                   ) : detailsError ? (
                     <div className="px-4 py-3 rounded-lg bg-red-950/20 border border-red-800 text-red-200 text-xs">
@@ -589,30 +589,30 @@ export default function HourlyAttendance() {
                     </div>
                   ) : detailRecords.length === 0 ? (
                     <div className="py-20 text-center space-y-3">
-                      <AlertTriangle className="w-10 h-10 text-slate-500 mx-auto" />
-                      <p className="text-slate-400 text-sm font-semibold">No attendance submitted for this class yet.</p>
-                      <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                      <AlertTriangle className="w-10 h-10 text-gray-400 mx-auto" />
+                      <p className="text-gray-500 text-sm font-semibold">No attendance submitted for this class yet.</p>
+                      <p className="text-xs text-gray-400 max-w-xs mx-auto">
                         Timetable slots will display student attendance details here once the mentor starts and submits their hourly scan.
                       </p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-slate-850 border border-slate-850 bg-slate-950 rounded-xl overflow-hidden shadow-sm">
+                    <div className="divide-y divide-slate-850 border border-gray-200 bg-gray-50 rounded-xl overflow-hidden shadow-sm">
                       {detailRecords.map(r => (
-                        <div key={r.studentId} className="px-4 py-3 flex items-center justify-between gap-4 hover:bg-slate-900/25 transition-colors">
+                        <div key={r.studentId} className="px-4 py-3 flex items-center justify-between gap-4 hover:bg-white/25 transition-colors">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="text-sm font-semibold text-slate-200 truncate">{r.name}</p>
+                              <p className="text-sm font-semibold text-gray-800 truncate">{r.name}</p>
                               {r.scannedGate ? (
                                 <span className="px-1.5 py-0.5 rounded bg-green-950/40 text-green-400 border border-green-900/30 text-[9px] font-bold">
                                   Gate Scanned
                                 </span>
                               ) : (
-                                <span className="px-1.5 py-0.5 rounded bg-slate-850/80 text-slate-500 border border-slate-800 text-[9px]">
+                                <span className="px-1.5 py-0.5 rounded bg-gray-50/80 text-gray-400 border border-gray-200 text-[9px]">
                                   No Gate Scan
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-slate-400 font-mono mt-0.5">{r.uniqueId}</p>
+                            <p className="text-xs text-gray-500 font-mono mt-0.5">{r.uniqueId}</p>
                           </div>
 
                           <div className="flex-shrink-0">
@@ -639,35 +639,35 @@ export default function HourlyAttendance() {
         {/* Assign Faculty to Class Modal */}
         {assignModalOpen && scheduleToAssign && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
                   <UserPlus className="w-5 h-5 text-blue-400" />
                   <h3 className="text-lg font-bold text-white">Assign Class to Faculty</h3>
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
-                  className="text-slate-400 hover:text-white p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="bg-slate-950 border border-slate-850 p-3 rounded-xl space-y-1 text-xs">
-                <p className="text-slate-300 font-bold">{scheduleToAssign.subject}</p>
-                <p className="text-slate-400">Class: {scheduleToAssign.year} Yr - {scheduleToAssign.section} | Day: {scheduleToAssign.day_of_week}</p>
-                <p className="text-slate-500 font-mono">{scheduleToAssign.start_time.slice(0,5)} - {scheduleToAssign.end_time.slice(0,5)}</p>
+              <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-1 text-xs">
+                <p className="text-gray-700 font-bold">{scheduleToAssign.subject}</p>
+                <p className="text-gray-500">Class: {scheduleToAssign.year} Yr - {scheduleToAssign.section} | Day: {scheduleToAssign.day_of_week}</p>
+                <p className="text-gray-400 font-mono">{scheduleToAssign.start_time.slice(0,5)} - {scheduleToAssign.end_time.slice(0,5)}</p>
               </div>
 
               <form onSubmit={handleConfirmAssign} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                     Select Faculty / Teacher
                   </label>
                   <select
                     value={selectedMentorId}
                     onChange={(e) => setSelectedMentorId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -690,7 +690,7 @@ export default function HourlyAttendance() {
                   <button
                     type="button"
                     onClick={() => setAssignModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
                   >
                     Cancel
                   </button>
@@ -720,15 +720,15 @@ export default function HourlyAttendance() {
         {/* Create New Class Schedule Modal */}
         {newClassModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
                   <Plus className="w-5 h-5 text-blue-400" />
                   <h3 className="text-lg font-bold text-white">Assign New Class Schedule</h3>
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}
-                  className="text-slate-400 hover:text-white p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -736,7 +736,7 @@ export default function HourlyAttendance() {
 
               <form onSubmit={handleCreateClass} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
                     Subject Name
                   </label>
                   <input
@@ -744,18 +744,18 @@ export default function HourlyAttendance() {
                     placeholder="e.g. DBMS, Computer Networks, AI"
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-blue-500"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Year</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Year</label>
                     <select
                       value={newYear}
                       onChange={(e) => setNewYear(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
                     >
                       <option value="II">II Year</option>
                       <option value="III">III Year</option>
@@ -763,11 +763,11 @@ export default function HourlyAttendance() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Section</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Section</label>
                     <select
                       value={newSection}
                       onChange={(e) => setNewSection(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
                     >
                       <option value="A">Section A</option>
                       <option value="B">Section B</option>
@@ -778,11 +778,11 @@ export default function HourlyAttendance() {
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Day</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Day</label>
                     <select
                       value={newDay}
                       onChange={(e) => setNewDay(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold"
+                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
                     >
                       <option value="MON">Mon</option>
                       <option value="TUE">Tue</option>
@@ -793,35 +793,35 @@ export default function HourlyAttendance() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Start Time</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Start Time</label>
                     <input
                       type="text"
                       placeholder="09:00:00"
                       value={newStartTime}
                       onChange={(e) => setNewStartTime(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono"
+                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">End Time</label>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">End Time</label>
                     <input
                       type="text"
                       placeholder="10:00:00"
                       value={newEndTime}
                       onChange={(e) => setNewEndTime(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono"
+                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
                     Assign Faculty / Teacher
                   </label>
                   <select
                     value={newMentorId}
                     onChange={(e) => setNewMentorId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -837,7 +837,7 @@ export default function HourlyAttendance() {
                   <button
                     type="button"
                     onClick={() => setNewClassModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
                   >
                     Cancel
                   </button>
