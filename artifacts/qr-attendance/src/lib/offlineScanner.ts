@@ -27,7 +27,7 @@ const KEY_SEQ = "secapp.seq.v1";
 const KEY_DEVICE = "secapp.device.v1";
 const KEY_RECEIPT = "secapp.receipt.v1";
 
-const COOLDOWN_MS = 5 * 1000; // 5 seconds — allows immediate entry/exit scanning while preventing accidental double taps
+const COOLDOWN_MS = 3 * 1000; // 3 seconds — matches scanner debounce, allows quick entry/exit re-scans
 const USER_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const GENESIS_HASH = "GENESIS_HASH_00000000000000000000000000000000000000000000000000000000";
 
