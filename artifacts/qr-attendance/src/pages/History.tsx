@@ -63,16 +63,16 @@ function isExitTimeOver(logDate: string | null | undefined, exitTime: string | n
 function StatusBadge({ status, exitOver }: { status: string; exitOver?: boolean }) {
   if (exitOver) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-950/60 text-red-400 border border-red-900/40">
-        <XCircle className="w-3.5 h-3.5 text-red-400" />
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-950/60 text-red-700 border border-red-900/40">
+        <XCircle className="w-3.5 h-3.5 text-red-700" />
         Not Scanned
       </span>
     );
   }
   const map: Record<string, string> = {
-    inside: "bg-green-900/40 text-green-400",
+    inside: "bg-green-900/40 text-green-700",
     left: "bg-gray-200 text-gray-700",
-    present: "bg-blue-900/40 text-blue-400",
+    present: "bg-blue-900/40 text-blue-700",
   };
   const labels: Record<string, string> = { inside: "Inside", left: "Left", present: "Present" };
   return (
@@ -129,11 +129,11 @@ function HistoryPanel({ userId }: { userId: number }) {
       {/* User info */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-blue-900/40 flex items-center justify-center text-2xl font-bold text-blue-300 flex-shrink-0">
+          <div className="w-14 h-14 rounded-xl bg-blue-900/40 flex items-center justify-center text-2xl font-bold text-blue-700 flex-shrink-0">
             {user.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white">{user.name}</h2>
+            <h2 className="text-lg font-bold text-gray-900">{user.name}</h2>
             <p className="text-sm text-gray-500">
               {user.role === "student" ? "Student" : "Staff"} · ID: {user.uniqueId}
             </p>
@@ -144,10 +144,10 @@ function HistoryPanel({ userId }: { userId: number }) {
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {[
-          { label: "Days Present", value: summary.totalDaysPresent, icon: Calendar, color: "text-blue-400" },
-          { label: "Avg Time Spent", value: formatDuration(summary.averageMinutesSpent), icon: Clock, color: "text-emerald-400" },
-          { label: "Late Entries", value: summary.lateEntriesCount, icon: AlertCircle, color: "text-orange-400" },
-          { label: "Total Records", value: summary.totalDaysChecked, icon: Calendar, color: "text-purple-400" },
+          { label: "Days Present", value: summary.totalDaysPresent, icon: Calendar, color: "text-blue-700" },
+          { label: "Avg Time Spent", value: formatDuration(summary.averageMinutesSpent), icon: Clock, color: "text-emerald-700" },
+          { label: "Late Entries", value: summary.lateEntriesCount, icon: AlertCircle, color: "text-orange-700" },
+          { label: "Total Records", value: summary.totalDaysChecked, icon: Calendar, color: "text-purple-700" },
         ].map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="bg-white border border-gray-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -225,7 +225,7 @@ function HistoryPanel({ userId }: { userId: number }) {
                     <td className="px-5 py-3 text-sm text-gray-700">{formatTime(rec.entryTime)}</td>
                     <td className="px-5 py-3 text-sm text-gray-700">
                       {isExitTimeOver(rec.date, rec.exitTime) ? (
-                        <span className="inline-flex items-center gap-1 text-red-400 font-semibold text-xs">
+                        <span className="inline-flex items-center gap-1 text-red-700 font-semibold text-xs">
                           <XCircle className="w-3.5 h-3.5 text-red-500" />
                           Not Scanned
                         </span>
@@ -268,7 +268,7 @@ export default function History() {
       <div className="p-6 max-w-5xl mx-auto">
         <BackButton />
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">Student History</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Student History</h1>
           <p className="text-sm text-gray-500 mt-1">Search and view complete attendance history</p>
         </div>
 
@@ -300,7 +300,7 @@ export default function History() {
                     onClick={() => { setSelectedUserId(user.id); setQuery(""); }}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-200/50 text-left border-b border-gray-200 last:border-0 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-xs font-bold text-blue-300 flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                     <div>

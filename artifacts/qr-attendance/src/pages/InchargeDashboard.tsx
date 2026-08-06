@@ -998,13 +998,13 @@ export default function InchargeDashboard() {
                 <>
                   <div className="flex items-center justify-between border-b border-gray-200 pb-6">
                     <div className="flex items-center gap-5">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-white shadow-xl">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-gray-900 shadow-xl">
                         {studentName.charAt(0)}
                       </div>
                       <div>
-                        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+                        <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                           {studentName}
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-500/30 uppercase tracking-wider">
                             Student
                           </span>
                         </h2>
@@ -1039,7 +1039,7 @@ export default function InchargeDashboard() {
                       </div>
                       <div className="p-4.5 rounded-2xl bg-white border border-gray-200">
                         <p className="text-xs font-bold text-gray-400 uppercase">Department</p>
-                        <p className="text-base font-bold text-blue-400 mt-1">
+                        <p className="text-base font-bold text-blue-700 mt-1">
                           CSE Data Science
                         </p>
                       </div>
@@ -1063,7 +1063,7 @@ export default function InchargeDashboard() {
 
                         <button
                           onClick={handleDirectCSVDownload}
-                          className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-800/60 shadow-xs"
+                          className="text-xs font-bold text-emerald-700 hover:text-emerald-700 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-800/60 shadow-xs"
                         >
                           <FileSpreadsheet className="w-4 h-4" />
                           Download Register (.csv)
@@ -1095,7 +1095,7 @@ export default function InchargeDashboard() {
                               />
                             </svg>
                             <div className="absolute flex flex-col items-center justify-center">
-                              <span className="text-2xl font-black text-white">{studentMonthlyPercent}%</span>
+                              <span className="text-2xl font-black text-gray-900">{studentMonthlyPercent}%</span>
                               <span className="text-[9px] font-bold text-gray-500 uppercase">Monthly</span>
                             </div>
                           </div>
@@ -1103,22 +1103,22 @@ export default function InchargeDashboard() {
 
                         {/* Present Days Card */}
                         <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
-                          <p className="text-xs font-bold text-emerald-400 uppercase">Present Days (P)</p>
-                          <p className="text-3xl font-black text-white">{calcPresentCount} Days</p>
+                          <p className="text-xs font-bold text-emerald-700 uppercase">Present Days (P)</p>
+                          <p className="text-3xl font-black text-gray-900">{calcPresentCount} Days</p>
                           <p className="text-[10px] text-gray-400 font-bold">Attended out of {calcWorkingDays} working days</p>
                         </div>
 
                         {/* Absent Days Card */}
                         <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
-                          <p className="text-xs font-bold text-rose-400 uppercase">Absent Days (A)</p>
-                          <p className="text-3xl font-black text-white">{calcAbsentCount} Days</p>
+                          <p className="text-xs font-bold text-rose-700 uppercase">Absent Days (A)</p>
+                          <p className="text-3xl font-black text-gray-900">{calcAbsentCount} Days</p>
                           <p className="text-[10px] text-gray-400 font-bold">Missed classes</p>
                         </div>
 
                         {/* Average College stay time */}
                         <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
-                          <p className="text-xs font-bold text-blue-400 uppercase">Avg Daily Campus Stay</p>
-                          <p className="text-3xl font-black text-white">{avgDurationStr}</p>
+                          <p className="text-xs font-bold text-blue-700 uppercase">Avg Daily Campus Stay</p>
+                          <p className="text-3xl font-black text-gray-900">{avgDurationStr}</p>
                           <p className="text-[10px] text-gray-400 font-bold">Calculated from gate logs</p>
                         </div>
                       </div>
@@ -1133,7 +1133,7 @@ export default function InchargeDashboard() {
                       }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 font-black text-sm text-white">
-                            <TrendingUp className="w-5 h-5 text-blue-400" />
+                            <TrendingUp className="w-5 h-5 text-blue-700" />
                             Academic Attendance Advisory & Recovery Strategy
                           </div>
                           <span style={item?.badgeStyle} className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">
@@ -1144,7 +1144,7 @@ export default function InchargeDashboard() {
                           {item?.tip}
                         </p>
                         {flag === "RED" && (
-                          <div className="pt-2 flex items-center justify-between text-xs font-extrabold border-t border-rose-950/65 mt-2 text-rose-300">
+                          <div className="pt-2 flex items-center justify-between text-xs font-extrabold border-t border-rose-950/65 mt-2 text-rose-700">
                             <span>Condonation Cutoff (65%): +{classesFor65} Classes</span>
                             <span>Safe Threshold (75%): +{classesFor75} Classes</span>
                           </div>
@@ -1176,7 +1176,7 @@ export default function InchargeDashboard() {
                                     ? "bg-purple-950/50 border-purple-800/60 text-purple-250"
                                     : d.status === "—"
                                     ? "bg-gray-50/40 border-gray-200/80 text-slate-600 opacity-60"
-                                    : "bg-red-950/40 border-red-900/40 text-red-300"
+                                    : "bg-red-950/40 border-red-900/40 text-red-700"
                                 }`}
                               >
                                 <span className="text-[10px] font-mono font-extrabold" style={{ color: "#ffffff" }}>
@@ -1204,19 +1204,19 @@ export default function InchargeDashboard() {
                         <div className="p-4 rounded-2xl bg-white border border-gray-200 space-y-4 animate-fadeIn">
                           <div className="flex items-center justify-between border-b border-gray-200 pb-2">
                             <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4 text-blue-400" />
-                              <h5 className="text-sm font-bold text-white">
-                                Date: <span className="font-mono text-blue-300">{selectedDayDetail.dateStr}</span> ({selectedDayDetail.dayOfWeek})
+                              <Calendar className="w-4 h-4 text-blue-700" />
+                              <h5 className="text-sm font-bold text-gray-900">
+                                Date: <span className="font-mono text-blue-700">{selectedDayDetail.dateStr}</span> ({selectedDayDetail.dayOfWeek})
                               </h5>
                             </div>
                             <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                               selectedDayDetail.status === "P"
-                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                ? "bg-emerald-100 text-emerald-700 border border-emerald-500/40"
                                 : selectedDayDetail.status === "*"
-                                ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                                ? "bg-purple-500/20 text-purple-700 border border-purple-500/40"
                                 : selectedDayDetail.status === "—"
-                                ? "bg-gray-100 text-gray-500 border border-gray-200"
-                                : "bg-red-500/20 text-red-300 border border-red-500/40"
+                                ? "bg-gray-100 text-gray-600 border border-gray-200"
+                                : "bg-red-100 text-red-700 border border-red-500/40"
                             }`}>
                               {selectedDayDetail.status === "P"
                                 ? "🟢 PRESENT"
@@ -1248,7 +1248,7 @@ export default function InchargeDashboard() {
                                 </div>
                                 <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
                                   <p className="text-[10px] font-bold text-gray-400 uppercase">Exit Time (Out)</p>
-                                  <p className="text-sm font-bold text-blue-400 mt-0.5">
+                                  <p className="text-sm font-bold text-blue-700 mt-0.5">
                                     {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
                                   </p>
                                 </div>
@@ -1304,8 +1304,8 @@ export default function InchargeDashboard() {
                                           <div className="flex flex-col items-end gap-1">
                                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
                                               isPresent
-                                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                                : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                                                ? "bg-emerald-100 text-emerald-700 border border-emerald-500/30"
+                                                : "bg-rose-100 text-rose-700 border border-rose-500/30"
                                             }`}>
                                               {isPresent ? "Present" : "Absent"}
                                             </span>

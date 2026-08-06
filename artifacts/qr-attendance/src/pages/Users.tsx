@@ -64,7 +64,7 @@ function QrModal({ userId, name, onClose }: { userId: number; name: string; onCl
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
       <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-semibold text-white">QR Code — {name}</h3>
+          <h3 className="text-base font-semibold text-gray-900">QR Code — {name}</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-900">
             <X className="w-5 h-5" />
           </button>
@@ -80,7 +80,7 @@ function QrModal({ userId, name, onClose }: { userId: number; name: string; onCl
             </div>
             <div className="text-center">
               <p className="text-xs text-gray-500">Unique ID</p>
-              <p className="text-lg font-mono font-bold text-white mt-1">{data.uniqueId}</p>
+              <p className="text-lg font-mono font-bold text-gray-900 mt-1">{data.uniqueId}</p>
             </div>
             <button
               data-testid="download-qr"
@@ -181,7 +181,7 @@ export default function Users() {
         <BackButton />
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-white">Users</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Users</h1>
             <p className="text-sm text-gray-500 mt-1">Manage students and staff</p>
           </div>
           <div className="flex gap-2">
@@ -263,7 +263,7 @@ export default function Users() {
         {/* Add user form */}
         {showForm && (
           <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
-            <h2 className="text-sm font-semibold text-white mb-4">Add New User</h2>
+            <h2 className="text-sm font-semibold text-gray-900 mb-4">Add New User</h2>
             {createError && (
               <div data-testid="create-user-error" className="mb-4 px-3 py-2 rounded-lg bg-red-900/40 border border-red-700 text-red-200 text-sm">
                 {createError}
@@ -392,7 +392,7 @@ export default function Users() {
                     <tr key={user.id} className="hover:bg-gray-100/40 transition-colors">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-xs font-bold text-blue-300 flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
                             {user.name.charAt(0).toUpperCase()}
                           </div>
                           <span className="text-sm font-medium text-white">{user.name}</span>
@@ -405,8 +405,8 @@ export default function Users() {
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                             user.role === "student"
-                              ? "bg-blue-900/40 text-blue-400"
-                              : "bg-purple-900/40 text-purple-400"
+                              ? "bg-blue-900/40 text-blue-700"
+                              : "bg-purple-900/40 text-purple-700"
                           }`}
                         >
                           {user.role}
@@ -420,7 +420,7 @@ export default function Users() {
                           <button
                             data-testid={`view-qr-${user.id}`}
                             onClick={() => { setQrUserId(user.id); setQrUserName(user.name); }}
-                            className="p-2 rounded-lg bg-gray-200 hover:bg-blue-900/40 text-gray-500 hover:text-blue-400 transition-colors"
+                            className="p-2 rounded-lg bg-gray-200 hover:bg-blue-900/40 text-gray-500 hover:text-blue-700 transition-colors"
                             title="View QR Code"
                           >
                             <QrCode className="w-4 h-4" />
@@ -428,7 +428,7 @@ export default function Users() {
                           <button
                             data-testid={`delete-user-${user.id}`}
                             onClick={() => handleDelete(user.id, user.name)}
-                            className="p-2 rounded-lg bg-gray-200 hover:bg-red-900/40 text-gray-500 hover:text-red-400 transition-colors"
+                            className="p-2 rounded-lg bg-gray-200 hover:bg-red-900/40 text-gray-500 hover:text-red-700 transition-colors"
                             title="Delete user"
                           >
                             <Trash2 className="w-4 h-4" />

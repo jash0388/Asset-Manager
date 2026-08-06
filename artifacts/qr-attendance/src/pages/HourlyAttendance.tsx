@@ -331,8 +331,8 @@ export default function HourlyAttendance() {
         {/* Prominent Date View */}
         <div className="bg-white border border-gray-200 p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
           <div>
-            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Active Date View</span>
-            <h2 className="text-2xl font-black text-white mt-1">
+            <span className="text-xs font-bold text-blue-700 uppercase tracking-widest">Active Date View</span>
+            <h2 className="text-2xl font-black text-gray-900 mt-1">
               {getFormattedDate(selectedDateFilter)}
             </h2>
           </div>
@@ -490,11 +490,11 @@ export default function HourlyAttendance() {
                         <div className="mt-4 flex items-center justify-between">
                           {/* Attendance Status Badge */}
                           {s.status === "submitted" ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-900/40">
+                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-950 text-emerald-700 border border-emerald-900/40">
                               ✓ Submitted ({s.studentCount} present)
                             </span>
                           ) : s.status === "started" ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-950 text-amber-400 border border-amber-900/40 animate-pulse">
+                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-950 text-amber-700 border border-amber-900/40 animate-pulse">
                               ● Scan Started
                             </span>
                           ) : (
@@ -503,7 +503,7 @@ export default function HourlyAttendance() {
                             </span>
                           )}
                           
-                          <div className="flex items-center text-[10px] text-blue-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center text-[10px] text-blue-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                             View <ChevronRight className="w-3.5 h-3.5" />
                           </div>
                         </div>
@@ -524,7 +524,7 @@ export default function HourlyAttendance() {
                 <SheetHeader className="p-6 border-b border-gray-200 bg-gray-50">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 text-[10px] font-extrabold uppercase">
+                      <span className="px-2.5 py-1 rounded-lg bg-blue-950 border border-blue-800 text-blue-700 text-[10px] font-extrabold uppercase">
                         {selectedSchedule.year} Yr - {selectedSchedule.section}
                       </span>
                       <span className="text-xs text-gray-500 font-mono">
@@ -571,7 +571,7 @@ export default function HourlyAttendance() {
                   
                   {detailRecords.length > 0 && (
                     <div className="text-xs font-bold text-gray-700 bg-gray-50 border border-gray-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
-                      Present: <span className="text-green-400 font-extrabold">{detailRecords.filter(r => r.markedPresent).length}</span> / {detailRecords.length}
+                      Present: <span className="text-green-700 font-extrabold">{detailRecords.filter(r => r.markedPresent).length}</span> / {detailRecords.length}
                     </div>
                   )}
                 </div>
@@ -580,7 +580,7 @@ export default function HourlyAttendance() {
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {detailsLoading ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-3">
-                      <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                      <Loader2 className="w-6 h-6 animate-spin text-purple-700" />
                       <p className="text-xs text-gray-500">Loading student attendance checklist...</p>
                     </div>
                   ) : detailsError ? (
@@ -603,7 +603,7 @@ export default function HourlyAttendance() {
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-semibold text-gray-800 truncate">{r.name}</p>
                               {r.scannedGate ? (
-                                <span className="px-1.5 py-0.5 rounded bg-green-950/40 text-green-400 border border-green-900/30 text-[9px] font-bold">
+                                <span className="px-1.5 py-0.5 rounded bg-green-950/40 text-green-700 border border-green-900/30 text-[9px] font-bold">
                                   Gate Scanned
                                 </span>
                               ) : (
@@ -617,11 +617,11 @@ export default function HourlyAttendance() {
 
                           <div className="flex-shrink-0">
                             {r.markedPresent ? (
-                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-950/50 text-green-400 border border-green-900/40">
+                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-950/50 text-green-700 border border-green-900/40">
                                 <CheckCircle className="w-3.5 h-3.5" /> Present
                               </span>
                             ) : (
-                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-950/50 text-red-400 border border-red-900/40">
+                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-950/50 text-red-700 border border-red-900/40">
                                 <XCircle className="w-3.5 h-3.5" /> Absent
                               </span>
                             )}
@@ -642,8 +642,8 @@ export default function HourlyAttendance() {
             <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-bold text-white">Assign Class to Faculty</h3>
+                  <UserPlus className="w-5 h-5 text-blue-700" />
+                  <h3 className="text-lg font-bold text-gray-900">Assign Class to Faculty</h3>
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
@@ -680,7 +680,7 @@ export default function HourlyAttendance() {
                 </div>
 
                 {assignSuccessMsg && (
-                  <div className="p-3 rounded-xl bg-green-950/60 border border-green-800 text-green-300 text-xs font-bold text-center flex items-center justify-center gap-2">
+                  <div className="p-3 rounded-xl bg-green-950/60 border border-green-800 text-green-700 text-xs font-bold text-center flex items-center justify-center gap-2">
                     <UserCheck className="w-4 h-4" />
                     {assignSuccessMsg}
                   </div>
@@ -723,8 +723,8 @@ export default function HourlyAttendance() {
             <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
-                  <Plus className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-bold text-white">Assign New Class Schedule</h3>
+                  <Plus className="w-5 h-5 text-blue-700" />
+                  <h3 className="text-lg font-bold text-gray-900">Assign New Class Schedule</h3>
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}

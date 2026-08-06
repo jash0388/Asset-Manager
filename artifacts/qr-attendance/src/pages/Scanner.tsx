@@ -321,7 +321,7 @@ export default function Scanner() {
             <QrCode className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-white">QR Scanner</h1>
+            <h1 className="text-base font-bold text-gray-900">QR Scanner</h1>
             <p className="text-xs text-gray-500">Scan student ID card to mark attendance</p>
           </div>
         </div>
@@ -342,11 +342,11 @@ export default function Scanner() {
             }`}
           >
             {result.success ? (
-              <CheckCircle className={`w-20 h-20 mb-4 ${result.action === "exit" ? "text-orange-400" : "text-green-400"}`} />
+              <CheckCircle className={`w-20 h-20 mb-4 ${result.action === "exit" ? "text-orange-700" : "text-green-700"}`} />
             ) : (
-              <XCircle className="w-20 h-20 text-red-400 mb-4" />
+              <XCircle className="w-20 h-20 text-red-700 mb-4" />
             )}
-            <p className={`text-3xl font-extrabold mb-3 uppercase tracking-wide ${result.success ? (result.action === "exit" ? "text-orange-400" : "text-green-400") : "text-amber-400"}`}>
+            <p className={`text-3xl font-extrabold mb-3 uppercase tracking-wide ${result.success ? (result.action === "exit" ? "text-orange-700" : "text-green-700") : "text-amber-700"}`}>
               {result.success
                 ? result.action === "exit"
                   ? "Left Campus"
@@ -357,7 +357,7 @@ export default function Scanner() {
             </p>
             {result.userName && (
               <div className="my-2 px-6 py-3 bg-white/90 border-2 border-amber-400/80 rounded-2xl shadow-2xl text-center">
-                <p className="text-4xl sm:text-5xl font-black text-amber-300 tracking-wide leading-tight drop-shadow-lg uppercase">
+                <p className="text-4xl sm:text-5xl font-black text-amber-700 tracking-wide leading-tight drop-shadow-lg uppercase">
                   {result.userName}
                 </p>
               </div>
@@ -392,7 +392,7 @@ export default function Scanner() {
         )}
 
         {isLateEntryMode && (
-          <div className="w-full mb-3 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black flex items-center justify-center gap-2 animate-pulse">
+          <div className="w-full mb-3 px-4 py-2.5 rounded-xl bg-amber-50 border border-amber-500/30 text-amber-700 text-xs font-black flex items-center justify-center gap-2 animate-pulse">
             ⚠️ LATE ENTRY MODE IS ACTIVE
           </div>
         )}
@@ -417,7 +417,7 @@ export default function Scanner() {
         </div>
 
         {cameraError && (
-          <div className="w-full mb-4 px-4 py-3 rounded-lg bg-red-900/30 border border-red-800 text-red-400 text-sm text-center">
+          <div className="w-full mb-4 px-4 py-3 rounded-lg bg-red-900/30 border border-red-800 text-red-700 text-sm text-center">
             {cameraError}
           </div>
         )}
@@ -425,7 +425,7 @@ export default function Scanner() {
         {/* Late Entry Mode Toggle */}
         <div className="w-full mb-4 bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between shadow-lg">
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-white tracking-wide">Late Entry Mode</span>
+            <span className="text-sm font-bold text-gray-900 tracking-wide">Late Entry Mode</span>
             <span className="text-xs text-slate-550 font-medium">Flag scanned student as late entry</span>
           </div>
           <button
@@ -511,7 +511,7 @@ export default function Scanner() {
             "Scan again after the confirmation to mark the student inside",
           ].map((tip, i) => (
             <div key={i} className="flex items-start gap-3 px-4 py-3 rounded-lg bg-white border border-gray-200">
-              <span className="w-5 h-5 rounded-full bg-blue-900/60 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="w-5 h-5 rounded-full bg-blue-900/60 text-blue-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </span>
               <p className="text-sm text-gray-500">{tip}</p>

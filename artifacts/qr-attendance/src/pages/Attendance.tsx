@@ -8,16 +8,16 @@ import { Download, Filter, Trash2, AlertTriangle, XCircle } from "lucide-react";
 function StatusBadge({ status, exitOver }: { status: string; exitOver?: boolean }) {
   if (exitOver) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
         <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
         Not Scanned
       </span>
     );
   }
   const map: Record<string, string> = {
-    inside: "bg-emerald-900/40 text-emerald-400 border border-emerald-800/40",
+    inside: "bg-emerald-900/40 text-emerald-700 border border-emerald-800/40",
     left: "bg-gray-100 text-gray-500 border border-gray-300/40",
-    present: "bg-blue-900/40 text-blue-400 border border-blue-800/40",
+    present: "bg-blue-900/40 text-blue-700 border border-blue-800/40",
   };
   const labels: Record<string, string> = { inside: "On Campus", left: "Left", present: "Present" };
   return (
@@ -169,7 +169,7 @@ export default function Attendance() {
         <BackButton />
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-white">Attendance Records</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Attendance Records</h1>
             <p className="text-sm text-gray-500 mt-1">{records.length} records found</p>
           </div>
           <div className="flex items-center gap-2">
@@ -314,7 +314,7 @@ export default function Attendance() {
                       </td>
                       <td className="px-5 py-3 font-mono text-sm text-gray-500">{rec.user?.uniqueId}</td>
                       <td className="px-5 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${rec.user?.role === "student" ? "bg-blue-900/40 text-blue-400" : "bg-purple-900/40 text-purple-400"}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${rec.user?.role === "student" ? "bg-blue-900/40 text-blue-700" : "bg-purple-900/40 text-purple-700"}`}>
                           {rec.user?.role}
                         </span>
                       </td>
@@ -352,17 +352,17 @@ export default function Attendance() {
           >
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
+                <AlertTriangle className="w-5 h-5 text-red-700" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Delete attendance records?</h3>
+                <h3 className="text-lg font-bold text-gray-900">Delete attendance records?</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  This will permanently remove <span className="font-bold text-white">{selected.size}</span> record{selected.size === 1 ? "" : "s"}. This action cannot be undone.
+                  This will permanently remove <span className="font-bold text-gray-900">{selected.size}</span> record{selected.size === 1 ? "" : "s"}. This action cannot be undone.
                 </p>
               </div>
             </div>
             {errorMsg && (
-              <div className="mb-4 px-3 py-2 rounded-lg bg-red-900/30 border border-red-800 text-red-400 text-sm">
+              <div className="mb-4 px-3 py-2 rounded-lg bg-red-900/30 border border-red-800 text-red-700 text-sm">
                 {errorMsg}
               </div>
             )}

@@ -234,7 +234,7 @@ export default function Mentors() {
         {/* Title */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-white">Mentors Panel</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Mentors Panel</h1>
             <p className="text-sm text-gray-500 mt-1">Manage mentors, timetables, and view active scanning logs</p>
           </div>
         </div>
@@ -352,8 +352,8 @@ export default function Mentors() {
               <div className="grid lg:grid-cols-2 gap-5">
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                   <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-purple-400" />
-                    <h2 className="text-sm font-semibold text-white">Mentors ({mentors.length})</h2>
+                    <GraduationCap className="w-4 h-4 text-purple-700" />
+                    <h2 className="text-sm font-semibold text-gray-900">Mentors ({mentors.length})</h2>
                   </div>
                   <div className="divide-y divide-gray-200">
                     {mentors.length === 0 ? (
@@ -363,7 +363,7 @@ export default function Mentors() {
                         const count = students.filter((s) => s.mentorId === m.id).length;
                         return (
                           <div key={m.id} className="px-5 py-3 flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-purple-900/40 text-purple-300 flex items-center justify-center text-sm font-bold">
+                            <div className="w-9 h-9 rounded-full bg-purple-900/40 text-purple-700 flex items-center justify-center text-sm font-bold">
                               {m.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -382,8 +382,8 @@ export default function Mentors() {
 
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                   <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
-                    <UserCheck className="w-4 h-4 text-blue-400" />
-                    <h2 className="text-sm font-semibold text-white">Assign students</h2>
+                    <UserCheck className="w-4 h-4 text-blue-700" />
+                    <h2 className="text-sm font-semibold text-gray-900">Assign students</h2>
                   </div>
                   <div className="max-h-[60vh] overflow-y-auto divide-y divide-gray-200">
                     {students.length === 0 ? (
@@ -556,8 +556,8 @@ export default function Mentors() {
             ) : (
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-purple-400" />
-                  <h2 className="text-sm font-semibold text-white">Active Timetable Schedules ({schedules.length})</h2>
+                  <Calendar className="w-4 h-4 text-purple-700" />
+                  <h2 className="text-sm font-semibold text-gray-900">Active Timetable Schedules ({schedules.length})</h2>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
@@ -585,7 +585,7 @@ export default function Mentors() {
                             <td className="px-4 py-2.5">{s.day_of_week}</td>
                             <td className="px-4 py-2.5 text-gray-700 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
                             <td className="px-4 py-2.5">
-                              <span className="px-2 py-0.5 rounded bg-gray-100 text-purple-300 text-xs font-semibold border border-gray-200">
+                              <span className="px-2 py-0.5 rounded bg-gray-100 text-purple-700 text-xs font-semibold border border-gray-200">
                                 {s.year} Yr - {s.section}
                               </span>
                             </td>
@@ -615,8 +615,8 @@ export default function Mentors() {
             {/* Mentor List Selection */}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm h-fit">
               <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2">
-                <List className="w-4 h-4 text-purple-400" />
-                <h2 className="text-sm font-semibold text-white">Mentors ({trackingData.length})</h2>
+                <List className="w-4 h-4 text-purple-700" />
+                <h2 className="text-sm font-semibold text-gray-900">Mentors ({trackingData.length})</h2>
               </div>
               {trackingLoading && trackingData.length === 0 ? (
                 <div className="p-10 flex items-center justify-center">
@@ -652,8 +652,8 @@ export default function Mentors() {
             {/* Mentor Scan History Logs */}
             <div className="md:col-span-2 bg-white border border-slate-880 rounded-xl overflow-hidden shadow-sm">
               <div className="px-5 py-3 border-b border-gray-200 flex items-center gap-2 bg-gray-50">
-                <Clock className="w-4 h-4 text-purple-400" />
-                <h2 className="text-sm font-semibold text-white">
+                <Clock className="w-4 h-4 text-purple-700" />
+                <h2 className="text-sm font-semibold text-gray-900">
                   {selectedMentorTracking
                     ? `${selectedMentorTracking.name}'s Scanning Logs`
                     : "Select a Mentor to view logs"}

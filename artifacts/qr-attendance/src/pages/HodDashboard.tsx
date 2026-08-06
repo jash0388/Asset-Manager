@@ -25,7 +25,8 @@ import {
   Flag,
   AlertCircle,
   AlertTriangle,
-  TrendingUp
+  TrendingUp,
+  Settings,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -1107,8 +1108,43 @@ export default function HodDashboard() {
 
   const getPercentageColor = (percent: number) => {
     if (percent < 40) return "text-red-500 font-bold";
-    if (percent < 60) return "text-orange-400 font-semibold";
-    return "text-green-400 font-semibold";
+    if (percent < 60) return "text-orange-700 font-semibold";
+    return "text-green-700 font-semibold";
+  };
+
+  // ---- Passcode Settings ----
+  const MASTER_PASSCODE = "038899";
+  const PASSCODE_KEY = "secapp.passcode.v1";
+  const getStoredPasscode = () => {
+    try { return localStorage.getItem(PASSCODE_KEY) || MASTER_PASSCODE; } catch { return MASTER_PASSCODE; }
+  };
+  const [showPwdModal, setShowPwdModal] = useState(false);
+  const [pwdStep, setPwdStep] = useState<"verify" | "change">("verify");
+  const [pwdCurrent, setPwdCurrent] = useState("");
+  const [pwdNew, setPwdNew] = useState("");
+  const [pwdConfirm, setPwdConfirm] = useState("");
+  const [pwdError, setPwdError] = useState("");
+  const [pwdSuccess, setPwdSuccess] = useState("");
+
+  const openPwdModal = () => {
+    setPwdStep("verify"); setPwdCurrent(""); setPwdNew(""); setPwdConfirm("");
+    setPwdError(""); setPwdSuccess(""); setShowPwdModal(true);
+  };
+  const handlePwdVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwdCurrent === getStoredPasscode() || pwdCurrent === MASTER_PASSCODE) {
+      setPwdStep("change"); setPwdError("");
+    } else { setPwdError("Incorrect passcode."); }
+  };
+  const handlePwdChange = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwdNew.length < 4) { setPwdError("Min 4 characters."); return; }
+    if (pwdNew !== pwdConfirm) { setPwdError("Passcodes don't match."); return; }
+    try {
+      localStorage.setItem(PASSCODE_KEY, pwdNew);
+      setPwdSuccess("✅ Scanner passcode updated!");
+      setTimeout(() => setShowPwdModal(false), 1800);
+    } catch { setPwdError("Storage unavailable."); }
   };
 
   return (
@@ -1126,19 +1162,32 @@ export default function HodDashboard() {
               <p className="text-gray-500 font-medium mt-1">Department of Data Science (DS)</p>
             </div>
             
-            <div className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 shadow-md hover:border-blue-500/50 transition-colors">
-              <Calendar className="w-4 h-4 text-blue-400 pointer-events-none" />
-              <input
-                type="date"
-                value={activeTab === "summary" ? selectedDate : logDate}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setSelectedDate(e.target.value);
-                    setLogDate(e.target.value);
-                  }
-                }}
-                className="bg-transparent text-sm font-bold text-gray-800 outline-none cursor-pointer [color-scheme:light]"
-              />
+            <div className="flex items-center gap-3">
+              {/* Settings Button */}
+              <button
+                onClick={openPwdModal}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 shadow-sm hover:border-blue-400 hover:shadow-md text-gray-600 hover:text-blue-600 font-semibold text-sm transition-all"
+                title="Change scanner passcode"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Settings</span>
+              </button>
+
+              {/* Date Picker */}
+              <div className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 shadow-md hover:border-blue-500/50 transition-colors">
+                <Calendar className="w-4 h-4 text-blue-700 pointer-events-none" />
+                <input
+                  type="date"
+                  value={activeTab === "summary" ? selectedDate : logDate}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setSelectedDate(e.target.value);
+                      setLogDate(e.target.value);
+                    }
+                  }}
+                  className="bg-transparent text-sm font-bold text-gray-800 outline-none cursor-pointer [color-scheme:light]"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -1208,7 +1257,7 @@ export default function HodDashboard() {
               <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Present Today</p>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-bold text-green-400">{overallTotalPresent}</span>
+                  <span className="text-3xl font-bold text-green-700">{overallTotalPresent}</span>
                   <span className="text-xs text-gray-500">active</span>
                 </div>
               </Card>
@@ -1216,7 +1265,7 @@ export default function HodDashboard() {
               <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Absent Today</p>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-bold text-red-400">{overallTotalAbsent}</span>
+                  <span className="text-3xl font-bold text-red-700">{overallTotalAbsent}</span>
                   <span className="text-xs text-gray-500">missed</span>
                 </div>
               </Card>
@@ -1224,7 +1273,7 @@ export default function HodDashboard() {
               <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between border-l-4 border-l-blue-500">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Department %</p>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-black text-blue-400">{overallDeptPercentage}%</span>
+                  <span className="text-3xl font-black text-blue-700">{overallDeptPercentage}%</span>
                   <span className="text-xs text-gray-400">attendance</span>
                 </div>
               </Card>
@@ -1282,14 +1331,14 @@ export default function HodDashboard() {
                                   
                                   <td 
                                     onClick={() => handleCellClick("PR", s)}
-                                    className="py-4 px-6 text-center text-green-400 font-semibold cursor-pointer hover:bg-green-500/10 active:scale-[0.98] transition-transform text-lg"
+                                    className="py-4 px-6 text-center text-green-700 font-semibold cursor-pointer hover:bg-green-50 active:scale-[0.98] transition-transform text-lg"
                                   >
                                     {s.presentStudents.length}
                                   </td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("AB", s)}
-                                    className="py-4 px-6 text-center text-red-400 font-semibold cursor-pointer hover:bg-red-500/10 active:scale-[0.98] transition-transform text-lg"
+                                    className="py-4 px-6 text-center text-red-700 font-semibold cursor-pointer hover:bg-red-50 active:scale-[0.98] transition-transform text-lg"
                                   >
                                     {s.absentStudents.length}
                                   </td>
@@ -1312,11 +1361,11 @@ export default function HodDashboard() {
 
                             {/* Overall row for this specific year */}
                             <tr className="bg-blue-950/20 border-y border-gray-200">
-                              <td className="py-4 px-6 font-black text-blue-400 text-base italic">Overall ({year})</td>
-                              <td className="py-4 px-6 text-center text-green-400 font-bold text-lg">{yearPresent}</td>
-                              <td className="py-4 px-6 text-center text-red-400 font-bold text-lg">{yearAbsent}</td>
+                              <td className="py-4 px-6 font-black text-blue-700 text-base italic">Overall ({year})</td>
+                              <td className="py-4 px-6 text-center text-green-700 font-bold text-lg">{yearPresent}</td>
+                              <td className="py-4 px-6 text-center text-red-700 font-bold text-lg">{yearAbsent}</td>
                               <td className="py-4 px-6 text-center text-gray-800 font-bold text-lg">{yearTotal}</td>
-                              <td className="py-4 px-6 text-center font-mono font-black text-blue-400 text-lg">
+                              <td className="py-4 px-6 text-center font-mono font-black text-blue-700 text-lg">
                                 {yearPercentage}
                               </td>
                             </tr>
@@ -1329,7 +1378,7 @@ export default function HodDashboard() {
                         <td colSpan={4} className="py-6 px-6 font-black text-gray-800 text-lg tracking-wider text-right pr-12">
                           Overall Department %
                         </td>
-                        <td className="py-6 px-6 text-center font-mono font-black text-blue-400 text-xl border-l border-gray-200">
+                        <td className="py-6 px-6 text-center font-mono font-black text-blue-700 text-xl border-l border-gray-200">
                           {overallDeptPercentage}
                         </td>
                       </tr>
@@ -1397,7 +1446,7 @@ export default function HodDashboard() {
                   onClick={() => setHolidayModalOpen(true)}
                   className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-900/60 hover:bg-blue-800/80 active:scale-[0.98] text-blue-200 font-bold text-xs border border-blue-700/50 transition-all shadow-md cursor-pointer"
                 >
-                  <Calendar className="w-4 h-4 text-blue-400" />
+                  <Calendar className="w-4 h-4 text-blue-700" />
                   Manage Holidays
                 </button>
               </div>
@@ -1458,10 +1507,10 @@ export default function HodDashboard() {
                                     {user.name.charAt(0)}
                                   </div>
                                   <div>
-                                    <p className="text-sm font-bold text-gray-800 group-hover:text-blue-400 transition-colors underline decoration-blue-500/30 underline-offset-4">
+                                    <p className="text-sm font-bold text-gray-800 group-hover:text-blue-700 transition-colors underline decoration-blue-500/30 underline-offset-4">
                                       {user.name}
                                     </p>
-                                    <p className="text-xs text-gray-500 font-mono mt-0.5 group-hover:text-blue-300 transition-colors">
+                                    <p className="text-xs text-gray-500 font-mono mt-0.5 group-hover:text-blue-700 transition-colors">
                                       {user.uniqueId}
                                     </p>
                                   </div>
@@ -1474,15 +1523,15 @@ export default function HodDashboard() {
 
                               <td className="py-4 px-6 text-center">
                                 {isExitTimeOver(log.date, log.exitTime) ? (
-                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">
                                     <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
                                     Not Scanned
                                   </span>
                                 ) : (
                                   <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold ${
                                     log.status === "inside"
-                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/25"
-                                      : "bg-gray-100 text-gray-500 border border-gray-200"
+                                      ? "bg-emerald-50 text-emerald-700 border border-emerald-500/25"
+                                      : "bg-gray-100 text-gray-600 border border-gray-200"
                                   }`}>
                                     <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-emerald-400" : "bg-gray-300"}`} />
                                     {log.status === "inside" ? "On Campus" : "Left"}
@@ -1494,7 +1543,7 @@ export default function HodDashboard() {
                                 <div className="flex flex-col items-center justify-center gap-0.5">
                                   <span>{formatTime(log.entryTime)}</span>
                                   {isLateTime(log.entryTime) && (
-                                    <span className="inline-block px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-wider scale-95">
+                                    <span className="inline-block px-1.5 py-0.5 rounded bg-amber-50 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-wider scale-95">
                                       Late Entry
                                     </span>
                                   )}
@@ -1576,9 +1625,9 @@ export default function HodDashboard() {
                         </div>
                       </div>
                       <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border ${
-                        m.yearLabel?.includes("4") ? "bg-orange-950/60 border-orange-800/50 text-orange-400"
-                        : m.yearLabel?.includes("3") ? "bg-blue-950/60 border-blue-800/50 text-blue-400"
-                        : "bg-emerald-950/60 border-emerald-800/50 text-emerald-400"
+                        m.yearLabel?.includes("4") ? "bg-orange-950/60 border-orange-800/50 text-orange-700"
+                        : m.yearLabel?.includes("3") ? "bg-blue-950/60 border-blue-800/50 text-blue-700"
+                        : "bg-emerald-950/60 border-emerald-800/50 text-emerald-700"
                       }`}>
                         {m.yearLabel}
                       </span>
@@ -1588,7 +1637,7 @@ export default function HodDashboard() {
                     <div className="bg-gray-100 rounded-xl px-4 py-3 border border-gray-200 min-w-0 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Assigned Section</span>
-                        <span className="text-xs font-black text-emerald-400 font-mono">Sec {m.section}</span>
+                        <span className="text-xs font-black text-emerald-700 font-mono">Sec {m.section}</span>
                       </div>
                       <p className="text-[11px] text-gray-700 font-mono mt-1 pt-1.5 border-t border-gray-300/40 break-words leading-relaxed">{m.rollRange}</p>
                     </div>
@@ -1685,7 +1734,7 @@ export default function HodDashboard() {
                             <td className="py-4 px-6 text-gray-700 font-bold">{s.day_of_week}</td>
                             <td className="py-4 px-6 text-slate-405 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
                             <td className="py-4 px-6">
-                              <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-950 border border-blue-800 text-blue-300 font-bold text-xs">
+                              <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-950 border border-blue-800 text-blue-700 font-bold text-xs">
                                 {s.year} Yr - {s.section}
                               </span>
                             </td>
@@ -1693,7 +1742,7 @@ export default function HodDashboard() {
                             <td className="py-4 px-6 text-center">
                               <button
                                 onClick={() => handleOpenAssignModal(s)}
-                                className="px-3 py-1.5 rounded-xl bg-blue-950 hover:bg-blue-900 text-blue-300 border border-blue-800/80 font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm"
+                                className="px-3 py-1.5 rounded-xl bg-blue-950 hover:bg-blue-900 text-blue-700 border border-blue-800/80 font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm"
                               >
                                 <UserPlus className="w-3.5 h-3.5" />
                                 Assign Faculty
@@ -2131,11 +2180,11 @@ export default function HodDashboard() {
                           <>
                             <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                               record && isExitTimeOver(record.date, record.exitTime)
-                                ? "bg-red-950/60 text-red-400 border border-red-900/40"
-                                : "bg-green-950/60 text-green-400 border border-green-900/40"
+                                ? "bg-red-950/60 text-red-700 border border-red-900/40"
+                                : "bg-green-950/60 text-green-700 border border-green-900/40"
                             }`}>
                               {record && isExitTimeOver(record.date, record.exitTime) ? (
-                                <XCircle className="w-3 h-3 text-red-400" />
+                                <XCircle className="w-3 h-3 text-red-700" />
                               ) : (
                                 <CheckCircle className="w-3 h-3" />
                               )}
@@ -2156,12 +2205,12 @@ export default function HodDashboard() {
                               {record?.exitTime ? (
                                 <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-red-500" /> Out: {formatTime(record?.exitTime)}</span>
                               ) : record && isExitTimeOver(record.date, record.exitTime) ? (
-                                <span className="flex items-center gap-1 text-red-400 font-semibold"><XCircle className="w-3.5 h-3.5 text-red-500" /> Out: Not Scanned</span>
+                                <span className="flex items-center gap-1 text-red-700 font-semibold"><XCircle className="w-3.5 h-3.5 text-red-500" /> Out: Not Scanned</span>
                               ) : null}
                             </div>
                           </>
                         ) : (
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-950/60 text-red-400 border border-red-900/40">
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-950/60 text-red-700 border border-red-900/40">
                             <XCircle className="w-3 h-3" />
                             Absent
                           </span>
@@ -2181,8 +2230,8 @@ export default function HodDashboard() {
             <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-purple-400" />
-                  <h3 className="text-lg font-bold text-white">Assign Class to Faculty</h3>
+                  <UserPlus className="w-5 h-5 text-purple-700" />
+                  <h3 className="text-lg font-bold text-gray-900">Assign Class to Faculty</h3>
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
@@ -2219,7 +2268,7 @@ export default function HodDashboard() {
                 </div>
 
                 {assignSuccessMsg && (
-                  <div className="p-3 rounded-xl bg-green-950/60 border border-green-800 text-green-300 text-xs font-bold text-center flex items-center justify-center gap-2">
+                  <div className="p-3 rounded-xl bg-green-950/60 border border-green-800 text-green-700 text-xs font-bold text-center flex items-center justify-center gap-2">
                     <UserCheck className="w-4 h-4" />
                     {assignSuccessMsg}
                   </div>
@@ -2262,8 +2311,8 @@ export default function HodDashboard() {
             <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
-                  <Plus className="w-5 h-5 text-purple-400" />
-                  <h3 className="text-lg font-bold text-white">Assign New Class Schedule</h3>
+                  <Plus className="w-5 h-5 text-purple-700" />
+                  <h3 className="text-lg font-bold text-gray-900">Assign New Class Schedule</h3>
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}
@@ -2409,11 +2458,11 @@ export default function HodDashboard() {
             <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl">
               <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <FileSpreadsheet className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Download Monthly Register</h3>
+                    <h3 className="text-lg font-bold text-gray-900">Download Monthly Register</h3>
                     <p className="text-xs text-gray-500">Export attendance spreadsheet (P / A register format)</p>
                   </div>
                 </div>
@@ -2570,7 +2619,7 @@ export default function HodDashboard() {
                     {/* Roll Number Search Input */}
                     <div className="relative">
                       <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                        <Search className="w-4 h-4 text-emerald-400" />
+                        <Search className="w-4 h-4 text-emerald-700" />
                       </div>
                       <input
                         type="text"
@@ -2632,15 +2681,15 @@ export default function HodDashboard() {
                         return (
                           <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between text-xs">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-emerald-900/60 border border-emerald-700/50 flex items-center justify-center font-bold text-emerald-300">
+                              <div className="w-8 h-8 rounded-full bg-emerald-900/60 border border-emerald-700/50 flex items-center justify-center font-bold text-emerald-700">
                                 {s.name.charAt(0)}
                               </div>
                               <div>
                                 <p className="font-bold text-emerald-200 text-sm">{s.name}</p>
-                                <p className="text-emerald-400/80 font-mono">Roll No: {s.uniqueId || "N/A"} | Sec {secName} ({yearLabel})</p>
+                                <p className="text-emerald-700/80 font-mono">Roll No: {s.uniqueId || "N/A"} | Sec {secName} ({yearLabel})</p>
                               </div>
                             </div>
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-500/30">
                               Selected
                             </span>
                           </div>
@@ -2653,7 +2702,7 @@ export default function HodDashboard() {
                 <div className="bg-gray-50/80 border border-gray-200 p-3.5 rounded-xl text-xs text-gray-500 space-y-1">
                   <p className="font-semibold text-gray-700">📊 Register Format Preview:</p>
                   <p>• Columns: S.No | Roll No | Student Name | Year | Section | Day 1..31 | Total P | Total A | Attendance %</p>
-                  <p>• Daily Status: <span className="text-emerald-400 font-bold">P</span> = Present, <span className="text-red-400 font-bold">A</span> = Absent</p>
+                  <p>• Daily Status: <span className="text-emerald-700 font-bold">P</span> = Present, <span className="text-red-700 font-bold">A</span> = Absent</p>
                 </div>
               </div>
 
@@ -2694,8 +2743,8 @@ export default function HodDashboard() {
             <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-purple-400" />
-                  <h3 className="text-lg font-bold text-white">Declare / Manage Holidays</h3>
+                  <Calendar className="w-5 h-5 text-purple-700" />
+                  <h3 className="text-lg font-bold text-gray-900">Declare / Manage Holidays</h3>
                 </div>
                 <button
                   onClick={() => setHolidayModalOpen(false)}
@@ -2757,12 +2806,12 @@ export default function HodDashboard() {
                       .map(([dStr, reason]) => (
                         <div key={dStr} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs">
                           <div>
-                            <span className="font-mono font-bold text-purple-300">{dStr}</span>
+                            <span className="font-mono font-bold text-purple-700">{dStr}</span>
                             <span className="text-gray-500 ml-2 font-medium">— {reason}</span>
                           </div>
                           <button
                             onClick={() => handleRemoveHoliday(dStr)}
-                            className="text-gray-400 hover:text-red-400 p-1 transition-colors cursor-pointer"
+                            className="text-gray-400 hover:text-red-700 p-1 transition-colors cursor-pointer"
                             title="Remove Holiday"
                           >
                             <XCircle className="w-4 h-4" />
@@ -2773,10 +2822,10 @@ export default function HodDashboard() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-900/40 text-[11px] text-purple-300/80 space-y-0.5">
+              <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-900/40 text-[11px] text-purple-700/80 space-y-0.5">
                 <p className="font-bold text-purple-200">ℹ️ Automatic Rules:</p>
-                <p>• All <span className="font-bold text-purple-200">Sundays</span> are automatically marked with <span className="font-bold text-amber-400">*</span> in the register.</p>
-                <p>• Declared holidays above are also marked with <span className="font-bold text-amber-400">*</span> and not counted as absent days.</p>
+                <p>• All <span className="font-bold text-purple-200">Sundays</span> are automatically marked with <span className="font-bold text-amber-700">*</span> in the register.</p>
+                <p>• Declared holidays above are also marked with <span className="font-bold text-amber-700">*</span> and not counted as absent days.</p>
               </div>
             </div>
           </div>
@@ -2788,7 +2837,7 @@ export default function HodDashboard() {
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-200 pb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-600 border border-blue-400 flex items-center justify-center text-2xl font-black text-white shadow-md">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-600 border border-blue-400 flex items-center justify-center text-2xl font-black text-gray-900 shadow-md">
                     {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
                   </div>
                   <div>
@@ -3096,13 +3145,13 @@ export default function HodDashboard() {
                                       <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider animate-pulse">LATE</span>
                                     )}
                                   </p>
-                                  <p className="text-sm font-bold text-emerald-400 mt-0.5">
+                                  <p className="text-sm font-bold text-emerald-700 mt-0.5">
                                     {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
                                   </p>
                                 </div>
                                 <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
                                   <p className="text-[10px] font-bold text-gray-500 uppercase">Exit Time (Out)</p>
-                                  <p className="text-sm font-bold text-blue-400 mt-0.5">
+                                  <p className="text-sm font-bold text-blue-700 mt-0.5">
                                     {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
                                   </p>
                                 </div>
@@ -3130,7 +3179,7 @@ export default function HodDashboard() {
                              {/* Hourly Period Attendance */}
                              <div className="space-y-2 pt-2.5 border-t border-gray-200">
                                <h6 className="text-[11px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
-                                 <Clock className="w-3.5 h-3.5 text-blue-400" />
+                                 <Clock className="w-3.5 h-3.5 text-blue-700" />
                                  Hourly Period Attendance
                                </h6>
                                {hourlyForSelectedDay.length > 0 ? (
@@ -3138,7 +3187,7 @@ export default function HodDashboard() {
                                    {hourlyForSelectedDay.map((hr: any) => (
                                      <div key={hr.id} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/60 border border-gray-200">
                                        <div className="space-y-0.5">
-                                         <p className="text-xs font-bold text-white">
+                                         <p className="text-xs font-bold text-gray-900">
                                            {hr.qr_schedules?.subject || "Unknown Subject"}
                                          </p>
                                          <p className="text-[10px] text-gray-400 font-medium font-mono">
@@ -3147,8 +3196,8 @@ export default function HodDashboard() {
                                        </div>
                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${
                                          hr.marked_present
-                                           ? "bg-emerald-950/80 text-emerald-400 border-emerald-900/30"
-                                           : "bg-red-950/80 text-red-400 border-red-900/30"
+                                           ? "bg-emerald-950/80 text-emerald-700 border-emerald-900/30"
+                                           : "bg-red-950/80 text-red-700 border-red-900/30"
                                        }`}>
                                          {hr.marked_present ? "PRESENT" : "ABSENT"}
                                        </span>
@@ -3186,6 +3235,86 @@ export default function HodDashboard() {
           </div>
         )}
       </div>
+      {/* ════════ SCANNER SETTINGS MODAL ════════ */}
+      {showPwdModal && (
+        <div className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowPwdModal(false); }}>
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <Settings className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-gray-900">Scanner Settings</h2>
+                  <p className="text-xs text-gray-500">{pwdStep === "verify" ? "Verify your identity first" : "Enter your new passcode"}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowPwdModal(false)} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors text-lg font-light">×</button>
+            </div>
+
+            {/* Step 1: Verify */}
+            {pwdStep === "verify" && (
+              <form onSubmit={handlePwdVerify} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Current Passcode</label>
+                  <input
+                    type="password"
+                    placeholder="Enter current passcode"
+                    value={pwdCurrent}
+                    onChange={e => { setPwdCurrent(e.target.value); setPwdError(""); }}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none text-center font-mono text-2xl tracking-[0.4em] text-gray-900 bg-gray-50 transition-colors placeholder:text-gray-300 placeholder:text-base placeholder:tracking-normal"
+                    autoFocus
+                  />
+                  {pwdError && <p className="text-red-500 text-xs font-semibold text-center mt-2">{pwdError}</p>}
+                </div>
+                <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-600/20">
+                  Verify & Continue →
+                </button>
+                <p className="text-center text-xs text-gray-400">Forgot? Use master code to access.</p>
+              </form>
+            )}
+
+            {/* Step 2: Change */}
+            {pwdStep === "change" && (
+              <form onSubmit={handlePwdChange} className="p-6 space-y-4">
+                <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="text-xs font-semibold text-blue-700">Identity verified — set your new passcode below</span>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">New Passcode</label>
+                  <input
+                    type="password"
+                    placeholder="Min 4 characters"
+                    value={pwdNew}
+                    onChange={e => { setPwdNew(e.target.value); setPwdError(""); }}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none text-center font-mono text-2xl tracking-[0.4em] text-gray-900 bg-gray-50 transition-colors placeholder:text-gray-300 placeholder:text-base placeholder:tracking-normal"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Confirm Passcode</label>
+                  <input
+                    type="password"
+                    placeholder="Repeat new passcode"
+                    value={pwdConfirm}
+                    onChange={e => { setPwdConfirm(e.target.value); setPwdError(""); }}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none text-center font-mono text-2xl tracking-[0.4em] text-gray-900 bg-gray-50 transition-colors placeholder:text-gray-300 placeholder:text-base placeholder:tracking-normal"
+                  />
+                </div>
+                {pwdError && <p className="text-red-500 text-xs font-semibold text-center">{pwdError}</p>}
+                {pwdSuccess && <p className="text-emerald-600 text-sm font-bold text-center">{pwdSuccess}</p>}
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setPwdStep("verify")} className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm transition-colors">← Back</button>
+                  <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-600/20">Save Passcode</button>
+                </div>
+                <p className="text-center text-xs text-gray-400">Master override always works as a backup.</p>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

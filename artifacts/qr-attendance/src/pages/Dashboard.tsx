@@ -21,7 +21,7 @@ function StatCard({
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{label}</p>
-          <p data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-3xl font-bold text-white mt-2">
+          <p data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-3xl font-bold text-gray-900 mt-2">
             {value}
           </p>
           {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
@@ -37,7 +37,7 @@ function StatCard({
 function StatusBadge({ status }: { status: string }) {
   if (status === "inside") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-900/40 text-green-400 text-xs font-medium">
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-900/40 text-green-700 text-xs font-medium">
         <Circle className="w-2 h-2 fill-current" />
         In Campus
       </span>
@@ -52,7 +52,7 @@ function StatusBadge({ status }: { status: string }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-900/40 text-blue-400 text-xs font-medium">
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-900/40 text-blue-700 text-xs font-medium">
       <Circle className="w-2 h-2 fill-current" />
       Present
     </span>
@@ -75,7 +75,7 @@ export default function Dashboard() {
     <Layout>
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">
             {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </p>
@@ -97,28 +97,28 @@ export default function Dashboard() {
               label="Total Users"
               value={data?.totalUsers ?? 0}
               icon={Users}
-              color="bg-blue-900/40 text-blue-400"
+              color="bg-blue-900/40 text-blue-700"
               sub={`${data?.totalStudents ?? 0} students, ${data?.totalStaff ?? 0} staff`}
             />
             <StatCard
               label="Today's Check-ins"
               value={data?.todayAttendanceCount ?? 0}
               icon={UserCheck}
-              color="bg-emerald-900/40 text-emerald-400"
+              color="bg-emerald-900/40 text-emerald-700"
               sub="Records today"
             />
             <StatCard
               label="Still on Campus"
               value={data?.currentlyInsideCount ?? 0}
               icon={Clock}
-              color="bg-orange-900/40 text-orange-400"
+              color="bg-orange-900/40 text-orange-700"
               sub="In college campus now"
             />
             <StatCard
               label="Students"
               value={data?.totalStudents ?? 0}
               icon={TrendingUp}
-              color="bg-purple-900/40 text-purple-400"
+              color="bg-purple-900/40 text-purple-700"
               sub={`${data?.totalStaff ?? 0} staff members`}
             />
           </div>
@@ -128,9 +128,9 @@ export default function Dashboard() {
           {/* Recent Activity */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-              <h2 className="text-sm font-semibold text-white">Recent Activity</h2>
+              <h2 className="text-sm font-semibold text-gray-900">Recent Activity</h2>
               <Link href="/attendance">
-                <span className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer">
+                <span className="text-xs text-blue-700 hover:text-blue-700 flex items-center gap-1 cursor-pointer">
                   View all <ArrowRight className="w-3 h-3" />
                 </span>
               </Link>
@@ -175,9 +175,9 @@ export default function Dashboard() {
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <h2 className="text-sm font-semibold text-white">Currently On Campus</h2>
+                <h2 className="text-sm font-semibold text-gray-900">Currently On Campus</h2>
               </div>
-              <span className="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-green-900/40 text-green-700 px-2 py-0.5 rounded-full">
                 {insideList.length} inside
               </span>
             </div>
@@ -197,7 +197,7 @@ export default function Dashboard() {
               ) : (
                 insideList.map((rec) => (
                   <div key={rec.id} className="flex items-center gap-3 px-5 py-3">
-                    <div className="w-8 h-8 rounded-full bg-green-900/40 flex items-center justify-center text-xs font-bold text-green-400 flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-green-900/40 flex items-center justify-center text-xs font-bold text-green-700 flex-shrink-0">
                       {rec.user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -205,7 +205,7 @@ export default function Dashboard() {
                       <p className="text-xs text-gray-500">{rec.user?.role} · Entered {formatTime(rec.entryTime)}</p>
                     </div>
                     <Link href={`/history/${rec.userId}`}>
-                      <span className="text-xs text-gray-400 hover:text-blue-400 cursor-pointer">
+                      <span className="text-xs text-gray-400 hover:text-blue-700 cursor-pointer">
                         <ArrowRight className="w-4 h-4" />
                       </span>
                     </Link>

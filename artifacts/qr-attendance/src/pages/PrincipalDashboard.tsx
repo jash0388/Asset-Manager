@@ -704,16 +704,16 @@ export default function PrincipalDashboard() {
           </div>
           <div>
             <h1 className="text-lg font-extrabold text-white tracking-tight">QR Attendance System</h1>
-            <p className="text-xs text-blue-400 font-semibold">Office of the Principal • Sphoorthy Engineering College</p>
+            <p className="text-xs text-blue-700 font-semibold">Office of the Principal • Sphoorthy Engineering College</p>
           </div>
         </div>
 
         {/* Top-Right Logout Button */}
         <button
           onClick={logout}
-          className="px-4 py-2 rounded-xl bg-red-950/50 hover:bg-red-900/60 text-red-300 font-bold text-xs border border-red-800/60 flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
+          className="px-4 py-2 rounded-xl bg-red-950/50 hover:bg-red-900/60 text-red-700 font-bold text-xs border border-red-800/60 flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
         >
-          <LogOut className="w-4 h-4 text-red-400" />
+          <LogOut className="w-4 h-4 text-red-700" />
           Logout
         </button>
       </header>
@@ -733,7 +733,7 @@ export default function PrincipalDashboard() {
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                       Dr. M. V. Ram Prasad
                     </h1>
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 uppercase tracking-wider">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-500/40 uppercase tracking-wider">
                       Principal
                     </span>
                   </div>
@@ -753,7 +753,7 @@ export default function PrincipalDashboard() {
                   }}
                   className="flex items-center gap-2 bg-gray-50 border border-gray-200 px-4 py-2.5 rounded-2xl text-gray-800 font-semibold text-xs cursor-pointer hover:border-gray-300 transition-all"
                 >
-                  <Calendar className="w-4 h-4 text-blue-400" />
+                  <Calendar className="w-4 h-4 text-blue-700" />
                   <input
                     type="date"
                     value={logDate}
@@ -782,19 +782,19 @@ export default function PrincipalDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Campus Enrolled</p>
-                <p className="text-2xl font-black text-white mt-1">{campusTotalStudents} Students</p>
+                <p className="text-2xl font-black text-gray-900 mt-1">{campusTotalStudents} Students</p>
               </div>
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Present Today</p>
-                <p className="text-2xl font-black text-emerald-300 mt-1">{campusPresentCount} Students</p>
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+                <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Present Today</p>
+                <p className="text-2xl font-black text-emerald-700 mt-1">{campusPresentCount} Students</p>
               </div>
-              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
-                <p className="text-xs font-bold text-rose-400 uppercase tracking-wider">Absent Today</p>
-                <p className="text-2xl font-black text-rose-300 mt-1">{campusAbsentCount} Students</p>
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200">
+                <p className="text-xs font-bold text-rose-700 uppercase tracking-wider">Absent Today</p>
+                <p className="text-2xl font-black text-rose-700 mt-1">{campusAbsentCount} Students</p>
               </div>
-              <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">Campus Attendance Rate</p>
-                <p className="text-2xl font-black text-blue-300 mt-1">{campusAttendancePercent}%</p>
+              <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200">
+                <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Campus Attendance Rate</p>
+                <p className="text-2xl font-black text-blue-700 mt-1">{campusAttendancePercent}%</p>
               </div>
             </div>
           </div>
@@ -804,8 +804,8 @@ export default function PrincipalDashboard() {
         {activeTab !== "flags" && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-blue-400" />
+              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-blue-700" />
                 Engineering Departments & Branches
               </h2>
               <span className="text-xs font-bold text-gray-500 bg-white border border-gray-200 px-3 py-1 rounded-full">
@@ -827,9 +827,9 @@ export default function PrincipalDashboard() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                       <span className="font-mono text-base font-black text-white">{b.code}</span>
+                       <span className="font-mono text-base font-black text-gray-900">{b.code}</span>
                        {b.code === "DS" ? (
-                         <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+                         <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-500/40 uppercase">
                            LIVE
                          </span>
                        ) : (
@@ -901,15 +901,15 @@ export default function PrincipalDashboard() {
                       className="flex items-center justify-between cursor-pointer group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center font-black text-blue-400 text-sm group-hover:scale-105 transition-transform">
+                        <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center font-black text-blue-700 text-sm group-hover:scale-105 transition-transform">
                           {st.section}
                         </div>
                         <div>
-                          <h4 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors">Section {st.section}</h4>
+                          <h4 className="text-base font-bold text-gray-900 group-hover:text-blue-700 transition-colors">Section {st.section}</h4>
                           <p className="text-xs font-medium text-gray-500">Data Science Dept • Click for Roster</p>
                         </div>
                       </div>
-                      <span className="text-base font-black text-blue-400">{st.percent}%</span>
+                      <span className="text-base font-black text-blue-700">{st.percent}%</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
@@ -934,7 +934,7 @@ export default function PrincipalDashboard() {
                         className="p-3 rounded-xl bg-gray-50 hover:bg-gray-50 border border-gray-200 transition-all cursor-pointer text-center active:scale-95"
                       >
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Enrolled</p>
-                        <p className="text-base font-black text-white mt-1">{st.total}</p>
+                        <p className="text-base font-black text-gray-900 mt-1">{st.total}</p>
                       </button>
 
                       {/* Present Button */}
@@ -955,10 +955,10 @@ export default function PrincipalDashboard() {
                             }),
                           });
                         }}
-                        className="p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all cursor-pointer text-center active:scale-95"
+                        className="p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer text-center active:scale-95"
                       >
-                        <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Present</p>
-                        <p className="text-base font-black text-emerald-300 mt-1">{st.present}</p>
+                        <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Present</p>
+                        <p className="text-base font-black text-emerald-700 mt-1">{st.present}</p>
                       </button>
 
                       {/* Absent Button */}
@@ -974,10 +974,10 @@ export default function PrincipalDashboard() {
                             })),
                           });
                         }}
-                        className="p-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all cursor-pointer text-center active:scale-95"
+                        className="p-3 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all cursor-pointer text-center active:scale-95"
                       >
-                        <p className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Absent</p>
-                        <p className="text-base font-black text-rose-300 mt-1">{st.absent}</p>
+                        <p className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Absent</p>
+                        <p className="text-base font-black text-rose-700 mt-1">{st.absent}</p>
                       </button>
                     </div>
                   </div>
@@ -997,15 +997,15 @@ export default function PrincipalDashboard() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
                         <AlertCircle className="w-4 h-4 text-rose-500" />
                         🔴 Red Flag (&lt; 65%)
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-500/40">
                         Critical
                       </span>
                     </div>
-                    <p className="text-2xl font-black text-white">{redFlagCount} Students</p>
+                    <p className="text-2xl font-black text-gray-900">{redFlagCount} Students</p>
                     <p className="text-[11px] text-gray-500 mt-1">Shortage Risk • Requires Condonation / Intimation</p>
                   </button>
 
@@ -1018,15 +1018,15 @@ export default function PrincipalDashboard() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
                         <AlertTriangle className="w-4 h-4 text-amber-500" />
                         🟡 Yellow Flag (65%–74%)
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-700 border border-amber-500/40">
                         Warning
                       </span>
                     </div>
-                    <p className="text-2xl font-black text-white">{yellowFlagCount} Students</p>
+                    <p className="text-2xl font-black text-gray-900">{yellowFlagCount} Students</p>
                     <p className="text-[11px] text-gray-500 mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
                   </button>
 
@@ -1039,15 +1039,15 @@ export default function PrincipalDashboard() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                         🟢 Green Flag (≥ 75%)
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-500/40">
                         Safe
                       </span>
                     </div>
-                    <p className="text-2xl font-black text-white">{greenFlagCount} Students</p>
+                    <p className="text-2xl font-black text-gray-900">{greenFlagCount} Students</p>
                     <p className="text-[11px] text-gray-500 mt-1">Good Standing • Target Met</p>
                   </button>
                 </div>
@@ -1110,13 +1110,13 @@ export default function PrincipalDashboard() {
                                 {item.dotColor}
                               </div>
                               <div>
-                                <h4 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
+                                <h4 className="text-sm font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
                                   {item.student.name}
                                 </h4>
                                 <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-700 font-mono font-medium">
-                                  <span>Roll: <strong className="text-emerald-400 font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
+                                  <span>Roll: <strong className="text-emerald-700 font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
                                   <span>•</span>
-                                  <span>Sec: <strong className="text-blue-400 font-bold">{getSectionDisplayName(item.student.section).name}</strong></span>
+                                  <span>Sec: <strong className="text-blue-700 font-bold">{getSectionDisplayName(item.student.section).name}</strong></span>
                                 </div>
                               </div>
                             </div>
@@ -1145,7 +1145,7 @@ export default function PrincipalDashboard() {
                                 Target +{item.classesNeededFor75} Classes Needed
                               </span>
                             ) : (
-                              <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-emerald-950 border border-emerald-500 text-emerald-300 shrink-0 shadow-xs">
+                              <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-emerald-950 border border-emerald-500 text-emerald-700 shrink-0 shadow-xs">
                                 ✓ Target Met
                               </span>
                             )}
@@ -1207,11 +1207,11 @@ export default function PrincipalDashboard() {
                           const student = log.user || students.find((s) => s.id === log.userId);
                           return (
                             <tr key={log.id} className="hover:bg-white">
-                              <td className="py-3 px-4 font-bold text-white">
+                              <td className="py-3 px-4 font-bold text-gray-900">
                                 {student ? (
                                   <button
                                     onClick={() => setSelectedStudentForDetails(student)}
-                                    className="text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition-colors text-left"
+                                    className="text-blue-700 hover:text-blue-700 hover:underline cursor-pointer transition-colors text-left"
                                   >
                                     {student.name}
                                   </button>
@@ -1223,7 +1223,7 @@ export default function PrincipalDashboard() {
                                 {student ? (
                                   <button
                                     onClick={() => setSelectedStudentForDetails(student)}
-                                    className="text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer font-bold transition-colors"
+                                    className="text-emerald-700 hover:text-emerald-700 hover:underline cursor-pointer font-bold transition-colors"
                                   >
                                     {student.uniqueId || student.unique_id || "N/A"}
                                   </button>
@@ -1234,23 +1234,23 @@ export default function PrincipalDashboard() {
                               <td className="py-3 px-4 text-center text-gray-700 font-semibold">
                                 {student ? getSectionDisplayName(student.section).name : "—"}
                               </td>
-                              <td className="py-3 px-4 text-center font-bold text-emerald-400">
+                              <td className="py-3 px-4 text-center font-bold text-emerald-700">
                                 <div className="flex flex-col items-center justify-center gap-0.5">
                                   <span>{log.entryTime ? formatTime(log.entryTime) : "—"}</span>
                                   {isLateTime(log.entryTime) && (
-                                    <span className="inline-block px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-wider scale-90">
+                                    <span className="inline-block px-1.5 py-0.5 rounded bg-amber-50 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-wider scale-90">
                                       Late Entry
                                     </span>
                                   )}
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-center font-bold text-blue-400">
+                              <td className="py-3 px-4 text-center font-bold text-blue-700">
                                 {log.exitTime ? formatTime(log.exitTime) : "—"}
                               </td>
                               <td className="py-3 px-4 text-center">
                                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                                   log.status === "inside"
-                                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                                    ? "bg-emerald-100 text-emerald-700 border-emerald-500/30"
                                     : "bg-gray-100 text-gray-500 border-gray-200"
                                 }`}>
                                   {log.status === "inside" ? "Still on Campus" : "Exited"}
@@ -1269,10 +1269,10 @@ export default function PrincipalDashboard() {
         ) : (
           /* Non-DS Branch Setup Card */
           <div className="bg-white border border-gray-200 rounded-3xl p-8 sm:p-12 text-center space-y-4 shadow-xl">
-            <div className="w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-200 flex items-center justify-center text-blue-700 mx-auto">
               <Building2 className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-white">
+            <h3 className="text-xl font-bold text-gray-900">
               {BRANCHES.find((b) => b.code === selectedBranch)?.name} ({selectedBranch})
             </h3>
             <p className="text-gray-500 text-sm max-w-md mx-auto font-medium">
@@ -1287,7 +1287,7 @@ export default function PrincipalDashboard() {
             <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-2xl p-6 space-y-4 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
               <div className="flex items-start justify-between border-b border-gray-200 pb-3">
                 <div>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                     {sectionModalData.title}
                   </h3>
                   <p className="text-xs text-gray-500 mt-0.5 font-medium">{sectionModalData.subtitle}</p>
@@ -1311,14 +1311,14 @@ export default function PrincipalDashboard() {
                       className="p-3 rounded-xl bg-white border border-gray-200 hover:border-blue-500/50 flex items-center justify-between transition-all cursor-pointer group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 font-bold text-xs flex items-center justify-center font-mono">
+                        <div className="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-700 font-bold text-xs flex items-center justify-center font-mono">
                           {idx + 1}
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">
+                          <p className="text-xs font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
                             {item.student.name}
                           </p>
-                          <p className="text-[11px] font-mono text-emerald-400 font-semibold">
+                          <p className="text-[11px] font-mono text-emerald-700 font-semibold">
                             Roll: {item.student.uniqueId || item.student.unique_id || "N/A"}
                           </p>
                         </div>
@@ -1326,7 +1326,7 @@ export default function PrincipalDashboard() {
 
                       <div className="flex items-center gap-3">
                         {item.entryTime ? (
-                          <span className="text-xs font-mono font-extrabold text-emerald-400 bg-gray-50 px-3 py-1 rounded-lg border border-emerald-500/50 shadow-xs flex items-center gap-1.5">
+                          <span className="text-xs font-mono font-extrabold text-emerald-700 bg-gray-50 px-3 py-1 rounded-lg border border-emerald-500/50 shadow-xs flex items-center gap-1.5">
                             In: {formatTime(item.entryTime)}
                             {isLateTime(item.entryTime) && (
                               <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider">LATE</span>
@@ -1335,8 +1335,8 @@ export default function PrincipalDashboard() {
                         ) : null}
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                           item.isPresent
-                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                            : "bg-rose-500/10 text-rose-300 border-rose-500/20"
+                            ? "bg-emerald-100 text-emerald-700 border-emerald-500/40"
+                            : "bg-rose-50 text-rose-700 border-rose-200"
                         }`}>
                           {item.isPresent ? "🟢 PRESENT" : "🔴 ABSENT"}
                         </span>
@@ -1365,13 +1365,13 @@ export default function PrincipalDashboard() {
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-200 pb-6">
                 <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-white shadow-xl">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-2xl font-black text-gray-900 shadow-xl">
                     {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
                   </div>
                   <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+                    <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                       {selectedStudentForDetails.name}
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-500/30 uppercase tracking-wider">
                         Student
                       </span>
                     </h2>
@@ -1407,7 +1407,7 @@ export default function PrincipalDashboard() {
                   </div>
                   <div className="p-4.5 rounded-2xl bg-white border border-gray-200">
                     <p className="text-xs font-bold text-gray-400 uppercase">Department</p>
-                    <p className="text-base font-bold text-blue-400 mt-1">
+                    <p className="text-base font-bold text-blue-700 mt-1">
                       CSE Data Science
                     </p>
                   </div>
@@ -1524,7 +1524,7 @@ export default function PrincipalDashboard() {
 
                           <button
                             onClick={() => handleDirectCSVDownload(selectedStudentForDetails.name, studentModalMonth, studentMonthlyRecords)}
-                            className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-800/60 shadow-xs"
+                            className="text-xs font-bold text-emerald-700 hover:text-emerald-700 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-800/60 shadow-xs"
                           >
                             <FileSpreadsheet className="w-4 h-4" />
                             Download Register (.csv)
@@ -1557,7 +1557,7 @@ export default function PrincipalDashboard() {
                                 />
                               </svg>
                               <div className="absolute flex flex-col items-center justify-center">
-                                <span className="text-2xl font-black text-white">{studentMonthlyPercent}%</span>
+                                <span className="text-2xl font-black text-gray-900">{studentMonthlyPercent}%</span>
                                 <span className="text-[9px] font-bold text-gray-500 uppercase">Monthly</span>
                               </div>
                             </div>
@@ -1565,22 +1565,22 @@ export default function PrincipalDashboard() {
 
                           {/* Present Days Card */}
                           <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
-                            <p className="text-xs font-bold text-emerald-400 uppercase">Present Days (P)</p>
-                            <p className="text-3xl font-black text-white">{studentPresentCount} Days</p>
+                            <p className="text-xs font-bold text-emerald-700 uppercase">Present Days (P)</p>
+                            <p className="text-3xl font-black text-gray-900">{studentPresentCount} Days</p>
                             <p className="text-[10px] text-gray-400 font-bold">Attended out of {calcWorkingDays} working days</p>
                           </div>
 
                           {/* Absent Days Card */}
                           <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
-                            <p className="text-xs font-bold text-rose-400 uppercase">Absent Days (A)</p>
-                            <p className="text-3xl font-black text-white">{studentAbsentCount} Days</p>
+                            <p className="text-xs font-bold text-rose-700 uppercase">Absent Days (A)</p>
+                            <p className="text-3xl font-black text-gray-900">{studentAbsentCount} Days</p>
                             <p className="text-[10px] text-gray-400 font-bold">Missed classes</p>
                           </div>
 
                           {/* Average College stay time */}
                           <div className="p-5 rounded-2xl bg-white border border-gray-200 text-center space-y-2">
-                            <p className="text-xs font-bold text-blue-400 uppercase">Avg Daily Campus Stay</p>
-                            <p className="text-3xl font-black text-white">{avgDurationStr}</p>
+                            <p className="text-xs font-bold text-blue-700 uppercase">Avg Daily Campus Stay</p>
+                            <p className="text-3xl font-black text-gray-900">{avgDurationStr}</p>
                             <p className="text-[10px] text-gray-400 font-bold">Calculated from gate logs</p>
                           </div>
                         </div>
@@ -1610,7 +1610,7 @@ export default function PrincipalDashboard() {
                                       ? "bg-purple-950/50 border-purple-800/60 text-purple-250"
                                       : d.status === "—"
                                       ? "bg-gray-50/40 border-gray-200/80 text-slate-600 opacity-60"
-                                      : "bg-red-950/40 border-red-900/40 text-red-300"
+                                      : "bg-red-950/40 border-red-900/40 text-red-700"
                                   }`}
                                 >
                                   <span className="text-[10px] font-mono font-semibold text-gray-500">
@@ -1638,19 +1638,19 @@ export default function PrincipalDashboard() {
                           <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-800/60 space-y-2 animate-fadeIn">
                             <div className="flex items-center justify-between border-b border-blue-900/60 pb-2">
                               <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-400" />
-                                <h5 className="text-sm font-bold text-white">
-                                  Date: <span className="font-mono text-blue-300">{selectedDayDetail.dateStr}</span> ({selectedDayDetail.dayOfWeek})
+                                <Calendar className="w-4 h-4 text-blue-700" />
+                                <h5 className="text-sm font-bold text-gray-900">
+                                  Date: <span className="font-mono text-blue-700">{selectedDayDetail.dateStr}</span> ({selectedDayDetail.dayOfWeek})
                                 </h5>
                               </div>
                               <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                                 selectedDayDetail.status === "P"
-                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                  ? "bg-emerald-100 text-emerald-700 border border-emerald-500/40"
                                   : selectedDayDetail.status === "*"
-                                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                                  ? "bg-purple-500/20 text-purple-700 border border-purple-500/40"
                                   : selectedDayDetail.status === "—"
-                                  ? "bg-gray-100 text-gray-500 border border-gray-200"
-                                  : "bg-red-500/20 text-red-300 border border-red-500/40"
+                                  ? "bg-gray-100 text-gray-600 border border-gray-200"
+                                  : "bg-red-100 text-red-700 border border-red-500/40"
                               }`}>
                                 {selectedDayDetail.status === "P"
                                   ? "🟢 PRESENT"
@@ -1671,13 +1671,13 @@ export default function PrincipalDashboard() {
                                       <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider animate-pulse">LATE</span>
                                     )}
                                   </p>
-                                  <p className="text-sm font-bold text-emerald-400 mt-0.5">
+                                  <p className="text-sm font-bold text-emerald-700 mt-0.5">
                                     {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
                                   </p>
                                 </div>
                                 <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
                                   <p className="text-[10px] font-bold text-gray-500 uppercase">Exit Time (Out)</p>
-                                  <p className="text-sm font-bold text-blue-400 mt-0.5">
+                                  <p className="text-sm font-bold text-blue-700 mt-0.5">
                                     {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
                                   </p>
                                 </div>
@@ -1704,7 +1704,7 @@ export default function PrincipalDashboard() {
                             {/* Hourly Period Attendance */}
                             <div className="space-y-2 pt-2.5 border-t border-gray-200">
                               <h6 className="text-[11px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5 text-blue-400" />
+                                <Clock className="w-3.5 h-3.5 text-blue-700" />
                                 Hourly Period Attendance
                               </h6>
                               {hourlyForSelectedDay.length > 0 ? (
@@ -1712,7 +1712,7 @@ export default function PrincipalDashboard() {
                                   {hourlyForSelectedDay.map((hr: any) => (
                                     <div key={hr.id} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/60 border border-gray-200">
                                       <div className="space-y-0.5">
-                                        <p className="text-xs font-bold text-white">
+                                        <p className="text-xs font-bold text-gray-900">
                                           {hr.qr_schedules?.subject || "Unknown Subject"}
                                         </p>
                                         <p className="text-[10px] text-gray-400 font-medium font-mono">
@@ -1721,8 +1721,8 @@ export default function PrincipalDashboard() {
                                       </div>
                                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${
                                         hr.marked_present
-                                          ? "bg-emerald-950/80 text-emerald-400 border-emerald-900/30"
-                                          : "bg-red-950/80 text-red-400 border-red-900/30"
+                                          ? "bg-emerald-950/80 text-emerald-700 border-emerald-900/30"
+                                          : "bg-red-950/80 text-red-700 border-red-900/30"
                                       }`}>
                                         {hr.marked_present ? "PRESENT" : "ABSENT"}
                                       </span>
@@ -1761,8 +1761,8 @@ export default function PrincipalDashboard() {
           <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-xs">
             <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl">
               <div className="flex items-center justify-between border-b border-gray-200 pb-3">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                  <FileSpreadsheet className="w-5 h-5 text-emerald-700" />
                   Export Campus Register (.csv)
                 </h3>
                 <button onClick={() => setExportModalOpen(false)} className="text-gray-500 hover:text-gray-900">
