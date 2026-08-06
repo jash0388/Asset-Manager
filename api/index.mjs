@@ -66039,22 +66039,21 @@ var ALLOWED_ORIGINS = [
 ];
 app.use((0, import_cors.default)({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: Origin '${origin}' not allowed`));
+    if (!origin || origin.includes("vercel.app") || origin.includes("localhost") || ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, true);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.options(/.*/, (req, res) => {
-  const origin = req.headers.origin || "";
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-  }
+  const origin = req.headers.origin || "*";
+  res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
   res.sendStatus(204);
 });
 app.use(
@@ -66080,6 +66079,11 @@ app.use(import_express7.default.json());
 app.use(import_express7.default.urlencoded({ extended: true }));
 app.use("/api", routes_default);
 app.use(routes_default);
+app.use((err, _req, res, _next) => {
+  console.error("API Express Error:", err);
+  const status = typeof err.status === "number" ? err.status : 500;
+  res.status(status).json({ error: err.message || "Internal server error" });
+});
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
 });

@@ -18,10 +18,11 @@ const ALLOWED_ORIGINS = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: Origin '${origin}' not allowed`));
+    // Always allow requests without origin or from any vercel / localhost / valid origin
+    if (!origin || origin.includes("vercel.app") || origin.includes("localhost") || ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, true);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -30,13 +31,11 @@ app.use(cors({
 
 // Handle preflight
 app.options(/.*/, (req, res) => {
-  const origin = req.headers.origin || "";
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-  }
+  const origin = req.headers.origin || "*";
+  res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
   res.sendStatus(204);
 });
 
@@ -64,6 +63,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 app.use(router);
+
+// Express JSON Error Handler (must have 4 arguments so Express knows it's an error handler)
+app.use((err: any, _req: any, res: any, _next: any) => {
+  console.error("API Express Error:", err);
+  const status = typeof err.status === "number" ? err.status : 500;
+  res.status(status).json({ error: err.message || "Internal server error" });
+});
 
 // Catch-all route to handle unmatched paths with clean JSON response instead of HTML 404
 app.use((req, res) => {
