@@ -3,6 +3,7 @@ import { useScanQr, getGetDashboardStatsQueryKey, getGetTodayAttendanceQueryKey,
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, XCircle, QrCode, Camera, ArrowLeft, Volume2, VolumeX, Play } from "lucide-react";
 import { Link } from "wouter";
+import { findUserLocal, enqueueScan, markScannedLocally, syncQueue, getQueue } from "../lib/offlineScanner";
 
 type ScanResult = {
   success: boolean;
@@ -18,8 +19,25 @@ export default function Scanner() {
   const scannerInstanceRef = useRef<any>(null);
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [pendingCount, setPendingCount] = useState<number>(() => getQueue().length);
   const [cameraError, setCameraError] = useState("");
   const [isLateEntryMode, setIsLateEntryMode] = useState(false);
+
+  // Auto-sync pending scans when network connection is restored
+  useEffect(() => {
+    const handleOnline = async () => {
+      if (getQueue().length > 0) {
+        await syncQueue();
+        setPendingCount(getQueue().length);
+      }
+    };
+    window.addEventListener("online", handleOnline);
+    const interval = setInterval(handleOnline, 3000);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      clearInterval(interval);
+    };
+  }, []);
   const [volume, setVolume] = useState<number>(() => {
     if (typeof window === "undefined") return 0.7;
     const saved = window.localStorage.getItem("qr_scanner_volume");
@@ -161,6 +179,28 @@ export default function Scanner() {
     isProcessingRef.current = true;
     safePauseScanner();
 
+    if (!navigator.onLine) {
+      // Offline fallback queueing
+      try {
+        const localUser = findUserLocal(uid);
+        enqueueScan(uid, isLateEntryMode);
+        markScannedLocally(uid);
+        showResult({
+          success: true,
+          message: `${localUser ? localUser.name : uid} queued offline (will push live when network returns)`,
+          userName: localUser?.name ?? "Student",
+          uniqueId: uid,
+          action: "entry",
+        });
+      } catch {
+        showResult({
+          success: false,
+          message: "Failed to queue offline scan.",
+        });
+      }
+      return;
+    }
+
     scanMutation.mutate(
       { data: { uniqueId: uid, isLateEntry: isLateEntryMode } as any },
       {
@@ -178,6 +218,22 @@ export default function Scanner() {
           queryClient.invalidateQueries({ queryKey: getGetCurrentlyInsideQueryKey() });
         },
         onError: (err: any) => {
+          // If network error occurred during scan, queue offline!
+          if (!navigator.onLine || err?.message?.includes("fetch") || err?.message?.includes("Network")) {
+            try {
+              const localUser = findUserLocal(uid);
+              enqueueScan(uid, isLateEntryMode);
+              markScannedLocally(uid);
+              showResult({
+                success: true,
+                message: `${localUser ? localUser.name : uid} queued offline (will push live when network returns)`,
+                userName: localUser?.name ?? "Student",
+                uniqueId: uid,
+                action: "entry",
+              });
+              return;
+            } catch {}
+          }
           showResult({
             success: false,
             message: err?.data?.error ?? err?.message ?? "Invalid QR code",
