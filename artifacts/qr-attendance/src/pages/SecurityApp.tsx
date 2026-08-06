@@ -199,6 +199,22 @@ export default function SecurityApp() {
     popupTimeoutRef.current = setTimeout(() => setPopup(null), POPUP_MS);
   };
 
+  const downloadQueueJson = () => {
+    const currentQueue = getQueue();
+    if (currentQueue.length === 0) {
+      alert("No pending scans to download.");
+      return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentQueue, null, 2));
+    const downloadAnchor = document.createElement("a");
+    const filename = `offline_scans_${new Date().toISOString().slice(0, 10)}_${Date.now()}.json`;
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", filename);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
   // ---------- LOCAL scan handling (instant, no network) ----------
   const handleScan = (decodedText: string) => {
     const raw = decodedText.trim();
@@ -242,26 +258,27 @@ export default function SecurityApp() {
     try {
       const { Html5Qrcode } = await import("html5-qrcode");
       if (!scannerRef.current) return;
+
       const scanner = new Html5Qrcode("sec-qr-reader");
       scannerInstanceRef.current = scanner;
-      const cameras = await Html5Qrcode.getCameras();
-      if (!cameras.length) {
-        setCameraError("No cameras found.");
-        setScanning(false);
-        return;
+
+      const config = { fps: 10, qrbox: { width: 240, height: 240 } };
+      const onScanSuccess = (text: string) => handleScan(text);
+
+      try {
+        await scanner.start({ facingMode: "environment" }, config, onScanSuccess, undefined);
+      } catch (backErr) {
+        console.warn("Back camera failed, trying user camera:", backErr);
+        await scanner.start({ facingMode: "user" }, config, onScanSuccess, undefined);
       }
-      const cameraId =
-        cameras.find((c) => c.label.toLowerCase().includes("back"))?.id ??
-        cameras[cameras.length - 1].id;
-      await scanner.start(
-        cameraId,
-        { fps: 10, qrbox: { width: 240, height: 240 } },
-        (text) => { handleScan(text); },
-        undefined,
-      );
-    } catch (err) {
-      console.error(err);
-      setCameraError("Camera access denied. Please allow camera permission.");
+    } catch (err: any) {
+      console.error("Camera start error:", err);
+      const errMsg = String(err?.message || err || "");
+      if (errMsg.includes("NotAllowedError") || errMsg.includes("Permission")) {
+        setCameraError("Camera permission blocked by browser. Please tap site settings (lock icon in address bar) -> allow Camera, then try again.");
+      } else {
+        setCameraError(`Camera error: ${errMsg || "Could not access camera"}`);
+      }
       setScanning(false);
     }
   };
@@ -532,6 +549,17 @@ export default function SecurityApp() {
             Sync now ({queueLen})
           </button>
         </div>
+
+        {queueLen > 0 && (
+          <button
+            onClick={downloadQueueJson}
+            data-testid="download-scans-json"
+            className="w-full mt-3 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-transform active:scale-98"
+          >
+            <Download className="w-4 h-4 text-slate-950 stroke-[3]" />
+            Download Offline Scans File ({queueLen} items .json)
+          </button>
+        )}
 
         <div className="w-full mt-4 px-3 py-2 rounded-lg bg-slate-900/60 border border-slate-800 text-xs text-slate-400">
           {cachedAt ? (
