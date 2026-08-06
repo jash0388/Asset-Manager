@@ -366,7 +366,7 @@ export async function syncQueue(): Promise<SyncResult> {
     if (cid) {
       acceptedIds.add(cid);
     }
-    if (r.status === "ok") {
+    if (r.status === "ok" || r.status === "duplicate" || r.status === "user_not_found" || r.action) {
       synced++;
     } else {
       skipped++;

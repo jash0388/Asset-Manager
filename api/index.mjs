@@ -65071,7 +65071,7 @@ router4.post("/scan/batch", async (req, res) => {
       continue;
     }
     try {
-      const { data: users, error: userError } = await supabase.from("qr_users").select("*").eq("unique_id", uniqueId).limit(1);
+      const { data: users, error: userError } = await supabase.from("qr_users").select("*").ilike("unique_id", uniqueId.trim()).limit(1);
       if (userError || !users?.[0]) {
         results.push({ clientScanId, status: "user_not_found", error: "Invalid QR code \u2014 user not found" });
         continue;
@@ -65166,7 +65166,7 @@ router4.post("/scan", async (req, res) => {
     return;
   }
   try {
-    const { data: users, error: userError } = await supabase.from("qr_users").select("*").eq("unique_id", uniqueId).limit(1);
+    const { data: users, error: userError } = await supabase.from("qr_users").select("*").ilike("unique_id", uniqueId.trim()).limit(1);
     if (userError || !users?.[0]) {
       res.status(404).json({ error: "Invalid QR code \u2014 user not found" });
       return;

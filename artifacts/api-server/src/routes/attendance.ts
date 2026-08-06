@@ -372,7 +372,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
       const { data: users, error: userError } = await supabase
         .from("qr_users")
         .select("*")
-        .eq("unique_id", uniqueId)
+        .ilike("unique_id", uniqueId.trim())
         .limit(1);
 
       if (userError || !users?.[0]) {
@@ -496,7 +496,7 @@ router.post("/scan", async (req: any, res: any) => {
     const { data: users, error: userError } = await supabase
       .from("qr_users")
       .select("*")
-      .eq("unique_id", uniqueId)
+      .ilike("unique_id", uniqueId.trim())
       .limit(1);
 
     if (userError || !users?.[0]) {
