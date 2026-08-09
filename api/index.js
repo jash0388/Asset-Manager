@@ -64455,20 +64455,21 @@ router2.post("/auth/mentor-login", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router2.post("/auth/pin-login", async (req, res) => {
+router2.all("/auth/pin-login", async (req, res) => {
   try {
-    const { pin } = req.body || {};
-    const cleanPin = String(pin || "").trim();
+    const rawPin = req.body?.pin || req.query?.pin;
+    const cleanPin = String(rawPin || "").trim();
     if (cleanPin === "999999" || cleanPin === "APP_VERSION") {
       res.json({
-        latestVersionCode: 2,
-        latestVersionName: "1.1.0",
+        latestVersionCode: 4,
+        latestVersionName: "1.3.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+        releaseNotes: "New Update: Complete student name & roll number visibility fix!"
       });
       return;
     }
+    const pin = req.body?.pin;
     const ip = getClientIp(req);
     const rateCheck = enforceLoginRateLimit(ip);
     if (!rateCheck.allowed) {
@@ -64588,20 +64589,21 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
     res.status(429).json({ error: `Too many attempts. Try again in ${Math.ceil(rateCheck.retryAfterSec / 60)} minutes.` });
     return;
   }
-  const { key } = req.body;
-  if (!key) {
-    res.status(400).json({ error: "Mentor key is required" });
-    return;
-  }
-  const cleanKey = String(key).trim().toUpperCase();
+  const rawKey = req.body?.key || req.query?.key;
+  const cleanKey = String(rawKey || "").trim().toUpperCase();
   if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
-      latestVersionCode: 2,
-      latestVersionName: "1.1.0",
+      latestVersionCode: 4,
+      latestVersionName: "1.3.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
     });
+    return;
+  }
+  const key = req.body?.key;
+  if (!key) {
+    res.status(400).json({ error: "Mentor key is required" });
     return;
   }
   try {
