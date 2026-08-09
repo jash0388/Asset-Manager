@@ -63,11 +63,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.all(["/api/auth/app-version", "/api/app-version"], (_req, res) => {
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 4,
+    latestVersionName: "1.3.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
   });
 });
 

@@ -358,6 +358,13 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
         name: mentor.name,
         key: mentor.key,
         section: (mentor as any).section || "DS II/I/A"
+      },
+      appVersion: {
+        latestVersionCode: 4,
+        latestVersionName: "1.3.0",
+        downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+        forceUpdate: false,
+        releaseNotes: "New Update: Complete student name & roll number visibility fix!"
       }
     });
   } catch (err: any) {
