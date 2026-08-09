@@ -66211,19 +66211,14 @@ app.use(
 );
 app.use(import_express7.default.json());
 app.use(import_express7.default.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  const p = (req.path || req.url || "").toLowerCase();
-  if (p.includes("app-version") || p.includes("version-check") || p.includes("app-version-info")) {
-    res.json({
-      latestVersionCode: 4,
-      latestVersionName: "1.3.0",
-      downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-      forceUpdate: false,
-      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
-    });
-    return;
-  }
-  next();
+app.get(["/api/app-version", "/app-version", "/api/version-check", "/version-check"], (_req, res) => {
+  res.json({
+    latestVersionCode: 4,
+    latestVersionName: "1.3.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+  });
 });
 app.use("/api", routes_default);
 app.use(routes_default);
