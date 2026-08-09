@@ -155,9 +155,8 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
       return;
     }
 
-    const cleanPin = pin.trim();
-    // App Version Check (999999 or APP_VERSION)
-    if (cleanPin === "999999" || cleanPin === "APP_VERSION") {
+    // Version check PIN (999999)
+    if (timingSafeStringEqual(cleanPin, "999999") || cleanPin === "APP_VERSION") {
       return res.json({
         latestVersionCode: 2,
         latestVersionName: "1.1.0",
@@ -166,10 +165,6 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
         releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
       });
     }
-
-    const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
-    const HOD_PIN = process.env["HOD_PIN"] || "038811";
-    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
 
     // HOD Check (supports 998226, 038811, or 038899)
     if (
