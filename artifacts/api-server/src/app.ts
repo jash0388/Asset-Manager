@@ -83,7 +83,14 @@ app.use((err: any, _req: any, res: any, _next: any) => {
 
 // Catch-all route to handle unmatched paths with clean JSON response instead of HTML 404
 app.use((req, res) => {
-  res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
+  res.status(404).json({
+    error: `Route ${req.method} ${req.path} not found`,
+    url: req.url,
+    originalUrl: req.originalUrl,
+    path: req.path,
+    xMatchedPath: req.headers["x-matched-path"] || null,
+    xForwardedUri: req.headers["x-forwarded-uri"] || null
+  });
 });
 
 // seed().catch((err) => logger.error({ err }, "Seed failed"));

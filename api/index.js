@@ -66228,7 +66228,14 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({ error: err.message || "Internal server error" });
 });
 app.use((req, res) => {
-  res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
+  res.status(404).json({
+    error: `Route ${req.method} ${req.path} not found`,
+    url: req.url,
+    originalUrl: req.originalUrl,
+    path: req.path,
+    xMatchedPath: req.headers["x-matched-path"] || null,
+    xForwardedUri: req.headers["x-forwarded-uri"] || null
+  });
 });
 var app_default = app;
 
