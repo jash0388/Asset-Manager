@@ -155,6 +155,11 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
       return;
     }
 
+    const cleanPin = pin.trim();
+    const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
+    const HOD_PIN = process.env["HOD_PIN"] || "038811";
+    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
+
     // Version check PIN (999999)
     if (timingSafeStringEqual(cleanPin, "999999") || cleanPin === "APP_VERSION") {
       return res.json({
