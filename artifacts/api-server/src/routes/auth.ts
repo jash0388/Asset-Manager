@@ -49,6 +49,16 @@ function getClientIp(req: any): string {
 
 
 
+router.post("/auth/app-version", (_req: any, res: any) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
+
 // ─── Admin Email/Password Login ───────────────────────────────────────────────
 
 router.post("/auth/login", async (req: any, res: any) => {
