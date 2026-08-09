@@ -306,7 +306,8 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
     return;
   }
 
-  if (String(key).trim() === "APP_VERSION") {
+  const cleanKey = String(key).trim().toUpperCase();
+  if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
       latestVersionCode: 2,
       latestVersionName: "1.1.0",
@@ -316,8 +317,6 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
     });
     return;
   }
-
-  const cleanKey = String(key).trim().toUpperCase();
   try {
     const { data: mentors } = await supabase
       .from("qr_mentors")
