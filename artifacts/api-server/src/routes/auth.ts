@@ -142,6 +142,20 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
 
 router.post("/auth/pin-login", async (req: any, res: any) => {
   try {
+    const { pin } = req.body || {};
+    const cleanPin = String(pin || "").trim();
+
+    if (cleanPin === "999999" || cleanPin === "APP_VERSION") {
+      res.json({
+        latestVersionCode: 2,
+        latestVersionName: "1.1.0",
+        downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+        forceUpdate: false,
+        releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+      });
+      return;
+    }
+
     const ip = getClientIp(req);
     const rateCheck = enforceLoginRateLimit(ip);
     if (!rateCheck.allowed) {
@@ -149,27 +163,14 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
       return;
     }
 
-    const { pin } = req.body;
     if (!pin || typeof pin !== "string") {
       res.status(400).json({ error: "PIN is required" });
       return;
     }
 
-    const cleanPin = pin.trim();
     const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
     const HOD_PIN = process.env["HOD_PIN"] || "038811";
     const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
-
-    // Version check PIN (999999)
-    if (cleanPin === "999999" || cleanPin === "APP_VERSION") {
-      return res.json({
-        latestVersionCode: 2,
-        latestVersionName: "1.1.0",
-        downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-        forceUpdate: false,
-        releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
-      });
-    }
 
     // HOD Check (supports 998226, 038811, or 038899)
     if (
