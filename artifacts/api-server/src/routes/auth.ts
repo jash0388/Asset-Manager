@@ -231,7 +231,17 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
 // ─── Mentor Key Login (Faculty 3/4-digit keys) ───────────────────────────────
 
 router.get("/auth/mentor-key-login", (_req: any, res: any) => {
-  res.json({ status: "active", message: "Send POST with JSON body { \"key\": \"YOUR_KEY\" }" });
+  res.json({
+    status: "active",
+    message: "Send POST with JSON body { \"key\": \"YOUR_KEY\" }",
+    appVersion: {
+      latestVersionCode: 3,
+      latestVersionName: "1.2.0",
+      downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+      forceUpdate: false,
+      releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    }
+  });
 });
 
 router.get("/auth/app-version", (_req: any, res: any) => {
