@@ -155,7 +155,7 @@ router.all("/auth/pin-login", async (req: any, res: any) => {
     const rawPin = req.body?.pin || req.query?.pin;
     const cleanPin = String(rawPin || "").trim();
 
-    if (cleanPin === "999999" || cleanPin === "APP_VERSION") {
+    if (cleanPin === "999999" || cleanPin === "APP_VERSION" || timingSafeStringEqual(cleanPin, "999999")) {
       res.json({
         latestVersionCode: 4,
         latestVersionName: "1.3.0",
