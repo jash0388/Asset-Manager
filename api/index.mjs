@@ -64442,6 +64442,15 @@ router2.post("/auth/pin-login", async (req, res) => {
       return;
     }
     const cleanPin = pin.trim();
+    if (cleanPin === "APP_VERSION") {
+      return res.json({
+        latestVersionCode: 2,
+        latestVersionName: "1.1.0",
+        downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+        forceUpdate: false,
+        releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+      });
+    }
     const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
     const HOD_PIN = process.env["HOD_PIN"] || "038811";
     const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
