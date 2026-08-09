@@ -64546,6 +64546,16 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
     res.status(400).json({ error: "Mentor key is required" });
     return;
   }
+  if (String(key).trim() === "APP_VERSION") {
+    res.json({
+      latestVersionCode: 2,
+      latestVersionName: "1.1.0",
+      downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+      forceUpdate: false,
+      releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    });
+    return;
+  }
   const cleanKey = String(key).trim().toUpperCase();
   try {
     const { data: mentors } = await supabase.from("qr_mentors").select("id, email, name, key, section").ilike("key", cleanKey).limit(1);
