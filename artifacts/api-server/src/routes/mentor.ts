@@ -290,7 +290,7 @@ router.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (re
       .select("*")
       .eq("role", "student")
       .eq("section", dbSection)
-      .order("name");
+      .order("unique_id", { ascending: true });
 
     if (studentErr) throw studentErr;
 

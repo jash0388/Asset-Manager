@@ -65675,7 +65675,7 @@ router5.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (r
       return;
     }
     const dbSection = `DS ${schedule.year}/I/${schedule.section}`;
-    const { data: students, error: studentErr } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", dbSection).order("name");
+    const { data: students, error: studentErr } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", dbSection).order("unique_id", { ascending: true });
     if (studentErr) throw studentErr;
     if (!students || students.length === 0) {
       res.json([]);
