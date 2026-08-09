@@ -10,9 +10,8 @@ const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any)
 const app = express();
 
 app.use((req: any, _res: any, next: any) => {
-  const original = req.headers["x-forwarded-uri"] || req.headers["x-matched-path"];
-  if (original && typeof original === "string") {
-    req.url = original;
+  if (req.originalUrl) {
+    req.url = req.originalUrl;
   }
   next();
 });

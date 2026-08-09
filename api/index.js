@@ -65884,9 +65884,8 @@ var logger = (0, import_pino.default)({
 var pinoHttp2 = pinoHttpModule.default ?? pinoHttpModule.pinoHttp ?? pinoHttpModule;
 var app = (0, import_express7.default)();
 app.use((req, _res, next) => {
-  const original = req.headers["x-forwarded-uri"] || req.headers["x-matched-path"];
-  if (original && typeof original === "string") {
-    req.url = original;
+  if (req.originalUrl) {
+    req.url = req.originalUrl;
   }
   next();
 });
