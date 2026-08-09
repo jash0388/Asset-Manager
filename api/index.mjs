@@ -66179,13 +66179,22 @@ app.use((0, import_cors.default)({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-app.options(/.*/, (req, res) => {
-  const origin = req.headers.origin || "*";
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(204);
+app.all(["/api/version", "/api/app-version", "/api/check-update", "/version", "/app-version", "/api/healthz"], (_req, res) => {
+  res.json({
+    status: "ok",
+    latestVersionCode: 4,
+    latestVersionName: "1.3.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Complete student name & roll number visibility fix!",
+    appVersion: {
+      latestVersionCode: 4,
+      latestVersionName: "1.3.0",
+      downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+      forceUpdate: false,
+      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+    }
+  });
 });
 app.use(
   pinoHttp2({
