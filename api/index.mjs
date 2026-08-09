@@ -64345,6 +64345,15 @@ var SESSION_SECRET = process.env["SESSION_SECRET"] || "fallback-insecure-secret-
 if (!process.env["SESSION_SECRET"]) {
   console.error("[SECURITY WARNING] SESSION_SECRET env var not set \u2014 using insecure fallback. Set this in production immediately.");
 }
+router2.get("/auth/version-check", (_req, res) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
 function timingSafeStringEqual(a, b) {
   try {
     const ha = createHash("sha256").update(a).digest();

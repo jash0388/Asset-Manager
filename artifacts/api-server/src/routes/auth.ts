@@ -13,6 +13,16 @@ if (!process.env["SESSION_SECRET"]) {
   console.error("[SECURITY WARNING] SESSION_SECRET env var not set — using insecure fallback. Set this in production immediately.");
 }
 
+router.get("/auth/version-check", (_req: any, res: any) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function timingSafeStringEqual(a: string, b: string): boolean {
