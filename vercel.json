@@ -5,13 +5,11 @@
   "outputDirectory": "artifacts/qr-attendance/dist/public",
   "framework": null,
   "functions": {
-    "api/index.js": {
-      "maxDuration": 30
-    }
+    "api/index.js": { "maxDuration": 30 },
+    "api/version.js": { "maxDuration": 5 }
   },
   "rewrites": [
     { "source": "/api/version", "destination": "/api/version" },
-    { "source": "/api/version.json", "destination": "/api/version" },
     { "source": "/api", "destination": "/api/index" },
     { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/((?!api|.*\\.json|.*\\.apk).*)", "destination": "/index.html" }

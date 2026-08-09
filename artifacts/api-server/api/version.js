@@ -1,0 +1,11 @@
+export default function handler(_req, res) {
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.status(200).json({
+    latestVersionCode: 4,
+    latestVersionName: "1.3.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+  });
+}

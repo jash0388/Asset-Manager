@@ -46,15 +46,30 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);`,
     },
   });
 
+  const { writeFile, copyFile, cp } = await import("node:fs/promises");
+
+  // Standalone /api/version Vercel function (not overwritten by esbuild)
+  const versionHandler = `export default function handler(_req, res) {
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.status(200).json({
+    latestVersionCode: 4,
+    latestVersionName: "1.3.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+  });
+}\n`;
+  await writeFile(path.resolve(outDir, "version.js"), versionHandler, "utf8");
+
   const artifactApiDir = path.resolve(artifactDir, "api");
   await rm(artifactApiDir, { recursive: true, force: true }).catch(() => {});
   await mkdir(artifactApiDir, { recursive: true });
 
-  await import("node:fs/promises").then(async fs => {
-    await fs.copyFile(path.resolve(outDir, "index.js"), path.resolve(outDir, "index.mjs"));
-    await fs.cp(outDir, artifactApiDir, { recursive: true });
-  });
-  console.log("✓ Vercel bundle written to root api/ and artifacts/api-server/api/");
+  await copyFile(path.resolve(outDir, "index.js"), path.resolve(outDir, "index.mjs"));
+  await cp(outDir, artifactApiDir, { recursive: true });
+
+  console.log("✓ Vercel bundle written to root api/ (includes api/version.js)");
 }
 
 buildVercel().catch((err) => {
