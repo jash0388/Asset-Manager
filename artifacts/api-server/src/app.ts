@@ -10,8 +10,8 @@ const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any)
 const app = express();
 
 app.use((req: any, res: any, next: any) => {
-  const p = (req.originalUrl || req.url || "").split("?")[0].toLowerCase();
-  if (p === "/api/version" || p === "/api/app-version" || p === "/api/healthz" || p === "/api/check-update" || p === "/version" || p === "/app-version") {
+  const matched = (req.headers["x-matched-path"] || req.headers["x-forwarded-uri"] || req.originalUrl || req.url || "").split("?")[0].toLowerCase();
+  if (matched.includes("version") || matched.includes("healthz") || matched.includes("check-update")) {
     res.json({
       status: "ok",
       latestVersionCode: 4,

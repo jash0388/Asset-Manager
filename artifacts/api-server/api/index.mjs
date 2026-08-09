@@ -65884,8 +65884,8 @@ var logger = (0, import_pino.default)({
 var pinoHttp2 = pinoHttpModule.default ?? pinoHttpModule.pinoHttp ?? pinoHttpModule;
 var app = (0, import_express7.default)();
 app.use((req, res, next) => {
-  const p = (req.originalUrl || req.url || "").split("?")[0].toLowerCase();
-  if (p === "/api/version" || p === "/api/app-version" || p === "/api/healthz" || p === "/api/check-update" || p === "/version" || p === "/app-version") {
+  const matched = (req.headers["x-matched-path"] || req.headers["x-forwarded-uri"] || req.originalUrl || req.url || "").split("?")[0].toLowerCase();
+  if (matched.includes("version") || matched.includes("healthz") || matched.includes("check-update")) {
     res.json({
       status: "ok",
       latestVersionCode: 4,
