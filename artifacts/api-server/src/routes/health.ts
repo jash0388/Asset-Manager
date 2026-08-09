@@ -8,7 +8,7 @@ router.get("/healthz", (_req: any, res: any) => {
   res.json(data);
 });
 
-router.get("/app-version", (_req: any, res: any) => {
+router.get("/version", (_req: any, res: any) => {
   res.json({
     latestVersionCode: 2,
     latestVersionName: "1.1.0",

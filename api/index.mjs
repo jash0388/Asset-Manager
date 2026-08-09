@@ -53998,7 +53998,7 @@ router.get("/healthz", (_req, res) => {
   const data = HealthCheckResponse.parse({ status: "ok" });
   res.json(data);
 });
-router.get("/app-version", (_req, res) => {
+router.get("/version", (_req, res) => {
   res.json({
     latestVersionCode: 2,
     latestVersionName: "1.1.0",
