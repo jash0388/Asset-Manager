@@ -66104,6 +66104,15 @@ app.use(
 );
 app.use(import_express7.default.json());
 app.use(import_express7.default.urlencoded({ extended: true }));
+app.get(["/api/auth/app-version", "/api/app-version"], (_req, res) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
 app.use("/api", routes_default);
 app.use(routes_default);
 app.use((err, _req, res, _next) => {
