@@ -503,6 +503,16 @@ router.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req:
   }
 });
 
+router.get("/app-version", (_req: any, res: any) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
+
 // 5. Admin Endpoint: Fetch all mentors and their sessions
 router.get("/admin/mentors-tracking", authMiddleware, async (req: any, res: any) => {
   try {

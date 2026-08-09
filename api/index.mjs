@@ -65838,6 +65838,15 @@ router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req
     res.status(500).json({ error: "Internal server error" });
   }
 });
+router5.get("/app-version", (_req, res) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
 router5.get("/admin/mentors-tracking", authMiddleware, async (req, res) => {
   try {
     const { data: mentors, error: mentorErr } = await supabase.from("qr_mentors").select("*").order("name");
