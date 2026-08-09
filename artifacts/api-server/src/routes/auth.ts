@@ -161,7 +161,7 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
     const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
 
     // Version check PIN (999999)
-    if (timingSafeStringEqual(cleanPin, "999999") || cleanPin === "APP_VERSION") {
+    if (cleanPin === "999999" || cleanPin === "APP_VERSION") {
       return res.json({
         latestVersionCode: 2,
         latestVersionName: "1.1.0",

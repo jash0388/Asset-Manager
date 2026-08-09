@@ -64445,7 +64445,7 @@ router2.post("/auth/pin-login", async (req, res) => {
     const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
     const HOD_PIN = process.env["HOD_PIN"] || "038811";
     const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
-    if (timingSafeStringEqual(cleanPin, "999999") || cleanPin === "APP_VERSION") {
+    if (cleanPin === "999999" || cleanPin === "APP_VERSION") {
       return res.json({
         latestVersionCode: 2,
         latestVersionName: "1.1.0",
