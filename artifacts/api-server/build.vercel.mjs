@@ -45,9 +45,16 @@ globalThis.__filename = __bannerUrl.fileURLToPath(import.meta.url);
 globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);`,
     },
   });
-  
-  await import("node:fs/promises").then(fs => fs.copyFile(path.resolve(outDir, "index.js"), path.resolve(outDir, "index.mjs")));
-  console.log("✓ Vercel bundle written to api/index.js and api/index.mjs");
+
+  const artifactApiDir = path.resolve(artifactDir, "api");
+  await rm(artifactApiDir, { recursive: true, force: true }).catch(() => {});
+  await mkdir(artifactApiDir, { recursive: true });
+
+  await import("node:fs/promises").then(async fs => {
+    await fs.copyFile(path.resolve(outDir, "index.js"), path.resolve(outDir, "index.mjs"));
+    await fs.cp(outDir, artifactApiDir, { recursive: true });
+  });
+  console.log("✓ Vercel bundle written to root api/ and artifacts/api-server/api/");
 }
 
 buildVercel().catch((err) => {
