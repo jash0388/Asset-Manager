@@ -202,7 +202,7 @@ router.get("/auth/mentor-key-login", (_req: any, res: any) => {
   res.json({ status: "active", message: "Send POST with JSON body { \"key\": \"YOUR_KEY\" }" });
 });
 
-router.get("/auth/app-version", (_req: any, res: any) => {
+router.get("/app-version", (_req: any, res: any) => {
   res.json({
     latestVersionCode: 2,
     latestVersionName: "1.1.0",
