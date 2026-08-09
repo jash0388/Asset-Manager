@@ -58,8 +58,20 @@ app.use(
     },
   }),
 );
+app.use((req: any, _res: any, next: any) => {
+  if (req.body && typeof req.body === "object") {
+    req._vercelBody = req.body;
+  }
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req: any, _res: any, next: any) => {
+  if ((!req.body || Object.keys(req.body).length === 0) && req._vercelBody) {
+    req.body = req._vercelBody;
+  }
+  next();
+});
 
 app.get(["/api/app-version", "/app-version", "/api/version-check", "/version-check"], (_req: any, res: any) => {
   res.json({

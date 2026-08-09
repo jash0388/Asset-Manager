@@ -66211,8 +66211,20 @@ app.use(
     }
   })
 );
+app.use((req, _res, next) => {
+  if (req.body && typeof req.body === "object") {
+    req._vercelBody = req.body;
+  }
+  next();
+});
 app.use(import_express7.default.json());
 app.use(import_express7.default.urlencoded({ extended: true }));
+app.use((req, _res, next) => {
+  if ((!req.body || Object.keys(req.body).length === 0) && req._vercelBody) {
+    req.body = req._vercelBody;
+  }
+  next();
+});
 app.get(["/api/app-version", "/app-version", "/api/version-check", "/version-check"], (_req, res) => {
   res.json({
     latestVersionCode: 4,
