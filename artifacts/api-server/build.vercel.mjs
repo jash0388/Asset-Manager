@@ -46,7 +46,8 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);`,
     },
   });
   
-  console.log("✓ Vercel bundle written to api/index.mjs");
+  await import("node:fs/promises").then(fs => fs.copyFile(path.resolve(outDir, "index.js"), path.resolve(outDir, "index.mjs")));
+  console.log("✓ Vercel bundle written to api/index.js and api/index.mjs");
 }
 
 buildVercel().catch((err) => {
