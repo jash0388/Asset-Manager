@@ -258,8 +258,8 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
       todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date },
       appVersion: {
-        latestVersionCode: 2,
-        latestVersionName: "1.1.0",
+        latestVersionCode: 3,
+        latestVersionName: "1.2.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
         releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
