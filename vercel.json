@@ -10,6 +10,8 @@
     }
   },
   "rewrites": [
+    { "source": "/api/version", "destination": "/api/version" },
+    { "source": "/api/version.json", "destination": "/api/version" },
     { "source": "/api", "destination": "/api/index" },
     { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/((?!api|.*\\.json|.*\\.apk).*)", "destination": "/index.html" }
