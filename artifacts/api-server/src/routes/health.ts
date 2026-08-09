@@ -5,7 +5,16 @@ const router = Router();
 
 router.get("/healthz", (_req: any, res: any) => {
   const data = HealthCheckResponse.parse({ status: "ok" });
-  res.json(data);
+  res.json({
+    ...data,
+    appVersion: {
+      latestVersionCode: 2,
+      latestVersionName: "1.1.0",
+      downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+      forceUpdate: false,
+      releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    }
+  });
 });
 
 router.get("/version", (_req: any, res: any) => {

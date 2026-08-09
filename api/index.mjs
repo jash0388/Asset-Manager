@@ -53996,7 +53996,16 @@ var GetMentorStudentAttendanceResponse = objectType({
 var router = (0, import_express.Router)();
 router.get("/healthz", (_req, res) => {
   const data = HealthCheckResponse.parse({ status: "ok" });
-  res.json(data);
+  res.json({
+    ...data,
+    appVersion: {
+      latestVersionCode: 2,
+      latestVersionName: "1.1.0",
+      downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+      forceUpdate: false,
+      releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    }
+  });
 });
 router.get("/version", (_req, res) => {
   res.json({
