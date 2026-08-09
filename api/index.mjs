@@ -66220,14 +66220,12 @@ app.use((req, _res, next) => {
   }
   next();
 });
-app.get(["/api/app-version", "/app-version", "/api/version-check", "/version-check"], (_req, res) => {
-  res.json({
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
-    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-    forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
-  });
+app.use((req, _res, next) => {
+  const original = req.headers["x-forwarded-uri"] || req.headers["x-matched-path"];
+  if (original && typeof original === "string") {
+    req.url = original;
+  }
+  next();
 });
 app.use("/api", routes_default);
 app.use(routes_default);
