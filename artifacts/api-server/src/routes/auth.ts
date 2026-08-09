@@ -213,6 +213,16 @@ router.get("/auth/mentor-key-login", (_req: any, res: any) => {
   res.json({ status: "active", message: "Send POST with JSON body { \"key\": \"YOUR_KEY\" }" });
 });
 
+router.get("/auth/app-version", (_req: any, res: any) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
+
 // Bcrypt hashes pre-computed at server startup for faculty key map
 const FACULTY_PIN_MAP: Record<string, { id: number; name: string; email: string; key: string; section: string; bcryptHash: string }> = {
   "101": { id: 1, name: "Mrs. CH. Naga Rohini", email: "mrschnagarohini@gmail.com", key: "101", section: "DS III/I/B", bcryptHash: bcrypt.hashSync("101", 10) },

@@ -64483,6 +64483,15 @@ router2.post("/auth/pin-login", async (req, res) => {
 router2.get("/auth/mentor-key-login", (_req, res) => {
   res.json({ status: "active", message: 'Send POST with JSON body { "key": "YOUR_KEY" }' });
 });
+router2.get("/auth/app-version", (_req, res) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
 var FACULTY_PIN_MAP = {
   "101": { id: 1, name: "Mrs. CH. Naga Rohini", email: "mrschnagarohini@gmail.com", key: "101", section: "DS III/I/B", bcryptHash: bcryptjs_default.hashSync("101", 10) },
   "102": { id: 2, name: "Mrs. Swetha", email: "mrsswetha@gmail.com", key: "102", section: "DS III/I/C", bcryptHash: bcryptjs_default.hashSync("102", 10) },
