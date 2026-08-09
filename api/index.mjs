@@ -65499,6 +65499,15 @@ function formatUser2(u) {
     createdAt: u.created_at
   };
 }
+router5.get("/mentor/app-version", (_req, res) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
 function isSentinel2(ts) {
   if (!ts) return true;
   return ts.startsWith("9999") || ts.startsWith("1970");
