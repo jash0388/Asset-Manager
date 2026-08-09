@@ -61,7 +61,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get(["/api/auth/app-version", "/api/app-version"], (_req, res) => {
+app.all(["/api/auth/app-version", "/api/app-version"], (_req, res) => {
   res.json({
     latestVersionCode: 2,
     latestVersionName: "1.1.0",
