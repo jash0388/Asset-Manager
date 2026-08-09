@@ -61,14 +61,19 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.all(["/api/auth/app-version", "/api/app-version"], (_req, res) => {
-  res.json({
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
-    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-    forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
-  });
+app.use((req: any, res: any, next: any) => {
+  const p = (req.path || req.url || "").toLowerCase();
+  if (p.includes("app-version") || p.includes("version-check") || p.includes("app-version-info")) {
+    res.json({
+      latestVersionCode: 4,
+      latestVersionName: "1.3.0",
+      downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+      forceUpdate: false,
+      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+    });
+    return;
+  }
+  next();
 });
 
 app.use("/api", router);
