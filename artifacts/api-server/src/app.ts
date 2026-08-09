@@ -9,27 +9,14 @@ const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any)
 
 const app = express();
 
-const ALLOWED_ORIGINS = [
-  "https://qr-attendance-app-eight.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "http://localhost:4173",
-];
+app.use((req: any, _res: any, next: any) => {
+  const original = req.headers["x-forwarded-uri"] || req.headers["x-matched-path"];
+  if (original && typeof original === "string") {
+    req.url = original;
+  }
+  next();
+});
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Always allow requests without origin or from any vercel / localhost / valid origin
-    if (!origin || origin.includes("vercel.app") || origin.includes("localhost") || ALLOWED_ORIGINS.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(null, true);
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
-// Handle preflight
 app.all(["/api/version", "/api/app-version", "/api/check-update", "/version", "/app-version", "/api/healthz"], (_req: any, res: any) => {
   res.json({
     status: "ok",
