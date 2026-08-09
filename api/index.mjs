@@ -64451,6 +64451,9 @@ router2.post("/auth/pin-login", async (req, res) => {
         releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
       });
     }
+    const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
+    const HOD_PIN = process.env["HOD_PIN"] || "038811";
+    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
     if (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN) || timingSafeStringEqual(cleanPin, "998226") || timingSafeStringEqual(cleanPin, "038811") || timingSafeStringEqual(cleanPin, "038899")) {
       resetLoginRateLimit(ip);
       const token = import_jsonwebtoken.default.sign({ adminId: -2, role: "hod" }, SESSION_SECRET, { expiresIn: "3650d" });

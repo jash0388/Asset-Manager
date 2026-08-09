@@ -167,6 +167,10 @@ router.post("/auth/pin-login", async (req: any, res: any) => {
       });
     }
 
+    const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
+    const HOD_PIN = process.env["HOD_PIN"] || "038811";
+    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
+
     // HOD Check (supports 998226, 038811, or 038899)
     if (
       (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN)) ||
