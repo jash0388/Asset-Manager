@@ -49,7 +49,7 @@ function getClientIp(req: any): string {
 
 
 
-router.post("/auth/app-version", (_req: any, res: any) => {
+router.post("/app-version-check", (_req: any, res: any) => {
   res.json({
     latestVersionCode: 2,
     latestVersionName: "1.1.0",
