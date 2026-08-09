@@ -21,7 +21,7 @@ async function buildVercel() {
     bundle: true,
     format: "esm",
     outdir: outDir,
-    outExtension: { ".js": ".mjs" },
+    outExtension: { ".js": ".js" },
     logLevel: "info",
     external: [
       "*.node",
