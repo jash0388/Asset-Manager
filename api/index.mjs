@@ -64356,15 +64356,17 @@ function resetLoginRateLimit(_ip) {
 function getClientIp(req) {
   return (req.headers["x-forwarded-for"] || req.ip || "127.0.0.1").toString().split(",")[0].trim();
 }
-router2.get("/app-version", (_req, res) => {
+var versionHandler = (_req, res) => {
   res.json({
     latestVersionCode: 2,
     latestVersionName: "1.1.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "Performance improvements, roll number sorting, and UI bug fixes."
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
   });
-});
+};
+router2.get("/app-version", versionHandler);
+router2.get("/auth/app-version", versionHandler);
 router2.post("/auth/login", async (req, res) => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
