@@ -252,6 +252,7 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
       };
     });
 
+    res.setHeader("x-app-version", "4.0.0");
     res.json({
       activeSchedule,
       session: activeSession,

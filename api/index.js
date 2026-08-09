@@ -65760,6 +65760,7 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
         status: session ? session.ended_at ? "submitted" : "started" : "pending"
       };
     });
+    res.setHeader("x-app-version", "4.0.0");
     res.json({
       activeSchedule,
       session: activeSession,
