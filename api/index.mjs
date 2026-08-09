@@ -64472,6 +64472,15 @@ router2.post("/auth/pin-login", async (req, res) => {
 router2.get("/auth/mentor-key-login", (_req, res) => {
   res.json({ status: "active", message: 'Send POST with JSON body { "key": "YOUR_KEY" }' });
 });
+router2.get("/auth/app-version", (_req, res) => {
+  res.json({
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+  });
+});
 router2.get("/admin/mentors-tracking-public", (_req, res) => {
   res.json({
     latestVersionCode: 2,
