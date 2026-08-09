@@ -9,29 +9,27 @@ const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any)
 
 const app = express();
 
-app.use((req: any, _res: any, next: any) => {
-  if (req.originalUrl) {
-    req.url = req.originalUrl;
-  }
-  next();
-});
-
-app.all(["/api/version", "/api/app-version", "/api/check-update", "/version", "/app-version", "/api/healthz"], (_req: any, res: any) => {
-  res.json({
-    status: "ok",
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
-    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-    forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!",
-    appVersion: {
+app.use((req: any, res: any, next: any) => {
+  const p = (req.originalUrl || req.url || "").split("?")[0].toLowerCase();
+  if (p === "/api/version" || p === "/api/app-version" || p === "/api/healthz" || p === "/api/check-update" || p === "/version" || p === "/app-version") {
+    res.json({
+      status: "ok",
       latestVersionCode: 4,
       latestVersionName: "1.3.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
-    }
-  });
+      releaseNotes: "New Update: Complete student name & roll number visibility fix!",
+      appVersion: {
+        latestVersionCode: 4,
+        latestVersionName: "1.3.0",
+        downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+        forceUpdate: false,
+        releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+      }
+    });
+    return;
+  }
+  next();
 });
 
 app.use(
