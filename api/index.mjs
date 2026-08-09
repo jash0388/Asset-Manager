@@ -66240,8 +66240,7 @@ app.use((req, res) => {
     url: req.url,
     originalUrl: req.originalUrl,
     path: req.path,
-    xMatchedPath: req.headers["x-matched-path"] || null,
-    xForwardedUri: req.headers["x-forwarded-uri"] || null
+    headers: req.headers
   });
 });
 var app_default = app;
