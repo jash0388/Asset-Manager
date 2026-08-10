@@ -133,9 +133,8 @@ function AppRouter() {
         <RequireAdmin><History /></RequireAdmin>
       </Route>
 
-      <Route path="/">
-        <Redirect to="/login" />
-      </Route>
+      <Route path="/" component={Login} />
+      <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -146,7 +145,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <WouterRouter base={(import.meta.env.BASE_URL || "/").replace(/\/$/, "")}>
+          <WouterRouter>
             <AppRouter />
           </WouterRouter>
           <Toaster />
