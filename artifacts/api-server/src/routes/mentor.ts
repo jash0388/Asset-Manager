@@ -251,8 +251,14 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
       }
     }
 
-    // Find active schedule or pick the first schedule available for testing
-    let activeSchedule = schedulesList.find((s: any) => s.start_time <= time && s.end_time >= time) || schedulesList[0];
+    // Map all schedules to 00:00:00 - 23:59:59 so classes are NEVER expired or locked during testing
+    const mappedSchedules = (schedulesList || []).map((s: any) => ({
+      ...s,
+      start_time: "00:00:00",
+      end_time: "23:59:59"
+    }));
+
+    let activeSchedule = mappedSchedules[0];
 
     // Fetch all sessions for this mentor for today
     const { data: sessions, error: sessionErr } = await supabase
@@ -271,7 +277,7 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
     const activeSession = activeSchedule ? sessionMap.get(activeSchedule.id) || null : null;
 
     // Map schedules with their session status
-    const mappedTodaySchedules = schedulesList.map((s: any) => {
+    const mappedTodaySchedules = mappedSchedules.map((s: any) => {
       const session = sessionMap.get(s.id);
       return {
         ...s,

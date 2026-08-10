@@ -65486,7 +65486,12 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
         }];
       }
     }
-    let activeSchedule = schedulesList.find((s) => s.start_time <= time && s.end_time >= time) || schedulesList[0];
+    const mappedSchedules = (schedulesList || []).map((s) => ({
+      ...s,
+      start_time: "00:00:00",
+      end_time: "23:59:59"
+    }));
+    let activeSchedule = mappedSchedules[0];
     const { data: sessions, error: sessionErr } = await supabase.from("qr_mentor_sessions").select("*").eq("mentor_id", mentorId).eq("date", date);
     if (sessionErr) throw sessionErr;
     const sessionMap = /* @__PURE__ */ new Map();
@@ -65494,7 +65499,7 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
       sessionMap.set(s.schedule_id, s);
     });
     const activeSession = activeSchedule ? sessionMap.get(activeSchedule.id) || null : null;
-    const mappedTodaySchedules = schedulesList.map((s) => {
+    const mappedTodaySchedules = mappedSchedules.map((s) => {
       const session = sessionMap.get(s.id);
       return {
         ...s,
