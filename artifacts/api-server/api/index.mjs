@@ -49466,7 +49466,7 @@ var versionPayload = {
     releaseNotes: "New Update: Complete student name & roll number visibility fix!"
   }
 };
-router.get(["/healthz", "/version", "/app-version", "/app-version-info", "/index", "/"], (_req, res) => {
+router.get(["/healthz", "/version", "/app-version", "/app-version-info", "/index", "/index.js", "/"], (_req, res) => {
   res.json(versionPayload);
 });
 var health_default = router;
@@ -65888,7 +65888,7 @@ app.use((req, res, next) => {
   const auth = req.headers.authorization;
   if (req.method === "GET" && !auth) {
     const rawPath = (req.originalUrl || req.url || req.path || "").split("?")[0].toLowerCase();
-    if (rawPath === "/api/index" || rawPath === "/api/version" || rawPath === "/api/app-version" || rawPath === "/api/healthz" || rawPath === "/version" || rawPath === "/app-version" || rawPath === "/healthz") {
+    if (rawPath === "/api/index" || rawPath === "/api/index.js" || rawPath === "/index" || rawPath === "/index.js" || rawPath === "/api/version" || rawPath === "/api/app-version" || rawPath === "/api/healthz" || rawPath === "/version" || rawPath === "/app-version" || rawPath === "/healthz") {
       res.json({
         status: "ok",
         latestVersionCode: 4,

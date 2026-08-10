@@ -18,7 +18,7 @@ const versionPayload = {
   }
 };
 
-router.get(["/healthz", "/version", "/app-version", "/app-version-info", "/index", "/"], (_req: any, res: any) => {
+router.get(["/healthz", "/version", "/app-version", "/app-version-info", "/index", "/index.js", "/"], (_req: any, res: any) => {
   res.json(versionPayload);
 });
 
