@@ -12,7 +12,12 @@ import * as zod from "zod";
  */
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
-});
+  latestVersionCode: zod.number().optional(),
+  latestVersionName: zod.string().optional(),
+  downloadUrl: zod.string().optional(),
+  forceUpdate: zod.boolean().optional(),
+  releaseNotes: zod.string().optional()
+}).passthrough();
 
 /**
  * @summary Admin login

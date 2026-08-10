@@ -63689,8 +63689,13 @@ var coerce = {
 
 // ../../lib/api-zod/src/generated/api.ts
 var HealthCheckResponse = objectType({
-  status: stringType()
-});
+  status: stringType(),
+  latestVersionCode: numberType().optional(),
+  latestVersionName: stringType().optional(),
+  downloadUrl: stringType().optional(),
+  forceUpdate: booleanType().optional(),
+  releaseNotes: stringType().optional()
+}).passthrough();
 var LoginBody = objectType({
   email: stringType().email(),
   password: stringType()
