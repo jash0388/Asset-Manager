@@ -64231,22 +64231,27 @@ router2.get("/auth/mentor-key-login", (_req, res) => {
   res.json({
     status: "active",
     message: 'Send POST with JSON body { "key": "YOUR_KEY" }',
+    latestVersionCode: 4,
+    latestVersionName: "1.3.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+    forceUpdate: false,
+    releaseNotes: "New Update: Complete student name & roll number visibility fix!",
     appVersion: {
-      latestVersionCode: 3,
-      latestVersionName: "1.2.0",
+      latestVersionCode: 4,
+      latestVersionName: "1.3.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
     }
   });
 });
 router2.get("/auth/app-version", (_req, res) => {
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 4,
+    latestVersionName: "1.3.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
   });
 });
 router2.get("/admin/mentors-tracking-public", (_req, res) => {
