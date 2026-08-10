@@ -10,10 +10,10 @@ const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any)
 const app = express();
 
 app.use((req: any, res: any, next: any) => {
-  const p = (req.path || req.url || "").toLowerCase();
   const auth = req.headers.authorization;
   if (req.method === "GET" && !auth) {
-    if (p === "/api/index" || p === "/index" || p.includes("version") || p.includes("healthz") || p.includes("check-update")) {
+    const rawPath = (req.originalUrl || req.url || req.path || "").split("?")[0].toLowerCase();
+    if (rawPath === "/api/index" || rawPath === "/api/version" || rawPath === "/api/app-version" || rawPath === "/api/healthz" || rawPath === "/version" || rawPath === "/app-version" || rawPath === "/healthz") {
       res.json({
         status: "ok",
         latestVersionCode: 4,

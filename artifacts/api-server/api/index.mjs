@@ -49466,16 +49466,7 @@ var versionPayload = {
     releaseNotes: "New Update: Complete student name & roll number visibility fix!"
   }
 };
-router.get("/healthz", (_req, res) => {
-  res.json(versionPayload);
-});
-router.get("/version", (_req, res) => {
-  res.json(versionPayload);
-});
-router.get("/app-version", (_req, res) => {
-  res.json(versionPayload);
-});
-router.get("/app-version-info", (_req, res) => {
+router.get(["/healthz", "/version", "/app-version", "/app-version-info", "/index", "/"], (_req, res) => {
   res.json(versionPayload);
 });
 var health_default = router;
@@ -65884,10 +65875,10 @@ var logger = (0, import_pino.default)({
 var pinoHttp2 = pinoHttpModule.default ?? pinoHttpModule.pinoHttp ?? pinoHttpModule;
 var app = (0, import_express7.default)();
 app.use((req, res, next) => {
-  const p = (req.path || req.url || "").toLowerCase();
   const auth = req.headers.authorization;
   if (req.method === "GET" && !auth) {
-    if (p === "/api/index" || p === "/index" || p.includes("version") || p.includes("healthz") || p.includes("check-update")) {
+    const rawPath = (req.originalUrl || req.url || req.path || "").split("?")[0].toLowerCase();
+    if (rawPath === "/api/index" || rawPath === "/api/version" || rawPath === "/api/app-version" || rawPath === "/api/healthz" || rawPath === "/version" || rawPath === "/app-version" || rawPath === "/healthz") {
       res.json({
         status: "ok",
         latestVersionCode: 4,
