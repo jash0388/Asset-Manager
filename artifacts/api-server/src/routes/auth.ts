@@ -152,7 +152,7 @@ router.post("/auth/mentor-login", async (req: any, res: any) => {
 
 router.all("/auth/pin-login", async (req: any, res: any) => {
   try {
-    const rawPin = req.body?.pin || req.query?.pin;
+    const rawPin = req.body?.pin || req.query?.pin || req._vercelBody?.pin || (typeof req.body === "string" ? JSON.parse(req.body || "{}")?.pin : null);
     const cleanPin = String(rawPin || "").trim();
 
     if (cleanPin === "999999" || cleanPin === "APP_VERSION" || timingSafeStringEqual(cleanPin, "999999")) {

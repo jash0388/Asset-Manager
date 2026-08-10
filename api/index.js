@@ -64168,7 +64168,7 @@ router2.post("/auth/mentor-login", async (req, res) => {
 });
 router2.all("/auth/pin-login", async (req, res) => {
   try {
-    const rawPin = req.body?.pin || req.query?.pin;
+    const rawPin = req.body?.pin || req.query?.pin || req._vercelBody?.pin || (typeof req.body === "string" ? JSON.parse(req.body || "{}")?.pin : null);
     const cleanPin = String(rawPin || "").trim();
     if (cleanPin === "999999" || cleanPin === "APP_VERSION" || timingSafeStringEqual(cleanPin, "999999")) {
       res.json({
