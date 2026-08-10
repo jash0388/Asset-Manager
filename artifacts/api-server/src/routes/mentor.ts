@@ -259,11 +259,11 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
       todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date },
       appVersion: {
-        latestVersionCode: 4,
-        latestVersionName: "1.3.0",
+        latestVersionCode: 5,
+        latestVersionName: "1.4.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+        releaseNotes: "New Update: System Back Button navigation fix!"
       }
     });
   } catch (err: any) {

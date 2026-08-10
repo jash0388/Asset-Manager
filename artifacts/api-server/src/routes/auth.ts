@@ -321,11 +321,11 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
   const cleanKey = String(rawKey || "").trim().toUpperCase();
   if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
-      latestVersionCode: 4,
-      latestVersionName: "1.3.0",
+      latestVersionCode: 5,
+      latestVersionName: "1.4.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+      releaseNotes: "New Update: System Back Button navigation fix!"
     });
     return;
   }

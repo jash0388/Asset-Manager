@@ -53,11 +53,11 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);`,
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.status(200).json({
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
+    latestVersionCode: 5,
+    latestVersionName: "1.4.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+    releaseNotes: "New Update: System Back Button navigation fix!"
   });
 }\n`;
   await writeFile(path.resolve(outDir, "version.js"), versionHandler, "utf8");
