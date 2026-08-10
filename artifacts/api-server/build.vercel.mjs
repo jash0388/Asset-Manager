@@ -66,7 +66,6 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);`,
   await rm(artifactApiDir, { recursive: true, force: true }).catch(() => {});
   await mkdir(artifactApiDir, { recursive: true });
 
-  await copyFile(path.resolve(outDir, "index.js"), path.resolve(outDir, "index.mjs"));
   await cp(outDir, artifactApiDir, { recursive: true });
 
   console.log("✓ Vercel bundle written to root api/ (includes api/version.js)");
