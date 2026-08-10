@@ -65466,32 +65466,7 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
     const { day, time, date } = getCurrentISTDateTime();
     const { data: todaySchedules, error: schedulesErr } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", day).order("start_time");
     if (schedulesErr) throw schedulesErr;
-    let schedulesList = todaySchedules || [];
-    if (schedulesList.length === 0) {
-      const { data: anySchedules } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).order("id");
-      if (anySchedules && anySchedules.length > 0) {
-        schedulesList = anySchedules;
-      } else {
-        schedulesList = [{
-          id: 9999,
-          mentor_id: mentorId,
-          subject_name: "Data Structures & Algorithms (Testing Class)",
-          year: "II",
-          section: "A",
-          period: 1,
-          day_of_week: day,
-          start_time: "08:00:00",
-          end_time: "23:59:00",
-          room: "Lab 3"
-        }];
-      }
-    }
-    const mappedSchedules = (schedulesList || []).map((s) => ({
-      ...s,
-      start_time: "00:00:00",
-      end_time: "23:59:59"
-    }));
-    let activeSchedule = mappedSchedules[0];
+    const activeSchedule = (todaySchedules || []).find((s) => s.start_time <= time && s.end_time >= time) || null;
     const { data: sessions, error: sessionErr } = await supabase.from("qr_mentor_sessions").select("*").eq("mentor_id", mentorId).eq("date", date);
     if (sessionErr) throw sessionErr;
     const sessionMap = /* @__PURE__ */ new Map();
@@ -65499,7 +65474,7 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
       sessionMap.set(s.schedule_id, s);
     });
     const activeSession = activeSchedule ? sessionMap.get(activeSchedule.id) || null : null;
-    const mappedTodaySchedules = mappedSchedules.map((s) => {
+    const mappedTodaySchedules = (todaySchedules || []).map((s) => {
       const session = sessionMap.get(s.id);
       return {
         ...s,
@@ -65536,15 +65511,10 @@ router5.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (r
   }
   try {
     const { date } = getCurrentISTDateTime();
-    let schedule = null;
-    if (scheduleId === 9999) {
-      schedule = { id: 9999, mentor_id: mentorId, year: "II", section: "A" };
-    } else {
-      const { data: schedules, error: scheduleErr } = await supabase.from("qr_schedules").select("*").eq("id", scheduleId).limit(1);
-      if (scheduleErr) throw scheduleErr;
-      schedule = schedules?.[0];
-    }
-    if (!schedule || scheduleId !== 9999 && mentorId !== -3 && schedule.mentor_id !== mentorId) {
+    const { data: schedules, error: scheduleErr } = await supabase.from("qr_schedules").select("*").eq("id", scheduleId).limit(1);
+    if (scheduleErr) throw scheduleErr;
+    const schedule = schedules?.[0];
+    if (!schedule || mentorId !== -3 && schedule.mentor_id !== mentorId) {
       res.status(404).json({ error: "Schedule not found or access denied" });
       return;
     }
