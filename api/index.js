@@ -65893,6 +65893,10 @@ app.use((req, _res, next) => {
 });
 app.use((req, res, next) => {
   const p = (req.url || req.path || "").split("?")[0].toLowerCase();
+  if (p.endsWith(".apk") || p.includes("facultyapp")) {
+    res.redirect(302, "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/FacultyApp.apk");
+    return;
+  }
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",

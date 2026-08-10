@@ -19,6 +19,10 @@ app.use((req: any, _res: any, next: any) => {
 
 app.use((req: any, res: any, next: any) => {
   const p = (req.url || req.path || "").split("?")[0].toLowerCase();
+  if (p.endsWith(".apk") || p.includes("facultyapp")) {
+    res.redirect(302, "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/FacultyApp.apk");
+    return;
+  }
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
