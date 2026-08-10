@@ -64309,11 +64309,11 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
   const cleanKey = String(rawKey || "").trim().toUpperCase();
   if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
-      latestVersionCode: 5,
-      latestVersionName: "1.4.0",
+      latestVersionCode: 6,
+      latestVersionName: "1.5.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: System Back Button navigation fix!"
+      releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!"
     });
     return;
   }
@@ -65489,11 +65489,11 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
       todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date },
       appVersion: {
-        latestVersionCode: 5,
-        latestVersionName: "1.4.0",
+        latestVersionCode: 6,
+        latestVersionName: "1.5.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: System Back Button navigation fix!"
+        releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!"
       }
     });
   } catch (err) {
@@ -65904,17 +65904,17 @@ app.use((req, res, next) => {
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
-      latestVersionCode: 5,
-      latestVersionName: "1.4.0",
+      latestVersionCode: 6,
+      latestVersionName: "1.5.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: System Back Button navigation fix!",
+      releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!",
       appVersion: {
-        latestVersionCode: 5,
-        latestVersionName: "1.4.0",
+        latestVersionCode: 6,
+        latestVersionName: "1.5.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: System Back Button navigation fix!"
+        releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!"
       }
     });
     return;
