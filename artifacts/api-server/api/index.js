@@ -65884,8 +65884,15 @@ var logger = (0, import_pino.default)({
 // src/app.ts
 var pinoHttp2 = pinoHttpModule.default ?? pinoHttpModule.pinoHttp ?? pinoHttpModule;
 var app = (0, import_express7.default)();
+app.use((req, _res, next) => {
+  const original = req.headers["x-forwarded-uri"] || req.headers["x-matched-path"];
+  if (original && typeof original === "string") {
+    req.url = original;
+  }
+  next();
+});
 app.use((req, res, next) => {
-  const p = (req.path || req.originalUrl || req.url || "").split("?")[0].toLowerCase();
+  const p = (req.url || req.path || "").split("?")[0].toLowerCase();
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",

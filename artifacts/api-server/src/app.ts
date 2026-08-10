@@ -9,8 +9,16 @@ const pinoHttp: any = (pinoHttpModule as any).default ?? (pinoHttpModule as any)
 
 const app = express();
 
+app.use((req: any, _res: any, next: any) => {
+  const original = req.headers["x-forwarded-uri"] || req.headers["x-matched-path"];
+  if (original && typeof original === "string") {
+    req.url = original;
+  }
+  next();
+});
+
 app.use((req: any, res: any, next: any) => {
-  const p = (req.path || req.originalUrl || req.url || "").split("?")[0].toLowerCase();
+  const p = (req.url || req.path || "").split("?")[0].toLowerCase();
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
