@@ -11,7 +11,7 @@ const app = express();
 
 app.use((req: any, res: any, next: any) => {
   const p = (req.path || req.originalUrl || req.url || "").split("?")[0].toLowerCase();
-  if (req.method === "GET" && (p.includes("version") || p.includes("healthz") || p === "/api/index" || p === "/api/index.js" || p === "/index" || p === "/index.js")) {
+  if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
       latestVersionCode: 4,
