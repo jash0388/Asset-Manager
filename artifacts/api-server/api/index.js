@@ -65466,13 +65466,30 @@ function getCurrentISTDateTime() {
   const dateStr = `${y}-${m}-${d}`;
   return { day, time: timeStr, date: dateStr };
 }
+function getBufferedTime(timeStr, offsetMinutes) {
+  try {
+    const [h, m, s] = timeStr.split(":").map(Number);
+    const d = /* @__PURE__ */ new Date();
+    d.setHours(h, m + offsetMinutes, s || 0, 0);
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const seconds = String(d.getSeconds()).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
+  } catch {
+    return timeStr;
+  }
+}
 router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
     const { day, time, date } = getCurrentISTDateTime();
     const { data: todaySchedules, error: schedulesErr } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", day).order("start_time");
     if (schedulesErr) throw schedulesErr;
-    const activeSchedule = (todaySchedules || []).find((s) => s.start_time <= time && s.end_time >= time) || null;
+    const activeSchedule = (todaySchedules || []).find((s) => {
+      const startTimeWithBuffer = getBufferedTime(s.start_time, -10);
+      const endTimeWithBuffer = getBufferedTime(s.end_time, 15);
+      return time >= startTimeWithBuffer && time <= endTimeWithBuffer;
+    }) || null;
     const { data: sessions, error: sessionErr } = await supabase.from("qr_mentor_sessions").select("*").eq("mentor_id", mentorId).eq("date", date);
     if (sessionErr) throw sessionErr;
     const sessionMap = /* @__PURE__ */ new Map();
@@ -65482,10 +65499,25 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
     const activeSession = activeSchedule ? sessionMap.get(activeSchedule.id) || null : null;
     const mappedTodaySchedules = (todaySchedules || []).map((s) => {
       const session = sessionMap.get(s.id);
+      const startTimeWithBuffer = getBufferedTime(s.start_time, -10);
+      const endTimeWithBuffer = getBufferedTime(s.end_time, 15);
+      const isCurrentTimeSlot = time >= startTimeWithBuffer && time <= endTimeWithBuffer;
+      const isSubmitted = Boolean(session && session.ended_at);
+      const isStarted = Boolean(session && !session.ended_at);
+      let status = "pending";
+      if (isSubmitted) {
+        status = "submitted";
+      } else if (isStarted) {
+        status = "started";
+      } else if (!isCurrentTimeSlot && mentorId !== -3) {
+        status = "locked";
+      }
       return {
         ...s,
         session: session || null,
-        status: session ? session.ended_at ? "submitted" : "started" : "pending"
+        status,
+        isLocked: status === "locked",
+        isCurrentTimeSlot
       };
     });
     res.setHeader("x-app-version", "4.0.0");
