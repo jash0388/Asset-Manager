@@ -64309,11 +64309,11 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
   const cleanKey = String(rawKey || "").trim().toUpperCase();
   if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
-      latestVersionCode: 6,
-      latestVersionName: "1.5.0",
+      latestVersionCode: 7,
+      latestVersionName: "1.6.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!"
+      releaseNotes: "New Update: 2-Hour lab & session duration badges!"
     });
     return;
   }
@@ -65489,11 +65489,11 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
       todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date },
       appVersion: {
-        latestVersionCode: 6,
-        latestVersionName: "1.5.0",
+        latestVersionCode: 7,
+        latestVersionName: "1.6.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!"
+        releaseNotes: "New Update: 2-Hour lab & session duration badges!"
       }
     });
   } catch (err) {
@@ -65904,17 +65904,17 @@ app.use((req, res, next) => {
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
-      latestVersionCode: 6,
-      latestVersionName: "1.5.0",
+      latestVersionCode: 7,
+      latestVersionName: "1.6.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!",
+      releaseNotes: "New Update: 2-Hour lab & session duration badges!",
       appVersion: {
-        latestVersionCode: 6,
-        latestVersionName: "1.5.0",
+        latestVersionCode: 7,
+        latestVersionName: "1.6.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!"
+        releaseNotes: "New Update: 2-Hour lab & session duration badges!"
       }
     });
     return;

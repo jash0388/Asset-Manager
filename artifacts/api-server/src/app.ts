@@ -26,17 +26,17 @@ app.use((req: any, res: any, next: any) => {
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
-      latestVersionCode: 6,
-      latestVersionName: "1.5.0",
+      latestVersionCode: 7,
+      latestVersionName: "1.6.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!",
+      releaseNotes: "New Update: 2-Hour lab & session duration badges!",
       appVersion: {
-        latestVersionCode: 6,
-        latestVersionName: "1.5.0",
+        latestVersionCode: 7,
+        latestVersionName: "1.6.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Ultra-smooth 60fps performance & Back button fix!"
+        releaseNotes: "New Update: 2-Hour lab & session duration badges!"
       }
     });
     return;
