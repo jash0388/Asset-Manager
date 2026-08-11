@@ -65803,16 +65803,32 @@ router5.get("/admin/schedules-with-status", authMiddleware, async (req, res) => 
     if (scheduleErr) throw scheduleErr;
     const { data: sessions, error: sessionErr } = await supabase.from("qr_mentor_sessions").select("*").eq("date", date);
     if (sessionErr) throw sessionErr;
+    const { data: hourlyRecs, error: hourlyErr } = await supabase.from("qr_hourly_attendance").select("schedule_id, marked_present").eq("date", date);
+    if (hourlyErr) throw hourlyErr;
     const sessionMap = /* @__PURE__ */ new Map();
     (sessions || []).forEach((s) => {
       sessionMap.set(s.schedule_id, s);
     });
+    const hourlyMap = /* @__PURE__ */ new Map();
+    (hourlyRecs || []).forEach((r) => {
+      if (!hourlyMap.has(r.schedule_id)) {
+        hourlyMap.set(r.schedule_id, { count: 0, presentCount: 0 });
+      }
+      const info = hourlyMap.get(r.schedule_id);
+      info.count++;
+      if (r.marked_present) info.presentCount++;
+    });
     const mapped = (schedules || []).map((s) => {
       const session = sessionMap.get(s.id);
+      const hourly = hourlyMap.get(s.id);
+      const isSubmitted = Boolean(session && session.ended_at || hourly && hourly.count > 0);
+      const isStarted = Boolean(session && !session.ended_at && (!hourly || hourly.count === 0));
+      const status = isSubmitted ? "submitted" : isStarted ? "started" : "pending";
+      const studentCount = hourly ? hourly.presentCount : session ? session.student_count : 0;
       return {
         ...s,
-        status: session ? session.ended_at ? "submitted" : "started" : "pending",
-        studentCount: session ? session.student_count : 0
+        status,
+        studentCount
       };
     });
     res.json(mapped);
