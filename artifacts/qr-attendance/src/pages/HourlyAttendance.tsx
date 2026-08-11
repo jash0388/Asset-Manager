@@ -458,11 +458,14 @@ export default function HourlyAttendance() {
                       >
                         <div>
                           <div className="flex items-start justify-between gap-2">
-                            <span className="px-2.5 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-900 text-[10px] font-black uppercase">
+                            <span
+                              className="px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wide"
+                              style={{ color: "#1e3a8a", backgroundColor: "#dbeafe", borderColor: "#60a5fa" }}
+                            >
                               {s.year} Yr - {s.section}
                             </span>
                             <span className="text-[10px] font-mono font-bold text-slate-700 flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-gray-400" />
+                              <Clock className="w-3 h-3 text-gray-500" />
                               {s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}
                             </span>
                           </div>
@@ -477,7 +480,8 @@ export default function HourlyAttendance() {
                             {(role === "hod" || role === "admin") && (
                               <button
                                 onClick={(e) => handleOpenAssignModal(e, s)}
-                                className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 text-[10px] font-bold flex items-center gap-1 transition-colors border border-blue-300"
+                                className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-colors border shadow-xs"
+                                style={{ color: "#1e40af", backgroundColor: "#eff6ff", borderColor: "#93c5fd" }}
                                 title="Assign or change faculty for this class"
                               >
                                 <UserPlus className="w-3 h-3 text-blue-700" />
@@ -490,15 +494,24 @@ export default function HourlyAttendance() {
                         <div className="mt-4 flex items-center justify-between">
                           {/* Attendance Status Badge */}
                           {s.status === "submitted" ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            <span
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border"
+                              style={{ color: "#065f46", backgroundColor: "#d1fae5", borderColor: "#34d399" }}
+                            >
                               ✓ Submitted ({s.studentCount} present)
                             </span>
                           ) : s.status === "started" ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
+                            <span
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border animate-pulse"
+                              style={{ color: "#92400e", backgroundColor: "#fef3c7", borderColor: "#f59e0b" }}
+                            >
                               ● Scan Started
                             </span>
                           ) : (
-                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-gray-50 text-gray-400 border border-gray-200">
+                            <span
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border"
+                              style={{ color: "#475569", backgroundColor: "#f1f5f9", borderColor: "#cbd5e1" }}
+                            >
                               Pending
                             </span>
                           )}
