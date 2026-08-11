@@ -65832,11 +65832,12 @@ router5.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, 
     const { data: datesRes, error: datesErr } = await supabase.from("qr_hourly_attendance").select("date").eq("schedule_id", scheduleId);
     if (datesErr) throw datesErr;
     const uniqueDates = Array.from(new Set((datesRes || []).map((d) => d.date))).sort().reverse();
-    if (uniqueDates.length === 0) {
-      res.json({ dates: [], date: null, records: [] });
+    const targetDate = dateParam || (uniqueDates.length > 0 ? uniqueDates[0] : null);
+    if (!targetDate || dateParam && !uniqueDates.includes(dateParam)) {
+      res.json({ dates: uniqueDates, date: dateParam || targetDate, records: [] });
       return;
     }
-    const date = dateParam && uniqueDates.includes(dateParam) ? dateParam : uniqueDates[0];
+    const date = targetDate;
     const { data: records, error: recordsErr } = await supabase.from("qr_hourly_attendance").select("*, qr_users(*)").eq("schedule_id", scheduleId).eq("date", date);
     if (recordsErr) throw recordsErr;
     const { data: gateScans, error: gateErr } = await supabase.from("qr_attendance").select("user_id, entry_time").eq("date", date);

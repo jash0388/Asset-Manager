@@ -763,13 +763,14 @@ router.get("/admin/hourly-attendance-submissions", authMiddleware, async (req: a
 
     const uniqueDates = Array.from(new Set((datesRes || []).map((d: any) => d.date))).sort().reverse();
 
-    if (uniqueDates.length === 0) {
-      res.json({ dates: [], date: null, records: [] });
+    const targetDate = dateParam || (uniqueDates.length > 0 ? uniqueDates[0] : null);
+
+    if (!targetDate || (dateParam && !uniqueDates.includes(dateParam))) {
+      res.json({ dates: uniqueDates, date: dateParam || targetDate, records: [] });
       return;
     }
 
-    // Determine target date
-    const date = dateParam && uniqueDates.includes(dateParam) ? dateParam : uniqueDates[0];
+    const date = targetDate;
 
     // 2. Fetch the hourly attendance records for this date and schedule
     const { data: records, error: recordsErr } = await supabase
