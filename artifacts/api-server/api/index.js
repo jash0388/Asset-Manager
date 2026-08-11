@@ -64288,6 +64288,12 @@ var FACULTY_PIN_MAP = {
   "113": { id: 13, name: "Mrs Ch Vijaya Lakshmi", email: "mrschvijayalakshmi@gmail.com", key: "113", section: "DS II/I/A", bcryptHash: bcryptjs_default.hashSync("113", 10) },
   "114": { id: 14, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", key: "114", section: "DS II/I/C", bcryptHash: bcryptjs_default.hashSync("114", 10) },
   "115": { id: 15, name: "Ms. Priyusha", email: "msspriyusha@gmail.com", key: "115", section: "DS III/I/A", bcryptHash: bcryptjs_default.hashSync("115", 10) },
+  "116": { id: 16, name: "Dr. A. Balaram", email: "drabalaram@gmail.com", key: "116", section: "DS II/I/A", bcryptHash: bcryptjs_default.hashSync("116", 10) },
+  "117": { id: 17, name: "Dr. Md Abdul Azeem", email: "drmdabdulazeem@gmail.com", key: "117", section: "DS III/I/A", bcryptHash: bcryptjs_default.hashSync("117", 10) },
+  "118": { id: 18, name: "Mr. Rakesh Goud", email: "mrrakeshgoud@gmail.com", key: "118", section: "DS II/I/A", bcryptHash: bcryptjs_default.hashSync("118", 10) },
+  "119": { id: 19, name: "Dr. Sri Hari VLN", email: "drsriharivln@gmail.com", key: "119", section: "DS II/I/A", bcryptHash: bcryptjs_default.hashSync("119", 10) },
+  "120": { id: 20, name: "Mr. Prateek", email: "mrprateek@gmail.com", key: "120", section: "DS III/I/A", bcryptHash: bcryptjs_default.hashSync("120", 10) },
+  "121": { id: 21, name: "Ms. Vaidehi", email: "msvaidehi@gmail.com", key: "121", section: "DS III/I/A", bcryptHash: bcryptjs_default.hashSync("121", 10) },
   // 4-digit incharge PINs
   "4011": { id: 9, name: "Mrs A Sravanthi", email: "mrsasravanthi@gmail.com", key: "4011", section: "DS IV/I/A", bcryptHash: bcryptjs_default.hashSync("4011", 10) },
   "4012": { id: 10, name: "Mrs K Sneha", email: "mrsksneha@gmail.com", key: "4012", section: "DS IV/I/B", bcryptHash: bcryptjs_default.hashSync("4012", 10) },
@@ -64323,7 +64329,7 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
     return;
   }
   try {
-    const { data: mentors } = await supabase.from("qr_mentors").select("id, email, name, key, section").ilike("key", cleanKey).limit(1);
+    const { data: mentors } = await supabase.from("qr_mentors").select("id, email, name, key").ilike("key", cleanKey).limit(1);
     let mentor = mentors?.[0];
     if (!mentor) {
       const pinEntry = FACULTY_PIN_MAP[cleanKey];
