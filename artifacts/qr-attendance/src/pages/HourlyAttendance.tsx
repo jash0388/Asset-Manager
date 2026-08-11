@@ -459,13 +459,13 @@ export default function HourlyAttendance() {
                         <div>
                           <div className="flex items-start justify-between gap-2">
                             <span
-                              className="px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wide"
-                              style={{ color: "#1e3a8a", backgroundColor: "#dbeafe", borderColor: "#60a5fa" }}
+                              className="px-2.5 py-1 rounded-lg border text-[11px] font-black uppercase tracking-wide shadow-xs"
+                              style={{ color: "#0369a1", backgroundColor: "#e0f2fe", borderColor: "#0284c7" }}
                             >
-                              {s.year} Yr - {s.section}
+                              {s.year ? `${s.year} Yr - ` : ""}{s.section || "Class"}
                             </span>
-                            <span className="text-[10px] font-mono font-bold text-slate-700 flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-gray-500" />
+                            <span className="text-[11px] font-mono font-bold text-slate-800 flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5 text-slate-600" />
                               {s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}
                             </span>
                           </div>
@@ -474,17 +474,17 @@ export default function HourlyAttendance() {
                             {s.subject || "Lecture hour"}
                           </h4>
                           <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200">
-                            <p className="text-xs text-slate-600 font-medium">
-                              Teacher: <span className="text-slate-900 font-bold">{s.qr_mentors?.name || "Unassigned"}</span>
+                            <p className="text-xs text-slate-700 font-bold">
+                              Teacher: <span className="text-slate-950 font-black">{s.qr_mentors?.name || "Unassigned"}</span>
                             </p>
                             {(role === "hod" || role === "admin") && (
                               <button
                                 onClick={(e) => handleOpenAssignModal(e, s)}
-                                className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-colors border shadow-xs"
-                                style={{ color: "#1e40af", backgroundColor: "#eff6ff", borderColor: "#93c5fd" }}
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-black flex items-center gap-1 transition-colors border shadow-xs"
+                                style={{ color: "#1d4ed8", backgroundColor: "#eff6ff", borderColor: "#3b82f6" }}
                                 title="Assign or change faculty for this class"
                               >
-                                <UserPlus className="w-3 h-3 text-blue-700" />
+                                <UserPlus className="w-3.5 h-3.5 text-blue-700" />
                                 Assign Faculty
                               </button>
                             )}
@@ -495,22 +495,22 @@ export default function HourlyAttendance() {
                           {/* Attendance Status Badge */}
                           {s.status === "submitted" ? (
                             <span
-                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border"
-                              style={{ color: "#065f46", backgroundColor: "#d1fae5", borderColor: "#34d399" }}
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-xs"
+                              style={{ color: "#064e3b", backgroundColor: "#d1fae5", borderColor: "#059669" }}
                             >
                               ✓ Submitted ({s.studentCount} present)
                             </span>
                           ) : s.status === "started" ? (
                             <span
-                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border animate-pulse"
-                              style={{ color: "#92400e", backgroundColor: "#fef3c7", borderColor: "#f59e0b" }}
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border animate-pulse shadow-xs"
+                              style={{ color: "#78350f", backgroundColor: "#fef3c7", borderColor: "#d97706" }}
                             >
                               ● Scan Started
                             </span>
                           ) : (
                             <span
-                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border"
-                              style={{ color: "#475569", backgroundColor: "#f1f5f9", borderColor: "#cbd5e1" }}
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-xs"
+                              style={{ color: "#334155", backgroundColor: "#f1f5f9", borderColor: "#64748b" }}
                             >
                               Pending
                             </span>
