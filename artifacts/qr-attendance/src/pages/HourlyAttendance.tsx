@@ -310,11 +310,11 @@ export default function HourlyAttendance() {
         {/* Title */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-              <BookOpen className="w-8 h-8 text-blue-500" />
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3" style={{ color: "#0f172a" }}>
+              <BookOpen className="w-8 h-8 text-blue-600" />
               Hourly Lecture Attendance
             </h1>
-            <p className="text-sm text-gray-500 mt-1">View scheduled lectures and check hourly attendance submitted by mentors</p>
+            <p className="text-sm font-semibold text-slate-600 mt-1">View scheduled lectures and check hourly attendance submitted by mentors</p>
           </div>
 
           {(role === "hod" || role === "admin") && (
