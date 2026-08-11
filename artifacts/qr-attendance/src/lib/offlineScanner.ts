@@ -334,115 +334,135 @@ export type SyncResult = {
   receipt?: string;
 };
 
+let isSyncingInProgress = false;
+
 export async function syncQueue(): Promise<SyncResult> {
-  const queue = getQueue();
-  if (queue.length === 0) {
+  if (isSyncingInProgress) {
     return { attempted: 0, synced: 0, failed: 0, skipped: 0 };
   }
-
-  const batch = queue.slice(0, 200);
-  const deviceId = getDeviceId();
-  const batchId = `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-  const payload = {
-    batchId,
-    deviceId,
-    scans: batch.map((s) => ({
-      clientScanId: s.clientScanId,
-      uniqueId: s.uniqueId,
-      scannedAt: s.scannedAt,
-      hash: s.hash,
-      prevHash: s.prevHash,
-      seqNo: s.seqNo,
-      deviceId: s.deviceId || deviceId,
-      isLateEntry: s.isLateEntry || false,
-    })),
-  };
-
-  let response: any;
-  let fetchError = "";
+  isSyncingInProgress = true;
 
   try {
-    const token = localStorage.getItem("qr_token") || localStorage.getItem("token");
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const queue = getQueue();
+    if (queue.length === 0) {
+      return { attempted: 0, synced: 0, failed: 0, skipped: 0 };
+    }
 
-    response = await customFetch<{ results: any[]; syncReceipt?: string }>("/api/scan/batch", {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload),
-    });
-  } catch (err: any) {
-    fetchError = String(err?.message || err || "");
-    console.warn("customFetch failed, trying direct window.fetch:", fetchError);
+    const batch = queue.slice(0, 200);
+    const deviceId = getDeviceId();
+    const batchId = `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+    const payload = {
+      batchId,
+      deviceId,
+      scans: batch.map((s) => ({
+        clientScanId: s.clientScanId,
+        uniqueId: s.uniqueId,
+        scannedAt: s.scannedAt,
+        hash: s.hash,
+        prevHash: s.prevHash,
+        seqNo: s.seqNo,
+        deviceId: s.deviceId || deviceId,
+        isLateEntry: s.isLateEntry || false,
+      })),
+    };
+
+    let response: any;
+    let fetchError = "";
+
     try {
       const token = localStorage.getItem("qr_token") || localStorage.getItem("token");
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res = await window.fetch("/api/scan/batch", {
+      response = await customFetch<{ results: any[]; syncReceipt?: string }>("/api/scan/batch", {
         method: "POST",
         headers,
         body: JSON.stringify(payload),
       });
-      if (res.ok) {
-        response = await res.json();
-        fetchError = "";
-      } else {
-        fetchError = `Direct fetch HTTP ${res.status}: ${await res.text()}`;
+    } catch (err: any) {
+      fetchError = String(err?.message || err || "");
+      console.warn("customFetch failed, trying direct window.fetch with timeout:", fetchError);
+      try {
+        const token = localStorage.getItem("qr_token") || localStorage.getItem("token");
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10_000); // 10s strict timeout
+
+        const res = await window.fetch("/api/scan/batch", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          response = await res.json();
+          fetchError = "";
+        } else {
+          fetchError = `Direct fetch HTTP ${res.status}: ${await res.text()}`;
+        }
+      } catch (directErr: any) {
+        fetchError = `Direct fetch error: ${directErr?.message || String(directErr)}`;
       }
-    } catch (directErr: any) {
-      fetchError = `Direct fetch error: ${directErr?.message || String(directErr)}`;
     }
-  }
 
-  if (!response || !Array.isArray(response.results)) {
-    console.error("syncQueue failed on all endpoints:", fetchError);
-    try { localStorage.setItem("qr_last_sync_error", fetchError); } catch {}
-    const updated = queue.map((s) => {
-      const inBatch = batch.find((b) => b.clientScanId === s.clientScanId);
-      return inBatch ? { ...s, attempts: s.attempts + 1 } : s;
-    });
-    setQueue(updated);
-    return { attempted: batch.length, synced: 0, failed: batch.length, skipped: 0 };
-  }
-
-  try { localStorage.removeItem("qr_last_sync_error"); } catch {}
-
-  if (typeof response?.syncReceipt === "string") {
-    try { localStorage.setItem(KEY_RECEIPT, response.syncReceipt); } catch {}
-  }
-
-  const results: any[] = response.results;
-  const acceptedClientIds = new Set<string>();
-  const acceptedUniqueIds = new Set<string>();
-  let synced = 0;
-  let skipped = 0;
-
-  for (const r of results) {
-    if (!r) continue;
-    const cid = String(r.clientScanId || "").trim();
-    if (cid) acceptedClientIds.add(cid);
-
-    if (r.status === "ok" || r.status === "duplicate" || r.status === "user_not_found" || r.status === "max_reached" || r.status === "invalid" || r.action) {
-      synced++;
-    } else {
-      skipped++;
+    if (!response || !Array.isArray(response.results)) {
+      console.error("syncQueue failed on all endpoints:", fetchError);
+      try { localStorage.setItem("qr_last_sync_error", fetchError); } catch {}
+      // Re-read current fresh queue from storage before updating attempt counts
+      const freshQueue = getQueue();
+      const updated = freshQueue.map((s) => {
+        const inBatch = batch.find((b) => b.clientScanId === s.clientScanId);
+        return inBatch ? { ...s, attempts: s.attempts + 1 } : s;
+      });
+      setQueue(updated);
+      return { attempted: batch.length, synced: 0, failed: batch.length, skipped: 0 };
     }
+
+    try { localStorage.removeItem("qr_last_sync_error"); } catch {}
+
+    if (typeof response?.syncReceipt === "string") {
+      try { localStorage.setItem(KEY_RECEIPT, response.syncReceipt); } catch {}
+    }
+
+    const results: any[] = response.results;
+    const acceptedClientIds = new Set<string>();
+    let synced = 0;
+    let skipped = 0;
+
+    for (const r of results) {
+      if (!r) continue;
+      const cid = String(r.clientScanId || "").trim();
+      if (cid) acceptedClientIds.add(cid);
+
+      if (r.status === "ok" || r.status === "duplicate" || r.status === "user_not_found" || r.status === "max_reached" || r.status === "invalid" || r.action) {
+        synced++;
+      } else {
+        skipped++;
+      }
+    }
+
+    // Re-read current fresh queue from storage before filtering out accepted scans
+    // This prevents wiping out newly enqueued scans that arrived during fetch!
+    const freshQueue = getQueue();
+    const remaining = freshQueue.filter((s) => !acceptedClientIds.has(s.clientScanId));
+
+    setQueue(remaining);
+    localStorage.setItem(KEY_LASTSYNC, String(Date.now()));
+
+    return {
+      attempted: batch.length,
+      synced,
+      failed: batch.length - synced - skipped,
+      skipped,
+    };
+  } finally {
+    isSyncingInProgress = false;
   }
-
-  // Filter out scans sent in batch that were accepted/processed by server
-  const remaining = queue.filter((s) => !acceptedClientIds.has(s.clientScanId));
-
-  setQueue(remaining);
-  localStorage.setItem(KEY_LASTSYNC, String(Date.now()));
-
-  return {
-    attempted: batch.length,
-    synced,
-    failed: batch.length - synced - skipped,
-    skipped,
-  };
 }
 
 export function clearQueue() {

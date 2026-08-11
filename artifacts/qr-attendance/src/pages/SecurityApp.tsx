@@ -149,13 +149,16 @@ export default function SecurityApp() {
   // ---------- Background sync ----------
   const [syncStatusMsg, setSyncStatusMsg] = useState<string>("");
   const [syncError, setSyncError] = useState(false);
+  const syncingRef = useRef(false);
 
   const runSync = useCallback(async (manual = false) => {
+    if (syncingRef.current) return;
     const qLen = getQueue().length;
     if (qLen === 0) {
       if (manual) setSyncStatusMsg("✅ No pending scans — all synced!");
       return;
     }
+    syncingRef.current = true;
     setSyncing(true);
     setSyncError(false);
     setSyncStatusMsg("⏳ Syncing pending scans to server...");
@@ -169,19 +172,20 @@ export default function SecurityApp() {
         setSyncStatusMsg(`✅ Synced ${res.synced} scans successfully. ${remaining > 0 ? `${remaining} still pending.` : "All clear!"}`);
       } else {
         setSyncError(true);
-        setSyncStatusMsg("⚠️ Server error — will retry automatically in 3s.");
+        setSyncStatusMsg("⚠️ Server busy — retrying in a moment...");
       }
     } catch {
       setSyncError(true);
       setSyncStatusMsg("❌ Network error — retrying automatically...");
     } finally {
+      syncingRef.current = false;
       setSyncing(false);
-      setTimeout(() => { setSyncStatusMsg(""); setSyncError(false); }, 6000);
+      setTimeout(() => { setSyncStatusMsg(""); setSyncError(false); }, 5000);
     }
   }, []);
 
   useEffect(() => {
-    const id = setInterval(() => { runSync(false); }, SYNC_INTERVAL_MS);
+    const id = setInterval(() => { runSync(false); }, 5_000);
     const onOnline = () => { runSync(false); };
     window.addEventListener("online", onOnline);
     runSync(false);
