@@ -873,4 +873,139 @@ router.get("/admin/hourly-attendance-submissions", authMiddleware, async (req: a
   }
 });
 
+// 6. Public Parent API: Fetch comprehensive student report for parents
+router.get("/parent/student-report", async (req: any, res: any) => {
+  const rollNumberRaw = (req.query.rollNumber || req.query.uniqueId || "").toString().trim();
+  if (!rollNumberRaw) {
+    res.status(400).json({ error: "Roll number / Student ID is required" });
+    return;
+  }
+
+  try {
+    const { date, day } = getCurrentISTDateTime();
+
+    // 1. Fetch student profile
+    const { data: students, error: studentErr } = await supabase
+      .from("qr_users")
+      .select("*")
+      .ilike("unique_id", rollNumberRaw)
+      .limit(1);
+
+    if (studentErr) throw studentErr;
+    const student = students?.[0];
+    if (!student) {
+      res.status(404).json({ error: `No student found matching Roll Number '${rollNumberRaw}'` });
+      return;
+    }
+
+    // 2. Fetch today's gate attendance record
+    const { data: gateRecords, error: gateErr } = await supabase
+      .from("qr_attendance")
+      .select("*")
+      .eq("user_id", student.id)
+      .eq("date", date)
+      .order("last_scan_at", { ascending: false })
+      .limit(1);
+
+    if (gateErr) throw gateErr;
+    const gateRecord = gateRecords?.[0] || null;
+
+    // Determine gate status
+    let gateStatus: "PRESENT" | "LEFT" | "MISSED_EXIT" | "ABSENT" = "ABSENT";
+    let entryTime: string | null = null;
+    let exitTime: string | null = null;
+
+    if (gateRecord) {
+      const hasEntry = gateRecord.entry_time && !isSentinel(gateRecord.entry_time);
+      const hasExit = gateRecord.exit_time && !isSentinel(gateRecord.exit_time);
+      entryTime = hasEntry ? gateRecord.entry_time : null;
+      exitTime = hasExit ? gateRecord.exit_time : null;
+
+      if (hasEntry && hasExit) {
+        gateStatus = "LEFT";
+      } else if (hasEntry && !hasExit) {
+        const { isPast430PM } = getCurrentISTHoursMinutes();
+        gateStatus = isPast430PM ? "MISSED_EXIT" : "PRESENT";
+      }
+    }
+
+    // 3. Fetch today's class schedule for student's section
+    let todaySchedule: any[] = [];
+    if (student.section) {
+      const { data: schedules, error: schedErr } = await supabase
+        .from("qr_schedules")
+        .select("*, qr_mentors(name)")
+        .eq("section", student.section)
+        .eq("day_of_week", day)
+        .order("start_time");
+
+      if (!schedErr && schedules) {
+        const scheduleIds = schedules.map(s => s.id);
+        const { data: hourlyAtt } = await supabase
+          .from("qr_hourly_attendance")
+          .select("*")
+          .eq("user_id", student.id)
+          .eq("date", date)
+          .in("schedule_id", scheduleIds);
+
+        const hourlyMap = new Map<number, any>();
+        (hourlyAtt || []).forEach(h => hourlyMap.set(h.schedule_id, h));
+
+        todaySchedule = schedules.map(s => {
+          const h = hourlyMap.get(s.id);
+          let status: "PRESENT" | "ABSENT" | "PENDING" = "PENDING";
+          if (h) {
+            status = h.marked_present ? "PRESENT" : "ABSENT";
+          }
+          return {
+            id: s.id,
+            subject: s.subject || "Lecture Hour",
+            startTime: s.start_time.slice(0, 5),
+            endTime: s.end_time.slice(0, 5),
+            teacherName: s.qr_mentors?.name || "Faculty",
+            markedPresent: h ? Boolean(h.marked_present) : null,
+            status
+          };
+        });
+      }
+    }
+
+    // 4. Fetch overall gate attendance statistics for summary (past 60 days)
+    const { data: pastGateRecords } = await supabase
+      .from("qr_attendance")
+      .select("date, entry_time, exit_time")
+      .eq("user_id", student.id)
+      .order("date", { ascending: false })
+      .limit(60);
+
+    const totalDaysPresent = (pastGateRecords || []).filter(r => r.entry_time && !isSentinel(r.entry_time)).length;
+
+    res.json({
+      student: {
+        id: student.id,
+        name: student.name,
+        uniqueId: student.unique_id,
+        section: student.section || "—",
+        role: student.role
+      },
+      today: {
+        date,
+        day,
+        entryTime,
+        exitTime,
+        gateStatus,
+        scannedGate: Boolean(entryTime)
+      },
+      todaySchedule,
+      summary: {
+        totalDaysPresent,
+      },
+      history: (pastGateRecords || []).slice(0, 14)
+    });
+  } catch (err: any) {
+    req.log.error({ err }, "Parent student report error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

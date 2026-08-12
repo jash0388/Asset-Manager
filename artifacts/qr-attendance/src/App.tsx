@@ -17,6 +17,7 @@ import HodDashboard from "@/pages/HodDashboard";
 import PrincipalDashboard from "@/pages/PrincipalDashboard";
 import HourlyAttendance from "@/pages/HourlyAttendance";
 import InchargeDashboard from "@/pages/InchargeDashboard";
+import ParentApp from "@/pages/ParentApp";
 import { Analytics } from "@vercel/analytics/react";
 import { useEffect } from "react";
 
@@ -109,6 +110,9 @@ function AppRouter() {
       </Route>
       <Route path="/security" component={SecurityApp} />
       <Route path="/login" component={Login} />
+      <Route path="/parent" component={ParentApp} />
+      <Route path="/parent/:uniqueId" component={ParentApp} />
+      <Route path="/parents" component={ParentApp} />
 
       {/* Mentor & Faculty Scanner App */}
       <Route path="/mentor" component={MentorApp} />

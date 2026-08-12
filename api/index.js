@@ -64628,12 +64628,33 @@ function getHostelDate(baseDate = /* @__PURE__ */ new Date()) {
   }
   return hostelDay.toISOString().slice(0, 10);
 }
+function getCurrentISTHoursMinutes2() {
+  const now = /* @__PURE__ */ new Date();
+  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1e3);
+  const todayDate = ist.toISOString().split("T")[0];
+  const hour = ist.getUTCHours();
+  const minute = ist.getUTCMinutes();
+  const isPast430PM = hour > 16 || hour === 16 && minute >= 30;
+  return { todayDate, isPast430PM };
+}
 function getRecordStatus(record) {
-  if (!record?.exit_time || isSentinel(record.exit_time)) return "inside";
-  if (!record?.entry_time || isSentinel(record.entry_time)) return "left";
-  const entryTime = new Date(record.entry_time).getTime();
-  const exitTime = new Date(record.exit_time).getTime();
-  return exitTime >= entryTime ? "left" : "inside";
+  if (!record) return "left";
+  const hasExit = record.exit_time && !isSentinel(record.exit_time);
+  const hasEntry = record.entry_time && !isSentinel(record.entry_time);
+  if (hasEntry && !hasExit) {
+    const { todayDate, isPast430PM } = getCurrentISTHoursMinutes2();
+    if (record.date < todayDate || record.date === todayDate && isPast430PM) {
+      return "missed_exit";
+    }
+    return "inside";
+  }
+  if (!hasEntry && hasExit) return "left";
+  if (hasEntry && hasExit) {
+    const entryTime = new Date(record.entry_time).getTime();
+    const exitTime = new Date(record.exit_time).getTime();
+    return exitTime >= entryTime ? "left" : "inside";
+  }
+  return "left";
 }
 function getLatestRecordsByUser(records = []) {
   const latestByUserId = /* @__PURE__ */ new Map();
@@ -65908,6 +65929,94 @@ router5.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, 
     });
   } catch (err) {
     req.log.error({ err }, "Fetch hourly submissions error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+router5.get("/parent/student-report", async (req, res) => {
+  const rollNumberRaw = (req.query.rollNumber || req.query.uniqueId || "").toString().trim();
+  if (!rollNumberRaw) {
+    res.status(400).json({ error: "Roll number / Student ID is required" });
+    return;
+  }
+  try {
+    const { date, day } = getCurrentISTDateTime();
+    const { data: students, error: studentErr } = await supabase.from("qr_users").select("*").ilike("unique_id", rollNumberRaw).limit(1);
+    if (studentErr) throw studentErr;
+    const student = students?.[0];
+    if (!student) {
+      res.status(404).json({ error: `No student found matching Roll Number '${rollNumberRaw}'` });
+      return;
+    }
+    const { data: gateRecords, error: gateErr } = await supabase.from("qr_attendance").select("*").eq("user_id", student.id).eq("date", date).order("last_scan_at", { ascending: false }).limit(1);
+    if (gateErr) throw gateErr;
+    const gateRecord = gateRecords?.[0] || null;
+    let gateStatus = "ABSENT";
+    let entryTime = null;
+    let exitTime = null;
+    if (gateRecord) {
+      const hasEntry = gateRecord.entry_time && !isSentinel2(gateRecord.entry_time);
+      const hasExit = gateRecord.exit_time && !isSentinel2(gateRecord.exit_time);
+      entryTime = hasEntry ? gateRecord.entry_time : null;
+      exitTime = hasExit ? gateRecord.exit_time : null;
+      if (hasEntry && hasExit) {
+        gateStatus = "LEFT";
+      } else if (hasEntry && !hasExit) {
+        const { isPast430PM } = getCurrentISTHoursMinutes();
+        gateStatus = isPast430PM ? "MISSED_EXIT" : "PRESENT";
+      }
+    }
+    let todaySchedule = [];
+    if (student.section) {
+      const { data: schedules, error: schedErr } = await supabase.from("qr_schedules").select("*, qr_mentors(name)").eq("section", student.section).eq("day_of_week", day).order("start_time");
+      if (!schedErr && schedules) {
+        const scheduleIds = schedules.map((s) => s.id);
+        const { data: hourlyAtt } = await supabase.from("qr_hourly_attendance").select("*").eq("user_id", student.id).eq("date", date).in("schedule_id", scheduleIds);
+        const hourlyMap = /* @__PURE__ */ new Map();
+        (hourlyAtt || []).forEach((h) => hourlyMap.set(h.schedule_id, h));
+        todaySchedule = schedules.map((s) => {
+          const h = hourlyMap.get(s.id);
+          let status = "PENDING";
+          if (h) {
+            status = h.marked_present ? "PRESENT" : "ABSENT";
+          }
+          return {
+            id: s.id,
+            subject: s.subject || "Lecture Hour",
+            startTime: s.start_time.slice(0, 5),
+            endTime: s.end_time.slice(0, 5),
+            teacherName: s.qr_mentors?.name || "Faculty",
+            markedPresent: h ? Boolean(h.marked_present) : null,
+            status
+          };
+        });
+      }
+    }
+    const { data: pastGateRecords } = await supabase.from("qr_attendance").select("date, entry_time, exit_time").eq("user_id", student.id).order("date", { ascending: false }).limit(60);
+    const totalDaysPresent = (pastGateRecords || []).filter((r) => r.entry_time && !isSentinel2(r.entry_time)).length;
+    res.json({
+      student: {
+        id: student.id,
+        name: student.name,
+        uniqueId: student.unique_id,
+        section: student.section || "\u2014",
+        role: student.role
+      },
+      today: {
+        date,
+        day,
+        entryTime,
+        exitTime,
+        gateStatus,
+        scannedGate: Boolean(entryTime)
+      },
+      todaySchedule,
+      summary: {
+        totalDaysPresent
+      },
+      history: (pastGateRecords || []).slice(0, 14)
+    });
+  } catch (err) {
+    req.log.error({ err }, "Parent student report error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -48,13 +48,37 @@ async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
   return getRecordStatus(records[0]);
 }
 
-function getRecordStatus(record: any): "inside" | "left" {
-  if (!record?.exit_time || isSentinel(record.exit_time)) return "inside";
-  if (!record?.entry_time || isSentinel(record.entry_time)) return "left";
+function getCurrentISTHoursMinutes(): { todayDate: string; isPast430PM: boolean } {
+  const now = new Date();
+  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+  const todayDate = ist.toISOString().split("T")[0];
+  const hour = ist.getUTCHours();
+  const minute = ist.getUTCMinutes();
+  const isPast430PM = hour > 16 || (hour === 16 && minute >= 30);
+  return { todayDate, isPast430PM };
+}
 
-  const entryTime = new Date(record.entry_time).getTime();
-  const exitTime = new Date(record.exit_time).getTime();
-  return exitTime >= entryTime ? "left" : "inside";
+function getRecordStatus(record: any): "inside" | "left" | "missed_exit" {
+  if (!record) return "left";
+  const hasExit = record.exit_time && !isSentinel(record.exit_time);
+  const hasEntry = record.entry_time && !isSentinel(record.entry_time);
+
+  if (hasEntry && !hasExit) {
+    const { todayDate, isPast430PM } = getCurrentISTHoursMinutes();
+    if (record.date < todayDate || (record.date === todayDate && isPast430PM)) {
+      return "missed_exit";
+    }
+    return "inside";
+  }
+
+  if (!hasEntry && hasExit) return "left";
+  if (hasEntry && hasExit) {
+    const entryTime = new Date(record.entry_time).getTime();
+    const exitTime = new Date(record.exit_time).getTime();
+    return exitTime >= entryTime ? "left" : "inside";
+  }
+
+  return "left";
 }
 
 function getLatestRecordsByUser(records: any[] = []): Map<number, any> {
