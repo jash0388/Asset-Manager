@@ -64,6 +64,7 @@ type SectionStats = {
   yearLabel: string;      // e.g. "2nd Year"
   totalStudents: StudentUser[];
   presentStudents: { student: StudentUser; record: AttendanceRecord }[];
+  inClassUnscannedStudents: { student: StudentUser }[];
   absentStudents: StudentUser[];
 };
 
@@ -378,6 +379,21 @@ export default function HodDashboard() {
     queryFn: () => customFetch<AttendanceRecord[]>(`/api/attendance?from=${logDate}&to=${logDate}`),
     refetchInterval: activeTab === "logs" ? 5000 : undefined,
   });
+
+  // Fetch class presence (marked present in hourly classes by faculty)
+  const { data: todayClassPresence = [] } = useQuery<any[]>({
+    queryKey: ["admin-today-class-presence", selectedDate],
+    queryFn: () => customFetch<any[]>(`/api/admin/today-class-presence?date=${selectedDate}`),
+    refetchInterval: 5000,
+  });
+
+  const classPresentUserIds = useMemo(() => {
+    const set = new Set<number>();
+    (todayClassPresence || []).forEach(r => {
+      if (r.user_id) set.add(r.user_id);
+    });
+    return set;
+  }, [todayClassPresence]);
 
   const queryClient = useQueryClient();
 
@@ -772,6 +788,7 @@ export default function HodDashboard() {
         yearLabel,
         totalStudents: [],
         presentStudents: [],
+        inClassUnscannedStudents: [],
         absentStudents: []
       });
     }
@@ -788,8 +805,12 @@ export default function HodDashboard() {
   sectionsMap.forEach((stats) => {
     stats.totalStudents.forEach(s => {
       const record = attendanceByUserId.get(s.id);
+      const isClassPresent = classPresentUserIds.has(s.id);
+
       if (record) {
         stats.presentStudents.push({ student: s, record });
+      } else if (isClassPresent) {
+        stats.inClassUnscannedStudents.push({ student: s });
       } else {
         stats.absentStudents.push(s);
       }
@@ -828,20 +849,27 @@ export default function HodDashboard() {
     : 0;
 
   // Handle cell click to open drill-down
-  const handleCellClick = (type: "PR" | "AB" | "Total", sectionStats: SectionStats) => {
+  const handleCellClick = (type: "PR" | "IN_CLASS" | "AB" | "Total", sectionStats: SectionStats) => {
     let title = "";
     let description = "";
-    let list: Array<{ student: StudentUser; record?: AttendanceRecord; status: "present" | "absent" }> = [];
+    let list: Array<{ student: StudentUser; record?: AttendanceRecord; status: "present" | "in_class" | "absent" }> = [];
 
     const secName = sectionStats.sectionKey.replace(/\//g, " ");
 
     if (type === "PR") {
-      title = `Present Students — Section ${sectionStats.displayName}`;
-      description = `Showing ${sectionStats.presentStudents.length} present students in ${secName}`;
+      title = `Gate Present Students — Section ${sectionStats.displayName}`;
+      description = `Showing ${sectionStats.presentStudents.length} gate-scanned present students in ${secName}`;
       list = sectionStats.presentStudents.map(p => ({
         student: p.student,
         record: p.record,
         status: "present"
+      }));
+    } else if (type === "IN_CLASS") {
+      title = `In Class (Gate Scan Missed) — Section ${sectionStats.displayName}`;
+      description = `Showing ${sectionStats.inClassUnscannedStudents.length} students marked present by faculty in class lecture but missed campus gate ID scan`;
+      list = sectionStats.inClassUnscannedStudents.map(p => ({
+        student: p.student,
+        status: "in_class"
       }));
     } else if (type === "AB") {
       title = `Absent Students — Section ${sectionStats.displayName}`;
@@ -855,10 +883,11 @@ export default function HodDashboard() {
       description = `Showing total roster of ${sectionStats.totalStudents.length} students in ${secName}`;
       list = sectionStats.totalStudents.map(s => {
         const pRecord = sectionStats.presentStudents.find(p => p.student.id === s.id);
+        const inClass = sectionStats.inClassUnscannedStudents.find(p => p.student.id === s.id);
         return {
           student: s,
           record: pRecord?.record,
-          status: pRecord ? "present" : "absent"
+          status: pRecord ? "present" : inClass ? "in_class" : "absent"
         };
       });
     }
@@ -1292,10 +1321,11 @@ export default function HodDashboard() {
                     <thead>
                       <tr className="border-b border-gray-200 bg-white text-gray-600 text-xs font-semibold uppercase tracking-wider">
                         <th className="py-4 px-6">DS (Section)</th>
-                        <th className="py-4 px-6 text-center">PR (Present)</th>
+                        <th className="py-4 px-6 text-center">PR (Gate Scanned)</th>
+                        <th className="py-4 px-6 text-center">In Class (Gate Scan Missed)</th>
                         <th className="py-4 px-6 text-center">AB (Absent)</th>
                         <th className="py-4 px-6 text-center">Total</th>
-                        <th className="py-4 px-6 text-center">% of Present</th>
+                        <th className="py-4 px-6 text-center">% Present</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-855/60">
@@ -1305,24 +1335,26 @@ export default function HodDashboard() {
 
                         // Compute year overall
                         let yearPresent = 0;
+                        let yearInClassUnscanned = 0;
                         let yearAbsent = 0;
                         let yearTotal = 0;
 
                         sectionsInYear.forEach(s => {
                           yearPresent += s.presentStudents.length;
+                          yearInClassUnscanned += s.inClassUnscannedStudents.length;
                           yearAbsent += s.absentStudents.length;
                           yearTotal += s.totalStudents.length;
                         });
 
                         const yearPercentage = yearTotal > 0 
-                          ? Math.floor((yearPresent / yearTotal) * 100) 
+                          ? Math.floor(((yearPresent + yearInClassUnscanned) / yearTotal) * 100) 
                           : 0;
 
                         return (
                           <>
                             {sectionsInYear.map(s => {
                               const percent = s.totalStudents.length > 0 
-                                ? (s.presentStudents.length / s.totalStudents.length) * 100 
+                                ? ((s.presentStudents.length + s.inClassUnscannedStudents.length) / s.totalStudents.length) * 100 
                                 : 0;
 
                               return (
@@ -1331,11 +1363,26 @@ export default function HodDashboard() {
                                   
                                   <td 
                                     onClick={() => handleCellClick("PR", s)}
-                                    className="py-4 px-6 text-center text-green-700 font-semibold cursor-pointer hover:bg-green-50 active:scale-[0.98] transition-transform text-lg"
+                                    className="py-4 px-6 text-center text-emerald-700 font-bold cursor-pointer hover:bg-emerald-50 active:scale-[0.98] transition-transform text-lg"
+                                    title="Gate Scanned Present"
                                   >
                                     {s.presentStudents.length}
                                   </td>
                                   
+                                  <td 
+                                    onClick={() => handleCellClick("IN_CLASS", s)}
+                                    className="py-4 px-6 text-center text-blue-700 font-bold cursor-pointer hover:bg-blue-50 active:scale-[0.98] transition-transform text-lg"
+                                    title="Present in Class Lecture (Not Scanned Gate ID)"
+                                  >
+                                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg border text-base ${
+                                      s.inClassUnscannedStudents.length > 0
+                                        ? "bg-blue-100 text-blue-800 border-blue-300 font-black shadow-xs"
+                                        : "text-gray-400 border-transparent font-semibold"
+                                    }`}>
+                                      {s.inClassUnscannedStudents.length}
+                                    </span>
+                                  </td>
+
                                   <td 
                                     onClick={() => handleCellClick("AB", s)}
                                     className="py-4 px-6 text-center text-red-700 font-semibold cursor-pointer hover:bg-red-50 active:scale-[0.98] transition-transform text-lg"
@@ -1352,7 +1399,7 @@ export default function HodDashboard() {
                                   
                                   <td className="py-4 px-6 text-center font-mono">
                                     <span className={getPercentageColor(percent)}>
-                                      {Math.floor(percent)}
+                                      {Math.floor(percent)}%
                                     </span>
                                   </td>
                                 </tr>

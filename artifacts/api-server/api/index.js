@@ -65932,6 +65932,17 @@ router5.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, 
     res.status(500).json({ error: "Internal server error" });
   }
 });
+router5.get("/admin/today-class-presence", authMiddleware, async (req, res) => {
+  const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
+  try {
+    const { data: records, error } = await supabase.from("qr_hourly_attendance").select("user_id, schedule_id, marked_present, date").eq("date", dateParam).eq("marked_present", true);
+    if (error) throw error;
+    res.json(records || []);
+  } catch (err) {
+    req.log.error({ err }, "Error fetching today class presence");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 function getCurrentISTHoursMinutes2() {
   const now = /* @__PURE__ */ new Date();
   const istOffset = 5.5 * 60 * 60 * 1e3;

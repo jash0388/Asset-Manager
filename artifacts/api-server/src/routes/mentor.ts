@@ -873,6 +873,24 @@ router.get("/admin/hourly-attendance-submissions", authMiddleware, async (req: a
   }
 });
 
+// 5b. Fetch class presence logs for date (students marked present in hourly classes)
+router.get("/admin/today-class-presence", authMiddleware, async (req: any, res: any) => {
+  const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes().todayDate;
+  try {
+    const { data: records, error } = await supabase
+      .from("qr_hourly_attendance")
+      .select("user_id, schedule_id, marked_present, date")
+      .eq("date", dateParam)
+      .eq("marked_present", true);
+
+    if (error) throw error;
+    res.json(records || []);
+  } catch (err: any) {
+    req.log.error({ err }, "Error fetching today class presence");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 function getCurrentISTHoursMinutes(): { todayDate: string; isPast430PM: boolean } {
   const now = new Date();
   const istOffset = 5.5 * 60 * 60 * 1000;
