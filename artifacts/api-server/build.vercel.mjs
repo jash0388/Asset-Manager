@@ -66,11 +66,11 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);`,
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.status(200).json({
-    latestVersionCode: 1,
-    latestVersionName: "1.0.0",
-    downloadUrl: "https://qr-attendance-app-eight.vercel.app/ParentApp.apk",
+    latestVersionCode: 2,
+    latestVersionName: "1.1.0",
+    downloadUrl: "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/ParentApp.apk",
     forceUpdate: false,
-    releaseNotes: "Official Parent App Release: Live Gate Attendance & Hourly Subject Schedule Tracking!"
+    releaseNotes: "New Parent App Release v1.1.0: Mobile UI layout polish, auto-uppercase input, and direct APK installer update!"
   });
 }\n`;
   await writeFile(path.resolve(outDir, "parent-version.js"), parentVersionHandler, "utf8");
