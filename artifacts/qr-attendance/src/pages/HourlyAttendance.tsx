@@ -19,7 +19,9 @@ import {
   UserPlus,
   Plus,
   UserCheck,
-  Edit3
+  Edit3,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -117,6 +119,49 @@ export default function HourlyAttendance() {
     queryKey: ["admin-schedules-list-status", selectedDateFilter],
     queryFn: () => customFetch<Schedule[]>(`/api/admin/schedules-with-status?date=${selectedDateFilter}`)
   });
+
+  // Fetch Schedule Overrides for selected date
+  const { data: scheduleOverrides = [] } = useQuery<any[]>({
+    queryKey: ["admin-schedule-overrides", selectedDateFilter],
+    queryFn: () => customFetch<any[]>(`/api/admin/schedule-overrides?date=${selectedDateFilter}`),
+    refetchInterval: 3000,
+  });
+
+  const handleToggleScheduleOverride = async (scheduleId: number, currentUnlocked: boolean, currentExtendedMins: number) => {
+    try {
+      await customFetch("/api/admin/schedule-override", {
+        method: "POST",
+        body: JSON.stringify({
+          scheduleId,
+          date: selectedDateFilter,
+          isUnlocked: !currentUnlocked,
+          extendedMinutes: currentExtendedMins,
+        }),
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedule-overrides", selectedDateFilter] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules-list-status", selectedDateFilter] });
+    } catch (err: any) {
+      alert("Failed to update schedule override settings");
+    }
+  };
+
+  const handleExtendScheduleTime = async (scheduleId: number, currentUnlocked: boolean, minutesToAdd: number) => {
+    try {
+      await customFetch("/api/admin/schedule-override", {
+        method: "POST",
+        body: JSON.stringify({
+          scheduleId,
+          date: selectedDateFilter,
+          isUnlocked: true, // Auto unlock when extending buffer time
+          extendedMinutes: minutesToAdd,
+        }),
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedule-overrides", selectedDateFilter] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules-list-status", selectedDateFilter] });
+    } catch (err: any) {
+      alert("Failed to extend schedule attendance time");
+    }
+  };
 
   const handleOpenAssignModal = (e: React.MouseEvent, schedule: Schedule) => {
     e.stopPropagation();
@@ -532,36 +577,111 @@ export default function HourlyAttendance() {
         {/* Detailed Attendance Log Sheet */}
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
           <SheetContent className="w-full sm:max-w-xl bg-white border-l border-gray-200 p-0 flex flex-col h-full text-gray-900">
-            {selectedSchedule && (
-              <>
-                <SheetHeader className="p-6 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 text-[10px] font-extrabold uppercase">
-                        {selectedSchedule.year} Yr - {selectedSchedule.section}
-                      </span>
-                      <span className="text-xs text-gray-500 font-mono">
-                        {selectedSchedule.start_time.slice(0,5)} - {selectedSchedule.end_time.slice(0,5)}
-                      </span>
-                    </div>
+            {selectedSchedule && (() => {
+              const overrideObj = (scheduleOverrides || []).find((o: any) => o.scheduleId === selectedSchedule.id);
+              const isUnlocked = overrideObj ? overrideObj.isUnlocked : false;
+              const extendedMins = overrideObj ? overrideObj.extendedMinutes : 0;
 
+              return (
+                <>
+                  <SheetHeader className="p-6 border-b border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 text-[10px] font-extrabold uppercase">
+                          {selectedSchedule.year} Yr - {selectedSchedule.section}
+                        </span>
+                        <span className="text-xs text-gray-500 font-mono">
+                          {selectedSchedule.start_time.slice(0,5)} - {selectedSchedule.end_time.slice(0,5)}
+                        </span>
+                      </div>
+
+                      {(role === "hod" || role === "admin") && (
+                        <button
+                          onClick={(e) => handleOpenAssignModal(e, selectedSchedule)}
+                          className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow cursor-pointer"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                          Reassign Faculty
+                        </button>
+                      )}
+                    </div>
+                    <SheetTitle className="text-xl font-black text-gray-900 mt-2 truncate">
+                      {selectedSchedule.subject}
+                    </SheetTitle>
+                    <SheetDescription className="text-gray-500 text-xs mt-1">
+                      Teacher: <span className="text-gray-800 font-semibold">{selectedSchedule.qr_mentors?.name || "Unassigned"}</span>
+                    </SheetDescription>
+
+                    {/* HOD Attendance Control Switch & Buffer Extension inside Modal */}
                     {(role === "hod" || role === "admin") && (
-                      <button
-                        onClick={(e) => handleOpenAssignModal(e, selectedSchedule)}
-                        className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow"
-                      >
-                        <UserPlus className="w-3.5 h-3.5" />
-                        Reassign Faculty
-                      </button>
+                      <div className="mt-4 p-3 bg-purple-100/70 border border-purple-300 rounded-xl space-y-2.5 shadow-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5">
+                            {isUnlocked ? (
+                              <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-600 text-white flex items-center gap-1 shadow-xs">
+                                <Unlock className="w-3.5 h-3.5" /> UNLOCKED (HOD Override)
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-gray-700 border border-gray-300 flex items-center gap-1">
+                                <Lock className="w-3.5 h-3.5 text-gray-500" /> Standard Time Lock (10m Buffer Active)
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => handleToggleScheduleOverride(selectedSchedule.id, isUnlocked, extendedMins)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 border ${
+                              isUnlocked
+                                ? "bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700"
+                                : "bg-purple-700 text-white border-purple-800 hover:bg-purple-800"
+                            }`}
+                          >
+                            {isUnlocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                            {isUnlocked ? "Lock Attendance" : "Unlock Class Now"}
+                          </button>
+                        </div>
+
+                        {/* Buffer Time Extension Buttons */}
+                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-purple-200">
+                          <span className="text-xs font-extrabold text-purple-950">Extend Attendance Buffer:</span>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 15)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                                extendedMins === 15 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                              }`}
+                            >
+                              +15m
+                            </button>
+                            <button
+                              onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 30)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                                extendedMins === 30 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                              }`}
+                            >
+                              +30m
+                            </button>
+                            <button
+                              onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 60)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                                extendedMins === 60 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                              }`}
+                            >
+                              +1h
+                            </button>
+                            {extendedMins > 0 && (
+                              <button
+                                onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 0)}
+                                className="px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 cursor-pointer"
+                                title="Reset extra buffer time"
+                              >
+                                Reset
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  <SheetTitle className="text-xl font-black text-gray-900 mt-2 truncate">
-                    {selectedSchedule.subject}
-                  </SheetTitle>
-                  <SheetDescription className="text-gray-500 text-xs mt-1">
-                    Teacher: <span className="text-gray-800 font-semibold">{selectedSchedule.qr_mentors?.name || "Unassigned"}</span>
-                  </SheetDescription>
-                </SheetHeader>
+                  </SheetHeader>
 
                 {/* Toolbar inside drawer */}
                 <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between gap-4">
@@ -645,8 +765,9 @@ export default function HourlyAttendance() {
                   )}
                 </div>
               </>
-            )}
-          </SheetContent>
+            );
+          })()}
+        </SheetContent>
         </Sheet>
 
         {/* Assign Faculty to Class Modal */}
