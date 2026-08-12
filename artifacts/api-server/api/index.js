@@ -65500,29 +65500,38 @@ function getBufferedTime(timeStr, offsetMinutes) {
     return timeStr;
   }
 }
+var scheduleOverridesMap = /* @__PURE__ */ new Map();
 router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
     const { day, time, date } = getCurrentISTDateTime();
     const { data: todaySchedules, error: schedulesErr } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", day).order("start_time");
     if (schedulesErr) throw schedulesErr;
-    const activeSchedule = (todaySchedules || []).find((s) => {
-      const startTimeWithBuffer = getBufferedTime(s.start_time, -10);
-      const endTimeWithBuffer = getBufferedTime(s.end_time, 15);
-      return time >= startTimeWithBuffer && time <= endTimeWithBuffer;
-    }) || null;
     const { data: sessions, error: sessionErr } = await supabase.from("qr_mentor_sessions").select("*").eq("mentor_id", mentorId).eq("date", date);
     if (sessionErr) throw sessionErr;
     const sessionMap = /* @__PURE__ */ new Map();
     (sessions || []).forEach((s) => {
       sessionMap.set(s.schedule_id, s);
     });
+    const activeSchedule = (todaySchedules || []).find((s) => {
+      const key = `${s.id}_${date}`;
+      const override = scheduleOverridesMap.get(key);
+      const isUnlockedByHod = override ? override.isUnlocked : false;
+      const extraBufferMins = override ? override.extendedMinutes : 0;
+      const startTimeWithBuffer = getBufferedTime(s.start_time, -10);
+      const endTimeWithBuffer = getBufferedTime(s.end_time, 10 + extraBufferMins);
+      return time >= startTimeWithBuffer && time <= endTimeWithBuffer || isUnlockedByHod;
+    }) || null;
     const activeSession = activeSchedule ? sessionMap.get(activeSchedule.id) || null : null;
     const mappedTodaySchedules = (todaySchedules || []).map((s) => {
       const session = sessionMap.get(s.id);
+      const key = `${s.id}_${date}`;
+      const override = scheduleOverridesMap.get(key);
+      const isUnlockedByHod = override ? override.isUnlocked : false;
+      const extraBufferMins = override ? override.extendedMinutes : 0;
       const startTimeWithBuffer = getBufferedTime(s.start_time, -10);
-      const endTimeWithBuffer = getBufferedTime(s.end_time, 15);
-      const isCurrentTimeSlot = time >= startTimeWithBuffer && time <= endTimeWithBuffer;
+      const endTimeWithBuffer = getBufferedTime(s.end_time, 10 + extraBufferMins);
+      const isCurrentTimeSlot = time >= startTimeWithBuffer && time <= endTimeWithBuffer || isUnlockedByHod;
       const isSubmitted = Boolean(session && session.ended_at);
       const isStarted = Boolean(session && !session.ended_at);
       let status = "pending";
@@ -65537,6 +65546,8 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
         ...s,
         session: session || null,
         status,
+        isUnlockedByHod,
+        extraBufferMins,
         isLocked: status === "locked",
         isCurrentTimeSlot
       };
@@ -65931,6 +65942,35 @@ router5.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, 
     req.log.error({ err }, "Fetch hourly submissions error");
     res.status(500).json({ error: "Internal server error" });
   }
+});
+router5.post("/admin/schedule-override", authMiddleware, async (req, res) => {
+  const scheduleId = parseInt(req.body.scheduleId);
+  if (isNaN(scheduleId)) {
+    res.status(400).json({ error: "Schedule ID is required" });
+    return;
+  }
+  const dateParam = (req.body.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
+  const isUnlocked = Boolean(req.body.isUnlocked);
+  const extendedMinutes = parseInt(req.body.extendedMinutes) || 0;
+  const key = `${scheduleId}_${dateParam}`;
+  const overrideData = { isUnlocked, extendedMinutes };
+  scheduleOverridesMap.set(key, overrideData);
+  res.json({
+    status: "ok",
+    key,
+    override: overrideData
+  });
+});
+router5.get("/admin/schedule-overrides", authMiddleware, async (req, res) => {
+  const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
+  const list = [];
+  scheduleOverridesMap.forEach((val, key) => {
+    if (key.endsWith(`_${dateParam}`)) {
+      const scheduleId = parseInt(key.split("_")[0]);
+      list.push({ scheduleId, date: dateParam, ...val });
+    }
+  });
+  res.json(list);
 });
 router5.get("/admin/today-class-presence", authMiddleware, async (req, res) => {
   const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;

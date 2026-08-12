@@ -27,6 +27,8 @@ import {
   AlertTriangle,
   TrendingUp,
   Settings,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -515,6 +517,50 @@ export default function HodDashboard() {
     queryFn: () => customFetch<any[]>("/api/admin/schedules"),
     enabled: activeTab === "schedules",
   });
+
+  // Fetch Schedule Overrides (Master Unlocks & Extended Times)
+  const { data: scheduleOverrides = [] } = useQuery<any[]>({
+    queryKey: ["admin-schedule-overrides", selectedDate],
+    queryFn: () => customFetch<any[]>(`/api/admin/schedule-overrides?date=${selectedDate}`),
+    refetchInterval: 3000,
+    enabled: activeTab === "schedules",
+  });
+
+  const handleToggleScheduleOverride = async (scheduleId: number, currentUnlocked: boolean, currentExtendedMins: number) => {
+    try {
+      await customFetch("/api/admin/schedule-override", {
+        method: "POST",
+        body: JSON.stringify({
+          scheduleId,
+          date: selectedDate,
+          isUnlocked: !currentUnlocked,
+          extendedMinutes: currentExtendedMins,
+        }),
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedule-overrides", selectedDate] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules"] });
+    } catch (err: any) {
+      alert("Failed to update schedule override settings");
+    }
+  };
+
+  const handleExtendScheduleTime = async (scheduleId: number, currentUnlocked: boolean, minutesToAdd: number) => {
+    try {
+      await customFetch("/api/admin/schedule-override", {
+        method: "POST",
+        body: JSON.stringify({
+          scheduleId,
+          date: selectedDate,
+          isUnlocked: true, // Auto unlock when extending buffer time
+          extendedMinutes: minutesToAdd,
+        }),
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedule-overrides", selectedDate] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules"] });
+    } catch (err: any) {
+      alert("Failed to extend schedule attendance time");
+    }
+  };
 
   const handleOpenAssignModal = (schedule: any) => {
     setScheduleToAssign(schedule);
@@ -1741,6 +1787,7 @@ export default function HodDashboard() {
                         <th className="py-4 px-6">Time Slot</th>
                         <th className="py-4 px-6">Class / Section</th>
                         <th className="py-4 px-6">Subject</th>
+                        <th className="py-4 px-6 text-center">HOD Attendance Switch & Buffer</th>
                         <th className="py-4 px-6 text-center">Assign Faculty</th>
                       </tr>
                     </thead>
@@ -1757,7 +1804,7 @@ export default function HodDashboard() {
                         );
                       }).length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center text-gray-400 text-sm">
+                          <td colSpan={7} className="py-12 text-center text-gray-400 text-sm">
                             No timetable slots found matching your query.
                           </td>
                         </tr>
@@ -1772,28 +1819,100 @@ export default function HodDashboard() {
                             s.year.toLowerCase().includes(q) ||
                             (s.subject || "").toLowerCase().includes(q)
                           );
-                        }).map((s: any) => (
-                          <tr key={s.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="py-4 px-6 font-semibold text-gray-800">{s.qr_mentors?.name || "Unassigned"}</td>
-                            <td className="py-4 px-6 text-gray-700 font-bold">{s.day_of_week}</td>
-                            <td className="py-4 px-6 text-slate-405 font-mono text-xs">{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</td>
-                            <td className="py-4 px-6">
-                              <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 font-bold text-xs">
-                                {s.year} Yr - {s.section}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-gray-700">{s.subject || "—"}</td>
-                            <td className="py-4 px-6 text-center">
-                              <button
-                                onClick={() => handleOpenAssignModal(s)}
-                                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm"
-                              >
-                                <UserPlus className="w-3.5 h-3.5" />
-                                Assign Faculty
-                              </button>
-                            </td>
-                          </tr>
-                        ))
+                        }).map((s: any) => {
+                          const overrideObj = (scheduleOverrides || []).find((o: any) => o.scheduleId === s.id);
+                          const isUnlocked = overrideObj ? overrideObj.isUnlocked : false;
+                          const extendedMins = overrideObj ? overrideObj.extendedMinutes : 0;
+
+                          return (
+                            <tr key={s.id} className="hover:bg-gray-50 transition-colors">
+                              <td className="py-4 px-6 font-semibold text-gray-800">{s.qr_mentors?.name || "Unassigned"}</td>
+                              <td className="py-4 px-6 text-gray-700 font-bold">{s.day_of_week}</td>
+                              <td className="py-4 px-6 text-slate-700 font-mono text-xs">
+                                <div>{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</div>
+                                <span className="text-[10px] text-blue-600 font-sans font-semibold">10m Buffer Active</span>
+                              </td>
+                              <td className="py-4 px-6">
+                                <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 font-bold text-xs">
+                                  {s.year} Yr - {s.section}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 text-gray-700 font-bold">{s.subject || "—"}</td>
+                              <td className="py-4 px-6 text-center">
+                                <div className="flex flex-col items-center gap-1.5">
+                                  {/* Master Unlock Switch */}
+                                  <button
+                                    onClick={() => handleToggleScheduleOverride(s.id, isUnlocked, extendedMins)}
+                                    className={`px-3 py-1.5 rounded-xl font-bold text-xs inline-flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer border ${
+                                      isUnlocked
+                                        ? "bg-emerald-600 text-white border-emerald-700 shadow-emerald-600/30"
+                                        : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                                    }`}
+                                    title="Toggle to force unlock or lock attendance for this class lecture"
+                                  >
+                                    {isUnlocked ? (
+                                      <>
+                                        <Unlock className="w-3.5 h-3.5 text-white" />
+                                        UNLOCKED (HOD Override)
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Lock className="w-3.5 h-3.5 text-gray-500" />
+                                        Standard Time Lock
+                                      </>
+                                    )}
+                                  </button>
+
+                                  {/* Time Extension Quick Buttons */}
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      onClick={() => handleExtendScheduleTime(s.id, isUnlocked, 15)}
+                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors cursor-pointer ${
+                                        extendedMins === 15 ? "bg-blue-600 text-white border-blue-700" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      +15m
+                                    </button>
+                                    <button
+                                      onClick={() => handleExtendScheduleTime(s.id, isUnlocked, 30)}
+                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors cursor-pointer ${
+                                        extendedMins === 30 ? "bg-blue-600 text-white border-blue-700" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      +30m
+                                    </button>
+                                    <button
+                                      onClick={() => handleExtendScheduleTime(s.id, isUnlocked, 60)}
+                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors cursor-pointer ${
+                                        extendedMins === 60 ? "bg-blue-600 text-white border-blue-700" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      +1h
+                                    </button>
+                                    {extendedMins > 0 && (
+                                      <button
+                                        onClick={() => handleExtendScheduleTime(s.id, isUnlocked, 0)}
+                                        className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 cursor-pointer"
+                                        title="Reset extra buffer time"
+                                      >
+                                        Reset
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6 text-center">
+                                <button
+                                  onClick={() => handleOpenAssignModal(s)}
+                                  className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                                >
+                                  <UserPlus className="w-3.5 h-3.5" />
+                                  Assign Faculty
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
