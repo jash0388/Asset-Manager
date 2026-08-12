@@ -25,7 +25,8 @@ import {
   Calendar,
   Layers,
   Check,
-  X as XIcon
+  X as XIcon,
+  Settings,
 } from "lucide-react";
 
 type Schedule = {
@@ -97,6 +98,7 @@ export default function MentorApp() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const [passkey, setPasskey] = useState("");
   const [keySubmitting, setKeySubmitting] = useState(false);
@@ -338,7 +340,7 @@ export default function MentorApp() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           {activeFaculty?.role?.includes("In-charge") && (
             <button
               onClick={() => navigate("/incharge-dashboard")}
@@ -351,12 +353,21 @@ export default function MentorApp() {
           )}
 
           <button
+            onClick={() => setShowSettingsModal(true)}
+            style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
+            className="p-2.5 rounded-xl font-bold text-xs border flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+            title="Settings & Profile"
+          >
+            <Settings className="w-4.5 h-4.5 text-slate-700" />
+          </button>
+
+          <button
             onClick={logout}
             style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
-            className="px-3 py-2 rounded-xl font-bold text-[10px] sm:text-xs border flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 flex-1 sm:flex-none justify-center"
+            className="px-3 py-2 rounded-xl font-bold text-[10px] sm:text-xs border flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
           >
             <LogOut className="w-4 h-4 text-slate-600" />
-            Logout
+            <span className="hidden xs:inline">Logout</span>
           </button>
         </div>
       </header>
@@ -389,13 +400,13 @@ export default function MentorApp() {
             <p style={{ color: "#475569" }} className="text-sm font-bold">Loading active classroom timetable & session...</p>
           </div>
         ) : !activeSchedule ? (
-          <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-3xl p-12 text-center space-y-4 shadow-xs">
+          <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-3xl p-8 sm:p-12 text-center space-y-4 shadow-xs">
             <div style={{ backgroundColor: "#eff6ff", color: "#2563eb" }} className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto">
               <Calendar className="w-8 h-8" />
             </div>
-            <h3 style={{ color: "#0f172a" }} className="text-xl font-black">No Active Classroom Session Scheduled</h3>
-            <p style={{ color: "#475569" }} className="text-sm font-medium max-w-md mx-auto leading-relaxed">
-              There are no ongoing timetable classes for your faculty profile at this exact time ({getCurrentISTTimeStr()}). Please check back when your scheduled period starts!
+            <h3 style={{ color: "#0f172a" }} className="text-xl font-black">No Active Classroom Session Right Now</h3>
+            <p style={{ color: "#475569" }} className="text-xs sm:text-sm font-medium max-w-md mx-auto leading-relaxed">
+              Attendance opens during class hours (with 10m buffer window). Please view today's schedule below:
             </p>
           </div>
         ) : (
@@ -433,11 +444,10 @@ export default function MentorApp() {
             </div>
 
             {/* Student Roster List */}
-            <div style={{ borderColor: "#f1f5f9" }} className="divide-y max-h-[55vh] overflow-y-auto pr-1 custom-scrollbar contain-paint">
+            <div style={{ borderColor: "#f1f5f9" }} className="divide-y max-h-[55vh] overflow-y-auto pr-1 custom-scrollbar contain-paint touch-pan-y">
               {filteredStudents.map((s) => (
                 <div key={s.id} className="py-3 flex items-center justify-between gap-3">
                   <div>
-                    {/* EXPLICIT 100% PITCH BLACK STUDENT NAME */}
                     <p style={{ color: "#0f172a" }} className="text-sm font-black">{s.name}</p>
                     <p style={{ color: "#059669" }} className="text-xs font-mono font-bold mt-0.5">{s.uniqueId}</p>
                   </div>
@@ -481,7 +491,121 @@ export default function MentorApp() {
             )}
           </div>
         )}
+
+        {/* Today's Timetable Schedules Cards List */}
+        <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              <h3 className="text-base font-black text-gray-900">Today's Class Timetable</h3>
+            </div>
+            <span className="text-xs font-bold text-gray-600 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
+              {todaySchedules.length} Periods Scheduled
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {todaySchedules.length === 0 ? (
+              <p className="text-xs text-gray-400 font-medium text-center py-6">No scheduled classes for today</p>
+            ) : (
+              todaySchedules.map((s) => {
+                const isCurrent = s.isCurrentTimeSlot || s.id === activeSchedule?.id;
+                const isSubmitted = s.status === "submitted";
+                const isLocked = s.status === "locked" && !isCurrent;
+
+                return (
+                  <div
+                    key={s.id}
+                    className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      isCurrent
+                        ? "bg-blue-50/80 border-blue-300 shadow-xs"
+                        : isSubmitted
+                        ? "bg-emerald-50/60 border-emerald-200"
+                        : "bg-gray-50/70 border-gray-200"
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-md bg-blue-100 border border-blue-200 text-blue-800 text-[10px] font-black uppercase">
+                          {s.year} Yr - {s.section}
+                        </span>
+                        <span className="text-xs font-mono font-bold text-gray-600 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 text-gray-500" />
+                          {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-black text-gray-900">{s.subject}</h4>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {isSubmitted ? (
+                        <span className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-xs">
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                          ✓ Submitted ({s.session?.student_count || 0} Present)
+                        </span>
+                      ) : isCurrent ? (
+                        <button
+                          onClick={() => setActiveSchedule(s)}
+                          className="px-4 py-2 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 uppercase tracking-wide"
+                        >
+                          <Sparkles className="w-4 h-4 text-white" />
+                          Take Attendance
+                        </button>
+                      ) : (
+                        <button
+                          disabled
+                          className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gray-200 text-gray-600 border border-gray-300 flex items-center gap-1.5 cursor-not-allowed opacity-85"
+                        >
+                          <Lock className="w-3.5 h-3.5 text-gray-500" />
+                          Locked (Starts at {s.start_time.slice(0, 5)})
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Faculty Settings & Profile Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" onClick={() => setShowSettingsModal(false)}>
+          <div className="bg-white border border-gray-200 rounded-3xl w-full max-w-sm p-6 space-y-5 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-blue-600" />
+                <h3 className="text-base font-black text-gray-900">Faculty Settings & Profile</h3>
+              </div>
+              <button onClick={() => setShowSettingsModal(false)} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm transition-colors">✕</button>
+            </div>
+
+            <div className="space-y-3 bg-gray-50 p-4 rounded-2xl border border-gray-200 text-xs">
+              <div>
+                <p className="text-gray-400 font-medium">Logged in as</p>
+                <p className="text-sm font-black text-gray-900">{activeFaculty?.name}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 font-medium">Role / Department</p>
+                <p className="text-xs font-bold text-blue-800">{activeFaculty?.section} Faculty • CSE Data Science</p>
+              </div>
+              <div>
+                <p className="text-gray-400 font-medium">App Build Version</p>
+                <p className="text-xs font-mono font-bold text-gray-700">v1.7.0 (Latest Release)</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => { setShowSettingsModal(false); logout(); }}
+              className="w-full py-3.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+            >
+              <LogOut className="w-4 h-4 text-white" />
+              Logout from Account
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

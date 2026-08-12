@@ -554,10 +554,11 @@ export default function HourlyAttendance() {
                             </span>
                           ) : (
                             <span
-                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-xs"
-                              style={{ color: "#334155", backgroundColor: "#f1f5f9", borderColor: "#64748b" }}
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-black border shadow-xs flex items-center gap-1"
+                              style={{ color: "#475569", backgroundColor: "#f1f5f9", borderColor: "#cbd5e1" }}
                             >
-                              Pending
+                              <Lock className="w-3 h-3 text-slate-500" />
+                              Locked (Starts at {s.start_time.slice(0, 5)})
                             </span>
                           )}
                           
