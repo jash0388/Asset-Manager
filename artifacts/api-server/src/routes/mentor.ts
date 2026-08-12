@@ -873,6 +873,17 @@ router.get("/admin/hourly-attendance-submissions", authMiddleware, async (req: a
   }
 });
 
+function getCurrentISTHoursMinutes(): { todayDate: string; isPast430PM: boolean } {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istTime = new Date(now.getTime() + istOffset);
+  const hours = istTime.getUTCHours();
+  const minutes = istTime.getUTCMinutes();
+  const todayDate = istTime.toISOString().split("T")[0];
+  const isPast430PM = hours > 16 || (hours === 16 && minutes >= 30);
+  return { todayDate, isPast430PM };
+}
+
 // 6. Public Parent API: Fetch comprehensive student report for parents
 router.get("/parent/student-report", async (req: any, res: any) => {
   const rollNumberRaw = (req.query.rollNumber || req.query.uniqueId || "").toString().trim();

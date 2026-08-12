@@ -64628,7 +64628,7 @@ function getHostelDate(baseDate = /* @__PURE__ */ new Date()) {
   }
   return hostelDay.toISOString().slice(0, 10);
 }
-function getCurrentISTHoursMinutes2() {
+function getCurrentISTHoursMinutes() {
   const now = /* @__PURE__ */ new Date();
   const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1e3);
   const todayDate = ist.toISOString().split("T")[0];
@@ -64642,7 +64642,7 @@ function getRecordStatus(record) {
   const hasExit = record.exit_time && !isSentinel(record.exit_time);
   const hasEntry = record.entry_time && !isSentinel(record.entry_time);
   if (hasEntry && !hasExit) {
-    const { todayDate, isPast430PM } = getCurrentISTHoursMinutes2();
+    const { todayDate, isPast430PM } = getCurrentISTHoursMinutes();
     if (record.date < todayDate || record.date === todayDate && isPast430PM) {
       return "missed_exit";
     }
@@ -65932,6 +65932,16 @@ router5.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, 
     res.status(500).json({ error: "Internal server error" });
   }
 });
+function getCurrentISTHoursMinutes2() {
+  const now = /* @__PURE__ */ new Date();
+  const istOffset = 5.5 * 60 * 60 * 1e3;
+  const istTime = new Date(now.getTime() + istOffset);
+  const hours = istTime.getUTCHours();
+  const minutes = istTime.getUTCMinutes();
+  const todayDate = istTime.toISOString().split("T")[0];
+  const isPast430PM = hours > 16 || hours === 16 && minutes >= 30;
+  return { todayDate, isPast430PM };
+}
 router5.get("/parent/student-report", async (req, res) => {
   const rollNumberRaw = (req.query.rollNumber || req.query.uniqueId || "").toString().trim();
   if (!rollNumberRaw) {
@@ -65966,7 +65976,7 @@ router5.get("/parent/student-report", async (req, res) => {
       if (hasEntry && hasExit) {
         gateStatus = "LEFT";
       } else if (hasEntry && !hasExit) {
-        const { isPast430PM } = getCurrentISTHoursMinutes();
+        const { isPast430PM } = getCurrentISTHoursMinutes2();
         gateStatus = isPast430PM ? "MISSED_EXIT" : "PRESENT";
       }
     }
