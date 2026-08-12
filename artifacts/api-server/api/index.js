@@ -66070,8 +66070,27 @@ app.use((req, _res, next) => {
 });
 app.use((req, res, next) => {
   const p = (req.url || req.path || "").split("?")[0].toLowerCase();
-  if (p.endsWith(".apk") || p.includes("facultyapp")) {
+  if (p.includes("parentapp") || p.includes("parent_attendance")) {
+    res.redirect(302, "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/ParentApp.apk");
+    return;
+  }
+  if (p.includes("facultyapp") || p.includes("faculty_attendance")) {
     res.redirect(302, "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/FacultyApp.apk");
+    return;
+  }
+  if (p.endsWith(".apk")) {
+    res.redirect(302, "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/FacultyApp.apk");
+    return;
+  }
+  if (p.includes("parent-version")) {
+    res.json({
+      status: "ok",
+      latestVersionCode: 1,
+      latestVersionName: "1.0.0",
+      downloadUrl: "https://qr-attendance-app-eight.vercel.app/ParentApp.apk",
+      forceUpdate: false,
+      releaseNotes: "Official Parent App Release: Live Gate Attendance & Hourly Subject Schedule Tracking!"
+    });
     return;
   }
   if (p.includes("version") || p.includes("healthz")) {
