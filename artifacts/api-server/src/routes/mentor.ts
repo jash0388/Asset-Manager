@@ -883,18 +883,29 @@ router.get("/parent/student-report", async (req: any, res: any) => {
 
   try {
     const { date, day } = getCurrentISTDateTime();
+    const cleanRoll = rollNumberRaw.replace(/\s+/g, "").trim().toUpperCase();
 
     // 1. Fetch student profile
-    const { data: students, error: studentErr } = await supabase
+    let { data: students, error: studentErr } = await supabase
       .from("qr_users")
       .select("*")
-      .ilike("unique_id", rollNumberRaw)
+      .ilike("unique_id", cleanRoll)
       .limit(1);
 
     if (studentErr) throw studentErr;
+
+    if (!students || students.length === 0) {
+      const { data: altStudents } = await supabase
+        .from("qr_users")
+        .select("*")
+        .ilike("unique_id", `%${cleanRoll}%`)
+        .limit(1);
+      students = altStudents || [];
+    }
+
     const student = students?.[0];
     if (!student) {
-      res.status(404).json({ error: `No student found matching Roll Number '${rollNumberRaw}'` });
+      res.status(404).json({ error: `No student found matching Roll Number '${cleanRoll}'` });
       return;
     }
 
@@ -932,14 +943,20 @@ router.get("/parent/student-report", async (req: any, res: any) => {
     // 3. Fetch today's class schedule for student's section
     let todaySchedule: any[] = [];
     if (student.section) {
-      const { data: schedules, error: schedErr } = await supabase
+      const { data: schedules } = await supabase
         .from("qr_schedules")
-        .select("*, qr_mentors(name)")
+        .select("*")
         .eq("section", student.section)
         .eq("day_of_week", day)
         .order("start_time");
 
-      if (!schedErr && schedules) {
+      if (schedules && schedules.length > 0) {
+        const { data: mentorsList } = await supabase
+          .from("qr_mentors")
+          .select("id, name");
+        const mentorMap = new Map<number, string>();
+        (mentorsList || []).forEach(m => mentorMap.set(m.id, m.name));
+
         const scheduleIds = schedules.map(s => s.id);
         const { data: hourlyAtt } = await supabase
           .from("qr_hourly_attendance")
@@ -960,9 +977,9 @@ router.get("/parent/student-report", async (req: any, res: any) => {
           return {
             id: s.id,
             subject: s.subject || "Lecture Hour",
-            startTime: s.start_time.slice(0, 5),
-            endTime: s.end_time.slice(0, 5),
-            teacherName: s.qr_mentors?.name || "Faculty",
+            startTime: (s.start_time || "00:00").slice(0, 5),
+            endTime: (s.end_time || "00:00").slice(0, 5),
+            teacherName: mentorMap.get(s.mentor_id) || "Faculty",
             markedPresent: h ? Boolean(h.marked_present) : null,
             status
           };
