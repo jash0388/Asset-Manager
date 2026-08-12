@@ -64,6 +64,27 @@ export default function ParentApp() {
   const [data, setData] = useState<ParentReportData | null>(null);
   const [error, setError] = useState("");
 
+  const LOCAL_VERSION_CODE = 1;
+  const LOCAL_VERSION_NAME = "1.0.0";
+  const [updateInfo, setUpdateInfo] = useState<{
+    latestVersionCode: number;
+    latestVersionName: string;
+    downloadUrl: string;
+    forceUpdate: boolean;
+    releaseNotes: string;
+  } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const ver = await customFetch<any>("/api/parent/app-version");
+        if (ver && ver.latestVersionCode > LOCAL_VERSION_CODE) {
+          setUpdateInfo(ver);
+        }
+      } catch {}
+    })();
+  }, []);
+
   const fetchReport = async (roll: string) => {
     const clean = roll.trim().toUpperCase();
     if (!clean) return;
@@ -94,6 +115,31 @@ export default function ParentApp() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 font-sans pb-12">
+      {/* Auto-Update Banner */}
+      {updateInfo && (
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 border-b border-blue-400 p-3.5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-white sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-yellow-400 text-slate-950 flex items-center justify-center font-black shrink-0 shadow-md">
+              🚀
+            </div>
+            <div>
+              <span className="font-black text-xs uppercase tracking-wider block text-yellow-300">
+                New Parent App Update (v{updateInfo.latestVersionName}) Available!
+              </span>
+              <span className="text-[11px] font-medium text-blue-100 block mt-0.5">{updateInfo.releaseNotes}</span>
+            </div>
+          </div>
+          <a
+            href={updateInfo.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shrink-0 transition-transform active:scale-95 flex items-center justify-center gap-2"
+          >
+            Download APK Update
+          </a>
+        </div>
+      )}
+
       {/* Header Bar */}
       <header className="bg-slate-800/90 border-b border-slate-700/80 sticky top-0 z-30 backdrop-blur-md px-4 py-3 shadow-md">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
@@ -102,21 +148,33 @@ export default function ParentApp() {
               <GraduationCap className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-base font-black text-white leading-tight">Parent Portal</h1>
-              <p className="text-[11px] font-bold text-slate-400">Sphoorthy Engineering College</p>
+              <h1 className="text-base font-black text-white leading-tight">Parent Attendance App</h1>
+              <p className="text-[11px] font-bold text-slate-400">Sphoorthy Engineering College • v{LOCAL_VERSION_NAME}</p>
             </div>
           </div>
 
-          {data && (
-            <button
-              onClick={() => fetchReport(data.student.uniqueId)}
-              disabled={loading}
-              className="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-slate-600 transition-all"
+          <div className="flex items-center gap-2">
+            <a
+              href="/ParentApp.apk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-black flex items-center gap-1.5 border border-blue-400/40 shadow-sm transition-all"
+              title="Download Android Parent App APK"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-              Refresh
-            </button>
-          )}
+              Get App (APK)
+            </a>
+
+            {data && (
+              <button
+                onClick={() => fetchReport(data.student.uniqueId)}
+                disabled={loading}
+                className="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-slate-600 transition-all"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                Refresh
+              </button>
+            )}
+          </div>
         </div>
       </header>
 

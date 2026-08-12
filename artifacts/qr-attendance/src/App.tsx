@@ -89,7 +89,19 @@ function RequireAdminOrHod({ children }: { children: React.ReactNode }) {
 function AppRouter() {
   return (
     <Switch>
-      {/* Public routes */}
+      {/* Public APK Download Routes */}
+      <Route path="/ParentApp.apk">
+        {() => {
+          window.location.href = "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/ParentApp.apk";
+          return null;
+        }}
+      </Route>
+      <Route path="/Parent_Attendance.apk">
+        {() => {
+          window.location.href = "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/ParentApp.apk";
+          return null;
+        }}
+      </Route>
       <Route path="/FacultyApp.apk">
         {() => {
           window.location.href = "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/FacultyApp.apk";

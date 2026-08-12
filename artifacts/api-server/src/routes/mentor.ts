@@ -1008,4 +1008,15 @@ router.get("/parent/student-report", async (req: any, res: any) => {
   }
 });
 
+// 7. Public Parent App Version Check Endpoint
+router.get("/parent/app-version", (_req: any, res: any) => {
+  res.json({
+    latestVersionCode: 1,
+    latestVersionName: "1.0.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/ParentApp.apk",
+    forceUpdate: false,
+    releaseNotes: "Official Parent App Release: Live Gate Attendance & Hourly Subject Schedule Tracking!"
+  });
+});
+
 export default router;

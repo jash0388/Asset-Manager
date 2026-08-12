@@ -66020,6 +66020,15 @@ router5.get("/parent/student-report", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+router5.get("/parent/app-version", (_req, res) => {
+  res.json({
+    latestVersionCode: 1,
+    latestVersionName: "1.0.0",
+    downloadUrl: "https://qr-attendance-app-eight.vercel.app/ParentApp.apk",
+    forceUpdate: false,
+    releaseNotes: "Official Parent App Release: Live Gate Attendance & Hourly Subject Schedule Tracking!"
+  });
+});
 var mentor_default = router5;
 
 // src/routes/index.ts
