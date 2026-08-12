@@ -89,37 +89,6 @@ function RequireAdminOrHod({ children }: { children: React.ReactNode }) {
 function AppRouter() {
   return (
     <Switch>
-      {/* Public APK Download Routes */}
-      <Route path="/ParentApp.apk">
-        {() => {
-          window.location.href = "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/ParentApp.apk";
-          return null;
-        }}
-      </Route>
-      <Route path="/Parent_Attendance.apk">
-        {() => {
-          window.location.href = "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/ParentApp.apk";
-          return null;
-        }}
-      </Route>
-      <Route path="/FacultyApp.apk">
-        {() => {
-          window.location.href = "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/FacultyApp.apk";
-          return null;
-        }}
-      </Route>
-      <Route path="/Faculty_Attendance.apk">
-        {() => {
-          window.location.href = "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/FacultyApp.apk";
-          return null;
-        }}
-      </Route>
-      <Route path="/:filename.apk">
-        {() => {
-          window.location.href = "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/FacultyApp.apk";
-          return null;
-        }}
-      </Route>
       <Route path="/security" component={SecurityApp} />
       <Route path="/login" component={Login} />
       <Route path="/parent" component={ParentApp} />
