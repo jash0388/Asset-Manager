@@ -221,13 +221,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* ══════════ MAIN CONTENT ══════════ */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
         {/* Mobile top bar */}
-        <header style={{ display: "flex", alignItems: "center", gap: "16px", padding: "12px 16px", borderBottom: "1px solid #E5E7EB", background: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }} className="lg:hidden">
-          <button data-testid="mobile-menu-button" onClick={() => setMobileOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", display: "flex" }}>
-            <Menu style={{ width: "24px", height: "24px" }} />
-          </button>
+        <header style={{ display: "flex", alignItems: "center", justifyBetween: "space-between", gap: "12px", padding: "12px 16px", borderBottom: "1px solid #E5E7EB", background: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }} className="lg:hidden flex items-center justify-between">
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button data-testid="mobile-menu-button" onClick={() => setMobileOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", display: "flex" }}>
+              <Menu style={{ width: "24px", height: "24px" }} />
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <ShieldCheck style={{ width: "20px", height: "20px", color: "#2563EB" }} />
+              <span style={{ fontSize: "14px", fontWeight: "700", color: "#111827" }}>QR Attendance</span>
+            </div>
+          </div>
+
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <ShieldCheck style={{ width: "20px", height: "20px", color: "#2563EB" }} />
-            <span style={{ fontSize: "14px", fontWeight: "700", color: "#111827" }}>QR Attendance</span>
+            <button
+              onClick={openSettings}
+              style={{ padding: "8px 10px", borderRadius: "10px", background: "#f1f5f9", border: "1px solid #cbd5e1", cursor: "pointer", display: "flex", alignItems: "center", justify: "center" }}
+              title="Settings"
+            >
+              <Settings style={{ width: "18px", height: "18px", color: "#334155" }} />
+            </button>
+            <button
+              onClick={logout}
+              style={{ padding: "8px 12px", borderRadius: "10px", background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b", fontWeight: "700", fontSize: "12px", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+            >
+              <LogOut style={{ width: "16px", height: "16px" }} />
+              <span>Logout</span>
+            </button>
           </div>
         </header>
 
@@ -244,50 +263,65 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Settings style={{ width: "18px", height: "18px", color: "#2563EB" }} />
                 </div>
                 <div>
-                  <p style={{ fontSize: "14px", fontWeight: "800", color: "#111827", margin: 0 }}>Scanner Settings</p>
-                  <p style={{ fontSize: "11px", color: "#6B7280", margin: 0 }}>{settingsStep === "verify" ? "Verify identity to continue" : "Set your new passcode"}</p>
+                  <p style={{ fontSize: "14px", fontWeight: "800", color: "#111827", margin: 0 }}>System Settings</p>
+                  <p style={{ fontSize: "11px", color: "#6B7280", margin: 0 }}>Account Options & Passcode</p>
                 </div>
               </div>
               <button onClick={() => setShowSettings(false)} style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#F3F4F6", border: "none", cursor: "pointer", fontSize: "16px", color: "#6B7280", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
             </div>
 
-            {settingsStep === "verify" && (
-              <form onSubmit={handleVerifyForSettings} style={{ padding: "20px" }}>
-                <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Current Passcode</label>
-                <input type="password" placeholder="••••••" value={settingsCurrentPwd}
-                  onChange={e => { setSettingsCurrentPwd(e.target.value); setSettingsError(""); }}
-                  style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
-                  onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
-                {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
-                <button type="submit" style={{ width: "100%", marginTop: "14px", padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Continue →</button>
-              </form>
-            )}
+            <div style={{ padding: "20px", spaceY: "16px" }}>
+              <div style={{ padding: "14px", borderRadius: "12px", background: "#F8FAFC", border: "1px solid #E2E8F0", marginBottom: "16px" }}>
+                <p style={{ fontSize: "11px", color: "#64748B", margin: 0 }}>Logged in Account</p>
+                <p style={{ fontSize: "14px", fontWeight: "800", color: "#0F172A", margin: "2px 0 0" }}>{userDisplayName}</p>
+                <p style={{ fontSize: "11px", fontWeight: "600", color: "#2563EB", margin: "2px 0 0" }}>{userEmail}</p>
+              </div>
 
-            {settingsStep === "change" && (
-              <form onSubmit={handleChangePasscode} style={{ padding: "20px" }}>
-                <div style={{ marginBottom: "14px" }}>
-                  <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>New Passcode</label>
-                  <input type="password" placeholder="Min 4 characters" value={settingsNewPwd}
-                    onChange={e => { setSettingsNewPwd(e.target.value); setSettingsError(""); }}
+              {settingsStep === "verify" && (
+                <form onSubmit={handleVerifyForSettings}>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Current Passcode</label>
+                  <input type="password" placeholder="••••••" value={settingsCurrentPwd}
+                    onChange={e => { setSettingsCurrentPwd(e.target.value); setSettingsError(""); }}
                     style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
                     onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Confirm Passcode</label>
-                  <input type="password" placeholder="Repeat passcode" value={settingsConfirmPwd}
-                    onChange={e => { setSettingsConfirmPwd(e.target.value); setSettingsError(""); }}
-                    style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
-                    onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
-                </div>
-                {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
-                {settingsSuccess && <p style={{ color: "#059669", fontSize: "13px", fontWeight: "700", textAlign: "center", marginTop: "8px" }}>{settingsSuccess}</p>}
-                <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
-                  <button type="button" onClick={() => setSettingsStep("verify")} style={{ flex: 1, padding: "12px", borderRadius: "12px", background: "#F3F4F6", border: "1px solid #E5E7EB", color: "#374151", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>← Back</button>
-                  <button type="submit" style={{ flex: 2, padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Save Passcode</button>
-                </div>
-                <p style={{ fontSize: "11px", color: "#9CA3AF", textAlign: "center", marginTop: "12px" }}>Master override always works as backup.</p>
-              </form>
-            )}
+                  {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
+                  <button type="submit" style={{ width: "100%", marginTop: "14px", padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Change Passcode →</button>
+                </form>
+              )}
+
+              {settingsStep === "change" && (
+                <form onSubmit={handleChangePasscode}>
+                  <div style={{ marginBottom: "14px" }}>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>New Passcode</label>
+                    <input type="password" placeholder="Min 4 characters" value={settingsNewPwd}
+                      onChange={e => { setSettingsNewPwd(e.target.value); setSettingsError(""); }}
+                      style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
+                      onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Confirm Passcode</label>
+                    <input type="password" placeholder="Repeat passcode" value={settingsConfirmPwd}
+                      onChange={e => { setSettingsConfirmPwd(e.target.value); setSettingsError(""); }}
+                      style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
+                      onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
+                  </div>
+                  {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
+                  {settingsSuccess && <p style={{ color: "#059669", fontSize: "13px", fontWeight: "700", textAlign: "center", marginTop: "8px" }}>{settingsSuccess}</p>}
+                  <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+                    <button type="button" onClick={() => setSettingsStep("verify")} style={{ flex: 1, padding: "12px", borderRadius: "12px", background: "#F3F4F6", border: "1px solid #E5E7EB", color: "#374151", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>← Back</button>
+                    <button type="submit" style={{ flex: 2, padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Save Passcode</button>
+                  </div>
+                </form>
+              )}
+
+              <button
+                onClick={() => { setShowSettings(false); logout(); }}
+                style={{ width: "100%", marginTop: "16px", padding: "14px", borderRadius: "12px", background: "#DC2626", color: "#ffffff", fontWeight: "800", fontSize: "14px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+              >
+                <LogOut style={{ width: "18px", height: "18px" }} />
+                LOGOUT FROM ACCOUNT
+              </button>
+            </div>
           </div>
         </div>
       )}
