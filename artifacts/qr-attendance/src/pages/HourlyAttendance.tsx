@@ -613,74 +613,72 @@ export default function HourlyAttendance() {
                     </SheetDescription>
 
                     {/* HOD Attendance Control Switch & Buffer Extension inside Modal */}
-                    {(role === "hod" || role === "admin") && (
-                      <div className="mt-4 p-3 bg-purple-100/70 border border-purple-300 rounded-xl space-y-2.5 shadow-xs">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5">
-                            {isUnlocked ? (
-                              <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-600 text-white flex items-center gap-1 shadow-xs">
-                                <Unlock className="w-3.5 h-3.5" /> UNLOCKED (HOD Override)
-                              </span>
-                            ) : (
-                              <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-gray-700 border border-gray-300 flex items-center gap-1">
-                                <Lock className="w-3.5 h-3.5 text-gray-500" /> Standard Time Lock (10m Buffer Active)
-                              </span>
-                            )}
-                          </div>
+                    <div className="mt-4 p-3 bg-[#f3e8ff] border border-purple-300 rounded-xl space-y-2.5 shadow-sm">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          {isUnlocked ? (
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-600 text-white flex items-center gap-1 shadow-xs">
+                              <Unlock className="w-3.5 h-3.5" /> UNLOCKED (Attendance Open)
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white text-gray-800 border border-gray-300 flex items-center gap-1">
+                              <Lock className="w-3.5 h-3.5 text-gray-500" /> Standard Time Lock (10m Buffer Active)
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleToggleScheduleOverride(selectedSchedule.id, isUnlocked, extendedMins)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 border ${
+                            isUnlocked
+                              ? "bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700"
+                              : "bg-purple-700 text-white border-purple-800 hover:bg-purple-800"
+                          }`}
+                        >
+                          {isUnlocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                          {isUnlocked ? "Lock Attendance" : "Unlock Class Now"}
+                        </button>
+                      </div>
+
+                      {/* Buffer Time Extension Buttons */}
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-purple-200">
+                        <span className="text-xs font-extrabold text-purple-950">Extend Attendance Buffer:</span>
+                        <div className="flex items-center gap-1.5">
                           <button
-                            onClick={() => handleToggleScheduleOverride(selectedSchedule.id, isUnlocked, extendedMins)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 border ${
-                              isUnlocked
-                                ? "bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700"
-                                : "bg-purple-700 text-white border-purple-800 hover:bg-purple-800"
+                            onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 15)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                              extendedMins === 15 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
                             }`}
                           >
-                            {isUnlocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                            {isUnlocked ? "Lock Attendance" : "Unlock Class Now"}
+                            +15m
                           </button>
-                        </div>
-
-                        {/* Buffer Time Extension Buttons */}
-                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-purple-200">
-                          <span className="text-xs font-extrabold text-purple-950">Extend Attendance Buffer:</span>
-                          <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 30)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                              extendedMins === 30 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                            }`}
+                          >
+                            +30m
+                          </button>
+                          <button
+                            onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 60)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                              extendedMins === 60 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                            }`}
+                          >
+                            +1h
+                          </button>
+                          {extendedMins > 0 && (
                             <button
-                              onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 15)}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
-                                extendedMins === 15 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                              }`}
+                              onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 0)}
+                              className="px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 cursor-pointer"
+                              title="Reset extra buffer time"
                             >
-                              +15m
+                              Reset
                             </button>
-                            <button
-                              onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 30)}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
-                                extendedMins === 30 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                              }`}
-                            >
-                              +30m
-                            </button>
-                            <button
-                              onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 60)}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
-                                extendedMins === 60 ? "bg-purple-700 text-white border-purple-800" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                              }`}
-                            >
-                              +1h
-                            </button>
-                            {extendedMins > 0 && (
-                              <button
-                                onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 0)}
-                                className="px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 cursor-pointer"
-                                title="Reset extra buffer time"
-                              >
-                                Reset
-                              </button>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
-                    )}
+                    </div>
                   </SheetHeader>
 
                 {/* Toolbar inside drawer */}
