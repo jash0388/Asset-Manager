@@ -20,6 +20,7 @@ import InchargeDashboard from "@/pages/InchargeDashboard";
 import ParentApp from "@/pages/ParentApp";
 import { Analytics } from "@vercel/analytics/react";
 import { useEffect } from "react";
+import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -178,6 +179,7 @@ function App() {
             <AppRouter />
           </WouterRouter>
           <Toaster />
+          <PWAUpdatePrompt />
           <Analytics />
         </TooltipProvider>
       </AuthProvider>

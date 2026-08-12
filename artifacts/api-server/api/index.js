@@ -49453,17 +49453,17 @@ var import_express = __toESM(require_express2(), 1);
 var router = (0, import_express.Router)();
 var versionPayload = {
   status: "ok",
-  latestVersionCode: 4,
-  latestVersionName: "1.3.0",
+  latestVersionCode: 8,
+  latestVersionName: "1.7.0",
   downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-  forceUpdate: false,
-  releaseNotes: "New Update: Complete student name & roll number visibility fix!",
+  forceUpdate: true,
+  releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!",
   appVersion: {
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-    forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+    forceUpdate: true,
+    releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
   }
 };
 router.get(["/healthz", "/version", "/app-version", "/app-version-info", "/index", "/index.js", "/"], (_req, res) => {
@@ -65559,11 +65559,11 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
       todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date },
       appVersion: {
-        latestVersionCode: 7,
-        latestVersionName: "1.6.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.7.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-        forceUpdate: false,
-        releaseNotes: "New Update: 2-Hour lab & session duration badges!"
+        forceUpdate: true,
+        releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
       }
     });
   } catch (err) {
