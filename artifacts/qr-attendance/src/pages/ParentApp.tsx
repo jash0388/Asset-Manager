@@ -77,7 +77,7 @@ export default function ParentApp() {
   useEffect(() => {
     (async () => {
       try {
-        const ver = await customFetch<any>("/api/parent/app-version");
+        const ver = await customFetch<any>("/api/parent-version");
         if (ver && ver.latestVersionCode > LOCAL_VERSION_CODE) {
           setUpdateInfo(ver);
         }
