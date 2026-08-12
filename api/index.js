@@ -66165,17 +66165,17 @@ app.use((req, res, next) => {
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
-      latestVersionCode: 7,
-      latestVersionName: "1.6.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.7.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-      forceUpdate: false,
-      releaseNotes: "New Update: 2-Hour lab & session duration badges!",
+      forceUpdate: true,
+      releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!",
       appVersion: {
-        latestVersionCode: 7,
-        latestVersionName: "1.6.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.7.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-        forceUpdate: false,
-        releaseNotes: "New Update: 2-Hour lab & session duration badges!"
+        forceUpdate: true,
+        releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
       }
     });
     return;
