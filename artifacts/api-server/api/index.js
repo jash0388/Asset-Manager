@@ -49453,16 +49453,16 @@ var import_express = __toESM(require_express2(), 1);
 var router = (0, import_express.Router)();
 var versionPayload = {
   status: "ok",
-  latestVersionCode: 8,
+  latestVersionCode: 7,
   latestVersionName: "1.7.0",
   downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-  forceUpdate: true,
+  forceUpdate: false,
   releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!",
   appVersion: {
-    latestVersionCode: 8,
+    latestVersionCode: 7,
     latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-    forceUpdate: true,
+    forceUpdate: false,
     releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
   }
 };
@@ -65559,10 +65559,10 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
       todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date },
       appVersion: {
-        latestVersionCode: 8,
+        latestVersionCode: 7,
         latestVersionName: "1.7.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-        forceUpdate: true,
+        forceUpdate: false,
         releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
       }
     });
@@ -66165,16 +66165,16 @@ app.use((req, res, next) => {
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
-      latestVersionCode: 8,
+      latestVersionCode: 7,
       latestVersionName: "1.7.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-      forceUpdate: true,
+      forceUpdate: false,
       releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!",
       appVersion: {
-        latestVersionCode: 8,
+        latestVersionCode: 7,
         latestVersionName: "1.7.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-        forceUpdate: true,
+        forceUpdate: false,
         releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
       }
     });

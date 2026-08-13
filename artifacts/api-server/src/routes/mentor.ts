@@ -310,10 +310,10 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
       todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date },
       appVersion: {
-        latestVersionCode: 8,
+        latestVersionCode: 7,
         latestVersionName: "1.7.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-        forceUpdate: true,
+        forceUpdate: false,
         releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
       }
     });
