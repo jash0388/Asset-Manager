@@ -391,7 +391,8 @@ export default function HodDashboard() {
   const classPresentUserIds = useMemo(() => {
     const set = new Set<number>();
     (todayClassPresence || []).forEach(r => {
-      if (r.user_id) set.add(r.user_id);
+      const uid = Number(r.user_id || r.userId || r.user?.id);
+      if (uid && !isNaN(uid)) set.add(uid);
     });
     return set;
   }, [todayClassPresence]);
