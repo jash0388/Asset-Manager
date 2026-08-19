@@ -154,8 +154,9 @@ function StudentProfileModal({ student, trainingStartDate, onClose }: { student:
 }
 
 // ─── Manage Sub-Sessions / Batches Modal ──────────────────────────────────────
-function ManageSubSessionsModal({ session, onClose, onUpdated }: {
+function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
   session: TrainingSession;
+  allStudents: Student[];
   onClose: () => void;
   onUpdated: () => void;
 }) {
@@ -168,6 +169,7 @@ function ManageSubSessionsModal({ session, onClose, onUpdated }: {
         ]
   );
   const [newSubName, setNewSubName] = useState("");
+  const [subForStudents, setSubForStudents] = useState<TrainingSubSession | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -200,7 +202,7 @@ function ManageSubSessionsModal({ session, onClose, onUpdated }: {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-      <div style={{ background: "#fff", borderRadius: "16px", width: "100%", maxWidth: "560px", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
+      <div style={{ background: "#fff", borderRadius: "16px", width: "100%", maxWidth: "620px", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
         <div style={{ background: "linear-gradient(135deg, #0284C7, #0EA5E9)", padding: "18px 24px", borderRadius: "16px 16px 0 0", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: "10px", opacity: 0.75 }}>TRAINING SESSIONS & BATCHES</div>
@@ -212,37 +214,46 @@ function ManageSubSessionsModal({ session, onClose, onUpdated }: {
         <div style={{ padding: "20px 24px" }}>
           {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "8px", padding: "10px 14px", marginBottom: "12px", color: "#DC2626", fontSize: "13px" }}>{error}</div>}
           <p style={{ fontSize: "13px", color: "#64748B", marginTop: 0, marginBottom: "16px" }}>
-            Create multiple sessions/batches (e.g. <strong>Session 1</strong>, <strong>Session 2</strong>) so the trainer can take attendance separately for each batch in the Faculty App.
+            Add students to <strong>Session 1</strong> or <strong>Session 2</strong> below so the trainer can take attendance separately for each batch in the Faculty App.
           </p>
 
           {/* List of sub-sessions */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
             {subSessions.map((sub, idx) => (
-              <div key={sub.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", background: "#F8FAFC", border: "1.5px solid #E2E8F0", borderRadius: "10px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ background: "#0284C7", color: "#fff", width: "24px", height: "24px", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 800 }}>
+              <div key={sub.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", background: "#F8FAFC", border: "1.5px solid #E2E8F0", borderRadius: "12px", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+                  <span style={{ background: "#0284C7", color: "#fff", width: "24px", height: "24px", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 800, flexShrink: 0 }}>
                     {idx + 1}
                   </span>
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <input
                       value={sub.name}
                       onChange={e => {
                         const val = e.target.value;
                         setSubSessions(prev => prev.map(s => s.id === sub.id ? { ...s, name: val } : s));
                       }}
-                      style={{ fontSize: "14px", fontWeight: 700, color: "#0F172A", border: "1px solid #CBD5E1", borderRadius: "6px", padding: "4px 8px" }}
+                      style={{ fontSize: "14px", fontWeight: 700, color: "#0F172A", border: "1px solid #CBD5E1", borderRadius: "6px", padding: "4px 8px", width: "100%", boxSizing: "border-box" }}
                     />
                     <div style={{ fontSize: "11px", color: "#64748B", marginTop: "2px" }}>
-                      👥 {sub.studentIds?.length || 0} students assigned
+                      👥 {sub.studentIds?.length || 0} students assigned to this session
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleRemove(sub.id)}
-                  style={{ background: "#FEE2E2", border: "1px solid #FECACA", color: "#DC2626", borderRadius: "8px", padding: "6px 10px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
-                >
-                  Delete
-                </button>
+
+                <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                  <button
+                    onClick={() => setSubForStudents(sub)}
+                    style={{ background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", border: "none", borderRadius: "8px", padding: "7px 14px", fontSize: "12px", fontWeight: 700, cursor: "pointer", boxShadow: "0 2px 8px rgba(124,58,237,0.25)" }}
+                  >
+                    👥 Select Students ({sub.studentIds?.length || 0})
+                  </button>
+                  <button
+                    onClick={() => handleRemove(sub.id)}
+                    style={{ background: "#FEE2E2", border: "1px solid #FECACA", color: "#DC2626", borderRadius: "8px", padding: "7px 10px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+                  >
+                    🗑
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -272,23 +283,58 @@ function ManageSubSessionsModal({ session, onClose, onUpdated }: {
           </div>
         </div>
       </div>
+
+      {/* Sub-session student selector modal nested */}
+      {subForStudents && (
+        <ManageStudentsModal
+          session={session}
+          initialSubSessionId={subForStudents.id}
+          allStudents={allStudents}
+          onClose={() => setSubForStudents(null)}
+          onSaved={() => {
+            onUpdated();
+            setSubForStudents(null);
+          }}
+        />
+      )}
     </div>
   );
 }
 
-// ─── Manage Students Modal (Optimistic & Rapid Fast) ─────────────────────────
-function ManageStudentsModal({ session, subSession, allStudents, onClose, onSaved }: {
+// ─── Manage Students Modal with Session 1 & Session 2 Toggle ─────────────────
+function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClose, onSaved }: {
   session: TrainingSession;
-  subSession?: TrainingSubSession | null;
+  initialSubSessionId?: number | null;
   allStudents: Student[];
   onClose: () => void;
-  onSaved: (updatedIds: number[]) => void;
+  onSaved: () => void;
 }) {
-  const initialIds = subSession ? (subSession.studentIds || []) : (session.studentIds || []);
-  const [selectedIds, setSelectedIds] = useState<number[]>([...initialIds]);
+  const subSessions = (session.subSessions && session.subSessions.length > 0)
+    ? session.subSessions
+    : [
+        { id: 1, name: "Session 1 (Morning Batch)", studentIds: [] },
+        { id: 2, name: "Session 2 (Afternoon Batch)", studentIds: [] }
+      ];
+
+  // Active sub-session tab inside the modal (default to Session 1 or initial selection)
+  const [activeTabSubId, setActiveTabSubId] = useState<number | null>(
+    initialSubSessionId !== undefined ? initialSubSessionId : (subSessions[0]?.id || 1)
+  );
+
+  // In-memory state for students assigned to each sub-session
+  const [subStudentsMap, setSubStudentsMap] = useState<Record<number, number[]>>(() => {
+    const map: Record<number, number[]> = {};
+    subSessions.forEach(s => { map[s.id] = [...(s.studentIds || [])]; });
+    return map;
+  });
+
+  const [overallIds, setOverallIds] = useState<number[]>([...(session.studentIds || [])]);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const currentSelectedIds = activeTabSubId !== null ? (subStudentsMap[activeTabSubId] || []) : overallIds;
+  const currentSub = subSessions.find(s => s.id === activeTabSubId);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return allStudents;
@@ -300,28 +346,56 @@ function ManageStudentsModal({ session, subSession, allStudents, onClose, onSave
     );
   }, [search, allStudents]);
 
-  const toggle = (id: number) =>
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  const selectAll = () => setSelectedIds(filtered.map(s => s.id));
-  const clearAll = () => setSelectedIds([]);
+  const toggle = (id: number) => {
+    if (activeTabSubId !== null) {
+      setSubStudentsMap(prev => {
+        const curr = prev[activeTabSubId] || [];
+        const next = curr.includes(id) ? curr.filter(x => x !== id) : [...curr, id];
+        return { ...prev, [activeTabSubId]: next };
+      });
+    } else {
+      setOverallIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    }
+  };
+
+  const selectAll = () => {
+    const ids = filtered.map(s => s.id);
+    if (activeTabSubId !== null) {
+      setSubStudentsMap(prev => ({ ...prev, [activeTabSubId]: ids }));
+    } else {
+      setOverallIds(ids);
+    }
+  };
+
+  const clearAll = () => {
+    if (activeTabSubId !== null) {
+      setSubStudentsMap(prev => ({ ...prev, [activeTabSubId]: [] }));
+    } else {
+      setOverallIds([]);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (subSession) {
-        // Update specific subSession
-        await apiFetch(`/api/admin/training-sessions/${session.id}/sub-sessions/${subSession.id}`, {
-          method: "PUT",
-          body: JSON.stringify({ name: subSession.name, studentIds: selectedIds })
-        });
-      } else {
-        // Update overall session
-        await apiFetch(`/api/admin/training-sessions/${session.id}`, {
-          method: "PUT",
-          body: JSON.stringify({ studentIds: selectedIds })
-        });
-      }
-      onSaved(selectedIds);
+      const updatedSubSessions = subSessions.map(s => ({
+        ...s,
+        studentIds: subStudentsMap[s.id] || []
+      }));
+
+      // Overall enrolled is union of all subSessions + overall
+      const allIds = new Set<number>();
+      Object.values(subStudentsMap).forEach(arr => arr.forEach(id => allIds.add(id)));
+      overallIds.forEach(id => allIds.add(id));
+
+      await apiFetch(`/api/admin/training-sessions/${session.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          subSessions: updatedSubSessions,
+          studentIds: Array.from(allIds)
+        })
+      });
+      onSaved();
       onClose();
     } catch (e: any) {
       setError(e.message || "Failed to save");
@@ -330,23 +404,64 @@ function ManageStudentsModal({ session, subSession, allStudents, onClose, onSave
     }
   };
 
-  const title = subSession ? `Add Students to ${subSession.name}` : `Manage Students for ${session.name}`;
-
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-      <div style={{ background: "#fff", borderRadius: "16px", width: "100%", maxWidth: "680px", maxHeight: "90vh", overflow: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
+      <div style={{ background: "#fff", borderRadius: "16px", width: "100%", maxWidth: "700px", maxHeight: "90vh", overflow: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
+        {/* Header */}
         <div style={{ background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", padding: "18px 24px", borderRadius: "16px 16px 0 0", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: "10px", opacity: 0.7 }}>ENROL STUDENTS</div>
-            <h2 style={{ margin: "4px 0 0", fontSize: "18px", fontWeight: 700 }}>{title}</h2>
+            <div style={{ fontSize: "10px", opacity: 0.75, letterSpacing: "0.5px" }}>MANAGE TRAINING ROSTER</div>
+            <h2 style={{ margin: "4px 0 0", fontSize: "18px", fontWeight: 800 }}>{session.name} — Select Session Students</h2>
           </div>
-          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "8px", padding: "6px 12px", cursor: "pointer" }}>✕</button>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontWeight: 700 }}>✕</button>
         </div>
+
         <div style={{ padding: "20px 24px" }}>
           {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "8px", padding: "10px 14px", marginBottom: "12px", color: "#DC2626", fontSize: "13px" }}>{error}</div>}
 
+          {/* SESSION 1 / SESSION 2 TOGGLE TABS */}
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", display: "block", marginBottom: "6px", letterSpacing: "0.5px" }}>
+              CHOOSE SESSION TO ADD / EDIT STUDENTS:
+            </label>
+            <div style={{ display: "flex", gap: "8px", background: "#F1F5F9", padding: "6px", borderRadius: "12px", flexWrap: "wrap" }}>
+              {subSessions.map(sub => {
+                const isSelected = activeTabSubId === sub.id;
+                const count = (subStudentsMap[sub.id] || []).length;
+                return (
+                  <button
+                    key={sub.id}
+                    onClick={() => setActiveTabSubId(sub.id)}
+                    style={{
+                      flex: "1 1 140px", padding: "10px 14px", borderRadius: "10px", border: "none", cursor: "pointer",
+                      fontSize: "13px", fontWeight: 700, transition: "all 0.15s",
+                      background: isSelected ? "linear-gradient(135deg, #7C3AED, #8B5CF6)" : "transparent",
+                      color: isSelected ? "#fff" : "#475569",
+                      boxShadow: isSelected ? "0 4px 12px rgba(124,58,237,0.3)" : "none"
+                    }}
+                  >
+                    📑 {sub.name} ({count})
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => setActiveTabSubId(null)}
+                style={{
+                  flex: "1 1 120px", padding: "10px 14px", borderRadius: "10px", border: "none", cursor: "pointer",
+                  fontSize: "13px", fontWeight: 700, transition: "all 0.15s",
+                  background: activeTabSubId === null ? "#1E293B" : "transparent",
+                  color: activeTabSubId === null ? "#fff" : "#475569"
+                }}
+              >
+                📋 All Enrolled ({overallIds.length})
+              </button>
+            </div>
+          </div>
+
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ fontSize: "13px", fontWeight: 700, color: "#1E293B" }}>{selectedIds.length} students selected</span>
+            <span style={{ fontSize: "13px", fontWeight: 700, color: "#1E293B" }}>
+              {currentSelectedIds.length} students selected for {currentSub ? currentSub.name : "All Enrolled"}
+            </span>
             <div style={{ display: "flex", gap: "6px" }}>
               <button onClick={selectAll} style={{ fontSize: "11px", padding: "5px 12px", borderRadius: "6px", background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1D4ED8", fontWeight: 600, cursor: "pointer" }}>Select All Visible</button>
               <button onClick={clearAll} style={{ fontSize: "11px", padding: "5px 12px", borderRadius: "6px", background: "#F1F5F9", border: "1px solid #CBD5E1", color: "#475569", fontWeight: 600, cursor: "pointer" }}>Clear All</button>
@@ -356,13 +471,13 @@ function ManageStudentsModal({ session, subSession, allStudents, onClose, onSave
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search student by name, roll number, or section..."
-            style={{ width: "100%", padding: "10px 14px", border: "1.5px solid #CBD5E1", borderRadius: "8px", fontSize: "13px", marginBottom: "10px", boxSizing: "border-box", outline: "none" }}
+            placeholder={`Search students to add to ${currentSub ? currentSub.name : "session"}...`}
+            style={{ width: "100%", padding: "10px 14px", border: "1.5px solid #CBD5E1", borderRadius: "10px", fontSize: "13px", marginBottom: "10px", boxSizing: "border-box", outline: "none" }}
           />
 
-          <div style={{ border: "1px solid #E2E8F0", borderRadius: "10px", maxHeight: "340px", overflow: "auto", marginBottom: "16px" }}>
+          <div style={{ border: "1px solid #E2E8F0", borderRadius: "12px", maxHeight: "320px", overflow: "auto", marginBottom: "16px" }}>
             {filtered.map((s, idx) => {
-              const checked = selectedIds.includes(s.id);
+              const checked = currentSelectedIds.includes(s.id);
               return (
                 <div
                   key={s.id}
@@ -385,7 +500,7 @@ function ManageStudentsModal({ session, subSession, allStudents, onClose, onSave
           <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
             <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: "10px", border: "1.5px solid #E2E8F0", background: "#fff", fontSize: "13px", cursor: "pointer" }}>Cancel</button>
             <button onClick={handleSave} disabled={saving} style={{ padding: "10px 24px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
-              {saving ? "Saving..." : `Save ${selectedIds.length} Students`}
+              {saving ? "Saving..." : "Save Students to Session"}
             </button>
           </div>
         </div>
@@ -532,7 +647,7 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
   const qc = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [addKeyFor, setAddKeyFor] = useState<TrainingSession | null>(null);
-  const [manageStudentsModal, setManageStudentsModal] = useState<{ session: TrainingSession; subSession?: TrainingSubSession | null } | null>(null);
+  const [manageStudentsOpen, setManageStudentsOpen] = useState(false);
   const [manageSubSessionsFor, setManageSubSessionsFor] = useState<TrainingSession | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [activeSubSessionId, setActiveSubSessionId] = useState<number | null>(null);
@@ -549,9 +664,15 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
   // Active session based on trainingId
   const activeSession = trainingId ? sessions.find(s => s.id === trainingId) : null;
 
-  // Active sub-session
-  const subSessions = activeSession?.subSessions || [];
-  const currentSubSession = activeSubSessionId ? subSessions.find(s => s.id === activeSubSessionId) : null;
+  // Active sub-sessions (defaults to Session 1 and Session 2 if empty)
+  const subSessions = (activeSession?.subSessions && activeSession.subSessions.length > 0)
+    ? activeSession.subSessions
+    : [
+        { id: 1, name: "Session 1 (Morning)", studentIds: [] },
+        { id: 2, name: "Session 2 (Afternoon)", studentIds: [] }
+      ];
+
+  const currentSubSession = activeSubSessionId !== null ? subSessions.find(s => s.id === activeSubSessionId) : null;
 
   // Fetch all students for lookup
   const { data: allStudents = [] } = useQuery<Student[]>({
@@ -659,20 +780,20 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
 
           {activeSession && (
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {/* Manage Students button (opens modal with Session 1 & Session 2 toggle) */}
+              <button
+                onClick={() => setManageStudentsOpen(true)}
+                style={{ padding: "10px 20px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
+              >
+                👥 Manage Students (Session 1 & 2)
+              </button>
+
               {/* Manage Sub-Sessions / Batches */}
               <button
                 onClick={() => setManageSubSessionsFor(activeSession)}
                 style={{ padding: "10px 18px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #0284C7, #0EA5E9)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(2,132,199,0.3)" }}
               >
                 📑 Manage Sessions / Batches
-              </button>
-
-              {/* Manage Students */}
-              <button
-                onClick={() => setManageStudentsModal({ session: activeSession, subSession: currentSubSession })}
-                style={{ padding: "10px 18px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
-              >
-                👥 {currentSubSession ? `Add to ${currentSubSession.name}` : "Manage Students"}
               </button>
 
               {/* Add Trainer Key */}
@@ -728,7 +849,7 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
                         <div style={{ fontSize: "10px", color: "#6B7280" }}>Students</div>
                       </div>
                       <div style={{ textAlign: "center", flex: 1, padding: "10px", background: "#EFF6FF", borderRadius: "10px" }}>
-                        <div style={{ fontSize: "20px", fontWeight: 800, color: "#1D4ED8" }}>{s.subSessions?.length || 0}</div>
+                        <div style={{ fontSize: "20px", fontWeight: 800, color: "#1D4ED8" }}>{s.subSessions?.length || 2}</div>
                         <div style={{ fontSize: "10px", color: "#6B7280" }}>Sessions/Batches</div>
                       </div>
                     </div>
@@ -753,12 +874,12 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
         {/* ── ACTIVE SESSION VIEW ── */}
         {activeSession && (
           <>
-            {/* SUB-SESSIONS TABS */}
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>
+            {/* SUB-SESSIONS BUTTONS BESIDE ALL ENROLLED BUTTON */}
+            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "18px", overflowX: "auto", paddingBottom: "4px" }}>
               <button
                 onClick={() => setActiveSubSessionId(null)}
                 style={{
-                  padding: "8px 16px", borderRadius: "10px", border: "none", cursor: "pointer",
+                  padding: "9px 18px", borderRadius: "10px", border: "none", cursor: "pointer",
                   fontSize: "13px", fontWeight: 700, transition: "all 0.15s",
                   background: activeSubSessionId === null ? "#1E293B" : "#F1F5F9",
                   color: activeSubSessionId === null ? "#fff" : "#475569",
@@ -770,19 +891,20 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
 
               {subSessions.map(sub => {
                 const isSelected = activeSubSessionId === sub.id;
+                const count = sub.studentIds?.length || 0;
                 return (
                   <button
                     key={sub.id}
                     onClick={() => setActiveSubSessionId(sub.id)}
                     style={{
-                      padding: "8px 16px", borderRadius: "10px", border: "none", cursor: "pointer",
+                      padding: "9px 18px", borderRadius: "10px", border: "none", cursor: "pointer",
                       fontSize: "13px", fontWeight: 700, transition: "all 0.15s",
                       background: isSelected ? "linear-gradient(135deg, #0284C7, #0EA5E9)" : "#F1F5F9",
                       color: isSelected ? "#fff" : "#475569",
                       boxShadow: isSelected ? "0 4px 12px rgba(2,132,199,0.3)" : "none"
                     }}
                   >
-                    📑 {sub.name} ({sub.studentIds?.length || 0})
+                    📑 {sub.name} ({count})
                   </button>
                 );
               })}
@@ -790,11 +912,11 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
               <button
                 onClick={() => setManageSubSessionsFor(activeSession)}
                 style={{
-                  padding: "8px 14px", borderRadius: "10px", border: "1.5px dashed #94A3B8", background: "transparent",
+                  padding: "9px 14px", borderRadius: "10px", border: "1.5px dashed #94A3B8", background: "transparent",
                   color: "#0284C7", fontSize: "12px", fontWeight: 700, cursor: "pointer"
                 }}
               >
-                + Add / Edit Sessions
+                + Add Session
               </button>
             </div>
 
@@ -849,7 +971,7 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
                   Click below to select and assign students to <strong>{currentSubSession ? currentSubSession.name : activeSession.name}</strong>.
                 </p>
                 <button
-                  onClick={() => setManageStudentsModal({ session: activeSession, subSession: currentSubSession })}
+                  onClick={() => setManageStudentsOpen(true)}
                   style={{ padding: "11px 24px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}
                 >
                   👥 {currentSubSession ? `Add Students to ${currentSubSession.name}` : "Manage Students"}
@@ -931,6 +1053,7 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
       {manageSubSessionsFor && (
         <ManageSubSessionsModal
           session={manageSubSessionsFor}
+          allStudents={allStudents}
           onClose={() => setManageSubSessionsFor(null)}
           onUpdated={() => {
             qc.invalidateQueries({ queryKey: ["training-sessions"] });
@@ -938,12 +1061,12 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
         />
       )}
 
-      {manageStudentsModal && (
+      {manageStudentsOpen && activeSession && (
         <ManageStudentsModal
-          session={manageStudentsModal.session}
-          subSession={manageStudentsModal.subSession}
+          session={activeSession}
+          initialSubSessionId={activeSubSessionId}
           allStudents={allStudents}
-          onClose={() => setManageStudentsModal(null)}
+          onClose={() => setManageStudentsOpen(false)}
           onSaved={() => {
             qc.invalidateQueries({ queryKey: ["training-sessions"] });
           }}
