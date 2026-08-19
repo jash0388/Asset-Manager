@@ -64080,6 +64080,22 @@ var defaultData = {
       description: "Full Stack Development & Quantitative Aptitude Training",
       createdAt: "2026-08-19T00:00:00.000Z",
       studentIds: [],
+      subSessions: [
+        {
+          id: 1,
+          name: "Session 1 (Morning Batch)",
+          studentIds: [],
+          startTime: "09:00",
+          endTime: "12:30"
+        },
+        {
+          id: 2,
+          name: "Session 2 (Afternoon Batch)",
+          studentIds: [],
+          startTime: "13:30",
+          endTime: "16:30"
+        }
+      ],
       trainerKeys: [
         {
           id: 901,
@@ -64137,7 +64153,7 @@ async function syncToSupabase(data) {
 syncFromSupabase().catch(() => {
 });
 async function ensureFreshStore() {
-  if (Date.now() - lastLoadedAt > 5e3) {
+  if (Date.now() - lastLoadedAt > 3e3) {
     await syncFromSupabase();
   }
   return memoryStore;
@@ -64168,6 +64184,10 @@ function saveTrainingSession(session) {
     description: session.description || "",
     createdAt: session.createdAt || (/* @__PURE__ */ new Date()).toISOString(),
     studentIds: Array.isArray(session.studentIds) ? session.studentIds : [],
+    subSessions: Array.isArray(session.subSessions) ? session.subSessions : existingIndex >= 0 ? memoryStore.sessions[existingIndex].subSessions || [] : [
+      { id: 1, name: "Session 1", studentIds: [] },
+      { id: 2, name: "Session 2", studentIds: [] }
+    ],
     trainerKeys: Array.isArray(session.trainerKeys) ? session.trainerKeys : [
       {
         id: 900 + id,
@@ -64192,6 +64212,40 @@ function deleteTrainingSession(id) {
   syncToSupabase(memoryStore).catch(console.error);
   return memoryStore.sessions.length < initLen;
 }
+function saveSubSession(trainingId, sub) {
+  const session = memoryStore.sessions.find((s) => s.id === trainingId);
+  if (!session) return void 0;
+  if (!Array.isArray(session.subSessions)) session.subSessions = [];
+  const subId = sub.id || (session.subSessions.length > 0 ? Math.max(...session.subSessions.map((x) => x.id)) + 1 : 1);
+  const existingIndex = session.subSessions.findIndex((x) => x.id === subId);
+  const fullSub = {
+    id: subId,
+    name: sub.name.trim(),
+    studentIds: Array.isArray(sub.studentIds) ? sub.studentIds : existingIndex >= 0 ? session.subSessions[existingIndex].studentIds : [],
+    startTime: sub.startTime,
+    endTime: sub.endTime,
+    trainerKey: sub.trainerKey
+  };
+  if (existingIndex >= 0) {
+    session.subSessions[existingIndex] = fullSub;
+  } else {
+    session.subSessions.push(fullSub);
+  }
+  const allEnrolledSet = new Set(session.studentIds || []);
+  session.subSessions.forEach((ss) => (ss.studentIds || []).forEach((sid) => allEnrolledSet.add(sid)));
+  session.studentIds = Array.from(allEnrolledSet);
+  syncToSupabase(memoryStore).catch(console.error);
+  return fullSub;
+}
+function deleteSubSession(trainingId, subSessionId) {
+  const session = memoryStore.sessions.find((s) => s.id === trainingId);
+  if (!session || !session.subSessions) return false;
+  const initLen = session.subSessions.length;
+  session.subSessions = session.subSessions.filter((x) => x.id !== subSessionId);
+  memoryStore.attendance = memoryStore.attendance.filter((a) => !(a.trainingId === trainingId && a.subSessionId === subSessionId));
+  syncToSupabase(memoryStore).catch(console.error);
+  return session.subSessions.length < initLen;
+}
 function addTrainerKeyToSession(trainingId, trainer) {
   const session = memoryStore.sessions.find((s) => s.id === trainingId);
   if (!session) return void 0;
@@ -64208,14 +64262,15 @@ function addTrainerKeyToSession(trainingId, trainer) {
 function markTrainingAttendance(records) {
   records.forEach((r) => {
     const existingIndex = memoryStore.attendance.findIndex(
-      (a) => a.trainingId === r.trainingId && a.userId === r.userId && a.date === r.date
+      (a) => a.trainingId === r.trainingId && (r.subSessionId ? a.subSessionId === r.subSessionId : true) && a.userId === r.userId && a.date === r.date
     );
     const rec = {
       trainingId: r.trainingId,
+      subSessionId: r.subSessionId,
       userId: r.userId,
       date: r.date,
       markedPresent: r.markedPresent,
-      markedBy: r.markedBy || "HOD/Trainer",
+      markedBy: r.markedBy || "Trainer",
       markedAt: (/* @__PURE__ */ new Date()).toISOString()
     };
     if (existingIndex >= 0) {
@@ -64236,10 +64291,12 @@ function clearTrainingAttendance(trainingId, date) {
   }
   syncToSupabase(memoryStore).catch(console.error);
 }
-function getTrainingAttendanceForDate(date, trainingId) {
+function getTrainingAttendanceForDate(date, trainingId, subSessionId) {
   ensureFreshStore().catch(() => {
   });
-  return memoryStore.attendance.filter((a) => a.date === date && (!trainingId || a.trainingId === trainingId));
+  return memoryStore.attendance.filter(
+    (a) => a.date === date && (!trainingId || a.trainingId === trainingId) && (!subSessionId || a.subSessionId === subSessionId)
+  );
 }
 function getPresentUserIdsInTrainingForDate(date) {
   ensureFreshStore().catch(() => {
@@ -65705,41 +65762,66 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
         res.status(404).json({ error: "Training session not found" });
         return;
       }
-      const todayAttendance = getTrainingAttendanceForDate(date, trainingId);
-      const isSubmitted = todayAttendance.length > 0;
-      const virtualScheduleId = -(9e3 + trainingId);
-      const virtualSchedule = {
-        id: virtualScheduleId,
-        mentor_id: mentorId,
-        day_of_week: day,
-        start_time: "08:00:00",
-        end_time: "17:00:00",
-        section: "ALL",
-        subject: training.name,
-        year: "TRAINING",
-        isTraining: true,
-        trainingId,
-        trainingName: training.name,
-        trainingCompany: training.company,
-        status: isSubmitted ? "submitted" : "active",
-        isLocked: false,
-        isCurrentTimeSlot: true,
-        isUnlockedByHod: true,
-        extraBufferMins: 0,
-        session: isSubmitted ? { ended_at: todayAttendance[0]?.markedAt } : null
-      };
+      const virtualSchedules = training.subSessions && training.subSessions.length > 0 ? training.subSessions.map((sub) => {
+        const subVirtualId = -(9e4 + trainingId * 100 + sub.id);
+        const subAttendance = getTrainingAttendanceForDate(date, trainingId, sub.id);
+        const isSubSubmitted = subAttendance.length > 0;
+        return {
+          id: subVirtualId,
+          mentor_id: mentorId,
+          day_of_week: day,
+          start_time: sub.startTime || "08:00:00",
+          end_time: sub.endTime || "17:00:00",
+          section: sub.name,
+          subject: `${training.name} - ${sub.name}`,
+          year: "TRAINING",
+          isTraining: true,
+          trainingId,
+          subSessionId: sub.id,
+          trainingName: training.name,
+          trainingCompany: training.company,
+          status: isSubSubmitted ? "submitted" : "active",
+          isLocked: false,
+          isCurrentTimeSlot: true,
+          isUnlockedByHod: true,
+          extraBufferMins: 0,
+          session: isSubSubmitted ? { ended_at: subAttendance[0]?.markedAt } : null
+        };
+      }) : [
+        {
+          id: -(9e3 + trainingId),
+          mentor_id: mentorId,
+          day_of_week: day,
+          start_time: "08:00:00",
+          end_time: "17:00:00",
+          section: "ALL",
+          subject: training.name,
+          year: "TRAINING",
+          isTraining: true,
+          trainingId,
+          trainingName: training.name,
+          trainingCompany: training.company,
+          status: getTrainingAttendanceForDate(date, trainingId).length > 0 ? "submitted" : "active",
+          isLocked: false,
+          isCurrentTimeSlot: true,
+          isUnlockedByHod: true,
+          extraBufferMins: 0,
+          session: getTrainingAttendanceForDate(date, trainingId).length > 0 ? { ended_at: getTrainingAttendanceForDate(date, trainingId)[0]?.markedAt } : null
+        }
+      ];
+      const activeSchedule2 = virtualSchedules[0];
       res.setHeader("x-app-version", "4.0.0");
       res.json({
-        activeSchedule: virtualSchedule,
-        session: isSubmitted ? { ended_at: todayAttendance[0]?.markedAt, started_at: todayAttendance[0]?.markedAt } : null,
-        todaySchedules: [virtualSchedule],
+        activeSchedule: activeSchedule2,
+        session: activeSchedule2.session,
+        todaySchedules: virtualSchedules,
         serverTime: { day, time, date },
         appVersion: {
           latestVersionCode: 7,
           latestVersionName: "1.7.0",
           downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
           forceUpdate: false,
-          releaseNotes: "Training Session Mode Active!"
+          releaseNotes: "Training Sub-Sessions Active!"
         }
       });
       return;
@@ -65821,18 +65903,33 @@ router5.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (r
   try {
     const { date } = getCurrentISTDateTime();
     if (scheduleId < 0) {
-      const trainingId = Math.abs(scheduleId) - 9e3;
+      let trainingId = 0;
+      let subSessionId = void 0;
+      if (scheduleId <= -9e4) {
+        const subId = Math.abs(scheduleId) - 9e4;
+        trainingId = Math.floor(subId / 100);
+        subSessionId = subId % 100;
+      } else {
+        trainingId = Math.abs(scheduleId) - 9e3;
+      }
       const training = getTrainingSessionById(trainingId);
       if (!training) {
         res.status(404).json({ error: "Training session not found" });
         return;
       }
-      if (!training.studentIds || training.studentIds.length === 0) {
+      let enrolledIds = [];
+      if (subSessionId !== void 0 && training.subSessions) {
+        const sub = training.subSessions.find((s) => s.id === subSessionId);
+        enrolledIds = sub ? sub.studentIds || [] : [];
+      } else {
+        enrolledIds = training.studentIds || [];
+      }
+      if (enrolledIds.length === 0) {
         res.json([]);
         return;
       }
-      const { data: students2 } = await supabase.from("qr_users").select("*").eq("role", "student").in("id", training.studentIds).order("unique_id", { ascending: true });
-      const todayAttendance = getTrainingAttendanceForDate(date, trainingId);
+      const { data: students2 } = await supabase.from("qr_users").select("*").eq("role", "student").in("id", enrolledIds).order("unique_id", { ascending: true });
+      const todayAttendance = getTrainingAttendanceForDate(date, trainingId, subSessionId);
       const attendanceMap = /* @__PURE__ */ new Map();
       todayAttendance.forEach((a) => attendanceMap.set(a.userId, a));
       const result2 = (students2 || []).map((s) => {
@@ -65848,7 +65945,9 @@ router5.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (r
           markedByTeacher: !!att,
           scannedQr: false,
           warningNotScanned: false,
-          isTraining: true
+          isTraining: true,
+          trainingId,
+          subSessionId
         };
       });
       res.json(result2);
@@ -65976,7 +66075,15 @@ router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req
   try {
     const { date } = getCurrentISTDateTime();
     if (scheduleId < 0) {
-      const trainingId = Math.abs(scheduleId) - 9e3;
+      let trainingId = 0;
+      let subSessionId = void 0;
+      if (scheduleId <= -9e4) {
+        const subId = Math.abs(scheduleId) - 9e4;
+        trainingId = Math.floor(subId / 100);
+        subSessionId = subId % 100;
+      } else {
+        trainingId = Math.abs(scheduleId) - 9e3;
+      }
       const training = getTrainingSessionById(trainingId);
       if (!training) {
         res.status(404).json({ error: "Training session not found" });
@@ -65984,6 +66091,7 @@ router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req
       }
       const toMark = studentRecords.map((r) => ({
         trainingId,
+        subSessionId,
         userId: r.studentId,
         date,
         markedPresent: !!r.markedPresent,
@@ -66540,6 +66648,41 @@ router5.get("/admin/training-attendance", authMiddleware, async (req, res) => {
     };
   });
   res.json(enriched);
+});
+router5.post("/admin/training-sessions/:id/sub-sessions", authMiddleware, async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, studentIds, startTime, endTime } = req.body;
+  if (!name || !name.trim()) {
+    res.status(400).json({ error: "Sub-session name is required" });
+    return;
+  }
+  const created = saveSubSession(id, { name: name.trim(), studentIds: studentIds || [], startTime, endTime });
+  if (!created) {
+    res.status(404).json({ error: "Training session not found" });
+    return;
+  }
+  res.status(201).json(created);
+});
+router5.put("/admin/training-sessions/:id/sub-sessions/:subId", authMiddleware, async (req, res) => {
+  const id = parseInt(req.params.id);
+  const subId = parseInt(req.params.subId);
+  const { name, studentIds, startTime, endTime } = req.body;
+  const updated = saveSubSession(id, { id: subId, name: name?.trim() || `Session ${subId}`, studentIds: studentIds || [], startTime, endTime });
+  if (!updated) {
+    res.status(404).json({ error: "Training or sub-session not found" });
+    return;
+  }
+  res.json(updated);
+});
+router5.delete("/admin/training-sessions/:id/sub-sessions/:subId", authMiddleware, async (req, res) => {
+  const id = parseInt(req.params.id);
+  const subId = parseInt(req.params.subId);
+  const deleted = deleteSubSession(id, subId);
+  if (!deleted) {
+    res.status(404).json({ error: "Sub-session not found" });
+    return;
+  }
+  res.json({ message: "Sub-session deleted successfully" });
 });
 router5.post("/admin/training-sessions/:id/unlock", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);

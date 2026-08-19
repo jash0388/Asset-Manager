@@ -1,5 +1,14 @@
 import { supabase } from "../lib/supabase.js";
 
+export interface TrainingSubSession {
+  id: number;
+  name: string; // e.g. "Session 1", "Session 2"
+  studentIds: number[];
+  startTime?: string;
+  endTime?: string;
+  trainerKey?: string;
+}
+
 export interface TrainingSession {
   id: number;
   name: string;
@@ -7,16 +16,19 @@ export interface TrainingSession {
   description: string;
   createdAt: string;
   studentIds: number[];
+  subSessions?: TrainingSubSession[];
   trainerKeys: Array<{
     id: number;
     name: string;
     email: string;
     key: string;
+    subSessionId?: number;
   }>;
 }
 
 export interface TrainingAttendanceRecord {
   trainingId: number;
+  subSessionId?: number;
   userId: number;
   date: string;
   markedPresent: boolean;
@@ -32,7 +44,7 @@ export interface TrainingStoreData {
 const STORE_MENTOR_ID = 9999;
 const STORE_MENTOR_EMAIL = "training_store@sphoorthyengg.ac.in";
 
-// Initial default data
+// Initial default data with Session 1 and Session 2 presets
 const defaultData: TrainingStoreData = {
   sessions: [
     {
@@ -42,6 +54,22 @@ const defaultData: TrainingStoreData = {
       description: "Full Stack Development & Quantitative Aptitude Training",
       createdAt: "2026-08-19T00:00:00.000Z",
       studentIds: [],
+      subSessions: [
+        {
+          id: 1,
+          name: "Session 1 (Morning Batch)",
+          studentIds: [],
+          startTime: "09:00",
+          endTime: "12:30"
+        },
+        {
+          id: 2,
+          name: "Session 2 (Afternoon Batch)",
+          studentIds: [],
+          startTime: "13:30",
+          endTime: "16:30"
+        }
+      ],
       trainerKeys: [
         {
           id: 901,
@@ -55,7 +83,7 @@ const defaultData: TrainingStoreData = {
   attendance: []
 };
 
-// In-memory cache
+// In-memory cache for 0ms ultra-fast reads & writes
 let memoryStore: TrainingStoreData = { ...defaultData };
 let lastLoadedAt = 0;
 
@@ -69,7 +97,6 @@ export async function syncFromSupabase(): Promise<TrainingStoreData> {
       .limit(1);
 
     if (error || !data || data.length === 0) {
-      // Initialize row in Supabase
       await supabase.from("qr_mentors").upsert({
         id: STORE_MENTOR_ID,
         email: STORE_MENTOR_EMAIL,
@@ -113,9 +140,8 @@ export async function syncToSupabase(data: TrainingStoreData): Promise<void> {
 // Pre-load at startup
 syncFromSupabase().catch(() => {});
 
-// Helper to ensure fresh data (re-sync if older than 5s)
 export async function ensureFreshStore(): Promise<TrainingStoreData> {
-  if (Date.now() - lastLoadedAt > 5000) {
+  if (Date.now() - lastLoadedAt > 3000) {
     await syncFromSupabase();
   }
   return memoryStore;
@@ -148,6 +174,10 @@ export function saveTrainingSession(session: Partial<TrainingSession> & { name: 
     description: session.description || "",
     createdAt: session.createdAt || new Date().toISOString(),
     studentIds: Array.isArray(session.studentIds) ? session.studentIds : [],
+    subSessions: Array.isArray(session.subSessions) ? session.subSessions : (existingIndex >= 0 ? memoryStore.sessions[existingIndex].subSessions || [] : [
+      { id: 1, name: "Session 1", studentIds: [] },
+      { id: 2, name: "Session 2", studentIds: [] }
+    ]),
     trainerKeys: Array.isArray(session.trainerKeys) ? session.trainerKeys : [
       {
         id: 900 + id,
@@ -176,6 +206,51 @@ export function deleteTrainingSession(id: number): boolean {
   return memoryStore.sessions.length < initLen;
 }
 
+// ─── Sub-Sessions Management ────────────────────────────────────────────────
+export function saveSubSession(trainingId: number, sub: Partial<TrainingSubSession> & { name: string }): TrainingSubSession | undefined {
+  const session = memoryStore.sessions.find(s => s.id === trainingId);
+  if (!session) return undefined;
+
+  if (!Array.isArray(session.subSessions)) session.subSessions = [];
+
+  const subId = sub.id || (session.subSessions.length > 0 ? Math.max(...session.subSessions.map(x => x.id)) + 1 : 1);
+  const existingIndex = session.subSessions.findIndex(x => x.id === subId);
+
+  const fullSub: TrainingSubSession = {
+    id: subId,
+    name: sub.name.trim(),
+    studentIds: Array.isArray(sub.studentIds) ? sub.studentIds : (existingIndex >= 0 ? session.subSessions[existingIndex].studentIds : []),
+    startTime: sub.startTime,
+    endTime: sub.endTime,
+    trainerKey: sub.trainerKey
+  };
+
+  if (existingIndex >= 0) {
+    session.subSessions[existingIndex] = fullSub;
+  } else {
+    session.subSessions.push(fullSub);
+  }
+
+  // Sync overall studentIds to union of all subSessions if desired
+  const allEnrolledSet = new Set<number>(session.studentIds || []);
+  session.subSessions.forEach(ss => (ss.studentIds || []).forEach(sid => allEnrolledSet.add(sid)));
+  session.studentIds = Array.from(allEnrolledSet);
+
+  syncToSupabase(memoryStore).catch(console.error);
+  return fullSub;
+}
+
+export function deleteSubSession(trainingId: number, subSessionId: number): boolean {
+  const session = memoryStore.sessions.find(s => s.id === trainingId);
+  if (!session || !session.subSessions) return false;
+
+  const initLen = session.subSessions.length;
+  session.subSessions = session.subSessions.filter(x => x.id !== subSessionId);
+  memoryStore.attendance = memoryStore.attendance.filter(a => !(a.trainingId === trainingId && a.subSessionId === subSessionId));
+  syncToSupabase(memoryStore).catch(console.error);
+  return session.subSessions.length < initLen;
+}
+
 export function addTrainerKeyToSession(trainingId: number, trainer: { name: string; email: string; key: string }): TrainingSession | undefined {
   const session = memoryStore.sessions.find(s => s.id === trainingId);
   if (!session) return undefined;
@@ -192,18 +267,22 @@ export function addTrainerKeyToSession(trainingId: number, trainer: { name: stri
   return session;
 }
 
-export function markTrainingAttendance(records: Array<{ trainingId: number; userId: number; date: string; markedPresent: boolean; markedBy?: string }>) {
+export function markTrainingAttendance(records: Array<{ trainingId: number; subSessionId?: number; userId: number; date: string; markedPresent: boolean; markedBy?: string }>) {
   records.forEach(r => {
     const existingIndex = memoryStore.attendance.findIndex(
-      a => a.trainingId === r.trainingId && a.userId === r.userId && a.date === r.date
+      a => a.trainingId === r.trainingId &&
+           (r.subSessionId ? a.subSessionId === r.subSessionId : true) &&
+           a.userId === r.userId &&
+           a.date === r.date
     );
 
     const rec: TrainingAttendanceRecord = {
       trainingId: r.trainingId,
+      subSessionId: r.subSessionId,
       userId: r.userId,
       date: r.date,
       markedPresent: r.markedPresent,
-      markedBy: r.markedBy || "HOD/Trainer",
+      markedBy: r.markedBy || "Trainer",
       markedAt: new Date().toISOString()
     };
 
@@ -228,9 +307,13 @@ export function clearTrainingAttendance(trainingId?: number, date?: string) {
   syncToSupabase(memoryStore).catch(console.error);
 }
 
-export function getTrainingAttendanceForDate(date: string, trainingId?: number): TrainingAttendanceRecord[] {
+export function getTrainingAttendanceForDate(date: string, trainingId?: number, subSessionId?: number): TrainingAttendanceRecord[] {
   ensureFreshStore().catch(() => {});
-  return memoryStore.attendance.filter(a => a.date === date && (!trainingId || a.trainingId === trainingId));
+  return memoryStore.attendance.filter(a =>
+    a.date === date &&
+    (!trainingId || a.trainingId === trainingId) &&
+    (!subSessionId || a.subSessionId === subSessionId)
+  );
 }
 
 export function getPresentUserIdsInTrainingForDate(date: string): number[] {
