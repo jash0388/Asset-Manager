@@ -1,5 +1,4 @@
-import fs from "fs";
-import path from "path";
+import { supabase } from "../lib/supabase.js";
 
 export interface TrainingSession {
   id: number;
@@ -25,15 +24,15 @@ export interface TrainingAttendanceRecord {
   markedAt: string;
 }
 
-interface TrainingStoreData {
+export interface TrainingStoreData {
   sessions: TrainingSession[];
   attendance: TrainingAttendanceRecord[];
 }
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const STORE_FILE = path.join(DATA_DIR, "training_store.json");
+const STORE_MENTOR_ID = 9999;
+const STORE_MENTOR_EMAIL = "training_store@sphoorthyengg.ac.in";
 
-// Default initial state with Wipro Training preset if none exists
+// Initial default data
 const defaultData: TrainingStoreData = {
   sessions: [
     {
@@ -41,7 +40,7 @@ const defaultData: TrainingStoreData = {
       name: "Wipro Training",
       company: "Wipro",
       description: "Full Stack Development & Quantitative Aptitude Training",
-      createdAt: new Date().toISOString(),
+      createdAt: "2026-08-19T00:00:00.000Z",
       studentIds: [],
       trainerKeys: [
         {
@@ -56,52 +55,85 @@ const defaultData: TrainingStoreData = {
   attendance: []
 };
 
-function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
+// In-memory cache
+let memoryStore: TrainingStoreData = { ...defaultData };
+let lastLoadedAt = 0;
 
-export function loadTrainingStore(): TrainingStoreData {
+// Load data from Supabase Postgres database
+export async function syncFromSupabase(): Promise<TrainingStoreData> {
   try {
-    ensureDir();
-    if (!fs.existsSync(STORE_FILE)) {
-      saveTrainingStore(defaultData);
-      return defaultData;
+    const { data, error } = await supabase
+      .from("qr_mentors")
+      .select("password_hash")
+      .eq("id", STORE_MENTOR_ID)
+      .limit(1);
+
+    if (error || !data || data.length === 0) {
+      // Initialize row in Supabase
+      await supabase.from("qr_mentors").upsert({
+        id: STORE_MENTOR_ID,
+        email: STORE_MENTOR_EMAIL,
+        name: "SYSTEM_TRAINING_STORE",
+        password_hash: JSON.stringify(defaultData),
+        key: "SYS_TRAIN"
+      });
+      memoryStore = { ...defaultData };
+      lastLoadedAt = Date.now();
+      return memoryStore;
     }
-    const raw = fs.readFileSync(STORE_FILE, "utf-8");
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed.sessions)) parsed.sessions = defaultData.sessions;
-    if (!Array.isArray(parsed.attendance)) parsed.attendance = [];
-    return parsed;
+
+    const raw = data[0]?.password_hash;
+    if (raw && raw.startsWith("{")) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed.sessions)) memoryStore.sessions = parsed.sessions;
+      if (Array.isArray(parsed.attendance)) memoryStore.attendance = parsed.attendance;
+      lastLoadedAt = Date.now();
+    }
   } catch (err) {
-    console.error("Error loading training store:", err);
-    return defaultData;
+    console.error("Error syncing training store from Supabase:", err);
   }
+  return memoryStore;
 }
 
-export function saveTrainingStore(data: TrainingStoreData) {
+// Save data back to Supabase Postgres database
+export async function syncToSupabase(data: TrainingStoreData): Promise<void> {
   try {
-    ensureDir();
-    fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), "utf-8");
+    await supabase.from("qr_mentors").upsert({
+      id: STORE_MENTOR_ID,
+      email: STORE_MENTOR_EMAIL,
+      name: "SYSTEM_TRAINING_STORE",
+      password_hash: JSON.stringify(data),
+      key: "SYS_TRAIN"
+    });
   } catch (err) {
-    console.error("Error saving training store:", err);
+    console.error("Error saving training store to Supabase:", err);
   }
 }
 
-// Memory cache
-let memoryStore: TrainingStoreData = loadTrainingStore();
+// Pre-load at startup
+syncFromSupabase().catch(() => {});
+
+// Helper to ensure fresh data (re-sync if older than 5s)
+export async function ensureFreshStore(): Promise<TrainingStoreData> {
+  if (Date.now() - lastLoadedAt > 5000) {
+    await syncFromSupabase();
+  }
+  return memoryStore;
+}
 
 export function getTrainingSessions(): TrainingSession[] {
+  ensureFreshStore().catch(() => {});
   return memoryStore.sessions;
 }
 
 export function getTrainingSessionById(id: number): TrainingSession | undefined {
+  ensureFreshStore().catch(() => {});
   return memoryStore.sessions.find(s => s.id === id);
 }
 
 export function getTrainingSessionByTrainerKey(key: string): TrainingSession | undefined {
   const cleanKey = String(key || "").trim();
+  ensureFreshStore().catch(() => {});
   return memoryStore.sessions.find(s => s.trainerKeys && s.trainerKeys.some(tk => String(tk.key).trim() === cleanKey));
 }
 
@@ -132,7 +164,7 @@ export function saveTrainingSession(session: Partial<TrainingSession> & { name: 
     memoryStore.sessions.push(fullSession);
   }
 
-  saveTrainingStore(memoryStore);
+  syncToSupabase(memoryStore).catch(console.error);
   return fullSession;
 }
 
@@ -140,7 +172,7 @@ export function deleteTrainingSession(id: number): boolean {
   const initLen = memoryStore.sessions.length;
   memoryStore.sessions = memoryStore.sessions.filter(s => s.id !== id);
   memoryStore.attendance = memoryStore.attendance.filter(a => a.trainingId !== id);
-  saveTrainingStore(memoryStore);
+  syncToSupabase(memoryStore).catch(console.error);
   return memoryStore.sessions.length < initLen;
 }
 
@@ -156,7 +188,7 @@ export function addTrainerKeyToSession(trainingId: number, trainer: { name: stri
     key: String(trainer.key).trim()
   });
 
-  saveTrainingStore(memoryStore);
+  syncToSupabase(memoryStore).catch(console.error);
   return session;
 }
 
@@ -182,14 +214,27 @@ export function markTrainingAttendance(records: Array<{ trainingId: number; user
     }
   });
 
-  saveTrainingStore(memoryStore);
+  syncToSupabase(memoryStore).catch(console.error);
+}
+
+export function clearTrainingAttendance(trainingId?: number, date?: string) {
+  if (trainingId && date) {
+    memoryStore.attendance = memoryStore.attendance.filter(a => !(a.trainingId === trainingId && a.date === date));
+  } else if (trainingId) {
+    memoryStore.attendance = memoryStore.attendance.filter(a => a.trainingId !== trainingId);
+  } else {
+    memoryStore.attendance = [];
+  }
+  syncToSupabase(memoryStore).catch(console.error);
 }
 
 export function getTrainingAttendanceForDate(date: string, trainingId?: number): TrainingAttendanceRecord[] {
+  ensureFreshStore().catch(() => {});
   return memoryStore.attendance.filter(a => a.date === date && (!trainingId || a.trainingId === trainingId));
 }
 
 export function getPresentUserIdsInTrainingForDate(date: string): number[] {
+  ensureFreshStore().catch(() => {});
   return memoryStore.attendance
     .filter(a => a.date === date && a.markedPresent)
     .map(a => a.userId);

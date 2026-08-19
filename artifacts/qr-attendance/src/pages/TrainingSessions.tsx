@@ -487,6 +487,20 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
     onSuccess: () => qc.invalidateQueries({ queryKey: ["training-sessions"] }),
   });
 
+  // Unlock / reset attendance session mutation
+  const unlockMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiFetch(`/api/admin/training-sessions/${id}/unlock`, {
+        method: "POST",
+        body: JSON.stringify({ date: today })
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["training-attendance"] });
+      alert("✅ Attendance session unlocked! Trainer can now mark attendance in Faculty App.");
+    }
+  });
+
   // Filter enrolled students by search (name, roll no, section)
   const filteredEnrolled = useMemo(() => {
     if (!searchQuery.trim()) return enrolledStudents;
@@ -527,18 +541,30 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
             </button>
           )}
           {activeSession && (
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <button
                 onClick={() => setManageStudentsFor(activeSession)}
-                style={{ padding: "10px 20px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
+                style={{ padding: "10px 18px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
               >
                 👥 Manage Students
               </button>
               <button
                 onClick={() => setAddKeyFor(activeSession)}
-                style={{ padding: "10px 20px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #059669, #10B981)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(5,150,105,0.3)" }}
+                style={{ padding: "10px 18px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #059669, #10B981)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(5,150,105,0.3)" }}
               >
                 🔑 Add Trainer Key
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm(`Unlock and reset attendance for ${activeSession.name} today so trainer can mark/retake attendance?`)) {
+                    unlockMutation.mutate(activeSession.id);
+                  }
+                }}
+                disabled={unlockMutation.isPending}
+                style={{ padding: "10px 18px", borderRadius: "10px", border: "1.5px solid #FCD34D", background: "#FEF3C7", color: "#92400E", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 2px 8px rgba(245,158,11,0.2)" }}
+                title="Allows trainer to mark attendance fresh in Faculty App"
+              >
+                {unlockMutation.isPending ? "Unlocking..." : "🔓 Unlock / Retake Attendance"}
               </button>
             </div>
           )}

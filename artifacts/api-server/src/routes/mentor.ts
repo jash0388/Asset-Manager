@@ -9,9 +9,11 @@ import {
   deleteTrainingSession,
   addTrainerKeyToSession,
   markTrainingAttendance,
+  clearTrainingAttendance,
   getTrainingAttendanceForDate,
   getPresentUserIdsInTrainingForDate
 } from "../services/trainingStore.js";
+
 
 
 const router = Router();
@@ -1449,15 +1451,12 @@ router.get("/admin/training-attendance", authMiddleware, async (req: any, res: a
   res.json(enriched);
 });
 
-// POST mark/update training attendance from HOD dashboard
-router.post("/admin/training-attendance", authMiddleware, async (req: any, res: any) => {
-  const { trainingId, userId, date, markedPresent } = req.body;
-  if (!trainingId || !userId || !date) {
-    res.status(400).json({ error: "trainingId, userId, and date are required" });
-    return;
-  }
-  markTrainingAttendance([{ trainingId: Number(trainingId), userId: Number(userId), date, markedPresent: !!markedPresent, markedBy: "HOD" }]);
-  res.json({ message: "Training attendance updated" });
+// POST unlock / reset training attendance for a date so trainer can retake attendance
+router.post("/admin/training-sessions/:id/unlock", authMiddleware, async (req: any, res: any) => {
+  const id = parseInt(req.params.id);
+  const dateParam = (req.body.date || "").toString().trim() || getCurrentISTHoursMinutes().todayDate;
+  clearTrainingAttendance(id, dateParam);
+  res.json({ message: "Training session attendance unlocked and reset successfully", trainingId: id, date: dateParam });
 });
 
 export default router;
