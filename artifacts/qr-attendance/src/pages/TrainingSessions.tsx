@@ -295,12 +295,116 @@ function AddTrainerKeyModal({ session, onClose, onAdded }: { session: TrainingSe
     </div>
   );
 }
+// ─── Manage Students Modal ───────────────────────────────────────────────────
+function ManageStudentsModal({ session, allStudents, onClose, onSaved }: {
+  session: TrainingSession;
+  allStudents: Student[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [selectedIds, setSelectedIds] = useState<number[]>([...session.studentIds]);
+  const [search, setSearch] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return allStudents;
+    const q = search.trim().toLowerCase();
+    return allStudents.filter(s =>
+      s.name.toLowerCase().includes(q) ||
+      (s.uniqueId || "").toLowerCase().includes(q) ||
+      (s.section || "").toLowerCase().includes(q)
+    );
+  }, [search, allStudents]);
+
+  const toggle = (id: number) =>
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const selectAll = () => setSelectedIds(filtered.map(s => s.id));
+  const clearAll = () => setSelectedIds([]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await apiFetch(`/api/admin/training-sessions/${session.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ studentIds: selectedIds })
+      });
+      onSaved();
+    } catch (e: any) {
+      setError(e.message || "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+      <div style={{ background: "#fff", borderRadius: "16px", width: "100%", maxWidth: "680px", maxHeight: "90vh", overflow: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
+        <div style={{ background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", padding: "18px 24px", borderRadius: "16px 16px 0 0", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: "10px", opacity: 0.7 }}>MANAGE ENROLLED STUDENTS</div>
+            <h2 style={{ margin: "4px 0 0", fontSize: "18px", fontWeight: 700 }}>{session.name}</h2>
+          </div>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "8px", padding: "6px 12px", cursor: "pointer" }}>✕</button>
+        </div>
+        <div style={{ padding: "20px 24px" }}>
+          {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "8px", padding: "10px 14px", marginBottom: "12px", color: "#DC2626", fontSize: "13px" }}>{error}</div>}
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "#374151" }}>{selectedIds.length} students selected</span>
+            <div style={{ display: "flex", gap: "6px" }}>
+              <button onClick={selectAll} style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "6px", background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1D4ED8", cursor: "pointer" }}>Select All</button>
+              <button onClick={clearAll} style={{ fontSize: "11px", padding: "4px 10px", borderRadius: "6px", background: "#F9FAFB", border: "1px solid #E5E7EB", color: "#6B7280", cursor: "pointer" }}>Clear All</button>
+            </div>
+          </div>
+
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name, roll no, section..."
+            style={{ width: "100%", padding: "9px 12px", border: "1.5px solid #D1D5DB", borderRadius: "8px", fontSize: "13px", marginBottom: "10px", boxSizing: "border-box" }}
+          />
+
+          <div style={{ border: "1px solid #E5E7EB", borderRadius: "10px", maxHeight: "320px", overflow: "auto", marginBottom: "16px" }}>
+            {filtered.map((s, idx) => {
+              const checked = selectedIds.includes(s.id);
+              return (
+                <div
+                  key={s.id}
+                  onClick={() => toggle(s.id)}
+                  style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", cursor: "pointer", background: checked ? "#EFF6FF" : idx % 2 === 0 ? "#fff" : "#F9FAFB", borderBottom: "1px solid #F3F4F6" }}
+                >
+                  <div style={{ width: "18px", height: "18px", borderRadius: "4px", border: `2px solid ${checked ? "#7C3AED" : "#D1D5DB"}`, background: checked ? "#7C3AED" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {checked && <span style={{ color: "#fff", fontSize: "11px", fontWeight: 800 }}>✓</span>}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: 600 }}>{s.name}</div>
+                    <div style={{ fontSize: "11px", color: "#6B7280" }}>{s.uniqueId} · {s.section}</div>
+                  </div>
+                </div>
+              );
+            })}
+            {filtered.length === 0 && <div style={{ padding: "20px", textAlign: "center", color: "#9CA3AF", fontSize: "13px" }}>No students found</div>}
+          </div>
+
+          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+            <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: "10px", border: "1.5px solid #E5E7EB", background: "#fff", fontSize: "13px", cursor: "pointer" }}>Cancel</button>
+            <button onClick={handleSave} disabled={saving} style={{ padding: "10px 24px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
+              {saving ? "Saving..." : `Save ${selectedIds.length} Students`}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Main TrainingSessions Page ──────────────────────────────────────────────
 export default function TrainingSessions({ trainingId }: { trainingId?: number }) {
   const qc = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [addKeyFor, setAddKeyFor] = useState<TrainingSession | null>(null);
+  const [manageStudentsFor, setManageStudentsFor] = useState<TrainingSession | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const today = new Date().toISOString().split("T")[0];
@@ -406,12 +510,20 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
             </button>
           )}
           {activeSession && (
-            <button
-              onClick={() => setAddKeyFor(activeSession)}
-              style={{ padding: "10px 20px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #059669, #10B981)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(5,150,105,0.3)" }}
-            >
-              🔑 Add Trainer Key
-            </button>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={() => setManageStudentsFor(activeSession)}
+                style={{ padding: "10px 20px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
+              >
+                👥 Manage Students
+              </button>
+              <button
+                onClick={() => setAddKeyFor(activeSession)}
+                style={{ padding: "10px 20px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #059669, #10B981)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(5,150,105,0.3)" }}
+              >
+                🔑 Add Trainer Key
+              </button>
+            </div>
           )}
         </div>
 
@@ -614,6 +726,18 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
           onAdded={() => {
             qc.invalidateQueries({ queryKey: ["training-sessions"] });
             setAddKeyFor(null);
+          }}
+        />
+      )}
+      {manageStudentsFor && (
+        <ManageStudentsModal
+          session={manageStudentsFor}
+          allStudents={allStudents}
+          onClose={() => setManageStudentsFor(null)}
+          onSaved={() => {
+            qc.invalidateQueries({ queryKey: ["training-sessions"] });
+            qc.invalidateQueries({ queryKey: ["training-sessions-nav"] });
+            setManageStudentsFor(null);
           }}
         />
       )}
