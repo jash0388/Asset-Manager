@@ -66594,13 +66594,14 @@ router5.put("/admin/training-sessions/:id", authMiddleware, async (req, res) => 
     res.status(404).json({ error: "Training session not found" });
     return;
   }
-  const { name, company, description, studentIds } = req.body;
+  const { name, company, description, studentIds, subSessions } = req.body;
   const updated = saveTrainingSession({
     ...existing,
     name: name?.trim() || existing.name,
     company: company || existing.company,
     description: description !== void 0 ? description : existing.description,
-    studentIds: Array.isArray(studentIds) ? studentIds : existing.studentIds
+    studentIds: Array.isArray(studentIds) ? studentIds : existing.studentIds,
+    subSessions: Array.isArray(subSessions) ? subSessions : existing.subSessions
   });
   res.json(updated);
 });
