@@ -437,11 +437,14 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
     return m;
   }, [allStudents]);
 
-  // Enrolled students for active session
+  // Enrolled students for active session (defaults to all students if no restriction is set)
   const enrolledStudents = useMemo(() => {
     if (!activeSession) return [];
+    if (!activeSession.studentIds || activeSession.studentIds.length === 0) {
+      return allStudents;
+    }
     return activeSession.studentIds.map(id => studentMap.get(id)).filter(Boolean) as Student[];
-  }, [activeSession, studentMap]);
+  }, [activeSession, studentMap, allStudents]);
 
   // Fetch training attendance for today for this session
   const { data: attendanceRecords = [] } = useQuery<TrainingAttendanceRecord[]>({
@@ -474,11 +477,15 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
     onSuccess: () => qc.invalidateQueries({ queryKey: ["training-sessions"] }),
   });
 
-  // Filter enrolled students by search
+  // Filter enrolled students by search (name, roll no, section)
   const filteredEnrolled = useMemo(() => {
     if (!searchQuery.trim()) return enrolledStudents;
     const q = searchQuery.trim().toLowerCase();
-    return enrolledStudents.filter(s => s.name.toLowerCase().includes(q) || (s.uniqueId || "").toLowerCase().includes(q));
+    return enrolledStudents.filter(s =>
+      s.name.toLowerCase().includes(q) ||
+      (s.uniqueId || "").toLowerCase().includes(q) ||
+      (s.section || "").toLowerCase().includes(q)
+    );
   }, [enrolledStudents, searchQuery]);
 
   const presentCount = enrolledStudents.filter(s => attendanceMap.get(s.id) === true).length;
