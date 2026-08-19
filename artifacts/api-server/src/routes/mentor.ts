@@ -1238,15 +1238,52 @@ router.get("/parent/student-report", async (req: any, res: any) => {
       }
     }
 
-    // 4. Fetch overall gate attendance statistics for summary (past 60 days)
-    const { data: pastGateRecords } = await supabase
+    // 4. Fetch overall gate attendance statistics for summary
+    const { data: allGateRecords } = await supabase
       .from("qr_attendance")
       .select("date, entry_time, exit_time")
       .eq("user_id", student.id)
-      .order("date", { ascending: false })
-      .limit(60);
+      .order("date", { ascending: false });
 
-    const totalDaysPresent = (pastGateRecords || []).filter(r => r.entry_time && !isSentinel(r.entry_time)).length;
+    // Fetch all distinct dates tracked by gate scanner
+    const { data: allDatesData } = await supabase
+      .from("qr_attendance")
+      .select("date");
+    const uniqueWorkingDates = Array.from(new Set((allDatesData || []).map((d: any) => d.date))).filter(Boolean);
+    const totalWorkingDays = uniqueWorkingDates.length || 1;
+
+    // Student present days (unique dates with entry_time)
+    const presentDates = new Set(
+      (allGateRecords || [])
+        .filter(r => r.entry_time && !isSentinel(r.entry_time))
+        .map(r => r.date)
+    );
+
+    // Also include dates where student was marked present in hourly classes
+    const { data: allHourlyRecords } = await supabase
+      .from("qr_hourly_attendance")
+      .select("date, marked_present, schedule_id, marked_at")
+      .eq("user_id", student.id)
+      .eq("marked_present", true);
+
+    (allHourlyRecords || []).forEach((h: any) => {
+      if (h.date) presentDates.add(h.date);
+    });
+
+    const presentDays = presentDates.size;
+    const absentDays = Math.max(0, totalWorkingDays - presentDays);
+    const attendancePercentage = Math.round((presentDays / totalWorkingDays) * 100);
+
+    const formattedHistory = (allGateRecords || []).slice(0, 30).map(r => {
+      const hasEntry = r.entry_time && !isSentinel(r.entry_time);
+      const hasExit = r.exit_time && !isSentinel(r.exit_time);
+      return {
+        date: r.date,
+        entryTime: hasEntry ? r.entry_time : null,
+        exitTime: hasExit ? r.exit_time : null,
+        status: hasEntry ? (hasExit ? "Completed" : "Only Entry") : "Absent"
+      };
+    });
 
     res.json({
       student: {
@@ -1256,6 +1293,8 @@ router.get("/parent/student-report", async (req: any, res: any) => {
         section: student.section || "—",
         role: student.role
       },
+      systemStartDate: "July 16, 2026",
+      hourlyStartDate: "August 11, 2026",
       today: {
         date,
         day,
@@ -1265,10 +1304,20 @@ router.get("/parent/student-report", async (req: any, res: any) => {
         scannedGate: Boolean(entryTime)
       },
       todaySchedule,
-      summary: {
-        totalDaysPresent,
+      stats: {
+        totalDays: totalWorkingDays,
+        presentDays,
+        absentDays,
+        attendancePercentage: `${attendancePercentage}%`,
+        systemStartDate: "July 16, 2026"
       },
-      history: (pastGateRecords || []).slice(0, 14)
+      summary: {
+        totalDaysPresent: presentDays,
+        totalWorkingDays,
+        attendancePercentage
+      },
+      history: formattedHistory,
+      recentHourly: (allHourlyRecords || []).slice(-10).reverse()
     });
   } catch (err: any) {
     req.log.error({ err }, "Parent student report error");

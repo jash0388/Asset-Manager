@@ -50,7 +50,7 @@ interface TrainingAttendanceRecord {
 }
 
 // ─── Student Profile Modal ───────────────────────────────────────────────────
-function StudentProfileModal({ student, onClose }: { student: Student; onClose: () => void }) {
+function StudentProfileModal({ student, trainingStartDate, onClose }: { student: Student; trainingStartDate?: string; onClose: () => void }) {
   const { data: report, isLoading } = useQuery({
     queryKey: ["parent-report", student.uniqueId],
     queryFn: () => apiFetch(`/api/parent/student-report?rollNumber=${encodeURIComponent(student.uniqueId)}`),
@@ -59,47 +59,77 @@ function StudentProfileModal({ student, onClose }: { student: Student; onClose: 
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-      <div style={{ background: "#fff", borderRadius: "16px", width: "100%", maxWidth: "640px", maxHeight: "85vh", overflow: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
+      <div style={{ background: "#fff", borderRadius: "16px", width: "100%", maxWidth: "680px", maxHeight: "88vh", overflow: "auto", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
         {/* Header */}
         <div style={{ background: "linear-gradient(135deg, #1E40AF, #3B82F6)", padding: "20px 24px", borderRadius: "16px 16px 0 0", color: "#fff" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <div style={{ fontSize: "10px", opacity: 0.7, marginBottom: "4px" }}>STUDENT PROFILE</div>
-              <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>{student.name}</h2>
-              <p style={{ margin: "4px 0 0", fontSize: "13px", opacity: 0.8 }}>{student.uniqueId} · {student.section}</p>
+              <div style={{ fontSize: "11px", opacity: 0.8, letterSpacing: "0.5px", marginBottom: "4px" }}>STUDENT ATTENDANCE PROFILE</div>
+              <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 800 }}>{student.name}</h2>
+              <p style={{ margin: "4px 0 0", fontSize: "13px", opacity: 0.85 }}>{student.uniqueId} · {student.section}</p>
             </div>
-            <button onClick={onClose} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontSize: "13px" }}>✕ Close</button>
+            <button onClick={onClose} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontSize: "13px", fontWeight: 700 }}>✕ Close</button>
+          </div>
+
+          {/* Training Session Date Banner */}
+          <div style={{ marginTop: "14px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <div style={{ background: "rgba(255,255,255,0.18)", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>🏢</span>
+              <span><strong>Training Started:</strong> {trainingStartDate || "Today (Live)"}</span>
+            </div>
+            <div style={{ background: "rgba(255,255,255,0.18)", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>📱</span>
+              <span><strong>Attendance Marked via:</strong> Faculty App</span>
+            </div>
           </div>
         </div>
 
         <div style={{ padding: "20px 24px" }}>
-          {isLoading && <div style={{ textAlign: "center", padding: "40px", color: "#6B7280" }}>Loading student data...</div>}
+          {isLoading && <div style={{ textAlign: "center", padding: "40px", color: "#6B7280" }}>Loading student attendance records...</div>}
           {report && (
             <>
-              {/* Today's Gate Status */}
-              <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: "12px", padding: "14px 16px", marginBottom: "16px" }}>
-                <div style={{ fontSize: "11px", fontWeight: 700, color: "#15803D", marginBottom: "8px" }}>TODAY'S GATE STATUS</div>
-                {report.gateRecord ? (
-                  <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "13px" }}>🟢 <strong>Entry:</strong> {report.gateRecord.entry_time ? new Date(report.gateRecord.entry_time).toLocaleTimeString() : "—"}</span>
-                    <span style={{ fontSize: "13px" }}>⚫ <strong>Exit:</strong> {report.gateRecord.exit_time ? new Date(report.gateRecord.exit_time).toLocaleTimeString() : "Still Inside"}</span>
+              {/* Overall Stats Cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginBottom: "18px" }}>
+                {[
+                  { label: "Total Working Days", value: report.stats?.totalDays ?? "—", color: "#1E40AF", bg: "#EFF6FF" },
+                  { label: "Present Days", value: report.stats?.presentDays ?? "—", color: "#15803D", bg: "#F0FDF4" },
+                  { label: "Absent Days", value: report.stats?.absentDays ?? "—", color: "#DC2626", bg: "#FEF2F2" },
+                  { label: "Attendance %", value: report.stats?.attendancePercentage ?? "—", color: "#7C3AED", bg: "#F5F3FF" },
+                ].map(stat => (
+                  <div key={stat.label} style={{ textAlign: "center", padding: "12px 8px", background: stat.bg, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.05)" }}>
+                    <div style={{ fontSize: "20px", fontWeight: 800, color: stat.color }}>{stat.value}</div>
+                    <div style={{ fontSize: "10px", color: "#6B7280", fontWeight: 600, marginTop: "2px" }}>{stat.label}</div>
                   </div>
-                ) : <div style={{ color: "#EF4444", fontSize: "13px" }}>❌ No gate scan today</div>}
+                ))}
               </div>
 
-              {/* Today's Class Attendance */}
-              {report.todayHourly && report.todayHourly.length > 0 && (
-                <div style={{ marginBottom: "16px" }}>
-                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#374151", marginBottom: "10px" }}>TODAY'S HOURLY ATTENDANCE</div>
+              {/* Today's Gate Status */}
+              <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "14px 16px", marginBottom: "16px" }}>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "#475569", marginBottom: "8px" }}>TODAY'S GATE STATUS ({report.today?.date || "Today"})</div>
+                {report.today?.entryTime ? (
+                  <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "13px" }}>🟢 <strong>Entry:</strong> {new Date(report.today.entryTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}</span>
+                    <span style={{ fontSize: "13px" }}>⚫ <strong>Exit:</strong> {report.today.exitTime ? new Date(report.today.exitTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }) : "Inside Campus"}</span>
+                    <span style={{ fontSize: "12px", fontWeight: 700, color: "#15803D", background: "#DCFCE7", padding: "2px 8px", borderRadius: "6px" }}>Status: {report.today.gateStatus || "PRESENT"}</span>
+                  </div>
+                ) : (
+                  <div style={{ color: "#DC2626", fontSize: "13px", fontWeight: 600 }}>❌ No gate scan record for today</div>
+                )}
+              </div>
+
+              {/* Today's Class Schedule */}
+              {report.todaySchedule && report.todaySchedule.length > 0 && (
+                <div style={{ marginBottom: "18px" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>TODAY'S CLASS SCHEDULE ({report.today?.day})</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                    {report.todayHourly.map((h: any, i: number) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: "10px", background: h.markedPresent ? "#F0FDF4" : "#FEF2F2", border: `1px solid ${h.markedPresent ? "#BBF7D0" : "#FECACA"}` }}>
+                    {report.todaySchedule.map((h: any, i: number) => (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: "10px", background: h.status === "PRESENT" ? "#F0FDF4" : h.status === "ABSENT" ? "#FEF2F2" : "#F8FAFC", border: `1px solid ${h.status === "PRESENT" ? "#BBF7D0" : h.status === "ABSENT" ? "#FECACA" : "#E2E8F0"}` }}>
                         <div>
-                          <div style={{ fontSize: "13px", fontWeight: 600 }}>{h.subject || "Class"}</div>
-                          <div style={{ fontSize: "11px", color: "#6B7280" }}>{h.startTime} – {h.endTime}</div>
+                          <div style={{ fontSize: "13px", fontWeight: 600 }}>{h.subject}</div>
+                          <div style={{ fontSize: "11px", color: "#6B7280" }}>{h.startTime} – {h.endTime} · {h.teacherName}</div>
                         </div>
-                        <span style={{ fontSize: "12px", fontWeight: 700, color: h.markedPresent ? "#15803D" : "#DC2626" }}>
-                          {h.markedPresent ? "✓ Present" : "✗ Absent"}
+                        <span style={{ fontSize: "12px", fontWeight: 700, color: h.status === "PRESENT" ? "#15803D" : h.status === "ABSENT" ? "#DC2626" : "#6B7280" }}>
+                          {h.status === "PRESENT" ? "✓ Present" : h.status === "ABSENT" ? "✗ Absent" : "⏳ Pending"}
                         </span>
                       </div>
                     ))}
@@ -107,21 +137,6 @@ function StudentProfileModal({ student, onClose }: { student: Student; onClose: 
                 </div>
               )}
 
-              {/* Overall Stats */}
-              <div style={{ background: "#F8FAFC", borderRadius: "12px", padding: "14px 16px" }}>
-                <div style={{ fontSize: "11px", fontWeight: 700, color: "#6B7280", marginBottom: "10px" }}>OVERALL ATTENDANCE STATS</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "10px" }}>
-                  {[
-                    { label: "Total Days", value: report.stats?.totalDays ?? "—" },
-                    { label: "Present Days", value: report.stats?.presentDays ?? "—", color: "#15803D" },
-                    { label: "Absent Days", value: report.stats?.absentDays ?? "—", color: "#DC2626" },
-                  ].map(stat => (
-                    <div key={stat.label} style={{ textAlign: "center", padding: "10px", background: "#fff", borderRadius: "10px", border: "1px solid #E5E7EB" }}>
-                      <div style={{ fontSize: "22px", fontWeight: 800, color: stat.color || "#1E40AF" }}>{stat.value}</div>
-                      <div style={{ fontSize: "10px", color: "#6B7280" }}>{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
               </div>
             </>
           )}
@@ -437,14 +452,11 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
     return m;
   }, [allStudents]);
 
-  // Enrolled students for active session (defaults to all students if no restriction is set)
+  // Enrolled students for active session (only students enrolled via Manage Students)
   const enrolledStudents = useMemo(() => {
     if (!activeSession) return [];
-    if (!activeSession.studentIds || activeSession.studentIds.length === 0) {
-      return allStudents;
-    }
-    return activeSession.studentIds.map(id => studentMap.get(id)).filter(Boolean) as Student[];
-  }, [activeSession, studentMap, allStudents]);
+    return (activeSession.studentIds || []).map(id => studentMap.get(id)).filter(Boolean) as Student[];
+  }, [activeSession, studentMap]);
 
   // Fetch training attendance for today for this session
   const { data: attendanceRecords = [] } = useQuery<TrainingAttendanceRecord[]>({
@@ -650,60 +662,58 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
 
             {/* Student roster */}
             {enrolledStudents.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "60px", background: "#F8FAFC", borderRadius: "14px", border: "2px dashed #E5E7EB" }}>
-                <div style={{ fontSize: "40px", marginBottom: "10px" }}>👥</div>
-                <p style={{ color: "#6B7280" }}>No students enrolled in this session yet.</p>
+              <div style={{ textAlign: "center", padding: "60px 20px", background: "#F8FAFC", borderRadius: "16px", border: "2px dashed #CBD5E1" }}>
+                <div style={{ fontSize: "42px", marginBottom: "12px" }}>👥</div>
+                <h3 style={{ margin: "0 0 6px", fontSize: "17px", color: "#1E293B", fontWeight: 700 }}>No Students Enrolled Yet</h3>
+                <p style={{ color: "#64748B", fontSize: "13px", marginBottom: "20px" }}>Click "Manage Students" above to select and assign students to <strong>{activeSession.name}</strong>.</p>
+                <button
+                  onClick={() => setManageStudentsFor(activeSession)}
+                  style={{ padding: "11px 24px", borderRadius: "10px", border: "none", background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}
+                >
+                  👥 Manage / Add Students
+                </button>
               </div>
             ) : (
               <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #E5E7EB", overflow: "hidden" }}>
                 <div style={{ padding: "14px 20px", background: "#F8FAFC", borderBottom: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#374151" }}>Students Roster ({filteredEnrolled.length})</span>
-                  <span style={{ fontSize: "12px", color: "#6B7280" }}>Click name for full profile · Toggle In/Out for attendance</span>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: "#374151" }}>Enrolled Students Roster ({filteredEnrolled.length})</span>
+                  <span style={{ fontSize: "12px", color: "#6B7280" }}>Click name to view student profile · Attendance is submitted by trainer via Faculty App</span>
                 </div>
 
                 {filteredEnrolled.map((s, idx) => {
                   const isPresent = attendanceMap.get(s.id) === true;
-                  const isPending = attendanceMap.get(s.id) === undefined;
+                  const isMarked = attendanceMap.has(s.id);
                   return (
                     <div
                       key={s.id}
                       style={{ display: "flex", alignItems: "center", padding: "12px 20px", borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#fff" : "#FAFAFA" }}
                     >
                       {/* Index */}
-                      <div style={{ width: "30px", fontSize: "12px", color: "#9CA3AF", flexShrink: 0 }}>{idx + 1}</div>
+                      <div style={{ width: "32px", fontSize: "12px", color: "#9CA3AF", flexShrink: 0 }}>{idx + 1}</div>
 
                       {/* Student info (clickable for profile) */}
                       <div style={{ flex: 1, cursor: "pointer" }} onClick={() => setSelectedStudent(s)}>
-                        <div style={{ fontSize: "14px", fontWeight: 600, color: "#1D4ED8", textDecoration: "underline", textDecorationStyle: "dotted" }}>{s.name}</div>
-                        <div style={{ fontSize: "11px", color: "#6B7280" }}>{s.uniqueId} · {s.section}</div>
+                        <div style={{ fontSize: "14px", fontWeight: 700, color: "#1D4ED8", textDecoration: "underline", textDecorationStyle: "dotted" }}>{s.name}</div>
+                        <div style={{ fontSize: "11px", color: "#6B7280", marginTop: "1px" }}>{s.uniqueId} · {s.section}</div>
                       </div>
 
-                      {/* In/Out Toggle */}
-                      <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-                        <button
-                          onClick={() => toggleAttendanceMutation.mutate({ userId: s.id, markedPresent: true })}
-                          style={{
-                            padding: "7px 14px", borderRadius: "8px", border: "none", cursor: "pointer",
-                            fontSize: "12px", fontWeight: 700, transition: "all 0.15s",
-                            background: isPresent ? "#15803D" : "#F0FDF4",
-                            color: isPresent ? "#fff" : "#15803D",
-                            boxShadow: isPresent ? "0 2px 8px rgba(21,128,61,0.35)" : "none",
-                          }}
-                        >
-                          ✓ In
-                        </button>
-                        <button
-                          onClick={() => toggleAttendanceMutation.mutate({ userId: s.id, markedPresent: false })}
-                          style={{
-                            padding: "7px 14px", borderRadius: "8px", border: "none", cursor: "pointer",
-                            fontSize: "12px", fontWeight: 700, transition: "all 0.15s",
-                            background: (!isPending && !isPresent) ? "#DC2626" : "#FEF2F2",
-                            color: (!isPending && !isPresent) ? "#fff" : "#DC2626",
-                            boxShadow: (!isPending && !isPresent) ? "0 2px 8px rgba(220,38,38,0.35)" : "none",
-                          }}
-                        >
-                          ✗ Out
-                        </button>
+                      {/* Live Faculty App Attendance Status Badge */}
+                      <div style={{ flexShrink: 0 }}>
+                        {isMarked ? (
+                          isPresent ? (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#DCFCE7", color: "#15803D", fontSize: "12px", fontWeight: 700 }}>
+                              ✓ Present
+                            </span>
+                          ) : (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#FEE2E2", color: "#DC2626", fontSize: "12px", fontWeight: 700 }}>
+                              ✗ Absent
+                            </span>
+                          )
+                        ) : (
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#F1F5F9", color: "#64748B", fontSize: "12px", fontWeight: 600 }}>
+                            ⏳ Pending Scan
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
@@ -749,7 +759,11 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
         />
       )}
       {selectedStudent && (
-        <StudentProfileModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
+        <StudentProfileModal
+          student={selectedStudent}
+          trainingStartDate={activeSession?.createdAt ? new Date(activeSession.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Today"}
+          onClose={() => setSelectedStudent(null)}
+        />
       )}
     </Layout>
   );
