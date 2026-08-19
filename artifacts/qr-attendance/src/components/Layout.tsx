@@ -45,7 +45,7 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
   const { data: sessions = [] } = useQuery<any[]>({
     queryKey: ["training-sessions-nav"],
     queryFn: async () => {
-      const token = localStorage.getItem("hod_token") || localStorage.getItem("admin_token") || "";
+      const token = localStorage.getItem("qr_token") || "";
       const res = await fetch("/api/admin/training-sessions", {
         headers: { Authorization: `Bearer ${token}` }
       });

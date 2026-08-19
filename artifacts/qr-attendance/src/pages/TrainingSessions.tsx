@@ -5,7 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function getToken() {
-  return localStorage.getItem("hod_token") || localStorage.getItem("admin_token") || "";
+  // AuthContext stores token under 'qr_token'
+  return localStorage.getItem("qr_token") || "";
 }
 
 async function apiFetch(url: string, opts: RequestInit = {}) {
