@@ -136,8 +136,6 @@ function StudentProfileModal({ student, trainingStartDate, onClose }: { student:
                   </div>
                 </div>
               )}
-
-              </div>
             </>
           )}
         </div>
