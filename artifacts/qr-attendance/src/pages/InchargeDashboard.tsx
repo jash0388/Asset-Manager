@@ -64,7 +64,16 @@ export const MENTOR_ALLOCATIONS = [
   { id: 11, name: "Mrs K Ramya", email: "mrskramya@gmail.com", key: "2012", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2B", startRoll: "25N81A6756", endRoll: "25N81A6783", rollRange: "25N81A6756 TO 25N81A6783", count: 27 },
   { id: 14, name: "Mr M Srinivasulu", email: "mrmsrinivasulu@gmail.com", key: "105", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", startRoll: "25N81A6784", endRoll: "25N81A67B3", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
   { id: 12, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", key: "114", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2C", startRoll: "25N81A67B4", endRoll: "25N81A67D9", rollRange: "25N81A67B4 TO 25N81A67D9", count: 26 },
-  { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "2013", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", startRoll: "25N81A67E0", endRoll: "25N81A67G0", rollRange: "25N81A67E0 TO 25N81A67G0", count: 19 }
+  { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "2013", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", startRoll: "25N81A67E0", endRoll: "25N81A67G0", rollRange: "25N81A67E0 TO 25N81A67G0", count: 19 },
+
+  // Subject Faculty
+  { id: 18, name: "Mr. Rakesh Goud", email: "mrrakeshgoud@gmail.com", key: "118", role: "Subject Faculty (MSF)", yearLabel: "2nd Year", section: "2A/2B/2C", startRoll: "25N81A6701", endRoll: "25N81A67G0", rollRange: "MSF — All 2nd Year Students", count: 80 },
+  { id: 16, name: "Dr. A. Balaram", email: "drabalaram@gmail.com", key: "116", role: "Subject Faculty", yearLabel: "2nd Year", section: "2A", startRoll: "25N81A6701", endRoll: "25N81A6727", rollRange: "2nd Year Students", count: 27 },
+  { id: 17, name: "Dr. Md Abdul Azeem", email: "drmdabdulazeem@gmail.com", key: "117", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", startRoll: "24N81A6701", endRoll: "24N81A6731", rollRange: "3rd Year Students", count: 29 },
+  { id: 19, name: "Dr. Sri Hari VLN", email: "drsriharivln@gmail.com", key: "119", role: "Subject Faculty", yearLabel: "2nd Year", section: "2A", startRoll: "25N81A6701", endRoll: "25N81A6727", rollRange: "2nd Year Students", count: 27 },
+  { id: 20, name: "Mr. Prateek", email: "mrprateek@gmail.com", key: "120", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", startRoll: "24N81A6701", endRoll: "24N81A6731", rollRange: "3rd Year Students", count: 29 },
+  { id: 21, name: "Ms. Vaidehi", email: "msvaidehi@gmail.com", key: "121", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", startRoll: "24N81A6701", endRoll: "24N81A6731", rollRange: "3rd Year Students", count: 29 },
+  { id: 22, name: "Dr. C. Lakshmi Nath", email: "lakshminath@sphoorthyengg.ac.in", key: "122", role: "Subject Faculty (OE)", yearLabel: "4th Year", section: "4B", startRoll: "23N81A6788", endRoll: "23N81A67C8", rollRange: "PPLE(OE) — All 4B Students", count: 39 },
 ];
 
 function getSectionDisplayName(sectionCode?: string): { name: string; yearLabel: string; yearNum: string } {

@@ -82,7 +82,13 @@ export const OFFICIAL_FACULTY_LIST = [
   { id: 12, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67B4 TO 25N81A67D9", count: 26 },
   { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67E0 TO 25N81A67G0", count: 19 },
 
-  // Subject Faculty (OE / Open Electives)
+  // Subject Faculty
+  { id: 18, name: "Mr. Rakesh Goud", email: "mrrakeshgoud@gmail.com", role: "Subject Faculty (MSF)", yearLabel: "2nd Year", section: "2A/2B/2C", rollRange: "MSF — All 2nd Year Students", count: 80 },
+  { id: 16, name: "Dr. A. Balaram", email: "drabalaram@gmail.com", role: "Subject Faculty", yearLabel: "2nd Year", section: "2A", rollRange: "2nd Year Students", count: 27 },
+  { id: 17, name: "Dr. Md Abdul Azeem", email: "drmdabdulazeem@gmail.com", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", rollRange: "3rd Year Students", count: 29 },
+  { id: 19, name: "Dr. Sri Hari VLN", email: "drsriharivln@gmail.com", role: "Subject Faculty", yearLabel: "2nd Year", section: "2A", rollRange: "2nd Year Students", count: 27 },
+  { id: 20, name: "Mr. Prateek", email: "mrprateek@gmail.com", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", rollRange: "3rd Year Students", count: 29 },
+  { id: 21, name: "Ms. Vaidehi", email: "msvaidehi@gmail.com", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", rollRange: "3rd Year Students", count: 29 },
   { id: 22, name: "Dr. C. Lakshmi Nath", email: "lakshminath@sphoorthyengg.ac.in", role: "Subject Faculty (OE)", yearLabel: "4th Year", section: "4B", rollRange: "PPLE(OE) — All 4B Students", count: 39 },
 ];
 
@@ -117,7 +123,9 @@ export default function MentorApp() {
     if (!mentor) return null;
     return OFFICIAL_FACULTY_LIST.find(
       (f) =>
-        f.email === mentor.email ||
+        f.email?.toLowerCase() === mentor.email?.toLowerCase() ||
+        f.id === mentor.id ||
+        (f.name && mentor.name && f.name.toLowerCase().trim() === mentor.name.toLowerCase().trim()) ||
         f.section.toLowerCase() === (mentor.section || "").toLowerCase().replace(/[^a-z0-9]/g, "") ||
         (mentor.section && mentor.section.includes(f.section))
     ) || {
