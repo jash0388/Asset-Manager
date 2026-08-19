@@ -31,7 +31,7 @@ interface TrainingSession {
 interface Student {
   id: number;
   name: string;
-  unique_id: string;
+  uniqueId: string;   // API returns camelCase 'uniqueId'
   section: string;
   role: string;
 }
@@ -51,9 +51,9 @@ interface TrainingAttendanceRecord {
 // ─── Student Profile Modal ───────────────────────────────────────────────────
 function StudentProfileModal({ student, onClose }: { student: Student; onClose: () => void }) {
   const { data: report, isLoading } = useQuery({
-    queryKey: ["parent-report", student.unique_id],
-    queryFn: () => apiFetch(`/api/parent/student-report?rollNumber=${encodeURIComponent(student.unique_id)}`),
-    enabled: !!student.unique_id,
+    queryKey: ["parent-report", student.uniqueId],
+    queryFn: () => apiFetch(`/api/parent/student-report?rollNumber=${encodeURIComponent(student.uniqueId)}`),
+    enabled: !!student.uniqueId,
   });
 
   return (
@@ -65,7 +65,7 @@ function StudentProfileModal({ student, onClose }: { student: Student; onClose: 
             <div>
               <div style={{ fontSize: "10px", opacity: 0.7, marginBottom: "4px" }}>STUDENT PROFILE</div>
               <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>{student.name}</h2>
-              <p style={{ margin: "4px 0 0", fontSize: "13px", opacity: 0.8 }}>{student.unique_id} · {student.section}</p>
+              <p style={{ margin: "4px 0 0", fontSize: "13px", opacity: 0.8 }}>{student.uniqueId} · {student.section}</p>
             </div>
             <button onClick={onClose} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontSize: "13px" }}>✕ Close</button>
           </div>
@@ -143,7 +143,7 @@ function CreateSessionModal({ onClose, onCreated, allStudents }: { onClose: () =
   const filtered = useMemo(() => {
     if (!search.trim()) return allStudents;
     const q = search.trim().toLowerCase();
-    return allStudents.filter(s => s.name.toLowerCase().includes(q) || (s.unique_id || "").toLowerCase().includes(q) || (s.section || "").toLowerCase().includes(q));
+    return allStudents.filter(s => s.name.toLowerCase().includes(q) || (s.uniqueId || "").toLowerCase().includes(q) || (s.section || "").toLowerCase().includes(q));
   }, [search, allStudents]);
 
   const toggleStudent = (id: number) => setSelectedStudentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -215,7 +215,7 @@ function CreateSessionModal({ onClose, onCreated, allStudents }: { onClose: () =
                     </div>
                     <div>
                       <div style={{ fontSize: "13px", fontWeight: 600 }}>{s.name}</div>
-                      <div style={{ fontSize: "11px", color: "#6B7280" }}>{s.unique_id} · {s.section}</div>
+                      <div style={{ fontSize: "11px", color: "#6B7280" }}>{s.uniqueId} · {s.section}</div>
                     </div>
                   </div>
                 );
@@ -318,8 +318,9 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
   const { data: allStudents = [] } = useQuery<Student[]>({
     queryKey: ["all-students-for-training"],
     queryFn: async () => {
-      const data = await apiFetch("/api/admin/users");
-      return Array.isArray(data) ? data.filter((u: any) => u.role === "student") : (data?.users || []).filter((u: any) => u.role === "student");
+      // /api/users returns a plain array; ?role=student filters server-side
+      const data = await apiFetch("/api/users?role=student");
+      return Array.isArray(data) ? data : [];
     },
     staleTime: 60000,
   });
@@ -372,7 +373,7 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
   const filteredEnrolled = useMemo(() => {
     if (!searchQuery.trim()) return enrolledStudents;
     const q = searchQuery.trim().toLowerCase();
-    return enrolledStudents.filter(s => s.name.toLowerCase().includes(q) || (s.unique_id || "").toLowerCase().includes(q));
+    return enrolledStudents.filter(s => s.name.toLowerCase().includes(q) || (s.uniqueId || "").toLowerCase().includes(q));
   }, [enrolledStudents, searchQuery]);
 
   const presentCount = enrolledStudents.filter(s => attendanceMap.get(s.id) === true).length;
@@ -554,7 +555,7 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
                       {/* Student info (clickable for profile) */}
                       <div style={{ flex: 1, cursor: "pointer" }} onClick={() => setSelectedStudent(s)}>
                         <div style={{ fontSize: "14px", fontWeight: 600, color: "#1D4ED8", textDecoration: "underline", textDecorationStyle: "dotted" }}>{s.name}</div>
-                        <div style={{ fontSize: "11px", color: "#6B7280" }}>{s.unique_id} · {s.section}</div>
+                        <div style={{ fontSize: "11px", color: "#6B7280" }}>{s.uniqueId} · {s.section}</div>
                       </div>
 
                       {/* In/Out Toggle */}
