@@ -18,6 +18,7 @@ import PrincipalDashboard from "@/pages/PrincipalDashboard";
 import HourlyAttendance from "@/pages/HourlyAttendance";
 import InchargeDashboard from "@/pages/InchargeDashboard";
 import ParentApp from "@/pages/ParentApp";
+import TrainingSessions from "@/pages/TrainingSessions";
 import { Analytics } from "@vercel/analytics/react";
 import { useEffect } from "react";
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
@@ -130,6 +131,14 @@ function AppRouter() {
       {/* HOD routes */}
       <Route path="/hod-dashboard">
         <RequireHod><HodDashboard /></RequireHod>
+      </Route>
+
+      {/* Training Sessions - HOD & Admin */}
+      <Route path="/training-sessions/:id">
+        {(params) => <RequireAdminOrHod><TrainingSessions trainingId={parseInt(params.id)} /></RequireAdminOrHod>}
+      </Route>
+      <Route path="/training-sessions">
+        <RequireAdminOrHod><TrainingSessions /></RequireAdminOrHod>
       </Route>
 
       {/* Principal routes */}

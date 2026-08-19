@@ -1,6 +1,18 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
 import { authMiddleware, mentorOnly } from "../middlewares/auth.js";
+import {
+  getTrainingSessions,
+  getTrainingSessionById,
+  getTrainingSessionByTrainerKey,
+  saveTrainingSession,
+  deleteTrainingSession,
+  addTrainerKeyToSession,
+  markTrainingAttendance,
+  getTrainingAttendanceForDate,
+  getPresentUserIdsInTrainingForDate
+} from "../services/trainingStore.js";
+
 
 const router = Router();
 
@@ -230,6 +242,60 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
   try {
     const { day, time, date } = getCurrentISTDateTime();
 
+    // --- TRAINING TRAINER EARLY RETURN ---
+    // Training trainers have mentorId < -9000 (e.g., -9001 for training #1)
+    if (mentorId <= -9000) {
+      const trainingId = Math.abs(mentorId) - 9000;
+      const training = getTrainingSessionById(trainingId);
+      if (!training) {
+        res.status(404).json({ error: "Training session not found" });
+        return;
+      }
+
+      // Fetch existing training attendance for today to determine session status
+      const todayAttendance = getTrainingAttendanceForDate(date, trainingId);
+      const isSubmitted = todayAttendance.length > 0;
+
+      const virtualScheduleId = -(9000 + trainingId);
+      const virtualSchedule = {
+        id: virtualScheduleId,
+        mentor_id: mentorId,
+        day_of_week: day,
+        start_time: "08:00:00",
+        end_time: "17:00:00",
+        section: "ALL",
+        subject: training.name,
+        year: "TRAINING",
+        isTraining: true,
+        trainingId,
+        trainingName: training.name,
+        trainingCompany: training.company,
+        status: isSubmitted ? "submitted" : "active",
+        isLocked: false,
+        isCurrentTimeSlot: true,
+        isUnlockedByHod: true,
+        extraBufferMins: 0,
+        session: isSubmitted ? { ended_at: todayAttendance[0]?.markedAt } : null
+      };
+
+      res.setHeader("x-app-version", "4.0.0");
+      res.json({
+        activeSchedule: virtualSchedule,
+        session: isSubmitted ? { ended_at: todayAttendance[0]?.markedAt, started_at: todayAttendance[0]?.markedAt } : null,
+        todaySchedules: [virtualSchedule],
+        serverTime: { day, time, date },
+        appVersion: {
+          latestVersionCode: 7,
+          latestVersionName: "1.7.0",
+          downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+          forceUpdate: false,
+          releaseNotes: "Training Session Mode Active!"
+        }
+      });
+      return;
+    }
+    // --- END TRAINING TRAINER ---
+
     // Fetch all schedules for this mentor for the current day
     const { data: todaySchedules, error: schedulesErr } = await supabase
       .from("qr_schedules")
@@ -335,7 +401,49 @@ router.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (re
 
   try {
     const { date } = getCurrentISTDateTime();
-    
+
+    // --- TRAINING VIRTUAL SCHEDULE ---
+    if (scheduleId < 0) {
+      const trainingId = Math.abs(scheduleId) - 9000;
+      const training = getTrainingSessionById(trainingId);
+      if (!training) {
+        res.status(404).json({ error: "Training session not found" });
+        return;
+      }
+
+      // Fetch enrolled students for this training session
+      let studentQuery = supabase.from("qr_users").select("*").eq("role", "student").order("unique_id", { ascending: true });
+      if (training.studentIds && training.studentIds.length > 0) {
+        studentQuery = studentQuery.in("id", training.studentIds);
+      }
+      const { data: students } = await studentQuery;
+
+      const todayAttendance = getTrainingAttendanceForDate(date, trainingId);
+      const attendanceMap = new Map<number, any>();
+      todayAttendance.forEach(a => attendanceMap.set(a.userId, a));
+
+      const result = (students || []).map((s: any) => {
+        const att = attendanceMap.get(s.id);
+        return {
+          id: s.id,
+          name: s.name,
+          uniqueId: s.unique_id,
+          section: s.section,
+          scannedGate: false,
+          gateEntryTime: null,
+          markedPresent: att ? att.markedPresent : false,
+          markedByTeacher: !!att,
+          scannedQr: false,
+          warningNotScanned: false,
+          isTraining: true
+        };
+      });
+
+      res.json(result);
+      return;
+    }
+    // --- END TRAINING ---
+
     // Fetch schedule to get the section
     const { data: schedules, error: scheduleErr } = await supabase
       .from("qr_schedules")
@@ -451,6 +559,28 @@ router.post("/mentor/start-session", authMiddleware, mentorOnly, async (req: any
   try {
     const { date } = getCurrentISTDateTime();
 
+    // --- TRAINING: return virtual session, don't touch DB ---
+    if (scheduleId < 0) {
+      const trainingId = Math.abs(scheduleId) - 9000;
+      const training = getTrainingSessionById(trainingId);
+      if (!training) {
+        res.status(404).json({ error: "Training session not found" });
+        return;
+      }
+      res.status(201).json({
+        id: scheduleId,
+        mentor_id: mentorId,
+        schedule_id: scheduleId,
+        date,
+        started_at: new Date().toISOString(),
+        ended_at: null,
+        student_count: 0,
+        isTraining: true
+      });
+      return;
+    }
+    // --- END TRAINING ---
+
     // Verify schedule belongs to mentor
     const { data: schedules, error: scheduleErr } = await supabase
       .from("qr_schedules")
@@ -513,6 +643,28 @@ router.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req:
 
   try {
     const { date } = getCurrentISTDateTime();
+
+    // --- TRAINING: write to trainingStore, NOT to qr_hourly_attendance ---
+    if (scheduleId < 0) {
+      const trainingId = Math.abs(scheduleId) - 9000;
+      const training = getTrainingSessionById(trainingId);
+      if (!training) {
+        res.status(404).json({ error: "Training session not found" });
+        return;
+      }
+      const toMark = studentRecords.map((r: any) => ({
+        trainingId,
+        userId: r.studentId,
+        date,
+        markedPresent: !!r.markedPresent,
+        markedBy: "Trainer"
+      }));
+      markTrainingAttendance(toMark);
+      const presentCount = toMark.filter(r => r.markedPresent).length;
+      res.json({ message: "Training attendance submitted successfully", presentCount });
+      return;
+    }
+    // --- END TRAINING ---
 
     // Verify schedule belongs to mentor
     const { data: schedules, error: scheduleErr } = await supabase
@@ -922,7 +1074,7 @@ router.get("/admin/schedule-overrides", authMiddleware, async (req: any, res: an
   res.json(list);
 });
 
-// 5c. Fetch class presence logs for date (students marked present in hourly classes)
+// 5c. Fetch class presence logs for date (students marked present in hourly classes + training)
 router.get("/admin/today-class-presence", authMiddleware, async (req: any, res: any) => {
   const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes().todayDate;
   try {
@@ -933,12 +1085,33 @@ router.get("/admin/today-class-presence", authMiddleware, async (req: any, res: 
       .eq("marked_present", true);
 
     if (error) throw error;
-    res.json(records || []);
+
+    // Also include students marked present in ANY training session today
+    const trainingPresentUserIds = getPresentUserIdsInTrainingForDate(dateParam);
+    const trainingRecords = trainingPresentUserIds.map(uid => ({
+      user_id: uid,
+      schedule_id: null,
+      marked_present: true,
+      date: dateParam,
+      isTraining: true
+    }));
+
+    // Merge: existing DB records + training records (deduplicate by user_id)
+    const merged = [...(records || [])];
+    const existingUserIds = new Set((records || []).map((r: any) => r.user_id));
+    trainingRecords.forEach(tr => {
+      if (!existingUserIds.has(tr.user_id)) {
+        merged.push(tr);
+      }
+    });
+
+    res.json(merged);
   } catch (err: any) {
     req.log.error({ err }, "Error fetching today class presence");
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 function getCurrentISTHoursMinutes(): { todayDate: string; isPast430PM: boolean } {
   const now = new Date();
@@ -1112,6 +1285,123 @@ router.get("/parent/app-version", (_req: any, res: any) => {
     forceUpdate: false,
     releaseNotes: "Official Parent App Release: Live Gate Attendance & Hourly Subject Schedule Tracking!"
   });
+});
+
+// ============================================================
+// TRAINING SESSIONS APIs
+// ============================================================
+
+// GET all training sessions
+router.get("/admin/training-sessions", authMiddleware, async (_req: any, res: any) => {
+  res.json(getTrainingSessions());
+});
+
+// GET one training session by ID
+router.get("/admin/training-sessions/:id", authMiddleware, async (req: any, res: any) => {
+  const id = parseInt(req.params.id);
+  const session = getTrainingSessionById(id);
+  if (!session) {
+    res.status(404).json({ error: "Training session not found" });
+    return;
+  }
+  res.json(session);
+});
+
+// POST create new training session
+router.post("/admin/training-sessions", authMiddleware, async (req: any, res: any) => {
+  const { name, company, description, studentIds } = req.body;
+  if (!name || !name.trim()) {
+    res.status(400).json({ error: "Training session name is required" });
+    return;
+  }
+  const created = saveTrainingSession({ name: name.trim(), company: company || "Corporate", description: description || "", studentIds: studentIds || [] });
+  res.status(201).json(created);
+});
+
+// PUT update training session
+router.put("/admin/training-sessions/:id", authMiddleware, async (req: any, res: any) => {
+  const id = parseInt(req.params.id);
+  const existing = getTrainingSessionById(id);
+  if (!existing) {
+    res.status(404).json({ error: "Training session not found" });
+    return;
+  }
+  const { name, company, description, studentIds } = req.body;
+  const updated = saveTrainingSession({
+    ...existing,
+    name: name?.trim() || existing.name,
+    company: company || existing.company,
+    description: description !== undefined ? description : existing.description,
+    studentIds: Array.isArray(studentIds) ? studentIds : existing.studentIds
+  });
+  res.json(updated);
+});
+
+// DELETE training session
+router.delete("/admin/training-sessions/:id", authMiddleware, async (req: any, res: any) => {
+  const id = parseInt(req.params.id);
+  const deleted = deleteTrainingSession(id);
+  if (!deleted) {
+    res.status(404).json({ error: "Training session not found" });
+    return;
+  }
+  res.json({ message: "Training session deleted successfully" });
+});
+
+// POST add trainer key to a training session
+router.post("/admin/training-sessions/:id/trainer-key", authMiddleware, async (req: any, res: any) => {
+  const id = parseInt(req.params.id);
+  const { name, email, key } = req.body;
+  if (!name || !key) {
+    res.status(400).json({ error: "Trainer name and key are required" });
+    return;
+  }
+  const updated = addTrainerKeyToSession(id, { name, email: email || `trainer@sphoorthyengg.ac.in`, key: String(key).trim() });
+  if (!updated) {
+    res.status(404).json({ error: "Training session not found" });
+    return;
+  }
+  res.json(updated);
+});
+
+// GET training attendance for a date
+router.get("/admin/training-attendance", authMiddleware, async (req: any, res: any) => {
+  const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes().todayDate;
+  const trainingIdParam = req.query.trainingId ? parseInt(req.query.trainingId as string) : undefined;
+  const records = getTrainingAttendanceForDate(dateParam, trainingIdParam);
+
+  // Enrich with student info
+  const userIds = [...new Set(records.map(r => r.userId))];
+  if (userIds.length === 0) {
+    res.json([]);
+    return;
+  }
+
+  const { data: students } = await supabase.from("qr_users").select("id, name, unique_id, section").in("id", userIds);
+  const studentMap = new Map((students || []).map((s: any) => [s.id, s]));
+
+  const enriched = records.map(r => {
+    const s = studentMap.get(r.userId);
+    return {
+      ...r,
+      name: s?.name || "Unknown",
+      uniqueId: s?.unique_id || "—",
+      section: s?.section || "—"
+    };
+  });
+
+  res.json(enriched);
+});
+
+// POST mark/update training attendance from HOD dashboard
+router.post("/admin/training-attendance", authMiddleware, async (req: any, res: any) => {
+  const { trainingId, userId, date, markedPresent } = req.body;
+  if (!trainingId || !userId || !date) {
+    res.status(400).json({ error: "trainingId, userId, and date are required" });
+    return;
+  }
+  markTrainingAttendance([{ trainingId: Number(trainingId), userId: Number(userId), date, markedPresent: !!markedPresent, markedBy: "HOD" }]);
+  res.json({ message: "Training attendance updated" });
 });
 
 export default router;

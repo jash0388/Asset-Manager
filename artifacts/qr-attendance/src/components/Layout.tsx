@@ -14,8 +14,13 @@ import {
   Clock,
   Flag,
   Settings,
+  Briefcase,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 
 const adminNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -32,6 +37,120 @@ const PASSCODE_KEY = "secapp.passcode.v1";
 const getStoredPasscode = () => {
   try { return localStorage.getItem(PASSCODE_KEY) || MASTER_PASSCODE; } catch { return MASTER_PASSCODE; }
 };
+
+// ─── Training Sessions Tree Component ────────────────────────────────────────
+function TrainingNavTree({ location, onNavigate }: { location: string; onNavigate: () => void }) {
+  const [expanded, setExpanded] = useState(true);
+
+  const { data: sessions = [] } = useQuery<any[]>({
+    queryKey: ["training-sessions-nav"],
+    queryFn: async () => {
+      const token = localStorage.getItem("hod_token") || localStorage.getItem("admin_token") || "";
+      const res = await fetch("/api/admin/training-sessions", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    refetchInterval: 15000,
+    staleTime: 10000,
+  });
+
+  const isOnTraining = location.startsWith("/training-sessions");
+
+  return (
+    <div style={{ marginTop: "4px" }}>
+      {/* Parent: Training Sessions header */}
+      <div
+        onClick={() => setExpanded(e => !e)}
+        style={{
+          display: "flex", alignItems: "center", gap: "10px",
+          padding: "9px 12px", borderRadius: "10px", marginBottom: "2px",
+          cursor: "pointer", transition: "all 0.15s ease",
+          background: isOnTraining ? "rgba(255,255,255,0.2)" : "transparent",
+          color: isOnTraining ? "#ffffff" : "rgba(255,255,255,0.80)",
+          fontWeight: isOnTraining ? "700" : "500",
+        }}
+        onMouseEnter={e => { if (!isOnTraining) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.1)"; }}
+        onMouseLeave={e => { if (!isOnTraining) (e.currentTarget as HTMLDivElement).style.background = isOnTraining ? "rgba(255,255,255,0.2)" : "transparent"; }}
+      >
+        <Briefcase style={{ width: "16px", height: "16px", flexShrink: 0 }} />
+        <span style={{ fontSize: "13px", flex: 1 }}>Training Sessions</span>
+        {expanded
+          ? <ChevronDown style={{ width: "12px", height: "12px", opacity: 0.7 }} />
+          : <ChevronRight style={{ width: "12px", height: "12px", opacity: 0.7 }} />
+        }
+      </div>
+
+      {/* Sub-tree items with branch lines */}
+      {expanded && (
+        <div style={{ marginLeft: "22px", position: "relative" }}>
+          {/* Vertical branch line */}
+          <div style={{
+            position: "absolute", left: "8px", top: 0, bottom: "14px",
+            width: "1.5px", background: "rgba(255,255,255,0.25)", borderRadius: "2px"
+          }} />
+
+          {/* All Sessions overview link */}
+          <div style={{ position: "relative", paddingLeft: "20px", marginBottom: "2px" }}>
+            <div style={{ position: "absolute", left: "8px", top: "50%", width: "12px", height: "1.5px", background: "rgba(255,255,255,0.25)" }} />
+            <Link href="/training-sessions" onClick={onNavigate}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                padding: "7px 10px", borderRadius: "8px", cursor: "pointer",
+                transition: "all 0.15s", fontSize: "12px",
+                background: location === "/training-sessions" ? "rgba(255,255,255,0.18)" : "transparent",
+                color: location === "/training-sessions" ? "#fff" : "rgba(255,255,255,0.7)",
+                fontWeight: location === "/training-sessions" ? "700" : "400",
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.12)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = location === "/training-sessions" ? "rgba(255,255,255,0.18)" : "transparent"; }}
+              >
+                <span>📋</span> All Sessions
+              </div>
+            </Link>
+          </div>
+
+          {/* Per-session links */}
+          {(sessions || []).map((s: any, idx: number) => {
+            const href = `/training-sessions/${s.id}`;
+            const isActive = location === href;
+            const isLast = idx === sessions.length - 1;
+            return (
+              <div key={s.id} style={{ position: "relative", paddingLeft: "20px", marginBottom: "2px" }}>
+                {/* Horizontal branch connector */}
+                <div style={{ position: "absolute", left: "8px", top: "50%", width: "12px", height: "1.5px", background: "rgba(255,255,255,0.25)" }} />
+                <Link href={href} onClick={onNavigate}>
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: "8px",
+                    padding: "7px 10px", borderRadius: "8px", cursor: "pointer",
+                    transition: "all 0.15s", fontSize: "12px",
+                    background: isActive ? "rgba(255,255,255,0.18)" : "transparent",
+                    color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
+                    fontWeight: isActive ? "700" : "400",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.12)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = isActive ? "rgba(255,255,255,0.18)" : "transparent"; }}
+                  >
+                    <span>🏢</span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+                  </div>
+                </Link>
+              </div>
+            );
+          })}
+
+          {sessions.length === 0 && (
+            <div style={{ paddingLeft: "20px", fontSize: "11px", color: "rgba(255,255,255,0.4)", padding: "6px 10px 6px 28px" }}>
+              No sessions yet
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { admin, hod, principal, role, logout } = useAuth();
@@ -170,6 +289,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+
+          {/* Training Sessions Tree Nav — HOD & Admin only */}
+          {(role === "hod" || role === "admin") && (
+            <TrainingNavTree location={location} onNavigate={() => setMobileOpen(false)} />
+          )}
         </nav>
 
         {/* Bottom: user + settings + logout */}

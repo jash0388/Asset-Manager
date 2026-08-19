@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { timingSafeEqual, createHash } from "crypto";
 import { supabase } from "../lib/supabase.js";
 import { LoginBody } from "@workspace/api-zod";
+import { getTrainingSessionByTrainerKey } from "../services/trainingStore.js";
 
 const router = Router();
 
@@ -355,6 +356,21 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
       const pinEntry = FACULTY_PIN_MAP[cleanKey];
       if (pinEntry && pinEntry.key === cleanKey) {
         mentor = pinEntry;
+      }
+    }
+
+    if (!mentor) {
+      // Check if this key belongs to a Training Session Trainer (e.g. Wipro Training key)
+      const trainingSession = getTrainingSessionByTrainerKey(cleanKey);
+      if (trainingSession) {
+        const trainerObj = trainingSession.trainerKeys.find(tk => String(tk.key).trim() === cleanKey);
+        mentor = {
+          id: -9000 - trainingSession.id,
+          name: trainerObj ? trainerObj.name : `${trainingSession.name} Trainer`,
+          email: trainerObj ? trainerObj.email : `trainer@sphoorthyengg.ac.in`,
+          key: cleanKey,
+          section: `TRAINING — ${trainingSession.name}`
+        } as any;
       }
     }
 
