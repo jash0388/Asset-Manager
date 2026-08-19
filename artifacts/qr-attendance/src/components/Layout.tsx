@@ -345,7 +345,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* ══════════ MAIN CONTENT ══════════ */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
         {/* Mobile top bar */}
-        <header style={{ display: "flex", alignItems: "center", justifyBetween: "space-between", gap: "12px", padding: "12px 16px", borderBottom: "1px solid #E5E7EB", background: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }} className="lg:hidden flex items-center justify-between">
+        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "12px 16px", borderBottom: "1px solid #E5E7EB", background: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }} className="lg:hidden flex items-center justify-between">
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <button data-testid="mobile-menu-button" onClick={() => setMobileOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", display: "flex" }}>
               <Menu style={{ width: "24px", height: "24px" }} />
