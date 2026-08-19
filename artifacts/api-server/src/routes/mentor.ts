@@ -411,12 +411,19 @@ router.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (re
         return;
       }
 
-      // Fetch enrolled students for this training session
-      let studentQuery = supabase.from("qr_users").select("*").eq("role", "student").order("unique_id", { ascending: true });
-      if (training.studentIds && training.studentIds.length > 0) {
-        studentQuery = studentQuery.in("id", training.studentIds);
+      // Fetch enrolled students for this training session ONLY
+      if (!training.studentIds || training.studentIds.length === 0) {
+        res.json([]);
+        return;
       }
-      const { data: students } = await studentQuery;
+
+      const { data: students } = await supabase
+        .from("qr_users")
+        .select("*")
+        .eq("role", "student")
+        .in("id", training.studentIds)
+        .order("unique_id", { ascending: true });
+
 
       const todayAttendance = getTrainingAttendanceForDate(date, trainingId);
       const attendanceMap = new Map<number, any>();
