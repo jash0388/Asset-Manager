@@ -978,49 +978,53 @@ export default function TrainingSessions({ trainingId }: { trainingId?: number }
                 </button>
               </div>
             ) : (
-              <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #E5E7EB", overflow: "hidden" }}>
-                <div style={{ padding: "14px 20px", background: "#F8FAFC", borderBottom: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ background: "#fff", borderRadius: "14px", border: "1px solid #E5E7EB", overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
+                {/* Sticky Header */}
+                <div style={{ padding: "14px 20px", background: "#F8FAFC", borderBottom: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 10 }}>
                   <span style={{ fontSize: "13px", fontWeight: 700, color: "#374151" }}>
                     {currentSubSession ? currentSubSession.name : "All Enrolled"} Roster ({filteredEnrolled.length})
                   </span>
                   <span style={{ fontSize: "12px", color: "#6B7280" }}>Click student name for profile · Live trainer status shown</span>
                 </div>
 
-                {filteredEnrolled.map((s, idx) => {
-                  const isPresent = attendanceMap.get(s.id) === true;
-                  const isMarked = attendanceMap.has(s.id);
-                  return (
-                    <div
-                      key={s.id}
-                      style={{ display: "flex", alignItems: "center", padding: "12px 20px", borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#fff" : "#FAFAFA" }}
-                    >
-                      <div style={{ width: "32px", fontSize: "12px", color: "#9CA3AF", flexShrink: 0 }}>{idx + 1}</div>
+                {/* Scrollable Student List Inside Box */}
+                <div style={{ maxHeight: "520px", overflowY: "auto" }}>
+                  {filteredEnrolled.map((s, idx) => {
+                    const isPresent = attendanceMap.get(s.id) === true;
+                    const isMarked = attendanceMap.has(s.id);
+                    return (
+                      <div
+                        key={s.id}
+                        style={{ display: "flex", alignItems: "center", padding: "12px 20px", borderBottom: "1px solid #F3F4F6", background: idx % 2 === 0 ? "#fff" : "#FAFAFA" }}
+                      >
+                        <div style={{ width: "32px", fontSize: "12px", color: "#9CA3AF", flexShrink: 0 }}>{idx + 1}</div>
 
-                      <div style={{ flex: 1, cursor: "pointer" }} onClick={() => setSelectedStudent(s)}>
-                        <div style={{ fontSize: "14px", fontWeight: 700, color: "#1D4ED8", textDecoration: "underline", textDecorationStyle: "dotted" }}>{s.name}</div>
-                        <div style={{ fontSize: "11px", color: "#6B7280", marginTop: "1px" }}>{s.uniqueId} · {s.section}</div>
-                      </div>
+                        <div style={{ flex: 1, cursor: "pointer" }} onClick={() => setSelectedStudent(s)}>
+                          <div style={{ fontSize: "14px", fontWeight: 700, color: "#1D4ED8", textDecoration: "underline", textDecorationStyle: "dotted" }}>{s.name}</div>
+                          <div style={{ fontSize: "11px", color: "#6B7280", marginTop: "1px" }}>{s.uniqueId} · {s.section}</div>
+                        </div>
 
-                      <div style={{ flexShrink: 0 }}>
-                        {isMarked ? (
-                          isPresent ? (
-                            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#DCFCE7", color: "#15803D", fontSize: "12px", fontWeight: 700 }}>
-                              ✓ Present
-                            </span>
+                        <div style={{ flexShrink: 0 }}>
+                          {isMarked ? (
+                            isPresent ? (
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#DCFCE7", color: "#15803D", fontSize: "12px", fontWeight: 700 }}>
+                                ✓ Present
+                              </span>
+                            ) : (
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#FEE2E2", color: "#DC2626", fontSize: "12px", fontWeight: 700 }}>
+                                ✗ Absent
+                              </span>
+                            )
                           ) : (
-                            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#FEE2E2", color: "#DC2626", fontSize: "12px", fontWeight: 700 }}>
-                              ✗ Absent
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#F1F5F9", color: "#64748B", fontSize: "12px", fontWeight: 600 }}>
+                              ⏳ Pending Scan
                             </span>
-                          )
-                        ) : (
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "5px 12px", borderRadius: "8px", background: "#F1F5F9", color: "#64748B", fontSize: "12px", fontWeight: 600 }}>
-                            ⏳ Pending Scan
-                          </span>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
           </>
