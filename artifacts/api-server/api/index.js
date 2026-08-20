@@ -64316,12 +64316,13 @@ if (!process.env["SESSION_SECRET"]) {
   console.error("[SECURITY WARNING] SESSION_SECRET env var not set \u2014 using insecure fallback. Set this in production immediately.");
 }
 router2.get("/auth/version-check", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 function timingSafeStringEqual(a, b) {
@@ -64345,12 +64346,13 @@ function getClientIp(req) {
   return (req.headers["x-forwarded-for"] || req.ip || "127.0.0.1").toString().split(",")[0].trim();
 }
 router2.post("/app-version-check", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 router2.post("/auth/login", async (req, res) => {
@@ -64487,30 +64489,33 @@ router2.get("/auth/mentor-key-login", (_req, res) => {
   });
 });
 router2.get("/auth/app-version", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 router2.get("/admin/mentors-tracking-public", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 router2.get("/app-version", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 var FACULTY_PIN_MAP = {
@@ -65589,12 +65594,13 @@ function formatUser2(u) {
   };
 }
 router5.get("/mentor/app-version", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 function isSentinel2(ts) {

@@ -15,12 +15,13 @@ if (!process.env["SESSION_SECRET"]) {
 }
 
 router.get("/auth/version-check", (_req: any, res: any) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 
@@ -61,12 +62,13 @@ function getClientIp(req: any): string {
 
 
 router.post("/app-version-check", (_req: any, res: any) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 
@@ -253,32 +255,35 @@ router.get("/auth/mentor-key-login", (_req: any, res: any) => {
 });
 
 router.get("/auth/app-version", (_req: any, res: any) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 
 router.get("/admin/mentors-tracking-public", (_req: any, res: any) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 
 router.get("/app-version", (_req: any, res: any) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 7,
+    latestVersionName: "1.7.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
   });
 });
 
