@@ -64303,6 +64303,11 @@ function getPresentUserIdsInTrainingForDate(date) {
   });
   return memoryStore.attendance.filter((a) => a.date === date && a.markedPresent).map((a) => a.userId);
 }
+function getUserTrainingAttendanceForDate(userId, date) {
+  ensureFreshStore().catch(() => {
+  });
+  return memoryStore.attendance.filter((a) => a.userId === userId && a.date === date && a.markedPresent);
+}
 
 // src/routes/auth.ts
 var router2 = (0, import_express2.Router)();
@@ -66476,19 +66481,45 @@ router5.get("/parent/student-report", async (req, res) => {
         const { data: hourlyAtt } = await supabase.from("qr_hourly_attendance").select("*").eq("user_id", student.id).eq("date", date).in("schedule_id", scheduleIds);
         const hourlyMap = /* @__PURE__ */ new Map();
         (hourlyAtt || []).forEach((h) => hourlyMap.set(h.schedule_id, h));
+        const trainingAttList = getUserTrainingAttendanceForDate(student.id, date);
         todaySchedule = schedules.map((s) => {
           const h = hourlyMap.get(s.id);
+          const startTimeStr = s.start_time || "00:00:00";
+          const isMorningSlot = startTimeStr < "13:00:00";
+          const isAfternoonSlot = startTimeStr >= "13:00:00";
+          let isTrainingCovered = false;
+          let trainingTag = "";
+          for (const ta of trainingAttList) {
+            const trSession = getTrainingSessionById(ta.trainingId);
+            const sub = trSession?.subSessions?.find((ss) => ss.id === ta.subSessionId);
+            if (ta.subSessionId === 1 && isMorningSlot) {
+              isTrainingCovered = true;
+              trainingTag = `${trSession?.name || "Training"} (Morning Batch)`;
+              break;
+            } else if (ta.subSessionId === 2 && isAfternoonSlot) {
+              isTrainingCovered = true;
+              trainingTag = `${trSession?.name || "Training"} (Afternoon Batch)`;
+              break;
+            } else if (!ta.subSessionId) {
+              isTrainingCovered = true;
+              trainingTag = `${trSession?.name || "Training"} Session`;
+              break;
+            }
+          }
           let status = "PENDING";
-          if (h) {
+          if (isTrainingCovered) {
+            status = "PRESENT";
+          } else if (h) {
             status = h.marked_present ? "PRESENT" : "ABSENT";
           }
           return {
             id: s.id,
-            subject: s.subject || "Lecture Hour",
+            subject: isTrainingCovered ? `${s.subject || "Class"} \u2022 ${trainingTag}` : s.subject || "Lecture Hour",
             startTime: (s.start_time || "00:00").slice(0, 5),
             endTime: (s.end_time || "00:00").slice(0, 5),
-            teacherName: mentorMap.get(s.mentor_id) || "Faculty",
-            markedPresent: h ? Boolean(h.marked_present) : null,
+            teacherName: isTrainingCovered ? "Training Faculty" : mentorMap.get(s.mentor_id) || "Faculty",
+            markedPresent: isTrainingCovered ? true : h ? Boolean(h.marked_present) : null,
+            isTrainingSession: isTrainingCovered,
             status
           };
         });
@@ -66684,6 +66715,46 @@ router5.delete("/admin/training-sessions/:id/sub-sessions/:subId", authMiddlewar
     return;
   }
   res.json({ message: "Sub-session deleted successfully" });
+});
+router5.post("/admin/mark-permission-attendance", authMiddleware, async (req, res) => {
+  const { studentIds, scheduleIds, date } = req.body;
+  if (!Array.isArray(studentIds) || studentIds.length === 0) {
+    res.status(400).json({ error: "Please select at least one student." });
+    return;
+  }
+  if (!Array.isArray(scheduleIds) || scheduleIds.length === 0) {
+    res.status(400).json({ error: "Please select at least one class period." });
+    return;
+  }
+  const dateParam = (date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
+  try {
+    const upsertRecords = [];
+    studentIds.forEach((uid) => {
+      scheduleIds.forEach((sid) => {
+        upsertRecords.push({
+          schedule_id: sid,
+          user_id: uid,
+          date: dateParam,
+          marked_present: true,
+          marked_by_teacher: true,
+          scanned_qr: false
+        });
+      });
+    });
+    if (upsertRecords.length > 0) {
+      const { error: upsertErr } = await supabase.from("qr_hourly_attendance").upsert(upsertRecords, {
+        onConflict: "schedule_id,user_id,date"
+      });
+      if (upsertErr) throw upsertErr;
+    }
+    res.json({
+      message: `Successfully marked permission attendance for ${studentIds.length} student(s) across ${scheduleIds.length} class period(s).`,
+      count: upsertRecords.length
+    });
+  } catch (err) {
+    req.log?.error({ err }, "Error marking permission attendance");
+    res.status(500).json({ error: err.message || "Failed to mark permission attendance" });
+  }
 });
 router5.post("/admin/training-sessions/:id/unlock", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
