@@ -242,8 +242,76 @@ function getBufferedTime(timeStr: string, offsetMinutes: number): string {
 // Store HOD Schedule Overrides: Key: `${schedule_id}_${date}` -> { isUnlocked: boolean, extendedMinutes: number }
 export const scheduleOverridesMap = new Map<string, { isUnlocked: boolean; extendedMinutes: number }>();
 
+// ── History endpoint: returns mentor's schedules + submission status for any date ──
+router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: any) => {
+  const mentorId = req.mentorId!;
+  const dateParam = req.query.date as string; // YYYY-MM-DD
+  if (!dateParam || !/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+    res.status(400).json({ error: "Missing or invalid date (expected YYYY-MM-DD)" });
+    return;
+  }
+  try {
+    // Derive day of week from the date
+    const dayNames = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+    const dayIndex = new Date(dateParam + "T00:00:00Z").getUTCDay();
+    const dayOfWeek = dayNames[dayIndex];
+
+    // Fetch all schedules for this mentor on that day
+    const { data: schedules, error: schedErr } = await supabase
+      .from("qr_schedules")
+      .select("*")
+      .eq("mentor_id", mentorId)
+      .eq("day_of_week", dayOfWeek)
+      .order("start_time");
+
+    if (schedErr) throw schedErr;
+    if (!schedules || schedules.length === 0) {
+      res.json({ date: dateParam, dayOfWeek, schedules: [] });
+      return;
+    }
+
+    // Fetch sessions for those schedules on that specific date
+    const scheduleIds = schedules.map((s: any) => s.id);
+    const { data: sessions, error: sessionErr } = await supabase
+      .from("qr_mentor_sessions")
+      .select("*")
+      .eq("date", dateParam)
+      .in("schedule_id", scheduleIds);
+
+    if (sessionErr) throw sessionErr;
+
+    const sessionMap = new Map<number, any>();
+    (sessions || []).forEach((s: any) => sessionMap.set(s.schedule_id, s));
+
+    const result = schedules.map((s: any) => {
+      const session = sessionMap.get(s.id);
+      const isSubmitted = Boolean(session && session.ended_at);
+      const isStarted   = Boolean(session && !session.ended_at);
+      return {
+        id: s.id,
+        mentor_id: s.mentor_id,
+        day_of_week: s.day_of_week,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        section: s.section,
+        subject: s.subject,
+        year: s.year,
+        status: isSubmitted ? "submitted" : isStarted ? "started" : "pending",
+        presentCount: session?.student_count ?? null,
+        submittedAt: session?.ended_at ?? null,
+      };
+    });
+
+    res.json({ date: dateParam, dayOfWeek, schedules: result });
+  } catch (err: any) {
+    req.log.error({ err }, "Get mentor history error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // 1. Get active schedule for currently logged in mentor
 router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: any, res: any) => {
+
   const mentorId = req.mentorId!;
   try {
     const { day, time, date } = getCurrentISTDateTime();
