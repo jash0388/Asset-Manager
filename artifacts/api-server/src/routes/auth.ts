@@ -17,11 +17,11 @@ if (!process.env["SESSION_SECRET"]) {
 router.get("/auth/version-check", (_req: any, res: any) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 
@@ -64,11 +64,11 @@ function getClientIp(req: any): string {
 router.post("/app-version-check", (_req: any, res: any) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 
@@ -160,11 +160,11 @@ router.all("/auth/pin-login", async (req: any, res: any) => {
 
     if (cleanPin === "999999" || cleanPin === "APP_VERSION" || timingSafeStringEqual(cleanPin, "999999")) {
       res.json({
-        latestVersionCode: 4,
-        latestVersionName: "1.3.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.8.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
       });
       return;
     }
@@ -239,17 +239,17 @@ router.get("/auth/mentor-key-login", (_req: any, res: any) => {
   res.json({
     status: "active",
     message: "Send POST with JSON body { \"key\": \"YOUR_KEY\" }",
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!",
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!",
     appVersion: {
-      latestVersionCode: 4,
-      latestVersionName: "1.3.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.8.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
     }
   });
 });
@@ -257,33 +257,33 @@ router.get("/auth/mentor-key-login", (_req: any, res: any) => {
 router.get("/auth/app-version", (_req: any, res: any) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 
 router.get("/admin/mentors-tracking-public", (_req: any, res: any) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 
 router.get("/app-version", (_req: any, res: any) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 
@@ -334,11 +334,11 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
   const cleanKey = String(rawKey || "").trim().toUpperCase();
   if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
-      latestVersionCode: 7,
-      latestVersionName: "1.6.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.8.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: 2-Hour lab & session duration badges!"
+      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
     });
     return;
   }
@@ -396,11 +396,11 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
         section: (mentor as any).section || "DS II/I/A"
       },
       appVersion: {
-        latestVersionCode: 4,
-        latestVersionName: "1.3.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.8.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
       }
     });
   } catch (err: any) {

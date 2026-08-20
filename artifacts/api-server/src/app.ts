@@ -38,11 +38,11 @@ app.use((req: any, res: any, next: any) => {
   if (p.includes("parent-version")) {
     res.json({
       status: "ok",
-      latestVersionCode: 2,
-      latestVersionName: "1.1.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.8.0",
       downloadUrl: "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/ParentApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Parent App Release v1.1.0: Mobile UI layout polish, auto-uppercase input, and direct APK installer update!"
+      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
     });
     return;
   }
@@ -50,17 +50,17 @@ app.use((req: any, res: any, next: any) => {
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
-      latestVersionCode: 7,
-      latestVersionName: "1.7.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.8.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!",
+      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!",
       appVersion: {
-        latestVersionCode: 7,
-        latestVersionName: "1.7.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.8.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
+        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
       }
     });
     return;

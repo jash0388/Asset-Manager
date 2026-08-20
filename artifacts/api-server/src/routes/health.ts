@@ -4,17 +4,17 @@ const router = Router();
 
 const versionPayload = {
   status: "ok",
-  latestVersionCode: 7,
-  latestVersionName: "1.7.0",
+  latestVersionCode: 8,
+  latestVersionName: "1.8.0",
   downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
   forceUpdate: false,
-  releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!",
+  releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!",
   appVersion: {
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   }
 };
 

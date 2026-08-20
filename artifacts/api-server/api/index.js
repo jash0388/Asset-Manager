@@ -49453,17 +49453,17 @@ var import_express = __toESM(require_express2(), 1);
 var router = (0, import_express.Router)();
 var versionPayload = {
   status: "ok",
-  latestVersionCode: 7,
-  latestVersionName: "1.7.0",
+  latestVersionCode: 8,
+  latestVersionName: "1.8.0",
   downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
   forceUpdate: false,
-  releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!",
+  releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!",
   appVersion: {
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   }
 };
 router.get(["/healthz", "/version", "/app-version", "/app-version-info", "/index", "/index.js", "/"], (_req, res) => {
@@ -64318,11 +64318,11 @@ if (!process.env["SESSION_SECRET"]) {
 router2.get("/auth/version-check", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 function timingSafeStringEqual(a, b) {
@@ -64348,11 +64348,11 @@ function getClientIp(req) {
 router2.post("/app-version-check", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 router2.post("/auth/login", async (req, res) => {
@@ -64415,11 +64415,11 @@ router2.all("/auth/pin-login", async (req, res) => {
     const cleanPin = String(rawPin || "").trim();
     if (cleanPin === "999999" || cleanPin === "APP_VERSION" || timingSafeStringEqual(cleanPin, "999999")) {
       res.json({
-        latestVersionCode: 4,
-        latestVersionName: "1.3.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.8.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
       });
       return;
     }
@@ -64474,48 +64474,48 @@ router2.get("/auth/mentor-key-login", (_req, res) => {
   res.json({
     status: "active",
     message: 'Send POST with JSON body { "key": "YOUR_KEY" }',
-    latestVersionCode: 4,
-    latestVersionName: "1.3.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Complete student name & roll number visibility fix!",
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!",
     appVersion: {
-      latestVersionCode: 4,
-      latestVersionName: "1.3.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.8.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
     }
   });
 });
 router2.get("/auth/app-version", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 router2.get("/admin/mentors-tracking-public", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 router2.get("/app-version", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 var FACULTY_PIN_MAP = {
@@ -64562,11 +64562,11 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
   const cleanKey = String(rawKey || "").trim().toUpperCase();
   if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
-      latestVersionCode: 7,
-      latestVersionName: "1.6.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.8.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: 2-Hour lab & session duration badges!"
+      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
     });
     return;
   }
@@ -64613,11 +64613,11 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
         section: mentor.section || "DS II/I/A"
       },
       appVersion: {
-        latestVersionCode: 4,
-        latestVersionName: "1.3.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.8.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Complete student name & roll number visibility fix!"
+        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
       }
     });
   } catch (err) {
@@ -65596,11 +65596,11 @@ function formatUser2(u) {
 router5.get("/mentor/app-version", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 7,
-    latestVersionName: "1.7.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Training sub-sessions, rapid roster sync & modern Faculty UI!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 function isSentinel2(ts) {
@@ -65828,11 +65828,11 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
         todaySchedules: virtualSchedules,
         serverTime: { day, time, date },
         appVersion: {
-          latestVersionCode: 7,
-          latestVersionName: "1.7.0",
+          latestVersionCode: 8,
+          latestVersionName: "1.8.0",
           downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
           forceUpdate: false,
-          releaseNotes: "Training Sub-Sessions Active!"
+          releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
         }
       });
       return;
@@ -65891,11 +65891,11 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
       todaySchedules: mappedTodaySchedules,
       serverTime: { day, time, date },
       appVersion: {
-        latestVersionCode: 7,
-        latestVersionName: "1.7.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.8.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
+        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
       }
     });
   } catch (err) {
@@ -66152,11 +66152,11 @@ router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req
 });
 router5.get("/app-version", (_req, res) => {
   res.json({
-    latestVersionCode: 2,
-    latestVersionName: "1.1.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "New Update: Visual Tick/Cross attendance buttons & roll number sorting!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 router5.get("/admin/mentors-tracking", authMiddleware, async (req, res) => {
@@ -66596,11 +66596,11 @@ router5.get("/parent/student-report", async (req, res) => {
 });
 router5.get("/parent/app-version", (_req, res) => {
   res.json({
-    latestVersionCode: 1,
-    latestVersionName: "1.0.0",
+    latestVersionCode: 8,
+    latestVersionName: "1.8.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/ParentApp.apk",
     forceUpdate: false,
-    releaseNotes: "Official Parent App Release: Live Gate Attendance & Hourly Subject Schedule Tracking!"
+    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
 router5.get("/admin/training-sessions", authMiddleware, async (_req, res) => {
@@ -66824,28 +66824,28 @@ app.use((req, res, next) => {
   if (p.includes("parent-version")) {
     res.json({
       status: "ok",
-      latestVersionCode: 2,
-      latestVersionName: "1.1.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.8.0",
       downloadUrl: "https://raw.githubusercontent.com/jash0388/Asset-Manager/main/artifacts/qr-attendance/public/ParentApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Parent App Release v1.1.0: Mobile UI layout polish, auto-uppercase input, and direct APK installer update!"
+      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
     });
     return;
   }
   if (p.includes("version") || p.includes("healthz")) {
     res.json({
       status: "ok",
-      latestVersionCode: 7,
-      latestVersionName: "1.7.0",
+      latestVersionCode: 8,
+      latestVersionName: "1.8.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!",
+      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!",
       appVersion: {
-        latestVersionCode: 7,
-        latestVersionName: "1.7.0",
+        latestVersionCode: 8,
+        latestVersionName: "1.8.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "New Update: Settings & Logout button, Locked class badges, smoother scrolling!"
+        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
       }
     });
     return;
