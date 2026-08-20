@@ -322,3 +322,9 @@ export function getPresentUserIdsInTrainingForDate(date: string): number[] {
     .filter(a => a.date === date && a.markedPresent)
     .map(a => a.userId);
 }
+
+export function getUserTrainingAttendanceForDate(userId: number, date: string): TrainingAttendanceRecord[] {
+  ensureFreshStore().catch(() => {});
+  return memoryStore.attendance.filter(a => a.userId === userId && a.date === date && a.markedPresent);
+}
+

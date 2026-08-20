@@ -2,11 +2,12 @@ import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   GraduationCap,
   LogOut,
   CheckCircle,
+  CheckCircle2,
   XCircle,
   Search,
   AlertTriangle,
@@ -21,7 +22,9 @@ import {
   Award,
   Filter,
   UserCheck,
-  Clock
+  Clock,
+  ClipboardCheck,
+  BookOpen
 } from "lucide-react";
 
 type StudentUser = {
@@ -529,6 +532,129 @@ export default function InchargeDashboard() {
     });
   }, [analyticsList, searchQuery, riskFlagFilter]);
 
+  const queryClient = useQueryClient();
+
+  // Permission / OD Attendance Modal States
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+  const [permissionDate, setPermissionDate] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  });
+  const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
+  const [selectedScheduleIds, setSelectedScheduleIds] = useState<number[]>([]);
+  const [permissionStudentSearch, setPermissionStudentSearch] = useState("");
+  const [permissionReason, setPermissionReason] = useState("Official Permission / On-Duty");
+  const [permissionSubmitting, setPermissionSubmitting] = useState(false);
+  const [permissionSuccessMsg, setPermissionSuccessMsg] = useState("");
+  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
+
+  // Fetch all schedules for timetable lookup
+  const { data: allSchedules = [] } = useQuery<any[]>({
+    queryKey: ["admin-all-schedules"],
+    queryFn: () => customFetch<any[]>("/api/admin/schedules"),
+  });
+
+  // Calculate day of week and section schedules for permissionDate
+  const { targetDayName, daySchedules } = useMemo(() => {
+    const [y, m, d] = (permissionDate || "").split("-").map(Number);
+    const dayIdx = !isNaN(y) && !isNaN(m) && !isNaN(d) ? new Date(y, m - 1, d, 12, 0, 0).getDay() : new Date().getDay();
+    const dayMap: Record<number, string> = {
+      1: "MON",
+      2: "TUE",
+      3: "WED",
+      4: "THUR",
+      5: "FRI",
+      6: "SAT",
+      0: "SUN"
+    };
+    const dayNameMap: Record<number, string> = {
+      1: "Monday",
+      2: "Tuesday",
+      3: "Wednesday",
+      4: "Thursday",
+      5: "Friday",
+      6: "Saturday",
+      0: "Sunday"
+    };
+    const targetDay = dayMap[dayIdx] || "MON";
+    const targetDayName = dayNameMap[dayIdx] || "Monday";
+
+    const inchargeSec = (activeAllocation.section || "").trim().toUpperCase(); // e.g. "4A", "3B", "2C", "3A"
+    const secLetter = inchargeSec.replace(/[^A-Z]/g, "") || "A"; // e.g. "A", "B", "C"
+    const yearCode = inchargeSec.includes("4") ? "IV" : inchargeSec.includes("3") ? "III" : inchargeSec.includes("2") ? "II" : "";
+
+    const matched = (allSchedules || []).filter((s: any) => {
+      const sDay = (s.day_of_week || "").trim().toUpperCase();
+      if (sDay !== targetDay) return false;
+      const sSec = (s.section || "").trim().toUpperCase();
+      const sYear = (s.year || "").trim().toUpperCase();
+
+      const matchSec = sSec === secLetter || sSec === inchargeSec || sSec.includes(secLetter);
+      const matchYear = !yearCode || sYear === yearCode || (yearCode === "IV" && (sYear === "4" || sYear === "IV")) || (yearCode === "III" && (sYear === "3" || sYear === "III")) || (yearCode === "II" && (sYear === "2" || sYear === "II"));
+
+      return matchSec && matchYear;
+    });
+
+    return {
+      targetDayName,
+      daySchedules: matched.sort((a: any, b: any) => (a.start_time || "").localeCompare(b.start_time || ""))
+    };
+  }, [allSchedules, permissionDate, activeAllocation.section]);
+
+  // Students available for selection in permission modal
+  const modalFilteredStudents = useMemo(() => {
+    const q = permissionStudentSearch.toLowerCase().trim();
+    return assignedStudents.filter((s) => {
+      if (!q) return true;
+      const name = (s.name || "").toLowerCase();
+      const roll = (s.uniqueId || s.unique_id || "").toLowerCase();
+      return name.includes(q) || roll.includes(q);
+    });
+  }, [assignedStudents, permissionStudentSearch]);
+
+  const handleMarkPermissionAttendance = async () => {
+    if (selectedStudentIds.length === 0) {
+      setPermissionErrorMsg("Please select at least one student.");
+      return;
+    }
+    if (selectedScheduleIds.length === 0) {
+      setPermissionErrorMsg("Please select at least one class period.");
+      return;
+    }
+
+    setPermissionSubmitting(true);
+    setPermissionErrorMsg("");
+    setPermissionSuccessMsg("");
+
+    try {
+      const res = await customFetch<any>("/api/admin/mark-permission-attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentIds: selectedStudentIds,
+          scheduleIds: selectedScheduleIds,
+          date: permissionDate,
+          reason: permissionReason
+        })
+      });
+
+      setPermissionSuccessMsg(res.message || "Attendance marked successfully!");
+      queryClient.invalidateQueries({ queryKey: ["incharge-monthly-attendance"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-today-class-presence"] });
+
+      setTimeout(() => {
+        setPermissionModalOpen(false);
+        setSelectedStudentIds([]);
+        setSelectedScheduleIds([]);
+        setPermissionSuccessMsg("");
+      }, 1500);
+    } catch (err: any) {
+      setPermissionErrorMsg(err?.data?.error || err.message || "Failed to mark permission attendance.");
+    } finally {
+      setPermissionSubmitting(false);
+    }
+  };
+
   const redCount = analyticsList.filter((s) => s.flag === "RED").length;
   const yellowCount = analyticsList.filter((s) => s.flag === "YELLOW").length;
   const greenCount = analyticsList.filter((s) => s.flag === "GREEN").length;
@@ -556,23 +682,39 @@ export default function InchargeDashboard() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => {
+              setPermissionModalOpen(true);
+              setPermissionErrorMsg("");
+              setPermissionSuccessMsg("");
+            }}
+            style={{ backgroundColor: "#10b981", color: "#ffffff", borderColor: "#10b981" }}
+            className="px-3.5 sm:px-4 py-2 rounded-xl font-extrabold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 hover:opacity-95"
+            title="Mark attendance for students taking permission / On-Duty"
+          >
+            <ClipboardCheck className="w-4 h-4 text-white" />
+            <span className="hidden sm:inline">Permission / OD Attendance</span>
+            <span className="sm:hidden">Permission</span>
+          </button>
+
           <button
             onClick={() => navigate("/mentor")}
             style={{ backgroundColor: "#2563eb", color: "#ffffff", borderColor: "#2563eb" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+            className="px-3.5 sm:px-4 py-2 rounded-xl font-bold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
           >
             <Clock className="w-3.5 h-3.5 text-white" />
-            Take Class Attendance
+            <span className="hidden sm:inline">Take Class Attendance</span>
+            <span className="sm:hidden">Take Class</span>
           </button>
 
           <button
             onClick={logout}
             style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs border flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
+            className="px-3 py-2 rounded-xl font-bold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
           >
             <LogOut className="w-4 h-4 text-slate-600" />
-            Logout
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>
@@ -1385,6 +1527,344 @@ export default function InchargeDashboard() {
                 </>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* ─── Mark Student Permission / OD Attendance Modal ─── */}
+      {permissionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            style={{ backgroundColor: "#ffffff" }}
+            className="rounded-3xl border border-gray-200 shadow-2xl max-w-2xl w-full max-h-[94vh] flex flex-col overflow-hidden text-slate-900"
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-emerald-50 via-teal-50 to-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md">
+                  <ClipboardCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">
+                    Mark Student Permission / OD Attendance
+                  </h3>
+                  <p className="text-xs font-bold text-emerald-800">
+                    Section {activeAllocation.section} ({activeAllocation.yearLabel}) • Grant class attendance for permitted students
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPermissionModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body - Scrollable */}
+            <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5 text-sm">
+              {/* Status alerts */}
+              {permissionErrorMsg && (
+                <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-bold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{permissionErrorMsg}</span>
+                </div>
+              )}
+              {permissionSuccessMsg && (
+                <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-600" />
+                  <span>{permissionSuccessMsg}</span>
+                </div>
+              )}
+
+              {/* Step 1: Date Picker */}
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <label className="block text-xs font-black uppercase text-gray-600 tracking-wider mb-1">
+                    1. Select Date & Day
+                  </label>
+                  <p className="text-xs text-gray-400">Date on which the student was given permission</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={permissionDate}
+                    onChange={(e) => setPermissionDate(e.target.value)}
+                    className="px-3.5 py-2 rounded-xl bg-white border border-gray-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-xs"
+                  />
+                  <span className="px-3 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-200 uppercase">
+                    {targetDayName}
+                  </span>
+                </div>
+              </div>
+
+              {/* Step 2: Student Multi-Select Box (Just like Training Manage Students) */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-gray-700 tracking-wider">
+                      2. Select Students ({selectedStudentIds.length} Selected)
+                    </label>
+                    <p className="text-xs text-gray-400">Choose the students who took permission</p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allIds = modalFilteredStudents.map(s => s.id);
+                        setSelectedStudentIds(Array.from(new Set([...selectedStudentIds, ...allIds])));
+                      }}
+                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer"
+                    >
+                      Select All Visible ({modalFilteredStudents.length})
+                    </button>
+                    {selectedStudentIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedStudentIds([])}
+                        className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={permissionStudentSearch}
+                    onChange={(e) => setPermissionStudentSearch(e.target.value)}
+                    placeholder="Search student by name or roll number..."
+                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs font-semibold text-slate-800 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                {/* Students Checkbox Container with internal scroll */}
+                <div className="border border-gray-200 rounded-2xl max-h-[190px] overflow-y-auto divide-y divide-gray-100 bg-white">
+                  {modalFilteredStudents.length === 0 ? (
+                    <div className="p-6 text-center text-xs font-semibold text-gray-400">
+                      No students found matching your search.
+                    </div>
+                  ) : (
+                    modalFilteredStudents.map((s) => {
+                      const isSelected = selectedStudentIds.includes(s.id);
+                      return (
+                        <div
+                          key={s.id}
+                          onClick={() => {
+                            setSelectedStudentIds(prev =>
+                              prev.includes(s.id) ? prev.filter(id => id !== s.id) : [...prev, s.id]
+                            );
+                          }}
+                          className={`px-3.5 py-2.5 flex items-center justify-between cursor-pointer transition-colors ${
+                            isSelected ? "bg-emerald-50/70" : "hover:bg-gray-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => {}}
+                              className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 pointer-events-none"
+                            />
+                            <div className="min-w-0">
+                              <p className="font-extrabold text-xs text-slate-900 truncate">{s.name}</p>
+                              <p className="text-[11px] font-mono text-gray-500">{s.uniqueId || s.unique_id || "—"}</p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">
+                            {s.section || activeAllocation.section}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Step 3: Class Periods Selector */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-gray-700 tracking-wider">
+                      3. Select Class Periods to Mark Present ({selectedScheduleIds.length} Selected)
+                    </label>
+                    <p className="text-xs text-gray-400">Choose which lectures or lab periods to grant attendance for</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSids = daySchedules.map(s => s.id);
+                        setSelectedScheduleIds(allSids);
+                      }}
+                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-all cursor-pointer"
+                    >
+                      All Periods ({daySchedules.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const morningSids = daySchedules.filter(s => (s.start_time || "") < "13:00:00").map(s => s.id);
+                        setSelectedScheduleIds(morningSids);
+                      }}
+                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition-all cursor-pointer"
+                    >
+                      Morning (9 AM - 1 PM)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const afternoonSids = daySchedules.filter(s => (s.start_time || "") >= "13:00:00").map(s => s.id);
+                        setSelectedScheduleIds(afternoonSids);
+                      }}
+                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 transition-all cursor-pointer"
+                    >
+                      Afternoon (1 PM - 4:30 PM)
+                    </button>
+                    {selectedScheduleIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedScheduleIds([])}
+                        className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Periods List */}
+                {daySchedules.length === 0 ? (
+                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
+                    ⚠️ No regular classes scheduled in timetable for {targetDayName} for Sec {activeAllocation.section}.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[170px] overflow-y-auto p-1">
+                    {daySchedules.map((sched: any, idx: number) => {
+                      const isSelected = selectedScheduleIds.includes(sched.id);
+                      const startFmt = (sched.start_time || "00:00").slice(0, 5);
+                      const endFmt = (sched.end_time || "00:00").slice(0, 5);
+                      const facultyName = sched.qr_mentors?.name || "Assigned Faculty";
+
+                      return (
+                        <div
+                          key={sched.id}
+                          onClick={() => {
+                            setSelectedScheduleIds(prev =>
+                              prev.includes(sched.id) ? prev.filter(id => id !== sched.id) : [...prev, sched.id]
+                            );
+                          }}
+                          className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                            isSelected
+                              ? "bg-emerald-50 border-emerald-400 shadow-xs"
+                              : "bg-white border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 pointer-events-none"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-extrabold text-xs text-slate-900 truncate">{sched.subject || `Period ${idx + 1}`}</span>
+                              <span className="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                                {startFmt} - {endFmt}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-gray-500 font-semibold truncate mt-0.5">{facultyName}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Step 4: Reason / Notes */}
+              <div>
+                <label className="block text-xs font-black uppercase text-gray-700 tracking-wider mb-1.5">
+                  4. Reason / OD Remarks
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[
+                    "Official Permission / On-Duty",
+                    "College Placement / Training",
+                    "Tech Fest / College Event",
+                    "Medical / Health Emergency",
+                    "Parent Request / Personal Work"
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setPermissionReason(preset)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                        permissionReason === preset
+                          ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                          : "bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={permissionReason}
+                  onChange={(e) => setPermissionReason(e.target.value)}
+                  placeholder="Enter reason or remarks..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs font-semibold text-slate-800 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-3">
+              <div className="text-xs text-gray-500 font-bold">
+                {selectedStudentIds.length > 0 && selectedScheduleIds.length > 0 ? (
+                  <span className="text-emerald-700">
+                    ⚡ Will mark <strong>{selectedStudentIds.length * selectedScheduleIds.length}</strong> class attendance record(s) as Present
+                  </span>
+                ) : (
+                  <span>Select student(s) and class(es) above to continue</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPermissionModalOpen(false)}
+                  disabled={permissionSubmitting}
+                  className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-100 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleMarkPermissionAttendance}
+                  disabled={permissionSubmitting || selectedStudentIds.length === 0 || selectedScheduleIds.length === 0}
+                  style={{ backgroundColor: "#10b981", borderColor: "#10b981" }}
+                  className="px-5 py-2.5 rounded-xl font-extrabold text-xs text-white border shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600"
+                >
+                  {permissionSubmitting ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Granting Attendance...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Confirm & Mark Present ({selectedStudentIds.length})</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

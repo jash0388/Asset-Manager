@@ -13,7 +13,8 @@ import {
   markTrainingAttendance,
   clearTrainingAttendance,
   getTrainingAttendanceForDate,
-  getPresentUserIdsInTrainingForDate
+  getPresentUserIdsInTrainingForDate,
+  getUserTrainingAttendanceForDate
 } from "../services/trainingStore.js";
 
 
@@ -1287,19 +1288,58 @@ router.get("/parent/student-report", async (req: any, res: any) => {
         const hourlyMap = new Map<number, any>();
         (hourlyAtt || []).forEach(h => hourlyMap.set(h.schedule_id, h));
 
+        // Fetch training attendance for this student on this date
+        const trainingAttList = getUserTrainingAttendanceForDate(student.id, date);
+
         todaySchedule = schedules.map(s => {
           const h = hourlyMap.get(s.id);
+          const startTimeStr = s.start_time || "00:00:00";
+          const isMorningSlot = startTimeStr < "13:00:00";
+          const isAfternoonSlot = startTimeStr >= "13:00:00";
+
+          // Check if student was marked present in training for this time window
+          let isTrainingCovered = false;
+          let trainingTag = "";
+
+          for (const ta of trainingAttList) {
+            const trSession = getTrainingSessionById(ta.trainingId);
+            const sub = trSession?.subSessions?.find(ss => ss.id === ta.subSessionId);
+
+            // Session 1: Morning Session (9:00 AM - 1:00 PM) -> covers morning slots
+            if (ta.subSessionId === 1 && isMorningSlot) {
+              isTrainingCovered = true;
+              trainingTag = `${trSession?.name || "Training"} (Morning Batch)`;
+              break;
+            }
+            // Session 2: Afternoon Session (1:00 PM - 4:30 PM) -> covers afternoon slots
+            else if (ta.subSessionId === 2 && isAfternoonSlot) {
+              isTrainingCovered = true;
+              trainingTag = `${trSession?.name || "Training"} (Afternoon Batch)`;
+              break;
+            }
+            // Full day training
+            else if (!ta.subSessionId) {
+              isTrainingCovered = true;
+              trainingTag = `${trSession?.name || "Training"} Session`;
+              break;
+            }
+          }
+
           let status: "PRESENT" | "ABSENT" | "PENDING" = "PENDING";
-          if (h) {
+          if (isTrainingCovered) {
+            status = "PRESENT";
+          } else if (h) {
             status = h.marked_present ? "PRESENT" : "ABSENT";
           }
+
           return {
             id: s.id,
-            subject: s.subject || "Lecture Hour",
+            subject: isTrainingCovered ? `${s.subject || "Class"} • ${trainingTag}` : (s.subject || "Lecture Hour"),
             startTime: (s.start_time || "00:00").slice(0, 5),
             endTime: (s.end_time || "00:00").slice(0, 5),
-            teacherName: mentorMap.get(s.mentor_id) || "Faculty",
-            markedPresent: h ? Boolean(h.marked_present) : null,
+            teacherName: isTrainingCovered ? "Training Faculty" : (mentorMap.get(s.mentor_id) || "Faculty"),
+            markedPresent: isTrainingCovered ? true : (h ? Boolean(h.marked_present) : null),
+            isTrainingSession: isTrainingCovered,
             status
           };
         });
@@ -1550,6 +1590,55 @@ router.delete("/admin/training-sessions/:id/sub-sessions/:subId", authMiddleware
     return;
   }
   res.json({ message: "Sub-session deleted successfully" });
+});
+
+// POST mark student permission / OD attendance for selected classes
+router.post("/admin/mark-permission-attendance", authMiddleware, async (req: any, res: any) => {
+  const { studentIds, scheduleIds, date } = req.body;
+  if (!Array.isArray(studentIds) || studentIds.length === 0) {
+    res.status(400).json({ error: "Please select at least one student." });
+    return;
+  }
+  if (!Array.isArray(scheduleIds) || scheduleIds.length === 0) {
+    res.status(400).json({ error: "Please select at least one class period." });
+    return;
+  }
+
+  const dateParam = (date || "").toString().trim() || getCurrentISTHoursMinutes().todayDate;
+
+  try {
+    const upsertRecords: any[] = [];
+    studentIds.forEach((uid: number) => {
+      scheduleIds.forEach((sid: number) => {
+        upsertRecords.push({
+          schedule_id: sid,
+          user_id: uid,
+          date: dateParam,
+          marked_present: true,
+          marked_by_teacher: true,
+          scanned_qr: false
+        });
+      });
+    });
+
+    if (upsertRecords.length > 0) {
+      const { error: upsertErr } = await supabase
+        .from("qr_hourly_attendance")
+        .upsert(upsertRecords, {
+          onConflict: "schedule_id,user_id,date"
+        });
+
+      if (upsertErr) throw upsertErr;
+    }
+
+    res.json({
+      message: `Successfully marked permission attendance for ${studentIds.length} student(s) across ${scheduleIds.length} class period(s).`,
+      count: upsertRecords.length
+    });
+  } catch (err: any) {
+    req.log?.error({ err }, "Error marking permission attendance");
+    res.status(500).json({ error: err.message || "Failed to mark permission attendance" });
+  }
 });
 
 // POST unlock / reset training attendance for a date so trainer can retake attendance
