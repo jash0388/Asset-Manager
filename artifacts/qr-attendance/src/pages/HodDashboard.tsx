@@ -1886,15 +1886,18 @@ export default function HodDashboard() {
                     { key: "WED", label: "WEDNESDAY" },
                     { key: "THUR", label: "THURSDAY" },
                     { key: "FRI", label: "FRIDAY" },
+                    { key: "SAT", label: "SATURDAY" },
                   ];
 
                   const defaultSlots = [
-                    { start: "09:00", end: "10:30", label: "09:00 - 10:30" },
-                    { start: "10:30", end: "11:00", label: "10:30 - 11:00", isBreak: true, breakName: "TEA BREAK" },
-                    { start: "11:00", end: "12:30", label: "11:00 - 12:30" },
-                    { start: "12:30", end: "01:30", label: "12:30 - 01:30", isBreak: true, breakName: "LUNCH BREAK" },
-                    { start: "01:30", end: "03:00", label: "01:30 - 03:00" },
-                    { start: "03:00", end: "04:30", label: "03:00 - 04:30" },
+                    { start: "09:00", end: "10:00", label: "09:00 - 10:00" },
+                    { start: "10:00", end: "11:00", label: "10:00 - 11:00" },
+                    { start: "11:00", end: "11:10", label: "11:00 - 11:10", isBreak: true, breakName: "MORNING BREAK" },
+                    { start: "11:10", end: "12:10", label: "11:10 - 12:10" },
+                    { start: "12:10", end: "01:10", label: "12:10 - 01:10" },
+                    { start: "01:10", end: "02:00", label: "01:10 - 02:00", isBreak: true, breakName: "LUNCH BREAK" },
+                    { start: "02:00", end: "03:00", label: "02:00 - 03:00" },
+                    { start: "03:00", end: "04:00", label: "03:00 - 04:00" },
                   ];
 
                   return (
