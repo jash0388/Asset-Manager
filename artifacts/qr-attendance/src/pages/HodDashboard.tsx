@@ -29,6 +29,11 @@ import {
   Settings,
   Lock,
   Unlock,
+  LayoutGrid,
+  List,
+  Coffee,
+  MapPin,
+  User,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -208,6 +213,13 @@ export default function HodDashboard() {
   const [mentorsSearchQuery, setMentorsSearchQuery] = useState("");
   const [schedulesSearchQuery, setSchedulesSearchQuery] = useState("");
   const [selectedSectionFilter, setSelectedSectionFilter] = useState("All");
+  const [selectedTimetableSection, setSelectedTimetableSection] = useState<string>("2A");
+  const [timetableViewMode, setTimetableViewMode] = useState<"grid" | "list">("grid");
+
+  // Timetable print / download schedule helper
+  const handleDownloadSchedule = () => {
+    window.print();
+  };
 
   // Fetch all students
   const { data: allUsers = [], isLoading: usersLoading } = useQuery<StudentUser[]>({
@@ -518,6 +530,26 @@ export default function HodDashboard() {
     queryFn: () => customFetch<any[]>("/api/admin/schedules"),
     enabled: activeTab === "schedules",
   });
+
+  // Extract unique available sections for timetable filter pills (e.g. 2A, 2B, 3A, 3B, 4A, 4B)
+  const availableTimetableSections = useMemo(() => {
+    const set = new Set<string>();
+    (schedules || []).forEach((s: any) => {
+      let yr = (s.year || "").toString().trim();
+      if (yr === "II" || yr === "2nd Year" || yr === "2") yr = "2";
+      else if (yr === "III" || yr === "3rd Year" || yr === "3") yr = "3";
+      else if (yr === "IV" || yr === "4th Year" || yr === "4") yr = "4";
+
+      const sec = (s.section || "").toString().trim().toUpperCase();
+      if (yr && sec) {
+        set.add(`${yr}${sec}`);
+      } else if (sec) {
+        set.add(sec);
+      }
+    });
+    const list = Array.from(set).sort();
+    return list.length > 0 ? list : ["2A", "2B", "3A", "3B", "4A", "4B"];
+  }, [schedules]);
 
   // Fetch Schedule Overrides (Master Unlocks & Extended Times)
   const { data: scheduleOverrides = [] } = useQuery<any[]>({
@@ -1744,40 +1776,285 @@ export default function HodDashboard() {
             )}
           </>
         ) : activeTab === "schedules" ? (
-          <>
-            {/* Timetable Schedules Search Toolbar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-gray-200 p-5 rounded-2xl">
-              <div className="flex-1 min-w-0 w-full">
-                <div className="relative group">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search subject, section, day or mentor..."
-                    value={schedulesSearchQuery}
-                    onChange={(e) => setSchedulesSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold"
-                  />
-                </div>
+          <div className="space-y-6">
+            {/* Department Timetable Header & Controls Bar matching Image 1 */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                  <GraduationCap className="w-7 h-7 text-blue-600" />
+                  Department Timetable
+                </h2>
+                <p className="text-xs font-semibold text-gray-500 mt-1">
+                  Manage and view weekly academic schedules across sections.
+                </p>
               </div>
 
-              <button
-                onClick={() => setNewClassModalOpen(true)}
-                className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/30 active:scale-[0.98] w-full sm:w-auto flex-shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                Assign New Class
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Section Filter Pills */}
+                <div className="flex items-center gap-1.5 bg-gray-100 p-1.5 rounded-2xl border border-gray-200 flex-wrap">
+                  <button
+                    onClick={() => setSelectedTimetableSection("All")}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedTimetableSection === "All"
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-200/60"
+                    }`}
+                  >
+                    All Sections
+                  </button>
+                  {availableTimetableSections.map((sec) => (
+                    <button
+                      key={sec}
+                      onClick={() => setSelectedTimetableSection(sec)}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        selectedTimetableSection === sec
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-200/60"
+                      }`}
+                    >
+                      Section {sec}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Download Schedule */}
+                <button
+                  onClick={handleDownloadSchedule}
+                  className="px-4 py-2.5 rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold text-xs flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+                >
+                  <Download className="w-4 h-4 text-blue-600" />
+                  Download Schedule
+                </button>
+
+                {/* Assign New Class */}
+                <button
+                  onClick={() => setNewClassModalOpen(true)}
+                  className="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-lg shadow-blue-600/30 active:scale-[0.98] cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Assign New Class
+                </button>
+
+                {/* View Switcher Toggle */}
+                <div className="flex items-center bg-gray-100 border border-gray-200 p-1 rounded-2xl">
+                  <button
+                    onClick={() => setTimetableViewMode("grid")}
+                    title="Timetable Grid View"
+                    className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      timetableViewMode === "grid" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-gray-700"
+                    }`}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setTimetableViewMode("list")}
+                    title="Management List View"
+                    className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      timetableViewMode === "list" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-gray-700"
+                    }`}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Timetable Schedules Table */}
+            {/* Search Bar Toolbar */}
+            <div className="bg-white border border-gray-200 p-4 rounded-2xl flex items-center gap-3 shadow-xs">
+              <Search className="w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Filter timetable by subject, room, section, day or faculty name..."
+                value={schedulesSearchQuery}
+                onChange={(e) => setSchedulesSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-sm font-semibold text-gray-800 placeholder-gray-400 focus:outline-none"
+              />
+            </div>
+
             {schedulesLoading ? (
               <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-sm font-semibold text-gray-500">Loading department timetables...</p>
               </div>
+            ) : timetableViewMode === "grid" ? (
+              /* ── GRID VIEW (Matching Image 1 Design) ── */
+              <Card className="bg-white border border-gray-200 rounded-3xl shadow-xl overflow-hidden p-6">
+                {(() => {
+                  const daysOfWeek = [
+                    { key: "MON", label: "MONDAY" },
+                    { key: "TUE", label: "TUESDAY" },
+                    { key: "WED", label: "WEDNESDAY" },
+                    { key: "THUR", label: "THURSDAY" },
+                    { key: "FRI", label: "FRIDAY" },
+                  ];
+
+                  const defaultSlots = [
+                    { start: "09:00", end: "10:30", label: "09:00 - 10:30" },
+                    { start: "10:30", end: "11:00", label: "10:30 - 11:00", isBreak: true, breakName: "TEA BREAK" },
+                    { start: "11:00", end: "12:30", label: "11:00 - 12:30" },
+                    { start: "12:30", end: "01:30", label: "12:30 - 01:30", isBreak: true, breakName: "LUNCH BREAK" },
+                    { start: "01:30", end: "03:00", label: "01:30 - 03:00" },
+                    { start: "03:00", end: "04:30", label: "03:00 - 04:30" },
+                  ];
+
+                  return (
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="border-b border-gray-200">
+                            <th className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-left w-36 bg-gray-50/50 rounded-tl-xl border-r border-gray-200">
+                              TIME
+                            </th>
+                            {daysOfWeek.map((day) => (
+                              <th
+                                key={day.key}
+                                className="py-4 px-4 text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center bg-gray-50/50"
+                              >
+                                {day.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {defaultSlots.map((slot, sIdx) => {
+                            if (slot.isBreak) {
+                              return (
+                                <tr key={sIdx} className="bg-gray-50/70 border-y border-gray-200/80">
+                                  <td className="py-3 px-4 font-mono text-xs font-bold text-gray-500 text-center border-r border-gray-200">
+                                    {slot.label}
+                                  </td>
+                                  <td colSpan={daysOfWeek.length} className="py-3 px-4 text-center">
+                                    <div className="inline-flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest bg-white border border-gray-200 px-6 py-1 rounded-full shadow-2xs">
+                                      <Coffee className="w-3.5 h-3.5 text-amber-500" />
+                                      {slot.breakName}
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            }
+
+                            return (
+                              <tr key={sIdx} className="hover:bg-gray-50/30 transition-colors">
+                                <td className="py-4 px-4 font-mono text-xs font-bold text-gray-600 align-middle border-r border-gray-100 text-center bg-gray-50/20">
+                                  {slot.label}
+                                </td>
+                                {daysOfWeek.map((day) => {
+                                  const matchingSchedules = (schedules || []).filter((s: any) => {
+                                    // Section filter
+                                    if (selectedTimetableSection !== "All") {
+                                      let yr = (s.year || "").toString().trim();
+                                      if (yr === "II" || yr === "2nd Year" || yr === "2") yr = "2";
+                                      else if (yr === "III" || yr === "3rd Year" || yr === "3") yr = "3";
+                                      else if (yr === "IV" || yr === "4th Year" || yr === "4") yr = "4";
+                                      const secKey = `${yr}${s.section || ""}`.trim().toUpperCase();
+                                      if (secKey !== selectedTimetableSection && s.section?.toUpperCase() !== selectedTimetableSection) {
+                                        return false;
+                                      }
+                                    }
+
+                                    // Search filter
+                                    const q = schedulesSearchQuery.toLowerCase().trim();
+                                    if (q) {
+                                      const matchSearch =
+                                        (s.qr_mentors?.name || "").toLowerCase().includes(q) ||
+                                        s.day_of_week.toLowerCase().includes(q) ||
+                                        s.section.toLowerCase().includes(q) ||
+                                        s.year.toLowerCase().includes(q) ||
+                                        (s.subject || "").toLowerCase().includes(q);
+                                      if (!matchSearch) return false;
+                                    }
+
+                                    // Day match
+                                    const dUpper = (s.day_of_week || "").toUpperCase();
+                                    const dayMatch = dUpper.startsWith(day.key) || dUpper.includes(day.key);
+                                    if (!dayMatch) return false;
+
+                                    // Time slot match
+                                    const st = (s.start_time || "").slice(0, 5);
+                                    return st === slot.start || (st >= slot.start && st < slot.end);
+                                  });
+
+                                  return (
+                                    <td key={day.key} className="py-3 px-3 align-top min-w-[175px]">
+                                      {matchingSchedules.length === 0 ? (
+                                        <div className="border-2 border-dashed border-gray-200/80 rounded-2xl flex items-center justify-center p-4 min-h-[95px] text-xs font-bold text-gray-300 bg-gray-50/30 select-none">
+                                          Free Slot
+                                        </div>
+                                      ) : (
+                                        <div className="space-y-2">
+                                          {matchingSchedules.map((s: any) => {
+                                            const overrideObj = (scheduleOverrides || []).find((o: any) => o.scheduleId === s.id);
+                                            const isUnlocked = overrideObj ? overrideObj.isUnlocked : false;
+                                            const extendedMins = overrideObj ? overrideObj.extendedMinutes : 0;
+
+                                            return (
+                                              <div
+                                                key={s.id}
+                                                className="group relative bg-blue-50/70 border border-blue-200/90 hover:border-blue-400 hover:shadow-md rounded-2xl p-3.5 transition-all flex flex-col justify-between min-h-[100px]"
+                                              >
+                                                <div>
+                                                  <div className="flex items-start justify-between gap-1">
+                                                    <h4 className="font-extrabold text-slate-900 text-sm leading-snug">
+                                                      {s.subject || "Untitled Subject"}
+                                                    </h4>
+                                                    {isUnlocked && (
+                                                      <span className="flex-shrink-0 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="HOD Override Unlocked" />
+                                                    )}
+                                                  </div>
+
+                                                  <div className="mt-2 space-y-1">
+                                                    <div className="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5 font-mono">
+                                                      <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                                                      <span>Room 301</span>
+                                                    </div>
+                                                    <div className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                                                      <User className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                                                      <span className="truncate">{s.qr_mentors?.name || "Unassigned"}</span>
+                                                    </div>
+                                                  </div>
+                                                </div>
+
+                                                {/* Card Action Controls */}
+                                                <div className="mt-3 pt-2 border-t border-blue-200/60 flex items-center justify-between gap-1">
+                                                  <button
+                                                    onClick={() => handleToggleScheduleOverride(s.id, isUnlocked, extendedMins)}
+                                                    className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors ${
+                                                      isUnlocked ? "bg-emerald-600 text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+                                                    }`}
+                                                    title="Toggle Lock/Unlock Status"
+                                                  >
+                                                    {isUnlocked ? <Unlock className="w-3 h-3 text-white" /> : <Lock className="w-3 h-3 text-gray-500" />}
+                                                    {isUnlocked ? "UNLOCKED" : "LOCKED"}
+                                                  </button>
+
+                                                  <button
+                                                    onClick={() => handleOpenAssignModal(s)}
+                                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                                                    title="Assign Faculty"
+                                                  >
+                                                    <UserPlus className="w-3 h-3" />
+                                                    Assign
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
+              </Card>
             ) : (
+              /* ── MANAGEMENT LIST VIEW (Matching Image 2 Design) ── */
               <Card className="bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
                 <div className="overflow-x-auto max-h-[620px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                   <table className="w-full text-left border-collapse relative">
@@ -1920,7 +2197,7 @@ export default function HodDashboard() {
                 </div>
               </Card>
             )}
-          </>
+          </div>
         ) : activeTab === "student-analytics" ? (
           <div className="space-y-6">
             {/* Student Analytics Search & Filter Header */}
