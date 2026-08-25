@@ -668,6 +668,27 @@ export default function PrincipalDashboard() {
               onClick={() => {
                 setActiveTab("flags");
                 setRiskFilter("RED");
+                const criticalStudents = studentAnalyticsList
+                  .filter((s) => s.flag === "RED" || s.percent < 65)
+                  .map((item) => {
+                    const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === item.student.id);
+                    const hourlyForStudent = studentDayHourlyMap.get(item.student.id) || [];
+                    return {
+                      student: item.student,
+                      isPresent: overallPresentSet.has(item.student.id),
+                      isClassPresent: classPresentUserIds.has(item.student.id),
+                      entryTime: log?.entryTime,
+                      exitTime: log?.exitTime,
+                      hourlyCount: hourlyForStudent.filter((h) => h.markedPresent).length,
+                      hourlyTotal: hourlyForStudent.length,
+                      hourlyPeriods: hourlyForStudent,
+                    };
+                  });
+                setSectionModalData({
+                  title: `Critical Attendance (< 65%) — ${criticalStudents.length} Students`,
+                  subtitle: `Data Science • Attendance Below 65% Target Limit`,
+                  students: criticalStudents,
+                });
               }}
               className="p-3 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer transition-all"
             >
@@ -911,6 +932,27 @@ export default function PrincipalDashboard() {
                     onClick={() => {
                       setActiveTab("flags");
                       setRiskFilter("RED");
+                      const criticalStudents = studentAnalyticsList
+                        .filter((s) => s.flag === "RED" || s.percent < 65)
+                        .map((item) => {
+                          const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === item.student.id);
+                          const hourlyForStudent = studentDayHourlyMap.get(item.student.id) || [];
+                          return {
+                            student: item.student,
+                            isPresent: overallPresentSet.has(item.student.id),
+                            isClassPresent: classPresentUserIds.has(item.student.id),
+                            entryTime: log?.entryTime,
+                            exitTime: log?.exitTime,
+                            hourlyCount: hourlyForStudent.filter((h) => h.markedPresent).length,
+                            hourlyTotal: hourlyForStudent.length,
+                            hourlyPeriods: hourlyForStudent,
+                          };
+                        });
+                      setSectionModalData({
+                        title: `Critical Attendance (< 65%) — ${criticalStudents.length} Students`,
+                        subtitle: `Data Science • Attendance Below 65% Target Limit`,
+                        students: criticalStudents,
+                      });
                     }}
                     className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
                   >
