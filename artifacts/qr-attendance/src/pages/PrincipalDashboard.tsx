@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -69,6 +69,14 @@ function getSectionDisplayName(sectionCode?: string): { name: string; yearLabel:
     return { name: `2${sectionLetter}`, yearLabel: "2nd Year" };
   }
   return { name: sectionCode, yearLabel: "Department" };
+}
+
+function hsYr(y?: string): string {
+  if (!y) return "";
+  if (y === "IV" || y === "4") return "4";
+  if (y === "III" || y === "3") return "3";
+  if (y === "II" || y === "2") return "2";
+  return y;
 }
 
 // Risk Flag Math helper
@@ -201,7 +209,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
 export default function PrincipalDashboard() {
   const { logout } = useAuth();
   const [selectedBranch, setSelectedBranch] = useState("DS");
-  const [activeTab, setActiveTab] = useState<"summary" | "detailed" | "flags">(() => {
+  const [activeTab, setActiveTab] = useState<"summary" | "hourly" | "detailed" | "flags">(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get("tab") === "flags" ? "flags" : "summary";
   });
@@ -217,6 +225,11 @@ export default function PrincipalDashboard() {
   const [sectionFilter, setSectionFilter] = useState("ALL");
   const [riskFilter, setRiskFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
 
+  // Hourly / Period Attendance States
+  const [hourlySectionFilter, setHourlySectionFilter] = useState("ALL");
+  const [hourlySearchQuery, setHourlySearchQuery] = useState("");
+  const [expandedHourlyScheduleId, setExpandedHourlyScheduleId] = useState<number | null>(null);
+
   const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
 
   const [sectionModalData, setSectionModalData] = useState<{
@@ -227,6 +240,9 @@ export default function PrincipalDashboard() {
       isPresent: boolean;
       entryTime?: string | null;
       exitTime?: string | null;
+      hourlyCount?: number;
+      hourlyTotal?: number;
+      hourlyPeriods?: { subject: string; time: string; markedPresent: boolean; faculty: string }[];
     }[];
   } | null>(null);
 
@@ -344,6 +360,49 @@ export default function PrincipalDashboard() {
     queryFn: () => customFetch<AttendanceRecord[]>(`/api/attendance?from=${logDate}&to=${logDate}`),
     refetchInterval: 5000,
   });
+
+  // Fetch Hourly / Period Classroom Attendance for the selected date
+  const { data: hourlyHistoryData, isLoading: hourlyLoading } = useQuery<{
+    date?: string;
+    summary: {
+      totalClasses: number;
+      totalStudents: number;
+      totalPresent: number;
+      totalAbsent: number;
+      averageAttendance: number;
+    };
+    sessions: any[];
+  }>({
+    queryKey: ["principal-hourly-history", logDate],
+    queryFn: () => customFetch(`/api/mentor/history?date=${logDate}&scope=all`),
+    refetchInterval: 10000,
+  });
+
+  const hourlySessions = hourlyHistoryData?.sessions || [];
+  const hourlySummary = hourlyHistoryData?.summary || {
+    totalClasses: 0,
+    totalStudents: 0,
+    totalPresent: 0,
+    totalAbsent: 0,
+    averageAttendance: 0
+  };
+
+  // Map of userId -> array of attended periods for the day
+  const studentDayHourlyMap = useMemo(() => {
+    const map = new Map<number, { subject: string; time: string; markedPresent: boolean; faculty: string }[]>();
+    hourlySessions.forEach(session => {
+      (session.students || []).forEach((st: any) => {
+        if (!map.has(st.id)) map.set(st.id, []);
+        map.get(st.id)!.push({
+          subject: session.subject,
+          time: `${session.startTime?.slice(0, 5)} - ${session.endTime?.slice(0, 5)}`,
+          markedPresent: st.markedPresent,
+          faculty: session.facultyName
+        });
+      });
+    });
+    return map;
+  }, [hourlySessions]);
 
   // Fetch Monthly Student Records when modal is open (Ultra-Fast API query for both gate and hourly attendance)
   const { data: studentMonthlyData } = useQuery<{ records: AttendanceRecord[], hourlyRecords: any[] }>({
@@ -864,6 +923,18 @@ export default function PrincipalDashboard() {
               </button>
 
               <button
+                onClick={() => setActiveTab("hourly")}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                  activeTab === "hourly"
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-white border border-gray-200 text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                <Clock className="w-4 h-4" />
+                Hourly / Period Attendance ({hourlySessions.length})
+              </button>
+
+              <button
                 onClick={() => setActiveTab("detailed")}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "detailed"
@@ -879,109 +950,370 @@ export default function PrincipalDashboard() {
             {activeTab === "summary" ? (
               /* DS Section Cards */
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {sectionStats.map((st) => (
-                  <div key={st.section} className="bg-white border border-gray-200 rounded-xl p-3.5 space-y-3 shadow-md hover:border-gray-300 transition-all">
-                    <div
-                      onClick={() => {
-                        const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
-                        setSectionModalData({
-                          title: `Section ${st.section} Roster`,
-                          subtitle: `All ${st.total} Enrolled Students in Data Science Dept (${st.present} Present, ${st.absent} Absent)`,
-                          students: secStudents.map((s) => {
-                            const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
-                            return {
-                              student: s,
-                              isPresent: dsPresentSet.has(s.id),
-                              entryTime: log?.entryTime,
-                              exitTime: log?.exitTime,
-                            };
-                          }),
-                        });
-                      }}
-                      className="flex items-center justify-between cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center font-black text-blue-700 text-sm group-hover:scale-105 transition-transform">
-                          {st.section}
-                        </div>
-                        <div>
-                          <h4 className="text-base font-bold text-gray-900 group-hover:text-blue-700 transition-colors">Section {st.section}</h4>
-                          <p className="text-xs font-medium text-gray-500">Data Science Dept • Click for Roster</p>
-                        </div>
-                      </div>
-                      <span className="text-base font-black text-blue-700">{st.percent}%</span>
-                    </div>
+                {sectionStats.map((st) => {
+                  const secHourlySessions = hourlySessions.filter((hs: any) => {
+                    const secName = hs.section || "";
+                    const yr = hs.year === "II" ? "2" : hs.year === "III" ? "3" : hs.year === "IV" ? "4" : hs.year;
+                    return `${yr}${secName}` === st.section;
+                  });
+                  const secHourlyPresent = secHourlySessions.reduce((acc: number, hs: any) => acc + (hs.presentCount || 0), 0);
+                  const secHourlyTotal = secHourlySessions.reduce((acc: number, hs: any) => acc + (hs.totalStudents || 0), 0);
+                  const secHourlyPct = secHourlyTotal > 0 ? Math.round((secHourlyPresent / secHourlyTotal) * 100) : null;
 
-                    <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
-                      {/* Enrolled Button */}
-                      <button
+                  return (
+                    <div key={st.section} className="bg-white border border-gray-200 rounded-xl p-3.5 space-y-3 shadow-md hover:border-gray-300 transition-all">
+                      <div
                         onClick={() => {
                           const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
                           setSectionModalData({
-                            title: `Section ${st.section} — Enrolled Roster`,
-                            subtitle: `Total ${st.total} Students Enrolled`,
+                            title: `Section ${st.section} Roster`,
+                            subtitle: `All ${st.total} Enrolled Students in Data Science Dept (${st.present} Gate Present, ${st.absent} Absent)`,
                             students: secStudents.map((s) => {
                               const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
+                              const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
+                              const hourlyPresentCount = hourlyForStudent.filter(h => h.markedPresent).length;
                               return {
                                 student: s,
                                 isPresent: dsPresentSet.has(s.id),
                                 entryTime: log?.entryTime,
                                 exitTime: log?.exitTime,
+                                hourlyCount: hourlyPresentCount,
+                                hourlyTotal: hourlyForStudent.length,
+                                hourlyPeriods: hourlyForStudent,
                               };
                             }),
                           });
                         }}
-                        className="p-3 rounded-xl bg-gray-50 hover:bg-gray-50 border border-gray-200 transition-all cursor-pointer text-center active:scale-95"
+                        className="flex items-center justify-between cursor-pointer group"
                       >
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Enrolled</p>
-                        <p className="text-base font-black text-gray-900 mt-1">{st.total}</p>
-                      </button>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center font-black text-blue-700 text-sm group-hover:scale-105 transition-transform">
+                            {st.section}
+                          </div>
+                          <div>
+                            <h4 className="text-base font-bold text-gray-900 group-hover:text-blue-700 transition-colors">Section {st.section}</h4>
+                            <p className="text-xs font-medium text-gray-500">
+                              {secHourlyPct !== null
+                                ? `Classroom: ${secHourlyPct}% (${secHourlySessions.length} Periods) • Click Roster`
+                                : "Data Science Dept • Click for Roster"}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-base font-black text-blue-700">{st.percent}%</span>
+                      </div>
 
-                      {/* Present Button */}
-                      <button
-                        onClick={() => {
-                          const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && dsPresentSet.has(s.id));
-                          setSectionModalData({
-                            title: `Section ${st.section} — Present Students`,
-                            subtitle: `${st.present} Students Present on ${logDate}`,
-                            students: secStudents.map((s) => {
-                              const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
-                              return {
-                                student: s,
-                                isPresent: true,
-                                entryTime: log?.entryTime,
-                                exitTime: log?.exitTime,
-                              };
-                            }),
-                          });
-                        }}
-                        className="p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer text-center active:scale-95"
-                      >
-                        <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Present</p>
-                        <p className="text-base font-black text-emerald-700 mt-1">{st.present}</p>
-                      </button>
+                      <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
+                        {/* Enrolled Button */}
+                        <button
+                          onClick={() => {
+                            const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
+                            setSectionModalData({
+                              title: `Section ${st.section} — Enrolled Roster`,
+                              subtitle: `Total ${st.total} Students Enrolled`,
+                              students: secStudents.map((s) => {
+                                const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
+                                const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
+                                return {
+                                  student: s,
+                                  isPresent: dsPresentSet.has(s.id),
+                                  entryTime: log?.entryTime,
+                                  exitTime: log?.exitTime,
+                                  hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
+                                  hourlyTotal: hourlyForStudent.length,
+                                  hourlyPeriods: hourlyForStudent,
+                                };
+                              }),
+                            });
+                          }}
+                          className="p-3 rounded-xl bg-gray-50 hover:bg-gray-50 border border-gray-200 transition-all cursor-pointer text-center active:scale-95"
+                        >
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Enrolled</p>
+                          <p className="text-base font-black text-gray-900 mt-1">{st.total}</p>
+                        </button>
 
-                      {/* Absent Button */}
-                      <button
-                        onClick={() => {
-                          const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && !dsPresentSet.has(s.id));
-                          setSectionModalData({
-                            title: `Section ${st.section} — Absent Students`,
-                            subtitle: `${st.absent} Students Absent on ${logDate}`,
-                            students: secStudents.map((s) => ({
-                              student: s,
-                              isPresent: false,
-                            })),
-                          });
-                        }}
-                        className="p-3 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all cursor-pointer text-center active:scale-95"
-                      >
-                        <p className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Absent</p>
-                        <p className="text-base font-black text-rose-700 mt-1">{st.absent}</p>
-                      </button>
+                        {/* Present Button */}
+                        <button
+                          onClick={() => {
+                            const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && dsPresentSet.has(s.id));
+                            setSectionModalData({
+                              title: `Section ${st.section} — Present Students`,
+                              subtitle: `${st.present} Students Gate Present on ${logDate}`,
+                              students: secStudents.map((s) => {
+                                const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
+                                const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
+                                return {
+                                  student: s,
+                                  isPresent: true,
+                                  entryTime: log?.entryTime,
+                                  exitTime: log?.exitTime,
+                                  hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
+                                  hourlyTotal: hourlyForStudent.length,
+                                  hourlyPeriods: hourlyForStudent,
+                                };
+                              }),
+                            });
+                          }}
+                          className="p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer text-center active:scale-95"
+                        >
+                          <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Present</p>
+                          <p className="text-base font-black text-emerald-700 mt-1">{st.present}</p>
+                        </button>
+
+                        {/* Absent Button */}
+                        <button
+                          onClick={() => {
+                            const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && !dsPresentSet.has(s.id));
+                            setSectionModalData({
+                              title: `Section ${st.section} — Absent Students`,
+                              subtitle: `${st.absent} Students Absent on ${logDate}`,
+                              students: secStudents.map((s) => {
+                                const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
+                                return {
+                                  student: s,
+                                  isPresent: false,
+                                  hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
+                                  hourlyTotal: hourlyForStudent.length,
+                                  hourlyPeriods: hourlyForStudent,
+                                };
+                              }),
+                            });
+                          }}
+                          className="p-3 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all cursor-pointer text-center active:scale-95"
+                        >
+                          <p className="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Absent</p>
+                          <p className="text-base font-black text-rose-700 mt-1">{st.absent}</p>
+                        </button>
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+            ) : activeTab === "hourly" ? (
+              /* DEDICATED HOURLY / PERIOD ATTENDANCE VIEW */
+              <div className="space-y-6">
+                {/* Hourly Bento Stats Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-2xl bg-white border border-gray-200 shadow-xs">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Classes Conducted</p>
+                    <p className="text-2xl font-black text-blue-600 mt-1">{hourlySummary.totalClasses} Periods</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Faculty Marked Sessions</p>
                   </div>
-                ))}
+                  <div className="p-4 rounded-2xl bg-white border border-gray-200 shadow-xs">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Classroom Attendance</p>
+                    <p className="text-2xl font-black text-emerald-600 mt-1">{hourlySummary.averageAttendance}%</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Average Across Classes</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white border border-gray-200 shadow-xs">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Students Present</p>
+                    <p className="text-2xl font-black text-emerald-600 mt-1">{hourlySummary.totalPresent}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Marked In Period Logs</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white border border-gray-200 shadow-xs">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Students Absent</p>
+                    <p className="text-2xl font-black text-rose-600 mt-1">{hourlySummary.totalAbsent}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Missed Class Sessions</p>
+                  </div>
+                </div>
+
+                {/* Section Filter Pills & Search */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200 shadow-xs">
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
+                    {["ALL", "2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B"].map((sec) => (
+                      <button
+                        key={sec}
+                        onClick={() => setHourlySectionFilter(sec)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                          hourlySectionFilter === sec
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                      >
+                        {sec === "ALL" ? "All Sections" : `Sec ${sec}`}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="relative min-w-[240px]">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search student, roll no, subject..."
+                      value={hourlySearchQuery}
+                      onChange={(e) => setHourlySearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-gray-50 border border-gray-200 text-gray-800 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Class Sessions List */}
+                {hourlyLoading ? (
+                  <div className="p-12 text-center text-gray-500 bg-white rounded-2xl border border-gray-200">
+                    <p className="text-sm font-semibold animate-pulse">Loading Hourly Period Attendance...</p>
+                  </div>
+                ) : hourlySessions.length === 0 ? (
+                  <div className="p-12 text-center text-gray-500 bg-white rounded-2xl border border-gray-200 space-y-2">
+                    <Clock className="w-10 h-10 text-gray-400 mx-auto" />
+                    <p className="text-base font-bold text-gray-800">No Classroom Attendance Submitted on {logDate}</p>
+                    <p className="text-xs text-gray-500">Faculty attendance records submitted through the mobile app will automatically appear here.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {hourlySessions
+                      .filter((session: any) => {
+                        const secName = session.section || "";
+                        const yr = session.year === "II" ? "2" : session.year === "III" ? "3" : hsYr(session.year);
+                        const secKey = `${yr}${secName}`;
+                        const matchesSection = hourlySectionFilter === "ALL" || secKey === hourlySectionFilter || session.section === hourlySectionFilter;
+                        if (!matchesSection) return false;
+
+                        if (!hourlySearchQuery) return true;
+                        const q = hourlySearchQuery.toLowerCase();
+                        const matchesMeta = (session.subject || "").toLowerCase().includes(q) ||
+                                            (session.facultyName || "").toLowerCase().includes(q) ||
+                                            (session.fullSection || "").toLowerCase().includes(q);
+                        const matchesStudent = (session.students || []).some((st: any) =>
+                          (st.name || "").toLowerCase().includes(q) || (st.uniqueId || "").toLowerCase().includes(q)
+                        );
+                        return matchesMeta || matchesStudent;
+                      })
+                      .map((session: any) => {
+                        const isExpanded = expandedHourlyScheduleId === session.scheduleId;
+                        const pct = session.percentage || 0;
+                        const studentList = session.students || [];
+
+                        return (
+                          <div
+                            key={`${session.scheduleId}_${session.date || logDate}`}
+                            className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-xs hover:border-gray-300 transition-all"
+                          >
+                            {/* Card Header */}
+                            <div className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100">
+                              <div className="flex items-start sm:items-center gap-3">
+                                <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 flex flex-col items-center justify-center text-blue-700 flex-shrink-0">
+                                  <span className="text-[10px] font-bold uppercase">{session.year} Year</span>
+                                  <span className="text-sm font-black font-mono">Sec {session.section}</span>
+                                </div>
+                                <div>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <h3 className="text-base font-bold text-gray-900">{session.subject}</h3>
+                                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-300">
+                                      SUBMITTED
+                                    </span>
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-1">
+                                    <span className="flex items-center gap-1 font-medium">
+                                      <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                      {session.startTime?.slice(0, 5)} – {session.endTime?.slice(0, 5)}
+                                    </span>
+                                    <span>•</span>
+                                    <span className="font-semibold text-gray-700">
+                                      Faculty: {session.facultyName}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <div className="flex items-center gap-2 justify-end">
+                                    <span className="text-lg font-black text-gray-900">{pct}%</span>
+                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                      pct >= 75
+                                        ? "bg-emerald-100 text-emerald-700"
+                                        : pct >= 65
+                                        ? "bg-amber-100 text-amber-700"
+                                        : "bg-rose-100 text-rose-700"
+                                    }`}>
+                                      {session.presentCount}/{session.totalStudents} Present
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] text-gray-400 mt-0.5">{session.absentCount} Absent</p>
+                                </div>
+
+                                <button
+                                  onClick={() => setExpandedHourlyScheduleId(isExpanded ? null : session.scheduleId)}
+                                  className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                                >
+                                  {isExpanded ? "Hide Roster" : `View Students (${studentList.length})`}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Expandable Student Roster */}
+                            {isExpanded && (
+                              <div className="p-4 sm:p-5 bg-gray-50 space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    Period Attendance Roster ({session.presentCount} Present, {session.absentCount} Absent)
+                                  </h4>
+                                  <a
+                                    href={`/api/mentor/history/export?date=${logDate}&scheduleId=${session.scheduleId}`}
+                                    download={`Attendance_${session.subject}_Sec${session.section}_${logDate}.csv`}
+                                    className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs"
+                                  >
+                                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                                    Export CSV
+                                  </a>
+                                </div>
+
+                                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                                  <table className="w-full text-left text-xs">
+                                    <thead>
+                                      <tr className="bg-gray-100/70 border-b border-gray-200 text-[11px] font-bold text-gray-600 uppercase">
+                                        <th className="py-2.5 px-3 w-12 text-center">#</th>
+                                        <th className="py-2.5 px-3">Roll Number</th>
+                                        <th className="py-2.5 px-3">Student Name</th>
+                                        <th className="py-2.5 px-3 text-center">Class Status</th>
+                                        <th className="py-2.5 px-3 text-center">Marking Method</th>
+                                        <th className="py-2.5 px-3 text-center">Gate Scan</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                      {studentList.map((st: any, idx: number) => (
+                                        <tr
+                                          key={st.id}
+                                          onClick={() => {
+                                            const fullUser = students.find((s) => s.id === st.id) || st;
+                                            setSelectedStudentForDetails(fullUser);
+                                          }}
+                                          className="hover:bg-blue-50/50 transition-colors cursor-pointer"
+                                        >
+                                          <td className="py-2 px-3 text-center text-gray-400 font-mono">{idx + 1}</td>
+                                          <td className="py-2 px-3 font-mono font-bold text-gray-900">{st.uniqueId || "N/A"}</td>
+                                          <td className="py-2 px-3 font-semibold text-gray-800">{st.name}</td>
+                                          <td className="py-2 px-3 text-center">
+                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
+                                              st.markedPresent
+                                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                                : "bg-rose-100 text-rose-800 border-rose-300"
+                                            }`}>
+                                              {st.markedPresent ? "🟢 PRESENT" : "🔴 ABSENT"}
+                                            </span>
+                                          </td>
+                                          <td className="py-2 px-3 text-center">
+                                            <span className="text-[11px] font-medium text-gray-600">
+                                              {st.scannedQr ? "📱 QR Code Scan" : st.markedByTeacher ? "✍️ Faculty Marked" : "—"}
+                                            </span>
+                                          </td>
+                                          <td className="py-2 px-3 text-center">
+                                            <span className={`text-[11px] font-medium ${
+                                              st.scannedGate ? "text-emerald-700 font-bold" : "text-gray-400"
+                                            }`}>
+                                              {st.scannedGate ? (st.gateEntryTime ? `In: ${formatTime(st.gateEntryTime)}` : "Verified Gate In") : "No Gate Scan"}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
               </div>
             ) : activeTab === "flags" ? (
               /* DEDICATED STUDENT RISK FLAG ANALYTICS TAB */
@@ -1324,21 +1656,32 @@ export default function PrincipalDashboard() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {item.hourlyTotal && item.hourlyTotal > 0 ? (
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
+                            item.hourlyCount && item.hourlyCount > 0
+                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                              : "bg-gray-100 text-gray-500 border-gray-200"
+                          }`}>
+                            📚 {item.hourlyCount}/{item.hourlyTotal} Classes
+                          </span>
+                        ) : null}
+
                         {item.entryTime ? (
-                          <span className="text-xs font-mono font-extrabold text-emerald-700 bg-gray-50 px-3 py-1 rounded-lg border border-emerald-500/50 shadow-xs flex items-center gap-1.5">
-                            In: {formatTime(item.entryTime)}
+                          <span className="text-xs font-mono font-extrabold text-emerald-700 bg-gray-50 px-2.5 py-1 rounded-lg border border-emerald-500/50 shadow-xs flex items-center gap-1.5">
+                            Gate In: {formatTime(item.entryTime)}
                             {isLateTime(item.entryTime) && (
                               <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider">LATE</span>
                             )}
                           </span>
                         ) : null}
+
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                           item.isPresent
                             ? "bg-emerald-100 text-emerald-700 border-emerald-500/40"
                             : "bg-rose-50 text-rose-700 border-rose-200"
                         }`}>
-                          {item.isPresent ? "🟢 PRESENT" : "🔴 ABSENT"}
+                          {item.isPresent ? "🟢 GATE PRESENT" : "🔴 GATE ABSENT"}
                         </span>
                       </div>
                     </div>

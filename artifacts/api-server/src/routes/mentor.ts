@@ -242,9 +242,13 @@ function getBufferedTime(timeStr: string, offsetMinutes: number): string {
 // Store HOD Schedule Overrides: Key: `${schedule_id}_${date}` -> { isUnlocked: boolean, extendedMinutes: number }
 export const scheduleOverridesMap = new Map<string, { isUnlocked: boolean; extendedMinutes: number }>();
 
-// ── History endpoint: returns mentor's historical attendance records with student rosters, metrics & filtering ──
-router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: any) => {
-  const mentorId = req.mentorId!;
+// ── History endpoint: returns historical classroom hourly attendance records with student rosters, metrics & filtering ──
+router.get("/mentor/history", authMiddleware, async (req: any, res: any) => {
+  const mentorId = req.mentorId || (req.adminId !== undefined ? -3 : null);
+  if (!mentorId && req.adminId === undefined) {
+    res.status(401).json({ error: "Unauthorized access" });
+    return;
+  }
   const dateParam = (req.query.date as string)?.trim(); // YYYY-MM-DD
   const startDateParam = (req.query.startDate as string)?.trim();
   const endDateParam = (req.query.endDate as string)?.trim();
@@ -509,8 +513,12 @@ router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: 
 });
 
 // ── Export endpoint: downloads historical attendance in CSV or JSON ──
-router.get("/mentor/history/export", authMiddleware, mentorOnly, async (req: any, res: any) => {
-  const mentorId = req.mentorId!;
+router.get("/mentor/history/export", authMiddleware, async (req: any, res: any) => {
+  const mentorId = req.mentorId || (req.adminId !== undefined ? -3 : null);
+  if (!mentorId && req.adminId === undefined) {
+    res.status(401).json({ error: "Unauthorized access" });
+    return;
+  }
   const dateParam = (req.query.date as string)?.trim();
   const startDateParam = (req.query.startDate as string)?.trim();
   const endDateParam = (req.query.endDate as string)?.trim();

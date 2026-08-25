@@ -65769,8 +65769,12 @@ function getBufferedTime(timeStr, offsetMinutes) {
   }
 }
 var scheduleOverridesMap = /* @__PURE__ */ new Map();
-router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
-  const mentorId = req.mentorId;
+router5.get("/mentor/history", authMiddleware, async (req, res) => {
+  const mentorId = req.mentorId || (req.adminId !== void 0 ? -3 : null);
+  if (!mentorId && req.adminId === void 0) {
+    res.status(401).json({ error: "Unauthorized access" });
+    return;
+  }
   const dateParam = req.query.date?.trim();
   const startDateParam = req.query.startDate?.trim();
   const endDateParam = req.query.endDate?.trim();
@@ -65976,8 +65980,12 @@ router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/mentor/history/export", authMiddleware, mentorOnly, async (req, res) => {
-  const mentorId = req.mentorId;
+router5.get("/mentor/history/export", authMiddleware, async (req, res) => {
+  const mentorId = req.mentorId || (req.adminId !== void 0 ? -3 : null);
+  if (!mentorId && req.adminId === void 0) {
+    res.status(401).json({ error: "Unauthorized access" });
+    return;
+  }
   const dateParam = req.query.date?.trim();
   const startDateParam = req.query.startDate?.trim();
   const endDateParam = req.query.endDate?.trim();
