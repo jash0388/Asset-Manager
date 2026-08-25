@@ -177,12 +177,12 @@ export default function Users() {
       {qrUserId !== null && (
         <QrModal userId={qrUserId} name={qrUserName} onClose={() => setQrUserId(null)} />
       )}
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="p-3 sm:p-4 max-w-6xl mx-auto space-y-3">
         <BackButton />
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage students and staff</p>
+            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Users</h1>
+            <p className="text-xs text-gray-500 mt-0.5">Manage students and staff roster</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -244,17 +244,17 @@ export default function Users() {
                   setIsPrinting(false);
                 }
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-white text-sm font-semibold transition-colors border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5" />
               {isPrinting ? "Generating PDF..." : "Print All"}
             </button>
             <button
               data-testid="add-user-button"
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-xs"
             >
-              <UserPlus className="w-4 h-4" />
+              <UserPlus className="w-3.5 h-3.5" />
               Add User
             </button>
           </div>
@@ -262,44 +262,44 @@ export default function Users() {
 
         {/* Add user form */}
         {showForm && (
-          <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">Add New User</h2>
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-xs">
+            <h2 className="text-xs font-bold text-gray-900 mb-3">Add New User</h2>
             {createError && (
-              <div data-testid="create-user-error" className="mb-4 px-3 py-2 rounded-lg bg-red-900/40 border border-red-700 text-red-200 text-sm">
+              <div data-testid="create-user-error" className="mb-3 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
                 {createError}
               </div>
             )}
-            <form onSubmit={handleCreate} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <form onSubmit={handleCreate} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Full Name *</label>
+                <label className="block text-[11px] font-bold text-gray-600 mb-1">Full Name *</label>
                 <input
                   data-testid="user-name-input"
                   type="text"
                   required
                   value={newUser.name}
                   onChange={(e) => { setCreateError(null); setNewUser((p) => ({ ...p, name: e.target.value })); }}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-xs font-medium focus:outline-none focus:border-blue-500"
                   placeholder="Full name"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Unique ID (optional)</label>
+                <label className="block text-[11px] font-bold text-gray-600 mb-1">Unique ID (optional)</label>
                 <input
                   data-testid="user-uid-input"
                   type="text"
                   value={newUser.uniqueId}
                   onChange={(e) => { setCreateError(null); setNewUser((p) => ({ ...p, uniqueId: e.target.value })); }}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-xs font-medium focus:outline-none focus:border-blue-500"
                   placeholder="Auto-generated if blank"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Role *</label>
+                <label className="block text-[11px] font-bold text-gray-600 mb-1">Role *</label>
                 <select
                   data-testid="user-role-select"
                   value={newUser.role}
                   onChange={(e) => setNewUser((p) => ({ ...p, role: e.target.value as "student" | "staff" }))}
-                  className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-xs font-medium focus:outline-none focus:border-blue-500"
                 >
                   <option value="student">Student</option>
                   <option value="staff">Staff</option>
@@ -310,16 +310,16 @@ export default function Users() {
                   data-testid="create-user-submit"
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white text-sm font-semibold transition-colors"
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white text-xs font-bold transition-colors"
                 >
                   {createMutation.isPending ? "Creating..." : "Create"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="py-2 px-3 rounded-lg bg-gray-200 hover:bg-gray-300 text-white text-sm"
+                  className="py-1.5 px-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold border border-gray-200"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             </form>
@@ -327,28 +327,28 @@ export default function Users() {
         )}
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
             <input
               data-testid="user-search"
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or ID..."
-              className="w-full pl-9 pr-4 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-900 placeholder-gray-400 text-xs font-medium focus:outline-none focus:border-blue-500 shadow-xs"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             {(["", "student", "staff"] as const).map((r) => (
               <button
                 key={r}
                 data-testid={`filter-${r || "all"}`}
                 onClick={() => setRoleFilter(r)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                   roleFilter === r
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-500 hover:text-gray-900"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "bg-white text-gray-600 hover:text-gray-900 border border-gray-200"
                 }`}
               >
                 {r === "" ? "All" : r === "student" ? "Students" : "Staff"}
@@ -358,80 +358,80 @@ export default function Users() {
         </div>
 
         {/* Table */}
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table data-testid="users-table" className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Name</th>
-                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Unique ID</th>
-                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Role</th>
-                  <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Added</th>
-                  <th className="text-right text-xs font-medium text-gray-500 px-5 py-3">Actions</th>
+                <tr className="border-b border-gray-100 bg-gray-50/80 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                  <th className="text-left px-4 py-2.5">Name</th>
+                  <th className="text-left px-4 py-2.5">Unique ID</th>
+                  <th className="text-left px-4 py-2.5">Role</th>
+                  <th className="text-left px-4 py-2.5">Added</th>
+                  <th className="text-right px-4 py-2.5">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-100">
                 {isLoading ? (
                   [...Array(5)].map((_, i) => (
                     <tr key={i}>
                       {[...Array(5)].map((_, j) => (
-                        <td key={j} className="px-5 py-4">
-                          <div className="h-4 bg-gray-100 rounded animate-pulse" />
+                        <td key={j} className="px-4 py-2.5">
+                          <div className="h-3.5 bg-gray-100 rounded animate-pulse" />
                         </td>
                       ))}
                     </tr>
                   ))
                 ) : !filteredUsers.length ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-10 text-center text-sm text-gray-400">
+                    <td colSpan={5} className="px-4 py-8 text-center text-xs text-gray-400 font-medium">
                       No users found
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-100/40 transition-colors">
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
+                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
                             {user.name.charAt(0).toUpperCase()}
                           </div>
-                          <span className="text-sm font-medium text-white">{user.name}</span>
+                          <span className="text-xs font-bold text-gray-900">{user.name}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3">
-                        <span className="font-mono text-sm text-gray-700">{user.uniqueId}</span>
+                      <td className="px-4 py-2">
+                        <span className="font-mono text-xs text-gray-600 font-semibold">{user.uniqueId}</span>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-2">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             user.role === "student"
-                              ? "bg-blue-900/40 text-blue-700"
-                              : "bg-purple-900/40 text-purple-700"
+                              ? "bg-blue-100 text-blue-800 border border-blue-200"
+                              : "bg-purple-100 text-purple-800 border border-purple-200"
                           }`}
                         >
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-sm text-gray-500">
+                      <td className="px-4 py-2 text-xs text-gray-500 font-medium">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-4 py-2">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
                             data-testid={`view-qr-${user.id}`}
                             onClick={() => { setQrUserId(user.id); setQrUserName(user.name); }}
-                            className="p-2 rounded-lg bg-gray-200 hover:bg-blue-900/40 text-gray-500 hover:text-blue-700 transition-colors"
+                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors border border-gray-200"
                             title="View QR Code"
                           >
-                            <QrCode className="w-4 h-4" />
+                            <QrCode className="w-3.5 h-3.5" />
                           </button>
                           <button
                             data-testid={`delete-user-${user.id}`}
                             onClick={() => handleDelete(user.id, user.name)}
-                            className="p-2 rounded-lg bg-gray-200 hover:bg-red-900/40 text-gray-500 hover:text-red-700 transition-colors"
+                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors border border-gray-200"
                             title="Delete user"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>

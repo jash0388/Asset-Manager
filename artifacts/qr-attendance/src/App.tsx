@@ -32,59 +32,106 @@ const queryClient = new QueryClient({
   },
 });
 
+function getStoredRole(): "admin" | "mentor" | "hod" | "principal" | null {
+  try {
+    const r = localStorage.getItem("qr_role");
+    return r === "admin" || r === "mentor" || r === "hod" || r === "principal" ? r : null;
+  } catch {
+    return null;
+  }
+}
+
 function RequireAdmin({ children }: { children: React.ReactNode }) {
-  const { role } = useAuth();
+  const { role, loading } = useAuth();
   const [, navigate] = useLocation();
+  const effectiveRole = role || getStoredRole();
 
   useEffect(() => {
-    if (role !== "admin") {
+    if (!loading && !effectiveRole) {
       navigate("/login");
+    } else if (!loading && effectiveRole && effectiveRole !== "admin") {
+      navigate(effectiveRole === "hod" ? "/hod-dashboard" : effectiveRole === "principal" ? "/principal-dashboard" : "/mentor");
     }
-  }, [role, navigate]);
+  }, [effectiveRole, loading, navigate]);
 
-  if (role !== "admin") return null;
+  if (loading || !effectiveRole) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
 
 function RequireHod({ children }: { children: React.ReactNode }) {
-  const { role } = useAuth();
+  const { role, loading } = useAuth();
   const [, navigate] = useLocation();
+  const effectiveRole = role || getStoredRole();
 
   useEffect(() => {
-    if (role !== "hod") {
+    if (!loading && !effectiveRole) {
       navigate("/login");
+    } else if (!loading && effectiveRole && effectiveRole !== "hod") {
+      navigate(effectiveRole === "admin" ? "/dashboard" : effectiveRole === "principal" ? "/principal-dashboard" : "/mentor");
     }
-  }, [role, navigate]);
+  }, [effectiveRole, loading, navigate]);
 
-  if (role !== "hod") return null;
+  if (loading || !effectiveRole) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
 
 function RequirePrincipal({ children }: { children: React.ReactNode }) {
-  const { role } = useAuth();
+  const { role, loading } = useAuth();
   const [, navigate] = useLocation();
+  const effectiveRole = role || getStoredRole();
 
   useEffect(() => {
-    if (role !== "principal") {
+    if (!loading && !effectiveRole) {
       navigate("/login");
+    } else if (!loading && effectiveRole && effectiveRole !== "principal") {
+      navigate(effectiveRole === "admin" ? "/dashboard" : effectiveRole === "hod" ? "/hod-dashboard" : "/mentor");
     }
-  }, [role, navigate]);
+  }, [effectiveRole, loading, navigate]);
 
-  if (role !== "principal") return null;
+  if (loading || !effectiveRole) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
 
 function RequireAdminOrHod({ children }: { children: React.ReactNode }) {
-  const { role } = useAuth();
+  const { role, loading } = useAuth();
   const [, navigate] = useLocation();
+  const effectiveRole = role || getStoredRole();
 
   useEffect(() => {
-    if (role !== "admin" && role !== "hod" && role !== "principal" && role !== "mentor") {
+    if (!loading && !effectiveRole) {
       navigate("/login");
     }
-  }, [role, navigate]);
+  }, [effectiveRole, loading, navigate]);
 
-  if (role !== "admin" && role !== "hod" && role !== "principal" && role !== "mentor") return null;
+  if (loading || !effectiveRole) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
 

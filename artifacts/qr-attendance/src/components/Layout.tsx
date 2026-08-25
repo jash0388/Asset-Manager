@@ -18,7 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 
@@ -42,19 +42,30 @@ const getStoredPasscode = () => {
 function TrainingNavTree({ location, onNavigate }: { location: string; onNavigate: () => void }) {
   const [expanded, setExpanded] = useState(true);
 
-  const { data: sessions = [] } = useQuery<any[]>({
+  const { data: rawData } = useQuery<any>({
     queryKey: ["training-sessions-nav"],
     queryFn: async () => {
-      const token = localStorage.getItem("qr_token") || "";
-      const res = await fetch("/api/admin/training-sessions", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) return [];
-      return res.json();
+      try {
+        const token = localStorage.getItem("qr_token") || "";
+        const res = await fetch("/api/admin/training-sessions", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) return [];
+        return await res.json();
+      } catch {
+        return [];
+      }
     },
     refetchInterval: 15000,
     staleTime: 10000,
   });
+
+  const sessions: any[] = useMemo(() => {
+    if (!rawData) return [];
+    if (Array.isArray(rawData)) return rawData;
+    if (Array.isArray(rawData?.sessions)) return rawData.sessions;
+    return [];
+  }, [rawData]);
 
   const isOnTraining = location.startsWith("/training-sessions");
 

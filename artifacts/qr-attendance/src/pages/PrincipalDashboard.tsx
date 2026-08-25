@@ -719,10 +719,10 @@ export default function PrincipalDashboard() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+      <main className="flex-1 p-3 sm:p-4 lg:p-5 space-y-3 max-w-7xl mx-auto w-full">
         {/* Executive Principal Header Card (only when NOT on Risk Flag Analytics tab) */}
         {activeTab !== "flags" && (
-          <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4 relative overflow-hidden">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-gray-200">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/40 flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
@@ -880,7 +880,7 @@ export default function PrincipalDashboard() {
               /* DS Section Cards */
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sectionStats.map((st) => (
-                  <div key={st.section} className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-lg hover:border-gray-300 transition-all">
+                  <div key={st.section} className="bg-white border border-gray-200 rounded-xl p-3.5 space-y-3 shadow-md hover:border-gray-300 transition-all">
                     <div
                       onClick={() => {
                         const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
@@ -1053,7 +1053,7 @@ export default function PrincipalDashboard() {
                 </div>
 
                 {/* Filter and Search Bar */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-xl">
+                <div className="bg-white border border-gray-200 rounded-xl p-3.5 space-y-3 shadow-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="relative flex-1">
                       <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -1158,7 +1158,7 @@ export default function PrincipalDashboard() {
               </div>
             ) : (
               /* Detailed Student Logs Table */
-              <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-xl">
+              <div className="bg-white border border-gray-200 rounded-xl p-3.5 space-y-3 shadow-lg">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="relative flex-1">
                     <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />

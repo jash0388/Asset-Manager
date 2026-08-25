@@ -61,22 +61,18 @@ function isExitTimeOver(logDate: string | null | undefined, exitTime: string | n
 }
 
 function StatusBadge({ status, exitOver }: { status: string; exitOver?: boolean }) {
-  if (exitOver) {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-950/60 text-red-700 border border-red-900/40">
-        <XCircle className="w-3.5 h-3.5 text-red-700" />
-        Not Scanned
-      </span>
-    );
-  }
   const map: Record<string, string> = {
-    inside: "bg-green-900/40 text-green-700",
-    left: "bg-gray-200 text-gray-700",
-    present: "bg-blue-900/40 text-blue-700",
+    inside: "bg-blue-100 text-blue-900 border-2 border-blue-400 font-black",
+    left: "bg-slate-100 text-slate-700 border border-slate-300 font-bold",
+    present: "bg-blue-100 text-blue-900 border-2 border-blue-400 font-black",
   };
-  const labels: Record<string, string> = { inside: "Inside", left: "Left", present: "Present" };
+  const labels: Record<string, string> = {
+    inside: exitOver ? "Present" : "Inside",
+    left: "Left",
+    present: "Present",
+  };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${map[status] ?? "bg-gray-200 text-gray-700"}`}>
+    <span className={`px-2.5 py-0.5 rounded-full text-[10px] ${map[status] ?? "bg-gray-100 text-gray-700 border border-gray-200"}`}>
       {labels[status] ?? status}
     </span>
   );
@@ -125,116 +121,116 @@ function HistoryPanel({ userId }: { userId: number }) {
   const { user, records, summary } = data;
 
   return (
-    <div>
+    <div className="space-y-3">
       {/* User info */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-blue-900/40 flex items-center justify-center text-2xl font-bold text-blue-700 flex-shrink-0">
+      <div className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-lg font-black text-blue-700 flex-shrink-0">
             {user.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">{user.name}</h2>
-            <p className="text-sm text-gray-500">
-              {user.role === "student" ? "Student" : "Staff"} · ID: {user.uniqueId}
+            <h2 className="text-base font-bold text-gray-900">{user.name}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {user.role === "student" ? "Student" : "Staff"} · ID: <span className="font-mono font-semibold text-gray-700">{user.uniqueId}</span>
             </p>
           </div>
         </div>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         {[
-          { label: "Days Present", value: summary.totalDaysPresent, icon: Calendar, color: "text-blue-700" },
-          { label: "Avg Time Spent", value: formatDuration(summary.averageMinutesSpent), icon: Clock, color: "text-emerald-700" },
-          { label: "Late Entries", value: summary.lateEntriesCount, icon: AlertCircle, color: "text-orange-700" },
-          { label: "Total Records", value: summary.totalDaysChecked, icon: Calendar, color: "text-purple-700" },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon className={`w-4 h-4 ${color}`} />
-              <p className="text-xs text-gray-500">{label}</p>
+          { label: "Days Present", value: summary.totalDaysPresent, icon: Calendar, color: "text-blue-700", bg: "bg-blue-50 border-blue-100" },
+          { label: "Avg Time Spent", value: formatDuration(summary.averageMinutesSpent), icon: Clock, color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
+          { label: "Late Entries", value: summary.lateEntriesCount, icon: AlertCircle, color: "text-amber-700", bg: "bg-amber-50 border-amber-100" },
+          { label: "Total Records", value: summary.totalDaysChecked, icon: Calendar, color: "text-purple-700", bg: "bg-purple-50 border-purple-100" },
+        ].map(({ label, value, icon: Icon, color, bg }) => (
+          <div key={label} className={`bg-white border border-gray-200 rounded-xl p-3 shadow-xs`}>
+            <div className="flex items-center gap-1.5 mb-1">
+              <Icon className={`w-3.5 h-3.5 ${color}`} />
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{label}</p>
             </div>
-            <p className={`text-xl font-bold ${color}`}>{value}</p>
+            <p className={`text-xl font-black ${color}`}>{value}</p>
           </div>
         ))}
       </div>
 
       {/* Date filter */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
-        <div className="flex flex-col sm:flex-row gap-3">
+      <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-xs">
+        <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1">From</label>
             <input
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-xs font-medium focus:outline-none focus:border-blue-500"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1">To</label>
             <input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-xs font-medium focus:outline-none focus:border-blue-500"
             />
           </div>
           <div className="flex items-end gap-2">
             <button
               onClick={() => setApplied({ ...(from ? { from } : {}), ...(to ? { to } : {}) })}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold"
+              className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-xs"
             >
               Apply
             </button>
             <button
               onClick={exportCsv}
               disabled={!records.length}
-              className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-white text-sm font-semibold flex items-center gap-2"
+              className="px-3 py-1.5 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 text-gray-700 text-xs font-bold border border-gray-200 shadow-xs flex items-center gap-1.5"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5" /> Export
             </button>
           </div>
         </div>
       </div>
 
       {/* History table */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table data-testid="history-table" className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Date</th>
-                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Entry</th>
-                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Exit</th>
-                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Duration</th>
-                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">Status</th>
+              <tr className="border-b border-gray-100 bg-gray-50/80 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                <th className="text-left px-4 py-2">Date</th>
+                <th className="text-left px-4 py-2">Entry</th>
+                <th className="text-left px-4 py-2">Exit</th>
+                <th className="text-left px-4 py-2">Duration</th>
+                <th className="text-left px-4 py-2">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-100 text-xs">
               {!records.length ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-gray-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-xs text-gray-400 font-medium">
                     No attendance records found
                   </td>
                 </tr>
               ) : (
                 records.map((rec) => (
-                  <tr key={rec.id} className="hover:bg-gray-100/40 transition-colors">
-                    <td className="px-5 py-3 text-sm text-white font-medium">{rec.date}</td>
-                    <td className="px-5 py-3 text-sm text-gray-700">{formatTime(rec.entryTime)}</td>
-                    <td className="px-5 py-3 text-sm text-gray-700">
+                  <tr key={rec.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-2 font-bold text-gray-900">{rec.date}</td>
+                    <td className="px-4 py-2 font-mono text-[11px] text-gray-700">{formatTime(rec.entryTime)}</td>
+                    <td className="px-4 py-2 font-mono text-[11px] text-gray-700">
                       {isExitTimeOver(rec.date, rec.exitTime) ? (
-                        <span className="inline-flex items-center gap-1 text-red-700 font-semibold text-xs">
-                          <XCircle className="w-3.5 h-3.5 text-red-500" />
+                        <span className="inline-flex items-center gap-1 text-red-700 font-bold text-[10px]">
+                          <XCircle className="w-3 h-3 text-red-500" />
                           Not Scanned
                         </span>
                       ) : (
                         formatTime(rec.exitTime)
                       )}
                     </td>
-                    <td className="px-5 py-3 text-sm text-gray-700">{formatDuration(rec.durationMinutes)}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-4 py-2 text-gray-700 font-medium">{formatDuration(rec.durationMinutes)}</td>
+                    <td className="px-4 py-2">
                       <StatusBadge status={rec.status} exitOver={isExitTimeOver(rec.date, rec.exitTime)} />
                     </td>
                   </tr>
@@ -265,47 +261,47 @@ export default function History() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="p-3 sm:p-4 max-w-5xl mx-auto space-y-3">
         <BackButton />
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Student History</h1>
-          <p className="text-sm text-gray-500 mt-1">Search and view complete attendance history</p>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Student History</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Search and view complete attendance history</p>
         </div>
 
         {/* Search */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
+        <div className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-xs">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
             <input
               data-testid="history-search"
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name or ID..."
-              className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300 text-white text-sm focus:outline-none focus:border-blue-500"
+              className="w-full pl-8 pr-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 text-xs font-medium focus:outline-none focus:border-blue-500"
             />
           </div>
 
           {query.length >= 2 && (
-            <div className="mt-3 border border-gray-300 rounded-lg overflow-hidden">
+            <div className="mt-2.5 border border-gray-200 rounded-lg overflow-hidden bg-white shadow-md divide-y divide-gray-100">
               {searching ? (
-                <div className="px-4 py-3 text-sm text-gray-500">Searching...</div>
+                <div className="px-3 py-2 text-xs text-gray-500 font-medium">Searching...</div>
               ) : !searchResults.length ? (
-                <div className="px-4 py-3 text-sm text-gray-500">No users found</div>
+                <div className="px-3 py-2 text-xs text-gray-500 font-medium">No users found</div>
               ) : (
                 searchResults.map((user) => (
                   <button
                     data-testid={`search-result-${user.id}`}
                     key={user.id}
                     onClick={() => { setSelectedUserId(user.id); setQuery(""); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-200/50 text-left border-b border-gray-200 last:border-0 transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 text-left transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-full bg-blue-900/40 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">{user.name}</p>
-                      <p className="text-xs text-gray-500">{user.role} · {user.uniqueId}</p>
+                      <p className="text-xs font-bold text-gray-900">{user.name}</p>
+                      <p className="text-[10px] text-gray-500 font-mono">{user.role} · {user.uniqueId}</p>
                     </div>
                   </button>
                 ))
@@ -318,11 +314,11 @@ export default function History() {
         {selectedUserId ? (
           <HistoryPanel userId={selectedUserId} />
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <Search className="w-8 h-8 text-gray-400" />
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+              <Search className="w-6 h-6 text-gray-400" />
             </div>
-            <p className="text-gray-500 text-sm">Search for a student or staff member to view their attendance history</p>
+            <p className="text-gray-500 text-xs font-medium">Search for a student or staff member to view their attendance history</p>
           </div>
         )}
       </div>

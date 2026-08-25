@@ -720,9 +720,9 @@ export default function InchargeDashboard() {
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 p-4 sm:p-6 max-w-5xl mx-auto w-full space-y-6">
+      <div className="flex-1 p-3 sm:p-4 max-w-6xl mx-auto w-full space-y-3">
         {/* Navigation Switcher Tabs */}
-        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border p-2 rounded-2xl flex flex-wrap gap-2 shadow-xs mb-2">
+        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border p-1.5 rounded-xl flex flex-wrap gap-1.5 shadow-xs mb-1">
           <button
             onClick={() => navigate("/incharge-dashboard")}
             style={{ backgroundColor: "#2563eb", color: "#ffffff" }}
@@ -742,7 +742,7 @@ export default function InchargeDashboard() {
         </div>
 
         {/* Allocation Info Banner */}
-        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
           <div>
             <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="text-[10px] font-black uppercase tracking-wider border px-2.5 py-0.5 rounded-full">
               Assigned Mentoring Roster
@@ -825,7 +825,7 @@ export default function InchargeDashboard() {
         </div>
 
         {/* Risk Flag Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             onClick={() => setRiskFlagFilter("RED")}
             style={{
@@ -833,7 +833,7 @@ export default function InchargeDashboard() {
               borderColor: riskFlagFilter === "RED" ? "#e11d48" : "#e2e8f0",
               boxShadow: riskFlagFilter === "RED" ? "0 0 0 2px rgba(225,29,72,0.2)" : "none",
             }}
-            className="p-5 rounded-2xl border-2 text-left transition-all cursor-pointer shadow-xs"
+            className="p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer shadow-xs"
           >
             <div className="flex items-center justify-between mb-2">
               <span style={{ color: "#be123c" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
@@ -844,7 +844,7 @@ export default function InchargeDashboard() {
                 Critical
               </span>
             </div>
-            <p style={{ color: "#0f172a" }} className="text-3xl font-black">{redCount} Students</p>
+            <p style={{ color: "#0f172a" }} className="text-2xl font-black">{redCount} Students</p>
             <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Shortage Risk • Requires Condonation / Parent Notice</p>
           </button>
 
@@ -855,7 +855,7 @@ export default function InchargeDashboard() {
               borderColor: riskFlagFilter === "YELLOW" ? "#f59e0b" : "#e2e8f0",
               boxShadow: riskFlagFilter === "YELLOW" ? "0 0 0 2px rgba(245,158,11,0.2)" : "none",
             }}
-            className="p-5 rounded-2xl border-2 text-left transition-all cursor-pointer shadow-xs"
+            className="p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer shadow-xs"
           >
             <div className="flex items-center justify-between mb-2">
               <span style={{ color: "#b45309" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
@@ -866,7 +866,7 @@ export default function InchargeDashboard() {
                 Warning
               </span>
             </div>
-            <p style={{ color: "#0f172a" }} className="text-3xl font-black">{yellowCount} Students</p>
+            <p style={{ color: "#0f172a" }} className="text-2xl font-black">{yellowCount} Students</p>
             <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
           </button>
 
@@ -877,7 +877,7 @@ export default function InchargeDashboard() {
               borderColor: riskFlagFilter === "GREEN" ? "#10b981" : "#e2e8f0",
               boxShadow: riskFlagFilter === "GREEN" ? "0 0 0 2px rgba(16,185,129,0.2)" : "none",
             }}
-            className="p-5 rounded-2xl border-2 text-left transition-all cursor-pointer shadow-xs"
+            className="p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer shadow-xs"
           >
             <div className="flex items-center justify-between mb-2">
               <span style={{ color: "#047857" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
@@ -888,13 +888,13 @@ export default function InchargeDashboard() {
                 Safe
               </span>
             </div>
-            <p style={{ color: "#0f172a" }} className="text-3xl font-black">{greenCount} Students</p>
+            <p style={{ color: "#0f172a" }} className="text-2xl font-black">{greenCount} Students</p>
             <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Good Standing • Attendance Target Met</p>
           </button>
         </div>
 
         {/* Toolbar & Student List */}
-        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-2xl p-5 space-y-4 shadow-xs">
+        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-xl p-4 space-y-3 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />

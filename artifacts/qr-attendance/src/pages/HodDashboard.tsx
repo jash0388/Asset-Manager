@@ -30,10 +30,47 @@ import {
   Lock,
   Unlock,
   LayoutGrid,
+  LayoutList,
   List,
   Coffee,
   MapPin,
   User,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
+  Edit3,
+  KeyRound,
+  ShieldCheck,
+  Sparkles,
+  Send,
+  MessageSquare,
+  MessageCircle,
+  AlertOctagon,
+  CheckSquare,
+  Square,
+  BarChart2,
+  Flame,
+  SlidersHorizontal,
+  ShieldAlert,
+  FileEdit,
+  History as HistoryIcon,
+  X,
+  BookOpen,
+  FlaskConical,
+  Printer,
+  Building,
+  Mail,
+  Phone,
+  Award,
+  School,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -149,6 +186,542 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
   );
 }
 
+interface SectionMetadata {
+  sectionKey: string;
+  yearNumber: string;
+  yearLabel: string;
+  sectionLetter: string;
+  degree: string;
+  branch: string;
+  classIncharge: {
+    name: string;
+    designation: string;
+    email: string;
+    phone: string;
+  };
+  lectureHall: string;
+  labRoom: string;
+  totalStudents: number;
+  rollRange: string;
+  semester: string;
+  academicYear: string;
+  wefDate: string;
+  mentors: string[];
+}
+
+export const SECTION_METADATA_REGISTRY: Record<string, SectionMetadata> = {
+  "2A": {
+    sectionKey: "2A",
+    yearNumber: "II",
+    yearLabel: "2nd Year",
+    sectionLetter: "A",
+    degree: "B.Tech",
+    branch: "Computer Science & Engineering (Data Science)",
+    classIncharge: {
+      name: "Mrs. B. Gayathri",
+      designation: "Assistant Professor & Class In-charge",
+      email: "mrsbgayathri@gmail.com",
+      phone: "+91 98480 11221",
+    },
+    lectureHall: "Hall 402",
+    labRoom: "Programming Lab 2 (Lab-205)",
+    totalStudents: 55,
+    rollRange: "25N81A6701 TO 25N81A6755",
+    semester: "III Semester",
+    academicYear: "2025 – 2026",
+    wefDate: "01-08-2025",
+    mentors: ["Mrs. B. Gayathri", "Mrs Ch Vijaya Lakshmi"],
+  },
+  "2B": {
+    sectionKey: "2B",
+    yearNumber: "II",
+    yearLabel: "2nd Year",
+    sectionLetter: "B",
+    degree: "B.Tech",
+    branch: "Computer Science & Engineering (Data Science)",
+    classIncharge: {
+      name: "Mrs. K. Ramya",
+      designation: "Assistant Professor & Class In-charge",
+      email: "mrskramya@gmail.com",
+      phone: "+91 98480 22332",
+    },
+    lectureHall: "Hall 408",
+    labRoom: "Programming Lab 2 (Lab-205)",
+    totalStudents: 55,
+    rollRange: "25N81A6756 TO 25N81A67B3",
+    semester: "III Semester",
+    academicYear: "2025 – 2026",
+    wefDate: "01-08-2025",
+    mentors: ["Mrs. K. Ramya", "Mr M Srinivasulu"],
+  },
+  "2C": {
+    sectionKey: "2C",
+    yearNumber: "II",
+    yearLabel: "2nd Year",
+    sectionLetter: "C",
+    degree: "B.Tech",
+    branch: "Computer Science & Engineering (Data Science)",
+    classIncharge: {
+      name: "Mr. K. Bikshapathi",
+      designation: "Assistant Professor & Class In-charge",
+      email: "mrkbikshapathi@gmail.com",
+      phone: "+91 98480 33443",
+    },
+    lectureHall: "Hall 410",
+    labRoom: "Programming Lab 2 (Lab-205)",
+    totalStudents: 45,
+    rollRange: "25N81A67B4 TO 25N81A67G0",
+    semester: "III Semester",
+    academicYear: "2025 – 2026",
+    wefDate: "01-08-2025",
+    mentors: ["Mr. K. Bikshapathi", "Mrs K Srinija"],
+  },
+  "3A": {
+    sectionKey: "3A",
+    yearNumber: "III",
+    yearLabel: "3rd Year",
+    sectionLetter: "A",
+    degree: "B.Tech",
+    branch: "Computer Science & Engineering (Data Science)",
+    classIncharge: {
+      name: "Mrs. G. Sushma",
+      designation: "Assistant Professor & Class In-charge",
+      email: "mrsgsushma@gmail.com",
+      phone: "+91 98480 44554",
+    },
+    lectureHall: "Hall 412",
+    labRoom: "Data Science Lab 1 (Lab-101) & Networks Lab",
+    totalStudents: 55,
+    rollRange: "24N81A6701 TO 24N81A6755",
+    semester: "V Semester",
+    academicYear: "2025 – 2026",
+    wefDate: "01-08-2025",
+    mentors: ["Mrs. G. Sushma", "Ms. Priyusha"],
+  },
+  "3B": {
+    sectionKey: "3B",
+    yearNumber: "III",
+    yearLabel: "3rd Year",
+    sectionLetter: "B",
+    degree: "B.Tech",
+    branch: "Computer Science & Engineering (Data Science)",
+    classIncharge: {
+      name: "Mr. T. Shravan Kumar",
+      designation: "Assistant Professor & Class In-charge",
+      email: "mrtshravankumar@gmail.com",
+      phone: "+91 98480 55665",
+    },
+    lectureHall: "Hall 413",
+    labRoom: "Data Science Lab 1 (Lab-101) & Networks Lab",
+    totalStudents: 52,
+    rollRange: "24N81A6756 TO 24N81A67A5",
+    semester: "V Semester",
+    academicYear: "2025 – 2026",
+    wefDate: "01-08-2025",
+    mentors: ["Mr. T. Shravan Kumar", "Mrs. CH. Naga Rohini", "Mr Miskeen Ali"],
+  },
+  "3C": {
+    sectionKey: "3C",
+    yearNumber: "III",
+    yearLabel: "3rd Year",
+    sectionLetter: "C",
+    degree: "B.Tech",
+    branch: "Computer Science & Engineering (Data Science)",
+    classIncharge: {
+      name: "Mr. M. Yadaiah",
+      designation: "Assistant Professor & Class In-charge",
+      email: "mrmyadaiah@gmail.com",
+      phone: "+91 98480 66776",
+    },
+    lectureHall: "Hall 417",
+    labRoom: "Data Science Lab 1 (Lab-101) & Networks Lab",
+    totalStudents: 54,
+    rollRange: "24N81A67A6 TO 24N81A67F9",
+    semester: "V Semester",
+    academicYear: "2025 – 2026",
+    wefDate: "01-08-2025",
+    mentors: ["Mr. M. Yadaiah", "Mrs. Swetha"],
+  },
+  "4A": {
+    sectionKey: "4A",
+    yearNumber: "IV",
+    yearLabel: "4th Year",
+    sectionLetter: "A",
+    degree: "B.Tech",
+    branch: "Computer Science & Engineering (Data Science)",
+    classIncharge: {
+      name: "Mrs. A. Sravanthi",
+      designation: "Assistant Professor & Class In-charge",
+      email: "mrsasravanthi@gmail.com",
+      phone: "+91 98480 77887",
+    },
+    lectureHall: "Hall 418",
+    labRoom: "Mobile App & Cloud Lab (Lab-102)",
+    totalStudents: 42,
+    rollRange: "23N81A6701 TO 23N81A6743",
+    semester: "VII Semester",
+    academicYear: "2025 – 2026",
+    wefDate: "01-08-2025",
+    mentors: ["Mrs. A. Sravanthi"],
+  },
+  "4B": {
+    sectionKey: "4B",
+    yearNumber: "IV",
+    yearLabel: "4th Year",
+    sectionLetter: "B",
+    degree: "B.Tech",
+    branch: "Computer Science & Engineering (Data Science)",
+    classIncharge: {
+      name: "Mrs. K. Sneha",
+      designation: "Assistant Professor & Class In-charge",
+      email: "mrsksneha@gmail.com",
+      phone: "+91 98480 88998",
+    },
+    lectureHall: "Hall 403",
+    labRoom: "Mobile App & Cloud Lab (Lab-102)",
+    totalStudents: 39,
+    rollRange: "23N81A6744 TO 23N81A67C8",
+    semester: "VII Semester",
+    academicYear: "2025 – 2026",
+    wefDate: "01-08-2025",
+    mentors: ["Mrs. K. Sneha"],
+  },
+};
+
+export const MASTER_SUBJECT_DIRECTORY: Record<string, {
+  fullName: string;
+  code: string;
+  type: "theory" | "practical" | "activity";
+  defaultRoom: string;
+  credits: number;
+}> = {
+  // II Year
+  "JAVA": { fullName: "Java Programming", code: "CS301PC", type: "theory", defaultRoom: "LH-201", credits: 3 },
+  "DBMS": { fullName: "Database Management Systems", code: "CS302PC", type: "theory", defaultRoom: "LH-201", credits: 4 },
+  "SE": { fullName: "Software Engineering", code: "CS303PC", type: "theory", defaultRoom: "LH-201", credits: 3 },
+  "COA": { fullName: "Computer Organization & Architecture", code: "CS304PC", type: "theory", defaultRoom: "LH-201", credits: 3 },
+  "MSF": { fullName: "Mathematical & Statistical Foundations for DS", code: "MA305BS", type: "theory", defaultRoom: "LH-201", credits: 4 },
+  "SDC": { fullName: "Skill Development Course (Python / DS)", code: "CS306SC", type: "theory", defaultRoom: "LH-202", credits: 2 },
+  "CM LAB": { fullName: "Computational Mathematics Lab", code: "MA307BS", type: "practical", defaultRoom: "Computing Lab", credits: 2 },
+  "JAVA/DBMS LAB": { fullName: "Java & DBMS Laboratory", code: "CS307PC", type: "practical", defaultRoom: "Programming Lab 2", credits: 2 },
+  "SE/JAVA LAB": { fullName: "Software Engineering & Java Lab", code: "CS308PC", type: "practical", defaultRoom: "Programming Lab 2", credits: 2 },
+  "DBMS/SE LAB": { fullName: "DBMS & Software Engineering Lab", code: "CS307PC", type: "practical", defaultRoom: "Data Science Lab 1", credits: 2 },
+  "JAVA/SE LAB": { fullName: "Java & Software Engineering Lab", code: "CS307PC", type: "practical", defaultRoom: "Programming Lab 2", credits: 2 },
+  "SE/DBMS LAB": { fullName: "Software Engineering & DBMS Lab", code: "CS308PC", type: "practical", defaultRoom: "Programming Lab 2", credits: 2 },
+  "DBMS/JAVA LAB": { fullName: "DBMS & Java Programming Lab", code: "CS308PC", type: "practical", defaultRoom: "Data Science Lab 1", credits: 2 },
+  "APTITUDE": { fullName: "Quantitative Aptitude & Placement Training", code: "TP308SC", type: "theory", defaultRoom: "LH-201", credits: 1 },
+
+  // III Year
+  "CN": { fullName: "Computer Networks", code: "CS501PC", type: "theory", defaultRoom: "LH-302", credits: 3 },
+  "ADA": { fullName: "Analysis & Design of Algorithms", code: "CS502PC", type: "theory", defaultRoom: "LH-302", credits: 4 },
+  "DEVOPS": { fullName: "DevOps & Cloud Automation", code: "CS503PC", type: "theory", defaultRoom: "LH-302", credits: 3 },
+  "IDS": { fullName: "Information & Data Security", code: "DS504PE", type: "theory", defaultRoom: "LH-302", credits: 3 },
+  "WP": { fullName: "Web Programming", code: "DS505PE", type: "theory", defaultRoom: "LH-302", credits: 3 },
+  "ARQA": { fullName: "Automated Testing & Quality Assurance", code: "DS506PE", type: "theory", defaultRoom: "LH-302", credits: 3 },
+  "KAFKA": { fullName: "Apache Kafka & Big Data Streams", code: "DS507PC", type: "theory", defaultRoom: "LH-302", credits: 3 },
+  "CN/R PROGRAMMING LAB": { fullName: "Computer Networks & R Programming Lab", code: "DS508PC", type: "practical", defaultRoom: "Data Science Lab 1", credits: 2 },
+  "R PROGRAMMING/CN LAB": { fullName: "R Programming & Computer Networks Lab", code: "DS508PC", type: "practical", defaultRoom: "Data Science Lab 1", credits: 2 },
+  "AECS LAB": { fullName: "Advanced English Communication Skills Lab", code: "EN509HS", type: "practical", defaultRoom: "Language Lab", credits: 1 },
+  "IPR": { fullName: "Intellectual Property Rights & Patents", code: "MC510MC", type: "theory", defaultRoom: "LH-301", credits: 0 },
+
+  // IV Year
+  "PA": { fullName: "Predictive Analytics", code: "DS701PE", type: "theory", defaultRoom: "LH-401", credits: 3 },
+  "PA LAB": { fullName: "Predictive Analytics Laboratory", code: "DS702PC", type: "practical", defaultRoom: "Data Science Lab 2", credits: 2 },
+  "WSMA": { fullName: "Web Services & Mobile Applications", code: "CS701PC", type: "theory", defaultRoom: "LH-401", credits: 3 },
+  "WSMA LAB": { fullName: "Web Services & Mobile App Lab", code: "CS706PC", type: "practical", defaultRoom: "Mobile App Lab", credits: 2 },
+  "CC": { fullName: "Cloud Computing & Virtualization", code: "CS702PC", type: "theory", defaultRoom: "LH-401", credits: 3 },
+  "NLP": { fullName: "Natural Language Processing", code: "DS703PE", type: "theory", defaultRoom: "LH-401", credits: 3 },
+  "OE": { fullName: "Open Elective (Professional Practice & Ethics)", code: "OE704OE", type: "theory", defaultRoom: "LH-402", credits: 3 },
+  "PS-I": { fullName: "Project Stage - I (Industry Review)", code: "DS705PW", type: "practical", defaultRoom: "Project Lab", credits: 3 },
+
+  // Institutional Activities
+  "SPORTS": { fullName: "Sports & Physical Education", code: "ACT01", type: "activity", defaultRoom: "College Ground", credits: 0 },
+  "SPORTS/LIBRARY": { fullName: "Sports & Library Hour", code: "ACT02", type: "activity", defaultRoom: "Central Library", credits: 0 },
+  "LIBRARY": { fullName: "Digital Library & Research Hour", code: "ACT02", type: "activity", defaultRoom: "Central Library", credits: 0 },
+  "COUNSELLING": { fullName: "Mentor-Mentee Academic Counselling", code: "ACT03", type: "activity", defaultRoom: "Classroom", credits: 0 },
+  "CLUB ACTIVITIES": { fullName: "Technical Club & Hackathon Projects", code: "ACT04", type: "activity", defaultRoom: "Innovation Cell", credits: 0 },
+  "FREE": { fullName: "Free Period / Self Study", code: "FREE", type: "activity", defaultRoom: "Library / Class", credits: 0 },
+};
+
+// Exact Department Timetable Schedule Provided by User
+export const DEPARTMENT_EXACT_TIMETABLE: Record<string, Record<string, string[]>> = {
+  "2A": {
+    "MON": ["JAVA/DBMS LAB", "JAVA/DBMS LAB", "MSF", "JAVA", "SE", "COA"],
+    "TUE": ["SE/JAVA LAB", "SE/JAVA LAB", "MSF", "COA", "DBMS", "SPORTS/LIBRARY"],
+    "WED": ["DBMS/SE LAB", "DBMS/SE LAB", "MSF", "JAVA", "DBMS", "SE"],
+    "THUR": ["SDC", "Free", "JAVA", "DBMS", "SE", "COUNSELLING"],
+    "FRI": ["DBMS", "COA", "JAVA", "SE", "APTITUDE", "Free"],
+    "SAT": ["CM LAB", "CM LAB", "COA", "MSF", "CLUB ACTIVITIES", "Free"],
+  },
+  "2B": {
+    "MON": ["MSF", "SE", "SE/JAVA LAB", "SE/JAVA LAB", "COA", "DBMS"],
+    "TUE": ["CM LAB", "CM LAB", "JAVA/DBMS LAB", "JAVA/DBMS LAB", "SE", "DBMS"],
+    "WED": ["COA", "JAVA", "SDC", "SDC", "MSF", "SPORTS/LIBRARY"],
+    "THUR": ["DBMS", "JAVA", "COA", "SE", "MSF", "COUNSELLING"],
+    "FRI": ["JAVA", "MSF", "DBMS", "DBMS/SE LAB", "SE", "JAVA"],
+    "SAT": ["APTITUDE", "Free", "DBMS/SE LAB", "DBMS/SE LAB", "CLUB ACTIVITIES", "Free"],
+  },
+  "2C": {
+    "MON": ["DBMS", "COA", "SDC", "SDC", "SE", "JAVA"],
+    "TUE": ["JAVA", "MSF", "SE", "COUNSELLING", "COA", "DBMS"],
+    "WED": ["CM LAB", "CM LAB", "JAVA/SE LAB", "JAVA/SE LAB", "JAVA", "COA"],
+    "THUR": ["JAVA", "COA", "SE/DBMS LAB", "SE/DBMS LAB", "SE", "MSF"],
+    "FRI": ["MSF", "SE", "DBMS/JAVA LAB", "DBMS/JAVA LAB", "DBMS", "SPORTS/LIBRARY"],
+    "SAT": ["MSF", "DBMS", "APTITUDE", "Free", "CLUB ACTIVITIES", "Free"],
+  },
+  "3A": {
+    "MON": ["KAFKA", "KAFKA", "ADA", "CN", "CN/R PROGRAMMING LAB", "CN/R PROGRAMMING LAB"],
+    "TUE": ["CN", "WP", "DEVOPS", "COUNSELLING", "R PROGRAMMING/CN LAB", "R PROGRAMMING/CN LAB"],
+    "WED": ["ARQA", "CN", "CN", "ADA", "DEVOPS", "SPORTS"],
+    "THUR": ["IDS", "WP", "DEVOPS", "LIBRARY", "ADA", "WP"],
+    "FRI": ["DEVOPS", "IDS", "IDS", "CN", "AECS LAB", "AECS LAB"],
+    "SAT": ["WP", "Free", "IPR", "Free", "CLUB ACTIVITIES", "Free"],
+  },
+  "3B": {
+    "MON": ["CN", "DEVOPS", "WP", "COUNSELLING", "ADA", "SPORTS"],
+    "TUE": ["WP", "IDS", "CN", "LIBRARY", "DEVOPS", "ADA"],
+    "WED": ["IDS", "ARQA", "WP", "DEVOPS", "CN/R PROGRAMMING LAB", "CN/R PROGRAMMING LAB"],
+    "THUR": ["ADA", "WP", "CN", "IDS", "R PROGRAMMING/CN LAB", "R PROGRAMMING/CN LAB"],
+    "FRI": ["KAFKA", "KAFKA", "CN", "ADA", "IDS", "DEVOPS"],
+    "SAT": ["AECS LAB", "AECS LAB", "IPR", "Free", "CLUB ACTIVITIES", "Free"],
+  },
+  "3C": {
+    "MON": ["CN", "IDS", "DEVOPS", "LIBRARY", "WP", "ADA"],
+    "TUE": ["DEVOPS", "CN", "WP", "ADA", "IDS", "SPORTS"],
+    "WED": ["ADA", "DEVOPS", "ARQA", "IDS", "WP", "CN"],
+    "THUR": ["CN/R PROGRAMMING LAB", "CN/R PROGRAMMING LAB", "AECS LAB", "AECS LAB", "DEVOPS", "WP"],
+    "FRI": ["R PROGRAMMING/CN LAB", "R PROGRAMMING/CN LAB", "COUNSELLING", "IDS", "CN", "ADA"],
+    "SAT": ["KAFKA", "Free", "IPR", "Free", "CLUB ACTIVITIES", "Free"],
+  },
+  "4A": {
+    "MON": ["PA", "WSMA", "OE", "CC", "PS-I", "PS-I"],
+    "TUE": ["PA Lab", "PA Lab", "CC", "NLP", "PS-I", "SPORTS"],
+    "WED": ["PA", "WSMA", "OE", "NLP", "CC", "COUNSELLING"],
+    "THUR": ["WSMA Lab", "WSMA Lab", "NLP", "CC", "PS-I", "Free"],
+    "FRI": ["WSMA", "PA", "NLP", "OE", "PS-I", "Free"],
+    "SAT": ["PA", "WSMA", "OE", "LIBRARY", "CLUB ACTIVITIES", "Free"],
+  },
+  "4B": {
+    "MON": ["PA", "WSMA", "NLP", "OE", "PS-I", "PS-I"],
+    "TUE": ["PA LAB", "PA LAB", "OE", "CC", "PS-I", "SPORTS"],
+    "WED": ["PA", "WSMA", "CC", "OE", "NLP", "PS-I"],
+    "THUR": ["WSMA LAB", "WSMA LAB", "CC", "NLP", "PS-I", "COUNSELLING"],
+    "FRI": ["WSMA", "PA", "OE", "LIBRARY", "CC", "Free"],
+    "SAT": ["PA", "WSMA", "NLP", "PS-I", "CLUB ACTIVITIES", "Free"],
+  },
+};
+
+export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, string>> = {
+  // II YEAR
+  "2A": {
+    "MSF": "Mr. Rakesh Goud",
+    "COA": "Mrs. CH. Naga Rohini",
+    "JAVA": "Dr. A. Balaram",
+    "JAVA/DBMS LAB": "Dr. A. Balaram & Mrs. Ch. Vijaya Lakshmi",
+    "SE/JAVA LAB": "Dr. A. Balaram & Mr. M. Srinivasulu",
+    "DBMS/SE LAB": "Mrs. Ch. Vijaya Lakshmi & Mr. M. Srinivasulu",
+    "JAVA/SE LAB": "Dr. A. Balaram & Mr. M. Srinivasulu",
+    "DBMS/JAVA LAB": "Mrs. Ch. Vijaya Lakshmi & Dr. A. Balaram",
+    "DBMS": "Mrs. Ch. Vijaya Lakshmi",
+    "SE": "Mr. M. Srinivasulu",
+    "CM LAB": "Dr. Sri Hari VLN",
+    "SDC": "Mrs. K. Srinija",
+    "APTITUDE": "Mr. K. Bikshapathi",
+    "COUNSELLING": "Mrs. B. Gayathri",
+    "SPORTS/LIBRARY": "Mrs. B. Gayathri",
+    "CLUB ACTIVITIES": "Mrs. B. Gayathri",
+  },
+  "2B": {
+    "MSF": "Mr. Rakesh Goud",
+    "COA": "Mrs. CH. Naga Rohini",
+    "JAVA": "Mr. M. Yadaiah",
+    "JAVA/DBMS LAB": "Mr. M. Yadaiah & Mrs. Ch. Vijaya Lakshmi",
+    "SE/JAVA LAB": "Mr. M. Srinivasulu & Mr. M. Yadaiah",
+    "DBMS/SE LAB": "Mrs. Ch. Vijaya Lakshmi & Mr. M. Srinivasulu",
+    "JAVA/SE LAB": "Mr. M. Yadaiah & Mr. M. Srinivasulu",
+    "DBMS/JAVA LAB": "Mrs. Ch. Vijaya Lakshmi & Mr. M. Yadaiah",
+    "DBMS": "Mrs. Ch. Vijaya Lakshmi",
+    "SE": "Mr. M. Srinivasulu",
+    "CM LAB": "Dr. Sri Hari VLN",
+    "SDC": "Mrs. K. Srinija",
+    "APTITUDE": "Mrs. K. Ramya",
+    "COUNSELLING": "Mrs. K. Ramya",
+    "SPORTS/LIBRARY": "Mrs. K. Ramya",
+    "CLUB ACTIVITIES": "Mrs. K. Ramya",
+  },
+  "2C": {
+    "MSF": "Mr. Rakesh Goud",
+    "COA": "Mrs. CH. Naga Rohini",
+    "JAVA": "Mr. M. Yadaiah",
+    "JAVA/SE LAB": "Mr. M. Yadaiah & Mr. K. Bikshapathi",
+    "DBMS/JAVA LAB": "Mrs. G. Sushma & Mr. M. Yadaiah",
+    "JAVA/DBMS LAB": "Mr. M. Yadaiah & Mrs. G. Sushma",
+    "SE/DBMS LAB": "Mr. K. Bikshapathi & Mrs. G. Sushma",
+    "DBMS/SE LAB": "Mrs. G. Sushma & Mr. K. Bikshapathi",
+    "SE/JAVA LAB": "Mr. K. Bikshapathi & Mr. M. Yadaiah",
+    "DBMS": "Mrs. G. Sushma",
+    "SE": "Mr. K. Bikshapathi",
+    "CM LAB": "Dr. Sri Hari VLN",
+    "SDC": "Mrs. K. Srinija",
+    "APTITUDE": "Mr. K. Bikshapathi",
+    "COUNSELLING": "Mr. K. Bikshapathi",
+    "SPORTS/LIBRARY": "Mr. K. Bikshapathi",
+    "CLUB ACTIVITIES": "Mr. K. Bikshapathi",
+  },
+
+  // III YEAR
+  "3A": {
+    "CN": "Mrs. K. Sneha",
+    "CN/R PROGRAMMING LAB": "Mrs. K. Sneha",
+    "R PROGRAMMING/CN LAB": "Mrs. K. Sneha",
+    "ADA": "Dr. Md Abdul Azeem",
+    "WP": "Mrs. G. Sushma",
+    "DEVOPS": "Mr. Miskeen Ali",
+    "IDS": "Mr. T. Shravan Kumar",
+    "KAFKA": "Mrs. K. Ramya",
+    "ARQA": "Mr. M. Yadaiah",
+    "AECS LAB": "Mr. M. Yadaiah",
+    "IPR": "Mr. M. Yadaiah",
+    "LIBRARY": "Mrs. G. Sushma",
+    "COUNSELLING": "Mrs. G. Sushma",
+    "SPORTS": "Mrs. G. Sushma",
+    "CLUB ACTIVITIES": "Mrs. G. Sushma",
+  },
+  "3B": {
+    "CN": "Mrs. K. Sneha",
+    "CN LAB": "Mrs. K. Sneha",
+    "WP": "Mrs. G. Sushma",
+    "IDS": "Mrs. A. Sravanthi",
+    "ADA": "Dr. Md Abdul Azeem",
+    "DEVOPS": "Mr. Mohammed Miskeen Ali",
+    "KAFKA": "Mrs. K. Ramya",
+    "CN/R PROGRAMMING LAB": "Mrs. K. Sneha & Mrs. A. Sravanthi",
+    "R PROGRAMMING/CN LAB": "Mrs. A. Sravanthi & Mrs. K. Sneha",
+    "R PROGRAMMING LAB": "Mrs. A. Sravanthi",
+    "AECS LAB": "Ms. Vaidehi",
+    "IPR": "Mr. Prateek",
+    "ARQA": "Mr. T. Shravan Kumar",
+    "COUNSELLING": "Mr. Miskeen Ali + Mrs. Naga Rohini",
+    "SPORTS": "Mr. T. Shravan Kumar",
+    "LIBRARY": "Mr. T. Shravan Kumar",
+    "CLUB ACTIVITIES": "Mr. T. Shravan Kumar",
+  },
+  "3C": {
+    "CN": "Mrs. K. Sneha",
+    "CN/R PROGRAMMING LAB": "Mrs. K. Sneha",
+    "R PROGRAMMING/CN LAB": "Mrs. K. Sneha",
+    "ADA": "Dr. Md Abdul Azeem",
+    "WP": "Mrs. G. Sushma",
+    "IDS": "Mrs. A. Sravanthi",
+    "DEVOPS": "Mr. Miskeen Ali",
+    "KAFKA": "Mrs. K. Ramya",
+    "ARQA": "Mr. M. Srinivasulu",
+    "AECS LAB": "Mr. M. Srinivasulu",
+    "IPR": "Mr. M. Srinivasulu",
+    "LIBRARY": "Mr. M. Srinivasulu",
+    "SPORTS": "Mr. M. Srinivasulu",
+    "COUNSELLING": "Mr. M. Srinivasulu",
+    "CLUB ACTIVITIES": "Mr. M. Srinivasulu",
+  },
+
+  // IV YEAR
+  "4A": {
+    "PA": "Mr. T. Shravan Kumar",
+    "PA LAB": "Mr. T. Shravan Kumar",
+    "PA Lab": "Mr. T. Shravan Kumar",
+    "WSMA": "Mr. K. Bikshapathi",
+    "WSMA LAB": "Mr. K. Bikshapathi",
+    "WSMA Lab": "Mr. K. Bikshapathi",
+    "NLP": "Mrs. B. Gayathri",
+    "CC": "Mrs. K. Ramya",
+    "OE": "Dr. C. Lakshmi Nath",
+    "PS-I": "Mr. Miskeen Ali",
+    "SPORTS": "Mrs. A. Sravanthi",
+    "LIBRARY": "Mrs. A. Sravanthi",
+    "COUNSELLING": "Mrs. A. Sravanthi",
+    "CLUB ACTIVITIES": "Mrs. A. Sravanthi",
+  },
+  "4B": {
+    "PA": "Mr. T. Shravan Kumar",
+    "PA LAB": "Mr. T. Shravan Kumar",
+    "PA Lab": "Mr. T. Shravan Kumar",
+    "WSMA": "Mr. K. Bikshapathi",
+    "WSMA LAB": "Mr. K. Bikshapathi",
+    "WSMA Lab": "Mr. K. Bikshapathi",
+    "NLP": "Mrs. B. Gayathri",
+    "CC": "Mrs. K. Ramya",
+    "OE": "Dr. C. Lakshmi Nath",
+    "PS-I": "Dr. Md Abdul Azeem",
+    "SPORTS": "Mrs. K. Sneha",
+    "LIBRARY": "Mrs. K. Sneha",
+    "COUNSELLING": "Mrs. K. Sneha",
+    "CLUB ACTIVITIES": "Mrs. K. Sneha",
+  },
+};
+
+export function getSectionFacultyForSubject(
+  subject: string,
+  sectionKey: string,
+  dayKey?: string,
+  slotIdx?: number,
+  overrides?: Record<string, Record<string, string>>
+): string {
+  const norm = (subject || "").trim().toUpperCase();
+  const sec = sectionKey || "3B";
+
+  // 1. Check specific slot override e.g. "3B:MON:0"
+  if (overrides && dayKey !== undefined && slotIdx !== undefined) {
+    const slotKey = `${sec}:${dayKey}:${slotIdx}`;
+    if (overrides[sec]?.[slotKey]) {
+      return overrides[sec][slotKey];
+    }
+  }
+
+  // 2. Check section subject-level override e.g. "3B:CN"
+  if (overrides?.[sec]?.[subject]) {
+    return overrides[sec][subject];
+  }
+  if (overrides?.[sec]?.[norm]) {
+    return overrides[sec][norm];
+  }
+
+  // 3. Fallback to static official matrix
+  const secAlloc = SECTION_FACULTY_ALLOCATION_MATRIX[sec];
+  if (secAlloc) {
+    if (secAlloc[subject]) return secAlloc[subject];
+    if (secAlloc[norm]) return secAlloc[norm];
+    for (const [k, v] of Object.entries(secAlloc)) {
+      if (norm === k.toUpperCase() || norm.includes(k.toUpperCase()) || k.toUpperCase().includes(norm)) {
+        return v;
+      }
+    }
+  }
+  return "Faculty Assigned";
+}
+
+export function getTimetableSubjectDetails(rawSubject: string, section?: string, year?: string) {
+  const norm = (rawSubject || "").trim().toUpperCase();
+  const direct = MASTER_SUBJECT_DIRECTORY[norm];
+  if (direct) {
+    return direct;
+  }
+
+  for (const [key, value] of Object.entries(MASTER_SUBJECT_DIRECTORY)) {
+    if (norm.includes(key) || key.includes(norm)) {
+      return value;
+    }
+  }
+
+  const isLab = norm.includes("LAB") || norm.includes("PRACTICAL") || norm.includes("/");
+  return {
+    fullName: rawSubject || "Special Academic Session",
+    code: isLab ? "DS-LAB" : "DS-TH",
+    type: isLab ? "practical" as const : "theory" as const,
+    defaultRoom: isLab ? "Data Science Lab 1" : "LH-302",
+    credits: isLab ? 2 : 3,
+  };
+}
+
 export default function HodDashboard() {
   const [activeTab, setActiveTab] = useState<"summary" | "logs" | "mentors" | "schedules" | "flags" | "student-analytics">((): any => {
     const params = new URLSearchParams(window.location.search);
@@ -162,11 +735,19 @@ export default function HodDashboard() {
   const [riskYearFilter, setRiskYearFilter] = useState("ALL");
   const [riskSectionFilter, setRiskSectionFilter] = useState("ALL");
   const [riskSearchQuery, setRiskSearchQuery] = useState("");
-  const [riskSortOrder, setRiskSortOrder] = useState<"lowest" | "roll" | "name">("lowest");
+  const [riskSortOrder, setRiskSortOrder] = useState<"lowest" | "highest" | "roll" | "name">("lowest");
+  const [riskViewMode, setRiskViewMode] = useState<"table" | "card">("table");
+  const [riskPage, setRiskPage] = useState(1);
+  const [riskPageSize, setRiskPageSize] = useState<number>(25);
 
   const [analyticsSearchQuery, setAnalyticsSearchQuery] = useState("");
   const [analyticsYearFilter, setAnalyticsYearFilter] = useState("ALL");
   const [analyticsSectionFilter, setAnalyticsSectionFilter] = useState("ALL");
+  const [analyticsStatusFilter, setAnalyticsStatusFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
+  const [analyticsSortOrder, setAnalyticsSortOrder] = useState<"name" | "roll" | "lowest" | "highest">("name");
+  const [analyticsViewMode, setAnalyticsViewMode] = useState<"table" | "card">("table");
+  const [analyticsPage, setAnalyticsPage] = useState(1);
+  const [analyticsPageSize, setAnalyticsPageSize] = useState<number>(25);
 
   useEffect(() => {
     const handleUrlChange = () => {
@@ -210,15 +791,58 @@ export default function HodDashboard() {
 
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
   const [logSearchQuery, setLogSearchQuery] = useState("");
+  const [logViewMode, setLogViewMode] = useState<"problems" | "late" | "unscanned" | "all" | "comparison" | "trend">("all");
+  const [selectedMentorFilter, setSelectedMentorFilter] = useState("All");
+  const [logSortField, setLogSortField] = useState<"severity" | "name" | "uniqueId" | "section" | "entryTime" | "exitTime" | "duration" | "status">("entryTime");
+  const [logSortOrder, setLogSortOrder] = useState<"asc" | "desc">("desc");
+  const [logCurrentPage, setLogCurrentPage] = useState(1);
+  const [logPageSize, setLogPageSize] = useState(25);
+
+  // Bulk Parent Notification States
+  const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
+  const [bulkMessageModalOpen, setBulkMessageModalOpen] = useState(false);
+  const [bulkMessageType, setBulkMessageType] = useState<"late" | "unscanned" | "custom">("late");
+  const [bulkCustomMessage, setBulkCustomMessage] = useState("");
+  const [bulkBroadcastChannel, setBulkBroadcastChannel] = useState<"whatsapp" | "sms" | "app">("whatsapp");
+  const [bulkBroadcastSending, setBulkBroadcastSending] = useState(false);
+  const [bulkBroadcastSuccess, setBulkBroadcastSuccess] = useState(false);
+
+  // Remarks / Excuses State
+  const [remarkModalData, setRemarkModalData] = useState<{ student: StudentUser; record?: AttendanceRecord; isLate: boolean; isUnscanned: boolean } | null>(null);
+  const [remarkInput, setRemarkInput] = useState("");
+  const [remarkPreset, setRemarkPreset] = useState("College Bus Delayed");
+  const [remarkIsExcused, setRemarkIsExcused] = useState(true);
+  const [remarksMap, setRemarksMap] = useState<Record<string, { text: string; preset: string; isExcused: boolean; updatedAt: string }>>(() => {
+    try {
+      const saved = localStorage.getItem("hod_student_remarks_v1");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
   const [mentorsSearchQuery, setMentorsSearchQuery] = useState("");
+  const [mentorsYearFilter, setMentorsYearFilter] = useState("All");
+  const [mentorsSectionFilter, setMentorsSectionFilter] = useState("All");
+  const [mentorsRoleFilter, setMentorsRoleFilter] = useState("All");
+  const [mentorsViewMode, setMentorsViewMode] = useState<"table" | "card">("table");
+  const [mentorsPage, setMentorsPage] = useState(1);
+  const [mentorsPageSize, setMentorsPageSize] = useState<number>(25);
+  const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
+  const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
+  const [selectedMentorForModal, setSelectedMentorForModal] = useState<any | null>(null);
+  const [editMentorModalOpen, setEditMentorModalOpen] = useState(false);
+  const [mentorEditData, setMentorEditData] = useState<{ id: number; name: string; email: string; role: string; section: string; key: string } | null>(null);
+  const [editKeyInput, setEditKeyInput] = useState("");
+  const [isSavingKey, setIsSavingKey] = useState(false);
   const [schedulesSearchQuery, setSchedulesSearchQuery] = useState("");
   const [selectedSectionFilter, setSelectedSectionFilter] = useState("All");
-  const [selectedTimetableSection, setSelectedTimetableSection] = useState<string>("2A");
+  const [selectedTimetableSection, setSelectedTimetableSection] = useState<string>("3B");
   const [timetableViewMode, setTimetableViewMode] = useState<"grid" | "list">("grid");
+  const [timetablePrintModalOpen, setTimetablePrintModalOpen] = useState(false);
 
   // Timetable print / download schedule helper
   const handleDownloadSchedule = () => {
-    window.print();
+    setTimetablePrintModalOpen(true);
   };
 
   // Fetch all students
@@ -290,29 +914,23 @@ export default function HodDashboard() {
       const classesNeededFor65 = Math.max(0, Math.ceil((0.65 * totalMonthWorkingDays - presentDays) / 0.35));
 
       let flag: "GREEN" | "YELLOW" | "RED" = "GREEN";
-      let label = "Safe Zone";
-      let badgeColor = "bg-emerald-500 text-white font-black border border-emerald-400";
-      let cardBorder = "border-l-4 border-l-emerald-500 border-gray-200";
-      let bannerBg = "bg-emerald-50 border-emerald-200 text-emerald-950 font-bold";
+      let label = "Compliant";
+      let badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
       let dotColor = "🟢";
-      let tip = "Good Standing (≥ 75%). Attendance target met!";
+      let tip = "Compliant (≥ 75%). Safe academic standing.";
 
       if (percent < 65) {
         flag = "RED";
-        label = "Critical Risk (< 65%)";
-        badgeColor = "bg-rose-600 text-white font-extrabold border border-rose-400 shadow-xs";
-        cardBorder = "border-l-4 border-l-rose-500 border-gray-200";
-        bannerBg = "bg-rose-50 border-rose-200 text-rose-950 font-bold";
+        label = "Critical (<65%)";
+        badgeColor = "bg-rose-50 text-rose-700 border-rose-200";
         dotColor = "🔴";
-        tip = `Critical attendance shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation limit, and ${classesNeededFor75} classes to reach 75% safe threshold. Parent notification recommended.`;
+        tip = `Critical shortage (< 65%). Needs ${classesNeededFor65} classes for 65% condonation, and ${classesNeededFor75} classes to reach 75% threshold.`;
       } else if (percent < 75) {
         flag = "YELLOW";
-        label = "Warning (Recoverable)";
-        badgeColor = "bg-amber-400 text-gray-900 font-black border border-amber-300 shadow-xs";
-        cardBorder = "border-l-4 border-l-amber-400 border-gray-200";
-        bannerBg = "bg-amber-50 border-amber-200 text-amber-950 font-bold";
+        label = "Borderline (65%–74%)";
+        badgeColor = "bg-amber-50 text-amber-800 border-amber-200";
         dotColor = "🟡";
-        tip = `Needs to attend next ${classesNeededFor75} consecutive classes to reach 75% safe threshold. Can improve by attending regularly!`;
+        tip = `Borderline warning. Needs ${classesNeededFor75} consecutive classes to reach 75% threshold.`;
       }
 
       const str = (student.section || "").trim();
@@ -338,8 +956,6 @@ export default function HodDashboard() {
         flag,
         label,
         badgeColor,
-        cardBorder,
-        bannerBg,
         dotColor,
         tip,
         classesNeededFor75,
@@ -370,6 +986,8 @@ export default function HodDashboard() {
 
     if (riskSortOrder === "lowest") {
       result.sort((a, b) => a.percent - b.percent);
+    } else if (riskSortOrder === "highest") {
+      result.sort((a, b) => b.percent - a.percent);
     } else if (riskSortOrder === "roll") {
       result.sort((a, b) => (a.student.uniqueId || "").localeCompare(b.student.uniqueId || ""));
     } else if (riskSortOrder === "name") {
@@ -378,6 +996,58 @@ export default function HodDashboard() {
 
     return result;
   }, [hodStudentAnalyticsList, riskSearchQuery, riskFlagFilter, riskYearFilter, riskSectionFilter, riskSortOrder]);
+
+  const paginatedRiskList = useMemo(() => {
+    if (riskPageSize === -1) return filteredHodAnalyticsList;
+    const start = (riskPage - 1) * riskPageSize;
+    return filteredHodAnalyticsList.slice(start, start + riskPageSize);
+  }, [filteredHodAnalyticsList, riskPage, riskPageSize]);
+
+  const totalRiskPages = useMemo(() => {
+    if (riskPageSize === -1) return 1;
+    return Math.ceil(filteredHodAnalyticsList.length / riskPageSize) || 1;
+  }, [filteredHodAnalyticsList, riskPageSize]);
+
+  const filteredAnalyticsList = useMemo(() => {
+    return hodStudentAnalyticsList.filter((item) => {
+      const s = item.student;
+      const q = analyticsSearchQuery.toLowerCase().trim();
+      if (q) {
+        const matchName = (s.name || (s as any).full_name || "").toLowerCase().includes(q);
+        const matchRoll = (s.uniqueId || "").toLowerCase().includes(q);
+        if (!matchName && !matchRoll) return false;
+      }
+      if (analyticsStatusFilter !== "ALL" && item.flag !== analyticsStatusFilter) {
+        return false;
+      }
+      if (analyticsYearFilter !== "ALL" && item.secInfo.yearNum !== analyticsYearFilter) {
+        return false;
+      }
+      if (analyticsSectionFilter !== "ALL") {
+        const matchSec = item.secInfo.name === analyticsSectionFilter || 
+                         item.secInfo.name.endsWith(analyticsSectionFilter) ||
+                         (s.section || "").toUpperCase().includes(analyticsSectionFilter);
+        if (!matchSec) return false;
+      }
+      return true;
+    }).sort((a, b) => {
+      if (analyticsSortOrder === "lowest") return a.percent - b.percent;
+      if (analyticsSortOrder === "highest") return b.percent - a.percent;
+      if (analyticsSortOrder === "roll") return (a.student.uniqueId || "").localeCompare(b.student.uniqueId || "");
+      return (a.student.name || "").localeCompare(b.student.name || "");
+    });
+  }, [hodStudentAnalyticsList, analyticsSearchQuery, analyticsStatusFilter, analyticsYearFilter, analyticsSectionFilter, analyticsSortOrder]);
+
+  const paginatedAnalyticsList = useMemo(() => {
+    if (analyticsPageSize === -1) return filteredAnalyticsList;
+    const start = (analyticsPage - 1) * analyticsPageSize;
+    return filteredAnalyticsList.slice(start, start + analyticsPageSize);
+  }, [filteredAnalyticsList, analyticsPage, analyticsPageSize]);
+
+  const totalAnalyticsPages = useMemo(() => {
+    if (analyticsPageSize === -1) return 1;
+    return Math.ceil(filteredAnalyticsList.length / analyticsPageSize) || 1;
+  }, [filteredAnalyticsList, analyticsPageSize]);
 
   // Fetch summary attendance records for selected date
   const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery<AttendanceRecord[]>({
@@ -416,6 +1086,193 @@ export default function HodDashboard() {
   const [selectedMentorId, setSelectedMentorId] = useState<number | "">("");
   const [assigning, setAssigning] = useState(false);
   const [assignSuccessMsg, setAssignSuccessMsg] = useState("");
+
+  // Click-to-reassign slot modal state
+  const [reassignSlotModalOpen, setReassignSlotModalOpen] = useState(false);
+  const [slotToReassign, setSlotToReassign] = useState<{
+    sectionKey: string;
+    dayKey: string;
+    dayLabel: string;
+    slotIdx: number;
+    periodName: string;
+    timeLabel: string;
+    subject: string;
+    currentFaculty: string;
+    room: string;
+  } | null>(null);
+
+  const [editedSubjectInput, setEditedSubjectInput] = useState("");
+  const [customSubjectOverrides, setCustomSubjectOverrides] = useState<Record<string, Record<string, string>>>(() => {
+    try {
+      const saved = localStorage.getItem("HOD_TIMETABLE_SUBJECT_OVERRIDES");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [customFacultyOverrides, setCustomFacultyOverrides] = useState<Record<string, Record<string, string>>>(() => {
+    try {
+      const saved = localStorage.getItem("HOD_TIMETABLE_FACULTY_OVERRIDES");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [selectedFacultyName, setSelectedFacultyName] = useState("");
+  const [customFacultyTextInput, setCustomFacultyTextInput] = useState("");
+  const [applyToAllSlotsOfSubject, setApplyToAllSlotsOfSubject] = useState(false);
+  const [savingReassignment, setSavingReassignment] = useState(false);
+  const [reassignSuccessMsg, setReassignSuccessMsg] = useState("");
+
+  const DEPARTMENT_FACULTY_LIST = [
+    "Dr. Md Abdul Azeem",
+    "Mrs. G. Sushma",
+    "Mrs. K. Sneha",
+    "Mrs. A. Sravanthi",
+    "Mr. Mohammed Miskeen Ali",
+    "Mr. T. Shravan Kumar",
+    "Mr. M. Yadaiah",
+    "Mr. M. Srinivasulu",
+    "Mrs. B. Gayathri",
+    "Mrs. K. Ramya",
+    "Mrs. Ch. Vijaya Lakshmi",
+    "Mr. K. Bikshapathi",
+    "Mrs. K. Srinija",
+    "Mrs. CH. Naga Rohini",
+    "Mrs. Swetha",
+    "Ms. Priyusha",
+    "Ms. Vaidehi",
+    "Mr. Prateek",
+    "Mr. Rakesh Goud",
+    "Dr. Sri Hari VLN",
+    "Dr. C. Lakshmi Nath",
+    "Dr. A. Balaram",
+  ];
+
+  const SLOT_TIME_MAP = [
+    { start: "09:00:00", end: "10:00:00" },
+    { start: "10:00:00", end: "11:00:00" },
+    { start: "11:10:00", end: "12:10:00" },
+    { start: "12:10:00", end: "13:10:00" },
+    { start: "14:00:00", end: "15:00:00" },
+    { start: "15:00:00", end: "16:00:00" },
+  ];
+
+  const handleOpenSlotReassign = (slotData: {
+    sectionKey: string;
+    dayKey: string;
+    dayLabel: string;
+    slotIdx: number;
+    periodName: string;
+    timeLabel: string;
+    subject: string;
+    currentFaculty: string;
+    room: string;
+  }) => {
+    setSlotToReassign(slotData);
+    setEditedSubjectInput(slotData.subject);
+    setSelectedFacultyName(slotData.currentFaculty);
+    setCustomFacultyTextInput("");
+    setApplyToAllSlotsOfSubject(false);
+    setReassignSuccessMsg("");
+    setReassignSlotModalOpen(true);
+  };
+
+  const handleSaveSlotReassign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slotToReassign) return;
+
+    const newFaculty = (customFacultyTextInput.trim() || selectedFacultyName.trim());
+    const newSubject = editedSubjectInput.trim() || slotToReassign.subject;
+    if (!newFaculty) return;
+
+    setSavingReassignment(true);
+
+    try {
+      const sec = slotToReassign.sectionKey;
+      const originalSubj = slotToReassign.subject;
+      const slotKey = `${sec}:${slotToReassign.dayKey}:${slotToReassign.slotIdx}`;
+      const timeInfo = SLOT_TIME_MAP[slotToReassign.slotIdx] || { start: "09:00:00", end: "10:00:00" };
+
+      // 1. Sync to Supabase PostgreSQL database via backend API
+      let mentorIdToSend: number | undefined = undefined;
+      const matchedMentor = mentorsTracking.find((m: any) => 
+        m.name?.toLowerCase().includes(newFaculty.toLowerCase()) || newFaculty.toLowerCase().includes(m.name?.toLowerCase())
+      );
+      if (matchedMentor) {
+        mentorIdToSend = matchedMentor.id;
+      }
+
+      await customFetch("/api/admin/schedules/sync-slot", {
+        method: "POST",
+        body: JSON.stringify({
+          sectionKey: sec,
+          year: sec.startsWith("2") ? "II" : sec.startsWith("3") ? "III" : "IV",
+          dayOfWeek: slotToReassign.dayKey,
+          startTime: timeInfo.start,
+          endTime: timeInfo.end,
+          subject: newSubject,
+          originalSubject: originalSubj,
+          mentorId: mentorIdToSend,
+          facultyName: newFaculty,
+          applyToSubject: applyToAllSlotsOfSubject,
+        }),
+      });
+
+      // 2. Update React State & localStorage for instant UI updates
+      setCustomFacultyOverrides((prev) => {
+        const next = { ...prev };
+        if (!next[sec]) next[sec] = {};
+
+        if (applyToAllSlotsOfSubject) {
+          next[sec][originalSubj] = newFaculty;
+          next[sec][originalSubj.toUpperCase()] = newFaculty;
+          if (newSubject !== originalSubj) {
+            next[sec][newSubject] = newFaculty;
+            next[sec][newSubject.toUpperCase()] = newFaculty;
+          }
+        } else {
+          next[sec][slotKey] = newFaculty;
+        }
+
+        try {
+          localStorage.setItem("HOD_TIMETABLE_FACULTY_OVERRIDES", JSON.stringify(next));
+        } catch (err) {
+          console.error("Failed to save faculty overrides", err);
+        }
+
+        return next;
+      });
+
+      setCustomSubjectOverrides((prev) => {
+        const next = { ...prev };
+        if (!next[sec]) next[sec] = {};
+        next[sec][slotKey] = newSubject;
+        try {
+          localStorage.setItem("HOD_TIMETABLE_SUBJECT_OVERRIDES", JSON.stringify(next));
+        } catch (err) {
+          console.error("Failed to save subject overrides", err);
+        }
+        return next;
+      });
+
+      // Invalidate queries so admin schedules list refetches from database
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules-list-status"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules-with-status"] });
+
+      setReassignSuccessMsg(`✅ Database Updated! ${newSubject} assigned to ${newFaculty}`);
+      setTimeout(() => {
+        setReassignSlotModalOpen(false);
+        setReassignSuccessMsg("");
+        setSavingReassignment(false);
+      }, 700);
+    } catch (err: any) {
+      alert(err?.data?.error || err?.message || "Failed to save and sync schedule to database");
+      setSavingReassignment(false);
+    }
+  };
 
   const [newClassModalOpen, setNewClassModalOpen] = useState(false);
   const [newSubject, setNewSubject] = useState("");
@@ -924,7 +1781,7 @@ export default function HodDashboard() {
   });
 
   const overallDeptPercentage = overallTotalStudents > 0 
-    ? Math.floor((overallTotalPresent / overallTotalStudents) * 100) 
+    ? Math.round((overallTotalPresent / overallTotalStudents) * 100) 
     : 0;
 
   // Handle cell click to open drill-down
@@ -1025,34 +1882,31 @@ export default function HodDashboard() {
     return Array.from(logsMap.values());
   }, [detailedLogs]);
 
-  // Filter logs list based on section filter and search query
-  const filteredLogs = consolidatedLogs.filter(log => {
-    const sUser = log.user;
-    if (!sUser) return false;
-    
-    // Filter section
-    if (selectedSectionFilter !== "All") {
-      const { name: dName } = getSectionDisplayName(sUser.section);
-      if (dName !== selectedSectionFilter) return false;
-    }
-    
-    // Filter search query
-    const q = logSearchQuery.toLowerCase().trim();
-    if (q) {
-      return sUser.name.toLowerCase().includes(q) || sUser.uniqueId.toLowerCase().includes(q);
-    }
-    return true;
-  });
+  // Department eligible students calculation
+  const deptStudents = useMemo(() => {
+    return allUsers.filter(u => u.role === "student");
+  }, [allUsers]);
 
-  const formatTime = (timeStr: string | null | undefined) => {
-    if (!timeStr) return "—";
-    try {
-      const d = new Date(timeStr);
-      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    } catch {
-      return "—";
-    }
-  };
+  const eligibleSectionStudents = useMemo(() => {
+    if (selectedSectionFilter === "All") return deptStudents;
+    return deptStudents.filter(u => {
+      const { name: dName } = getSectionDisplayName(u.section);
+      return dName === selectedSectionFilter;
+    });
+  }, [deptStudents, selectedSectionFilter]);
+
+  // All logs matching current section
+  const sectionLogs = useMemo(() => {
+    return consolidatedLogs.filter(log => {
+      const sUser = log.user;
+      if (!sUser) return false;
+      if (selectedSectionFilter !== "All") {
+        const { name: dName } = getSectionDisplayName(sUser.section);
+        if (dName !== selectedSectionFilter) return false;
+      }
+      return true;
+    });
+  }, [consolidatedLogs, selectedSectionFilter]);
 
   const isLateTime = (timeStr: string | null | undefined) => {
     if (!timeStr) return false;
@@ -1062,9 +1916,429 @@ export default function HodDashboard() {
       const minutes = d.getMinutes();
       const seconds = d.getSeconds();
       const ms = d.getMilliseconds();
-      return (seconds === 59 && ms === 999) || (hours === 22 && minutes === 0) || (hours === 3 && minutes === 30);
+      return (seconds === 59 && ms === 999) || (hours === 22 && minutes === 0) || (hours === 3 && minutes === 30) || (hours > 9 || (hours === 9 && minutes > 30));
     } catch {
       return false;
+    }
+  };
+
+  const getMinutesLate = (timeStr: string | null | undefined) => {
+    if (!timeStr) return 0;
+    try {
+      const d = new Date(timeStr);
+      const hours = d.getHours();
+      const minutes = d.getMinutes();
+      const startMin = 9 * 60; // 9:00 AM
+      const currentMin = hours * 60 + minutes;
+      return Math.max(0, currentMin - startMin);
+    } catch {
+      return 0;
+    }
+  };
+
+  const formatLateDuration = (minutes: number) => {
+    if (minutes <= 0) return "On time";
+    if (minutes < 60) return `+${minutes}m late`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `+${h}h ${m}m late` : `+${h}h late`;
+  };
+
+  // Helper to map student to mentor from OFFICIAL_FACULTY_LIST
+  const getMentorForStudent = (student: StudentUser) => {
+    if (!student) return null;
+    const { name: secName } = getSectionDisplayName(student.section);
+    const roll = (student.uniqueId || "").toUpperCase();
+
+    const mentor = OFFICIAL_FACULTY_LIST.find(m => {
+      if (m.section && m.section === secName) return true;
+      if (m.rollRange && roll && m.rollRange.includes(roll)) return true;
+      return false;
+    });
+    return mentor || null;
+  };
+
+  // Student monthly frequency counts for late comers & absences
+  const studentLateCounts = useMemo(() => {
+    const map = new Map<number, number>();
+    monthlyAttendanceForFlags.forEach(rec => {
+      if (rec.userId && isLateTime(rec.entryTime)) {
+        map.set(rec.userId, (map.get(rec.userId) || 0) + 1);
+      }
+    });
+    return map;
+  }, [monthlyAttendanceForFlags]);
+
+  const studentAbsentCounts = useMemo(() => {
+    const map = new Map<number, number>();
+    deptStudents.forEach(st => {
+      const present = studentPresentCounts.get(st.id) || 0;
+      const abs = Math.max(0, totalMonthWorkingDays - present);
+      map.set(st.id, abs);
+    });
+    return map;
+  }, [deptStudents, studentPresentCounts, totalMonthWorkingDays]);
+
+  // Comprehensive Problem Area Items list
+  const allProblemItems = useMemo(() => {
+    return eligibleSectionStudents.map(st => {
+      const rec = consolidatedLogs.find(l => l.userId === st.id);
+      const isLate = rec ? isLateTime(rec.entryTime) : false;
+      const isUnscanned = !rec;
+      const minutesLate = rec ? getMinutesLate(rec.entryTime) : 0;
+      const monthlyLate = studentLateCounts.get(st.id) || 0;
+      const monthlyAbs = studentAbsentCounts.get(st.id) || 0;
+      const mentor = getMentorForStudent(st);
+      const remarkKey = `${st.id}_${logDate}`;
+      const remark = remarksMap[remarkKey];
+
+      let severityScore = 1;
+      let severityLabel: "Chronic Offender" | "High Concern" | "Repeat Late" | "1st Late" | "Unscanned" | "Punctual" = "Punctual";
+
+      if (isUnscanned) {
+        if (monthlyAbs >= 5) {
+          severityScore = 4;
+          severityLabel = "Chronic Offender";
+        } else {
+          severityScore = 3;
+          severityLabel = "Unscanned";
+        }
+      } else if (isLate) {
+        if (monthlyLate >= 3 || minutesLate >= 60) {
+          severityScore = 4;
+          severityLabel = "Chronic Offender";
+        } else if (monthlyLate === 2 || minutesLate >= 30) {
+          severityScore = 3;
+          severityLabel = "Repeat Late";
+        } else {
+          severityScore = 2;
+          severityLabel = "1st Late";
+        }
+      }
+
+      return {
+        student: st,
+        record: rec,
+        status: isUnscanned ? "unscanned" : isLate ? "late" : (rec?.status === "left" || rec?.exitTime) ? "left" : "inside",
+        isLate,
+        isUnscanned,
+        minutesLate,
+        monthlyLate,
+        monthlyAbs,
+        mentor,
+        remark,
+        severityScore,
+        severityLabel,
+      };
+    });
+  }, [eligibleSectionStudents, consolidatedLogs, logDate, remarksMap, studentLateCounts, studentAbsentCounts]);
+
+  // Statistics for Problem Areas Toolbar
+  const problemStats = useMemo(() => {
+    const totalEnrolled = eligibleSectionStudents.length;
+    const scannedCount = allProblemItems.filter(i => !i.isUnscanned).length;
+    const lateCount = allProblemItems.filter(i => i.isLate).length;
+    const chronicLateCount = allProblemItems.filter(i => i.severityScore === 4).length;
+    const unscannedCount = allProblemItems.filter(i => i.isUnscanned).length;
+    const excusedCount = allProblemItems.filter(i => i.remark?.isExcused).length;
+    const onCampusCount = allProblemItems.filter(i => i.status === "inside").length;
+    const leftCount = allProblemItems.filter(i => i.status === "left").length;
+    const punctualityRate = scannedCount > 0 ? Math.round(((scannedCount - lateCount) / scannedCount) * 100) : 0;
+    const attendanceRate = totalEnrolled > 0 ? Math.round((scannedCount / totalEnrolled) * 100) : 0;
+
+    return {
+      totalEnrolled,
+      scannedCount,
+      lateCount,
+      chronicLateCount,
+      unscannedCount,
+      excusedCount,
+      onCampusCount,
+      leftCount,
+      punctualityRate,
+      attendanceRate,
+    };
+  }, [eligibleSectionStudents, allProblemItems]);
+
+  // Filtered Problem Items
+  const filteredProblemItems = useMemo(() => {
+    return allProblemItems.filter(item => {
+      // Mentor filter
+      if (selectedMentorFilter !== "All") {
+        if (item.mentor?.name !== selectedMentorFilter && !item.mentor?.email?.includes(selectedMentorFilter)) {
+          return false;
+        }
+      }
+
+      // View Mode filter
+      if (logViewMode === "problems") {
+        if (!item.isLate && !item.isUnscanned) return false;
+      } else if (logViewMode === "late") {
+        if (!item.isLate) return false;
+      } else if (logViewMode === "unscanned") {
+        if (!item.isUnscanned) return false;
+      } else if (logViewMode === "all") {
+        // Show all
+      }
+
+      // Multi-field search
+      const q = logSearchQuery.toLowerCase().trim();
+      if (q) {
+        const { name: dName } = getSectionDisplayName(item.student.section);
+        const nameMatch = (item.student.name || "").toLowerCase().includes(q);
+        const rollMatch = (item.student.uniqueId || "").toLowerCase().includes(q);
+        const secMatch = (item.student.section || "").toLowerCase().includes(q) || dName.toLowerCase().includes(q);
+        const mentorMatch = (item.mentor?.name || "").toLowerCase().includes(q);
+        const remarkMatch = (item.remark?.text || "").toLowerCase().includes(q);
+        if (!nameMatch && !rollMatch && !secMatch && !mentorMatch && !remarkMatch) return false;
+      }
+
+      return true;
+    });
+  }, [allProblemItems, selectedMentorFilter, logViewMode, logSearchQuery]);
+
+  // Sort Problem Items
+  const sortedProblemItems = useMemo(() => {
+    return [...filteredProblemItems].sort((a, b) => {
+      if (logSortField === "severity") {
+        if (b.severityScore !== a.severityScore) {
+          return logSortOrder === "asc" ? a.severityScore - b.severityScore : b.severityScore - a.severityScore;
+        }
+        return logSortOrder === "asc" ? a.minutesLate - b.minutesLate : b.minutesLate - a.minutesLate;
+      } else if (logSortField === "name") {
+        const cmp = a.student.name.localeCompare(b.student.name);
+        return logSortOrder === "asc" ? cmp : -cmp;
+      } else if (logSortField === "uniqueId") {
+        const cmp = (a.student.uniqueId || "").localeCompare(b.student.uniqueId || "");
+        return logSortOrder === "asc" ? cmp : -cmp;
+      } else if (logSortField === "section") {
+        const cmp = (a.student.section || "").localeCompare(b.student.section || "");
+        return logSortOrder === "asc" ? cmp : -cmp;
+      } else if (logSortField === "entryTime") {
+        const aTime = a.record?.entryTime ? new Date(a.record.entryTime).getTime() : 0;
+        const bTime = b.record?.entryTime ? new Date(b.record.entryTime).getTime() : 0;
+        return logSortOrder === "asc" ? aTime - bTime : bTime - aTime;
+      } else if (logSortField === "duration") {
+        const aDur = a.record?.durationMinutes || 0;
+        const bDur = b.record?.durationMinutes || 0;
+        return logSortOrder === "asc" ? aDur - bDur : bDur - aDur;
+      }
+      return 0;
+    });
+  }, [filteredProblemItems, logSortField, logSortOrder]);
+
+  // Paginated Problem Items
+  const totalPages = Math.max(1, Math.ceil(sortedProblemItems.length / logPageSize));
+  const safeCurrentPage = Math.min(logCurrentPage, totalPages);
+  const paginatedProblemItems = useMemo(() => {
+    const start = (safeCurrentPage - 1) * logPageSize;
+    return sortedProblemItems.slice(start, start + logPageSize);
+  }, [sortedProblemItems, safeCurrentPage, logPageSize]);
+
+  // Section comparison breakdown
+  const sectionComparisonStats = useMemo(() => {
+    const sections = ["2A", "2B", "2C", "3A", "3B", "3C", "3D", "4A", "4B"];
+    return sections.map(secName => {
+      const secStudents = deptStudents.filter(u => getSectionDisplayName(u.section).name === secName);
+      const total = secStudents.length;
+      const mentor = OFFICIAL_FACULTY_LIST.find(m => m.section === secName) || null;
+
+      let scanned = 0;
+      let late = 0;
+      let inside = 0;
+      let left = 0;
+
+      secStudents.forEach(st => {
+        const rec = consolidatedLogs.find(l => l.userId === st.id);
+        if (rec) {
+          scanned++;
+          if (isLateTime(rec.entryTime)) late++;
+          if (rec.status === "left" || rec.exitTime) left++;
+          else inside++;
+        }
+      });
+
+      const unscanned = Math.max(0, total - scanned);
+      const punctualityRate = scanned > 0 ? Math.round(((scanned - late) / scanned) * 100) : 0;
+      const attendanceRate = total > 0 ? Math.round((scanned / total) * 100) : 0;
+
+      const status: "critical" | "warning" | "good" = late > 4 || unscanned > 6
+        ? "critical"
+        : late > 2 || unscanned > 3
+        ? "warning"
+        : "good";
+
+      return {
+        secName,
+        mentor,
+        total,
+        scanned,
+        late,
+        unscanned,
+        inside,
+        left,
+        punctualityRate,
+        attendanceRate,
+        status,
+      };
+    });
+  }, [deptStudents, consolidatedLogs]);
+
+  // 6-Day Weekly Trend
+  const weeklyTrendData = useMemo(() => {
+    const days: Array<{ dayName: string; dateStr: string; lateCount: number; unscannedCount: number; scannedCount: number; punctuality: number }> = [];
+    const curr = new Date(logDate || new Date());
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(curr);
+      d.setDate(curr.getDate() - i);
+      const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const dayName = d.toLocaleDateString("en-US", { weekday: "short", day: "numeric" });
+
+      const dayRecords = monthlyAttendanceForFlags.filter(r => r.date === dStr);
+      const late = dayRecords.filter(r => isLateTime(r.entryTime)).length;
+      const scanned = dayRecords.length;
+      const unscanned = Math.max(0, deptStudents.length - scanned);
+      const punctuality = scanned > 0 ? Math.round(((scanned - late) / scanned) * 100) : 0;
+
+      days.push({
+        dayName,
+        dateStr: dStr,
+        lateCount: late,
+        unscannedCount: unscanned,
+        scannedCount: scanned,
+        punctuality,
+      });
+    }
+    return days;
+  }, [logDate, monthlyAttendanceForFlags, deptStudents.length]);
+
+  const handleSort = (field: "severity" | "name" | "uniqueId" | "section" | "entryTime" | "exitTime" | "duration" | "status") => {
+    if (logSortField === field) {
+      setLogSortOrder(prev => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setLogSortField(field);
+      setLogSortOrder("asc");
+    }
+    setLogCurrentPage(1);
+  };
+
+  const handleExportProblemCsv = () => {
+    const headers = ["Student Name", "Roll Number", "Section", "Mentor", "Date", "Status", "Entry Time", "Delay", "Repeat Offenses (Month)", "Remark", "Excused"];
+    const rows = sortedProblemItems.map(item => {
+      const { name: sDisplayName } = getSectionDisplayName(item.student.section);
+      const statusText = item.isUnscanned
+        ? "Not Scanned (Absent)"
+        : item.isLate
+        ? `Late (${formatLateDuration(item.minutesLate)})`
+        : (item.status === "left" || item.record?.exitTime ? "Left" : "Present / On Campus");
+
+      return [
+        `"${(item.student.name || "").replace(/"/g, '""')}"`,
+        `"${item.student.uniqueId || ""}"`,
+        `"${sDisplayName}"`,
+        `"${item.mentor?.name || "Not Assigned"}"`,
+        `"${logDate}"`,
+        `"${statusText}"`,
+        `"${formatTime(item.record?.entryTime)}"`,
+        `"${item.minutesLate > 0 ? `${item.minutesLate} mins` : "On time"}"`,
+        `"${item.isLate ? item.monthlyLate : item.monthlyAbs} times"`,
+        `"${(item.remark?.text || "").replace(/"/g, '""')}"`,
+        `"${item.remark?.isExcused ? "Yes" : "No"}"`
+      ];
+    });
+
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `HOD_Attendance_Problem_Report_${logDate}_${selectedSectionFilter}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Mentors helper methods & stats
+  const toggleRevealKey = (id: string | number) => {
+    setRevealedKeys(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const handleCopyKey = (key: string, id: string | number) => {
+    if (!key) return;
+    navigator.clipboard.writeText(key);
+    setCopiedKeyId(String(id));
+    setTimeout(() => {
+      setCopiedKeyId(null);
+    }, 2000);
+  };
+
+  const filteredMentorsList = useMemo(() => {
+    return OFFICIAL_FACULTY_LIST.filter((m) => {
+      // Year Filter
+      if (mentorsYearFilter !== "All") {
+        const yFilterNormalized = mentorsYearFilter.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const mYearNormalized = (m.yearLabel || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (mentorsYearFilter === "2nd Year" && !mYearNormalized.includes("2nd") && !mYearNormalized.includes("2")) return false;
+        if (mentorsYearFilter === "3rd Year" && !mYearNormalized.includes("3rd") && !mYearNormalized.includes("3")) return false;
+        if (mentorsYearFilter === "4th Year" && !mYearNormalized.includes("4th") && !mYearNormalized.includes("4")) return false;
+      }
+      // Section Filter
+      if (mentorsSectionFilter !== "All") {
+        const secFilterClean = mentorsSectionFilter.toUpperCase().trim();
+        const secClean = (m.section || "").toUpperCase();
+        if (!secClean.includes(secFilterClean)) return false;
+      }
+      // Role Filter
+      if (mentorsRoleFilter !== "All") {
+        if (mentorsRoleFilter === "incharge" && !m.role.toLowerCase().includes("in-charge")) return false;
+        if (mentorsRoleFilter === "faculty" && (!m.role.toLowerCase().includes("faculty mentor") || m.role.toLowerCase().includes("in-charge"))) return false;
+        if (mentorsRoleFilter === "subject" && !m.role.toLowerCase().includes("subject")) return false;
+      }
+      // Search query
+      const q = mentorsSearchQuery.toLowerCase().trim();
+      if (q) {
+        const nameMatch = m.name.toLowerCase().includes(q);
+        const emailMatch = m.email.toLowerCase().includes(q);
+        const roleMatch = m.role.toLowerCase().includes(q);
+        const secMatch = m.section.toLowerCase().includes(q);
+        const rollMatch = m.rollRange.toLowerCase().includes(q);
+        if (!nameMatch && !emailMatch && !roleMatch && !secMatch && !rollMatch) return false;
+      }
+      return true;
+    });
+  }, [mentorsYearFilter, mentorsSectionFilter, mentorsRoleFilter, mentorsSearchQuery]);
+
+  const paginatedMentorsList = useMemo(() => {
+    if (mentorsPageSize === -1) return filteredMentorsList;
+    const start = (mentorsPage - 1) * mentorsPageSize;
+    return filteredMentorsList.slice(start, start + mentorsPageSize);
+  }, [filteredMentorsList, mentorsPage, mentorsPageSize]);
+
+  const totalMentorsPages = useMemo(() => {
+    if (mentorsPageSize === -1) return 1;
+    return Math.ceil(filteredMentorsList.length / mentorsPageSize) || 1;
+  }, [filteredMentorsList, mentorsPageSize]);
+
+  const mentorsStats = useMemo(() => {
+    const total = OFFICIAL_FACULTY_LIST.length;
+    const inchargeCount = OFFICIAL_FACULTY_LIST.filter(m => m.role.includes("In-charge")).length;
+    const facultyCount = OFFICIAL_FACULTY_LIST.filter(m => m.role.includes("Faculty Mentor") && !m.role.includes("In-charge")).length;
+    const subjectCount = OFFICIAL_FACULTY_LIST.filter(m => m.role.includes("Subject")).length;
+    const totalEnrolledStudents = deptStudents.length > 0 ? deptStudents.length : 437;
+    return { total, inchargeCount, facultyCount, subjectCount, totalEnrolledStudents };
+  }, [deptStudents.length]);
+
+  const formatTime = (timeStr: string | null | undefined) => {
+    if (!timeStr) return "—";
+    try {
+      const d = new Date(timeStr);
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return "—";
     }
   };
 
@@ -1249,33 +2523,32 @@ export default function HodDashboard() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-5xl mx-auto space-y-8 font-sans">
+      <div className="px-4 py-3 max-w-6xl mx-auto space-y-3 font-sans">
         
         {/* Header section (only show when NOT on Risk Flag Analytics tab) */}
         {activeTab !== "flags" && (
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight flex items-center gap-3">
-                <GraduationCap className="w-8 h-8 text-blue-500" />
-                HOD Dashboard
-              </h1>
-              <p className="text-gray-500 font-medium mt-1">Department of Data Science (DS)</p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-extrabold text-gray-800 tracking-tight leading-tight">HOD Dashboard</h1>
+                <p className="text-[11px] text-gray-400 font-medium -mt-0.5">Department of Data Science (DS)</p>
+              </div>
             </div>
             
-            <div className="flex items-center gap-3">
-              {/* Settings Button */}
+            <div className="flex items-center gap-2">
               <button
                 onClick={openPwdModal}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 shadow-sm hover:border-blue-400 hover:shadow-md text-gray-600 hover:text-blue-600 font-semibold text-sm transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:border-blue-400 hover:shadow-md text-gray-500 hover:text-blue-600 font-semibold text-xs transition-all"
                 title="Change scanner passcode"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Settings</span>
               </button>
-
-              {/* Date Picker */}
-              <div className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3.5 py-2.5 shadow-md hover:border-blue-500/50 transition-colors">
-                <Calendar className="w-4 h-4 text-blue-700 pointer-events-none" />
+              <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-2.5 py-2 shadow-sm hover:border-blue-400 transition-colors">
+                <Calendar className="w-3.5 h-3.5 text-blue-600 pointer-events-none" />
                 <input
                   type="date"
                   value={activeTab === "summary" ? selectedDate : logDate}
@@ -1285,98 +2558,86 @@ export default function HodDashboard() {
                       setLogDate(e.target.value);
                     }
                   }}
-                  className="bg-transparent text-sm font-bold text-gray-800 outline-none cursor-pointer [color-scheme:light]"
+                  className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer [color-scheme:light]"
                 />
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab Toggle buttons (only show when NOT on Risk Flag Analytics tab) */}
-        {activeTab !== "flags" && (
-          <div className="flex bg-white border border-gray-200 p-1.5 rounded-2xl w-fit">
-            <button
-              onClick={() => setActiveTab("summary")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                activeTab === "summary"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              <Grid3X3 className="w-4 h-4" />
-              Summary Grid
-            </button>
-            <button
-              onClick={() => setActiveTab("logs")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                activeTab === "logs"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              <ClipboardList className="w-4 h-4" />
-              Detailed Logs
-            </button>
-            <button
-              onClick={() => setActiveTab("mentors")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                activeTab === "mentors"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              <GraduationCap className="w-4 h-4" />
-              Department Mentors
-            </button>
-            <button
-              onClick={() => setActiveTab("schedules")}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                activeTab === "schedules"
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              <Calendar className="w-4 h-4" />
-              Schedules (Timetable)
-            </button>
-          </div>
-        )}
+        {/* Top Module Navigation Bar */}
+        <div className="flex flex-wrap items-center bg-slate-100/90 border border-slate-200 p-1 rounded-xl w-fit shadow-2xs gap-0.5">
+          <button
+            onClick={() => setActiveTab("summary")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "summary"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+            }`}
+          >
+            <Grid3X3 className="w-3.5 h-3.5" />
+            Summary
+          </button>
+          <button
+            onClick={() => setActiveTab("logs")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "logs"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+            }`}
+          >
+            <ClipboardList className="w-3.5 h-3.5" />
+            Logs
+          </button>
+          <button
+            onClick={() => setActiveTab("mentors")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "mentors"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+            }`}
+          >
+            <GraduationCap className="w-3.5 h-3.5" />
+            Mentors
+          </button>
+          <button
+            onClick={() => setActiveTab("schedules")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "schedules"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            Timetable
+          </button>
+        </div>
 
         {activeTab === "summary" ? (
           <>
-            {/* Quick summary stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Students</p>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-bold text-gray-800">{overallTotalStudents}</span>
-                  <span className="text-xs text-gray-500">enrolled</span>
+            {/* Compact inline stats bar */}
+            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm">
+              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
+                <Users className="w-3.5 h-3.5 text-gray-400" />
+                <span className="text-xs text-gray-400 font-medium">Total</span>
+                <span className="text-lg font-extrabold text-gray-800">{overallTotalStudents}</span>
+              </div>
+              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="text-xs text-gray-400 font-medium">Present</span>
+                <span className="text-lg font-extrabold text-emerald-600">{overallTotalPresent}</span>
+              </div>
+              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
+                <XCircle className="w-3.5 h-3.5 text-red-400" />
+                <span className="text-xs text-gray-400 font-medium">Absent</span>
+                <span className="text-lg font-extrabold text-red-500">{overallTotalAbsent}</span>
+              </div>
+              <div className="flex items-center gap-1.5 ml-auto">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <span className="text-[11px] font-black text-white">{overallDeptPercentage}%</span>
                 </div>
-              </Card>
-
-              <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Present Today</p>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-bold text-green-700">{overallTotalPresent}</span>
-                  <span className="text-xs text-gray-500">active</span>
-                </div>
-              </Card>
-
-              <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Absent Today</p>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-bold text-red-700">{overallTotalAbsent}</span>
-                  <span className="text-xs text-gray-500">missed</span>
-                </div>
-              </Card>
-
-              <Card className="bg-white border-gray-200 p-5 shadow-xl rounded-2xl flex flex-col justify-between border-l-4 border-l-blue-500">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Department %</p>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-3xl font-black text-blue-700">{overallDeptPercentage}%</span>
-                  <span className="text-xs text-gray-400">attendance</span>
-                </div>
-              </Card>
+                <span className="text-xs text-gray-400 font-medium">Dept.</span>
+              </div>
             </div>
 
             {/* Main Grid View */}
@@ -1386,24 +2647,24 @@ export default function HodDashboard() {
                 <p className="text-sm font-semibold text-gray-500">Loading student rosters & attendance records...</p>
               </div>
             ) : (
-              <Card className="bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
+              <Card className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-gray-200 bg-white text-gray-600 text-xs font-semibold uppercase tracking-wider">
-                        <th className="py-4 px-6">DS (Section)</th>
-                        <th className="py-4 px-6 text-center">PR (Present)</th>
-                        <th className="py-4 px-6 text-center">AB (Absent)</th>
-                        <th className="py-4 px-6 text-center">Total</th>
-                        <th className="py-4 px-6 text-center">% Present</th>
+                      <tr className="border-b border-gray-100 bg-gray-50/80 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+                        <th className="py-2.5 px-4">Section</th>
+                        <th className="py-2.5 px-4 text-center">Present</th>
+                        <th className="py-2.5 px-4 text-center">Absent</th>
+                        <th className="py-2.5 px-4 text-center">Total</th>
+                        <th className="py-2.5 px-4 text-center">%</th>
+                        <th className="py-2.5 px-4 w-32"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-855/60">
+                    <tbody>
                       {yearGroups.map(year => {
                         const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
                         if (sectionsInYear.length === 0) return null;
 
-                        // Compute year overall
                         let yearPresent = 0;
                         let yearAbsent = 0;
                         let yearTotal = 0;
@@ -1415,7 +2676,7 @@ export default function HodDashboard() {
                         });
 
                         const yearPercentage = yearTotal > 0 
-                          ? Math.floor((yearPresent / yearTotal) * 100) 
+                          ? Math.round((yearPresent / yearTotal) * 100) 
                           : 0;
 
                         return (
@@ -1424,63 +2685,87 @@ export default function HodDashboard() {
                               const percent = s.totalStudents.length > 0 
                                 ? (s.presentStudents.length / s.totalStudents.length) * 100 
                                 : 0;
+                              const barWidth = Math.min(percent, 100);
 
                               return (
-                                <tr key={s.sectionKey} className="hover:bg-gray-50 transition-colors group">
-                                  <td className="py-4 px-6 font-bold text-gray-800 text-base">{s.displayName}</td>
+                                <tr key={s.sectionKey} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
+                                  <td className="py-2 px-4 font-bold text-gray-700 text-sm">{s.displayName}</td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("PR", s)}
-                                    className="py-4 px-6 text-center text-emerald-700 font-bold cursor-pointer hover:bg-emerald-50 active:scale-[0.98] transition-transform text-lg"
-                                    title="Present Students (Gate Scans & In-Class Lecture Attendance)"
+                                    className="py-2 px-4 text-center text-emerald-600 font-bold cursor-pointer hover:bg-emerald-50 active:scale-[0.97] transition-all text-sm"
+                                    title="Present Students"
                                   >
                                     {s.presentStudents.length}
                                   </td>
 
                                   <td 
                                     onClick={() => handleCellClick("AB", s)}
-                                    className="py-4 px-6 text-center text-red-700 font-semibold cursor-pointer hover:bg-red-50 active:scale-[0.98] transition-transform text-lg"
+                                    className="py-2 px-4 text-center text-red-500 font-semibold cursor-pointer hover:bg-red-50 active:scale-[0.97] transition-all text-sm"
                                   >
                                     {s.absentStudents.length}
                                   </td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("Total", s)}
-                                    className="py-4 px-6 text-center text-gray-700 font-medium cursor-pointer hover:bg-gray-200/20 active:scale-[0.98] transition-transform text-lg"
+                                    className="py-2 px-4 text-center text-gray-500 font-medium cursor-pointer hover:bg-gray-100/50 active:scale-[0.97] transition-all text-sm"
                                   >
                                     {s.totalStudents.length}
                                   </td>
                                   
-                                  <td className="py-4 px-6 text-center font-mono">
-                                    <span className={getPercentageColor(percent)}>
-                                      {Math.floor(percent)}%
+                                  <td className="py-2 px-4 text-center">
+                                    <span className={`text-sm font-bold ${getPercentageColor(percent)}`}>
+                                      {Math.round(percent)}%
                                     </span>
+                                  </td>
+
+                                  <td className="py-2 px-4">
+                                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                      <div 
+                                        className={`h-full rounded-full transition-all duration-500 ${
+                                          percent >= 75 ? 'bg-emerald-400' : percent >= 50 ? 'bg-amber-400' : 'bg-red-400'
+                                        }`}
+                                        style={{ width: `${barWidth}%` }}
+                                      />
+                                    </div>
                                   </td>
                                 </tr>
                               );
                             })}
 
-                            {/* Overall row for this specific year */}
-                            <tr className="bg-blue-50 border-y border-gray-200">
-                              <td className="py-4 px-6 font-black text-blue-700 text-base italic">Overall ({year})</td>
-                              <td className="py-4 px-6 text-center text-green-700 font-bold text-lg">{yearPresent}</td>
-                              <td className="py-4 px-6 text-center text-red-700 font-bold text-lg">{yearAbsent}</td>
-                              <td className="py-4 px-6 text-center text-gray-800 font-bold text-lg">{yearTotal}</td>
-                              <td className="py-4 px-6 text-center font-mono font-black text-blue-700 text-lg">
-                                {yearPercentage}
+                            {/* Year subtotal row */}
+                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50/50 border-b border-blue-100">
+                              <td className="py-2 px-4 font-black text-blue-600 text-xs uppercase tracking-wide">⬥ {year}</td>
+                              <td className="py-2 px-4 text-center text-emerald-600 font-bold text-sm">{yearPresent}</td>
+                              <td className="py-2 px-4 text-center text-red-500 font-bold text-sm">{yearAbsent}</td>
+                              <td className="py-2 px-4 text-center text-gray-600 font-bold text-sm">{yearTotal}</td>
+                              <td className="py-2 px-4 text-center font-black text-blue-600 text-sm">
+                                {yearPercentage}%
+                              </td>
+                              <td className="py-2 px-4">
+                                <div className="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden">
+                                  <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${yearPercentage}%` }} />
+                                </div>
                               </td>
                             </tr>
                           </>
                         );
                       })}
                       
-                      {/* Department level summary footer */}
-                      <tr className="bg-white border-t border-gray-200">
-                        <td colSpan={4} className="py-6 px-6 font-black text-gray-800 text-lg tracking-wider text-right pr-12">
-                          Overall Department %
+                      {/* Department total footer */}
+                      <tr className="bg-white border-t-2 border-gray-200">
+                        <td colSpan={4} className="py-3 px-4 font-extrabold text-gray-700 text-xs uppercase tracking-wider text-right">
+                          Department Overall
                         </td>
-                        <td className="py-6 px-6 text-center font-mono font-black text-blue-700 text-xl border-l border-gray-200">
-                          {overallDeptPercentage}
+                        <td className="py-3 px-4 text-center">
+                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-black shadow-md shadow-blue-500/20">
+                            {overallDeptPercentage}%
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${overallDeptPercentage}%` }} />
+                          </div>
                         </td>
                       </tr>
                     </tbody>
@@ -1490,180 +2775,863 @@ export default function HodDashboard() {
             )}
           </>
         ) : activeTab === "logs" ? (
-          <>
-            {/* Detailed logs filter toolbar */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 bg-white border border-gray-200 p-5 rounded-2xl">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Date Filter</label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={logDate}
-                    onChange={(e) => setLogDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold [color-scheme:light]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Section Filter</label>
-                <select
-                  value={selectedSectionFilter}
-                  onChange={(e) => setSelectedSectionFilter(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold cursor-pointer"
-                >
-                  <option value="All">All Sections</option>
-                  <option value="2A">2A CSE Data Science</option>
-                  <option value="2B">2B CSE Data Science</option>
-                  <option value="2C">2C CSE Data Science</option>
-                  <option value="3A">3A CSE Data Science</option>
-                  <option value="3B">3B CSE Data Science</option>
-                  <option value="3C">3C CSE Data Science</option>
-                  <option value="3D">3D CSE Data Science</option>
-                  <option value="4A">4A CSE Data Science</option>
-                  <option value="4B">4B CSE Data Science</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Search Students</label>
-                <div className="relative group">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Search className="w-4 h-4" />
+          <div className="space-y-2.5">
+            {/* ── ACTIONABLE COMMAND CENTER HEADER & FILTER BAR ── */}
+            <div className="bg-white border border-gray-200 p-2.5 sm:p-3 rounded-xl shadow-xs space-y-2.5">
+              {/* Header Strip */}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse" />
+                    <h2 className="text-sm font-black text-gray-900 tracking-tight">
+                      Daily Problem Areas & Student Accountability
+                    </h2>
+                    <span className="px-2.5 py-1 rounded-md bg-rose-100 border border-rose-300 text-rose-950 text-xs font-black">
+                      {problemStats.lateCount + problemStats.unscannedCount} Attention Needed
+                    </span>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Search name or roll..."
-                    value={logSearchQuery}
-                    onChange={(e) => setLogSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
-                  />
+                  <p className="text-xs text-gray-700 mt-1 font-semibold">
+                    College starts: <span className="font-black text-gray-950">09:00 AM</span> • Late threshold: <span className="font-black text-amber-950 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">09:30 AM</span> • Unscanned marked <span className="font-black text-red-950 bg-red-100 px-1.5 py-0.5 rounded border border-red-300">Absent</span>
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      setBulkMessageType("late");
+                      setBulkMessageModalOpen(true);
+                    }}
+                    className="h-8 flex items-center gap-1.5 px-3 rounded-lg bg-rose-100 hover:bg-rose-200 border-2 border-rose-400 text-rose-950 font-black text-xs transition-all shadow-xs cursor-pointer"
+                    title="Send bulk WhatsApp/SMS notice to parents of late or unscanned students"
+                  >
+                    <Send className="w-3.5 h-3.5 text-rose-700" />
+                    <span>Notify Parents</span>
+                    {selectedStudentIds.length > 0 && (
+                      <span className="px-1.5 py-0.2 bg-rose-200 text-rose-950 border border-rose-300 rounded text-[10px] font-black">
+                        {selectedStudentIds.length}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={handleExportProblemCsv}
+                    className="h-8 flex items-center gap-1.5 px-2.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 border-2 border-emerald-400 text-emerald-950 font-black text-xs transition-colors shadow-xs cursor-pointer"
+                    title="Export detailed problem report with delay minutes, mentor and remarks"
+                  >
+                    <Download className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Problem Report</span>
+                  </button>
+
+                  <button
+                    onClick={() => setHolidayModalOpen(true)}
+                    className="h-8 flex items-center gap-1 px-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Holidays</span>
+                  </button>
+
+                  <button
+                    onClick={() => setExportModalOpen(true)}
+                    className="h-8 flex items-center gap-1.5 px-2.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-950 border-2 border-blue-400 font-black text-xs transition-colors cursor-pointer"
+                    title="Open Monthly Attendance Register"
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-blue-700" />
+                    <span>Register</span>
+                  </button>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Holidays</label>
-                <button
-                  onClick={() => setHolidayModalOpen(true)}
-                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-900/60 hover:bg-blue-800/80 active:scale-[0.98] text-blue-200 font-bold text-xs border border-blue-700/50 transition-all shadow-md cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4 text-blue-700" />
-                  Manage Holidays
-                </button>
+              {/* Filters Row: Date, Section, Mentor, Sort, Search */}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+                  {/* Date Input */}
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={logDate}
+                      onChange={(e) => {
+                        setLogDate(e.target.value);
+                        setLogCurrentPage(1);
+                      }}
+                      className="h-8 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 [color-scheme:light] cursor-pointer"
+                      title="Select Attendance Date"
+                    />
+                  </div>
+
+                  {/* Section Select */}
+                  <div className="relative">
+                    <select
+                      value={selectedSectionFilter}
+                      onChange={(e) => {
+                        setSelectedSectionFilter(e.target.value);
+                        setLogCurrentPage(1);
+                      }}
+                      className="h-8 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 cursor-pointer"
+                    >
+                      <option value="All">All Sections ({deptStudents.length})</option>
+                      <option value="2A">2A CSE Data Science</option>
+                      <option value="2B">2B CSE Data Science</option>
+                      <option value="2C">2C CSE Data Science</option>
+                      <option value="3A">3A CSE Data Science</option>
+                      <option value="3B">3B CSE Data Science</option>
+                      <option value="3C">3C CSE Data Science</option>
+                      <option value="3D">3D CSE Data Science</option>
+                      <option value="4A">4A CSE Data Science</option>
+                      <option value="4B">4B CSE Data Science</option>
+                    </select>
+                  </div>
+
+                  {/* Mentor Filter */}
+                  <div className="relative">
+                    <select
+                      value={selectedMentorFilter}
+                      onChange={(e) => {
+                        setSelectedMentorFilter(e.target.value);
+                        setLogCurrentPage(1);
+                      }}
+                      className="h-8 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-bold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 cursor-pointer"
+                      title="Filter students by assigned faculty mentor"
+                    >
+                      <option value="All">All Faculty Mentors</option>
+                      {OFFICIAL_FACULTY_LIST.map((m) => (
+                        <option key={m.id} value={m.name}>
+                          {m.name} ({m.section || m.role})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Sort Field */}
+                  <div className="relative">
+                    <select
+                      value={logSortField}
+                      onChange={(e) => {
+                        setLogSortField(e.target.value as any);
+                        setLogCurrentPage(1);
+                      }}
+                      className="h-8 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                      title="Sort logs"
+                    >
+                      <option value="severity">🔥 Sort: Problem Severity (Repeat & Delay)</option>
+                      <option value="entryTime">🕒 Sort: Entry Time</option>
+                      <option value="name">👤 Sort: Student Name</option>
+                      <option value="uniqueId">🆔 Sort: Roll Number</option>
+                      <option value="section">🏫 Sort: Section</option>
+                    </select>
+                  </div>
+
+                  {/* Search Input with quick clear */}
+                  <div className="relative flex-1 min-w-[180px] max-w-sm">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search student, roll, mentor, remark..."
+                      value={logSearchQuery}
+                      onChange={(e) => {
+                        setLogSearchQuery(e.target.value);
+                        setLogCurrentPage(1);
+                      }}
+                      className="w-full h-8 pl-8 pr-7 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 text-xs font-medium focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                    />
+                    {logSearchQuery && (
+                      <button
+                        onClick={() => {
+                          setLogSearchQuery("");
+                          setLogCurrentPage(1);
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Export Register</label>
+              {/* View Mode Pills (Light tinted backgrounds with Dark Colored text - No White text!) */}
+              <div className="flex items-center gap-1.5 pt-1 border-t border-gray-100 overflow-x-auto text-[11px]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mr-1 flex items-center gap-1">
+                  <SlidersHorizontal className="w-3 h-3" /> Focus:
+                </span>
                 <button
-                  onClick={() => setExportModalOpen(true)}
-                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-bold text-xs transition-all shadow-lg shadow-emerald-950/40 cursor-pointer"
+                  onClick={() => { setLogViewMode("problems"); setLogCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    logViewMode === "problems"
+                      ? "bg-rose-200 border-2 border-rose-600 text-rose-950 ring-2 ring-rose-300"
+                      : "bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-950"
+                  }`}
                 >
-                  <FileSpreadsheet className="w-4 h-4" />
-                  Download CSV
+                  <Flame className="w-3.5 h-3.5 text-rose-700" />
+                  <span>Problem Areas ({problemStats.lateCount + problemStats.unscannedCount})</span>
+                </button>
+                <button
+                  onClick={() => { setLogViewMode("late"); setLogCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    logViewMode === "late"
+                      ? "bg-amber-200 border-2 border-amber-600 text-amber-950 ring-2 ring-amber-300"
+                      : "bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950"
+                  }`}
+                >
+                  <span>Late Comers ({problemStats.lateCount})</span>
+                </button>
+                <button
+                  onClick={() => { setLogViewMode("unscanned"); setLogCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    logViewMode === "unscanned"
+                      ? "bg-red-200 border-2 border-red-600 text-red-950 ring-2 ring-red-300"
+                      : "bg-red-50 hover:bg-red-100 border border-red-300 text-red-950"
+                  }`}
+                >
+                  <span>Not Scanned ({problemStats.unscannedCount})</span>
+                </button>
+                <button
+                  onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer ${
+                    logViewMode === "all"
+                      ? "bg-slate-200 border-2 border-slate-600 text-slate-950 ring-2 ring-slate-300"
+                      : "bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-900"
+                  }`}
+                >
+                  Full Registry ({eligibleSectionStudents.length})
+                </button>
+                <button
+                  onClick={() => { setLogViewMode("comparison"); setLogCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    logViewMode === "comparison"
+                      ? "bg-indigo-200 border-2 border-indigo-600 text-indigo-950 ring-2 ring-indigo-300"
+                      : "bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-950"
+                  }`}
+                >
+                  <BarChart2 className="w-3.5 h-3.5 text-indigo-700" />
+                  <span>Section Comparison</span>
+                </button>
+                <button
+                  onClick={() => { setLogViewMode("trend"); setLogCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                    logViewMode === "trend"
+                      ? "bg-purple-200 border-2 border-purple-600 text-purple-950 ring-2 ring-purple-300"
+                      : "bg-purple-50 hover:bg-purple-100 border border-purple-300 text-purple-950"
+                  }`}
+                >
+                  <TrendingUp className="w-3.5 h-3.5 text-purple-700" />
+                  <span>Weekly Trend</span>
                 </button>
               </div>
             </div>
 
-            {/* Detailed Logs Table */}
-            {logsLoading ? (
-              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-gray-500">Loading attendance log registry...</p>
+            {/* ── DAILY PROBLEM SEVERITY KPI COUNTER STRIP ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {/* Late Comers */}
+              <div
+                onClick={() => { setLogViewMode("late"); setLogCurrentPage(1); }}
+                className={`bg-white rounded-2xl p-3.5 shadow-xs cursor-pointer transition-all border-2 ${
+                  logViewMode === "late"
+                    ? "border-amber-500 ring-2 ring-amber-200"
+                    : "border-gray-200 hover:border-amber-400"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                    <span>Late Arrivals</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-amber-950 text-xs font-black">
+                    {">9:30 AM"}
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
+                  {problemStats.lateCount}
+                </div>
+                <div className="text-xs text-amber-950 font-bold mt-1.5 flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                  <span>{problemStats.chronicLateCount} Repeat Offenders</span>
+                </div>
               </div>
-            ) : (
-              <Card className="bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
-                <div className="overflow-x-auto max-h-[620px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-                  <table className="w-full text-left border-collapse relative">
-                    <thead className="sticky top-0 z-20 bg-white shadow-md">
-                      <tr className="border-b border-gray-200 bg-white text-gray-600 text-xs font-semibold uppercase tracking-wider">
-                        <th className="py-4 px-6">Student details</th>
-                        <th className="py-4 px-6 text-center">Class / Section</th>
-                        <th className="py-4 px-6 text-center">Status</th>
-                        <th className="py-4 px-6 text-center">Entry Time (In)</th>
-                        <th className="py-4 px-6 text-center">Exit Time (Out)</th>
-                        <th className="py-4 px-6 text-center">Duration</th>
+
+              {/* Not Scanned */}
+              <div
+                onClick={() => { setLogViewMode("unscanned"); setLogCurrentPage(1); }}
+                className={`bg-white rounded-2xl p-3.5 shadow-xs cursor-pointer transition-all border-2 ${
+                  logViewMode === "unscanned"
+                    ? "border-red-500 ring-2 ring-red-200"
+                    : "border-gray-200 hover:border-red-400"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-red-950 uppercase tracking-wider flex items-center gap-1.5">
+                    <XCircle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
+                    <span>Not Scanned</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-red-100 border border-red-300 text-red-950 text-xs font-black">
+                    Absent
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
+                  {problemStats.unscannedCount}
+                </div>
+                <div className="text-xs text-red-950 font-bold mt-1.5 flex items-center gap-1">
+                  <AlertOctagon className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
+                  <span>0 Gate Scans Today</span>
+                </div>
+              </div>
+
+              {/* Excuses / Documented Remarks */}
+              <div className="bg-white rounded-2xl p-3.5 shadow-xs border-2 border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-blue-950 uppercase tracking-wider flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                    <span>Excused / Remarks</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-blue-100 border border-blue-300 text-blue-950 text-xs font-black">
+                    Valid
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
+                  {problemStats.excusedCount}
+                </div>
+                <div className="text-xs text-blue-950 font-bold mt-1.5 flex items-center gap-1 truncate">
+                  <CheckCircle className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                  <span>Bus Delay / Medical / OD</span>
+                </div>
+              </div>
+
+              {/* Punctual & On Campus */}
+              <div className="bg-white rounded-2xl p-3.5 shadow-xs border-2 border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                    <span>On-Time Arrivals</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
+                    &lt;9:30 AM
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
+                  {Math.max(0, problemStats.scannedCount - problemStats.lateCount)}
+                </div>
+                <div className="text-xs text-emerald-950 font-bold mt-1.5 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse flex-shrink-0" />
+                  <span>{problemStats.onCampusCount} Active Inside</span>
+                </div>
+              </div>
+
+              {/* Punctuality Rate Index */}
+              <div className="bg-white rounded-2xl p-3.5 shadow-xs border-2 border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-purple-950 uppercase tracking-wider flex items-center gap-1.5">
+                    <BarChart2 className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
+                    <span>Punctuality Score</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-purple-100 border border-purple-300 text-purple-950 text-xs font-black">
+                    Score
+                  </span>
+                </div>
+                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
+                  {problemStats.punctualityRate}%
+                </div>
+                <div className="text-xs text-purple-950 font-bold mt-1.5 flex items-center gap-1">
+                  <TrendingUp className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
+                  <span>{problemStats.attendanceRate}% Gate Scanned</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ── SECTION COMPARISON VIEW ── */}
+            {logViewMode === "comparison" && (
+              <Card className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <BarChart2 className="w-4 h-4 text-indigo-600" />
+                      Section-Wise Punctuality & Accountability Matrix
+                    </h3>
+                    <p className="text-[11px] text-gray-500">Hold class in-charges and mentors accountable for late comers and unscanned students.</p>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-gray-50 text-gray-600 text-[10px] font-bold uppercase tracking-wider border-b border-gray-200">
+                        <th className="py-2.5 px-3">Section</th>
+                        <th className="py-2.5 px-3">Class In-charge / Mentor</th>
+                        <th className="py-2.5 px-3 text-center">Strength</th>
+                        <th className="py-2.5 px-3 text-center">Scanned</th>
+                        <th className="py-2.5 px-3 text-center">Late Comers</th>
+                        <th className="py-2.5 px-3 text-center">Unscanned</th>
+                        <th className="py-2.5 px-3 text-center">Punctuality %</th>
+                        <th className="py-2.5 px-3 text-center">Health Status</th>
+                        <th className="py-2.5 px-3 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-855/60">
-                      {filteredLogs.length === 0 ? (
+                    <tbody className="divide-y divide-gray-100 font-medium">
+                      {sectionComparisonStats.map((row) => (
+                        <tr key={row.secName} className="hover:bg-indigo-50/30 transition-colors">
+                          <td className="py-2.5 px-3 font-extrabold text-gray-900">
+                            <span className="px-2 py-0.5 rounded bg-gray-100 border border-gray-200 font-mono text-xs">
+                              {row.secName}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className="font-bold text-gray-800">{row.mentor?.name || "Not Assigned"}</span>
+                            <p className="text-[10px] text-gray-400 font-mono">{row.mentor?.email || "—"}</p>
+                          </td>
+                          <td className="py-2.5 px-3 text-center font-bold text-gray-700">{row.total}</td>
+                          <td className="py-2.5 px-3 text-center font-bold text-blue-700">{row.scanned}</td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span className={`px-2 py-0.5 rounded-full font-black text-xs ${
+                              row.late > 4 ? "bg-amber-100 text-amber-950 border border-amber-400" : row.late > 0 ? "bg-amber-50 text-amber-800" : "text-gray-400"
+                            }`}>
+                              {row.late}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span className={`px-2 py-0.5 rounded-full font-black text-xs ${
+                              row.unscanned > 5 ? "bg-red-100 text-red-800 border border-red-300" : row.unscanned > 0 ? "bg-red-50 text-red-700" : "text-gray-400"
+                            }`}>
+                              {row.unscanned}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <span className="font-black text-gray-900">{row.punctualityRate}%</span>
+                              <div className="w-12 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    row.punctualityRate >= 85 ? "bg-emerald-500" : row.punctualityRate >= 70 ? "bg-amber-500" : "bg-red-500"
+                                  }`}
+                                  style={{ width: `${row.punctualityRate}%` }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            {row.status === "critical" ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 flex items-center justify-center gap-1 w-max mx-auto">
+                                <AlertOctagon className="w-3 h-3" /> Critical Attention
+                              </span>
+                            ) : row.status === "warning" ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center justify-center gap-1 w-max mx-auto">
+                                <AlertTriangle className="w-3 h-3" /> Needs Review
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center justify-center gap-1 w-max mx-auto">
+                                <Check className="w-3 h-3" /> Good Health
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <button
+                              onClick={() => {
+                                setSelectedSectionFilter(row.secName);
+                                setLogViewMode("problems");
+                                setLogCurrentPage(1);
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-[11px] transition-colors cursor-pointer"
+                            >
+                              Filter Section →
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
+
+            {/* ── WEEKLY TREND VIEW ── */}
+            {logViewMode === "trend" && (
+              <Card className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <TrendingUp className="w-4 h-4 text-purple-600" />
+                      6-Day Department Punctuality & Late Arrival Trend
+                    </h3>
+                    <p className="text-[11px] text-gray-500">Track day-by-day late entries to evaluate whether corrective actions are working.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                  {weeklyTrendData.map((d) => (
+                    <div key={d.dateStr} className="p-3 bg-gray-50 rounded-xl border border-gray-200 text-center space-y-1">
+                      <span className="text-[11px] font-black text-gray-800 block">{d.dayName}</span>
+                      <span className="text-[10px] text-gray-400 font-mono block">{d.dateStr}</span>
+                      
+                      <div className="pt-1.5 border-t border-gray-200 space-y-1 text-xs">
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="text-amber-800 font-bold">Late Comers:</span>
+                          <span className="font-black text-amber-950 px-1.5 py-0.2 bg-amber-100 rounded">{d.lateCount}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="text-red-700 font-bold">Unscanned:</span>
+                          <span className="font-black text-red-800 px-1.5 py-0.2 bg-red-100 rounded">{d.unscannedCount}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="text-purple-700 font-bold">On-Time %:</span>
+                          <span className="font-black text-purple-900">{d.punctuality}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* ── ACTIONABLE PROBLEM REGISTRY TABLE ── */}
+            {logsLoading ? (
+              <div className="bg-white border border-gray-200 p-12 flex flex-col items-center justify-center gap-3 rounded-2xl shadow-xs">
+                <Loader2 className="w-7 h-7 text-blue-600 animate-spin" />
+                <p className="text-xs font-semibold text-gray-500">Loading daily problem areas & accountability registry...</p>
+              </div>
+            ) : (
+              <Card className="bg-white border border-gray-200 rounded-xl shadow-xs overflow-hidden">
+                {/* Bulk Select Bar */}
+                <div className="p-2 sm:px-3 bg-slate-50 border-b border-gray-200 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-gray-700">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        if (selectedStudentIds.length === sortedProblemItems.length) {
+                          setSelectedStudentIds([]);
+                        } else {
+                          setSelectedStudentIds(sortedProblemItems.map(i => i.student.id));
+                        }
+                      }}
+                      className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-gray-900 font-bold cursor-pointer"
+                    >
+                      {selectedStudentIds.length > 0 && selectedStudentIds.length === sortedProblemItems.length ? (
+                        <CheckSquare className="w-4 h-4 text-blue-600" />
+                      ) : (
+                        <Square className="w-4 h-4 text-gray-400" />
+                      )}
+                      <span>Select All ({sortedProblemItems.length})</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const lateIds = sortedProblemItems.filter(i => i.isLate).map(i => i.student.id);
+                        setSelectedStudentIds(lateIds);
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 border border-amber-400 text-amber-950 text-xs font-black transition-colors cursor-pointer"
+                    >
+                      Select All Late ({sortedProblemItems.filter(i => i.isLate).length})
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const unscannedIds = sortedProblemItems.filter(i => i.isUnscanned).map(i => i.student.id);
+                        setSelectedStudentIds(unscannedIds);
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-red-100 hover:bg-red-200 border border-red-400 text-red-950 text-xs font-black transition-colors cursor-pointer"
+                    >
+                      Select All Unscanned ({sortedProblemItems.filter(i => i.isUnscanned).length})
+                    </button>
+                  </div>
+
+                  {selectedStudentIds.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-700 font-black">{selectedStudentIds.length} Selected</span>
+                      <button
+                        onClick={() => {
+                          setBulkMessageType("custom");
+                          setBulkMessageModalOpen(true);
+                        }}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>Broadcast to {selectedStudentIds.length} Parents</span>
+                      </button>
+                      <button
+                        onClick={() => setSelectedStudentIds([])}
+                        className="text-gray-400 hover:text-gray-600 text-xs cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="overflow-x-auto max-h-[580px] overflow-y-auto scroll-smooth scrollbar-thin">
+                  <table className="w-full text-left border-collapse relative">
+                    <thead className="sticky top-0 z-20 bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3 px-3 text-center w-10">Select</th>
+                        <th
+                          className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          onClick={() => handleSort("name")}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span>Student Details</span>
+                            {logSortField === "name" ? (
+                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
+                            ) : (
+                              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+                            )}
+                          </div>
+                        </th>
+
+                        <th
+                          className="py-3 px-3 text-center cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          onClick={() => handleSort("section")}
+                        >
+                          <div className="flex items-center justify-center gap-1.5">
+                            <span>Class & Mentor</span>
+                            {logSortField === "section" ? (
+                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
+                            ) : (
+                              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+                            )}
+                          </div>
+                        </th>
+
+                        <th
+                          className="py-3 px-3 text-center cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          onClick={() => handleSort("entryTime")}
+                        >
+                          <div className="flex items-center justify-center gap-1.5">
+                            <span>Entry Time & Delay</span>
+                            {logSortField === "entryTime" ? (
+                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
+                            ) : (
+                              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+                            )}
+                          </div>
+                        </th>
+
+                        <th
+                          className="py-3 px-3 text-center cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          onClick={() => handleSort("severity")}
+                        >
+                          <div className="flex items-center justify-center gap-1.5">
+                            <span>Severity & Frequency</span>
+                            {logSortField === "severity" ? (
+                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
+                            ) : (
+                              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+                            )}
+                          </div>
+                        </th>
+
+                        <th className="py-3 px-3 text-center">
+                          <span>HOD Remarks</span>
+                        </th>
+
+                        <th className="py-3 px-3 text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {paginatedProblemItems.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center text-gray-400 text-sm">
-                            No attendance logs registered for this query selection.
+                          <td colSpan={7} className="py-12 text-center text-slate-400 text-xs font-medium">
+                            No students match the current problem area and filter query.
                           </td>
                         </tr>
                       ) : (
-                        filteredLogs.map((log) => {
-                          const user = log.user!;
+                        paginatedProblemItems.map((item) => {
+                          const user = item.student;
                           const { name: sDisplayName } = getSectionDisplayName(user.section);
-                          
+                          const isSelected = selectedStudentIds.includes(user.id);
+                          const isInside = item.record?.status === "inside" && !item.record?.exitTime;
+
                           return (
-                            <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                              <td className="py-4 px-6">
+                            <tr
+                              key={user.id}
+                              className={`transition-colors group ${
+                                isSelected
+                                  ? "bg-blue-50/70"
+                                  : item.severityScore === 4
+                                  ? "bg-rose-50/20 hover:bg-rose-50/40"
+                                  : item.isLate
+                                  ? "bg-amber-50/15 hover:bg-amber-50/30"
+                                  : "hover:bg-slate-50/60"
+                              }`}
+                            >
+                              {/* Checkbox */}
+                              <td className="py-3 px-3 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedStudentIds(prev =>
+                                      prev.includes(user.id) ? prev.filter(id => id !== user.id) : [...prev, user.id]
+                                    );
+                                  }}
+                                  className="text-slate-400 hover:text-blue-600 cursor-pointer"
+                                >
+                                  {isSelected ? (
+                                    <CheckSquare className="w-4 h-4 text-blue-600" />
+                                  ) : (
+                                    <Square className="w-4 h-4 text-slate-300" />
+                                  )}
+                                </button>
+                              </td>
+
+                              {/* Student Details */}
+                              <td className="py-3 px-4">
                                 <div
                                   onClick={() => setSelectedStudentForDetails(user)}
-                                  className="flex items-center gap-3 cursor-pointer group hover:opacity-90 transition-opacity"
-                                  title="Click to view full student details"
+                                  className="flex items-center gap-2.5 cursor-pointer"
+                                  title="Click to view student profile"
                                 >
-                                  <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 uppercase group-hover:border-blue-500 transition-colors">
+                                  <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase flex-shrink-0">
                                     {user.name.charAt(0)}
                                   </div>
                                   <div>
-                                    <p className="text-sm font-bold text-gray-800 group-hover:text-blue-700 transition-colors underline decoration-blue-500/30 underline-offset-4">
+                                    <p className="text-xs font-bold text-slate-900 group-hover:text-blue-700 transition-colors leading-tight">
                                       {user.name}
                                     </p>
-                                    <p className="text-xs text-gray-500 font-mono mt-0.5 group-hover:text-blue-700 transition-colors">
+                                    <p className="text-[11px] text-slate-500 font-mono mt-0.5">
                                       {user.uniqueId}
                                     </p>
                                   </div>
                                 </div>
                               </td>
 
-                              <td className="py-4 px-6 text-center font-bold text-gray-700">
-                                {sDisplayName}
+                              {/* Class & Assigned Mentor */}
+                              <td className="py-3 px-3 text-center">
+                                <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-bold font-mono">
+                                  {sDisplayName}
+                                </span>
+                                <p className="text-[11px] font-medium text-slate-600 mt-1 truncate max-w-[140px] mx-auto flex items-center justify-center gap-1" title={item.mentor?.name || "Not Assigned"}>
+                                  <User className="w-3 h-3 text-indigo-500 flex-shrink-0" />
+                                  <span className="truncate">{item.mentor?.name || "Not Assigned"}</span>
+                                </p>
                               </td>
 
-                              <td className="py-4 px-6 text-center">
-                                {isExitTimeOver(log.date, log.exitTime) ? (
-                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                                    Not Scanned
+                              {/* Entry Time & Delay */}
+                              <td className="py-3 px-3 text-center">
+                                {item.isUnscanned ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-red-100 border border-red-300 text-red-950">
+                                    <X className="w-3 h-3 text-red-700" /> NOT SCANNED
                                   </span>
                                 ) : (
-                                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold ${
-                                    log.status === "inside"
-                                      ? "bg-emerald-50 text-emerald-700 border border-emerald-500/25"
-                                      : "bg-gray-100 text-gray-600 border border-gray-200"
-                                  }`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${log.status === "inside" ? "bg-emerald-400" : "bg-gray-300"}`} />
-                                    {log.status === "inside" ? "On Campus" : "Left"}
-                                  </span>
+                                  <div className="space-y-0.5">
+                                    <div className="inline-flex items-center justify-center gap-1.5">
+                                      <span className="font-mono text-xs font-bold text-slate-900">{formatTime(item.record?.entryTime)}</span>
+                                      {item.isLate ? (
+                                        <span className="px-1.5 py-0.5 rounded bg-amber-100 border border-amber-300 text-amber-950 text-[10px] font-black uppercase tracking-wider">
+                                          LATE
+                                        </span>
+                                      ) : isInside ? (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-900 text-[10px] font-bold">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" /> Inside
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-medium">
+                                          Left
+                                        </span>
+                                      )}
+                                    </div>
+                                    {item.minutesLate > 0 && (
+                                      <span className="block text-[11px] font-semibold text-amber-900">
+                                        +{item.minutesLate}m delay
+                                      </span>
+                                    )}
+                                  </div>
                                 )}
                               </td>
 
-                              <td className="py-4 px-6 text-center text-gray-700 font-mono">
-                                <div className="flex flex-col items-center justify-center gap-0.5">
-                                  <span>{formatTime(log.entryTime)}</span>
-                                  {isLateTime(log.entryTime) && (
-                                    <span className="inline-block px-1.5 py-0.5 rounded bg-amber-50 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-wider scale-95">
-                                      Late Entry
+                              {/* Severity & Repeat Offenses */}
+                              <td className="py-3 px-3 text-center">
+                                {item.severityScore === 4 ? (
+                                  <div className="inline-block text-center">
+                                    <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 border border-rose-200 text-rose-800 inline-flex items-center gap-1 justify-center">
+                                      <ShieldAlert className="w-3 h-3 text-rose-600" /> Chronic Offender
                                     </span>
-                                  )}
-                                </div>
-                              </td>
-
-                              <td className="py-4 px-6 text-center text-gray-700 font-mono">
-                                {isExitTimeOver(log.date, log.exitTime) ? (
-                                  <span className="inline-flex items-center justify-center gap-1.5 text-gray-400 text-xs font-medium">
-                                    <span className="w-4 h-[1.5px] bg-gray-300 rounded-full inline-block" />
-                                    —
+                                    <span className="text-[10px] text-rose-700 font-medium block mt-0.5">
+                                      {item.isLate ? `${item.monthlyLate} late entries this mo.` : `${item.monthlyAbs} total absences`}
+                                    </span>
+                                  </div>
+                                ) : item.severityScore === 3 ? (
+                                  <div className="inline-block text-center">
+                                    <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-800 inline-block">
+                                      {item.isLate ? `Repeat Late (${item.monthlyLate}x)` : `Unscanned (${item.monthlyAbs} abs)`}
+                                    </span>
+                                    <span className="text-[10px] text-amber-700 font-medium block mt-0.5">
+                                      {item.monthlyLate} late this month
+                                    </span>
+                                  </div>
+                                ) : item.isLate ? (
+                                  <span className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-blue-50 border border-blue-200 text-blue-800 inline-block">
+                                    1st Late Today
                                   </span>
                                 ) : (
-                                  formatTime(log.exitTime)
+                                  <span className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-50 border border-emerald-200 text-emerald-800 inline-block">
+                                    Punctual
+                                  </span>
                                 )}
                               </td>
 
-                              <td className="py-4 px-6 text-center text-gray-500 text-sm">
-                                {log.durationMinutes ? `${log.durationMinutes} mins` : "—"}
+                              {/* HOD Remarks / Valid Reason */}
+                              <td className="py-3 px-3 text-center">
+                                {item.remark ? (
+                                  <div
+                                    onClick={() => {
+                                      setRemarkModalData(item);
+                                      setRemarkInput(item.remark?.text || "");
+                                      setRemarkPreset(item.remark?.preset || "College Bus Delayed");
+                                      setRemarkIsExcused(item.remark?.isExcused ?? true);
+                                    }}
+                                    className="p-1.5 rounded-lg bg-blue-50/70 border border-blue-200 hover:border-blue-300 cursor-pointer transition-all max-w-[180px] mx-auto text-left"
+                                    title="Click to edit remark"
+                                  >
+                                    <div className="flex items-center justify-between gap-1">
+                                      <span className="text-[11px] font-bold text-blue-900 truncate">
+                                        {item.remark.preset}
+                                      </span>
+                                      {item.remark.isExcused && (
+                                        <span className="px-1 py-0.2 rounded bg-emerald-100 text-emerald-800 text-[9px] font-bold flex-shrink-0">
+                                          Excused
+                                        </span>
+                                      )}
+                                    </div>
+                                    {item.remark.text && item.remark.text !== item.remark.preset && (
+                                      <p className="text-[10px] text-slate-600 truncate mt-0.5 font-normal">
+                                        {item.remark.text}
+                                      </p>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setRemarkModalData(item);
+                                      setRemarkInput("");
+                                      setRemarkPreset("College Bus Delayed");
+                                      setRemarkIsExcused(true);
+                                    }}
+                                    className="h-7 px-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 border border-slate-200 text-xs font-medium inline-flex items-center gap-1 transition-colors cursor-pointer"
+                                  >
+                                    <Plus className="w-3 h-3 text-slate-400" />
+                                    <span>Add Remark</span>
+                                  </button>
+                                )}
+                              </td>
+
+                              {/* Actions */}
+                              <td className="py-3 px-3 text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedStudentIds([user.id]);
+                                      setBulkMessageType(item.isLate ? "late" : "unscanned");
+                                      setBulkMessageModalOpen(true);
+                                    }}
+                                    className="w-7 h-7 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer"
+                                    title={`Send notice to ${user.name}'s parent`}
+                                  >
+                                    <Send className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <button
+                                    onClick={() => setSelectedStudentForDetails(user)}
+                                    className="w-7 h-7 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-colors cursor-pointer"
+                                    title="View student profile & attendance history"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -1672,529 +3640,1028 @@ export default function HodDashboard() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* ── PAGINATION CONTROLS ── */}
+                <div className="p-2.5 sm:p-3 bg-gray-50 border-t border-gray-200 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                  <div className="text-gray-500 font-medium">
+                    Showing <span className="font-bold text-gray-900">{sortedProblemItems.length === 0 ? 0 : (safeCurrentPage - 1) * logPageSize + 1}</span> to{" "}
+                    <span className="font-bold text-gray-900">{Math.min(safeCurrentPage * logPageSize, sortedProblemItems.length)}</span> of{" "}
+                    <span className="font-bold text-gray-900">{sortedProblemItems.length}</span> students
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {/* Rows per page */}
+                    <div className="flex items-center gap-1 text-gray-600">
+                      <span className="text-[11px]">Rows:</span>
+                      <select
+                        value={logPageSize}
+                        onChange={(e) => {
+                          setLogPageSize(Number(e.target.value));
+                          setLogCurrentPage(1);
+                        }}
+                        className="h-7 px-1.5 rounded bg-white border border-gray-300 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                      >
+                        <option value={15}>15</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select>
+                    </div>
+
+                    {/* Page buttons */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setLogCurrentPage(1)}
+                        disabled={safeCurrentPage === 1}
+                        className="p-1 rounded bg-white border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                        title="First Page"
+                      >
+                        <ChevronsLeft className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={() => setLogCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={safeCurrentPage === 1}
+                        className="p-1 rounded bg-white border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                        title="Previous Page"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                      </button>
+
+                      <span className="px-2 font-bold text-gray-700 text-xs">
+                        Page {safeCurrentPage} of {totalPages}
+                      </span>
+
+                      <button
+                        onClick={() => setLogCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={safeCurrentPage === totalPages}
+                        className="p-1 rounded bg-white border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                        title="Next Page"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        onClick={() => setLogCurrentPage(totalPages)}
+                        disabled={safeCurrentPage === totalPages}
+                        className="p-1 rounded bg-white border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                        title="Last Page"
+                      >
+                        <ChevronsRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </Card>
             )}
-          </>
+          </div>
         ) : activeTab === "mentors" ? (
-          <>
-            {/* Mentors Search Toolbar */}
-            <div className="flex items-center gap-4 bg-white border border-gray-200 p-5 rounded-2xl">
-              <div className="flex-1 min-w-0">
-                <div className="relative group">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search mentor name, email, or passkey..."
-                    value={mentorsSearchQuery}
-                    onChange={(e) => setMentorsSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-semibold"
-                  />
+          <div className="space-y-2.5">
+            {/* ── ULTRA-COMPACT MENTORS KPI METRIC STRIP ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Total Mentors</span>
+                  <span className="text-base font-black text-slate-900 leading-none">{mentorsStats.total} Faculty</span>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">Class In-charges</span>
+                  <span className="text-base font-black text-indigo-900 leading-none">{mentorsStats.inchargeCount} Primary</span>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">Faculty Mentors</span>
+                  <span className="text-base font-black text-blue-900 leading-none">{mentorsStats.facultyCount} Mentors</span>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider block">Subject Faculty</span>
+                  <span className="text-base font-black text-purple-900 leading-none">{mentorsStats.subjectCount} Instructors</span>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between col-span-2 sm:col-span-1">
+                <div>
+                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Total Enrolled</span>
+                  <span className="text-base font-black text-emerald-900 leading-none">{mentorsStats.totalEnrolledStudents} Students</span>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+              </div>
+            </div>
+
+            {/* ── FILTER & TOOLBAR (COMPACT ERP BAR) ── */}
+            <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search faculty name, email, roll range..."
+                  value={mentorsSearchQuery}
+                  onChange={(e) => {
+                    setMentorsSearchQuery(e.target.value);
+                    setMentorsPage(1);
+                  }}
+                  className="w-full pl-8 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                />
+                {mentorsSearchQuery && (
+                  <button
+                    onClick={() => {
+                      setMentorsSearchQuery("");
+                      setMentorsPage(1);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5">
+                {/* Year Filter */}
+                <select
+                  value={mentorsYearFilter}
+                  onChange={(e) => {
+                    setMentorsYearFilter(e.target.value);
+                    setMentorsPage(1);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="All">All Academic Years</option>
+                  <option value="2nd Year">2nd Year (II Year)</option>
+                  <option value="3rd Year">3rd Year (III Year)</option>
+                  <option value="4th Year">4th Year (IV Year)</option>
+                </select>
+
+                {/* Section Filter */}
+                <select
+                  value={mentorsSectionFilter}
+                  onChange={(e) => {
+                    setMentorsSectionFilter(e.target.value);
+                    setMentorsPage(1);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="All">All Sections</option>
+                  <option value="2A">Section 2A</option>
+                  <option value="2B">Section 2B</option>
+                  <option value="2C">Section 2C</option>
+                  <option value="3A">Section 3A</option>
+                  <option value="3B">Section 3B</option>
+                  <option value="3C">Section 3C</option>
+                  <option value="4A">Section 4A</option>
+                  <option value="4B">Section 4B</option>
+                </select>
+
+                {/* Role Filter */}
+                <select
+                  value={mentorsRoleFilter}
+                  onChange={(e) => {
+                    setMentorsRoleFilter(e.target.value);
+                    setMentorsPage(1);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="All">All Roles</option>
+                  <option value="incharge">Class In-charge & Mentor</option>
+                  <option value="faculty">Faculty Mentor</option>
+                  <option value="subject">Subject Faculty</option>
+                </select>
+
+                {(mentorsYearFilter !== "All" || mentorsSectionFilter !== "All" || mentorsRoleFilter !== "All" || mentorsSearchQuery) && (
+                  <button
+                    onClick={() => {
+                      setMentorsYearFilter("All");
+                      setMentorsSectionFilter("All");
+                      setMentorsRoleFilter("All");
+                      setMentorsSearchQuery("");
+                      setMentorsPage(1);
+                    }}
+                    className="px-2 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 transition-colors cursor-pointer"
+                    title="Reset all filters"
+                  >
+                    Reset
+                  </button>
+                )}
+
+                {/* Page Size */}
+                <select
+                  value={mentorsPageSize}
+                  onChange={(e) => {
+                    setMentorsPageSize(Number(e.target.value));
+                    setMentorsPage(1);
+                  }}
+                  className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  title="Rows per page"
+                >
+                  <option value={20}>20 rows</option>
+                  <option value={50}>50 rows</option>
+                  <option value={-1}>All ({filteredMentorsList.length})</option>
+                </select>
+
+                {/* View Switcher: Table vs Cards */}
+                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                  <button
+                    onClick={() => setMentorsViewMode("table")}
+                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      mentorsViewMode === "table"
+                        ? "bg-white text-blue-700 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                    title="Table View (Low-scrolling ERP scan)"
+                  >
+                    <LayoutList className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setMentorsViewMode("card")}
+                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      mentorsViewMode === "card"
+                        ? "bg-white text-blue-700 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                    title="Card View"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Mentors Grid */}
+            {/* ── HIGH-DENSITY MENTOR DISPLAY (TABLE / CARD VIEW) ── */}
             {mentorsLoading ? (
-              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-gray-500">Loading faculty registry...</p>
+              <div className="bg-white border border-slate-200 p-12 flex flex-col items-center justify-center gap-2 rounded-xl shadow-2xs">
+                <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                <p className="text-xs font-semibold text-slate-500">Loading faculty registry...</p>
+              </div>
+            ) : filteredMentorsList.length === 0 ? (
+              <div className="bg-white border border-slate-200 p-12 text-center rounded-xl shadow-2xs">
+                <Users className="w-8 h-8 text-slate-300 mx-auto mb-1.5" />
+                <p className="text-xs font-bold text-slate-700">No mentors match the selected filters</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Try resetting the year, section, or search query</p>
+              </div>
+            ) : mentorsViewMode === "table" ? (
+              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto max-h-[calc(100vh-270px)] min-h-[300px] overflow-y-auto scrollbar-thin">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-2 px-2.5 text-center w-10">#</th>
+                        <th className="py-2 px-3">Faculty Name & Email</th>
+                        <th className="py-2 px-2.5">Year</th>
+                        <th className="py-2 px-2 text-center">Section</th>
+                        <th className="py-2 px-3">Designated Role</th>
+                        <th className="py-2 px-3">Allocated Roll Range</th>
+                        <th className="py-2 px-3">Passkey</th>
+                        <th className="py-2 px-2.5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                      {paginatedMentorsList.map((m, idx) => {
+                        const dbMentor = mentorsTracking.find((mt: any) =>
+                          mt.email?.toLowerCase() === m.email?.toLowerCase() ||
+                          mt.name?.toLowerCase() === m.name?.toLowerCase()
+                        );
+                        const key = dbMentor?.key || dbMentor?.passkey;
+                        const isKeyRevealed = !!revealedKeys[m.id];
+                        const isCopied = copiedKeyId === String(m.id);
+                        const isClassIncharge = m.role.includes("In-charge");
+                        const isFacultyMentor = m.role.includes("Faculty Mentor") && !isClassIncharge;
+                        const rowNum = mentorsPageSize === -1 ? idx + 1 : (mentorsPage - 1) * mentorsPageSize + idx + 1;
+
+                        return (
+                          <tr key={m.id} className="hover:bg-slate-50/80 transition-colors group">
+                            <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
+                              {rowNum}
+                            </td>
+                            <td className="py-1.5 px-3">
+                              <span className="font-bold text-slate-900 block leading-tight">
+                                {m.name}
+                              </span>
+                              <span className="text-[10.5px] font-mono text-slate-500 block">
+                                {m.email}
+                              </span>
+                            </td>
+                            <td className="py-1.5 px-2.5 whitespace-nowrap">
+                              <span
+                                className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                  m.yearLabel?.includes("4")
+                                    ? "bg-amber-50 border-amber-300 text-amber-900"
+                                    : m.yearLabel?.includes("3")
+                                    ? "bg-blue-50 border-blue-300 text-blue-900"
+                                    : "bg-emerald-50 border-emerald-300 text-emerald-900"
+                                }`}
+                              >
+                                {m.yearLabel}
+                              </span>
+                            </td>
+                            <td className="py-1.5 px-2 text-center whitespace-nowrap">
+                              <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[10px] font-bold font-mono">
+                                Sec {m.section}
+                              </span>
+                            </td>
+                            <td className="py-1.5 px-3">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                  isClassIncharge
+                                    ? "bg-indigo-50 border-indigo-300 text-indigo-900"
+                                    : isFacultyMentor
+                                    ? "bg-blue-50 border-blue-300 text-blue-900"
+                                    : "bg-purple-50 border-purple-300 text-purple-900"
+                                }`}
+                              >
+                                {isClassIncharge && <ShieldCheck className="w-3 h-3 text-indigo-700 shrink-0" />}
+                                <span>{m.role}</span>
+                              </span>
+                            </td>
+                            <td className="py-1.5 px-3">
+                              <div className="flex items-center gap-1.5 font-mono text-[10.5px]">
+                                <span className="font-bold text-slate-800 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                                  {m.rollRange}
+                                </span>
+                                <span className="text-[9.5px] font-semibold text-slate-500">
+                                  ({m.count} std)
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-1.5 px-3">
+                              {key ? (
+                                <div className="flex items-center gap-1">
+                                  <span className={`font-mono font-bold rounded px-1.5 py-0.5 border text-[10.5px] ${
+                                    isKeyRevealed
+                                      ? "bg-blue-50 text-blue-950 border-blue-300"
+                                      : "bg-slate-50 text-slate-700 border-slate-200"
+                                  }`}>
+                                    {isKeyRevealed ? key : "••••••••"}
+                                  </span>
+                                  <button
+                                    onClick={() => toggleRevealKey(m.id)}
+                                    className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                                    title={isKeyRevealed ? "Hide Passkey" : "Show Passkey"}
+                                  >
+                                    {isKeyRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                  </button>
+                                  <button
+                                    onClick={() => handleCopyKey(key, m.id)}
+                                    className={`p-1 rounded transition-colors cursor-pointer ${
+                                      isCopied ? "bg-emerald-100 text-emerald-800" : "hover:bg-slate-100 text-slate-500 hover:text-slate-800"
+                                    }`}
+                                    title="Copy Passkey"
+                                  >
+                                    {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-mono text-slate-400 italic">Not set</span>
+                              )}
+                            </td>
+                            <td className="py-1.5 px-2.5 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  onClick={() => setSelectedMentorForModal({ ...m, key })}
+                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  title="View Mentor Details"
+                                >
+                                  <span>View</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setMentorEditData({
+                                      id: m.id,
+                                      name: m.name,
+                                      email: m.email,
+                                      role: m.role,
+                                      section: m.section,
+                                      key: key || "",
+                                    });
+                                    setEditKeyInput(key || "");
+                                    setEditMentorModalOpen(true);
+                                  }}
+                                  className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
+                                  title="Edit Passkey / Assignment"
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Compact Pagination Footer */}
+                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                  <div>
+                    Showing <strong className="text-slate-900">{filteredMentorsList.length === 0 ? 0 : (mentorsPage - 1) * (mentorsPageSize === -1 ? filteredMentorsList.length : mentorsPageSize) + 1}</strong> to <strong className="text-slate-900">{mentorsPageSize === -1 ? filteredMentorsList.length : Math.min(mentorsPage * mentorsPageSize, filteredMentorsList.length)}</strong> of <strong className="text-slate-900">{filteredMentorsList.length}</strong> mentors
+                  </div>
+
+                  {mentorsPageSize !== -1 && totalMentorsPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setMentorsPage((p) => Math.max(1, p - 1))}
+                        disabled={mentorsPage === 1}
+                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                      >
+                        Prev
+                      </button>
+                      <span className="px-2 font-mono text-[11px] font-bold text-slate-800">
+                        {mentorsPage} / {totalMentorsPages}
+                      </span>
+                      <button
+                        onClick={() => setMentorsPage((p) => Math.min(totalMentorsPages, p + 1))}
+                        disabled={mentorsPage >= totalMentorsPages}
+                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {OFFICIAL_FACULTY_LIST.filter((m) => {
-                  const q = mentorsSearchQuery.toLowerCase().trim();
-                  if (!q) return true;
-                  return (
-                    m.name.toLowerCase().includes(q) ||
-                    m.email.toLowerCase().includes(q) ||
-                    m.role.toLowerCase().includes(q) ||
-                    m.section.toLowerCase().includes(q)
+              /* Compact Streamlined Card View (~100px height) */
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5 max-h-[calc(100vh-270px)] min-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+                {paginatedMentorsList.map((m) => {
+                  const dbMentor = mentorsTracking.find((mt: any) =>
+                    mt.email?.toLowerCase() === m.email?.toLowerCase() ||
+                    mt.name?.toLowerCase() === m.name?.toLowerCase()
                   );
-                }).map((m) => (
-                  <div key={m.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-gray-300 transition-colors shadow-lg min-w-0 overflow-hidden">
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-300 flex items-center justify-center text-sm font-black text-gray-700 uppercase flex-shrink-0">
-                          {m.name.split(" ").slice(-1)[0]?.charAt(0) || m.name.charAt(0)}
-                        </div>
+                  const key = dbMentor?.key || dbMentor?.passkey;
+                  const isKeyRevealed = !!revealedKeys[m.id];
+                  const isCopied = copiedKeyId === String(m.id);
+                  const isClassIncharge = m.role.includes("In-charge");
+
+                  return (
+                    <div
+                      key={m.id}
+                      className="bg-white border border-slate-200 hover:border-blue-400 rounded-xl p-3 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between space-y-2"
+                    >
+                      <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <p className="font-extrabold text-gray-900 text-sm leading-tight truncate">{m.name}</p>
-                          <p className="text-[11px] text-gray-400 font-mono mt-0.5 truncate w-full block">{m.email}</p>
+                          <h4 className="font-bold text-slate-900 text-xs leading-tight truncate" title={m.name}>
+                            {m.name}
+                          </h4>
+                          <p className="text-[10.5px] text-slate-500 font-mono mt-0.5 truncate">
+                            {m.email}
+                          </p>
                         </div>
+                        <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-slate-100 border border-slate-200 text-slate-800 font-mono shrink-0">
+                          Sec {m.section}
+                        </span>
                       </div>
-                      <span className={`flex-shrink-0 inline-block px-2.5 py-1 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
-                        m.yearLabel?.includes("4") ? "bg-orange-50 border-orange-200 text-orange-700"
-                        : m.yearLabel?.includes("3") ? "bg-blue-50 border-blue-200 text-blue-700"
-                        : "bg-emerald-50 border-emerald-200 text-emerald-700"
-                      }`}>
-                        {m.yearLabel}
-                      </span>
-                    </div>
 
-                    {/* Section & Roll Range */}
-                    <div className="bg-gray-100 rounded-xl px-4 py-3 border border-gray-200 min-w-0 overflow-hidden">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Assigned Section</span>
-                        <span className="text-xs font-black text-emerald-700 font-mono">Sec {m.section}</span>
-                      </div>
-                      <p className="text-[11px] text-gray-700 font-mono mt-1 pt-1.5 border-t border-gray-300/40 break-words leading-relaxed">{m.rollRange}</p>
-                    </div>
-
-                    {/* Role & Students Count */}
-                    <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5 border border-gray-200">
-                      <span className="text-xs font-bold text-gray-500 truncate">{m.role}</span>
-                      <span className="text-xs font-black text-gray-800 font-mono bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-300 flex-shrink-0">{m.count} Students</span>
-                    </div>
-
-                    {/* Login Key from DB */}
-                    {(() => {
-                      const dbMentor = mentorsTracking.find((mt: any) =>
-                        mt.email?.toLowerCase() === m.email?.toLowerCase() ||
-                        mt.name?.toLowerCase() === m.name?.toLowerCase()
-                      );
-                      const key = dbMentor?.key || dbMentor?.passkey;
-                      return key ? (
-                        <div className="flex items-center justify-between bg-blue-50 rounded-xl px-3.5 py-2.5 border border-blue-100">
-                          <span className="text-xs font-bold text-blue-500 flex items-center gap-1.5">
-                            🔑 Login Key
+                      <div className="bg-slate-50 rounded-lg p-2 border border-slate-200 text-[10.5px] space-y-1">
+                        <div className="flex items-center justify-between text-slate-600 font-semibold">
+                          <span>Role / Year:</span>
+                          <span className="font-bold text-slate-900">
+                            {m.role} • {m.yearLabel}
                           </span>
-                          <span className="text-sm font-black text-blue-800 font-mono tracking-[0.2em] bg-white px-2.5 py-1 rounded-lg border border-blue-200 select-all">{key}</span>
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3.5 py-2.5 border border-gray-200">
-                          <span className="text-xs font-bold text-gray-400 flex items-center gap-1.5">🔑 Login Key</span>
-                          <span className="text-xs font-mono text-gray-400 italic">Not set in DB</span>
+                        <div className="flex items-center justify-between text-slate-600 font-semibold">
+                          <span>Roll Range:</span>
+                          <span className="font-mono font-bold text-blue-800">
+                            {m.rollRange} ({m.count} std)
+                          </span>
                         </div>
-                      );
-                    })()}
-                  </div>
-                ))}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10.5px] font-bold text-slate-500">Key:</span>
+                          <span className="font-mono font-bold text-[10.5px] text-slate-800 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                            {isKeyRevealed ? key || "None" : "••••••••"}
+                          </span>
+                          {key && (
+                            <button
+                              onClick={() => toggleRevealKey(m.id)}
+                              className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
+                              title={isKeyRevealed ? "Hide" : "Show"}
+                            >
+                              {isKeyRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setSelectedMentorForModal({ ...m, key })}
+                            className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 text-slate-700 text-[10.5px] font-bold border border-slate-200 cursor-pointer"
+                          >
+                            Details
+                          </button>
+                          <button
+                            onClick={() => {
+                              setMentorEditData({
+                                id: m.id,
+                                name: m.name,
+                                email: m.email,
+                                role: m.role,
+                                section: m.section,
+                                key: key || "",
+                              });
+                              setEditKeyInput(key || "");
+                              setEditMentorModalOpen(true);
+                            }}
+                            className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer"
+                            title="Edit"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
-          </>
+          </div>
         ) : activeTab === "schedules" ? (
-          <div className="space-y-6">
-            {/* Department Timetable Header & Controls Bar matching Image 1 */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border border-gray-200 p-6 rounded-3xl shadow-sm">
-              <div>
-                <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-                  <GraduationCap className="w-7 h-7 text-blue-600" />
-                  Department Timetable
-                </h2>
-                <p className="text-xs font-semibold text-gray-500 mt-1">
-                  Manage and view weekly academic schedules across sections.
-                </p>
-              </div>
+          <div className="space-y-3">
+            {/* ── ULTRA-COMPACT HEADER & SECTION SELECTOR BAR ── */}
+            {(() => {
+              const activeSecKey = selectedTimetableSection === "All" ? "2A" : selectedTimetableSection;
+              const activeSecMeta = SECTION_METADATA_REGISTRY[activeSecKey] || SECTION_METADATA_REGISTRY["2A"];
 
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Section Filter Pills */}
-                <div className="flex items-center gap-1.5 bg-gray-100 p-1.5 rounded-2xl border border-gray-200 flex-wrap">
-                  <button
-                    onClick={() => setSelectedTimetableSection("All")}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      selectedTimetableSection === "All"
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-200/60"
-                    }`}
-                  >
-                    All Sections
-                  </button>
-                  {availableTimetableSections.map((sec) => (
+              return (
+                <div className="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs space-y-2.5">
+                  {/* Top Row: Title, Metadata Chips & Primary Actions */}
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                        <GraduationCap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h2 className="text-base font-bold text-slate-900 leading-none">
+                            Department Master Timetable
+                          </h2>
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-100 text-blue-950 border border-blue-300">
+                            {selectedTimetableSection === "All" ? "All Sections (Showing 2A)" : `Section ${activeSecMeta.sectionKey} • ${activeSecMeta.yearLabel}`}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-indigo-50 text-indigo-950 border border-indigo-200">
+                            👤 {activeSecMeta.classIncharge.name} (In-charge)
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-950 border border-emerald-200">
+                            📍 {activeSecMeta.lectureHall}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700">
+                            {activeSecMeta.totalStudents} Students
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {/* Print / Export Timetable */}
+                      <button
+                        onClick={() => setTimetablePrintModalOpen(true)}
+                        className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                      >
+                        <Printer className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Print / Export</span>
+                      </button>
+
+                      {/* Assign New Class */}
+                      <button
+                        onClick={() => setNewClassModalOpen(true)}
+                        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Assign Class</span>
+                      </button>
+
+                      {/* View Switcher Toggle */}
+                      <div className="flex items-center bg-slate-100 border border-slate-200 p-0.5 rounded-lg">
+                        <button
+                          onClick={() => setTimetableViewMode("grid")}
+                          title="Weekly Matrix Grid View"
+                          className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                            timetableViewMode === "grid" ? "bg-white text-blue-600 shadow-2xs" : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          <LayoutGrid className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setTimetableViewMode("list")}
+                          title="Management List View"
+                          className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                            timetableViewMode === "list" ? "bg-white text-blue-600 shadow-2xs" : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          <List className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section Selector Pills Row */}
+                  <div className="flex items-center gap-1 pt-2 border-t border-slate-100 overflow-x-auto text-xs scrollbar-none">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 mr-1 flex items-center gap-1 flex-shrink-0">
+                      <SlidersHorizontal className="w-3 h-3" /> Section:
+                    </span>
                     <button
-                      key={sec}
-                      onClick={() => setSelectedTimetableSection(sec)}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        selectedTimetableSection === sec
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-200/60"
+                      onClick={() => setSelectedTimetableSection("All")}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                        selectedTimetableSection === "All"
+                          ? "bg-blue-600 text-white shadow-2xs"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
                       }`}
                     >
-                      Section {sec}
+                      All Sections
                     </button>
-                  ))}
+                    {["2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B"].map((sec) => (
+                      <button
+                        key={sec}
+                        onClick={() => setSelectedTimetableSection(sec)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                          selectedTimetableSection === sec
+                            ? "bg-blue-600 text-white shadow-2xs"
+                            : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
+                        }`}
+                      >
+                        Section {sec}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              );
+            })()}
 
-                {/* Download Schedule */}
-                <button
-                  onClick={handleDownloadSchedule}
-                  className="px-4 py-2.5 rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold text-xs flex items-center gap-2 transition-all shadow-xs cursor-pointer"
-                >
-                  <Download className="w-4 h-4 text-blue-600" />
-                  Download Schedule
-                </button>
-
-                {/* Assign New Class */}
-                <button
-                  onClick={() => setNewClassModalOpen(true)}
-                  className="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-lg shadow-blue-600/30 active:scale-[0.98] cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  Assign New Class
-                </button>
-
-                {/* View Switcher Toggle */}
-                <div className="flex items-center bg-gray-100 border border-gray-200 p-1 rounded-2xl">
-                  <button
-                    onClick={() => setTimetableViewMode("grid")}
-                    title="Timetable Grid View"
-                    className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      timetableViewMode === "grid" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-gray-700"
-                    }`}
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setTimetableViewMode("list")}
-                    title="Management List View"
-                    className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      timetableViewMode === "list" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400 hover:text-gray-700"
-                    }`}
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Search Bar Toolbar */}
-            <div className="bg-white border border-gray-200 p-4 rounded-2xl flex items-center gap-3 shadow-xs">
-              <Search className="w-4 h-4 text-gray-400" />
+            {/* ── ULTRA-COMPACT SEARCH BAR ── */}
+            <div className="bg-white border border-slate-200 px-3 py-2 rounded-xl flex items-center gap-2 shadow-2xs">
+              <Search className="w-3.5 h-3.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Filter timetable by subject, room, section, day or faculty name..."
+                placeholder="Search subject, faculty, room or day..."
                 value={schedulesSearchQuery}
                 onChange={(e) => setSchedulesSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-sm font-semibold text-gray-800 placeholder-gray-400 focus:outline-none"
+                className="w-full bg-transparent text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none"
               />
             </div>
 
             {schedulesLoading ? (
-              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4 rounded-3xl">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-gray-500">Loading department timetables...</p>
+              <div className="bg-white border border-slate-200 p-12 flex flex-col items-center justify-center gap-2 rounded-2xl">
+                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-xs font-semibold text-slate-500">Loading department academic schedule...</p>
               </div>
             ) : timetableViewMode === "grid" ? (
-              /* ── GRID VIEW (Matching Image 1 Design) ── */
-              <Card className="bg-white border border-gray-200 rounded-3xl shadow-xl overflow-hidden p-6">
-                {(() => {
-                  const daysOfWeek = [
-                    { key: "MON", label: "MONDAY" },
-                    { key: "TUE", label: "TUESDAY" },
-                    { key: "WED", label: "WEDNESDAY" },
-                    { key: "THUR", label: "THURSDAY" },
-                    { key: "FRI", label: "FRIDAY" },
-                    { key: "SAT", label: "SATURDAY" },
-                  ];
+              /* ── ULTRA-COMPACT WEEKLY TIMETABLE MATRIX (GRID VIEW) ── */
+              <div className="space-y-3">
+                <Card className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden p-2 sm:p-3">
+                  {(() => {
+                    const daysOfWeek = [
+                      { key: "MON", label: "MON" },
+                      { key: "TUE", label: "TUE" },
+                      { key: "WED", label: "WED" },
+                      { key: "THUR", label: "THU" },
+                      { key: "FRI", label: "FRI" },
+                      { key: "SAT", label: "SAT" },
+                    ];
 
-                  const defaultSlots = [
-                    { start: "09:00", end: "10:00", label: "09:00 - 10:00" },
-                    { start: "10:00", end: "11:00", label: "10:00 - 11:00" },
-                    { start: "11:00", end: "11:10", label: "11:00 - 11:10", isBreak: true, breakName: "MORNING BREAK" },
-                    { start: "11:10", end: "12:10", label: "11:10 - 12:10" },
-                    { start: "12:10", end: "01:10", label: "12:10 - 01:10" },
-                    { start: "01:10", end: "02:00", label: "01:10 - 02:00", isBreak: true, breakName: "LUNCH BREAK" },
-                    { start: "02:00", end: "03:00", label: "02:00 - 03:00" },
-                    { start: "03:00", end: "04:00", label: "03:00 - 04:00" },
-                  ];
+                    const defaultSlots = [
+                      { slotIdx: 0, start: "09:00", end: "10:00", label: "09:00 - 10:00", periodName: "Period I" },
+                      { slotIdx: 1, start: "10:00", end: "11:00", label: "10:00 - 11:00", periodName: "Period II" },
+                      { isBreak: true, breakName: "TEA BREAK (11:00 - 11:10 AM)" },
+                      { slotIdx: 2, start: "11:10", end: "12:10", label: "11:10 - 12:10", periodName: "Period III" },
+                      { slotIdx: 3, start: "12:10", end: "01:10", label: "12:10 - 01:10", periodName: "Period IV" },
+                      { isBreak: true, breakName: "LUNCH BREAK (01:10 - 02:00 PM)" },
+                      { slotIdx: 4, start: "02:00", end: "03:00", label: "02:00 - 03:00", periodName: "Period V" },
+                      { slotIdx: 5, start: "03:00", end: "04:00", label: "03:00 - 04:00", periodName: "Period VI" },
+                    ];
 
-                  return (
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="border-b border-gray-200">
-                            <th className="py-4 px-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-left w-36 bg-gray-50/50 rounded-tl-xl border-r border-gray-200">
-                              TIME
-                            </th>
-                            {daysOfWeek.map((day) => (
-                              <th
-                                key={day.key}
-                                className="py-4 px-4 text-xs font-extrabold text-gray-500 uppercase tracking-wider text-center bg-gray-50/50"
-                              >
-                                {day.label}
+                    const activeSecKey = selectedTimetableSection === "All" ? "2A" : selectedTimetableSection;
+                    const secMeta = SECTION_METADATA_REGISTRY[activeSecKey] || SECTION_METADATA_REGISTRY["2A"];
+                    const exactSecSchedule = DEPARTMENT_EXACT_TIMETABLE[activeSecKey] || DEPARTMENT_EXACT_TIMETABLE["2A"];
+
+                    return (
+                      <div className="overflow-x-auto scrollbar-thin">
+                        <table className="w-full border-collapse text-xs">
+                          <thead>
+                            <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+                              <th className="py-2 px-2 text-center w-28 border-r border-slate-200">
+                                TIME / SLOT
                               </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {defaultSlots.map((slot, sIdx) => {
-                            if (slot.isBreak) {
-                              return (
-                                <tr key={sIdx} className="bg-gray-50/70 border-y border-gray-200/80">
-                                  <td className="py-3 px-4 font-mono text-xs font-bold text-gray-500 text-center border-r border-gray-200">
-                                    {slot.label}
-                                  </td>
-                                  <td colSpan={daysOfWeek.length} className="py-3 px-4 text-center">
-                                    <div className="inline-flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest bg-white border border-gray-200 px-6 py-1 rounded-full shadow-2xs">
-                                      <Coffee className="w-3.5 h-3.5 text-amber-500" />
-                                      {slot.breakName}
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            }
+                              {daysOfWeek.map((day) => (
+                                <th
+                                  key={day.key}
+                                  className="py-2 px-2 text-center min-w-[125px]"
+                                >
+                                  {day.label}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 text-xs">
+                            {defaultSlots.map((slot, sIdx) => {
+                              if (slot.isBreak) {
+                                return (
+                                  <tr key={sIdx} className="bg-amber-50/70 border-y border-amber-200/80">
+                                    <td colSpan={daysOfWeek.length + 1} className="py-1 px-3 text-center">
+                                      <div className="inline-flex items-center gap-1.5 text-[10px] font-black text-amber-950 uppercase tracking-wider">
+                                        <Coffee className="w-3 h-3 text-amber-700" />
+                                        {slot.breakName}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
 
-                            return (
-                              <tr key={sIdx} className="hover:bg-gray-50/30 transition-colors">
-                                <td className="py-4 px-4 font-mono text-xs font-bold text-gray-600 align-middle border-r border-gray-100 text-center bg-gray-50/20">
-                                  {slot.label}
-                                </td>
-                                {daysOfWeek.map((day) => {
-                                  const matchingSchedules = (schedules || []).filter((s: any) => {
-                                    // Section filter
-                                    if (selectedTimetableSection !== "All") {
-                                      let yr = (s.year || "").toString().trim();
-                                      if (yr === "II" || yr === "2nd Year" || yr === "2") yr = "2";
-                                      else if (yr === "III" || yr === "3rd Year" || yr === "3") yr = "3";
-                                      else if (yr === "IV" || yr === "4th Year" || yr === "4") yr = "4";
-                                      const secKey = `${yr}${s.section || ""}`.trim().toUpperCase();
-                                      if (secKey !== selectedTimetableSection && s.section?.toUpperCase() !== selectedTimetableSection) {
-                                        return false;
-                                      }
-                                    }
+                              const pIdx = slot.slotIdx!;
+
+                              return (
+                                <tr key={sIdx} className="hover:bg-slate-50/40 transition-colors">
+                                  {/* Period Column */}
+                                  <td className="py-1.5 px-2 align-middle border-r border-slate-200 text-center bg-slate-50/30">
+                                    <span className="block text-[9.5px] font-bold text-slate-400 uppercase">{slot.periodName}</span>
+                                    <span className="block font-mono text-[10px] font-bold text-slate-800 mt-0.5">{slot.label}</span>
+                                  </td>
+
+                                  {/* Day Columns */}
+                                  {daysOfWeek.map((day) => {
+                                    const slotKey = `${activeSecKey}:${day.key}:${pIdx}`;
+                                    const rawSubj = customSubjectOverrides?.[activeSecKey]?.[slotKey] || exactSecSchedule[day.key]?.[pIdx] || "Free";
+                                    const isFree = rawSubj === "Free" || !rawSubj || rawSubj.trim() === "";
 
                                     // Search filter
                                     const q = schedulesSearchQuery.toLowerCase().trim();
                                     if (q) {
-                                      const matchSearch =
-                                        (s.qr_mentors?.name || "").toLowerCase().includes(q) ||
-                                        s.day_of_week.toLowerCase().includes(q) ||
-                                        s.section.toLowerCase().includes(q) ||
-                                        s.year.toLowerCase().includes(q) ||
-                                        (s.subject || "").toLowerCase().includes(q);
-                                      if (!matchSearch) return false;
+                                      const match = rawSubj.toLowerCase().includes(q) ||
+                                        day.label.toLowerCase().includes(q) ||
+                                        secMeta.lectureHall.toLowerCase().includes(q);
+                                      if (!match) {
+                                        return (
+                                          <td key={day.key} className="py-1 px-1.5 align-middle opacity-25">
+                                            <div className="p-1 text-[10px] text-center text-slate-400">—</div>
+                                          </td>
+                                        );
+                                      }
                                     }
 
-                                    // Day match
-                                    const dUpper = (s.day_of_week || "").toUpperCase();
-                                    const dayMatch = dUpper.startsWith(day.key) || dUpper.includes(day.key);
-                                    if (!dayMatch) return false;
+                                    if (isFree) {
+                                      return (
+                                        <td key={day.key} className="py-1 px-1.5 align-middle min-w-[125px]">
+                                          <div
+                                            onClick={() => handleOpenSlotReassign({
+                                              sectionKey: activeSecKey,
+                                              dayKey: day.key,
+                                              dayLabel: day.label,
+                                              slotIdx: pIdx,
+                                              periodName: slot.periodName || "",
+                                              timeLabel: slot.label,
+                                              subject: "Free",
+                                              currentFaculty: "Unassigned",
+                                              room: secMeta.lectureHall,
+                                            })}
+                                            title="Click to assign subject and faculty for this free period"
+                                            className="border border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-700 rounded-lg flex items-center justify-center p-1.5 min-h-[48px] text-[11px] font-bold text-slate-400 bg-slate-50/40 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] group"
+                                          >
+                                            <div className="flex items-center gap-1">
+                                              <span>Free</span>
+                                              <Plus className="w-3 h-3 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            </div>
+                                          </div>
+                                        </td>
+                                      );
+                                    }
 
-                                    // Time slot match
-                                    const st = (s.start_time || "").slice(0, 5);
-                                    return st === slot.start || (st >= slot.start && st < slot.end);
-                                  });
+                                    const subjDetails = getTimetableSubjectDetails(rawSubj, activeSecKey);
+                                    const faculty = getSectionFacultyForSubject(rawSubj, activeSecKey, day.key, pIdx, customFacultyOverrides);
+                                    const isLab = subjDetails.type === "practical" || rawSubj.includes("LAB") || rawSubj.includes("/");
+                                    const isActivity = subjDetails.type === "activity" || ["SPORTS", "LIBRARY", "COUNSELLING", "CLUB ACTIVITIES", "APTITUDE"].includes(rawSubj.toUpperCase());
 
-                                  return (
-                                    <td key={day.key} className="py-3 px-3 align-top min-w-[175px]">
-                                      {matchingSchedules.length === 0 ? (
-                                        <div className="border-2 border-dashed border-gray-200/80 rounded-2xl flex items-center justify-center p-4 min-h-[95px] text-xs font-bold text-gray-300 bg-gray-50/30 select-none">
-                                          Free Slot
-                                        </div>
-                                      ) : (
-                                        <div className="space-y-2">
-                                          {matchingSchedules.map((s: any) => {
-                                            const overrideObj = (scheduleOverrides || []).find((o: any) => o.scheduleId === s.id);
-                                            const isUnlocked = overrideObj ? overrideObj.isUnlocked : false;
-                                            const extendedMins = overrideObj ? overrideObj.extendedMinutes : 0;
-
-                                            return (
-                                              <div
-                                                key={s.id}
-                                                className="group relative bg-blue-50/70 border border-blue-200/90 hover:border-blue-400 hover:shadow-md rounded-2xl p-3.5 transition-all flex flex-col justify-between min-h-[100px]"
-                                              >
-                                                <div>
-                                                  <div className="flex items-start justify-between gap-1">
-                                                    <h4 className="font-extrabold text-slate-900 text-sm leading-snug">
-                                                      {s.subject || "Untitled Subject"}
-                                                    </h4>
-                                                    {isUnlocked && (
-                                                      <span className="flex-shrink-0 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="HOD Override Unlocked" />
-                                                    )}
-                                                  </div>
-
-                                                  <div className="mt-2 space-y-1">
-                                                    <div className="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5 font-mono">
-                                                      <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                                                      <span>Room 301</span>
-                                                    </div>
-                                                    <div className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                                                      <User className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
-                                                      <span className="truncate">{s.qr_mentors?.name || "Unassigned"}</span>
-                                                    </div>
-                                                  </div>
-                                                </div>
-
-                                                {/* Card Action Controls */}
-                                                <div className="mt-3 pt-2 border-t border-blue-200/60 flex items-center justify-between gap-1">
-                                                  <button
-                                                    onClick={() => handleToggleScheduleOverride(s.id, isUnlocked, extendedMins)}
-                                                    className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors ${
-                                                      isUnlocked ? "bg-emerald-600 text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
-                                                    }`}
-                                                    title="Toggle Lock/Unlock Status"
-                                                  >
-                                                    {isUnlocked ? <Unlock className="w-3 h-3 text-white" /> : <Lock className="w-3 h-3 text-gray-500" />}
-                                                    {isUnlocked ? "UNLOCKED" : "LOCKED"}
-                                                  </button>
-
-                                                  <button
-                                                    onClick={() => handleOpenAssignModal(s)}
-                                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                                                    title="Assign Faculty"
-                                                  >
-                                                    <UserPlus className="w-3 h-3" />
-                                                    Assign
-                                                  </button>
-                                                </div>
-                                              </div>
-                                            );
+                                    return (
+                                      <td key={day.key} className="py-1 px-1.5 align-middle min-w-[125px]">
+                                        <div
+                                          onClick={() => handleOpenSlotReassign({
+                                            sectionKey: activeSecKey,
+                                            dayKey: day.key,
+                                            dayLabel: day.label,
+                                            slotIdx: pIdx,
+                                            periodName: slot.periodName || "",
+                                            timeLabel: slot.label,
+                                            subject: rawSubj,
+                                            currentFaculty: faculty,
+                                            room: isLab ? secMeta.labRoom : secMeta.lectureHall,
                                           })}
+                                          title={`Click to reassign faculty for ${rawSubj}`}
+                                          className={`rounded-lg p-1.5 border transition-all flex flex-col justify-between min-h-[48px] cursor-pointer group hover:scale-[1.02] active:scale-[0.98] ${
+                                            isLab
+                                              ? "bg-emerald-50/90 border-emerald-300 hover:border-emerald-500 hover:ring-2 hover:ring-emerald-400/40 shadow-2xs"
+                                              : isActivity
+                                              ? "bg-amber-50/80 border-amber-200 hover:border-amber-400 hover:ring-2 hover:ring-amber-400/40 shadow-2xs"
+                                              : "bg-blue-50/90 border-blue-200 hover:border-blue-400 hover:ring-2 hover:ring-blue-400/40 shadow-2xs"
+                                          }`}
+                                        >
+                                          <div>
+                                            {/* Tag & Code Row */}
+                                            <div className="flex items-center justify-between gap-1 mb-0.5">
+                                              <span className={`px-1.5 py-0.2 rounded text-[8.5px] font-black uppercase tracking-wider ${
+                                                isLab
+                                                  ? "bg-emerald-200 text-emerald-950 border border-emerald-300"
+                                                  : isActivity
+                                                  ? "bg-amber-200 text-amber-950 border border-amber-300"
+                                                  : "bg-blue-200 text-blue-950 border border-blue-300"
+                                              }`}>
+                                                {isLab ? "LAB" : isActivity ? "ACT" : "THEORY"}
+                                              </span>
+                                              <div className="flex items-center gap-1">
+                                                <span className="font-mono text-[9px] font-bold text-slate-600 truncate">
+                                                  {subjDetails.code}
+                                                </span>
+                                                <Edit3 className="w-2.5 h-2.5 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                                              </div>
+                                            </div>
+
+                                            {/* Subject Title */}
+                                            <h4 className="font-bold text-slate-900 text-[11px] leading-tight truncate" title={subjDetails.fullName || rawSubj}>
+                                              {rawSubj}
+                                            </h4>
+
+                                            {/* Faculty & Venue */}
+                                            <div className="mt-1 flex items-center justify-between text-[9.5px] text-slate-600 font-semibold gap-1">
+                                              <span className="truncate flex items-center gap-0.5" title={faculty}>
+                                                <User className="w-2.5 h-2.5 text-slate-500 flex-shrink-0" />
+                                                <span className="truncate">{faculty}</span>
+                                              </span>
+                                              <span className="font-mono text-slate-500 flex-shrink-0">
+                                                {isLab ? "Lab" : secMeta.lectureHall.replace("Hall ", "H")}
+                                              </span>
+                                            </div>
+                                          </div>
                                         </div>
-                                      )}
-                                    </td>
-                                  );
-                                })}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
+                </Card>
+
+                {/* ── ULTRA-COMPACT COURSE REFERENCE CATALOG ── */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                        Academic Course & Faculty Allocation (Section {selectedTimetableSection === "All" ? "2A" : selectedTimetableSection})
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                          <th className="py-1.5 px-2 text-center w-10">S.No</th>
+                          <th className="py-1.5 px-2">Code</th>
+                          <th className="py-1.5 px-3">Subject / Lab Title</th>
+                          <th className="py-1.5 px-2 text-center">Type</th>
+                          <th className="py-1.5 px-3">Assigned Faculty</th>
+                          <th className="py-1.5 px-2">Room</th>
+                          <th className="py-1.5 px-2 text-center">Edit</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-medium text-[11px]">
+                        {(() => {
+                          const activeSecKey = selectedTimetableSection === "All" ? "2A" : selectedTimetableSection;
+                          const activeSecMeta = SECTION_METADATA_REGISTRY[activeSecKey] || SECTION_METADATA_REGISTRY["2A"];
+                          const sched = DEPARTMENT_EXACT_TIMETABLE[activeSecKey] || DEPARTMENT_EXACT_TIMETABLE["2A"];
+
+                          const uniqueSubjects = Array.from(new Set(
+                            Object.values(sched).flat().filter((s) => s && s !== "Free")
+                          ));
+
+                          return uniqueSubjects.map((rawSubj, idx) => {
+                            const details = getTimetableSubjectDetails(rawSubj, activeSecKey);
+                            const faculty = getSectionFacultyForSubject(rawSubj, activeSecKey, undefined, undefined, customFacultyOverrides);
+                            const isLab = details.type === "practical" || rawSubj.includes("LAB") || rawSubj.includes("/");
+
+                            return (
+                              <tr key={rawSubj} className="hover:bg-slate-50/70 transition-colors">
+                                <td className="py-1.5 px-2 text-center font-mono font-bold text-slate-500">{idx + 1}</td>
+                                <td className="py-1.5 px-2 font-mono font-bold text-blue-700">{details.code}</td>
+                                <td className="py-1.5 px-3 font-bold text-slate-900">{details.fullName || rawSubj}</td>
+                                <td className="py-1.5 px-2 text-center">
+                                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                                    isLab
+                                      ? "bg-emerald-100 text-emerald-950 border border-emerald-300"
+                                      : "bg-blue-100 text-blue-950 border border-blue-300"
+                                  }`}>
+                                    {isLab ? "LAB" : "THEORY"}
+                                  </span>
+                                </td>
+                                <td className="py-1.5 px-3 font-bold text-slate-800">{faculty}</td>
+                                <td className="py-1.5 px-2 font-mono text-[10px] text-slate-600">
+                                  {isLab ? activeSecMeta.labRoom : activeSecMeta.lectureHall}
+                                </td>
+                                <td className="py-1.5 px-2 text-center">
+                                  <button
+                                    onClick={() => handleOpenSlotReassign({
+                                      sectionKey: activeSecKey,
+                                      dayKey: "ALL",
+                                      dayLabel: "All Days",
+                                      slotIdx: 0,
+                                      periodName: "Subject Scope",
+                                      timeLabel: "All Slots",
+                                      subject: rawSubj,
+                                      currentFaculty: faculty,
+                                      room: isLab ? activeSecMeta.labRoom : activeSecMeta.lectureHall,
+                                    })}
+                                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <Edit3 className="w-2.5 h-2.5" />
+                                    <span>Reassign</span>
+                                  </button>
+                                </td>
                               </tr>
                             );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  );
-                })()}
-              </Card>
+                          });
+                        })()}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             ) : (
-              /* ── MANAGEMENT LIST VIEW (Matching Image 2 Design) ── */
-              <Card className="bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-md">
-                <div className="overflow-x-auto max-h-[620px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-                  <table className="w-full text-left border-collapse relative">
-                    <thead className="sticky top-0 z-20 bg-white shadow-md">
-                      <tr className="border-b border-gray-200 bg-white text-gray-600 text-xs font-semibold uppercase tracking-wider">
-                        <th className="py-4 px-6">Mentor / Teacher</th>
-                        <th className="py-4 px-6">Day</th>
-                        <th className="py-4 px-6">Time Slot</th>
-                        <th className="py-4 px-6">Class / Section</th>
-                        <th className="py-4 px-6">Subject</th>
-                        <th className="py-4 px-6 text-center">HOD Attendance Switch & Buffer</th>
-                        <th className="py-4 px-6 text-center">Assign Faculty</th>
+              /* ── COMPACT LIST VIEW ── */
+              <Card className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto max-h-[500px] overflow-y-auto scroll-smooth scrollbar-thin">
+                  <table className="w-full text-left border-collapse relative text-xs">
+                    <thead className="sticky top-0 z-20 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-2.5 px-3">Faculty / Mentor</th>
+                        <th className="py-2.5 px-2">Day</th>
+                        <th className="py-2.5 px-2">Time Slot</th>
+                        <th className="py-2.5 px-2">Section</th>
+                        <th className="py-2.5 px-3">Subject Title</th>
+                        <th className="py-2.5 px-3 text-center">HOD Override</th>
+                        <th className="py-2.5 px-2 text-center">Assign</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-855/60">
-                      {schedules.filter((s: any) => {
-                        const q = schedulesSearchQuery.toLowerCase().trim();
-                        if (!q) return true;
+                    <tbody className="divide-y divide-slate-100 text-xs font-medium">
+                      {schedules.map((s: any) => {
+                        const overrideObj = (scheduleOverrides || []).find((o: any) => o.scheduleId === s.id);
+                        const isUnlocked = overrideObj ? overrideObj.isUnlocked : false;
+                        const extendedMins = overrideObj ? overrideObj.extendedMinutes : 0;
+                        const subjInfo = getTimetableSubjectDetails(s.subject, s.section, s.year);
+
                         return (
-                          (s.qr_mentors?.name || "").toLowerCase().includes(q) ||
-                          s.day_of_week.toLowerCase().includes(q) ||
-                          s.section.toLowerCase().includes(q) ||
-                          s.year.toLowerCase().includes(q) ||
-                          (s.subject || "").toLowerCase().includes(q)
+                          <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
+                            <td className="py-2 px-3 font-bold text-slate-900">{s.qr_mentors?.name || "Unassigned"}</td>
+                            <td className="py-2 px-2 text-slate-700 font-bold">{s.day_of_week}</td>
+                            <td className="py-2 px-2 text-slate-700 font-mono text-[11px]">
+                              {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}
+                            </td>
+                            <td className="py-2 px-2">
+                              <span className="inline-block px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-bold text-[10px] font-mono">
+                                {s.year} - {s.section}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3">
+                              <span className="font-bold text-slate-900">{subjInfo.fullName}</span>
+                              <span className="block text-[9.5px] font-mono text-slate-500">{subjInfo.code}</span>
+                            </td>
+                            <td className="py-2 px-3 text-center">
+                              <button
+                                onClick={() => handleToggleScheduleOverride(s.id, isUnlocked, extendedMins)}
+                                className={`px-2 py-0.5 rounded-lg font-bold text-[10px] inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                                  isUnlocked
+                                    ? "bg-emerald-600 text-white border-emerald-700"
+                                    : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200"
+                                }`}
+                              >
+                                {isUnlocked ? <Unlock className="w-3 h-3 text-white" /> : <Lock className="w-3 h-3 text-slate-500" />}
+                                {isUnlocked ? "UNLOCKED" : "LOCKED"}
+                              </button>
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <button
+                                onClick={() => handleOpenAssignModal(s)}
+                                className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-600 hover:bg-blue-500 text-white inline-flex items-center gap-0.5 cursor-pointer"
+                              >
+                                <UserPlus className="w-3 h-3" />
+                                Assign
+                              </button>
+                            </td>
+                          </tr>
                         );
-                      }).length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="py-12 text-center text-gray-400 text-sm">
-                            No timetable slots found matching your query.
-                          </td>
-                        </tr>
-                      ) : (
-                        schedules.filter((s: any) => {
-                          const q = schedulesSearchQuery.toLowerCase().trim();
-                          if (!q) return true;
-                          return (
-                            (s.qr_mentors?.name || "").toLowerCase().includes(q) ||
-                            s.day_of_week.toLowerCase().includes(q) ||
-                            s.section.toLowerCase().includes(q) ||
-                            s.year.toLowerCase().includes(q) ||
-                            (s.subject || "").toLowerCase().includes(q)
-                          );
-                        }).map((s: any) => {
-                          const overrideObj = (scheduleOverrides || []).find((o: any) => o.scheduleId === s.id);
-                          const isUnlocked = overrideObj ? overrideObj.isUnlocked : false;
-                          const extendedMins = overrideObj ? overrideObj.extendedMinutes : 0;
-
-                          return (
-                            <tr key={s.id} className="hover:bg-gray-50 transition-colors">
-                              <td className="py-4 px-6 font-semibold text-gray-800">{s.qr_mentors?.name || "Unassigned"}</td>
-                              <td className="py-4 px-6 text-gray-700 font-bold">{s.day_of_week}</td>
-                              <td className="py-4 px-6 text-slate-700 font-mono text-xs">
-                                <div>{s.start_time.slice(0,5)} - {s.end_time.slice(0,5)}</div>
-                                <span className="text-[10px] text-blue-600 font-sans font-semibold">10m Buffer Active</span>
-                              </td>
-                              <td className="py-4 px-6">
-                                <span className="inline-block px-2.5 py-0.5 rounded-lg bg-blue-100 border border-blue-300 text-blue-800 font-bold text-xs">
-                                  {s.year} Yr - {s.section}
-                                </span>
-                              </td>
-                              <td className="py-4 px-6 text-gray-700 font-bold">{s.subject || "—"}</td>
-                              <td className="py-4 px-6 text-center">
-                                <div className="flex flex-col items-center gap-1.5">
-                                  {/* Master Unlock Switch */}
-                                  <button
-                                    onClick={() => handleToggleScheduleOverride(s.id, isUnlocked, extendedMins)}
-                                    className={`px-3 py-1.5 rounded-xl font-bold text-xs inline-flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer border ${
-                                      isUnlocked
-                                        ? "bg-emerald-600 text-white border-emerald-700 shadow-emerald-600/30"
-                                        : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
-                                    }`}
-                                    title="Toggle to force unlock or lock attendance for this class lecture"
-                                  >
-                                    {isUnlocked ? (
-                                      <>
-                                        <Unlock className="w-3.5 h-3.5 text-white" />
-                                        UNLOCKED (HOD Override)
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Lock className="w-3.5 h-3.5 text-gray-500" />
-                                        Standard Time Lock
-                                      </>
-                                    )}
-                                  </button>
-
-                                  {/* Time Extension Quick Buttons */}
-                                  <div className="flex items-center gap-1">
-                                    <button
-                                      onClick={() => handleExtendScheduleTime(s.id, isUnlocked, 15)}
-                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors cursor-pointer ${
-                                        extendedMins === 15 ? "bg-blue-600 text-white border-blue-700" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
-                                      }`}
-                                    >
-                                      +15m
-                                    </button>
-                                    <button
-                                      onClick={() => handleExtendScheduleTime(s.id, isUnlocked, 30)}
-                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors cursor-pointer ${
-                                        extendedMins === 30 ? "bg-blue-600 text-white border-blue-700" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
-                                      }`}
-                                    >
-                                      +30m
-                                    </button>
-                                    <button
-                                      onClick={() => handleExtendScheduleTime(s.id, isUnlocked, 60)}
-                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors cursor-pointer ${
-                                        extendedMins === 60 ? "bg-blue-600 text-white border-blue-700" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
-                                      }`}
-                                    >
-                                      +1h
-                                    </button>
-                                    {extendedMins > 0 && (
-                                      <button
-                                        onClick={() => handleExtendScheduleTime(s.id, isUnlocked, 0)}
-                                        className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 cursor-pointer"
-                                        title="Reset extra buffer time"
-                                      >
-                                        Reset
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="py-4 px-6 text-center">
-                                <button
-                                  onClick={() => handleOpenAssignModal(s)}
-                                  className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 font-bold text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
-                                >
-                                  <UserPlus className="w-3.5 h-3.5" />
-                                  Assign Faculty
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -2202,266 +4669,61 @@ export default function HodDashboard() {
             )}
           </div>
         ) : activeTab === "student-analytics" ? (
-          <div className="space-y-6">
-            {/* Student Analytics Search & Filter Header */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4 shadow-sm">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2.5">
+            {/* Student Analytics Search & Filter Header (Compact ERP Bar) */}
+            <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs space-y-2.5">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                    <Users className="w-6 h-6 text-blue-600" />
-                    Student Analytics & Profiles
+                  <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
+                    <Users className="w-4 h-4 text-blue-600" />
+                    Student Profiles & Academic Attendance Register
+                    <span className="ml-1.5 px-2 py-0.2 rounded-full text-[10.5px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                      {filteredAnalyticsList.length} Students
+                    </span>
                   </h3>
-                  <p className="text-xs text-slate-700 mt-1 font-semibold">
-                    Search any student by full name or roll number to view full attendance reports, risk status, and monthly register
-                  </p>
                 </div>
               </div>
 
-              {/* Prominent Search Bar */}
-              <div className="relative">
-                <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Type student name or roll number (e.g. 23N81A6701, Jashwanth)..."
-                  value={analyticsSearchQuery}
-                  onChange={(e) => setAnalyticsSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-slate-900 font-bold placeholder-gray-400 text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-all shadow-inner"
-                />
-              </div>
-
-              {/* Filter Tabs */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-gray-200">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-black text-slate-900 uppercase tracking-wider mr-1">Year:</span>
-                  {["ALL", "2", "3", "4"].map((y) => (
-                    <button
-                      key={y}
-                      onClick={() => setAnalyticsYearFilter(y)}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                        analyticsYearFilter === y
-                          ? "bg-blue-600 text-white shadow-md"
-                          : "bg-gray-100 text-slate-800 hover:bg-gray-200 border border-gray-300"
-                      }`}
-                    >
-                      {y === "ALL" ? "All Years" : `${y}${y === "2" ? "nd" : y === "3" ? "rd" : "th"} Year`}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-black text-slate-900 uppercase tracking-wider mr-1">Section:</span>
-                  {["ALL", "A", "B", "C"].map((sec) => (
-                    <button
-                      key={sec}
-                      onClick={() => setAnalyticsSectionFilter(sec)}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                        analyticsSectionFilter === sec
-                          ? "bg-emerald-600 text-white shadow-md"
-                          : "bg-gray-100 text-slate-800 hover:bg-gray-200 border border-gray-300"
-                      }`}
-                    >
-                      {sec === "ALL" ? "All Sections" : `Sec ${sec}`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Filtered Students Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(() => {
-                const filtered = hodStudentAnalyticsList.filter((item) => {
-                  const s = item.student;
-                  const q = analyticsSearchQuery.toLowerCase().trim();
-                  if (q) {
-                    const matchName = s.name.toLowerCase().includes(q);
-                    const matchRoll = (s.uniqueId || "").toLowerCase().includes(q);
-                    if (!matchName && !matchRoll) return false;
-                  }
-                  if (analyticsYearFilter !== "ALL") {
-                    if (item.secInfo.yearNum !== analyticsYearFilter) return false;
-                  }
-                  if (analyticsSectionFilter !== "ALL") {
-                    if (item.secInfo.name !== analyticsSectionFilter) return false;
-                  }
-                  return true;
-                });
-
-                if (filtered.length === 0) {
-                  return (
-                    <div className="col-span-full bg-white border border-gray-200 rounded-2xl p-12 text-center space-y-2">
-                      <Users className="w-12 h-12 text-gray-400 mx-auto" />
-                      <h4 className="text-slate-900 font-bold text-base">No Students Found</h4>
-                      <p className="text-xs text-slate-700 font-semibold">No student matches your search query or selected filters.</p>
-                    </div>
-                  );
-                }
-
-                return filtered.map((item) => {
-                  const s = item.student;
-                  const isSafe = item.flag === "GREEN";
-                  const isWarning = item.flag === "YELLOW";
-
-                  return (
-                    <div
-                      key={s.id}
-                      className="bg-white border border-gray-200 hover:border-blue-500 rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between space-y-4 group min-w-0"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-11 h-11 rounded-2xl bg-blue-100 border border-blue-300 text-blue-900 flex items-center justify-center font-black text-lg flex-shrink-0">
-                              {s.name.charAt(0)}
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="text-sm font-black text-slate-900 truncate group-hover:text-blue-600 transition-colors">
-                                {s.name}
-                              </h4>
-                              <p className="text-xs font-mono font-bold text-slate-700 mt-0.5 truncate">
-                                {s.uniqueId || "N/A"}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <span
-                            className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border shrink-0 ${
-                              isSafe
-                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                                : isWarning
-                                ? "bg-amber-100 text-amber-800 border-amber-300"
-                                : "bg-rose-100 text-rose-800 border-rose-300"
-                            }`}
-                          >
-                            {item.percent}% {isSafe ? "✅ Safe" : isWarning ? "⚠️ Warning" : "🔴 Critical"}
-                          </span>
-                        </div>
-
-                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 text-xs space-y-1">
-                          <div className="flex items-center justify-between text-slate-700 font-semibold">
-                            <span>Class / Section:</span>
-                            <span className="font-bold text-slate-900">{item.secInfo.yearLabel} - Sec {item.secInfo.name}</span>
-                          </div>
-                          <div className="flex items-center justify-between text-slate-700 font-semibold">
-                            <span>Days Attended:</span>
-                            <span className="font-bold text-slate-900">{item.presentDays} / {item.totalWorkingDays} days</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => setSelectedStudentForDetails(s)}
-                        className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] cursor-pointer"
-                      >
-                        <UserCheck className="w-4 h-4" />
-                        View Full Profile & Report
-                      </button>
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          </div>
-        ) : activeTab === "flags" ? (
-          /* DEDICATED HOD STUDENT RISK FLAG ANALYTICS VIEW */
-          <div className="space-y-5">
-            {/* Risk Flag Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <button
-                onClick={() => setRiskFlagFilter("RED")}
-                className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
-                  riskFlagFilter === "RED"
-                    ? "bg-rose-50 border-rose-400 ring-2 ring-rose-400/40 shadow-xl"
-                    : "bg-white border-gray-200 hover:border-rose-300 shadow-sm hover:shadow-md"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <AlertCircle className="w-4 h-4 text-rose-600" />
-                    🔴 Red Flag (&lt; 65%)
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300">
-                    Critical
-                  </span>
-                </div>
-                <p className="text-3xl font-black text-slate-900">{hodRedCount} Students</p>
-                <p className="text-xs text-slate-700 font-bold mt-1">Shortage Risk • Requires Condonation / Intimation</p>
-              </button>
-
-              <button
-                onClick={() => setRiskFlagFilter("YELLOW")}
-                className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
-                  riskFlagFilter === "YELLOW"
-                    ? "bg-amber-50 border-amber-400 ring-2 ring-amber-400/40 shadow-xl"
-                    : "bg-white border-gray-200 hover:border-amber-300 shadow-sm hover:shadow-md"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    🟡 Yellow Flag (65%–74%)
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300">
-                    Warning
-                  </span>
-                </div>
-                <p className="text-3xl font-black text-slate-900">{hodYellowCount} Students</p>
-                <p className="text-xs text-slate-700 font-bold mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
-              </button>
-
-              <button
-                onClick={() => setRiskFlagFilter("GREEN")}
-                className={`p-5 rounded-2xl border text-left transition-all cursor-pointer ${
-                  riskFlagFilter === "GREEN"
-                    ? "bg-emerald-50 border-emerald-400 ring-2 ring-emerald-400/40 shadow-xl"
-                    : "bg-white border-gray-200 hover:border-emerald-300 shadow-sm hover:shadow-md"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    🟢 Green Flag (≥ 75%)
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    Safe
-                  </span>
-                </div>
-                <p className="text-3xl font-black text-slate-900">{hodGreenCount} Students</p>
-                <p className="text-xs text-slate-700 font-bold mt-1">Good Standing • Target Met</p>
-              </button>
-            </div>
-
-            {/* Categorization & Filter Toolbar */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4 shadow-md">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              {/* Toolbar: Search + Quick Filters */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 pt-1">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    placeholder="Search student name or roll number..."
-                    value={riskSearchQuery}
-                    onChange={(e) => setRiskSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 placeholder-gray-400 text-xs font-bold focus:outline-none focus:border-amber-500 shadow-inner"
+                    placeholder="Search by full name or roll number (e.g. 23N81A6701, Naveen)..."
+                    value={analyticsSearchQuery}
+                    onChange={(e) => {
+                      setAnalyticsSearchQuery(e.target.value);
+                      setAnalyticsPage(1);
+                    }}
+                    className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Flag Filter */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {/* Status Filter */}
                   <select
-                    value={riskFlagFilter}
-                    onChange={(e: any) => setRiskFlagFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
+                    value={analyticsStatusFilter}
+                    onChange={(e: any) => {
+                      setAnalyticsStatusFilter(e.target.value);
+                      setAnalyticsPage(1);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
                   >
-                    <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
-                    <option value="RED">🔴 Red Flag (&lt; 65%)</option>
-                    <option value="YELLOW">🟡 Yellow Flag (65%–74%)</option>
-                    <option value="GREEN">🟢 Green Flag (≥ 75%)</option>
+                    <option value="ALL">Status: All</option>
+                    <option value="RED">Critical Shortage (&lt;65%)</option>
+                    <option value="YELLOW">Borderline Warning (65%–74%)</option>
+                    <option value="GREEN">Compliant (≥75%)</option>
                   </select>
 
                   {/* Year Filter */}
                   <select
-                    value={riskYearFilter}
-                    onChange={(e) => setRiskYearFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
+                    value={analyticsYearFilter}
+                    onChange={(e) => {
+                      setAnalyticsYearFilter(e.target.value);
+                      setAnalyticsPage(1);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Academic Years</option>
                     <option value="2">2nd Year (II)</option>
@@ -2471,100 +4733,751 @@ export default function HodDashboard() {
 
                   {/* Section Filter */}
                   <select
-                    value={riskSectionFilter}
-                    onChange={(e) => setRiskSectionFilter(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
+                    value={analyticsSectionFilter}
+                    onChange={(e) => {
+                      setAnalyticsSectionFilter(e.target.value);
+                      setAnalyticsPage(1);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">All Sections</option>
-                    <option value="2A">Section 2A</option>
-                    <option value="2B">Section 2B</option>
-                    <option value="2C">Section 2C</option>
-                    <option value="3A">Section 3A</option>
-                    <option value="3B">Section 3B</option>
-                    <option value="3C">Section 3C</option>
-                    <option value="4A">Section 4A</option>
-                    <option value="4B">Section 4B</option>
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
                   </select>
 
                   {/* Sort Order */}
                   <select
-                    value={riskSortOrder}
-                    onChange={(e: any) => setRiskSortOrder(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 text-slate-900 text-xs font-black focus:outline-none cursor-pointer"
+                    value={analyticsSortOrder}
+                    onChange={(e: any) => {
+                      setAnalyticsSortOrder(e.target.value);
+                      setAnalyticsPage(1);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
                   >
-                    <option value="lowest">Sort: Lowest Attendance %</option>
+                    <option value="name">Sort: Full Name (A–Z)</option>
                     <option value="roll">Sort: Roll Number</option>
-                    <option value="name">Sort: Student Name</option>
+                    <option value="lowest">Sort: Lowest Attendance %</option>
+                    <option value="highest">Sort: Highest Attendance %</option>
                   </select>
+
+                  {/* Page Size */}
+                  <select
+                    value={analyticsPageSize}
+                    onChange={(e) => {
+                      setAnalyticsPageSize(Number(e.target.value));
+                      setAnalyticsPage(1);
+                    }}
+                    className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    title="Rows per page"
+                  >
+                    <option value={20}>20 rows</option>
+                    <option value={50}>50 rows</option>
+                    <option value={100}>100 rows</option>
+                    <option value={-1}>All ({filteredAnalyticsList.length})</option>
+                  </select>
+
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                    <button
+                      onClick={() => setAnalyticsViewMode("table")}
+                      className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        analyticsViewMode === "table"
+                          ? "bg-white text-blue-700 shadow-2xs"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                      title="Table View (Fast Scanning)"
+                    >
+                      <LayoutList className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setAnalyticsViewMode("card")}
+                      className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        analyticsViewMode === "card"
+                          ? "bg-white text-blue-700 shadow-2xs"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                      title="Card View"
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Student Flag Cards */}
-              <div className="space-y-3 pt-2 max-h-[58vh] overflow-y-auto pr-2 custom-scrollbar contain-paint">
-                {filteredHodAnalyticsList.length === 0 ? (
-                  <div className="p-12 text-center text-slate-800 text-xs font-bold">
-                    No students found matching your categorised filter.
+            {/* High-Density Administrative Display */}
+            {analyticsViewMode === "table" ? (
+              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto max-h-[calc(100vh-290px)] min-h-[320px] overflow-y-auto scrollbar-thin">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-2 px-2.5 text-center w-10">#</th>
+                        <th className="py-2 px-3">Student Full Name</th>
+                        <th className="py-2 px-3">Roll Number</th>
+                        <th className="py-2 px-2 text-center">Class</th>
+                        <th className="py-2 px-3 text-center">Attendance %</th>
+                        <th className="py-2 px-3">Present / Absent / Total</th>
+                        <th className="py-2 px-3">Compliance & 75% Requirement</th>
+                        <th className="py-2 px-2.5 text-right">Report</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                      {filteredAnalyticsList.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
+                            No student profiles match your query or filters.
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedAnalyticsList.map((item, idx) => {
+                          const s = item.student;
+                          const studentFullName = s.name || (s as any).full_name || (s as any).username || s.uniqueId || "Student";
+                          const absentDays = Math.max(0, item.totalWorkingDays - item.presentDays);
+                          const rowNum = analyticsPageSize === -1 ? idx + 1 : (analyticsPage - 1) * analyticsPageSize + idx + 1;
+
+                          return (
+                            <tr
+                              key={s.id}
+                              onClick={() => setSelectedStudentForDetails(s)}
+                              className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                            >
+                              <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
+                                {rowNum}
+                              </td>
+                              <td className="py-1.5 px-3">
+                                <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors block break-words">
+                                  {studentFullName}
+                                </span>
+                              </td>
+                              <td className="py-1.5 px-3 font-mono font-bold text-slate-700 text-[11px] whitespace-nowrap">
+                                {s.uniqueId || "N/A"}
+                              </td>
+                              <td className="py-1.5 px-2 text-center whitespace-nowrap">
+                                <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[9.5px] font-bold font-mono">
+                                  {item.secInfo.name}
+                                </span>
+                              </td>
+                              <td className="py-1.5 px-3 text-center">
+                                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-black border ${
+                                  item.flag === "RED"
+                                    ? "bg-rose-50 text-rose-700 border-rose-200"
+                                    : item.flag === "YELLOW"
+                                    ? "bg-amber-50 text-amber-800 border-amber-200"
+                                    : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                }`}>
+                                  {item.percent}%
+                                </span>
+                              </td>
+                              <td className="py-1.5 px-3">
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center gap-2 text-[11px] font-bold">
+                                    <span className="text-emerald-700">{item.presentDays}P</span>
+                                    <span className="text-slate-300">•</span>
+                                    <span className="text-rose-600">{absentDays}A</span>
+                                    <span className="text-slate-300">•</span>
+                                    <span className="text-slate-600">{item.totalWorkingDays} Days</span>
+                                  </div>
+                                  <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full ${
+                                        item.flag === "RED" ? "bg-rose-500" : item.flag === "YELLOW" ? "bg-amber-500" : "bg-emerald-500"
+                                      }`}
+                                      style={{ width: `${item.percent}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-1.5 px-3">
+                                {item.flag === "RED" ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+                                      Critical (&lt;65%)
+                                    </span>
+                                    <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
+                                      +{item.classesNeededFor75} classes to 75%
+                                    </span>
+                                  </div>
+                                ) : item.flag === "YELLOW" ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                      Warning
+                                    </span>
+                                    <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
+                                      +{item.classesNeededFor75} classes to 75%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    ✓ Compliant • ≥75%
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-1.5 px-2.5 text-right">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedStudentForDetails(s);
+                                  }}
+                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                >
+                                  <span>Report</span>
+                                  <ChevronRight className="w-3 h-3" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Compact Pagination Footer */}
+                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                  <div>
+                    Showing <strong className="text-slate-900">{filteredAnalyticsList.length === 0 ? 0 : (analyticsPage - 1) * (analyticsPageSize === -1 ? filteredAnalyticsList.length : analyticsPageSize) + 1}</strong> to <strong className="text-slate-900">{analyticsPageSize === -1 ? filteredAnalyticsList.length : Math.min(analyticsPage * analyticsPageSize, filteredAnalyticsList.length)}</strong> of <strong className="text-slate-900">{filteredAnalyticsList.length}</strong> students
+                  </div>
+
+                  {analyticsPageSize !== -1 && totalAnalyticsPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setAnalyticsPage((p) => Math.max(1, p - 1))}
+                        disabled={analyticsPage === 1}
+                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                      >
+                        Prev
+                      </button>
+                      <span className="px-2 font-mono text-[11px] font-bold text-slate-800">
+                        {analyticsPage} / {totalAnalyticsPages}
+                      </span>
+                      <button
+                        onClick={() => setAnalyticsPage((p) => Math.min(totalAnalyticsPages, p + 1))}
+                        disabled={analyticsPage >= totalAnalyticsPages}
+                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Administrative Cards View (No giant button bloat, full student names) */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[calc(100vh-290px)] min-h-[320px] overflow-y-auto pr-1 scrollbar-thin">
+                {filteredAnalyticsList.length === 0 ? (
+                  <div className="col-span-full bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 font-semibold text-xs">
+                    No student profiles match your query or filters.
                   </div>
                 ) : (
-                  filteredHodAnalyticsList.map((item) => (
-                    <div
-                      key={item.student.id}
-                      onClick={() => setSelectedStudentForDetails(item.student)}
-                      className={`bg-white border rounded-2xl p-4 transition-all hover:shadow-md cursor-pointer space-y-3 group ${item.cardBorder}`}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-300 flex items-center justify-center font-black text-base">
-                            {item.dotColor}
+                  paginatedAnalyticsList.map((item) => {
+                    const s = item.student;
+                    const studentFullName = s.name || (s as any).full_name || (s as any).username || s.uniqueId || "Student";
+                    const absentDays = Math.max(0, item.totalWorkingDays - item.presentDays);
+
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => setSelectedStudentForDetails(s)}
+                        className="bg-white border border-slate-200 hover:border-blue-400 rounded-xl p-3 shadow-2xs hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2.5"
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <h4 className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug break-words">
+                                {studentFullName}
+                              </h4>
+                              <div className="flex items-center gap-1.5 text-[10.5px] font-mono text-slate-500 mt-0.5">
+                                <span className="font-bold text-blue-700">{s.uniqueId || "N/A"}</span>
+                                <span>•</span>
+                                <span>Sec {item.secInfo.name}</span>
+                              </div>
+                            </div>
+
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[11px] font-black border shrink-0 ${
+                                item.flag === "RED"
+                                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                                  : item.flag === "YELLOW"
+                                  ? "bg-amber-50 text-amber-800 border-amber-200"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              }`}
+                            >
+                              {item.percent}%
+                            </span>
                           </div>
-                          <div>
-                            <h4 className="text-base font-black text-slate-950 group-hover:text-blue-600 transition-colors">
-                              {item.student.name || (item.student as any).full_name || (item.student as any).username || item.student.uniqueId || "Student"}
-                            </h4>
-                            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-800 font-mono font-bold">
-                              <span className="text-slate-800 font-bold">Roll: <strong className="text-emerald-800 font-black">{item.student.uniqueId || "N/A"}</strong></span>
-                              <span className="text-gray-500">•</span>
-                              <span className="text-slate-800 font-bold">Year: <strong className="text-slate-900 font-black">{item.secInfo.yearLabel}</strong></span>
-                              <span className="text-gray-500">•</span>
-                              <span className="text-slate-800 font-bold">Sec: <strong className="text-blue-800 font-black">{item.secInfo.name}</strong></span>
+
+                          <div className="bg-slate-50 rounded-lg p-2 border border-slate-200/80 text-[11px] space-y-1">
+                            <div className="flex items-center justify-between text-slate-600 font-semibold">
+                              <span>Days Attended:</span>
+                              <span className="font-bold text-slate-900">
+                                {item.presentDays} Present / {absentDays} Absent ({item.totalWorkingDays} Total)
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-slate-600 font-semibold">
+                              <span>Action Target:</span>
+                              <span className="font-bold text-slate-900">
+                                {item.classesNeededFor75 > 0 ? `+${item.classesNeededFor75} Classes to 75%` : "✓ Compliant"}
+                              </span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            <span className={`px-3.5 py-1 rounded-full text-xs font-black shadow-xs inline-block ${item.badgeColor}`}>
-                              {item.label} ({item.percent}%)
-                            </span>
-                            <p className="text-xs text-slate-800 font-extrabold mt-1">
-                              {item.presentDays} / {item.totalWorkingDays} Working Days Attended
-                            </p>
+                        <div className="pt-1 border-t border-slate-100 flex items-center justify-between text-[10.5px] font-bold text-blue-700 group-hover:text-blue-800">
+                          <span>View Attendance Profile</span>
+                          <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
+        ) : activeTab === "flags" ? (
+          /* DEDICATED HOD STUDENT RISK FLAG ANALYTICS VIEW (INSTITUTIONAL ERP DISPLAY) */
+          <div className="space-y-2.5">
+            {/* Ultra-Compact Risk Summary Metric Strip */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {/* Card 1: Critical Shortage (<65%) */}
+              <button
+                onClick={() => {
+                  setRiskFlagFilter(riskFlagFilter === "RED" ? "ALL" : "RED");
+                  setRiskPage(1);
+                }}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                  riskFlagFilter === "RED"
+                    ? "border-rose-400 bg-rose-50/40 ring-2 ring-rose-400/30 shadow-xs"
+                    : "border-slate-200 hover:border-rose-300 shadow-2xs"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
+                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                      Critical Shortage (&lt;65%)
+                    </span>
+                  </div>
+                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                    Condonation Req.
+                  </span>
+                </div>
+                <div className="mt-1 flex items-baseline justify-between">
+                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                    {hodRedCount === 1 ? "1 Student" : `${hodRedCount} Students`}
+                  </p>
+                  <span className="text-[10px] font-semibold text-slate-500">
+                    Below 65% limit
+                  </span>
+                </div>
+              </button>
+
+              {/* Card 2: Borderline Warning (65%–74%) */}
+              <button
+                onClick={() => {
+                  setRiskFlagFilter(riskFlagFilter === "YELLOW" ? "ALL" : "YELLOW");
+                  setRiskPage(1);
+                }}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                  riskFlagFilter === "YELLOW"
+                    ? "border-amber-400 bg-amber-50/40 ring-2 ring-amber-400/30 shadow-xs"
+                    : "border-slate-200 hover:border-amber-300 shadow-2xs"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                      Borderline Warning (65%–74%)
+                    </span>
+                  </div>
+                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    Recoverable
+                  </span>
+                </div>
+                <div className="mt-1 flex items-baseline justify-between">
+                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                    {hodYellowCount === 1 ? "1 Student" : `${hodYellowCount} Students`}
+                  </p>
+                  <span className="text-[10px] font-semibold text-slate-500">
+                    Target 75% achievable
+                  </span>
+                </div>
+              </button>
+
+              {/* Card 3: Compliant (≥75%) */}
+              <button
+                onClick={() => {
+                  setRiskFlagFilter(riskFlagFilter === "GREEN" ? "ALL" : "GREEN");
+                  setRiskPage(1);
+                }}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                  riskFlagFilter === "GREEN"
+                    ? "border-emerald-400 bg-emerald-50/40 ring-2 ring-emerald-400/30 shadow-xs"
+                    : "border-slate-200 hover:border-emerald-300 shadow-2xs"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                      Compliant (≥75%)
+                    </span>
+                  </div>
+                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Safe Standing
+                  </span>
+                </div>
+                <div className="mt-1 flex items-baseline justify-between">
+                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                    {hodGreenCount === 1 ? "1 Student" : `${hodGreenCount} Students`}
+                  </p>
+                  <span className="text-[10px] font-semibold text-slate-500">
+                    Compliant • ≥75%
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            {/* Categorization & Filter Toolbar (Compact ERP Bar) */}
+            <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search student name or roll number..."
+                  value={riskSearchQuery}
+                  onChange={(e) => {
+                    setRiskSearchQuery(e.target.value);
+                    setRiskPage(1);
+                  }}
+                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5">
+                {/* Risk Status Filter */}
+                <select
+                  value={riskFlagFilter}
+                  onChange={(e: any) => {
+                    setRiskFlagFilter(e.target.value);
+                    setRiskPage(1);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">Risk Status: All</option>
+                  <option value="RED">Critical Shortage (&lt;65%)</option>
+                  <option value="YELLOW">Borderline Warning (65%–74%)</option>
+                  <option value="GREEN">Compliant (≥75%)</option>
+                </select>
+
+                {/* Year Filter */}
+                <select
+                  value={riskYearFilter}
+                  onChange={(e) => {
+                    setRiskYearFilter(e.target.value);
+                    setRiskPage(1);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Academic Years</option>
+                  <option value="2">2nd Year (II)</option>
+                  <option value="3">3rd Year (III)</option>
+                  <option value="4">4th Year (IV)</option>
+                </select>
+
+                {/* Section Filter */}
+                <select
+                  value={riskSectionFilter}
+                  onChange={(e) => {
+                    setRiskSectionFilter(e.target.value);
+                    setRiskPage(1);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Sections</option>
+                  <option value="2A">Section 2A</option>
+                  <option value="2B">Section 2B</option>
+                  <option value="2C">Section 2C</option>
+                  <option value="3A">Section 3A</option>
+                  <option value="3B">Section 3B</option>
+                  <option value="3C">Section 3C</option>
+                  <option value="4A">Section 4A</option>
+                  <option value="4B">Section 4B</option>
+                </select>
+
+                {/* Sort Order */}
+                <select
+                  value={riskSortOrder}
+                  onChange={(e: any) => {
+                    setRiskSortOrder(e.target.value);
+                    setRiskPage(1);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="lowest">Sort: Lowest Attendance %</option>
+                  <option value="highest">Sort: Highest Attendance %</option>
+                  <option value="roll">Sort: Roll Number</option>
+                  <option value="name">Sort: Student Name</option>
+                </select>
+
+                {/* Page Size */}
+                <select
+                  value={riskPageSize}
+                  onChange={(e) => {
+                    setRiskPageSize(Number(e.target.value));
+                    setRiskPage(1);
+                  }}
+                  className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  title="Rows per page"
+                >
+                  <option value={20}>20 rows</option>
+                  <option value={50}>50 rows</option>
+                  <option value={100}>100 rows</option>
+                  <option value={-1}>All ({filteredHodAnalyticsList.length})</option>
+                </select>
+
+                {/* View Switcher: Table vs Cards */}
+                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                  <button
+                    onClick={() => setRiskViewMode("table")}
+                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      riskViewMode === "table"
+                        ? "bg-white text-blue-700 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                    title="Table View (Fast Scanning)"
+                  >
+                    <LayoutList className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => setRiskViewMode("card")}
+                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      riskViewMode === "card"
+                        ? "bg-white text-blue-700 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                    title="Card View"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* High-Density Display (Table View / Card View) */}
+            {riskViewMode === "table" ? (
+              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+                <div className="overflow-x-auto max-h-[calc(100vh-310px)] min-h-[300px] overflow-y-auto scrollbar-thin">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="py-2 px-2.5 text-center w-10">#</th>
+                        <th className="py-2 px-3">Student Name</th>
+                        <th className="py-2 px-3">Roll Number</th>
+                        <th className="py-2 px-2 text-center">Class</th>
+                        <th className="py-2 px-3 text-center">Attendance %</th>
+                        <th className="py-2 px-3">Attended Days</th>
+                        <th className="py-2 px-3">Compliance & Recovery Target</th>
+                        <th className="py-2 px-2.5 text-right">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                      {filteredHodAnalyticsList.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
+                            No students found matching your selected filters.
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedRiskList.map((item, idx) => {
+                          const rowNum = riskPageSize === -1 ? idx + 1 : (riskPage - 1) * riskPageSize + idx + 1;
+                          return (
+                            <tr
+                              key={item.student.id}
+                              onClick={() => setSelectedStudentForDetails(item.student)}
+                              className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                            >
+                              <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
+                                {rowNum}
+                              </td>
+                              <td className="py-1.5 px-3">
+                                <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors block truncate max-w-[220px]">
+                                  {item.student.name || (item.student as any).full_name || item.student.uniqueId || "Student"}
+                                </span>
+                              </td>
+                              <td className="py-1.5 px-3 font-mono font-bold text-slate-700 text-[11px]">
+                                {item.student.uniqueId || "N/A"}
+                              </td>
+                              <td className="py-1.5 px-2 text-center">
+                                <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[9.5px] font-bold font-mono">
+                                  {item.secInfo.name}
+                                </span>
+                              </td>
+                              <td className="py-1.5 px-3 text-center">
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-black border ${
+                                  item.flag === "RED"
+                                    ? "bg-rose-50 text-rose-700 border-rose-200"
+                                    : item.flag === "YELLOW"
+                                    ? "bg-amber-50 text-amber-800 border-amber-200"
+                                    : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                }`}>
+                                  {item.percent}%
+                                </span>
+                              </td>
+                              <td className="py-1.5 px-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-slate-800 text-[11px] whitespace-nowrap">
+                                    {item.presentDays} / {item.totalWorkingDays} Days
+                                  </span>
+                                  <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
+                                    <div
+                                      className={`h-full rounded-full ${
+                                        item.flag === "RED" ? "bg-rose-500" : item.flag === "YELLOW" ? "bg-amber-500" : "bg-emerald-500"
+                                      }`}
+                                      style={{ width: `${item.percent}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-1.5 px-3">
+                                {item.flag === "RED" ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+                                      Critical (&lt;65%)
+                                    </span>
+                                    <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
+                                      +{item.classesNeededFor75} classes to 75% (+{item.classesNeededFor65} to 65%)
+                                    </span>
+                                  </div>
+                                ) : item.flag === "YELLOW" ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                      Warning
+                                    </span>
+                                    <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
+                                      +{item.classesNeededFor75} consecutive classes to 75%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    ✓ Compliant • ≥75%
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-1.5 px-2.5 text-right">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedStudentForDetails(item.student);
+                                  }}
+                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                >
+                                  <span>View</span>
+                                  <ChevronRight className="w-3 h-3" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Compact Table Pagination Footer */}
+                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                  <div>
+                    Showing <strong className="text-slate-900">{filteredHodAnalyticsList.length === 0 ? 0 : (riskPage - 1) * (riskPageSize === -1 ? filteredHodAnalyticsList.length : riskPageSize) + 1}</strong> to <strong className="text-slate-900">{riskPageSize === -1 ? filteredHodAnalyticsList.length : Math.min(riskPage * riskPageSize, filteredHodAnalyticsList.length)}</strong> of <strong className="text-slate-900">{filteredHodAnalyticsList.length}</strong> students
+                  </div>
+
+                  {riskPageSize !== -1 && totalRiskPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setRiskPage((p) => Math.max(1, p - 1))}
+                        disabled={riskPage === 1}
+                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                      >
+                        Prev
+                      </button>
+                      <span className="px-2 font-mono text-[11px] font-bold text-slate-800">
+                        {riskPage} / {totalRiskPages}
+                      </span>
+                      <button
+                        onClick={() => setRiskPage((p) => Math.min(totalRiskPages, p + 1))}
+                        disabled={riskPage >= totalRiskPages}
+                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Streamlined Compact Card View (No repeated giant paragraph boxes) */
+              <div className="space-y-1.5 max-h-[calc(100vh-310px)] min-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+                {filteredHodAnalyticsList.length === 0 ? (
+                  <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 font-semibold text-xs">
+                    No students found matching your selected filters.
+                  </div>
+                ) : (
+                  paginatedRiskList.map((item) => (
+                    <div
+                      key={item.student.id}
+                      onClick={() => setSelectedStudentForDetails(item.student)}
+                      className="bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-2.5 transition-all hover:shadow-2xs cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] shrink-0 border ${
+                          item.flag === "RED"
+                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            : item.flag === "YELLOW"
+                            ? "bg-amber-50 text-amber-800 border-amber-200"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        }`}>
+                          {item.percent}%
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                            {item.student.name || (item.student as any).full_name || item.student.uniqueId || "Student"}
+                          </h4>
+                          <div className="flex items-center gap-2 text-[10.5px] text-slate-500 font-mono">
+                            <span className="text-blue-700 font-bold">{item.student.uniqueId || "N/A"}</span>
+                            <span>•</span>
+                            <span>{item.secInfo.yearLabel}</span>
+                            <span>•</span>
+                            <span className="font-bold text-slate-700">Sec {item.secInfo.name}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Recovery Math Banner */}
-                      <div className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${item.bannerBg}`}>
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4 shrink-0 text-slate-800" />
-                          <span className="font-extrabold text-slate-900">{item.tip}</span>
+                      <div className="flex items-center gap-3 justify-between sm:justify-end">
+                        <div className="text-left sm:text-right">
+                          <span className="text-xs font-bold text-slate-800 block">
+                            {item.presentDays} / {item.totalWorkingDays} Days Attended
+                          </span>
+                          <span className="text-[10px] font-semibold text-slate-500 block">
+                            {item.classesNeededFor75 > 0 ? `Target: +${item.classesNeededFor75} Classes Needed` : "Target Met"}
+                          </span>
                         </div>
 
-                        {item.classesNeededFor75 > 0 ? (
-                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-blue-100 border border-blue-300 text-blue-950 shrink-0 shadow-xs">
-                            Target +{item.classesNeededFor75} Classes Needed
-                          </span>
-                        ) : (
-                          <span className="font-mono font-black text-xs px-3 py-1 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-950 shrink-0 shadow-xs">
-                            ✓ Target Met
-                          </span>
-                        )}
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0 ${
+                          item.flag === "RED"
+                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            : item.flag === "YELLOW"
+                            ? "bg-amber-50 text-amber-800 border-amber-200"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        }`}>
+                          {item.flag === "RED" ? "Critical (<65%)" : item.flag === "YELLOW" ? "Warning (65-74%)" : "Compliant (≥75%)"}
+                        </span>
                       </div>
                     </div>
                   ))
                 )}
               </div>
-            </div>
+            )}
           </div>
         ) : null}
 
@@ -2622,40 +5535,32 @@ export default function HodDashboard() {
                       <div className="flex flex-col items-end gap-1.5 text-right">
                         {item.status === "present" ? (
                           <>
-                            <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                              record && isExitTimeOver(record.date, record.exitTime)
-                                ? "bg-red-950/60 text-red-700 border border-red-900/40"
-                                : "bg-green-950/60 text-green-700 border border-green-900/40"
-                            }`}>
-                              {record && isExitTimeOver(record.date, record.exitTime) ? (
-                                <XCircle className="w-3 h-3 text-red-700" />
-                              ) : (
-                                <CheckCircle className="w-3 h-3" />
-                              )}
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+                              <CheckCircle className="w-3 h-3 text-emerald-600" />
                               {record?.exitTime
                                 ? "Left Campus"
-                                : record && isExitTimeOver(record.date, record.exitTime)
-                                  ? "Not Scanned"
+                                : isExitTimeOver(record?.date, record?.exitTime)
+                                  ? "Present"
                                   : "Still on Campus"}
                             </span>
-                            <div className="flex items-center gap-3 text-gray-400 text-[10px]">
+                            <div className="flex items-center gap-3 text-gray-500 text-[10px]">
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3.5 h-3.5 text-blue-500" /> 
                                 In: {formatTime(record?.entryTime)}
                                 {isLateTime(record?.entryTime) && (
-                                  <span className="ml-1.5 px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider">LATE</span>
+                                  <span className="ml-1.5 px-1 py-0.2 rounded bg-amber-500/20 text-amber-600 text-[8px] font-black uppercase tracking-wider">LATE</span>
                                 )}
                               </span>
                               {record?.exitTime ? (
-                                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-red-500" /> Out: {formatTime(record?.exitTime)}</span>
-                              ) : record && isExitTimeOver(record.date, record.exitTime) ? (
-                                <span className="flex items-center gap-1 text-red-700 font-semibold"><XCircle className="w-3.5 h-3.5 text-red-500" /> Out: Not Scanned</span>
-                              ) : null}
+                                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-500" /> Out: {formatTime(record?.exitTime)}</span>
+                              ) : (
+                                <span className="flex items-center gap-1 text-gray-400 font-medium">Out: —</span>
+                              )}
                             </div>
                           </>
                         ) : (
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-950/60 text-red-700 border border-red-900/40">
-                            <XCircle className="w-3 h-3" />
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">
+                            <XCircle className="w-3 h-3 text-red-500" />
                             Absent
                           </span>
                         )}
@@ -2667,6 +5572,181 @@ export default function HodDashboard() {
             </div>
           </SheetContent>
         </Sheet>
+
+        {/* Reassign Faculty for Timetable Slot Modal */}
+        {reassignSlotModalOpen && slotToReassign && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                    <UserPlus className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Reassign Faculty / Teacher</h3>
+                    <p className="text-[11px] font-semibold text-slate-500">
+                      Section {slotToReassign.sectionKey} • {slotToReassign.dayLabel} • {slotToReassign.periodName} ({slotToReassign.timeLabel})
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setReassignSlotModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition-colors cursor-pointer"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Slot details card */}
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-sm">{slotToReassign.subject}</span>
+                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-900 font-bold text-[10px]">
+                    {slotToReassign.room}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-slate-600 font-medium text-[11px]">
+                  <span>Current Assigned Faculty:</span>
+                  <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    {slotToReassign.currentFaculty}
+                  </span>
+                </div>
+              </div>
+
+              <form onSubmit={handleSaveSlotReassign} className="space-y-4">
+                {/* Edit Subject Field */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Subject / Lab / Activity Title
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editedSubjectInput}
+                      onChange={(e) => setEditedSubjectInput(e.target.value)}
+                      placeholder="e.g. CN, JAVA LAB, Free"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold focus:outline-none focus:border-blue-500 font-mono"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditedSubjectInput("Free")}
+                      className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-colors cursor-pointer"
+                    >
+                      Set Free
+                    </button>
+                  </div>
+                </div>
+
+                {/* Select from list */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Select Department Faculty
+                  </label>
+                  <select
+                    value={selectedFacultyName}
+                    onChange={(e) => {
+                      setSelectedFacultyName(e.target.value);
+                      setCustomFacultyTextInput("");
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                  >
+                    <option value="" disabled>-- Select Faculty --</option>
+                    {DEPARTMENT_FACULTY_LIST.map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Or Custom / Multi Faculty */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Or Enter Custom Name / Multi-Faculty Co-Teachers
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Mrs. K. Sneha & Mrs. A. Sravanthi"
+                    value={customFacultyTextInput}
+                    onChange={(e) => {
+                      setCustomFacultyTextInput(e.target.value);
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:border-blue-500 placeholder-slate-400"
+                  />
+                  <span className="text-[10px] text-slate-500 mt-1 block">
+                    If entered, this custom text will take precedence over the dropdown selection.
+                  </span>
+                </div>
+
+                {/* Scope of change */}
+                <div className="bg-blue-50/70 border border-blue-200 p-3 rounded-xl space-y-2">
+                  <span className="block text-[11px] font-bold text-blue-950 uppercase tracking-wide">
+                    Reassignment Scope:
+                  </span>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="reassignScope"
+                      checked={applyToAllSlotsOfSubject}
+                      onChange={() => setApplyToAllSlotsOfSubject(true)}
+                      className="text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>
+                      Update faculty for <strong>all "{slotToReassign.subject}"</strong> classes in Section {slotToReassign.sectionKey}
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="reassignScope"
+                      checked={!applyToAllSlotsOfSubject}
+                      onChange={() => setApplyToAllSlotsOfSubject(false)}
+                      className="text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>
+                      Update only this specific time slot (<strong>{slotToReassign.dayLabel} {slotToReassign.timeLabel}</strong>)
+                    </span>
+                  </label>
+                </div>
+
+                {reassignSuccessMsg && (
+                  <div className="p-3 rounded-xl bg-green-100 border border-green-300 text-green-800 text-xs font-bold text-center flex items-center justify-center gap-2 animate-in fade-in">
+                    <CheckCircle className="w-4 h-4 text-green-700" />
+                    {reassignSuccessMsg}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setReassignSlotModalOpen(false)}
+                    className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingReassignment || (!selectedFacultyName && !customFacultyTextInput.trim())}
+                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200 cursor-pointer"
+                  >
+                    {savingReassignment ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving Reassignment...
+                      </>
+                    ) : (
+                      <>
+                        <UserCheck className="w-4 h-4" />
+                        Save Reassignment
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Assign Faculty to Class Modal */}
         {assignModalOpen && scheduleToAssign && (
@@ -2892,6 +5972,252 @@ export default function HodDashboard() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Official Printable Timetable Document Modal */}
+        {timetablePrintModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+            <div className="bg-white border border-slate-300 rounded-3xl w-full max-w-5xl my-6 p-6 sm:p-8 space-y-6 shadow-2xl relative text-slate-900">
+              {/* Modal Control Bar */}
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4 print:hidden">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200">
+                    <Printer className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Official Department Timetable Document</h3>
+                    <p className="text-xs text-slate-500">Autonomous university standard format ready for printing & archiving</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span>Print Document</span>
+                  </button>
+                  <button
+                    onClick={() => setTimetablePrintModalOpen(false)}
+                    className="p-2 text-slate-400 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* ── PRINTABLE LETTERHEAD & MASTER TIMETABLE ── */}
+              {(() => {
+                const secKey = selectedTimetableSection === "All" ? "3B" : selectedTimetableSection;
+                const secMeta = SECTION_METADATA_REGISTRY[secKey] || SECTION_METADATA_REGISTRY["3B"];
+
+                const daysOfWeek = [
+                  { key: "MON", label: "MONDAY" },
+                  { key: "TUE", label: "TUESDAY" },
+                  { key: "WED", label: "WEDNESDAY" },
+                  { key: "THUR", label: "THURSDAY" },
+                  { key: "FRI", label: "FRIDAY" },
+                  { key: "SAT", label: "SATURDAY" },
+                ];
+
+                const defaultSlots = [
+                  { start: "09:00", end: "10:00", label: "09:00 - 10:00 AM", periodName: "Period I" },
+                  { start: "10:00", end: "11:00", label: "10:00 - 11:00 AM", periodName: "Period II" },
+                  { start: "11:00", end: "11:10", label: "11:00 - 11:10 AM", isBreak: true, breakName: "TEA BREAK" },
+                  { start: "11:10", end: "12:10", label: "11:10 - 12:10 PM", periodName: "Period III" },
+                  { start: "12:10", end: "01:10", label: "12:10 - 01:10 PM", periodName: "Period IV" },
+                  { start: "01:10", end: "02:00", label: "01:10 - 02:00 PM", isBreak: true, breakName: "LUNCH BREAK" },
+                  { start: "02:00", end: "03:00", label: "02:00 - 03:00 PM", periodName: "Period V" },
+                  { start: "03:00", end: "04:00", label: "03:00 - 04:00 PM", periodName: "Period VI" },
+                ];
+
+                const exactSecSchedule = DEPARTMENT_EXACT_TIMETABLE[secKey] || DEPARTMENT_EXACT_TIMETABLE["2A"];
+                const uniqueSubjects = Array.from(new Set([
+                  ...Object.values(exactSecSchedule).flat().filter((s) => s && s !== "Free"),
+                  ...Object.values(customSubjectOverrides?.[secKey] || {}).filter((s) => s && s !== "Free"),
+                ]));
+
+                const legendList = uniqueSubjects.map((rawSubj) => ({
+                  raw: rawSubj,
+                  details: getTimetableSubjectDetails(rawSubj, secKey),
+                  faculty: getSectionFacultyForSubject(rawSubj, secKey, undefined, undefined, customFacultyOverrides),
+                }));
+
+                return (
+                  <div className="space-y-6">
+                    {/* College Official Letterhead */}
+                    <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
+                      <h1 className="text-xl sm:text-2xl font-black tracking-wide text-slate-900 uppercase">
+                        SPHOORTHY ENGINEERING COLLEGE
+                      </h1>
+                      <p className="text-xs font-semibold text-slate-700 tracking-wider">
+                        (An Autonomous Institution • Approved by AICTE, Affiliated to JNTUH, NAAC 'A+' Grade)
+                      </p>
+                      <p className="text-[11px] text-slate-600">Sagar Road, Nadargul, Hyderabad, Telangana – 501510</p>
+                      <div className="pt-2">
+                        <span className="inline-block px-3 py-1 bg-slate-100 border border-slate-300 rounded font-black text-xs uppercase tracking-widest text-slate-900">
+                          DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING (DATA SCIENCE)
+                        </span>
+                      </div>
+                      <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider pt-1">
+                        CLASS TIME TABLE — ACADEMIC YEAR {secMeta.academicYear}
+                      </h2>
+                    </div>
+
+                    {/* Section Metadata Table */}
+                    <div className="border border-slate-300 rounded-xl overflow-hidden text-xs">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 bg-slate-50 divide-x divide-y sm:divide-y-0 divide-slate-200 border-b border-slate-200">
+                        <div className="p-2.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 block">Degree & Branch</span>
+                          <span className="font-bold text-slate-900">B.Tech – CSE (Data Science)</span>
+                        </div>
+                        <div className="p-2.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 block">Year / Semester / Sec</span>
+                          <span className="font-bold text-slate-900">{secMeta.yearNumber} Year • {secMeta.semester} • Sec {secMeta.sectionLetter}</span>
+                        </div>
+                        <div className="p-2.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 block">Lecture Hall / Room</span>
+                          <span className="font-bold text-slate-900">{secMeta.lectureHall}</span>
+                        </div>
+                        <div className="p-2.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 block">W.E.F. Date</span>
+                          <span className="font-bold text-slate-900">{secMeta.wefDate}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 divide-x divide-slate-200 bg-white">
+                        <div className="p-2.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 block">Class In-charge & Mentor</span>
+                          <span className="font-bold text-slate-900">{secMeta.classIncharge.name} ({secMeta.classIncharge.designation})</span>
+                        </div>
+                        <div className="p-2.5">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 block">Practical Lab Venue</span>
+                          <span className="font-bold text-slate-900">{secMeta.labRoom}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Master Timetable Matrix */}
+                    <div className="border border-slate-300 rounded-xl overflow-x-auto text-xs">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-900 border-b border-slate-300 font-bold uppercase text-[11px]">
+                            <th className="py-2.5 px-3 text-center border-r border-slate-300 w-32">DAY / TIME</th>
+                            {defaultSlots.map((slot, i) => (
+                              <th key={i} className={`py-2 px-2 text-center border-r border-slate-300 ${slot.isBreak ? "bg-amber-100 text-amber-950 w-24" : ""}`}>
+                                <span className="block text-[10px] font-black">{slot.periodName || slot.breakName}</span>
+                                <span className="block font-mono text-[10px] font-normal text-slate-600 mt-0.5">{slot.label}</span>
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-300">
+                          {daysOfWeek.map((day) => (
+                            <tr key={day.key} className="hover:bg-slate-50/50">
+                              <td className="py-3 px-3 font-black text-slate-900 text-center bg-slate-50 border-r border-slate-300">
+                                {day.label}
+                              </td>
+                              {defaultSlots.map((slot, sIdx) => {
+                                if (slot.isBreak) {
+                                  return (
+                                    <td key={sIdx} className="bg-amber-50 text-amber-950 font-black text-[10px] text-center border-r border-slate-300 p-1">
+                                      {slot.breakName}
+                                    </td>
+                                  );
+                                }
+
+                                const slotPeriodMap: Record<string, number> = {
+                                  "Period I": 0,
+                                  "Period II": 1,
+                                  "Period III": 2,
+                                  "Period IV": 3,
+                                  "Period V": 4,
+                                  "Period VI": 5,
+                                };
+                                const pIdx = slotPeriodMap[slot.periodName || ""] ?? 0;
+                                const slotKey = `${secKey}:${day.key}:${pIdx}`;
+                                const rawSubj = customSubjectOverrides?.[secKey]?.[slotKey] || exactSecSchedule[day.key]?.[pIdx] || "Free";
+
+                                if (rawSubj === "Free" || !rawSubj) {
+                                  return (
+                                    <td key={sIdx} className="text-center text-slate-400 font-medium border-r border-slate-300 p-2 bg-slate-50/30">
+                                      —
+                                    </td>
+                                  );
+                                }
+
+                                const subj = getTimetableSubjectDetails(rawSubj, secKey);
+                                const faculty = getSectionFacultyForSubject(rawSubj, secKey, day.key, pIdx, customFacultyOverrides);
+
+                                return (
+                                  <td key={sIdx} className={`p-2 border-r border-slate-300 text-center ${subj.type === "practical" ? "bg-emerald-50/60" : "bg-white"}`}>
+                                    <span className="font-bold text-slate-900 block text-xs leading-snug">{subj.fullName || rawSubj}</span>
+                                    <span className="font-mono text-[10px] text-blue-800 font-bold block mt-0.5">{subj.code}</span>
+                                    <span className="text-[10px] font-semibold text-slate-600 block mt-0.5">{faculty}</span>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Subject Legend & Faculty Allocation Table */}
+                    <div className="border border-slate-300 rounded-xl overflow-hidden text-xs">
+                      <div className="bg-slate-100 border-b border-slate-300 px-4 py-2 font-bold text-slate-900 uppercase text-[11px]">
+                        Subject Details & Faculty Allocation Reference
+                      </div>
+                      <table className="w-full border-collapse text-left">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-300 text-slate-700 font-bold text-[11px]">
+                            <th className="py-2 px-3 text-center w-12 border-r border-slate-200">S.No</th>
+                            <th className="py-2 px-3 border-r border-slate-200">Subject Code</th>
+                            <th className="py-2 px-3 border-r border-slate-200">Subject Name</th>
+                            <th className="py-2 px-3 text-center border-r border-slate-200">L-T-P-C</th>
+                            <th className="py-2 px-3">Faculty / Mentor Name</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200 font-medium">
+                          {legendList.map((item, idx) => (
+                            <tr key={item.raw}>
+                              <td className="py-2 px-3 text-center font-bold text-slate-500 border-r border-slate-200">{idx + 1}</td>
+                              <td className="py-2 px-3 font-mono font-bold text-blue-800 border-r border-slate-200">{item.details.code}</td>
+                              <td className="py-2 px-3 font-bold text-slate-900 border-r border-slate-200">{item.details.fullName}</td>
+                              <td className="py-2 px-3 text-center font-mono border-r border-slate-200">{item.details.type === "practical" ? "0-0-3-2" : "3-1-0-4"}</td>
+                              <td className="py-2 px-3 font-bold text-slate-800">{item.faculty}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Signature Blocks */}
+                    <div className="pt-8 pb-4 grid grid-cols-3 text-center text-xs font-bold text-slate-800">
+                      <div>
+                        <div className="h-10"></div>
+                        <div className="border-t border-slate-400 pt-1.5 mx-6">
+                          Time Table Coordinator
+                        </div>
+                      </div>
+                      <div>
+                        <div className="h-10"></div>
+                        <div className="border-t border-slate-400 pt-1.5 mx-6">
+                          Head of the Department (CSE-DS)
+                        </div>
+                      </div>
+                      <div>
+                        <div className="h-10"></div>
+                        <div className="border-t border-slate-400 pt-1.5 mx-6">
+                          Principal
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -3756,6 +7082,547 @@ export default function HodDashboard() {
                 <p className="text-center text-xs text-gray-400">Master override always works as a backup.</p>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ════════ MENTOR DETAILS MODAL ════════ */}
+      {selectedMentorForModal && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedMentorForModal(null); }}
+        >
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="p-5 border-b border-gray-100 flex items-start justify-between gap-3 bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-base font-black uppercase shadow-xs">
+                  {selectedMentorForModal.name.split(" ").slice(-1)[0]?.charAt(0) || selectedMentorForModal.name.charAt(0)}
+                </div>
+                <div>
+                  <h2 className="text-base font-extrabold text-gray-900">{selectedMentorForModal.name}</h2>
+                  <p className="text-xs text-gray-500 font-mono">{selectedMentorForModal.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedMentorForModal(null)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 space-y-4 text-xs">
+              {/* Role & Section Badges */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2.5 py-1 rounded-lg font-bold bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  {selectedMentorForModal.role}
+                </span>
+                <span className="px-2.5 py-1 rounded-lg font-bold bg-blue-50 border border-blue-200 text-blue-700 text-xs">
+                  {selectedMentorForModal.yearLabel}
+                </span>
+                <span className="px-2.5 py-1 rounded-lg font-bold bg-gray-100 border border-gray-200 text-gray-800 text-xs font-mono">
+                  Section {selectedMentorForModal.section}
+                </span>
+              </div>
+
+              {/* Allocation details */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Students Assigned</span>
+                  <span className="text-base font-black text-gray-900 font-mono">{selectedMentorForModal.count} Students</span>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Department</span>
+                  <span className="text-sm font-bold text-gray-800">CSE Data Science</span>
+                </div>
+              </div>
+
+              {/* Roll Numbers Allocated */}
+              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5">Assigned Roll Range</span>
+                <p className="font-mono text-xs font-bold text-gray-800 bg-white p-2 rounded-lg border border-gray-200 break-words leading-relaxed">
+                  {selectedMentorForModal.rollRange}
+                </p>
+              </div>
+
+              {/* Login Key */}
+              <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Security Passkey</span>
+                  <span className="font-mono text-xs font-black text-blue-900 tracking-widest mt-0.5 block">
+                    {selectedMentorForModal.key || "Not configured"}
+                  </span>
+                </div>
+                {selectedMentorForModal.key && (
+                  <button
+                    onClick={() => handleCopyKey(selectedMentorForModal.key, selectedMentorForModal.id)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    {copiedKeyId === String(selectedMentorForModal.id) ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedKeyId === String(selectedMentorForModal.id) ? "Copied!" : "Copy Key"}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+              <button
+                onClick={() => setSelectedMentorForModal(null)}
+                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold text-xs text-gray-800 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════ EDIT MENTOR MODAL ════════ */}
+      {editMentorModalOpen && mentorEditData && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setEditMentorModalOpen(false); }}
+        >
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                  <Edit3 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-gray-900">Edit Faculty Assignment</h2>
+                  <p className="text-[11px] text-gray-500">{mentorEditData.name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditMentorModalOpen(false)}
+                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Form */}
+            <div className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Faculty Name</label>
+                <input
+                  type="text"
+                  value={mentorEditData.name}
+                  disabled
+                  className="w-full h-8 px-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Official Email</label>
+                <input
+                  type="text"
+                  value={mentorEditData.email}
+                  disabled
+                  className="w-full h-8 px-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 font-mono text-xs cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Assigned Section</label>
+                <input
+                  type="text"
+                  value={mentorEditData.section}
+                  disabled
+                  className="w-full h-8 px-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-wider mb-1">Login Key / Passkey</label>
+                <input
+                  type="text"
+                  value={editKeyInput}
+                  onChange={(e) => setEditKeyInput(e.target.value)}
+                  placeholder="Enter login passkey"
+                  className="w-full h-9 px-3 rounded-lg bg-gray-50 border-2 border-blue-200 focus:border-blue-500 text-gray-900 font-mono text-xs font-bold outline-none"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">This key is used by faculty to log into the Mentor App.</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditMentorModalOpen(false)}
+                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!mentorEditData) return;
+                  setIsSavingKey(true);
+                  try {
+                    await customFetch(`/api/mentors/${mentorEditData.id}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ passkey: editKeyInput, key: editKeyInput })
+                    });
+                    queryClient.invalidateQueries({ queryKey: ["mentors"] });
+                    setEditMentorModalOpen(false);
+                  } catch (e) {
+                    console.error(e);
+                  } finally {
+                    setIsSavingKey(false);
+                  }
+                }}
+                disabled={isSavingKey}
+                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+              >
+                {isSavingKey ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════ BULK PARENT NOTIFICATION MODAL ════════ */}
+      {bulkMessageModalOpen && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setBulkMessageModalOpen(false); }}
+        >
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
+                  <Send className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-extrabold text-gray-900">Broadcast Notice to Parents</h2>
+                  <p className="text-xs text-gray-500">Official HOD Punctuality & Absence Notification</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setBulkMessageModalOpen(false)}
+                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 space-y-4 text-xs">
+              {/* Target Audience Selector */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                  Target Recipient Group
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBulkMessageType("late")}
+                    className={`p-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
+                      bulkMessageType === "late"
+                        ? "bg-amber-50 border-amber-400 text-amber-950 ring-2 ring-amber-200"
+                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <span className="block text-sm font-black text-amber-900">{problemStats.lateCount}</span>
+                    <span className="text-[10px] text-amber-800">All Late Comers</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBulkMessageType("unscanned")}
+                    className={`p-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
+                      bulkMessageType === "unscanned"
+                        ? "bg-red-50 border-red-400 text-red-950 ring-2 ring-red-200"
+                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <span className="block text-sm font-black text-red-900">{problemStats.unscannedCount}</span>
+                    <span className="text-[10px] text-red-800">All Unscanned</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBulkMessageType("custom")}
+                    className={`p-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
+                      bulkMessageType === "custom"
+                        ? "bg-blue-50 border-blue-400 text-blue-950 ring-2 ring-blue-200"
+                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <span className="block text-sm font-black text-blue-900">{selectedStudentIds.length}</span>
+                    <span className="text-[10px] text-blue-800">Selected Only</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Delivery Channel */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                  Notification Channel
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBulkBroadcastChannel("whatsapp")}
+                    className={`flex-1 py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      bulkBroadcastChannel === "whatsapp"
+                        ? "bg-emerald-50 border-emerald-400 text-emerald-800 ring-1 ring-emerald-300"
+                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>WhatsApp Official</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBulkBroadcastChannel("sms")}
+                    className={`flex-1 py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      bulkBroadcastChannel === "sms"
+                        ? "bg-blue-50 border-blue-400 text-blue-800 ring-1 ring-blue-300"
+                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                    <span>SMS Gateway</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Message Template Preview */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Message Content Preview
+                </label>
+                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 font-sans text-xs text-gray-800 leading-relaxed space-y-1">
+                  {bulkMessageType === "late" ? (
+                    <>
+                      <p className="font-bold text-gray-900">🔔 Late Arrival Advisory:</p>
+                      <p>
+                        "Dear Parent, your ward was marked <strong>LATE</strong> today ({logDate}) at Sphoorthy Engineering College. College timing commences at <strong>09:00 AM</strong>. Repeated late entries affect academic attendance records. Please advise punctuality. — <em>HOD, CSE Data Science</em>"
+                      </p>
+                    </>
+                  ) : bulkMessageType === "unscanned" ? (
+                    <>
+                      <p className="font-bold text-gray-900">⚠️ Absence & Safety Alert:</p>
+                      <p>
+                        "Dear Parent, your ward has <strong>NOT SCANNED</strong> into the college campus today ({logDate}). If they have not arrived, please confirm their status with the faculty mentor or department office. — <em>HOD, CSE Data Science</em>"
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-bold text-gray-900">📢 Department Circular:</p>
+                      <p>
+                        "Dear Parent, this is an official attendance notice regarding your ward's attendance status today ({logDate}) at Sphoorthy Engineering College CSE-DS Dept. — <em>HOD</em>"
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Broadcast Alert */}
+              {bulkBroadcastSuccess && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span className="font-bold">
+                    Broadcast queued successfully! {bulkMessageType === "late" ? problemStats.lateCount : bulkMessageType === "unscanned" ? problemStats.unscannedCount : selectedStudentIds.length} parent alerts sent via {bulkBroadcastChannel.toUpperCase()}.
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setBulkMessageModalOpen(false)}
+                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBulkBroadcastSending(true);
+                  setTimeout(() => {
+                    setBulkBroadcastSending(false);
+                    setBulkBroadcastSuccess(true);
+                    setTimeout(() => {
+                      setBulkBroadcastSuccess(false);
+                      setBulkMessageModalOpen(false);
+                      setSelectedStudentIds([]);
+                    }, 1800);
+                  }, 800);
+                }}
+                disabled={bulkBroadcastSending || (bulkMessageType === "custom" && selectedStudentIds.length === 0)}
+                className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-xs transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                {bulkBroadcastSending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Broadcasting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Send Broadcast Notice</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════ ADD / EDIT STUDENT REMARK & EXCUSE MODAL ════════ */}
+      {remarkModalData && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setRemarkModalData(null); }}
+        >
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                  <FileEdit className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-gray-900">Document Reason & Excuse</h2>
+                  <p className="text-[11px] text-gray-500">{remarkModalData.student.name} ({remarkModalData.student.uniqueId})</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setRemarkModalData(null)}
+                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Form */}
+            <div className="p-5 space-y-3.5 text-xs">
+              {/* Quick Preset Buttons */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                  Select Valid Reason Preset
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    "College Bus Delayed",
+                    "Medical / Sick Leave",
+                    "OD / Sports / Placement",
+                    "Permission from Mentor",
+                    "Traffic / Commute Issue",
+                    "Parent Informed & Verified",
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => {
+                        setRemarkPreset(preset);
+                        if (!remarkInput || remarkInput === remarkPreset) setRemarkInput(preset);
+                      }}
+                      className={`p-2 rounded-lg border text-left font-bold text-[11px] transition-all cursor-pointer ${
+                        remarkPreset === preset
+                          ? "bg-blue-50 border-blue-400 text-blue-900 ring-1 ring-blue-200"
+                          : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Remark Input */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Custom Remark / Description
+                </label>
+                <input
+                  type="text"
+                  value={remarkInput}
+                  onChange={(e) => setRemarkInput(e.target.value)}
+                  placeholder="e.g. Route 12 college bus punctured at LB Nagar"
+                  className="w-full h-9 px-3 rounded-lg bg-gray-50 border border-gray-300 focus:border-blue-500 text-gray-900 font-medium text-xs outline-none"
+                />
+              </div>
+
+              {/* Excused Toggle */}
+              <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-emerald-900 block">Mark as Valid / Excused</span>
+                  <span className="text-[10px] text-emerald-700">Will mark this late entry or absence as approved by HOD.</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={remarkIsExcused}
+                  onChange={(e) => setRemarkIsExcused(e.target.checked)}
+                  className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+              {remarksMap[`${remarkModalData.student.id}_${logDate}`] ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const key = `${remarkModalData.student.id}_${logDate}`;
+                    const updated = { ...remarksMap };
+                    delete updated[key];
+                    setRemarksMap(updated);
+                    localStorage.setItem("hod_student_remarks_v1", JSON.stringify(updated));
+                    setRemarkModalData(null);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs transition-colors cursor-pointer"
+                >
+                  Delete Remark
+                </button>
+              ) : <div />}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRemarkModalData(null)}
+                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const key = `${remarkModalData.student.id}_${logDate}`;
+                    const updated = {
+                      ...remarksMap,
+                      [key]: {
+                        preset: remarkPreset,
+                        text: remarkInput.trim() || remarkPreset,
+                        isExcused: remarkIsExcused,
+                        updatedAt: new Date().toISOString(),
+                      }
+                    };
+                    setRemarksMap(updated);
+                    localStorage.setItem("hod_student_remarks_v1", JSON.stringify(updated));
+                    setRemarkModalData(null);
+                  }}
+                  className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                >
+                  Save Remark
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

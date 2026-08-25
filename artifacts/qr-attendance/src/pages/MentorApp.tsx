@@ -88,27 +88,27 @@ export const OFFICIAL_FACULTY_LIST = [
   // III Year
   { id: 4, name: "Mrs G Sushma", email: "mrsgsushma@gmail.com", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6701 TO 24N81A6731", count: 29 },
   { id: 15, name: "Ms. Priyusha", email: "msspriyusha@gmail.com", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3A", rollRange: "24N81A6732 TO 24N81A6752 + LE-3 to LE-8", count: 26 },
-  { id: 6, name: "Mrs. CH. Naga Rohini", email: "mrschnagarohini@gmail.com", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6753 TO 24N81A6779 + RA-33, A9", count: 26 },
+  { id: 6, name: "Mrs. CH. Naga Rohini", email: "mrschnagarohini@gmail.com", role: "Faculty Mentor (3B) & Subject Faculty (COA - 2A)", yearLabel: "2nd & 3rd Year", section: "2A / 3B", rollRange: "COA (2A) / 24N81A6753 TO 24N81A6779 + RA-33, A9", count: 26 },
   { id: 8, name: "Mr Miskeen Ali", email: "mrmiskeenali@gmail.com", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3B", rollRange: "24N81A6780 TO 24N81A67A5", count: 24 },
   { id: 5, name: "Mr M Yadaiah", email: "mrmyadaiah@gmail.com", role: "Class In-charge & Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67A6 TO 24N81A67D2", count: 27 },
   { id: 9, name: "Mrs. Swetha", email: "mrsswetha@gmail.com", role: "Faculty Mentor", yearLabel: "3rd Year", section: "3C", rollRange: "24N81A67D3 TO 24N81A67F9", count: 27 },
 
   // II Year
-  { id: 10, name: "Mrs B Gayathri", email: "mrsbgayathri@gmail.com", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6701 TO 25N81A6727", count: 27 },
-  { id: 13, name: "Mrs Ch Vijaya Lakshmi", email: "mrschvijayalakshmi@gmail.com", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6728 TO 25N81A6755", count: 28 },
+  { id: 10, name: "Mrs B Gayathri", email: "mrsbgayathri@gmail.com", role: "Class In-charge & Mentor (Counselling)", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6701 TO 25N81A6727 (Counselling)", count: 27 },
+  { id: 13, name: "Mrs Ch Vijaya Lakshmi", email: "mrschvijayalakshmi@gmail.com", role: "Faculty Mentor & Subject Faculty (DBMS)", yearLabel: "2nd Year", section: "2A", rollRange: "25N81A6728 TO 25N81A6755 (DBMS & Lab)", count: 28 },
   { id: 11, name: "Mrs K Ramya", email: "mrskramya@gmail.com", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6756 TO 25N81A6783", count: 27 },
-  { id: 14, name: "Mr M Srinivasulu", email: "mrmsrinivasulu@gmail.com", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2B", rollRange: "25N81A6784 TO 25N81A67B3", count: 28 },
+  { id: 14, name: "Mr M Srinivasulu", email: "mrmsrinivasulu@gmail.com", role: "Faculty Mentor & Subject Faculty (SE - 2A)", yearLabel: "2nd Year", section: "2A / 2B", rollRange: "SE (2A) / 25N81A6784 TO 25N81A67B3 (2B)", count: 28 },
   { id: 12, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", role: "Faculty Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67B4 TO 25N81A67D9", count: 26 },
   { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67E0 TO 25N81A67G0", count: 19 },
 
   // Subject Faculty
-  { id: 18, name: "Mr. Rakesh Goud", email: "mrrakeshgoud@gmail.com", role: "Subject Faculty (MSF)", yearLabel: "2nd Year", section: "2A/2B/2C", rollRange: "MSF — All 2nd Year Students", count: 80 },
-  { id: 16, name: "Dr. A. Balaram", email: "drabalaram@gmail.com", role: "Subject Faculty", yearLabel: "2nd Year", section: "2A", rollRange: "2nd Year Students", count: 27 },
-  { id: 17, name: "Dr. Md Abdul Azeem", email: "drmdabdulazeem@gmail.com", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", rollRange: "3rd Year Students", count: 29 },
-  { id: 19, name: "Dr. Sri Hari VLN", email: "drsriharivln@gmail.com", role: "Subject Faculty", yearLabel: "2nd Year", section: "2A", rollRange: "2nd Year Students", count: 27 },
-  { id: 20, name: "Mr. Prateek", email: "mrprateek@gmail.com", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", rollRange: "3rd Year Students", count: 29 },
-  { id: 21, name: "Ms. Vaidehi", email: "msvaidehi@gmail.com", role: "Subject Faculty", yearLabel: "3rd Year", section: "3A", rollRange: "3rd Year Students", count: 29 },
-  { id: 22, name: "Dr. C. Lakshmi Nath", email: "lakshminath@sphoorthyengg.ac.in", role: "Subject Faculty (OE)", yearLabel: "4th Year", section: "4B", rollRange: "PPLE(OE) — All 4B Students", count: 39 },
+  { id: 18, name: "Mr. Rakesh Goud", email: "mrrakeshgoud@gmail.com", role: "Subject Faculty (MSF)", yearLabel: "2nd Year", section: "2A / 2B / 2C", rollRange: "MSF (Mathematical & Statistical Foundations) — 2A/2B/2C", count: 80 },
+  { id: 16, name: "Dr. A. Balaram", email: "drabalaram@gmail.com", role: "Subject Faculty (Java & Java Lab)", yearLabel: "2nd Year", section: "2A", rollRange: "OOP Through Java & Java Lab — Section 2A", count: 27 },
+  { id: 17, name: "Dr. Md Abdul Azeem", email: "drmdabdulazeem@gmail.com", role: "Subject Faculty (ADA)", yearLabel: "3rd Year", section: "3A", rollRange: "Analysis & Design of Algorithms — Section 3A", count: 29 },
+  { id: 19, name: "Dr. Sri Hari VLN", email: "drsriharivln@gmail.com", role: "Subject Faculty (CM Lab)", yearLabel: "2nd Year", section: "2A", rollRange: "Computational Mathematics Lab — Section 2A", count: 27 },
+  { id: 20, name: "Mr. Prateek", email: "mrprateek@gmail.com", role: "Subject Faculty (CN)", yearLabel: "3rd Year", section: "3A", rollRange: "Computer Networks — Section 3A", count: 29 },
+  { id: 21, name: "Ms. Vaidehi", email: "msvaidehi@gmail.com", role: "Subject Faculty (DevOps)", yearLabel: "3rd Year", section: "3A", rollRange: "DevOps & Cloud Automation — Section 3A", count: 29 },
+  { id: 22, name: "Dr. C. Lakshmi Nath", email: "lakshminath@sphoorthyengg.ac.in", role: "Subject Faculty (OE)", yearLabel: "4th Year", section: "4B", rollRange: "PPLE (Open Elective) — Section 4B", count: 39 },
 ];
 
 export default function MentorApp() {
@@ -136,8 +136,10 @@ export default function MentorApp() {
   const [keySubmitting, setKeySubmitting] = useState(false);
 
   // Auto-Update Engine States
-  const CURRENT_APP_VERSION = "1.7.0";
+  const CURRENT_APP_VERSION = "1.8.0";
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [updateCheckStatus, setUpdateCheckStatus] = useState<string | null>(null);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [latestVersionInfo, setLatestVersionInfo] = useState<{
     versionName: string;
     versionCode: number;
@@ -150,8 +152,75 @@ export default function MentorApp() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [offlineMode, setOfflineMode] = useState(false);
 
-  // History Tab Selected Date
-  const [historySelectedDay, setHistorySelectedDay] = useState("WED");
+  // Date helper functions in IST
+  const getISTDateStr = (dateObj = new Date()): string => {
+    const utc = dateObj.getTime() + (dateObj.getTimezoneOffset() * 60000);
+    const istDate = new Date(utc + (3600000 * 5.5));
+    const y = istDate.getFullYear();
+    const m = String(istDate.getMonth() + 1).padStart(2, '0');
+    const d = String(istDate.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
+  const getYesterdayISTDateStr = (): string => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return getISTDateStr(d);
+  };
+
+  const getThisWeekRange = (): { startDate: string; endDate: string } => {
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istDate = new Date(utc + (3600000 * 5.5));
+    const day = istDate.getDay();
+    const diffToMon = (day === 0 ? -6 : 1) - day;
+    const monday = new Date(istDate);
+    monday.setDate(istDate.getDate() + diffToMon);
+    const saturday = new Date(monday);
+    saturday.setDate(monday.getDate() + 5);
+    return {
+      startDate: getISTDateStr(monday),
+      endDate: getISTDateStr(saturday)
+    };
+  };
+
+  const isNewerVersion = (remote: string, current: string): boolean => {
+    if (!remote) return false;
+    const rParts = remote.replace(/^v/i, "").split(".").map(n => parseInt(n) || 0);
+    const cParts = current.replace(/^v/i, "").split(".").map(n => parseInt(n) || 0);
+    for (let i = 0; i < Math.max(rParts.length, cParts.length); i++) {
+      const r = rParts[i] || 0;
+      const c = cParts[i] || 0;
+      if (r > c) return true;
+      if (r < c) return false;
+    }
+    return false;
+  };
+
+  // ── History Tab States ──
+  const [historyQuickFilter, setHistoryQuickFilter] = useState<"today" | "yesterday" | "this_week" | "this_month" | "custom">("yesterday");
+  const [historySelectedDate, setHistorySelectedDate] = useState<string>(getYesterdayISTDateStr());
+  const [historySearch, setHistorySearch] = useState<string>("");
+  const [historyLoading, setHistoryLoading] = useState<boolean>(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyData, setHistoryData] = useState<{
+    date?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    summary: {
+      totalClasses: number;
+      totalStudents: number;
+      totalPresent: number;
+      totalAbsent: number;
+      averageAttendance: number;
+    };
+    sessions: any[];
+  }>({
+    summary: { totalClasses: 0, totalStudents: 0, totalPresent: 0, totalAbsent: 0, averageAttendance: 0 },
+    sessions: []
+  });
+  const [expandedSessionId, setExpandedSessionId] = useState<number | null>(null);
+  const [exportingCsv, setExportingCsv] = useState<boolean>(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -165,32 +234,149 @@ export default function MentorApp() {
   }, []);
 
   // Check for app updates on mount
-  useEffect(() => {
-    async function checkAppVersion() {
-      try {
-        const res = await fetch(`https://qr-attendance-app-eight.vercel.app/api/auth/version-check?t=${Date.now()}`, {
-          cache: "no-store",
-          headers: { "Cache-Control": "no-cache" }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.latestVersionName && data.latestVersionName !== CURRENT_APP_VERSION) {
-            setLatestVersionInfo({
-              versionName: data.latestVersionName,
-              versionCode: data.latestVersionCode || 7,
-              downloadUrl: data.downloadUrl || "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-              releaseNotes: data.releaseNotes || "Performance enhancements & training sub-sessions sync."
-            });
-            // Show update dialog if newer version available
-            setUpdateModalOpen(true);
-          }
-        }
-      } catch (e) {
-        // silent fail on network glitch
-      }
+  const checkAppVersion = async (manual = false) => {
+    if (manual) {
+      setCheckingUpdate(true);
+      setUpdateCheckStatus(null);
     }
-    checkAppVersion();
+    try {
+      const res = await fetch(`https://qr-attendance-app-eight.vercel.app/api/auth/version-check?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.latestVersionName && isNewerVersion(data.latestVersionName, CURRENT_APP_VERSION)) {
+          setLatestVersionInfo({
+            versionName: data.latestVersionName,
+            versionCode: data.latestVersionCode || 8,
+            downloadUrl: data.downloadUrl || "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
+            releaseNotes: data.releaseNotes || "Performance enhancements & timetable snapshots sync."
+          });
+          setUpdateModalOpen(true);
+        } else if (manual) {
+          setUpdateCheckStatus(`App is up to date (v${CURRENT_APP_VERSION})`);
+          setTimeout(() => setUpdateCheckStatus(null), 4000);
+        }
+      } else if (manual) {
+        setUpdateCheckStatus("Unable to reach update server.");
+        setTimeout(() => setUpdateCheckStatus(null), 4000);
+      }
+    } catch (e) {
+      if (manual) {
+        setUpdateCheckStatus("Update check failed. Check network.");
+        setTimeout(() => setUpdateCheckStatus(null), 4000);
+      }
+    } finally {
+      if (manual) setCheckingUpdate(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAppVersion(false);
   }, []);
+
+  // Fetch history data whenever history tab is active and filters change
+  const loadHistoryData = async () => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      let queryUrl = `/api/mentor/history?`;
+      if (historyQuickFilter === "today") {
+        queryUrl += `date=${getISTDateStr()}`;
+      } else if (historyQuickFilter === "yesterday") {
+        queryUrl += `date=${getYesterdayISTDateStr()}`;
+      } else if (historyQuickFilter === "this_week") {
+        const week = getThisWeekRange();
+        queryUrl += `startDate=${week.startDate}&endDate=${week.endDate}`;
+      } else if (historyQuickFilter === "this_month") {
+        const month = getISTDateStr().slice(0, 7);
+        queryUrl += `month=${month}`;
+      } else if (historyQuickFilter === "custom") {
+        queryUrl += `date=${historySelectedDate}`;
+      }
+
+      if (historySearch.trim()) {
+        queryUrl += `&search=${encodeURIComponent(historySearch.trim())}`;
+      }
+
+      const res = await customFetch<any>(queryUrl);
+      if (res && res.sessions) {
+        setHistoryData(res);
+      } else if (res && res.schedules) {
+        setHistoryData({
+          date: res.date,
+          startDate: res.startDate,
+          endDate: res.endDate,
+          summary: res.summary || {
+            totalClasses: (res.schedules || []).filter((s: any) => s.status === "submitted").length,
+            totalStudents: 0,
+            totalPresent: 0,
+            totalAbsent: 0,
+            averageAttendance: 0
+          },
+          sessions: res.schedules || []
+        });
+      }
+    } catch (err: any) {
+      setHistoryError(err?.message || "Failed to load attendance history records");
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "history" && role === "mentor") {
+      loadHistoryData();
+    }
+  }, [activeTab, historyQuickFilter, historySelectedDate, historySearch, role]);
+
+  const handleExportAttendance = async (sessionToExport?: any) => {
+    try {
+      setExportingCsv(true);
+      let queryUrl = `/api/mentor/history/export?`;
+      if (sessionToExport) {
+        queryUrl += `date=${sessionToExport.date}&scheduleId=${sessionToExport.scheduleId}`;
+      } else {
+        if (historyQuickFilter === "today") {
+          queryUrl += `date=${getISTDateStr()}`;
+        } else if (historyQuickFilter === "yesterday") {
+          queryUrl += `date=${getYesterdayISTDateStr()}`;
+        } else if (historyQuickFilter === "this_week") {
+          const week = getThisWeekRange();
+          queryUrl += `startDate=${week.startDate}&endDate=${week.endDate}`;
+        } else if (historyQuickFilter === "this_month") {
+          queryUrl += `month=${getISTDateStr().slice(0, 7)}`;
+        } else if (historyQuickFilter === "custom") {
+          queryUrl += `date=${historySelectedDate}`;
+        }
+      }
+
+      const token = localStorage.getItem("auth_token") || "";
+      const res = await fetch(queryUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+
+      if (!res.ok) throw new Error("Export request failed");
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      const fileLabel = sessionToExport
+        ? `${sessionToExport.subject}_${sessionToExport.section}_${sessionToExport.date}`
+        : `${historyQuickFilter}_${historySelectedDate || getISTDateStr()}`;
+      link.download = `Attendance_Report_${fileLabel}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e: any) {
+      alert("Failed to export attendance CSV report.");
+    } finally {
+      setExportingCsv(false);
+    }
+  };
 
   useEffect(() => {
     if (role === "mentor") {
@@ -362,7 +548,7 @@ export default function MentorApp() {
 
   // Trigger APK download with zero-cache URL
   const handleDownloadApk = () => {
-    const freshUrl = `https://qr-attendance-app-eight.vercel.app/FacultyApp.apk?v=1.7.0&t=${Date.now()}`;
+    const freshUrl = `https://qr-attendance-app-eight.vercel.app/FacultyApp.apk?v=1.8.0&t=${Date.now()}`;
     window.location.href = freshUrl;
   };
 
@@ -815,191 +1001,404 @@ export default function MentorApp() {
           </>
         )}
 
-        {/* ─── TAB 2: ATTENDANCE HISTORY (Exact Match to Stitch) ─── */}
+        {/* ─── TAB 2: ATTENDANCE HISTORY (Production Database-Backed) ─── */}
         {activeTab === "history" && (
           <div className="space-y-4">
-            {/* Header & Date Ribbon */}
-            <section className="flex flex-col gap-1">
-              <h2 className="text-xl font-bold text-[#000666]">Attendance History</h2>
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar mt-1">
-                <span className="text-[11px] font-bold text-gray-500 uppercase mr-1">OCT</span>
-                {[
-                  { day: "Mon", date: "09", code: "09" },
-                  { day: "Tue", date: "10", code: "10" },
-                  { day: "Wed", date: "11", code: "11", active: true },
-                  { day: "Thu", date: "12", code: "12" },
-                  { day: "Fri", date: "13", code: "13" }
-                ].map((item) => (
+            {/* Header & Global Actions */}
+            <section className="flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-bold text-[#000666]">Attendance History</h2>
+                  <p className="text-[11px] text-gray-500 font-medium">
+                    {historyQuickFilter === "today" && `Today • ${getISTDateStr()}`}
+                    {historyQuickFilter === "yesterday" && `Yesterday • ${getYesterdayISTDateStr()}`}
+                    {historyQuickFilter === "this_week" && `This Week (${getThisWeekRange().startDate} to ${getThisWeekRange().endDate})`}
+                    {historyQuickFilter === "this_month" && `This Month (${getISTDateStr().slice(0, 7)})`}
+                    {historyQuickFilter === "custom" && `Date: ${historySelectedDate}`}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5">
                   <button
-                    key={item.code}
-                    onClick={() => setHistorySelectedDay(item.code)}
-                    className={`flex-shrink-0 flex flex-col items-center justify-center w-12 h-14 rounded-xl border transition-all cursor-pointer ${
-                      item.active || historySelectedDay === item.code
-                        ? "bg-[#000666] text-white border-[#000666] shadow-sm"
-                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                    onClick={() => handleExportAttendance()}
+                    disabled={exportingCsv || historyLoading || (historyData.sessions || []).length === 0}
+                    className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-[11px] flex items-center gap-1 transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
+                    title="Export Filtered CSV"
+                  >
+                    {exportingCsv ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#000666]" /> : <Download className="w-3.5 h-3.5 text-[#000666]" />}
+                    <span>CSV</span>
+                  </button>
+
+                  <button
+                    onClick={() => loadHistoryData()}
+                    disabled={historyLoading}
+                    className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-all cursor-pointer shadow-2xs"
+                    title="Refresh History"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${historyLoading ? "animate-spin text-[#000666]" : ""}`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Date Filter Quick Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar mt-0.5">
+                {[
+                  { id: "yesterday", label: "Yesterday" },
+                  { id: "today", label: "Today" },
+                  { id: "this_week", label: "This Week" },
+                  { id: "this_month", label: "This Month" },
+                  { id: "custom", label: "Select Date 📅" }
+                ].map((pill) => (
+                  <button
+                    key={pill.id}
+                    onClick={() => {
+                      setHistoryQuickFilter(pill.id as any);
+                      if (pill.id === "today") setHistorySelectedDate(getISTDateStr());
+                      if (pill.id === "yesterday") setHistorySelectedDate(getYesterdayISTDateStr());
+                    }}
+                    className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      historyQuickFilter === pill.id
+                        ? "bg-[#000666] text-white shadow-sm"
+                        : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
                     }`}
                   >
-                    <span className="text-[10px] font-semibold opacity-80">{item.day}</span>
-                    <span className="text-sm font-bold">{item.date}</span>
+                    {pill.label}
                   </button>
                 ))}
               </div>
+
+              {/* Custom Exact Date Input (Shown when custom is selected) */}
+              {historyQuickFilter === "custom" && (
+                <div className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-[#000666] shadow-2xs">
+                  <CalendarDays className="w-4 h-4 text-[#000666] shrink-0" />
+                  <span className="text-xs font-bold text-gray-700">Choose Date:</span>
+                  <input
+                    type="date"
+                    value={historySelectedDate}
+                    max={getISTDateStr()}
+                    onChange={(e) => setHistorySelectedDate(e.target.value)}
+                    className="flex-1 text-xs font-bold text-gray-900 bg-transparent border-0 outline-none cursor-pointer"
+                  />
+                </div>
+              )}
+
+              {/* Student Search Bar */}
+              <div className="relative">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search student name or roll number..."
+                  value={historySearch}
+                  onChange={(e) => setHistorySearch(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-xs font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#000666] shadow-2xs transition-all"
+                />
+                {historySearch && (
+                  <button
+                    onClick={() => setHistorySearch("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </section>
 
-            {/* Bento Summary Box (Exact Stitch) */}
+            {/* Bento Dynamic Summary Box */}
             <section className="grid grid-cols-2 gap-3">
-              <div className="bg-[#f3f3f3] rounded-xl p-3.5 flex flex-col justify-between border border-gray-200">
-                <div className="flex items-center gap-1.5 mb-2 text-gray-600">
+              <div className="bg-[#f3f3f3] rounded-xl p-3.5 flex flex-col justify-between border border-gray-200 shadow-2xs">
+                <div className="flex items-center gap-1.5 mb-1.5 text-gray-600">
                   <School className="w-4 h-4 text-[#000666]" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Total Classes</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Total Classes</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-[#000666]">04</span>
+                  <span className="text-2xl font-bold text-[#000666]">
+                    {String(historyData.summary?.totalClasses ?? 0).padStart(2, "0")}
+                  </span>
                   <span className="text-xs text-gray-500 font-medium">Sessions</span>
                 </div>
               </div>
 
-              <div className="bg-[#fdd400] rounded-xl p-3.5 flex flex-col justify-between border border-yellow-300">
-                <div className="flex items-center gap-1.5 mb-2 text-gray-800">
+              <div className="bg-[#fdd400] rounded-xl p-3.5 flex flex-col justify-between border border-yellow-300 shadow-2xs">
+                <div className="flex items-center gap-1.5 mb-1.5 text-gray-800">
                   <TrendingUp className="w-4 h-4 text-gray-900" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Avg Attendance</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Avg Attendance</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-gray-900">92%</span>
-                  <span className="text-xs text-gray-800 font-medium">Present</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {historyData.summary?.averageAttendance ?? 0}%
+                  </span>
+                  <span className="text-xs text-gray-800 font-medium">
+                    ({historyData.summary?.totalPresent ?? 0} P / {historyData.summary?.totalAbsent ?? 0} A)
+                  </span>
                 </div>
               </div>
             </section>
 
-            {/* Historical Sessions List (Exact Stitch) */}
+            {/* Historical Sessions List */}
             <section className="space-y-3">
-              <div className="flex justify-between items-center px-1">
-                <h3 className="text-xs font-semibold text-gray-600">Wednesday, Oct 11</h3>
-                <span className="text-xs font-bold text-[#000666] cursor-pointer">Filter</span>
-              </div>
-
-              {[
-                { title: "Data Structures", sec: "Section DS II/I/A", time: "09:00 AM - 10:30 AM", present: "48/52", pct: "92%", color: "bg-emerald-500" },
-                { title: "Algorithms Lab", sec: "Section AL III/B", time: "11:00 AM - 12:30 PM", present: "30/30", pct: "100%", color: "bg-emerald-500" },
-                { title: "Software Engineering", sec: "Section SE IV/C", time: "02:00 PM - 03:30 PM", present: "45/60", pct: "75%", color: "bg-red-500" },
-              ].map((s, idx) => (
-                <div key={idx} className="bg-white rounded-xl p-4 border border-gray-200 shadow-2xs space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-900">{s.title}</h4>
-                      <p className="text-xs text-gray-500">{s.sec}</p>
+              {historyLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="bg-white rounded-xl p-4 border border-gray-200 animate-pulse space-y-3 shadow-2xs">
+                      <div className="h-4 bg-gray-200 rounded w-1/3" />
+                      <div className="h-3 bg-gray-100 rounded w-1/2" />
+                      <div className="h-3 bg-gray-100 rounded w-full" />
                     </div>
-                    <div className="bg-[#e8e8e8] px-2.5 py-0.5 rounded-full text-[10px] font-medium text-gray-600 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{s.time}</span>
-                    </div>
+                  ))}
+                </div>
+              ) : historyError ? (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-5 text-center flex flex-col items-center gap-2">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                  <p className="text-xs font-bold text-red-800">{historyError}</p>
+                  <button
+                    onClick={() => loadHistoryData()}
+                    className="mt-1 px-4 py-1.5 bg-[#000666] text-white rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : (historyData.sessions || []).length === 0 ? (
+                <div className="bg-white rounded-2xl p-8 border border-gray-200 text-center flex flex-col items-center shadow-2xs">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
+                    <CalendarDays className="w-6 h-6" />
                   </div>
-
-                  <div className="h-px w-full bg-gray-100" />
-
-                  <div className="flex justify-between items-center text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <div className={`w-2 h-2 rounded-full ${s.color}`} />
-                      <span className="font-semibold text-gray-800"><strong>{s.present}</strong> Present</span>
-                    </div>
-                    <span className="font-bold text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                      {s.pct}
-                    </span>
+                  <h3 className="text-sm font-bold text-gray-900 mb-1">No Attendance Records Found</h3>
+                  <p className="text-xs text-gray-500 max-w-xs mb-4">
+                    {historySearch
+                      ? `No students matching "${historySearch}" found in this period.`
+                      : "No submitted classroom attendance logs found for this selection."}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setHistoryQuickFilter("yesterday");
+                        setHistorySelectedDate(getYesterdayISTDateStr());
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-[#000666] text-white font-bold text-xs cursor-pointer shadow-xs"
+                    >
+                      View Yesterday
+                    </button>
+                    <button
+                      onClick={() => {
+                        setHistoryQuickFilter("this_week");
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs cursor-pointer"
+                    >
+                      View This Week
+                    </button>
                   </div>
                 </div>
-              ))}
+              ) : (
+                (historyData.sessions || []).map((sessionItem: any, idx: number) => {
+                  const isExpanded = expandedSessionId === sessionItem.id;
+                  const isSubmitted = sessionItem.status === "submitted";
+                  const pct = sessionItem.percentage ?? 0;
+                  const colorBadge =
+                    pct >= 75
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : pct >= 60
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : "bg-red-50 text-red-700 border-red-200";
+
+                  return (
+                    <div
+                      key={sessionItem.id || idx}
+                      className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden transition-all"
+                    >
+                      {/* Session Header Card (Tappable) */}
+                      <div
+                        onClick={() => setExpandedSessionId(isExpanded ? null : sessionItem.id)}
+                        className="p-4 cursor-pointer hover:bg-gray-50/60 transition-colors space-y-2.5"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 pr-2">
+                            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                              <h4 className="text-sm font-bold text-gray-900">{sessionItem.subject}</h4>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-[#000666] border border-blue-100">
+                                {sessionItem.fullSection || `DS ${sessionItem.year}/I/${sessionItem.section}`}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-gray-500 font-medium">
+                              Faculty: {sessionItem.facultyName || "Faculty Teacher"}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-1">
+                            <div className="bg-gray-100 px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-700 flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-gray-500" />
+                              <span>{sessionItem.startTime?.slice(0, 5)} - {sessionItem.endTime?.slice(0, 5)}</span>
+                            </div>
+                            <span className="text-[10px] font-semibold text-gray-400">
+                              {sessionItem.date} {sessionItem.dayOfWeek ? `(${sessionItem.dayOfWeek})` : ""}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="h-px w-full bg-gray-100" />
+
+                        {/* Status & Counts Line */}
+                        <div className="flex justify-between items-center text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${isSubmitted ? "bg-emerald-500" : "bg-amber-400"}`} />
+                            <span className="font-semibold text-gray-800">
+                              <strong>{sessionItem.presentCount ?? 0}/{sessionItem.totalStudents ?? 0}</strong> Present
+                            </span>
+                            <span className="text-gray-400 text-[11px]">
+                              ({sessionItem.absentCount ?? 0} Absent)
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <span className={`font-bold text-[11px] px-2 py-0.5 rounded-md border ${colorBadge}`}>
+                              {pct}%
+                            </span>
+                            <div className="text-gray-400">
+                              {isExpanded ? <X className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Expanded Roster Details */}
+                      {isExpanded && (
+                        <div className="border-t border-gray-100 bg-[#fafafa] p-3.5 space-y-3 animate-in slide-in-from-top-2 duration-200">
+                          <div className="flex justify-between items-center">
+                            <div className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                              Student Attendance Roster ({sessionItem.students?.length || 0})
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExportAttendance(sessionItem);
+                              }}
+                              disabled={exportingCsv}
+                              className="px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-[10px] font-bold text-[#000666] flex items-center gap-1 hover:bg-gray-50 cursor-pointer shadow-2xs"
+                            >
+                              <Download className="w-3 h-3 text-[#000666]" />
+                              Export Class CSV
+                            </button>
+                          </div>
+
+                          {/* Student list */}
+                          <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                            {(sessionItem.students || []).map((st: any, sIdx: number) => (
+                              <div
+                                key={st.id || sIdx}
+                                className="bg-white p-2.5 rounded-xl border border-gray-200 flex items-center justify-between shadow-2xs"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <span className="text-[10px] font-mono text-gray-400 w-5 text-right font-semibold">
+                                    {sIdx + 1}.
+                                  </span>
+                                  <div className="min-w-0">
+                                    <h5 className="text-xs font-bold text-gray-900 truncate">
+                                      {st.name}
+                                    </h5>
+                                    <div className="flex items-center gap-2 text-[10px] text-gray-500 font-mono">
+                                      <span>{st.uniqueId || st.rollNumber}</span>
+                                      {st.scannedGate && (
+                                        <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-sans font-bold text-[9px]">
+                                          Gate Scanned
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                      st.markedPresent
+                                        ? "bg-emerald-100 text-emerald-800"
+                                        : "bg-red-100 text-red-800"
+                                    }`}
+                                  >
+                                    {st.markedPresent ? "Present" : "Absent"}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
             </section>
           </div>
         )}
 
-        {/* ─── TAB 3: FACULTY PROFILE (Exact Match to Stitch) ─── */}
+        {/* ─── TAB 3: FACULTY PROFILE (Production Master) ─── */}
         {activeTab === "profile" && (
           <div className="space-y-4">
             {/* Profile Card */}
-            <section className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl border border-gray-200 text-center">
+            <section className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl border border-gray-200 text-center shadow-2xs">
               <img
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuC88bLXC6ysKxleMb3vTfOeWk_k4m60sGLvT0OT-_Xl4AWCNMobx_y4KddCFFdLZ42WPoBPnA2eQMlywgIA7Tq12xBMx_KnF4Nx3CDBqkqMySbit4setrJpbXLlgDO3iuL9gWTxjfL7q3MbZzQGdEXzm_oH72uG0QHbzH7AggoE8NmD0NnyR-CAKNd7_0vFNTF6fS4DODyRUuXYkrE0mWTV04EGuZWvsgrXZSA3AK9_1OcINbg3GSgU"
                 alt="Faculty Portrait"
                 className="w-20 h-20 rounded-2xl object-cover shadow-sm mb-3 border-2 border-white ring-2 ring-gray-100"
               />
-              <h2 className="text-lg font-bold text-gray-900">{activeFaculty?.name || "Dr. Eleanor Vance"}</h2>
-              <p className="text-xs text-gray-500 font-medium">Department of Computer Science</p>
+              <h2 className="text-lg font-bold text-gray-900">{activeFaculty?.name || mentor?.name || "Faculty Teacher"}</h2>
+              <p className="text-xs text-gray-500 font-medium">Department of Computer Science & Engineering (Data Science)</p>
+              <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 bg-blue-50 text-[#000666] border border-blue-200 rounded-full text-[10px] font-bold">
+                <ShieldCheck className="w-3 h-3 text-[#000666]" />
+                <span>Verified Faculty Member</span>
+              </div>
             </section>
 
-            {/* Sync Status Banner (Lavender pill from Stitch) */}
+            {/* Sync Status Banner */}
             <section className="bg-[#bdc2ff]/40 text-[#000767] px-4 py-2.5 rounded-xl flex items-center justify-between border border-[#bdc2ff]">
               <div className="flex items-center gap-2">
                 <Cloud className="w-4 h-4 text-[#000666]" />
-                <span className="text-xs font-bold">All Data Synced</span>
+                <span className="text-xs font-bold">Database Source of Truth (Supabase Live)</span>
               </div>
-              <span className="text-[11px] font-semibold text-gray-600">Just now</span>
+              <span className="text-[11px] font-semibold text-gray-600">Synced</span>
             </section>
 
-            {/* Metrics Bento Grid */}
-            <section className="grid grid-cols-2 gap-3">
-              <div className="bg-white border border-gray-200 rounded-xl p-3.5 flex flex-col justify-between shadow-2xs">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-bold text-gray-500 uppercase">Classes Today</span>
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                </div>
-                <div className="text-2xl font-bold text-[#000666]">3</div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-xl p-3.5 flex flex-col justify-between shadow-2xs">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-bold text-gray-500 uppercase">Attendance Rate</span>
-                  <Percent className="w-4 h-4 text-gray-400" />
-                </div>
-                <div className="text-2xl font-bold text-[#000666]">94%</div>
-              </div>
-            </section>
-
-            {/* Recent Sessions List */}
+            {/* App Preferences & APK Update System */}
             <section className="space-y-2.5">
-              <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Recent Sessions</h3>
+              <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">App Management</h3>
 
-              <div className="bg-white border border-gray-200 rounded-xl p-3.5 flex flex-col gap-1.5 shadow-2xs">
-                <div className="flex justify-between items-start">
+              {/* Version & Update Card */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-2xs space-y-2">
+                <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="text-xs font-bold text-gray-900">Data Structures & Algo</h4>
-                    <p className="text-[11px] text-gray-500">CS301 • Room 402</p>
+                    <h4 className="text-xs font-bold text-gray-900">Application Version</h4>
+                    <p className="text-[11px] text-gray-500 font-mono">v{CURRENT_APP_VERSION} (Production Build)</p>
                   </div>
-                  <span className="bg-[#e2e2e2] text-gray-700 px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                    Completed
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => checkAppVersion(true)}
+                      disabled={checkingUpdate}
+                      className="px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-[10px] flex items-center gap-1 transition-all cursor-pointer"
+                    >
+                      <RefreshCw className={`w-3 h-3 text-[#000666] ${checkingUpdate ? "animate-spin" : ""}`} />
+                      Check Update
+                    </button>
+                    <button
+                      onClick={handleDownloadApk}
+                      className="px-3 py-1.5 rounded-lg bg-[#000666] hover:bg-blue-950 text-white font-bold text-[10px] flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                    >
+                      <Download className="w-3 h-3" />
+                      Download APK
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium mt-1">
-                  <Users className="w-3.5 h-3.5" />
-                  <span>42/45 Present</span>
-                </div>
+
+                {updateCheckStatus && (
+                  <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 text-xs font-semibold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                    <span>{updateCheckStatus}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="bg-white border border-[#000666] rounded-xl p-3.5 flex flex-col gap-1.5 shadow-2xs relative overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#000666]" />
-                <div className="flex justify-between items-start pl-1">
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-900">Advanced Compilers</h4>
-                    <p className="text-[11px] text-gray-500">CS410 • Room 305</p>
-                  </div>
-                  <span className="bg-[#000666] text-white px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                    Ongoing
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium pl-1 mt-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Ends in 20m</span>
-                </div>
-              </div>
-            </section>
-
-            {/* App Preferences */}
-            <section className="space-y-2.5">
-              <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">App Preferences</h3>
-
+              {/* Push Notifications Toggle */}
               <div className="bg-white border border-gray-200 rounded-xl p-3.5 flex justify-between items-center shadow-2xs">
                 <div>
                   <h4 className="text-xs font-bold text-gray-900">Push Notifications</h4>
-                  <p className="text-[11px] text-gray-500">Alerts for upcoming classes</p>
+                  <p className="text-[11px] text-gray-500">Alerts for scheduled timetable sessions</p>
                 </div>
                 <button
                   type="button"
@@ -1014,10 +1413,11 @@ export default function MentorApp() {
                 </button>
               </div>
 
+              {/* Offline Mode Cache */}
               <div className="bg-white border border-gray-200 rounded-xl p-3.5 flex justify-between items-center shadow-2xs">
                 <div>
-                  <h4 className="text-xs font-bold text-gray-900">Offline Mode</h4>
-                  <p className="text-[11px] text-gray-500">Cache rosters locally</p>
+                  <h4 className="text-xs font-bold text-gray-900">Offline Safe Sync</h4>
+                  <p className="text-[11px] text-gray-500">Automatic retry on network reconnection</p>
                 </div>
                 <button
                   type="button"
@@ -1029,21 +1429,6 @@ export default function MentorApp() {
                   <div className={`w-4 h-4 bg-white rounded-full shadow-xs transition-transform ${
                     offlineMode ? "translate-x-5" : "translate-x-0"
                   }`} />
-                </button>
-              </div>
-
-              {/* Version & APK Download */}
-              <div className="bg-white border border-gray-200 rounded-xl p-3.5 flex justify-between items-center shadow-2xs">
-                <div>
-                  <h4 className="text-xs font-bold text-gray-900">App Version</h4>
-                  <p className="text-[11px] text-gray-500 font-mono">v{CURRENT_APP_VERSION} (Production Build)</p>
-                </div>
-                <button
-                  onClick={handleDownloadApk}
-                  className="px-2.5 py-1 rounded-lg bg-[#000666] text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer"
-                >
-                  <Download className="w-3 h-3" />
-                  APK
                 </button>
               </div>
 

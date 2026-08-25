@@ -64071,27 +64071,30 @@ var GetMentorStudentAttendanceResponse = objectType({
 // src/services/trainingStore.ts
 var STORE_MENTOR_ID = 9999;
 var STORE_MENTOR_EMAIL = "training_store@sphoorthyengg.ac.in";
+var B1_IDS = [82, 61, 76, 35, 74, 111, 95, 121, 71, 6, 40, 89, 112, 80, 96, 42, 59, 4, 64, 120, 26, 58, 107, 94, 63, 79, 106, 53, 38, 60, 20, 46, 92, 122, 113, 23, 93, 110, 108, 72, 75, 19, 81, 77, 109, 56, 91, 78, 8, 2, 7, 14, 5, 115, 21, 116, 54, 44, 118, 73, 39, 41, 90];
+var B2_IDS = [132, 218, 211, 274, 169, 272, 128, 162, 171, 158, 165, 220, 229, 175, 142, 216, 222, 138, 161, 203, 224, 187, 200, 175, 242, 262, 280, 164, 172, 181, 223, 130, 255, 148, 192, 183, 185, 217, 232, 213, 221, 254, 168, 249, 222, 223, 226, 241, 140, 126, 189, 124, 228, 144, 281, 167, 204, 238, 188, 191, 253, 206, 190, 198, 243, 135, 245, 170, 131, 143, 227, 196, 157, 173, 279, 278, 166, 240, 195, 221, 127];
+var ALL_IDS = Array.from(/* @__PURE__ */ new Set([...B1_IDS, ...B2_IDS]));
 var defaultData = {
   sessions: [
     {
       id: 1,
-      name: "Wipro Training",
-      company: "Wipro",
-      description: "Full Stack Development & Quantitative Aptitude Training",
+      name: "NEXT GEN EMPLOYABILITY TRAINING",
+      company: "NEXT GEN",
+      description: "Full Stack Employability, Soft Skills & Aptitude Bootcamp",
       createdAt: "2026-08-19T00:00:00.000Z",
-      studentIds: [],
+      studentIds: ALL_IDS,
       subSessions: [
         {
           id: 1,
-          name: "Session 1 (Morning Batch)",
-          studentIds: [],
+          name: "Session 1 (Final years)",
+          studentIds: B1_IDS,
           startTime: "09:00",
           endTime: "12:30"
         },
         {
           id: 2,
-          name: "Session 2 (Afternoon Batch)",
-          studentIds: [],
+          name: "Session 2 (Pre Final years)",
+          studentIds: B2_IDS,
           startTime: "13:30",
           endTime: "16:30"
         }
@@ -64099,9 +64102,9 @@ var defaultData = {
       trainerKeys: [
         {
           id: 901,
-          name: "Wipro Lead Trainer",
-          email: "wipro.trainer@sphoorthyengg.ac.in",
-          key: "801"
+          name: "NEXT GEN Lead Trainer",
+          email: "trainer@nextgen.com",
+          key: "802"
         }
       ]
     }
@@ -64128,7 +64131,9 @@ async function syncFromSupabase() {
     const raw = data[0]?.password_hash;
     if (raw && raw.startsWith("{")) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed.sessions)) memoryStore.sessions = parsed.sessions;
+      if (Array.isArray(parsed.sessions) && parsed.sessions.length > 0) {
+        memoryStore.sessions = parsed.sessions;
+      }
       if (Array.isArray(parsed.attendance)) memoryStore.attendance = parsed.attendance;
       lastLoadedAt = Date.now();
     }
@@ -64153,7 +64158,7 @@ async function syncToSupabase(data) {
 syncFromSupabase().catch(() => {
 });
 async function ensureFreshStore() {
-  if (Date.now() - lastLoadedAt > 3e3) {
+  if (Date.now() - lastLoadedAt > 6e4) {
     await syncFromSupabase();
   }
   return memoryStore;
@@ -64166,7 +64171,9 @@ function getTrainingSessions() {
 function getTrainingSessionById(id) {
   ensureFreshStore().catch(() => {
   });
-  return memoryStore.sessions.find((s) => s.id === id);
+  const found = memoryStore.sessions.find((s) => s.id === id);
+  if (found) return found;
+  return memoryStore.sessions[0];
 }
 function getTrainingSessionByTrainerKey(key) {
   const cleanKey = String(key || "").trim();
@@ -64188,14 +64195,7 @@ function saveTrainingSession(session) {
       { id: 1, name: "Session 1", studentIds: [] },
       { id: 2, name: "Session 2", studentIds: [] }
     ],
-    trainerKeys: Array.isArray(session.trainerKeys) ? session.trainerKeys : [
-      {
-        id: 900 + id,
-        name: `${session.name} Trainer`,
-        email: `trainer.${id}@sphoorthyengg.ac.in`,
-        key: String(800 + id)
-      }
-    ]
+    trainerKeys: Array.isArray(session.trainerKeys) ? session.trainerKeys : existingIndex >= 0 ? memoryStore.sessions[existingIndex].trainerKeys || [] : []
   };
   if (existingIndex >= 0) {
     memoryStore.sessions[existingIndex] = fullSession;
@@ -64206,11 +64206,14 @@ function saveTrainingSession(session) {
   return fullSession;
 }
 function deleteTrainingSession(id) {
-  const initLen = memoryStore.sessions.length;
+  const initialLen = memoryStore.sessions.length;
   memoryStore.sessions = memoryStore.sessions.filter((s) => s.id !== id);
-  memoryStore.attendance = memoryStore.attendance.filter((a) => a.trainingId !== id);
-  syncToSupabase(memoryStore).catch(console.error);
-  return memoryStore.sessions.length < initLen;
+  if (memoryStore.sessions.length !== initialLen) {
+    memoryStore.attendance = memoryStore.attendance.filter((a) => a.trainingId !== id);
+    syncToSupabase(memoryStore).catch(console.error);
+    return true;
+  }
+  return false;
 }
 function saveSubSession(trainingId, sub) {
   const session = memoryStore.sessions.find((s) => s.id === trainingId);
@@ -64246,15 +64249,16 @@ function deleteSubSession(trainingId, subSessionId) {
   syncToSupabase(memoryStore).catch(console.error);
   return session.subSessions.length < initLen;
 }
-function addTrainerKeyToSession(trainingId, trainer) {
-  const session = memoryStore.sessions.find((s) => s.id === trainingId);
+function addTrainerKeyToSession(sessionId, trainer) {
+  const session = memoryStore.sessions.find((s) => s.id === sessionId);
   if (!session) return void 0;
-  const newTrainerId = 9e3 + Math.floor(Math.random() * 1e3);
+  const nextKeyId = session.trainerKeys.length > 0 ? Math.max(...session.trainerKeys.map((k) => k.id)) + 1 : 901;
   session.trainerKeys.push({
-    id: newTrainerId,
+    id: nextKeyId,
     name: trainer.name,
-    email: trainer.email,
-    key: String(trainer.key).trim()
+    email: trainer.email || "",
+    key: String(trainer.key).trim(),
+    subSessionId: trainer.subSessionId
   });
   syncToSupabase(memoryStore).catch(console.error);
   return session;
@@ -64294,9 +64298,12 @@ function clearTrainingAttendance(trainingId, date) {
 function getTrainingAttendanceForDate(date, trainingId, subSessionId) {
   ensureFreshStore().catch(() => {
   });
-  return memoryStore.attendance.filter(
-    (a) => a.date === date && (!trainingId || a.trainingId === trainingId) && (!subSessionId || a.subSessionId === subSessionId)
-  );
+  return memoryStore.attendance.filter((a) => {
+    if (a.date !== date) return false;
+    if (trainingId && a.trainingId !== trainingId) return false;
+    if (subSessionId && a.subSessionId !== subSessionId) return false;
+    return true;
+  });
 }
 function getPresentUserIdsInTrainingForDate(date) {
   ensureFreshStore().catch(() => {
@@ -65762,6 +65769,295 @@ function getBufferedTime(timeStr, offsetMinutes) {
   }
 }
 var scheduleOverridesMap = /* @__PURE__ */ new Map();
+router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  const dateParam = req.query.date?.trim();
+  const startDateParam = req.query.startDate?.trim();
+  const endDateParam = req.query.endDate?.trim();
+  const monthParam = req.query.month?.trim();
+  const searchQuery = req.query.search?.toLowerCase().trim();
+  const requestedScheduleId = req.query.scheduleId ? parseInt(req.query.scheduleId) : void 0;
+  try {
+    const { date: todayIst } = getCurrentISTDateTime();
+    let filterDates = [];
+    let startFilter = null;
+    let endFilter = null;
+    if (startDateParam && endDateParam && /^\d{4}-\d{2}-\d{2}$/.test(startDateParam) && /^\d{4}-\d{2}-\d{2}$/.test(endDateParam)) {
+      startFilter = startDateParam;
+      endFilter = endDateParam;
+    } else if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
+      startFilter = `${monthParam}-01`;
+      endFilter = `${monthParam}-31`;
+    } else if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+      filterDates = [dateParam];
+    } else {
+      filterDates = [todayIst];
+    }
+    let hourlyQuery = supabase.from("qr_hourly_attendance").select("*, qr_users(id, name, unique_id, section, role)");
+    if (filterDates.length === 1) {
+      hourlyQuery = hourlyQuery.eq("date", filterDates[0]);
+    } else if (startFilter && endFilter) {
+      hourlyQuery = hourlyQuery.gte("date", startFilter).lte("date", endFilter);
+    }
+    if (requestedScheduleId) {
+      hourlyQuery = hourlyQuery.eq("schedule_id", requestedScheduleId);
+    }
+    const { data: rawHourly, error: hourlyErr } = await hourlyQuery.order("marked_at", { ascending: false });
+    if (hourlyErr) throw hourlyErr;
+    let sessionQuery = supabase.from("qr_mentor_sessions").select("*");
+    if (filterDates.length === 1) {
+      sessionQuery = sessionQuery.eq("date", filterDates[0]);
+    } else if (startFilter && endFilter) {
+      sessionQuery = sessionQuery.gte("date", startFilter).lte("date", endFilter);
+    }
+    const { data: rawSessions } = await sessionQuery;
+    const attendanceScheduleIds = /* @__PURE__ */ new Set();
+    (rawHourly || []).forEach((r) => {
+      if (r.schedule_id) attendanceScheduleIds.add(r.schedule_id);
+    });
+    (rawSessions || []).forEach((s) => {
+      if (s.schedule_id) attendanceScheduleIds.add(s.schedule_id);
+    });
+    const { data: allSchedules } = await supabase.from("qr_schedules").select("*, qr_mentors(id, name, email)");
+    const scheduleMap = /* @__PURE__ */ new Map();
+    (allSchedules || []).forEach((s) => scheduleMap.set(s.id, s));
+    const distinctDates = [.../* @__PURE__ */ new Set([
+      ...filterDates,
+      ...(rawHourly || []).map((r) => r.date),
+      ...(rawSessions || []).map((s) => s.date)
+    ])].filter(Boolean);
+    let gateMap = /* @__PURE__ */ new Map();
+    if (distinctDates.length > 0) {
+      const { data: gateRecs } = await supabase.from("qr_attendance").select("user_id, date, entry_time").in("date", distinctDates);
+      (gateRecs || []).forEach((g) => {
+        gateMap.set(`${g.user_id}_${g.date}`, g);
+      });
+    }
+    const sessionGroupMap = /* @__PURE__ */ new Map();
+    (rawHourly || []).forEach((r) => {
+      const key = `${r.schedule_id}_${r.date}`;
+      if (!sessionGroupMap.has(key)) {
+        sessionGroupMap.set(key, {
+          scheduleId: r.schedule_id,
+          date: r.date,
+          hourlyRecords: []
+        });
+      }
+      sessionGroupMap.get(key).hourlyRecords.push(r);
+    });
+    if (filterDates.length === 1) {
+      const singleDate = filterDates[0];
+      const dayNames = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+      const [y, m, d] = singleDate.split("-").map(Number);
+      const parsedDate = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+      const dayOfWeek = dayNames[parsedDate.getUTCDay()];
+      (allSchedules || []).forEach((s) => {
+        if (s.day_of_week === dayOfWeek) {
+          if (mentorId === -3 || s.mentor_id === mentorId) {
+            const key = `${s.id}_${singleDate}`;
+            if (!sessionGroupMap.has(key)) {
+              sessionGroupMap.set(key, {
+                scheduleId: s.id,
+                date: singleDate,
+                hourlyRecords: []
+              });
+            }
+          }
+        }
+      });
+    }
+    const sessionsList = [];
+    let grandTotalStudents = 0;
+    let grandTotalPresent = 0;
+    let grandTotalAbsent = 0;
+    for (const [key, group] of sessionGroupMap.entries()) {
+      const sched = scheduleMap.get(group.scheduleId);
+      const sessionRow = (rawSessions || []).find((s) => s.schedule_id === group.scheduleId && s.date === group.date);
+      if (mentorId !== -3 && sched && sched.mentor_id !== mentorId && sessionRow?.mentor_id !== mentorId) {
+        continue;
+      }
+      const scheduleYear = sched?.year || "II";
+      const scheduleSection = sched?.section || "A";
+      const dbSection = `DS ${scheduleYear}/I/${scheduleSection}`;
+      const studentHourlyMap = /* @__PURE__ */ new Map();
+      group.hourlyRecords.forEach((r) => studentHourlyMap.set(r.user_id, r));
+      let sectionStudents = [];
+      if (group.hourlyRecords.length > 0) {
+        sectionStudents = group.hourlyRecords.map((r) => ({
+          id: r.user_id,
+          name: r.qr_users?.name || `Student #${r.user_id}`,
+          uniqueId: r.qr_users?.unique_id || "",
+          section: r.qr_users?.section || dbSection,
+          markedPresent: r.marked_present,
+          markedByTeacher: r.marked_by_teacher,
+          scannedQr: r.scanned_qr,
+          markedAt: r.marked_at
+        }));
+      } else {
+        const { data: roster } = await supabase.from("qr_users").select("id, name, unique_id, section").eq("role", "student").eq("section", dbSection).order("unique_id", { ascending: true });
+        sectionStudents = (roster || []).map((st) => ({
+          id: st.id,
+          name: st.name,
+          uniqueId: st.unique_id,
+          section: st.section,
+          markedPresent: false,
+          markedByTeacher: false,
+          scannedQr: false,
+          markedAt: null
+        }));
+      }
+      const studentsWithGate = sectionStudents.map((st) => {
+        const gate = gateMap.get(`${st.id}_${group.date}`);
+        const hasGate = Boolean(gate && gate.entry_time);
+        return {
+          ...st,
+          scannedGate: hasGate,
+          gateEntryTime: hasGate ? gate.entry_time : null
+        };
+      });
+      let filteredStudents = studentsWithGate;
+      if (searchQuery) {
+        filteredStudents = studentsWithGate.filter(
+          (st) => (st.name || "").toLowerCase().includes(searchQuery) || (st.uniqueId || "").toLowerCase().includes(searchQuery)
+        );
+      }
+      const totalStudents = studentsWithGate.length;
+      const presentCount = studentsWithGate.filter((st) => st.markedPresent).length;
+      const absentCount = totalStudents - presentCount;
+      const pct = totalStudents > 0 ? Math.round(presentCount / totalStudents * 100) : 0;
+      const isSubmitted = group.hourlyRecords.length > 0 || Boolean(sessionRow?.ended_at);
+      if (isSubmitted) {
+        grandTotalStudents += totalStudents;
+        grandTotalPresent += presentCount;
+        grandTotalAbsent += absentCount;
+      }
+      if (searchQuery && filteredStudents.length === 0) {
+        continue;
+      }
+      sessionsList.push({
+        id: group.scheduleId,
+        scheduleId: group.scheduleId,
+        date: group.date,
+        dayOfWeek: sched?.day_of_week || "",
+        startTime: sched?.start_time || "09:00:00",
+        endTime: sched?.end_time || "10:00:00",
+        subject: sched?.subject || "Class Lecture",
+        year: scheduleYear,
+        section: scheduleSection,
+        fullSection: dbSection,
+        facultyName: sched?.qr_mentors?.name || "Subject Faculty",
+        facultyEmail: sched?.qr_mentors?.email || "",
+        status: isSubmitted ? "submitted" : "pending",
+        submittedAt: sessionRow?.ended_at || group.hourlyRecords[0]?.marked_at || null,
+        totalStudents,
+        presentCount,
+        absentCount,
+        percentage: pct,
+        students: filteredStudents
+      });
+    }
+    sessionsList.sort((a, b) => {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      return a.startTime.localeCompare(b.startTime);
+    });
+    const submittedCount = sessionsList.filter((s) => s.status === "submitted").length;
+    const avgAttendance = grandTotalStudents > 0 ? Math.round(grandTotalPresent / grandTotalStudents * 100) : 0;
+    res.json({
+      date: filterDates.length === 1 ? filterDates[0] : null,
+      startDate: startFilter,
+      endDate: endFilter,
+      summary: {
+        totalClasses: submittedCount,
+        totalStudents: grandTotalStudents,
+        totalPresent: grandTotalPresent,
+        totalAbsent: grandTotalAbsent,
+        averageAttendance: avgAttendance
+      },
+      schedules: sessionsList,
+      sessions: sessionsList
+    });
+  } catch (err) {
+    req.log.error({ err }, "Get mentor history error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+router5.get("/mentor/history/export", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  const dateParam = req.query.date?.trim();
+  const startDateParam = req.query.startDate?.trim();
+  const endDateParam = req.query.endDate?.trim();
+  const monthParam = req.query.month?.trim();
+  const scheduleIdParam = req.query.scheduleId ? parseInt(req.query.scheduleId) : void 0;
+  try {
+    const { date: todayIst } = getCurrentISTDateTime();
+    let filterDates = [];
+    let startFilter = null;
+    let endFilter = null;
+    if (startDateParam && endDateParam) {
+      startFilter = startDateParam;
+      endFilter = endDateParam;
+    } else if (monthParam) {
+      startFilter = `${monthParam}-01`;
+      endFilter = `${monthParam}-31`;
+    } else if (dateParam) {
+      filterDates = [dateParam];
+    } else {
+      filterDates = [todayIst];
+    }
+    let hourlyQuery = supabase.from("qr_hourly_attendance").select("*, qr_users(id, name, unique_id, section, role)");
+    if (filterDates.length === 1) {
+      hourlyQuery = hourlyQuery.eq("date", filterDates[0]);
+    } else if (startFilter && endFilter) {
+      hourlyQuery = hourlyQuery.gte("date", startFilter).lte("date", endFilter);
+    }
+    if (scheduleIdParam) {
+      hourlyQuery = hourlyQuery.eq("schedule_id", scheduleIdParam);
+    }
+    const { data: rawHourly, error: hourlyErr } = await hourlyQuery.order("date", { ascending: false });
+    if (hourlyErr) throw hourlyErr;
+    const { data: allSchedules } = await supabase.from("qr_schedules").select("*, qr_mentors(id, name, email)");
+    const scheduleMap = /* @__PURE__ */ new Map();
+    (allSchedules || []).forEach((s) => scheduleMap.set(s.id, s));
+    const csvRows = [
+      ["Date", "Time Slot", "Subject", "Year", "Section", "Faculty", "Student Name", "Roll Number", "Status", "Marked By", "Marked At"]
+    ];
+    (rawHourly || []).forEach((r) => {
+      const sched = scheduleMap.get(r.schedule_id);
+      if (mentorId !== -3 && sched && sched.mentor_id !== mentorId) return;
+      const timeSlot = sched ? `${sched.start_time.slice(0, 5)} - ${sched.end_time.slice(0, 5)}` : "Lecture Slot";
+      const subject = sched?.subject || "Subject";
+      const year = sched?.year || "II";
+      const section = sched?.section || "A";
+      const faculty = sched?.qr_mentors?.name || "Subject Faculty";
+      const studentName = r.qr_users?.name || `Student #${r.user_id}`;
+      const rollNumber = r.qr_users?.unique_id || "";
+      const status = r.marked_present ? "Present" : "Absent";
+      const markedBy = r.marked_by_teacher ? "Faculty" : r.scanned_qr ? "QR Scan" : "System";
+      const markedAt = r.marked_at ? new Date(r.marked_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "";
+      csvRows.push([
+        r.date,
+        timeSlot,
+        subject,
+        year,
+        section,
+        faculty,
+        studentName,
+        rollNumber,
+        status,
+        markedBy,
+        markedAt
+      ]);
+    });
+    const csvContent = csvRows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const filename = `Attendance_Report_${startFilter || filterDates[0] || "export"}.csv`;
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.send(csvContent);
+  } catch (err) {
+    req.log.error({ err }, "Export history error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
@@ -66139,11 +66435,24 @@ router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req
       });
       if (upsertErr) throw upsertErr;
     }
-    const { data: sessionRes, error: sessionErr } = await supabase.from("qr_mentor_sessions").update({
-      ended_at: (/* @__PURE__ */ new Date()).toISOString(),
-      student_count: presentCount
-    }).eq("schedule_id", scheduleId).eq("date", date).select();
-    if (sessionErr) throw sessionErr;
+    const nowIso = (/* @__PURE__ */ new Date()).toISOString();
+    const { data: existingSession } = await supabase.from("qr_mentor_sessions").select("id").eq("schedule_id", scheduleId).eq("date", date).maybeSingle();
+    if (existingSession) {
+      await supabase.from("qr_mentor_sessions").update({
+        ended_at: nowIso,
+        student_count: presentCount,
+        mentor_id: mentorId
+      }).eq("id", existingSession.id);
+    } else {
+      await supabase.from("qr_mentor_sessions").insert({
+        mentor_id: mentorId,
+        schedule_id: scheduleId,
+        date,
+        started_at: nowIso,
+        ended_at: nowIso,
+        student_count: presentCount
+      });
+    }
     res.json({ message: "Attendance submitted successfully", presentCount });
   } catch (err) {
     req.log.error({ err }, "Submit attendance error");
@@ -66245,6 +66554,82 @@ router5.post("/admin/schedules", authMiddleware, async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Create admin schedule error");
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+router5.post("/admin/schedules/sync-slot", authMiddleware, async (req, res) => {
+  const {
+    sectionKey,
+    year,
+    dayOfWeek,
+    startTime,
+    endTime,
+    subject,
+    originalSubject,
+    mentorId,
+    facultyName,
+    applyToSubject
+  } = req.body;
+  try {
+    const secLetter = sectionKey ? sectionKey.replace(/[^A-Z]/g, "") : "A";
+    const yr = year || (sectionKey?.startsWith("2") ? "II" : sectionKey?.startsWith("3") ? "III" : "IV");
+    let resolvedMentorId = mentorId ? Number(mentorId) : null;
+    if (!resolvedMentorId && facultyName) {
+      const { data: matchedMentors } = await supabase.from("qr_mentors").select("id, name");
+      const cleanName = facultyName.replace(/^(Dr\.|Mr\.|Mrs\.|Ms\.)\s*/i, "").trim().toLowerCase();
+      const found = (matchedMentors || []).find(
+        (m) => m.name?.toLowerCase().includes(cleanName) || cleanName.includes(m.name?.toLowerCase())
+      );
+      if (found) {
+        resolvedMentorId = found.id;
+      } else if (matchedMentors && matchedMentors.length > 0) {
+        resolvedMentorId = matchedMentors[0].id;
+      }
+    }
+    if (!resolvedMentorId) resolvedMentorId = 1;
+    if (applyToSubject && originalSubject) {
+      const updateData = { mentor_id: resolvedMentorId };
+      if (subject && subject.trim() !== originalSubject.trim()) {
+        updateData.subject = subject.trim();
+      }
+      const { data: updated, error } = await supabase.from("qr_schedules").update(updateData).eq("year", yr).eq("section", secLetter).ilike("subject", `%${originalSubject.trim()}%`).select("*, qr_mentors(*)");
+      if (error) throw error;
+      res.json({ success: true, count: updated?.length, data: updated });
+      return;
+    }
+    const { data: existingSlots } = await supabase.from("qr_schedules").select("id").eq("year", yr).eq("section", secLetter).eq("day_of_week", dayOfWeek).eq("start_time", startTime);
+    if (existingSlots && existingSlots.length > 0) {
+      if (subject === "Free") {
+        await supabase.from("qr_schedules").delete().eq("id", existingSlots[0].id);
+        res.json({ success: true, deleted: true });
+        return;
+      }
+      const { data: updated, error } = await supabase.from("qr_schedules").update({
+        subject: subject.trim(),
+        mentor_id: resolvedMentorId,
+        end_time: endTime || "10:00:00"
+      }).eq("id", existingSlots[0].id).select("*, qr_mentors(*)").single();
+      if (error) throw error;
+      res.json({ success: true, data: updated });
+    } else {
+      if (subject === "Free") {
+        res.json({ success: true, message: "Free period, no row needed" });
+        return;
+      }
+      const { data: inserted, error } = await supabase.from("qr_schedules").insert({
+        year: yr,
+        section: secLetter,
+        day_of_week: dayOfWeek,
+        start_time: startTime,
+        end_time: endTime || "10:00:00",
+        subject: subject.trim(),
+        mentor_id: resolvedMentorId
+      }).select("*, qr_mentors(*)").single();
+      if (error) throw error;
+      res.status(201).json({ success: true, data: inserted });
+    }
+  } catch (err) {
+    req.log.error({ err }, "Sync timetable slot error");
+    res.status(500).json({ error: err?.message || "Failed to sync timetable slot" });
   }
 });
 router5.put("/admin/schedules/:id", authMiddleware, async (req, res) => {

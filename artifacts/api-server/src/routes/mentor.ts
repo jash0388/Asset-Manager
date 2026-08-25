@@ -242,69 +242,364 @@ function getBufferedTime(timeStr: string, offsetMinutes: number): string {
 // Store HOD Schedule Overrides: Key: `${schedule_id}_${date}` -> { isUnlocked: boolean, extendedMinutes: number }
 export const scheduleOverridesMap = new Map<string, { isUnlocked: boolean; extendedMinutes: number }>();
 
-// ── History endpoint: returns mentor's schedules + submission status for any date ──
+// ── History endpoint: returns mentor's historical attendance records with student rosters, metrics & filtering ──
 router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: any) => {
   const mentorId = req.mentorId!;
-  const dateParam = req.query.date as string; // YYYY-MM-DD
-  if (!dateParam || !/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
-    res.status(400).json({ error: "Missing or invalid date (expected YYYY-MM-DD)" });
-    return;
-  }
+  const dateParam = (req.query.date as string)?.trim(); // YYYY-MM-DD
+  const startDateParam = (req.query.startDate as string)?.trim();
+  const endDateParam = (req.query.endDate as string)?.trim();
+  const monthParam = (req.query.month as string)?.trim(); // YYYY-MM
+  const searchQuery = (req.query.search as string)?.toLowerCase().trim();
+  const requestedScheduleId = req.query.scheduleId ? parseInt(req.query.scheduleId as string) : undefined;
+
   try {
-    // Derive day of week from the date
-    const dayNames = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
-    const dayIndex = new Date(dateParam + "T00:00:00Z").getUTCDay();
-    const dayOfWeek = dayNames[dayIndex];
+    const { date: todayIst } = getCurrentISTDateTime();
 
-    // Fetch all schedules for this mentor on that day
-    const { data: schedules, error: schedErr } = await supabase
-      .from("qr_schedules")
-      .select("*")
-      .eq("mentor_id", mentorId)
-      .eq("day_of_week", dayOfWeek)
-      .order("start_time");
+    // Determine active date filter
+    let filterDates: string[] = [];
+    let startFilter: string | null = null;
+    let endFilter: string | null = null;
 
-    if (schedErr) throw schedErr;
-    if (!schedules || schedules.length === 0) {
-      res.json({ date: dateParam, dayOfWeek, schedules: [] });
-      return;
+    if (startDateParam && endDateParam && /^\d{4}-\d{2}-\d{2}$/.test(startDateParam) && /^\d{4}-\d{2}-\d{2}$/.test(endDateParam)) {
+      startFilter = startDateParam;
+      endFilter = endDateParam;
+    } else if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
+      startFilter = `${monthParam}-01`;
+      endFilter = `${monthParam}-31`;
+    } else if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+      filterDates = [dateParam];
+    } else {
+      filterDates = [todayIst];
     }
 
-    // Fetch sessions for those schedules on that specific date
-    const scheduleIds = schedules.map((s: any) => s.id);
-    const { data: sessions, error: sessionErr } = await supabase
-      .from("qr_mentor_sessions")
-      .select("*")
-      .eq("date", dateParam)
-      .in("schedule_id", scheduleIds);
+    // 1. Fetch hourly attendance records for the date range
+    let hourlyQuery = supabase.from("qr_hourly_attendance").select("*, qr_users(id, name, unique_id, section, role)");
 
-    if (sessionErr) throw sessionErr;
+    if (filterDates.length === 1) {
+      hourlyQuery = hourlyQuery.eq("date", filterDates[0]);
+    } else if (startFilter && endFilter) {
+      hourlyQuery = hourlyQuery.gte("date", startFilter).lte("date", endFilter);
+    }
 
-    const sessionMap = new Map<number, any>();
-    (sessions || []).forEach((s: any) => sessionMap.set(s.schedule_id, s));
+    if (requestedScheduleId) {
+      hourlyQuery = hourlyQuery.eq("schedule_id", requestedScheduleId);
+    }
 
-    const result = schedules.map((s: any) => {
-      const session = sessionMap.get(s.id);
-      const isSubmitted = Boolean(session && session.ended_at);
-      const isStarted   = Boolean(session && !session.ended_at);
-      return {
-        id: s.id,
-        mentor_id: s.mentor_id,
-        day_of_week: s.day_of_week,
-        start_time: s.start_time,
-        end_time: s.end_time,
-        section: s.section,
-        subject: s.subject,
-        year: s.year,
-        status: isSubmitted ? "submitted" : isStarted ? "started" : "pending",
-        presentCount: session?.student_count ?? null,
-        submittedAt: session?.ended_at ?? null,
-      };
+    const { data: rawHourly, error: hourlyErr } = await hourlyQuery.order("marked_at", { ascending: false });
+    if (hourlyErr) throw hourlyErr;
+
+    // 2. Fetch mentor sessions in date range
+    let sessionQuery = supabase.from("qr_mentor_sessions").select("*");
+    if (filterDates.length === 1) {
+      sessionQuery = sessionQuery.eq("date", filterDates[0]);
+    } else if (startFilter && endFilter) {
+      sessionQuery = sessionQuery.gte("date", startFilter).lte("date", endFilter);
+    }
+    const { data: rawSessions } = await sessionQuery;
+
+    // 3. Collect distinct schedule IDs found in hourly attendance or sessions or scheduled for mentor
+    const attendanceScheduleIds = new Set<number>();
+    (rawHourly || []).forEach(r => { if (r.schedule_id) attendanceScheduleIds.add(r.schedule_id); });
+    (rawSessions || []).forEach(s => { if (s.schedule_id) attendanceScheduleIds.add(s.schedule_id); });
+
+    // Also fetch all schedules (to resolve timetable information)
+    const { data: allSchedules } = await supabase.from("qr_schedules").select("*, qr_mentors(id, name, email)");
+    const scheduleMap = new Map<number, any>();
+    (allSchedules || []).forEach((s: any) => scheduleMap.set(s.id, s));
+
+    // Also fetch gate attendance for the relevant dates to correlate entry times
+    const distinctDates = [...new Set([
+      ...filterDates,
+      ...(rawHourly || []).map(r => r.date),
+      ...(rawSessions || []).map(s => s.date)
+    ])].filter(Boolean);
+
+    let gateMap = new Map<string, any>(); // key: `${userId}_${date}`
+    if (distinctDates.length > 0) {
+      const { data: gateRecs } = await supabase
+        .from("qr_attendance")
+        .select("user_id, date, entry_time")
+        .in("date", distinctDates);
+      (gateRecs || []).forEach((g: any) => {
+        gateMap.set(`${g.user_id}_${g.date}`, g);
+      });
+    }
+
+    // Build unique session groups: key: `${schedule_id}_${date}`
+    const sessionGroupMap = new Map<string, {
+      scheduleId: number;
+      date: string;
+      hourlyRecords: any[];
+    }>();
+
+    (rawHourly || []).forEach(r => {
+      const key = `${r.schedule_id}_${r.date}`;
+      if (!sessionGroupMap.has(key)) {
+        sessionGroupMap.set(key, {
+          scheduleId: r.schedule_id,
+          date: r.date,
+          hourlyRecords: []
+        });
+      }
+      sessionGroupMap.get(key)!.hourlyRecords.push(r);
     });
 
-    res.json({ date: dateParam, dayOfWeek, schedules: result });
+    // If single date requested and no hourly attendance found for scheduled classes today, include pending schedules
+    if (filterDates.length === 1) {
+      const singleDate = filterDates[0];
+      const dayNames = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+      // Parse UTC date to IST day of week
+      const [y, m, d] = singleDate.split("-").map(Number);
+      const parsedDate = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+      const dayOfWeek = dayNames[parsedDate.getUTCDay()];
+
+      (allSchedules || []).forEach(s => {
+        if (s.day_of_week === dayOfWeek) {
+          if (mentorId === -3 || s.mentor_id === mentorId) {
+            const key = `${s.id}_${singleDate}`;
+            if (!sessionGroupMap.has(key)) {
+              sessionGroupMap.set(key, {
+                scheduleId: s.id,
+                date: singleDate,
+                hourlyRecords: []
+              });
+            }
+          }
+        }
+      });
+    }
+
+    // Process each session group
+    const sessionsList: any[] = [];
+    let grandTotalStudents = 0;
+    let grandTotalPresent = 0;
+    let grandTotalAbsent = 0;
+
+    for (const [key, group] of sessionGroupMap.entries()) {
+      const sched = scheduleMap.get(group.scheduleId);
+      
+      // Filter out if not assigned to this mentor (unless mentor is HOD/admin or mentor took the session)
+      const sessionRow = (rawSessions || []).find(s => s.schedule_id === group.scheduleId && s.date === group.date);
+      if (mentorId !== -3 && sched && sched.mentor_id !== mentorId && sessionRow?.mentor_id !== mentorId) {
+        continue;
+      }
+
+      const scheduleYear = sched?.year || "II";
+      const scheduleSection = sched?.section || "A";
+      const dbSection = `DS ${scheduleYear}/I/${scheduleSection}`;
+
+      // Student records map for this session
+      const studentHourlyMap = new Map<number, any>();
+      group.hourlyRecords.forEach(r => studentHourlyMap.set(r.user_id, r));
+
+      // Fetch official section roster if records were missing or partial
+      let sectionStudents: any[] = [];
+      if (group.hourlyRecords.length > 0) {
+        sectionStudents = group.hourlyRecords.map(r => ({
+          id: r.user_id,
+          name: r.qr_users?.name || `Student #${r.user_id}`,
+          uniqueId: r.qr_users?.unique_id || "",
+          section: r.qr_users?.section || dbSection,
+          markedPresent: r.marked_present,
+          markedByTeacher: r.marked_by_teacher,
+          scannedQr: r.scanned_qr,
+          markedAt: r.marked_at
+        }));
+      } else {
+        // Class is pending: fetch section roster
+        const { data: roster } = await supabase
+          .from("qr_users")
+          .select("id, name, unique_id, section")
+          .eq("role", "student")
+          .eq("section", dbSection)
+          .order("unique_id", { ascending: true });
+        sectionStudents = (roster || []).map(st => ({
+          id: st.id,
+          name: st.name,
+          uniqueId: st.unique_id,
+          section: st.section,
+          markedPresent: false,
+          markedByTeacher: false,
+          scannedQr: false,
+          markedAt: null
+        }));
+      }
+
+      // Attach gate scan info
+      const studentsWithGate = sectionStudents.map(st => {
+        const gate = gateMap.get(`${st.id}_${group.date}`);
+        const hasGate = Boolean(gate && gate.entry_time);
+        return {
+          ...st,
+          scannedGate: hasGate,
+          gateEntryTime: hasGate ? gate.entry_time : null
+        };
+      });
+
+      // Filter by search query if present
+      let filteredStudents = studentsWithGate;
+      if (searchQuery) {
+        filteredStudents = studentsWithGate.filter(st =>
+          (st.name || "").toLowerCase().includes(searchQuery) ||
+          (st.uniqueId || "").toLowerCase().includes(searchQuery)
+        );
+      }
+
+      const totalStudents = studentsWithGate.length;
+      const presentCount = studentsWithGate.filter(st => st.markedPresent).length;
+      const absentCount = totalStudents - presentCount;
+      const pct = totalStudents > 0 ? Math.round((presentCount / totalStudents) * 100) : 0;
+      const isSubmitted = group.hourlyRecords.length > 0 || Boolean(sessionRow?.ended_at);
+
+      if (isSubmitted) {
+        grandTotalStudents += totalStudents;
+        grandTotalPresent += presentCount;
+        grandTotalAbsent += absentCount;
+      }
+
+      // Don't skip if search matched students, or if no search query
+      if (searchQuery && filteredStudents.length === 0) {
+        continue;
+      }
+
+      sessionsList.push({
+        id: group.scheduleId,
+        scheduleId: group.scheduleId,
+        date: group.date,
+        dayOfWeek: sched?.day_of_week || "",
+        startTime: sched?.start_time || "09:00:00",
+        endTime: sched?.end_time || "10:00:00",
+        subject: sched?.subject || "Class Lecture",
+        year: scheduleYear,
+        section: scheduleSection,
+        fullSection: dbSection,
+        facultyName: sched?.qr_mentors?.name || "Subject Faculty",
+        facultyEmail: sched?.qr_mentors?.email || "",
+        status: isSubmitted ? "submitted" : "pending",
+        submittedAt: sessionRow?.ended_at || group.hourlyRecords[0]?.marked_at || null,
+        totalStudents,
+        presentCount,
+        absentCount,
+        percentage: pct,
+        students: filteredStudents
+      });
+    }
+
+    // Sort sessions descending by date, then by start_time
+    sessionsList.sort((a, b) => {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      return a.startTime.localeCompare(b.startTime);
+    });
+
+    const submittedCount = sessionsList.filter(s => s.status === "submitted").length;
+    const avgAttendance = grandTotalStudents > 0 ? Math.round((grandTotalPresent / grandTotalStudents) * 100) : 0;
+
+    res.json({
+      date: filterDates.length === 1 ? filterDates[0] : null,
+      startDate: startFilter,
+      endDate: endFilter,
+      summary: {
+        totalClasses: submittedCount,
+        totalStudents: grandTotalStudents,
+        totalPresent: grandTotalPresent,
+        totalAbsent: grandTotalAbsent,
+        averageAttendance: avgAttendance
+      },
+      schedules: sessionsList,
+      sessions: sessionsList
+    });
   } catch (err: any) {
     req.log.error({ err }, "Get mentor history error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── Export endpoint: downloads historical attendance in CSV or JSON ──
+router.get("/mentor/history/export", authMiddleware, mentorOnly, async (req: any, res: any) => {
+  const mentorId = req.mentorId!;
+  const dateParam = (req.query.date as string)?.trim();
+  const startDateParam = (req.query.startDate as string)?.trim();
+  const endDateParam = (req.query.endDate as string)?.trim();
+  const monthParam = (req.query.month as string)?.trim();
+  const scheduleIdParam = req.query.scheduleId ? parseInt(req.query.scheduleId as string) : undefined;
+
+  try {
+    const { date: todayIst } = getCurrentISTDateTime();
+    let filterDates: string[] = [];
+    let startFilter: string | null = null;
+    let endFilter: string | null = null;
+
+    if (startDateParam && endDateParam) {
+      startFilter = startDateParam;
+      endFilter = endDateParam;
+    } else if (monthParam) {
+      startFilter = `${monthParam}-01`;
+      endFilter = `${monthParam}-31`;
+    } else if (dateParam) {
+      filterDates = [dateParam];
+    } else {
+      filterDates = [todayIst];
+    }
+
+    let hourlyQuery = supabase.from("qr_hourly_attendance").select("*, qr_users(id, name, unique_id, section, role)");
+    if (filterDates.length === 1) {
+      hourlyQuery = hourlyQuery.eq("date", filterDates[0]);
+    } else if (startFilter && endFilter) {
+      hourlyQuery = hourlyQuery.gte("date", startFilter).lte("date", endFilter);
+    }
+    if (scheduleIdParam) {
+      hourlyQuery = hourlyQuery.eq("schedule_id", scheduleIdParam);
+    }
+
+    const { data: rawHourly, error: hourlyErr } = await hourlyQuery.order("date", { ascending: false });
+    if (hourlyErr) throw hourlyErr;
+
+    const { data: allSchedules } = await supabase.from("qr_schedules").select("*, qr_mentors(id, name, email)");
+    const scheduleMap = new Map<number, any>();
+    (allSchedules || []).forEach((s: any) => scheduleMap.set(s.id, s));
+
+    const csvRows = [
+      ["Date", "Time Slot", "Subject", "Year", "Section", "Faculty", "Student Name", "Roll Number", "Status", "Marked By", "Marked At"]
+    ];
+
+    (rawHourly || []).forEach(r => {
+      const sched = scheduleMap.get(r.schedule_id);
+      if (mentorId !== -3 && sched && sched.mentor_id !== mentorId) return;
+
+      const timeSlot = sched ? `${sched.start_time.slice(0, 5)} - ${sched.end_time.slice(0, 5)}` : "Lecture Slot";
+      const subject = sched?.subject || "Subject";
+      const year = sched?.year || "II";
+      const section = sched?.section || "A";
+      const faculty = sched?.qr_mentors?.name || "Subject Faculty";
+      const studentName = r.qr_users?.name || `Student #${r.user_id}`;
+      const rollNumber = r.qr_users?.unique_id || "";
+      const status = r.marked_present ? "Present" : "Absent";
+      const markedBy = r.marked_by_teacher ? "Faculty" : r.scanned_qr ? "QR Scan" : "System";
+      const markedAt = r.marked_at ? new Date(r.marked_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "";
+
+      csvRows.push([
+        r.date,
+        timeSlot,
+        subject,
+        year,
+        section,
+        faculty,
+        studentName,
+        rollNumber,
+        status,
+        markedBy,
+        markedAt
+      ]);
+    });
+
+    const csvContent = csvRows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const filename = `Attendance_Report_${startFilter || filterDates[0] || "export"}.csv`;
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.send(csvContent);
+  } catch (err: any) {
+    req.log.error({ err }, "Export history error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -842,18 +1137,36 @@ router.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req:
       if (upsertErr) throw upsertErr;
     }
 
-    // Update session end time and student count
-    const { data: sessionRes, error: sessionErr } = await supabase
+    // Ensure session record exists in qr_mentor_sessions
+    const nowIso = new Date().toISOString();
+    const { data: existingSession } = await supabase
       .from("qr_mentor_sessions")
-      .update({
-        ended_at: new Date().toISOString(),
-        student_count: presentCount
-      })
+      .select("id")
       .eq("schedule_id", scheduleId)
       .eq("date", date)
-      .select();
+      .maybeSingle();
 
-    if (sessionErr) throw sessionErr;
+    if (existingSession) {
+      await supabase
+        .from("qr_mentor_sessions")
+        .update({
+          ended_at: nowIso,
+          student_count: presentCount,
+          mentor_id: mentorId
+        })
+        .eq("id", existingSession.id);
+    } else {
+      await supabase
+        .from("qr_mentor_sessions")
+        .insert({
+          mentor_id: mentorId,
+          schedule_id: scheduleId,
+          date: date,
+          started_at: nowIso,
+          ended_at: nowIso,
+          student_count: presentCount
+        });
+    }
 
     res.json({ message: "Attendance submitted successfully", presentCount });
   } catch (err: any) {
@@ -984,6 +1297,121 @@ router.post("/admin/schedules", authMiddleware, async (req: any, res: any) => {
   } catch (err: any) {
     req.log.error({ err }, "Create admin schedule error");
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/admin/schedules/sync-slot", authMiddleware, async (req: any, res: any) => {
+  const {
+    sectionKey,
+    year,
+    dayOfWeek,
+    startTime,
+    endTime,
+    subject,
+    originalSubject,
+    mentorId,
+    facultyName,
+    applyToSubject
+  } = req.body;
+
+  try {
+    const secLetter = sectionKey ? sectionKey.replace(/[^A-Z]/g, "") : "A";
+    const yr = year || (sectionKey?.startsWith("2") ? "II" : sectionKey?.startsWith("3") ? "III" : "IV");
+
+    // Resolve mentor_id if not provided directly
+    let resolvedMentorId = mentorId ? Number(mentorId) : null;
+    if (!resolvedMentorId && facultyName) {
+      const { data: matchedMentors } = await supabase
+        .from("qr_mentors")
+        .select("id, name");
+      
+      const cleanName = facultyName.replace(/^(Dr\.|Mr\.|Mrs\.|Ms\.)\s*/i, "").trim().toLowerCase();
+      const found = (matchedMentors || []).find((m: any) => 
+        m.name?.toLowerCase().includes(cleanName) || cleanName.includes(m.name?.toLowerCase())
+      );
+      if (found) {
+        resolvedMentorId = found.id;
+      } else if (matchedMentors && matchedMentors.length > 0) {
+        resolvedMentorId = matchedMentors[0].id;
+      }
+    }
+
+    if (!resolvedMentorId) resolvedMentorId = 1;
+
+    if (applyToSubject && originalSubject) {
+      const updateData: any = { mentor_id: resolvedMentorId };
+      if (subject && subject.trim() !== originalSubject.trim()) {
+        updateData.subject = subject.trim();
+      }
+
+      const { data: updated, error } = await supabase
+        .from("qr_schedules")
+        .update(updateData)
+        .eq("year", yr)
+        .eq("section", secLetter)
+        .ilike("subject", `%${originalSubject.trim()}%`)
+        .select("*, qr_mentors(*)");
+
+      if (error) throw error;
+      res.json({ success: true, count: updated?.length, data: updated });
+      return;
+    }
+
+    // Specific time slot update or insert
+    const { data: existingSlots } = await supabase
+      .from("qr_schedules")
+      .select("id")
+      .eq("year", yr)
+      .eq("section", secLetter)
+      .eq("day_of_week", dayOfWeek)
+      .eq("start_time", startTime);
+
+    if (existingSlots && existingSlots.length > 0) {
+      if (subject === "Free") {
+        await supabase.from("qr_schedules").delete().eq("id", existingSlots[0].id);
+        res.json({ success: true, deleted: true });
+        return;
+      }
+
+      const { data: updated, error } = await supabase
+        .from("qr_schedules")
+        .update({
+          subject: subject.trim(),
+          mentor_id: resolvedMentorId,
+          end_time: endTime || "10:00:00",
+        })
+        .eq("id", existingSlots[0].id)
+        .select("*, qr_mentors(*)")
+        .single();
+
+      if (error) throw error;
+      res.json({ success: true, data: updated });
+    } else {
+      if (subject === "Free") {
+        res.json({ success: true, message: "Free period, no row needed" });
+        return;
+      }
+
+      const { data: inserted, error } = await supabase
+        .from("qr_schedules")
+        .insert({
+          year: yr,
+          section: secLetter,
+          day_of_week: dayOfWeek,
+          start_time: startTime,
+          end_time: endTime || "10:00:00",
+          subject: subject.trim(),
+          mentor_id: resolvedMentorId,
+        })
+        .select("*, qr_mentors(*)")
+        .single();
+
+      if (error) throw error;
+      res.status(201).json({ success: true, data: inserted });
+    }
+  } catch (err: any) {
+    req.log.error({ err }, "Sync timetable slot error");
+    res.status(500).json({ error: err?.message || "Failed to sync timetable slot" });
   }
 });
 

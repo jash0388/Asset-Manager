@@ -19,17 +19,17 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-xs">
+    <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-3.5 shadow-xs">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{label}</p>
-          <p data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1.5">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
+          <p data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
             {value}
           </p>
-          {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+          {sub && <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>}
         </div>
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color} shadow-xs`}>
-          <Icon className="w-5 h-5" />
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${color} shadow-xs`}>
+          <Icon className="w-4 h-4" />
         </div>
       </div>
     </div>
@@ -130,26 +130,28 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-          </p>
+      <div className="p-3 sm:p-4 max-w-7xl mx-auto space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Dashboard Overview</h1>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+            </p>
+          </div>
         </div>
 
         {/* Top Metric Cards */}
         {stats.isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-white border border-gray-200 rounded-xl p-5 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
-                <div className="h-8 bg-gray-200 rounded w-1/2" />
+              <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 animate-pulse">
+                <div className="h-3 bg-gray-200 rounded w-2/3 mb-2" />
+                <div className="h-6 bg-gray-200 rounded w-1/2" />
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
             <StatCard
               label="Total Users"
               value={data?.totalUsers ?? 0}
@@ -189,13 +191,13 @@ export default function Dashboard() {
         )}
 
         {/* 3 Main Activity Columns */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-3">
           {/* Recent Gate Activity */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50/50">
-              <h2 className="text-sm font-bold text-gray-900">Recent Gate Activity</h2>
+            <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-gray-100 bg-gray-50/80">
+              <h2 className="text-xs font-bold text-gray-900">Recent Gate Activity</h2>
               <Link href="/attendance">
-                <span className="text-xs text-blue-700 font-bold hover:text-blue-800 flex items-center gap-1 cursor-pointer">
+                <span className="text-[11px] text-blue-700 font-bold hover:text-blue-800 flex items-center gap-1 cursor-pointer">
                   View all <ArrowRight className="w-3 h-3" />
                 </span>
               </Link>
