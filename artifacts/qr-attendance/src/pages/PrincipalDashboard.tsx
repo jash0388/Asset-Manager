@@ -10,19 +10,11 @@ import {
   Search,
   Calendar,
   Layers,
-  GraduationCap,
   LogOut,
   ShieldCheck,
   AlertTriangle,
-  Flag,
-  AlertCircle,
-  TrendingUp,
   Clock,
   ChevronRight,
-  Filter,
-  ArrowUpRight,
-  CheckCircle,
-  Sparkles
 } from "lucide-react";
 import { customFetch } from "@workspace/api-client-react";
 
@@ -93,7 +85,7 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
     return {
       flag: "GREEN" as const,
       percent,
-      label: "Safe Standing (≥ 75%)",
+      label: "Safe (≥ 75%)",
       badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
       dotColor: "🟢",
       classesNeededFor75: 0,
@@ -103,7 +95,7 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
     return {
       flag: "YELLOW" as const,
       percent,
-      label: "Warning Zone (65–74%)",
+      label: "Warning (65–74%)",
       badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
       dotColor: "🟡",
       classesNeededFor75,
@@ -113,7 +105,7 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
     return {
       flag: "RED" as const,
       percent,
-      label: "Critical Shortage (< 65%)",
+      label: "Critical (< 65%)",
       badgeColor: "bg-rose-100 text-rose-800 border-rose-300",
       dotColor: "🔴",
       classesNeededFor75,
@@ -243,7 +235,7 @@ export default function PrincipalDashboard() {
   const [logStatusFilter, setLogStatusFilter] = useState<"ALL" | "PRESENT" | "ABSENT" | "LATE" | "CLASS_ONLY" | "GATE_ONLY">("ALL");
   const [riskFilter, setRiskFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
 
-  // Hourly / Period Attendance States
+  // Class Attendance Filter States
   const [hourlySectionFilter, setHourlySectionFilter] = useState("ALL");
   const [hourlySearchQuery, setHourlySearchQuery] = useState("");
   const [expandedHourlyScheduleId, setExpandedHourlyScheduleId] = useState<number | null>(null);
@@ -292,15 +284,12 @@ export default function PrincipalDashboard() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportType, setExportType] = useState<"section" | "all" | "student">("all");
   const [exportSection, setExportSection] = useState("2A");
-  const [exportStudentId, setExportStudentId] = useState<number | "">("");
-  const [exportRollQuery, setExportRollQuery] = useState("");
   const [exportMonth, setExportMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
-  const [isExporting, setIsExporting] = useState(false);
 
-  // 1. Fetch Users (Students)
+  // 1. Fetch Students
   const { data: allUsers = [], isLoading: usersLoading } = useQuery<StudentUser[]>({
     queryKey: ["users-all"],
     queryFn: () => customFetch<StudentUser[]>("/api/users"),
@@ -465,30 +454,12 @@ export default function PrincipalDashboard() {
   });
 
   const studentMonthlyRecords = studentMonthlyData?.records || [];
-  const studentHourlyRecords = studentMonthlyData?.hourlyRecords || [];
 
   // Institution Executive Statistics
   const campusTotalStudents = students.length;
   const campusPresentCount = overallPresentSet.size;
   const campusAbsentCount = Math.max(0, campusTotalStudents - campusPresentCount);
   const campusAttendancePercent = campusTotalStudents > 0 ? Math.round((campusPresentCount / campusTotalStudents) * 100) : 0;
-
-  // Breakdown statistics
-  const gateOnlyCount = useMemo(() => {
-    let count = 0;
-    dsPresentSet.forEach(id => {
-      if (!classPresentUserIds.has(id)) count++;
-    });
-    return count;
-  }, [dsPresentSet, classPresentUserIds]);
-
-  const classOnlyCount = useMemo(() => {
-    let count = 0;
-    classPresentUserIds.forEach(id => {
-      if (!dsPresentSet.has(id)) count++;
-    });
-    return count;
-  }, [classPresentUserIds, dsPresentSet]);
 
   const bothGateAndClassCount = useMemo(() => {
     let count = 0;
@@ -526,12 +497,12 @@ export default function PrincipalDashboard() {
         absent,
         percent,
         periodsCount: secHourly.length,
-        status: percent >= 75 ? "HEALTHY" : percent >= 65 ? "WARNING" : "CRITICAL"
+        status: percent >= 75 ? "Good" : percent >= 65 ? "Warning" : "Critical"
       };
     });
   }, [sections, students, dsPresentSet, classPresentUserIds, overallPresentSet, hourlySessions]);
 
-  // Filter Detailed Daily Logs
+  // Filter Daily Records
   const filteredLogs = useMemo(() => {
     return students.map(student => {
       const log = detailedLogs.find(l => (l.userId || (l as any).user_id) === student.id);
@@ -575,10 +546,10 @@ export default function PrincipalDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased pb-12">
-      {/* 1. COMPACT INSTITUTIONAL HEADER */}
+      {/* 1. COMPACT PRINCIPAL HEADER */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Institution Title */}
+          {/* Header Title */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-xs font-black">
               <ShieldCheck className="w-6 h-6" />
@@ -596,7 +567,7 @@ export default function PrincipalDashboard() {
             </div>
           </div>
 
-          {/* Right Controls: Date Picker, Export, Logout */}
+          {/* Controls: Date, Export, Logout */}
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700">
               <Calendar className="w-3.5 h-3.5 text-slate-500" />
@@ -613,7 +584,7 @@ export default function PrincipalDashboard() {
               className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
-              Export Register
+              Export
             </button>
 
             <button
@@ -627,72 +598,72 @@ export default function PrincipalDashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 space-y-5">
-        {/* 2. INSTITUTION OVERVIEW (EXECUTIVE KPIS) */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-4">
+        {/* 2. TOP SUMMARY (SIMPLE EXECUTIVE STATS) */}
         <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-blue-700" />
               <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                Institutional Attendance Summary — {logDate}
+                College Attendance Today — {logDate}
               </h2>
             </div>
             <span className="text-[11px] font-semibold text-slate-500">
-              Active Scope: All Departments & Sections
+              All Departments
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-            {/* KPI 1: Enrolled */}
+            {/* Card 1: Total Students */}
             <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
               <p className="text-[10px] font-bold text-slate-500 uppercase">Total Students</p>
               <p className="text-xl font-black text-slate-900 mt-0.5">{campusTotalStudents}</p>
               <p className="text-[10px] text-slate-400">Enrolled</p>
             </div>
 
-            {/* KPI 2: Present */}
+            {/* Card 2: Present Today */}
             <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
               <p className="text-[10px] font-bold text-emerald-800 uppercase">Present Today</p>
               <p className="text-xl font-black text-emerald-700 mt-0.5">{campusPresentCount}</p>
-              <p className="text-[10px] text-emerald-600 font-semibold">{campusAttendancePercent}% Present</p>
+              <p className="text-[10px] text-emerald-600 font-semibold">{campusAttendancePercent}%</p>
             </div>
 
-            {/* KPI 3: Absent */}
+            {/* Card 3: Absent Today */}
             <div className="p-3 rounded-lg bg-rose-50 border border-rose-200">
               <p className="text-[10px] font-bold text-rose-800 uppercase">Absent Today</p>
               <p className="text-xl font-black text-rose-700 mt-0.5">{campusAbsentCount}</p>
-              <p className="text-[10px] text-rose-600 font-semibold">{100 - campusAttendancePercent}% Absent</p>
+              <p className="text-[10px] text-rose-600 font-semibold">{100 - campusAttendancePercent}%</p>
             </div>
 
-            {/* KPI 4: Rate */}
+            {/* Card 4: Attendance % */}
             <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-              <p className="text-[10px] font-bold text-blue-800 uppercase">Attendance Rate</p>
+              <p className="text-[10px] font-bold text-blue-800 uppercase">Attendance %</p>
               <p className="text-xl font-black text-blue-700 mt-0.5">{campusAttendancePercent}%</p>
-              <p className="text-[10px] text-blue-600">Institutional %</p>
+              <p className="text-[10px] text-blue-600">College Average</p>
             </div>
 
-            {/* KPI 5: Scheduled */}
+            {/* Card 5: Classes */}
             <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Periods Sched.</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase">Classes</p>
               <p className="text-xl font-black text-slate-800 mt-0.5">{hourlySummary.totalClasses}</p>
-              <p className="text-[10px] text-slate-400">Class Sessions</p>
+              <p className="text-[10px] text-slate-400">Scheduled</p>
             </div>
 
-            {/* KPI 6: Completed */}
+            {/* Card 6: Completed */}
             <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
               <p className="text-[10px] font-bold text-emerald-800 uppercase">Completed</p>
               <p className="text-xl font-black text-emerald-700 mt-0.5">{hourlySessions.length}</p>
               <p className="text-[10px] text-emerald-600">Submitted</p>
             </div>
 
-            {/* KPI 7: Pending */}
+            {/* Card 7: Pending */}
             <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
               <p className="text-[10px] font-bold text-slate-500 uppercase">Pending</p>
               <p className="text-xl font-black text-slate-700 mt-0.5">0</p>
-              <p className="text-[10px] text-emerald-600 font-semibold">100% On-Time</p>
+              <p className="text-[10px] text-emerald-600 font-semibold">None</p>
             </div>
 
-            {/* KPI 8: Critical Shortage */}
+            {/* Card 8: Critical */}
             <div
               onClick={() => {
                 setActiveTab("flags");
@@ -701,60 +672,60 @@ export default function PrincipalDashboard() {
               className="p-3 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer transition-all"
             >
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold text-rose-800 uppercase">Critical (&lt;65%)</p>
+                <p className="text-[10px] font-bold text-rose-800 uppercase">Critical</p>
                 <ChevronRight className="w-3 h-3 text-rose-500" />
               </div>
               <p className="text-xl font-black text-rose-700 mt-0.5">{redFlagCount}</p>
-              <p className="text-[10px] text-rose-600 font-semibold underline">View Roster</p>
+              <p className="text-[10px] text-rose-600 font-semibold underline">Below 65%</p>
             </div>
           </div>
 
-          {/* Verification Modality Breakdown Strip */}
+          {/* Simple 3-Label Modality Strip */}
           <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="font-semibold text-slate-600">📚 Classroom Attendance</span>
-              <span className="font-bold text-emerald-700 font-mono">{classPresentUserIds.size} Present in Lectures</span>
+            <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
+              <span className="font-semibold text-slate-600">Class Attendance</span>
+              <span className="font-bold text-emerald-700 font-mono">{classPresentUserIds.size} Present</span>
             </div>
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="font-semibold text-slate-600">🏢 Turnstile Gate Scans</span>
-              <span className="font-bold text-blue-700 font-mono">{dsPresentSet.size} Scanned at Main Gate</span>
+            <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
+              <span className="font-semibold text-slate-600">Gate Scans</span>
+              <span className="font-bold text-blue-700 font-mono">{dsPresentSet.size} Scanned</span>
             </div>
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="font-semibold text-slate-600">🔍 Verified Compliance</span>
-              <span className="font-bold text-slate-800 font-mono">{bothGateAndClassCount} Gate + Class Matches</span>
+            <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
+              <span className="font-semibold text-slate-600">Gate + Class Match</span>
+              <span className="font-bold text-slate-800 font-mono">{bothGateAndClassCount} Matches</span>
             </div>
           </div>
         </section>
 
-        {/* 3. ATTENTION REQUIRED (ACTIONABLE EXECUTIVE ALERTS) */}
+        {/* 3. NEEDS ATTENTION AREA */}
         <section className="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <span>Executive Attention Required</span>
+              <span>Needs Attention</span>
             </div>
             <span className="text-[11px] font-semibold text-amber-700">
-              {sectionStats.filter(s => s.status !== "HEALTHY").length} Exceptions Found
+              {sectionStats.filter(s => s.status !== "Good").length} Issues
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
-            {/* Alert 1: Low Sections */}
+            {/* Issue 1: Section 4A */}
             <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  <p className="font-bold text-slate-900">Section 4A Critical Attendance (54%)</p>
+                  <p className="font-bold text-slate-900">Section 4A — 54%</p>
                 </div>
-                <p className="text-slate-500 text-[11px] mt-0.5">29 absent students out of 63 enrolled.</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">29 absent out of 63 students.</p>
               </div>
               <button
                 onClick={() => {
                   setActiveTab("sections");
                   const sec4A = students.filter(s => getSectionDisplayName(s.section).name === "4A");
                   setSectionModalData({
-                    title: "Section 4A — Attendance Review",
-                    subtitle: "Critical Attendance Section (54% Present • 29 Absent)",
+                    title: "Section 4A — Students",
+                    subtitle: "54% Present • 29 Absent",
                     students: sec4A.map(s => {
                       const log = detailedLogs.find(l => (l.userId || (l as any).user_id) === s.id);
                       const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
@@ -771,28 +742,28 @@ export default function PrincipalDashboard() {
                     })
                   });
                 }}
-                className="px-2 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[10px] cursor-pointer whitespace-nowrap"
+                className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
               >
-                Inspect 4A
+                View 4A
               </button>
             </div>
 
-            {/* Alert 2: Section 3C */}
+            {/* Issue 2: Section 3C */}
             <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  <p className="font-bold text-slate-900">Section 3C Warning (70%)</p>
+                  <p className="font-bold text-slate-900">Section 3C — 70%</p>
                 </div>
-                <p className="text-slate-500 text-[11px] mt-0.5">16 absent students out of 54 enrolled.</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">16 absent out of 54 students.</p>
               </div>
               <button
                 onClick={() => {
                   setActiveTab("sections");
                   const sec3C = students.filter(s => getSectionDisplayName(s.section).name === "3C");
                   setSectionModalData({
-                    title: "Section 3C — Attendance Review",
-                    subtitle: "Attendance Warning (70% Present • 16 Absent)",
+                    title: "Section 3C — Students",
+                    subtitle: "70% Present • 16 Absent",
                     students: sec3C.map(s => {
                       const log = detailedLogs.find(l => (l.userId || (l as any).user_id) === s.id);
                       const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
@@ -809,43 +780,43 @@ export default function PrincipalDashboard() {
                     })
                   });
                 }}
-                className="px-2 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[10px] cursor-pointer whitespace-nowrap"
+                className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
               >
-                Inspect 3C
+                View 3C
               </button>
             </div>
 
-            {/* Alert 3: Semester Flag Shortage */}
+            {/* Issue 3: Critical Attendance */}
             <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  <p className="font-bold text-slate-900">{redFlagCount} Students in Critical Shortage</p>
+                  <p className="font-bold text-slate-900">{redFlagCount} Students — Below 65%</p>
                 </div>
-                <p className="text-slate-500 text-[11px] mt-0.5">Month-to-date attendance below 65% limit.</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">Attendance below 65% limit.</p>
               </div>
               <button
                 onClick={() => {
                   setActiveTab("flags");
                   setRiskFilter("RED");
                 }}
-                className="px-2 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[10px] cursor-pointer whitespace-nowrap"
+                className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
               >
-                View Roster
+                View Students
               </button>
             </div>
           </div>
         </section>
 
-        {/* 4. ALL DEPARTMENTS AT A GLANCE (INSTITUTIONAL COMPARISON TABLE) */}
+        {/* 4. ACADEMIC DEPARTMENTS AT A GLANCE */}
         <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900">Academic Departments at a Glance</h3>
-              <p className="text-xs text-slate-500">Cross-department comparison and operational status</p>
+              <p className="text-xs text-slate-500">Department comparison today</p>
             </div>
             <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
-              6 Departments Registered
+              6 Departments
             </span>
           </div>
 
@@ -853,13 +824,12 @@ export default function PrincipalDashboard() {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
-                  <th className="py-2.5 px-3">Department Name</th>
-                  <th className="py-2.5 px-3 text-center">Code</th>
-                  <th className="py-2.5 px-3 text-right">Enrolled</th>
+                  <th className="py-2.5 px-3">Department</th>
+                  <th className="py-2.5 px-3 text-right">Students</th>
                   <th className="py-2.5 px-3 text-right">Present</th>
                   <th className="py-2.5 px-3 text-right">Absent</th>
                   <th className="py-2.5 px-3 text-center">Attendance %</th>
-                  <th className="py-2.5 px-3 text-center">Pending Classes</th>
+                  <th className="py-2.5 px-3 text-center">Classes Pending</th>
                   <th className="py-2.5 px-3 text-center">Status</th>
                   <th className="py-2.5 px-3 text-center">Action</th>
                 </tr>
@@ -882,13 +852,10 @@ export default function PrincipalDashboard() {
                       }`}
                     >
                       <td className="py-2.5 px-3 font-bold text-slate-900">
-                        {dept.name}
-                      </td>
-                      <td className="py-2.5 px-3 text-center font-mono font-bold text-slate-600">
-                        {dept.code}
+                        {dept.name} ({dept.code})
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-800">
-                        {isDS ? enrolled : "—"}
+                        {isDS ? enrolled : "No Data Today"}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">
                         {isDS ? present : "—"}
@@ -928,7 +895,7 @@ export default function PrincipalDashboard() {
                             ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                             : "bg-slate-100 text-slate-600 border-slate-200"
                         }`}>
-                          {dept.active ? "🟢 Live Active" : "⚪ Ready"}
+                          {dept.active ? "Live" : "Not Started"}
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-center">
@@ -937,13 +904,13 @@ export default function PrincipalDashboard() {
                             e.stopPropagation();
                             setSelectedBranch(dept.code);
                           }}
-                          className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                          className={`px-3 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
                             isSelected
                               ? "bg-blue-700 text-white"
                               : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                           }`}
                         >
-                          {isSelected ? "Active View" : "Drill Down"}
+                          {isSelected ? "Open" : "View"}
                         </button>
                       </td>
                     </tr>
@@ -954,10 +921,10 @@ export default function PrincipalDashboard() {
           </div>
         </section>
 
-        {/* 5. DEPARTMENT DRILL-DOWN MONITORING TABS */}
+        {/* 5. DEPARTMENT DRILL-DOWN TABS */}
         {selectedBranch === "DS" ? (
-          <section className="space-y-4">
-            {/* View Mode Navigation Tabs */}
+          <section className="space-y-3">
+            {/* Simple View Navigation Tabs */}
             <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-thin">
               <button
                 onClick={() => setActiveTab("sections")}
@@ -968,7 +935,7 @@ export default function PrincipalDashboard() {
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
-                Section Breakdown Matrix ({sectionStats.length})
+                Section Attendance ({sectionStats.length})
               </button>
 
               <button
@@ -980,7 +947,7 @@ export default function PrincipalDashboard() {
                 }`}
               >
                 <Clock className="w-3.5 h-3.5" />
-                Hourly / Period Attendance ({hourlySessions.length})
+                Class Attendance ({hourlySessions.length})
               </button>
 
               <button
@@ -992,7 +959,7 @@ export default function PrincipalDashboard() {
                 }`}
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
-                Attendance Risk Analytics ({redFlagCount} Critical)
+                Attendance Problems ({redFlagCount})
               </button>
 
               <button
@@ -1004,25 +971,25 @@ export default function PrincipalDashboard() {
                 }`}
               >
                 <Users className="w-3.5 h-3.5" />
-                Daily Audit Logs ({filteredLogs.length})
+                Daily Records ({filteredLogs.length})
               </button>
             </div>
 
-            {/* TAB 1: SECTION BREAKDOWN MATRIX */}
+            {/* TAB 1: SECTION ATTENDANCE */}
             {activeTab === "sections" && (
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                   <div>
                     <h3 className="text-sm font-extrabold text-slate-900">
-                      Department of Data Science — Section Breakdown Matrix
+                      Section Attendance — Data Science
                     </h3>
                     <p className="text-xs text-slate-500">
-                      All 8 Class Sections with Live Period Attendance & Turnstile Gate Sync
+                      Attendance across all 8 class sections
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
-                      Total: {campusTotalStudents} Students
+                      {campusTotalStudents} Students
                     </span>
                     <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
                       {campusPresentCount} Present ({campusAttendancePercent}%)
@@ -1036,13 +1003,13 @@ export default function PrincipalDashboard() {
                       <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
                         <th className="py-2.5 px-3 w-14 text-center">Year</th>
                         <th className="py-2.5 px-3">Section</th>
-                        <th className="py-2.5 px-3 text-right">Enrolled</th>
+                        <th className="py-2.5 px-3 text-right">Students</th>
                         <th className="py-2.5 px-3 text-right">Present</th>
                         <th className="py-2.5 px-3 text-right">Absent</th>
                         <th className="py-2.5 px-3 text-center">Attendance %</th>
-                        <th className="py-2.5 px-3 text-center">Classroom Periods</th>
+                        <th className="py-2.5 px-3 text-center">Classes</th>
                         <th className="py-2.5 px-3 text-center">Status</th>
-                        <th className="py-2.5 px-3 text-center">Roster Actions</th>
+                        <th className="py-2.5 px-3 text-center">Students</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -1064,8 +1031,8 @@ export default function PrincipalDashboard() {
                               <button
                                 onClick={() => {
                                   setSectionModalData({
-                                    title: `Section ${st.section} — Complete Enrolled Roster`,
-                                    subtitle: `Total ${st.total} Enrolled Students`,
+                                    title: `Section ${st.section} — Students`,
+                                    subtitle: `Total ${st.total} Students`,
                                     students: secStudents.map((s) => {
                                       const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
                                       const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
@@ -1093,7 +1060,7 @@ export default function PrincipalDashboard() {
                                   const presentOnly = secStudents.filter(s => overallPresentSet.has(s.id));
                                   setSectionModalData({
                                     title: `Section ${st.section} — Present Students`,
-                                    subtitle: `${st.present} Students Present on ${logDate} (${st.classPresent} In-Class • ${st.gatePresent} Gate Scan)`,
+                                    subtitle: `${st.present} Present on ${logDate}`,
                                     students: presentOnly.map((s) => {
                                       const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
                                       const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
@@ -1121,7 +1088,7 @@ export default function PrincipalDashboard() {
                                   const absentOnly = secStudents.filter(s => !overallPresentSet.has(s.id));
                                   setSectionModalData({
                                     title: `Section ${st.section} — Absent Students`,
-                                    subtitle: `${st.absent} Students Absent on ${logDate}`,
+                                    subtitle: `${st.absent} Absent on ${logDate}`,
                                     students: absentOnly.map((s) => {
                                       const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
                                       return {
@@ -1157,20 +1124,14 @@ export default function PrincipalDashboard() {
                                 </div>
                               </div>
                             </td>
-                            <td className="py-2.5 px-3 text-center text-slate-600">
-                              {st.periodsCount > 0 ? (
-                                <span className="font-semibold text-blue-700">
-                                  {st.periodsCount} Conducted
-                                </span>
-                              ) : (
-                                <span className="text-slate-400">0 Conducted</span>
-                              )}
+                            <td className="py-2.5 px-3 text-center text-slate-600 font-semibold">
+                              {st.periodsCount > 0 ? `${st.periodsCount} Completed` : "0"}
                             </td>
                             <td className="py-2.5 px-3 text-center">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
-                                st.status === "HEALTHY"
+                                st.status === "Good"
                                   ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                                  : st.status === "WARNING"
+                                  : st.status === "Warning"
                                   ? "bg-amber-100 text-amber-800 border-amber-300"
                                   : "bg-rose-100 text-rose-800 border-rose-300"
                               }`}>
@@ -1181,8 +1142,8 @@ export default function PrincipalDashboard() {
                               <button
                                 onClick={() => {
                                   setSectionModalData({
-                                    title: `Section ${st.section} Roster`,
-                                    subtitle: `All ${st.total} Enrolled Students (${st.present} Present, ${st.absent} Absent)`,
+                                    title: `Section ${st.section} — Students`,
+                                    subtitle: `All ${st.total} Students (${st.present} Present, ${st.absent} Absent)`,
                                     students: secStudents.map((s) => {
                                       const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
                                       const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
@@ -1201,7 +1162,7 @@ export default function PrincipalDashboard() {
                                 }}
                                 className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] cursor-pointer"
                               >
-                                View Roster
+                                View Students
                               </button>
                             </td>
                           </tr>
@@ -1213,17 +1174,16 @@ export default function PrincipalDashboard() {
               </div>
             )}
 
-            {/* TAB 2: HOURLY / PERIOD ATTENDANCE MONITORING */}
+            {/* TAB 2: CLASS ATTENDANCE */}
             {activeTab === "hourly" && (
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-4">
-                {/* Header & Filter Controls */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
                   <div>
                     <h3 className="text-sm font-extrabold text-slate-900">
-                      Hourly / Period Classroom Attendance Monitoring
+                      Class Attendance Today — {logDate}
                     </h3>
                     <p className="text-xs text-slate-500">
-                      Live verification of all class period submissions on {logDate}
+                      Attendance submissions by faculty
                     </p>
                   </div>
 
@@ -1232,7 +1192,7 @@ export default function PrincipalDashboard() {
                       <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="text"
-                        placeholder="Filter subject, faculty, section..."
+                        placeholder="Search subject, faculty..."
                         value={hourlySearchQuery}
                         onChange={(e) => setHourlySearchQuery(e.target.value)}
                         className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-blue-500"
@@ -1250,7 +1210,7 @@ export default function PrincipalDashboard() {
                               : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                           }`}
                         >
-                          {sec === "ALL" ? "All Sec" : sec}
+                          {sec === "ALL" ? "All" : sec}
                         </button>
                       ))}
                     </div>
@@ -1259,16 +1219,16 @@ export default function PrincipalDashboard() {
 
                 {hourlyLoading ? (
                   <div className="p-8 text-center text-slate-500 text-xs font-semibold animate-pulse">
-                    Loading Hourly Period Logs...
+                    Loading Class Attendance...
                   </div>
                 ) : hourlySessions.length === 0 ? (
                   <div className="p-8 text-center text-slate-500 text-xs space-y-1">
                     <Clock className="w-8 h-8 text-slate-400 mx-auto" />
-                    <p className="font-bold text-slate-700">No Classroom Sessions Recorded on {logDate}</p>
-                    <p className="text-slate-400">Faculty period submissions will automatically appear here in real-time.</p>
+                    <p className="font-bold text-slate-700">No Classes Recorded on {logDate}</p>
+                    <p className="text-slate-400">Classes will appear here as faculty submit attendance.</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {hourlySessions
                       .filter((session: any) => {
                         const secName = session.section || "";
@@ -1295,9 +1255,9 @@ export default function PrincipalDashboard() {
                             key={`${session.scheduleId}_${session.date || logDate}`}
                             className="border border-slate-200 rounded-xl overflow-hidden shadow-xs hover:border-slate-300 transition-all bg-white"
                           >
-                            <div className="p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
+                            <div className="p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-800 flex flex-col items-center justify-center flex-shrink-0 font-mono">
+                                <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-800 flex flex-col items-center justify-center flex-shrink-0 font-mono">
                                   <span className="text-[9px] font-bold uppercase">{session.year}</span>
                                   <span className="text-xs font-black">{session.section}</span>
                                 </div>
@@ -1305,11 +1265,11 @@ export default function PrincipalDashboard() {
                                   <div className="flex items-center gap-2">
                                     <h4 className="text-sm font-bold text-slate-900">{session.subject}</h4>
                                     <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                      SUBMITTED
+                                      Complete
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                                    <span>⏱️ {session.startTime?.slice(0, 5)} – {session.endTime?.slice(0, 5)}</span>
+                                    <span>{session.startTime?.slice(0, 5)} – {session.endTime?.slice(0, 5)}</span>
                                     <span>•</span>
                                     <span className="font-semibold text-slate-700">Faculty: {session.facultyName}</span>
                                   </div>
@@ -1319,7 +1279,7 @@ export default function PrincipalDashboard() {
                               <div className="flex items-center gap-3 justify-end">
                                 <div className="text-right">
                                   <div className="flex items-center gap-2 justify-end">
-                                    <span className="text-base font-black text-slate-900">{pct}%</span>
+                                    <span className="text-sm font-black text-slate-900">{pct}%</span>
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                                       pct >= 75 ? "bg-emerald-100 text-emerald-800" : pct >= 65 ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"
                                     }`}>
@@ -1333,16 +1293,16 @@ export default function PrincipalDashboard() {
                                   onClick={() => setExpandedHourlyScheduleId(isExpanded ? null : session.scheduleId)}
                                   className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer"
                                 >
-                                  {isExpanded ? "Hide Roster" : `Roster (${studentList.length})`}
+                                  {isExpanded ? "Hide" : `Students (${studentList.length})`}
                                 </button>
                               </div>
                             </div>
 
                             {isExpanded && (
-                              <div className="p-3.5 bg-white border-t border-slate-200 space-y-2.5">
+                              <div className="p-3 bg-white border-t border-slate-200 space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs font-bold text-slate-700 uppercase">
-                                    Student Attendance Roster ({session.presentCount} Present, {session.absentCount} Absent)
+                                  <span className="text-xs font-bold text-slate-700">
+                                    Students ({session.presentCount} Present, {session.absentCount} Absent)
                                   </span>
                                   <a
                                     href={`/api/mentor/history/export?date=${logDate}&scheduleId=${session.scheduleId}`}
@@ -1350,7 +1310,7 @@ export default function PrincipalDashboard() {
                                     className="px-2.5 py-1 rounded bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-bold flex items-center gap-1"
                                   >
                                     <FileSpreadsheet className="w-3.5 h-3.5" />
-                                    Export Class CSV
+                                    Export CSV
                                   </a>
                                 </div>
 
@@ -1359,7 +1319,7 @@ export default function PrincipalDashboard() {
                                     <thead>
                                       <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase">
                                         <th className="py-2 px-3 w-10 text-center">#</th>
-                                        <th className="py-2 px-3">Roll No</th>
+                                        <th className="py-2 px-3">Roll Number</th>
                                         <th className="py-2 px-3">Student Name</th>
                                         <th className="py-2 px-3 text-center">Class Status</th>
                                         <th className="py-2 px-3 text-center">Marking Method</th>
@@ -1385,15 +1345,15 @@ export default function PrincipalDashboard() {
                                                 ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                                                 : "bg-rose-100 text-rose-800 border-rose-300"
                                             }`}>
-                                              {st.markedPresent ? "🟢 PRESENT" : "🔴 ABSENT"}
+                                              {st.markedPresent ? "Present" : "Absent"}
                                             </span>
                                           </td>
                                           <td className="py-1.5 px-3 text-center text-slate-600 text-[11px]">
-                                            {st.scannedQr ? "📱 QR Code Scan" : st.markedByTeacher ? "✍️ Faculty Marked" : "—"}
+                                            {st.scannedQr ? "QR Scan" : st.markedByTeacher ? "Faculty Marked" : "—"}
                                           </td>
                                           <td className="py-1.5 px-3 text-center text-[11px]">
                                             <span className={st.scannedGate ? "text-emerald-700 font-bold" : "text-slate-400"}>
-                                              {st.scannedGate ? (st.gateEntryTime ? `In: ${formatTime(st.gateEntryTime)}` : "Verified Gate In") : "No Gate Scan"}
+                                              {st.scannedGate ? (st.gateEntryTime ? formatTime(st.gateEntryTime) : "Scanned") : "No Gate Scan"}
                                             </span>
                                           </td>
                                         </tr>
@@ -1411,16 +1371,16 @@ export default function PrincipalDashboard() {
               </div>
             )}
 
-            {/* TAB 3: ATTENDANCE RISK ANALYTICS */}
+            {/* TAB 3: ATTENDANCE PROBLEMS */}
             {activeTab === "flags" && (
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
                   <div>
                     <h3 className="text-sm font-extrabold text-slate-900">
-                      Institutional Student Attendance Risk Analytics ({monthForFlags})
+                      Attendance Problems ({monthForFlags})
                     </h3>
                     <p className="text-xs text-slate-500">
-                      Target Threshold: 75% Safe Standing • 65% Condonation Limit
+                      Students below 75% target threshold
                     </p>
                   </div>
 
@@ -1468,10 +1428,10 @@ export default function PrincipalDashboard() {
                         <th className="py-2.5 px-3">Roll Number</th>
                         <th className="py-2.5 px-3 text-center">Section</th>
                         <th className="py-2.5 px-3 text-right">Days Present</th>
-                        <th className="py-2.5 px-3 text-center">Semester %</th>
-                        <th className="py-2.5 px-3 text-center">Status Flag</th>
-                        <th className="py-2.5 px-3">Remediation Action Needed</th>
-                        <th className="py-2.5 px-3 text-center">Register</th>
+                        <th className="py-2.5 px-3 text-center">Attendance %</th>
+                        <th className="py-2.5 px-3 text-center">Status</th>
+                        <th className="py-2.5 px-3">Needed for 75%</th>
+                        <th className="py-2.5 px-3 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -1487,7 +1447,7 @@ export default function PrincipalDashboard() {
                             <td className="py-2 px-3 font-bold text-slate-900">{item.student.name}</td>
                             <td className="py-2 px-3 font-mono font-bold text-slate-700">{item.student.uniqueId || "N/A"}</td>
                             <td className="py-2 px-3 text-center font-mono font-bold text-blue-700">
-                              {getSectionDisplayName(item.student.section).name}
+                              Sec {getSectionDisplayName(item.student.section).name}
                             </td>
                             <td className="py-2 px-3 text-right font-mono font-bold text-slate-800">
                               {item.presentDays} / {item.totalWorkingDays}
@@ -1505,14 +1465,14 @@ export default function PrincipalDashboard() {
                             <td className="py-2 px-3 text-slate-600 text-[11px]">
                               {item.flag === "RED" ? (
                                 <span className="text-rose-700 font-semibold">
-                                  Needs {item.classesNeededFor65} days for 65%, {item.classesNeededFor75} for 75% target
+                                  Needs {item.classesNeededFor75} days for 75%
                                 </span>
                               ) : item.flag === "YELLOW" ? (
                                 <span className="text-amber-700 font-semibold">
-                                  Needs {item.classesNeededFor75} consecutive days to reach 75% target
+                                  Needs {item.classesNeededFor75} days for 75%
                                 </span>
                               ) : (
-                                <span className="text-emerald-700 font-semibold">Target Satisfied (≥ 75%)</span>
+                                <span className="text-emerald-700 font-semibold">Target Satisfied</span>
                               )}
                             </td>
                             <td className="py-2 px-3 text-center">
@@ -1534,16 +1494,16 @@ export default function PrincipalDashboard() {
               </div>
             )}
 
-            {/* TAB 4: DAILY AUDIT LOGS */}
+            {/* TAB 4: DAILY RECORDS */}
             {activeTab === "logs" && (
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
                   <div>
                     <h3 className="text-sm font-extrabold text-slate-900">
-                      Institutional Daily Audit Logs — {logDate}
+                      Daily Records — {logDate}
                     </h3>
                     <p className="text-xs text-slate-500">
-                      Individual student presence verification across Gate Turnstiles & Classroom Lectures
+                      Student attendance across classes and gate
                     </p>
                   </div>
 
@@ -1553,7 +1513,7 @@ export default function PrincipalDashboard() {
                       <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         type="text"
-                        placeholder="Search student or roll..."
+                        placeholder="Search student, roll..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-blue-500"
@@ -1575,10 +1535,10 @@ export default function PrincipalDashboard() {
                       className="px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-semibold"
                     >
                       <option value="ALL">All Statuses</option>
-                      <option value="PRESENT">Present (Class & Gate)</option>
-                      <option value="CLASS_ONLY">Class Present (No Gate)</option>
-                      <option value="GATE_ONLY">Gate Scanned Only</option>
-                      <option value="LATE">Late Gate Arrival</option>
+                      <option value="PRESENT">Present</option>
+                      <option value="CLASS_ONLY">Class Only</option>
+                      <option value="GATE_ONLY">Gate Only</option>
+                      <option value="LATE">Late</option>
                       <option value="ABSENT">Absent</option>
                     </select>
                   </div>
@@ -1592,9 +1552,10 @@ export default function PrincipalDashboard() {
                         <th className="py-2.5 px-3">Roll Number</th>
                         <th className="py-2.5 px-3">Student Name</th>
                         <th className="py-2.5 px-3 text-center">Section</th>
-                        <th className="py-2.5 px-3 text-center">Gate Entry</th>
-                        <th className="py-2.5 px-3 text-center">Classroom Attendance</th>
-                        <th className="py-2.5 px-3 text-center">Final Verified Status</th>
+                        <th className="py-2.5 px-3 text-center">Entry</th>
+                        <th className="py-2.5 px-3 text-center">Exit</th>
+                        <th className="py-2.5 px-3 text-center">Class Attendance</th>
+                        <th className="py-2.5 px-3 text-center">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -1619,16 +1580,19 @@ export default function PrincipalDashboard() {
                                 )}
                               </span>
                             ) : (
-                              <span className="text-slate-400">No Gate Scan</span>
+                              <span className="text-slate-400">—</span>
                             )}
+                          </td>
+                          <td className="py-2 px-3 text-center font-mono text-[11px] text-slate-500">
+                            {item.log?.exitTime ? formatTime(item.log.exitTime) : "—"}
                           </td>
                           <td className="py-2 px-3 text-center">
                             {item.isClass ? (
                               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                                Verified in Lectures
+                                Present
                               </span>
                             ) : (
-                              <span className="text-slate-400 text-[11px]">No Class Marks</span>
+                              <span className="text-slate-400 text-[11px]">Absent</span>
                             )}
                           </td>
                           <td className="py-2 px-3 text-center">
@@ -1642,12 +1606,12 @@ export default function PrincipalDashboard() {
                                 : "bg-rose-100 text-rose-800 border-rose-300"
                             }`}>
                               {item.unifiedStatus === "PRESENT"
-                                ? "🟢 GATE & CLASS PRESENT"
+                                ? "Present"
                                 : item.unifiedStatus === "CLASS_ONLY"
-                                ? "🟢 PRESENT IN CLASS"
+                                ? "Class Only"
                                 : item.unifiedStatus === "GATE_ONLY"
-                                ? "🟡 GATE SCANNED ONLY"
-                                : "🔴 ABSENT"}
+                                ? "Gate Only"
+                                : "Absent"}
                             </span>
                           </td>
                         </tr>
@@ -1665,18 +1629,18 @@ export default function PrincipalDashboard() {
               Department of {BRANCHES.find(b => b.code === selectedBranch)?.name} ({selectedBranch})
             </h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Department infrastructure is configured. No active student cohorts registered under this department code for live session tracking.
+              No attendance data today. This department is available but has not started sessions yet.
             </p>
             <button
               onClick={() => setSelectedBranch("DS")}
               className="px-3.5 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold cursor-pointer"
             >
-              Switch back to Data Science (DS)
+              Open Data Science (DS)
             </button>
           </section>
         )}
 
-        {/* SECTION INTERACTIVE ROSTER MODAL */}
+        {/* SECTION STUDENTS MODAL */}
         {sectionModalData && (
           <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl p-5 space-y-3 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
@@ -1724,7 +1688,7 @@ export default function PrincipalDashboard() {
                               ? "bg-blue-50 text-blue-800 border-blue-200"
                               : "bg-slate-100 text-slate-500 border-slate-200"
                           }`}>
-                            📚 {item.hourlyCount}/{item.hourlyTotal} Periods
+                            {item.hourlyCount}/{item.hourlyTotal} Classes
                           </span>
                         ) : null}
 
@@ -1746,10 +1710,10 @@ export default function PrincipalDashboard() {
                             : "bg-rose-100 text-rose-800 border-rose-300"
                         }`}>
                           {item.hourlyCount && item.hourlyCount > 0
-                            ? "🟢 PRESENT IN CLASS"
+                            ? "Present in Class"
                             : item.entryTime
-                            ? "🟡 GATE ONLY"
-                            : "🔴 ABSENT"}
+                            ? "Gate Only"
+                            : "Absent"}
                         </span>
                       </div>
                     </div>
@@ -1762,31 +1726,31 @@ export default function PrincipalDashboard() {
                   onClick={() => setSectionModalData(null)}
                   className="px-4 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer"
                 >
-                  Close Roster
+                  Close
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* STUDENT PROFILE & INTERACTIVE MONTHLY ATTENDANCE REGISTER MODAL */}
+        {/* STUDENT PROFILE & ATTENDANCE REGISTER MODAL */}
         {selectedStudentForDetails && (
           <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-4xl p-6 space-y-6 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-700 text-white font-black text-xl flex items-center justify-center shadow-xs">
+            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-4xl p-6 space-y-5 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-blue-700 text-white font-black text-lg flex items-center justify-center shadow-xs">
                     {selectedStudentForDetails.name?.charAt(0) || "S"}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-bold text-slate-900">{selectedStudentForDetails.name}</h2>
+                      <h2 className="text-base font-bold text-slate-900">{selectedStudentForDetails.name}</h2>
                       <span className="px-2 py-0.5 rounded text-[10px] font-black bg-blue-100 text-blue-800">
                         Roll: {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
                       </span>
                     </div>
                     <p className="text-xs font-medium text-slate-500 mt-0.5">
-                      Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel}) • Dept. of Data Science
+                      Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel}) • Data Science
                     </p>
                   </div>
                 </div>
@@ -1802,7 +1766,7 @@ export default function PrincipalDashboard() {
               {/* Month Selector & Metrics */}
               <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-700">Month Register:</span>
+                  <span className="text-xs font-bold text-slate-700">Month:</span>
                   <CustomMonthSelector value={studentModalMonth} onChange={setStudentModalMonth} />
                 </div>
                 <span className="text-xs font-bold text-slate-600">
@@ -1810,9 +1774,9 @@ export default function PrincipalDashboard() {
                 </span>
               </div>
 
-              {/* Calendar Grid for Selected Month */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 uppercase">Monthly Register Calendar Grid</h4>
+              {/* Calendar Grid */}
+              <div className="space-y-2.5">
+                <h4 className="text-xs font-bold text-slate-700 uppercase">Monthly Calendar</h4>
                 <div className="grid grid-cols-7 gap-1.5 text-center text-xs">
                   {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
                     <div key={d} className="font-bold text-slate-400 py-1">{d}</div>
@@ -1826,7 +1790,7 @@ export default function PrincipalDashboard() {
                     const cells = [];
 
                     for (let i = 0; i < firstDayIdx; i++) {
-                      cells.push(<div key={`empty_${i}`} className="h-14 rounded-lg bg-slate-50/50" />);
+                      cells.push(<div key={`empty_${i}`} className="h-13 rounded-lg bg-slate-50/50" />);
                     }
 
                     for (let day = 1; day <= daysInM; day++) {
@@ -1850,7 +1814,7 @@ export default function PrincipalDashboard() {
                               holidayReason: isHoliday
                             });
                           }}
-                          className={`h-14 rounded-lg p-1 border flex flex-col justify-between cursor-pointer transition-all ${
+                          className={`h-13 rounded-lg p-1 border flex flex-col justify-between cursor-pointer transition-all ${
                             isPresent
                               ? "bg-emerald-50 border-emerald-300 text-emerald-900"
                               : isSunday || isHoliday
@@ -1860,7 +1824,7 @@ export default function PrincipalDashboard() {
                         >
                           <div className="flex justify-between items-center text-[10px] font-bold">
                             <span>{day}</span>
-                            <span>{isPresent ? "🟢 P" : isSunday ? "SUN" : isHoliday ? "HOL" : "🔴 A"}</span>
+                            <span>{isPresent ? "P" : isSunday ? "SUN" : isHoliday ? "HOL" : "A"}</span>
                           </div>
                           <span className="text-[9px] truncate font-mono">
                             {isPresent && record?.entryTime ? formatTime(record.entryTime) : isHoliday || isSunday ? "Off" : "Absent"}
@@ -1873,27 +1837,27 @@ export default function PrincipalDashboard() {
                 </div>
               </div>
 
-              {/* Day Inspector Drawer */}
+              {/* Day Inspector */}
               {selectedDayDetail && (
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 text-xs">
                   <div className="flex justify-between items-center font-bold text-slate-800">
-                    <span>Attendance Details: {selectedDayDetail.dateStr} ({selectedDayDetail.dayOfWeek})</span>
+                    <span>{selectedDayDetail.dateStr} ({selectedDayDetail.dayOfWeek})</span>
                     <button onClick={() => setSelectedDayDetail(null)} className="text-slate-400 hover:text-slate-700">✕</button>
                   </div>
                   <p className="text-slate-600">
-                    Status: <span className="font-bold">{selectedDayDetail.status === "P" ? "Present" : selectedDayDetail.status === "A" ? "Absent" : "Holiday / Off"}</span>
+                    Status: <span className="font-bold">{selectedDayDetail.status === "P" ? "Present" : selectedDayDetail.status === "A" ? "Absent" : "Off"}</span>
                     {selectedDayDetail.record?.entryTime && ` • Entry: ${formatTime(selectedDayDetail.record.entryTime)}`}
                     {selectedDayDetail.record?.exitTime && ` • Exit: ${formatTime(selectedDayDetail.record.exitTime)}`}
                   </p>
                 </div>
               )}
 
-              <div className="pt-3 border-t border-slate-100 flex justify-end">
+              <div className="pt-2 border-t border-slate-100 flex justify-end">
                 <button
                   onClick={() => setSelectedStudentForDetails(null)}
                   className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer"
                 >
-                  Close Profile
+                  Close
                 </button>
               </div>
             </div>
@@ -1907,7 +1871,7 @@ export default function PrincipalDashboard() {
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
                   <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-                  <span>Export Attendance Register (.csv)</span>
+                  <span>Export Attendance (.csv)</span>
                 </div>
                 <button onClick={() => setExportModalOpen(false)} className="text-slate-400 hover:text-slate-700">
                   <XCircle className="w-5 h-5" />
@@ -1916,20 +1880,20 @@ export default function PrincipalDashboard() {
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="font-bold text-slate-700">Export Scope</label>
+                  <label className="font-bold text-slate-700">Scope</label>
                   <select
                     value={exportType}
                     onChange={(e) => setExportType(e.target.value as any)}
                     className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-semibold"
                   >
-                    <option value="all">Entire Institution / All Sections</option>
+                    <option value="all">All Departments & Sections</option>
                     <option value="section">Specific Section</option>
                   </select>
                 </div>
 
                 {exportType === "section" && (
                   <div>
-                    <label className="font-bold text-slate-700">Select Section</label>
+                    <label className="font-bold text-slate-700">Section</label>
                     <select
                       value={exportSection}
                       onChange={(e) => setExportSection(e.target.value)}
@@ -1941,14 +1905,13 @@ export default function PrincipalDashboard() {
                 )}
 
                 <div>
-                  <label className="font-bold text-slate-700">Month / Period</label>
+                  <label className="font-bold text-slate-700">Month</label>
                   <input
                     type="month"
                     value={exportMonth}
                     onChange={(e) => setExportMonth(e.target.value)}
                     className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-semibold"
-                  >
-                  </input>
+                  />
                 </div>
               </div>
 
@@ -1961,11 +1924,11 @@ export default function PrincipalDashboard() {
                 </button>
                 <a
                   href={`/api/attendance/export?month=${exportMonth}${exportType === "section" ? `&section=${exportSection}` : ""}`}
-                  download={`Attendance_Register_${exportMonth}.csv`}
+                  download={`Attendance_${exportMonth}.csv`}
                   onClick={() => setExportModalOpen(false)}
                   className="px-4 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold shadow-xs"
                 >
-                  Download CSV Register
+                  Download CSV
                 </a>
               </div>
             </div>
