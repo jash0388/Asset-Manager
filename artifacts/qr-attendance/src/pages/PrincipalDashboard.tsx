@@ -377,6 +377,8 @@ export default function PrincipalDashboard() {
     return set;
   }, [todayClassPresence]);
 
+  const classPresentSet = classPresentUserIds;
+
   // Fetch Hourly / Period Classroom Attendance for the selected date
   const { data: hourlyHistoryData, isLoading: hourlyLoading } = useQuery<{
     date?: string;
@@ -1003,7 +1005,7 @@ export default function PrincipalDashboard() {
                               const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
                               const hourlyPresentCount = hourlyForStudent.filter((h: any) => h.markedPresent).length;
                               const isGatePresent = dsPresentSet.has(s.id);
-                              const isClassPresent = classPresentSet.has(s.id);
+                              const isClassPresent = classPresentUserIds.has(s.id);
                               return {
                                 student: s,
                                 isPresent: isGatePresent || isClassPresent,
@@ -1038,7 +1040,9 @@ export default function PrincipalDashboard() {
                       <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
                         {/* Enrolled Button */}
                         <button
-                          onClick={() => {
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
                             setSectionModalData({
                               title: `Section ${st.section} — Enrolled Roster`,
@@ -1047,7 +1051,7 @@ export default function PrincipalDashboard() {
                                 const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
                                 const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
                                 const isGatePresent = dsPresentSet.has(s.id);
-                                const isClassPresent = classPresentSet.has(s.id);
+                                const isClassPresent = classPresentUserIds.has(s.id);
                                 return {
                                   student: s,
                                   isPresent: isGatePresent || isClassPresent,
@@ -1061,7 +1065,7 @@ export default function PrincipalDashboard() {
                               }),
                             });
                           }}
-                          className="p-3 rounded-xl bg-gray-50 hover:bg-gray-50 border border-gray-200 transition-all cursor-pointer text-center active:scale-95"
+                          className="p-3 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all cursor-pointer text-center active:scale-95"
                         >
                           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Enrolled</p>
                           <p className="text-base font-black text-gray-900 mt-1">{st.total}</p>
@@ -1069,7 +1073,9 @@ export default function PrincipalDashboard() {
 
                         {/* Present Button */}
                         <button
-                          onClick={() => {
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && overallPresentSet.has(s.id));
                             setSectionModalData({
                               title: `Section ${st.section} — Present Students (Class & Gate)`,
@@ -1078,7 +1084,7 @@ export default function PrincipalDashboard() {
                                 const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
                                 const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
                                 const isGatePresent = dsPresentSet.has(s.id);
-                                const isClassPresent = classPresentSet.has(s.id);
+                                const isClassPresent = classPresentUserIds.has(s.id);
                                 return {
                                   student: s,
                                   isPresent: true,
@@ -1101,7 +1107,9 @@ export default function PrincipalDashboard() {
 
                         {/* Absent Button */}
                         <button
-                          onClick={() => {
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && !overallPresentSet.has(s.id));
                             setSectionModalData({
                               title: `Section ${st.section} — Absent Students`,
