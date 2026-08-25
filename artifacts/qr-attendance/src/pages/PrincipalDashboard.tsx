@@ -556,13 +556,13 @@ export default function PrincipalDashboard() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-extrabold text-slate-900 tracking-tight">Office of the Principal</h1>
+                <h1 className="text-base font-extrabold text-slate-900 tracking-tight">Sphoorthy Engineering College</h1>
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200 uppercase tracking-wider">
                   PRINCIPAL
                 </span>
               </div>
               <p className="text-xs font-medium text-slate-500">
-                Sphoorthy Engineering College • Institutional Campus Portal
+                Institutional Campus Portal
               </p>
             </div>
           </div>
