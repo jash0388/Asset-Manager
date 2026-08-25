@@ -39,11 +39,11 @@ function formatUser(u: any) {
 router.get("/mentor/app-version", (_req: any, res: any) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 8,
-    latestVersionName: "1.8.0",
+    latestVersionCode: 9,
+    latestVersionName: "1.9.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+    releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
   });
 });
 
@@ -250,6 +250,7 @@ router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: 
   const endDateParam = (req.query.endDate as string)?.trim();
   const monthParam = (req.query.month as string)?.trim(); // YYYY-MM
   const searchQuery = (req.query.search as string)?.toLowerCase().trim();
+  const scopeParam = (req.query.scope as string)?.toLowerCase().trim() || "all"; // "all" | "my"
   const requestedScheduleId = req.query.scheduleId ? parseInt(req.query.scheduleId as string) : undefined;
 
   try {
@@ -297,12 +298,7 @@ router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: 
     }
     const { data: rawSessions } = await sessionQuery;
 
-    // 3. Collect distinct schedule IDs found in hourly attendance or sessions or scheduled for mentor
-    const attendanceScheduleIds = new Set<number>();
-    (rawHourly || []).forEach(r => { if (r.schedule_id) attendanceScheduleIds.add(r.schedule_id); });
-    (rawSessions || []).forEach(s => { if (s.schedule_id) attendanceScheduleIds.add(s.schedule_id); });
-
-    // Also fetch all schedules (to resolve timetable information)
+    // 3. Fetch all schedules (to resolve timetable information)
     const { data: allSchedules } = await supabase.from("qr_schedules").select("*, qr_mentors(id, name, email)");
     const scheduleMap = new Map<number, any>();
     (allSchedules || []).forEach((s: any) => scheduleMap.set(s.id, s));
@@ -344,18 +340,17 @@ router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: 
       sessionGroupMap.get(key)!.hourlyRecords.push(r);
     });
 
-    // If single date requested and no hourly attendance found for scheduled classes today, include pending schedules
-    if (filterDates.length === 1) {
+    // ONLY for TODAY: if scheduled class has not been submitted yet, include as pending
+    if (filterDates.length === 1 && filterDates[0] === todayIst) {
       const singleDate = filterDates[0];
       const dayNames = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
-      // Parse UTC date to IST day of week
       const [y, m, d] = singleDate.split("-").map(Number);
       const parsedDate = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
       const dayOfWeek = dayNames[parsedDate.getUTCDay()];
 
       (allSchedules || []).forEach(s => {
         if (s.day_of_week === dayOfWeek) {
-          if (mentorId === -3 || s.mentor_id === mentorId) {
+          if (mentorId === -3 || s.mentor_id === mentorId || scopeParam === "all") {
             const key = `${s.id}_${singleDate}`;
             if (!sessionGroupMap.has(key)) {
               sessionGroupMap.set(key, {
@@ -377,20 +372,18 @@ router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: 
 
     for (const [key, group] of sessionGroupMap.entries()) {
       const sched = scheduleMap.get(group.scheduleId);
-      
-      // Filter out if not assigned to this mentor (unless mentor is HOD/admin or mentor took the session)
       const sessionRow = (rawSessions || []).find(s => s.schedule_id === group.scheduleId && s.date === group.date);
-      if (mentorId !== -3 && sched && sched.mentor_id !== mentorId && sessionRow?.mentor_id !== mentorId) {
-        continue;
+      
+      // If user explicitly requested "my" classes only, filter by mentorId
+      if (scopeParam === "my" && mentorId !== -3) {
+        if (sched && sched.mentor_id !== mentorId && sessionRow?.mentor_id !== mentorId) {
+          continue;
+        }
       }
 
       const scheduleYear = sched?.year || "II";
       const scheduleSection = sched?.section || "A";
       const dbSection = `DS ${scheduleYear}/I/${scheduleSection}`;
-
-      // Student records map for this session
-      const studentHourlyMap = new Map<number, any>();
-      group.hourlyRecords.forEach(r => studentHourlyMap.set(r.user_id, r));
 
       // Fetch official section roster if records were missing or partial
       let sectionStudents: any[] = [];
@@ -406,7 +399,7 @@ router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: 
           markedAt: r.marked_at
         }));
       } else {
-        // Class is pending: fetch section roster
+        // Class is pending for today
         const { data: roster } = await supabase
           .from("qr_users")
           .select("id, name, unique_id, section")
@@ -475,6 +468,7 @@ router.get("/mentor/history", authMiddleware, mentorOnly, async (req: any, res: 
         fullSection: dbSection,
         facultyName: sched?.qr_mentors?.name || "Subject Faculty",
         facultyEmail: sched?.qr_mentors?.email || "",
+        isMyClass: Boolean((sched && sched.mentor_id === mentorId) || sessionRow?.mentor_id === mentorId),
         status: isSubmitted ? "submitted" : "pending",
         submittedAt: sessionRow?.ended_at || group.hourlyRecords[0]?.marked_at || null,
         totalStudents,
@@ -1177,11 +1171,11 @@ router.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req:
 
 router.get("/app-version", (_req: any, res: any) => {
   res.json({
-    latestVersionCode: 8,
-    latestVersionName: "1.8.0",
+    latestVersionCode: 9,
+    latestVersionName: "1.9.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+    releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
   });
 });
 

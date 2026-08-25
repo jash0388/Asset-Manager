@@ -64325,11 +64325,11 @@ if (!process.env["SESSION_SECRET"]) {
 router2.get("/auth/version-check", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 8,
-    latestVersionName: "1.8.0",
+    latestVersionCode: 9,
+    latestVersionName: "1.9.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+    releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
   });
 });
 function timingSafeStringEqual(a, b) {
@@ -64443,8 +64443,17 @@ router2.all("/auth/pin-login", async (req, res) => {
     }
     const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
     const HOD_PIN = process.env["HOD_PIN"] || "038811";
-    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
-    if (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN) || timingSafeStringEqual(cleanPin, "998226") || timingSafeStringEqual(cleanPin, "038811") || timingSafeStringEqual(cleanPin, "038899")) {
+    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "038877";
+    if (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN) || timingSafeStringEqual(cleanPin, "038877") || timingSafeStringEqual(cleanPin, "778899") || timingSafeStringEqual(cleanPin, "038800")) {
+      resetLoginRateLimit(ip);
+      const token = import_jsonwebtoken.default.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "3650d" });
+      return res.json({
+        token,
+        role: "principal",
+        profile: { id: -4, name: "Dr. M. V. Ram Prasad", email: "principal@sphoorthyengg.ac.in" }
+      });
+    }
+    if (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN) || timingSafeStringEqual(cleanPin, "998226") || timingSafeStringEqual(cleanPin, "038811")) {
       resetLoginRateLimit(ip);
       const token = import_jsonwebtoken.default.sign({ adminId: -2, role: "hod" }, SESSION_SECRET, { expiresIn: "3650d" });
       return res.json({
@@ -64460,15 +64469,6 @@ router2.all("/auth/pin-login", async (req, res) => {
         token,
         role: "admin",
         profile: { id: -1, name: "Admin", email: "admin@sphoorthyengg.ac.in" }
-      });
-    }
-    if (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) {
-      resetLoginRateLimit(ip);
-      const token = import_jsonwebtoken.default.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "3650d" });
-      return res.json({
-        token,
-        role: "principal",
-        profile: { id: -4, name: "Dr. M. V. Ram Prasad", email: "principal@sphoorthyengg.ac.in" }
       });
     }
     res.status(401).json({ error: "Invalid access code. Please check your code and try again." });
@@ -64569,11 +64569,11 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
   const cleanKey = String(rawKey || "").trim().toUpperCase();
   if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
-      latestVersionCode: 8,
-      latestVersionName: "1.8.0",
+      latestVersionCode: 9,
+      latestVersionName: "1.9.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+      releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
     });
     return;
   }
@@ -64620,11 +64620,11 @@ router2.post("/auth/mentor-key-login", async (req, res) => {
         section: mentor.section || "DS II/I/A"
       },
       appVersion: {
-        latestVersionCode: 8,
-        latestVersionName: "1.8.0",
+        latestVersionCode: 9,
+        latestVersionName: "1.9.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+        releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
       }
     });
   } catch (err) {
@@ -65603,11 +65603,11 @@ function formatUser2(u) {
 router5.get("/mentor/app-version", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 8,
-    latestVersionName: "1.8.0",
+    latestVersionCode: 9,
+    latestVersionName: "1.9.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+    releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
   });
 });
 function isSentinel2(ts) {
@@ -65776,6 +65776,7 @@ router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
   const endDateParam = req.query.endDate?.trim();
   const monthParam = req.query.month?.trim();
   const searchQuery = req.query.search?.toLowerCase().trim();
+  const scopeParam = req.query.scope?.toLowerCase().trim() || "all";
   const requestedScheduleId = req.query.scheduleId ? parseInt(req.query.scheduleId) : void 0;
   try {
     const { date: todayIst } = getCurrentISTDateTime();
@@ -65811,13 +65812,6 @@ router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
       sessionQuery = sessionQuery.gte("date", startFilter).lte("date", endFilter);
     }
     const { data: rawSessions } = await sessionQuery;
-    const attendanceScheduleIds = /* @__PURE__ */ new Set();
-    (rawHourly || []).forEach((r) => {
-      if (r.schedule_id) attendanceScheduleIds.add(r.schedule_id);
-    });
-    (rawSessions || []).forEach((s) => {
-      if (s.schedule_id) attendanceScheduleIds.add(s.schedule_id);
-    });
     const { data: allSchedules } = await supabase.from("qr_schedules").select("*, qr_mentors(id, name, email)");
     const scheduleMap = /* @__PURE__ */ new Map();
     (allSchedules || []).forEach((s) => scheduleMap.set(s.id, s));
@@ -65845,7 +65839,7 @@ router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
       }
       sessionGroupMap.get(key).hourlyRecords.push(r);
     });
-    if (filterDates.length === 1) {
+    if (filterDates.length === 1 && filterDates[0] === todayIst) {
       const singleDate = filterDates[0];
       const dayNames = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
       const [y, m, d] = singleDate.split("-").map(Number);
@@ -65853,7 +65847,7 @@ router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
       const dayOfWeek = dayNames[parsedDate.getUTCDay()];
       (allSchedules || []).forEach((s) => {
         if (s.day_of_week === dayOfWeek) {
-          if (mentorId === -3 || s.mentor_id === mentorId) {
+          if (mentorId === -3 || s.mentor_id === mentorId || scopeParam === "all") {
             const key = `${s.id}_${singleDate}`;
             if (!sessionGroupMap.has(key)) {
               sessionGroupMap.set(key, {
@@ -65873,14 +65867,14 @@ router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
     for (const [key, group] of sessionGroupMap.entries()) {
       const sched = scheduleMap.get(group.scheduleId);
       const sessionRow = (rawSessions || []).find((s) => s.schedule_id === group.scheduleId && s.date === group.date);
-      if (mentorId !== -3 && sched && sched.mentor_id !== mentorId && sessionRow?.mentor_id !== mentorId) {
-        continue;
+      if (scopeParam === "my" && mentorId !== -3) {
+        if (sched && sched.mentor_id !== mentorId && sessionRow?.mentor_id !== mentorId) {
+          continue;
+        }
       }
       const scheduleYear = sched?.year || "II";
       const scheduleSection = sched?.section || "A";
       const dbSection = `DS ${scheduleYear}/I/${scheduleSection}`;
-      const studentHourlyMap = /* @__PURE__ */ new Map();
-      group.hourlyRecords.forEach((r) => studentHourlyMap.set(r.user_id, r));
       let sectionStudents = [];
       if (group.hourlyRecords.length > 0) {
         sectionStudents = group.hourlyRecords.map((r) => ({
@@ -65947,6 +65941,7 @@ router5.get("/mentor/history", authMiddleware, mentorOnly, async (req, res) => {
         fullSection: dbSection,
         facultyName: sched?.qr_mentors?.name || "Subject Faculty",
         facultyEmail: sched?.qr_mentors?.email || "",
+        isMyClass: Boolean(sched && sched.mentor_id === mentorId || sessionRow?.mentor_id === mentorId),
         status: isSubmitted ? "submitted" : "pending",
         submittedAt: sessionRow?.ended_at || group.hourlyRecords[0]?.marked_at || null,
         totalStudents,
@@ -66461,11 +66456,11 @@ router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req
 });
 router5.get("/app-version", (_req, res) => {
   res.json({
-    latestVersionCode: 8,
-    latestVersionName: "1.8.0",
+    latestVersionCode: 9,
+    latestVersionName: "1.9.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+    releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
   });
 });
 router5.get("/admin/mentors-tracking", authMiddleware, async (req, res) => {

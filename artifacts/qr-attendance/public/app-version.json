@@ -1,7 +1,7 @@
 {
-  "latestVersionCode": 8,
-  "latestVersionName": "1.8.0",
+  "latestVersionCode": 9,
+  "latestVersionName": "1.9.0",
   "downloadUrl": "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
   "forceUpdate": false,
-  "releaseNotes": "v1.8.0: New Stitch UI, Incharge login support (4-digit keys), dark navy design, bottom navigation with Schedule/History/Profile/Overview tabs!"
+  "releaseNotes": "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
 }

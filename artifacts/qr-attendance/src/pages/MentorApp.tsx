@@ -136,7 +136,7 @@ export default function MentorApp() {
   const [keySubmitting, setKeySubmitting] = useState(false);
 
   // Auto-Update Engine States
-  const CURRENT_APP_VERSION = "1.8.0";
+  const CURRENT_APP_VERSION = "1.9.0";
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updateCheckStatus, setUpdateCheckStatus] = useState<string | null>(null);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -200,6 +200,7 @@ export default function MentorApp() {
   // ── History Tab States ──
   const [historyQuickFilter, setHistoryQuickFilter] = useState<"today" | "yesterday" | "this_week" | "this_month" | "custom">("yesterday");
   const [historySelectedDate, setHistorySelectedDate] = useState<string>(getYesterdayISTDateStr());
+  const [historyScope, setHistoryScope] = useState<"all" | "my">("all");
   const [historySearch, setHistorySearch] = useState<string>("");
   const [historyLoading, setHistoryLoading] = useState<boolean>(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
@@ -249,9 +250,9 @@ export default function MentorApp() {
         if (data && data.latestVersionName && isNewerVersion(data.latestVersionName, CURRENT_APP_VERSION)) {
           setLatestVersionInfo({
             versionName: data.latestVersionName,
-            versionCode: data.latestVersionCode || 8,
+            versionCode: data.latestVersionCode || 9,
             downloadUrl: data.downloadUrl || "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
-            releaseNotes: data.releaseNotes || "Performance enhancements & timetable snapshots sync."
+            releaseNotes: data.releaseNotes || "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
           });
           setUpdateModalOpen(true);
         } else if (manual) {
@@ -281,19 +282,19 @@ export default function MentorApp() {
     setHistoryLoading(true);
     setHistoryError(null);
     try {
-      let queryUrl = `/api/mentor/history?`;
+      let queryUrl = `/api/mentor/history?scope=${historyScope}`;
       if (historyQuickFilter === "today") {
-        queryUrl += `date=${getISTDateStr()}`;
+        queryUrl += `&date=${getISTDateStr()}`;
       } else if (historyQuickFilter === "yesterday") {
-        queryUrl += `date=${getYesterdayISTDateStr()}`;
+        queryUrl += `&date=${getYesterdayISTDateStr()}`;
       } else if (historyQuickFilter === "this_week") {
         const week = getThisWeekRange();
-        queryUrl += `startDate=${week.startDate}&endDate=${week.endDate}`;
+        queryUrl += `&startDate=${week.startDate}&endDate=${week.endDate}`;
       } else if (historyQuickFilter === "this_month") {
         const month = getISTDateStr().slice(0, 7);
-        queryUrl += `month=${month}`;
+        queryUrl += `&month=${month}`;
       } else if (historyQuickFilter === "custom") {
-        queryUrl += `date=${historySelectedDate}`;
+        queryUrl += `&date=${historySelectedDate}`;
       }
 
       if (historySearch.trim()) {
@@ -329,7 +330,7 @@ export default function MentorApp() {
     if (activeTab === "history" && role === "mentor") {
       loadHistoryData();
     }
-  }, [activeTab, historyQuickFilter, historySelectedDate, historySearch, role]);
+  }, [activeTab, historyQuickFilter, historySelectedDate, historyScope, historySearch, role]);
 
   const handleExportAttendance = async (sessionToExport?: any) => {
     try {
@@ -548,7 +549,7 @@ export default function MentorApp() {
 
   // Trigger APK download with zero-cache URL
   const handleDownloadApk = () => {
-    const freshUrl = `https://qr-attendance-app-eight.vercel.app/FacultyApp.apk?v=1.8.0&t=${Date.now()}`;
+    const freshUrl = `https://qr-attendance-app-eight.vercel.app/FacultyApp.apk?v=1.9.0&t=${Date.now()}`;
     window.location.href = freshUrl;
   };
 
@@ -1040,6 +1041,28 @@ export default function MentorApp() {
                 </div>
               </div>
 
+              {/* Scope & Date Filter Quick Pills */}
+              <div className="flex items-center justify-between gap-2 mt-0.5">
+                <div className="flex items-center p-0.5 bg-gray-200/80 rounded-xl">
+                  <button
+                    onClick={() => setHistoryScope("all")}
+                    className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                      historyScope === "all" ? "bg-[#000666] text-white shadow-2xs" : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    All Classes
+                  </button>
+                  <button
+                    onClick={() => setHistoryScope("my")}
+                    className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                      historyScope === "my" ? "bg-[#000666] text-white shadow-2xs" : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    My Classes
+                  </button>
+                </div>
+              </div>
+
               {/* Date Filter Quick Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar mt-0.5">
                 {[
@@ -1248,7 +1271,14 @@ export default function MentorApp() {
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                isSubmitted ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                              }`}
+                            >
+                              {isSubmitted ? "SUBMITTED" : "PENDING"}
+                            </span>
                             <span className={`font-bold text-[11px] px-2 py-0.5 rounded-md border ${colorBadge}`}>
                               {pct}%
                             </span>

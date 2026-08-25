@@ -53,11 +53,11 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);`,
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.status(200).json({
-    latestVersionCode: 8,
-    latestVersionName: "1.8.0",
+    latestVersionCode: 9,
+    latestVersionName: "1.9.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "v1.8.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
+    releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
   });
 }\n`;
   await writeFile(path.resolve(outDir, "version.js"), versionHandler, "utf8");

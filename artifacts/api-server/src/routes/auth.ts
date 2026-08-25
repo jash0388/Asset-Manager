@@ -17,11 +17,11 @@ if (!process.env["SESSION_SECRET"]) {
 router.get("/auth/version-check", (_req: any, res: any) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
-    latestVersionCode: 8,
-    latestVersionName: "1.8.0",
+    latestVersionCode: 9,
+    latestVersionName: "1.9.0",
     downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
     forceUpdate: false,
-    releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+    releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
   });
 });
 
@@ -185,14 +185,28 @@ router.all("/auth/pin-login", async (req: any, res: any) => {
 
     const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
     const HOD_PIN = process.env["HOD_PIN"] || "038811";
-    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "";
+    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "038877";
+
+    // Principal Check (supports PRINCIPAL_PIN env, 038877, 778899, 038800)
+    if (
+      (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) ||
+      timingSafeStringEqual(cleanPin, "038877") ||
+      timingSafeStringEqual(cleanPin, "778899") ||
+      timingSafeStringEqual(cleanPin, "038800")
+    ) {
+      resetLoginRateLimit(ip);
+      const token = jwt.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "3650d" });
+      return res.json({
+        token, role: "principal",
+        profile: { id: -4, name: "Dr. M. V. Ram Prasad", email: "principal@sphoorthyengg.ac.in" }
+      });
+    }
 
     // HOD Check (supports 998226, 038811, or 038899)
     if (
       (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN)) ||
       timingSafeStringEqual(cleanPin, "998226") ||
-      timingSafeStringEqual(cleanPin, "038811") ||
-      timingSafeStringEqual(cleanPin, "038899")
+      timingSafeStringEqual(cleanPin, "038811")
     ) {
       resetLoginRateLimit(ip);
       const token = jwt.sign({ adminId: -2, role: "hod" }, SESSION_SECRET, { expiresIn: "3650d" });
@@ -213,16 +227,6 @@ router.all("/auth/pin-login", async (req: any, res: any) => {
       return res.json({
         token, role: "admin",
         profile: { id: -1, name: "Admin", email: "admin@sphoorthyengg.ac.in" }
-      });
-    }
-
-    // Principal Check
-    if (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) {
-      resetLoginRateLimit(ip);
-      const token = jwt.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "3650d" });
-      return res.json({
-        token, role: "principal",
-        profile: { id: -4, name: "Dr. M. V. Ram Prasad", email: "principal@sphoorthyengg.ac.in" }
       });
     }
 
@@ -334,11 +338,11 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
   const cleanKey = String(rawKey || "").trim().toUpperCase();
   if (cleanKey === "APP_VERSION" || cleanKey === "999" || cleanKey === "9999" || cleanKey === "999999") {
     res.json({
-      latestVersionCode: 8,
-      latestVersionName: "1.8.0",
+      latestVersionCode: 9,
+      latestVersionName: "1.9.0",
       downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
       forceUpdate: false,
-      releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+      releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
     });
     return;
   }
@@ -396,11 +400,11 @@ router.post("/auth/mentor-key-login", async (req: any, res: any) => {
         section: (mentor as any).section || "DS II/I/A"
       },
       appVersion: {
-        latestVersionCode: 8,
-        latestVersionName: "1.8.0",
+        latestVersionCode: 9,
+        latestVersionName: "1.9.0",
         downloadUrl: "https://qr-attendance-app-eight.vercel.app/FacultyApp.apk",
         forceUpdate: false,
-        releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
+        releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
       }
     });
   } catch (err: any) {
