@@ -217,6 +217,12 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
   );
 }
 
+const DEFAULT_COLLEGE_HOLIDAYS: Record<string, string> = {
+  "2026-08-26": "Declared College Holiday",
+  "2026-08-15": "Independence Day",
+  "2026-08-10": "Holiday",
+};
+
 export default function PrincipalDashboard() {
   const { logout } = useAuth();
   const [selectedBranch, setSelectedBranch] = useState("DS");
@@ -233,15 +239,25 @@ export default function PrincipalDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sectionFilter, setSectionFilter] = useState("ALL");
   const [logStatusFilter, setLogStatusFilter] = useState<"ALL" | "PRESENT" | "ABSENT" | "LATE" | "CLASS_ONLY" | "GATE_ONLY">("ALL");
-  const [riskFilter, setRiskFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
 
   // Class Attendance Filter States
   const [hourlySectionFilter, setHourlySectionFilter] = useState("ALL");
   const [hourlySearchQuery, setHourlySearchQuery] = useState("");
   const [expandedHourlyScheduleId, setExpandedHourlyScheduleId] = useState<number | null>(null);
 
-  const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<any | null>(null);
+  // Filters & Sub-state
+  const [riskFilter, setRiskFilter] = useState<"ALL" | "RED" | "YELLOW" | "GREEN">("ALL");
+  const [logSearch, setLogSearch] = useState("");
+  const [logFilter, setLogFilter] = useState<"ALL" | "PRESENT" | "ABSENT" | "LATE" | "CLASS_ONLY" | "GATE_ONLY">("ALL");
+  const [selectedStudentForDetails, setSelectedStudentForDetails] = useState<StudentUser | null>(null);
 
+  // Pagination states (20 per page)
+  const [flagsPage, setFlagsPage] = useState(1);
+  const [sectionModalPage, setSectionModalPage] = useState(1);
+  const [logsPage, setLogsPage] = useState(1);
+  const PAGE_SIZE = 20;
+
+  // Modals
   const [sectionModalData, setSectionModalData] = useState<{
     title: string;
     subtitle: string;
@@ -265,9 +281,9 @@ export default function PrincipalDashboard() {
   const [holidays] = useState<Record<string, string>>(() => {
     try {
       const saved = localStorage.getItem("qr_hod_holidays");
-      return saved ? JSON.parse(saved) : {};
+      return { ...DEFAULT_COLLEGE_HOLIDAYS, ...(saved ? JSON.parse(saved) : {}) };
     } catch {
-      return {};
+      return DEFAULT_COLLEGE_HOLIDAYS;
     }
   });
 
@@ -275,9 +291,10 @@ export default function PrincipalDashboard() {
     dateStr: string;
     dayNum: number;
     dayOfWeek: string;
-    status: "P" | "A" | "*" | "—";
+    status: "P" | "A" | "*" | "—" | "SUN" | "HOL";
     record?: AttendanceRecord;
     holidayReason?: string;
+    isFuture?: boolean;
   } | null>(null);
 
   // CSV Export Modal State
@@ -329,12 +346,12 @@ export default function PrincipalDashboard() {
       const dObj = new Date(y, m - 1, day, 12, 0, 0);
       const dStr = `${y}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
       if (dStr > todayStr) break;
-      if (dObj.getDay() !== 0) { // Not Sunday
+      if (dObj.getDay() !== 0 && !holidays[dStr]) { // Not Sunday and Not Declared Holiday
         working++;
       }
     }
     return Math.max(1, working);
-  }, [monthForFlags]);
+  }, [monthForFlags, holidays]);
 
   // Map student IDs to monthly present count
   const studentPresentCounts = useMemo(() => {
@@ -1409,127 +1426,181 @@ export default function PrincipalDashboard() {
             )}
 
             {/* TAB 3: ATTENDANCE PROBLEMS */}
-            {activeTab === "flags" && (
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
-                  <div>
-                    <h3 className="text-sm font-extrabold text-slate-900">
-                      Attendance Problems ({monthForFlags})
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Students below 75% target threshold
-                    </p>
+            {activeTab === "flags" && (() => {
+              const filteredFlagsList = studentAnalyticsList.filter(
+                (item) => riskFilter === "ALL" || item.flag === riskFilter
+              );
+              const totalFlagsPages = Math.ceil(filteredFlagsList.length / PAGE_SIZE) || 1;
+              const paginatedFlagsList = filteredFlagsList.slice((flagsPage - 1) * PAGE_SIZE, flagsPage * PAGE_SIZE);
+
+              return (
+                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
+                    <div>
+                      <h3 className="text-sm font-extrabold text-slate-900">
+                        Attendance Problems ({monthForFlags})
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Students below 75% target threshold
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setRiskFilter("ALL");
+                          setFlagsPage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                          riskFilter === "ALL" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        }`}
+                      >
+                        All ({studentAnalyticsList.length})
+                      </button>
+                      <button
+                        onClick={() => {
+                          setRiskFilter("RED");
+                          setFlagsPage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                          riskFilter === "RED" ? "bg-rose-700 text-white" : "bg-rose-100 text-rose-800 hover:bg-rose-200"
+                        }`}
+                      >
+                        Critical ({redFlagCount})
+                      </button>
+                      <button
+                        onClick={() => {
+                          setRiskFilter("YELLOW");
+                          setFlagsPage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                          riskFilter === "YELLOW" ? "bg-amber-600 text-white" : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                        }`}
+                      >
+                        Warning ({yellowFlagCount})
+                      </button>
+                      <button
+                        onClick={() => {
+                          setRiskFilter("GREEN");
+                          setFlagsPage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                          riskFilter === "GREEN" ? "bg-emerald-700 text-white" : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                        }`}
+                      >
+                        Safe ({greenFlagCount})
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setRiskFilter("ALL")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer ${
-                        riskFilter === "ALL" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      All ({studentAnalyticsList.length})
-                    </button>
-                    <button
-                      onClick={() => setRiskFilter("RED")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer ${
-                        riskFilter === "RED" ? "bg-rose-700 text-white" : "bg-rose-100 text-rose-800"
-                      }`}
-                    >
-                      Critical ({redFlagCount})
-                    </button>
-                    <button
-                      onClick={() => setRiskFilter("YELLOW")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer ${
-                        riskFilter === "YELLOW" ? "bg-amber-600 text-white" : "bg-amber-100 text-amber-800"
-                      }`}
-                    >
-                      Warning ({yellowFlagCount})
-                    </button>
-                    <button
-                      onClick={() => setRiskFilter("GREEN")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer ${
-                        riskFilter === "GREEN" ? "bg-emerald-700 text-white" : "bg-emerald-100 text-emerald-800"
-                      }`}
-                    >
-                      Safe ({greenFlagCount})
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto rounded-lg border border-slate-200">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
-                        <th className="py-2.5 px-3">Student Name</th>
-                        <th className="py-2.5 px-3">Roll Number</th>
-                        <th className="py-2.5 px-3 text-center">Section</th>
-                        <th className="py-2.5 px-3 text-right">Days Present</th>
-                        <th className="py-2.5 px-3 text-center">Attendance %</th>
-                        <th className="py-2.5 px-3 text-center">Status</th>
-                        <th className="py-2.5 px-3">Needed for 75%</th>
-                        <th className="py-2.5 px-3 text-center">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {studentAnalyticsList
-                        .filter((item) => riskFilter === "ALL" || item.flag === riskFilter)
-                        .slice(0, 100)
-                        .map((item) => (
-                          <tr
-                            key={item.student.id}
-                            onClick={() => setSelectedStudentForDetails(item.student)}
-                            className="hover:bg-slate-50 transition-colors cursor-pointer"
-                          >
-                            <td className="py-2 px-3 font-bold text-slate-900">{item.student.name}</td>
-                            <td className="py-2 px-3 font-mono font-bold text-slate-700">{item.student.uniqueId || "N/A"}</td>
-                            <td className="py-2 px-3 text-center font-mono font-bold text-blue-700">
-                              Sec {getSectionDisplayName(item.student.section).name}
-                            </td>
-                            <td className="py-2 px-3 text-right font-mono font-bold text-slate-800">
-                              {item.presentDays} / {item.totalWorkingDays}
-                            </td>
-                            <td className="py-2 px-3 text-center font-mono font-black">
-                              <span className={item.percent >= 75 ? "text-emerald-700" : item.percent >= 65 ? "text-amber-700" : "text-rose-700"}>
-                                {item.percent}%
-                              </span>
-                            </td>
-                            <td className="py-2 px-3 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${item.badgeColor}`}>
-                                {item.dotColor} {item.label}
-                              </span>
-                            </td>
-                            <td className="py-2 px-3 text-slate-600 text-[11px]">
-                              {item.flag === "RED" ? (
-                                <span className="text-rose-700 font-semibold">
-                                  Needs {item.classesNeededFor75} days for 75%
-                                </span>
-                              ) : item.flag === "YELLOW" ? (
-                                <span className="text-amber-700 font-semibold">
-                                  Needs {item.classesNeededFor75} days for 75%
-                                </span>
-                              ) : (
-                                <span className="text-emerald-700 font-semibold">Target Satisfied</span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3 text-center">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedStudentForDetails(item.student);
-                                }}
-                                className="px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px]"
-                              >
-                                View
-                              </button>
+                  <div className="overflow-x-auto rounded-lg border border-slate-200">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
+                          <th className="py-2.5 px-3">Student Name</th>
+                          <th className="py-2.5 px-3">Roll Number</th>
+                          <th className="py-2.5 px-3 text-center">Section</th>
+                          <th className="py-2.5 px-3 text-right">Days Present</th>
+                          <th className="py-2.5 px-3 text-center">Attendance %</th>
+                          <th className="py-2.5 px-3 text-center">Status</th>
+                          <th className="py-2.5 px-3">Needed for 75%</th>
+                          <th className="py-2.5 px-3 text-center">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {paginatedFlagsList.length === 0 ? (
+                          <tr>
+                            <td colSpan={8} className="py-8 text-center text-slate-400 italic">
+                              No students found in this category.
                             </td>
                           </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                        ) : (
+                          paginatedFlagsList.map((item) => (
+                            <tr
+                              key={item.student.id}
+                              onClick={() => setSelectedStudentForDetails(item.student)}
+                              className="hover:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                              <td className="py-2 px-3 font-bold text-slate-900">{item.student.name}</td>
+                              <td className="py-2 px-3 font-mono font-bold text-slate-700">{item.student.uniqueId || "N/A"}</td>
+                              <td className="py-2 px-3 text-center font-mono font-bold text-blue-700">
+                                Sec {getSectionDisplayName(item.student.section).name}
+                              </td>
+                              <td className="py-2 px-3 text-right font-mono font-bold text-slate-800">
+                                {item.presentDays} / {item.totalWorkingDays}
+                              </td>
+                              <td className="py-2 px-3 text-center font-mono font-black">
+                                <span className={item.percent >= 75 ? "text-emerald-700" : item.percent >= 65 ? "text-amber-700" : "text-rose-700"}>
+                                  {item.percent}%
+                                </span>
+                              </td>
+                              <td className="py-2 px-3 text-center">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${item.badgeColor}`}>
+                                  {item.dotColor} {item.label}
+                                </span>
+                              </td>
+                              <td className="py-2 px-3 text-slate-600 text-[11px]">
+                                {item.flag === "RED" ? (
+                                  <span className="text-rose-700 font-semibold">
+                                    Needs {item.classesNeededFor75} days for 75%
+                                  </span>
+                                ) : item.flag === "YELLOW" ? (
+                                  <span className="text-amber-700 font-semibold">
+                                    Needs {item.classesNeededFor75} days for 75%
+                                  </span>
+                                ) : (
+                                  <span className="text-emerald-700 font-semibold">Target Satisfied</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3 text-center">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedStudentForDetails(item.student);
+                                  }}
+                                  className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] cursor-pointer"
+                                >
+                                  View
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* 20 Per Page Pagination Bar */}
+                  {filteredFlagsList.length > 0 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                      <div>
+                        Showing <span className="font-bold font-mono text-slate-900">{(flagsPage - 1) * PAGE_SIZE + 1}–{Math.min(flagsPage * PAGE_SIZE, filteredFlagsList.length)}</span> of <span className="font-bold font-mono text-slate-900">{filteredFlagsList.length}</span> students
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          disabled={flagsPage <= 1}
+                          onClick={() => setFlagsPage((p) => Math.max(1, p - 1))}
+                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                        >
+                          Previous
+                        </button>
+                        <span className="px-2.5 py-1 rounded bg-slate-100 font-mono font-bold text-slate-800 text-xs">
+                          Page {flagsPage} of {totalFlagsPages}
+                        </span>
+                        <button
+                          disabled={flagsPage >= totalFlagsPages}
+                          onClick={() => setFlagsPage((p) => Math.min(totalFlagsPages, p + 1))}
+                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* TAB 4: DAILY RECORDS */}
             {activeTab === "logs" && (
@@ -1678,97 +1749,139 @@ export default function PrincipalDashboard() {
         )}
 
         {/* SECTION STUDENTS MODAL */}
-        {sectionModalData && (
-          <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl p-5 space-y-3 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
-              <div className="flex items-start justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900">{sectionModalData.title}</h3>
-                  <p className="text-xs text-slate-500 font-medium">{sectionModalData.subtitle}</p>
+        {sectionModalData && (() => {
+          const totalSectionModalPages = Math.ceil(sectionModalData.students.length / PAGE_SIZE) || 1;
+          const paginatedSectionStudents = sectionModalData.students.slice(
+            (sectionModalPage - 1) * PAGE_SIZE,
+            sectionModalPage * PAGE_SIZE
+          );
+
+          return (
+            <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+              <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl p-5 space-y-3 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">{sectionModalData.title}</h3>
+                    <p className="text-xs text-slate-500 font-medium">{sectionModalData.subtitle}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSectionModalData(null);
+                      setSectionModalPage(1);
+                    }}
+                    className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                  >
+                    <XCircle className="w-5 h-5" />
+                  </button>
                 </div>
-                <button onClick={() => setSectionModalData(null)} className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
-                  <XCircle className="w-5 h-5" />
-                </button>
-              </div>
 
-              <div className="overflow-y-auto space-y-1.5 pr-1 flex-1 border border-slate-200 rounded-xl bg-slate-50/50 p-2">
-                {sectionModalData.students.length === 0 ? (
-                  <div className="p-8 text-center text-slate-400 text-xs italic">No students match this view.</div>
-                ) : (
-                  sectionModalData.students.map((item, idx) => (
-                    <div
-                      key={item.student.id}
-                      onClick={() => {
-                        setSelectedStudentForDetails(item.student);
-                        setSectionModalData(null);
-                      }}
-                      className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-blue-400 flex items-center justify-between transition-all cursor-pointer group shadow-xs"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center font-mono">
-                          {idx + 1}
+                <div className="overflow-y-auto space-y-1.5 pr-1 flex-1 border border-slate-200 rounded-xl bg-slate-50/50 p-2">
+                  {sectionModalData.students.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400 text-xs italic">No students match this view.</div>
+                  ) : (
+                    paginatedSectionStudents.map((item, idx) => (
+                      <div
+                        key={item.student.id}
+                        onClick={() => {
+                          setSelectedStudentForDetails(item.student);
+                          setSectionModalData(null);
+                          setSectionModalPage(1);
+                        }}
+                        className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-blue-400 flex items-center justify-between transition-all cursor-pointer group shadow-xs"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center font-mono">
+                            {(sectionModalPage - 1) * PAGE_SIZE + idx + 1}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+                              {item.student.name}
+                            </p>
+                            <p className="text-[11px] font-mono text-slate-500">
+                              Roll: {item.student.uniqueId || item.student.unique_id || "N/A"}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
-                            {item.student.name}
-                          </p>
-                          <p className="text-[11px] font-mono text-slate-500">
-                            Roll: {item.student.uniqueId || item.student.unique_id || "N/A"}
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {item.hourlyTotal && item.hourlyTotal > 0 ? (
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {item.hourlyTotal && item.hourlyTotal > 0 ? (
+                            <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${
+                              item.hourlyCount && item.hourlyCount > 0
+                                ? "bg-blue-50 text-blue-800 border-blue-200"
+                                : "bg-slate-100 text-slate-500 border-slate-200"
+                            }`}>
+                              {item.hourlyCount}/{item.hourlyTotal} Classes
+                            </span>
+                          ) : null}
+
+                          {item.entryTime ? (
+                            <span className="text-[11px] font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                              Gate: {formatTime(item.entryTime)}
+                            </span>
+                          ) : (
+                            <span className="text-[11px] font-medium text-slate-400">
+                              No Gate Scan
+                            </span>
+                          )}
+
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
                             item.hourlyCount && item.hourlyCount > 0
-                              ? "bg-blue-50 text-blue-800 border-blue-200"
-                              : "bg-slate-100 text-slate-500 border-slate-200"
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                              : item.entryTime
+                              ? "bg-amber-100 text-amber-800 border-amber-300"
+                              : "bg-rose-100 text-rose-800 border-rose-300"
                           }`}>
-                            {item.hourlyCount}/{item.hourlyTotal} Classes
+                            {item.hourlyCount && item.hourlyCount > 0
+                              ? "Present in Class"
+                              : item.entryTime
+                              ? "Gate Only"
+                              : "Absent"}
                           </span>
-                        ) : null}
-
-                        {item.entryTime ? (
-                          <span className="text-[11px] font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                            Gate: {formatTime(item.entryTime)}
-                          </span>
-                        ) : (
-                          <span className="text-[11px] font-medium text-slate-400">
-                            No Gate Scan
-                          </span>
-                        )}
-
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
-                          item.hourlyCount && item.hourlyCount > 0
-                            ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                            : item.entryTime
-                            ? "bg-amber-100 text-amber-800 border-amber-300"
-                            : "bg-rose-100 text-rose-800 border-rose-300"
-                        }`}>
-                          {item.hourlyCount && item.hourlyCount > 0
-                            ? "Present in Class"
-                            : item.entryTime
-                            ? "Gate Only"
-                            : "Absent"}
-                        </span>
+                        </div>
                       </div>
-                    </div>
-                  ))
-                )}
-              </div>
+                    ))
+                  )}
+                </div>
 
-              <div className="pt-2 border-t border-slate-100 flex justify-end">
-                <button
-                  onClick={() => setSectionModalData(null)}
-                  className="px-4 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer"
-                >
-                  Close
-                </button>
+                {/* 20 Per Page Pagination Bar */}
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                  <span>
+                    Showing <span className="font-bold font-mono text-slate-900">{sectionModalData.students.length === 0 ? 0 : (sectionModalPage - 1) * PAGE_SIZE + 1}–{Math.min(sectionModalPage * PAGE_SIZE, sectionModalData.students.length)}</span> of <span className="font-bold font-mono text-slate-900">{sectionModalData.students.length}</span> students
+                  </span>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      disabled={sectionModalPage <= 1}
+                      onClick={() => setSectionModalPage((p) => Math.max(1, p - 1))}
+                      className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                    >
+                      Previous
+                    </button>
+                    <span className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-800 text-[11px]">
+                      {sectionModalPage} / {totalSectionModalPages}
+                    </span>
+                    <button
+                      disabled={sectionModalPage >= totalSectionModalPages}
+                      onClick={() => setSectionModalPage((p) => Math.min(totalSectionModalPages, p + 1))}
+                      className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                    >
+                      Next
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSectionModalData(null);
+                        setSectionModalPage(1);
+                      }}
+                      className="ml-2 px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* STUDENT PROFILE & ATTENDANCE REGISTER MODAL */}
         {selectedStudentForDetails && (
@@ -1793,7 +1906,10 @@ export default function PrincipalDashboard() {
                 </div>
 
                 <button
-                  onClick={() => setSelectedStudentForDetails(null)}
+                  onClick={() => {
+                    setSelectedStudentForDetails(null);
+                    setSelectedDayDetail(null);
+                  }}
                   className="p-1 text-slate-400 hover:text-slate-800 cursor-pointer"
                 >
                   <XCircle className="w-6 h-6" />
@@ -1825,6 +1941,7 @@ export default function PrincipalDashboard() {
                     const daysInM = new Date(y, m, 0).getDate();
                     const firstDayIdx = new Date(y, m - 1, 1).getDay();
                     const cells = [];
+                    const todayDateString = "2026-08-26";
 
                     for (let i = 0; i < firstDayIdx; i++) {
                       cells.push(<div key={`empty_${i}`} className="h-13 rounded-lg bg-slate-50/50" />);
@@ -1834,9 +1951,10 @@ export default function PrincipalDashboard() {
                       const dStr = `${y}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
                       const dObj = new Date(y, m - 1, day);
                       const isSunday = dObj.getDay() === 0;
-                      const record = studentMonthlyRecords.find(r => r.date === dStr);
+                      const record = studentMonthlyRecords.find((r) => r.date === dStr);
                       const isHoliday = holidays[dStr];
                       const isPresent = Boolean(record);
+                      const isFuture = dStr > todayDateString;
 
                       cells.push(
                         <div
@@ -1846,25 +1964,34 @@ export default function PrincipalDashboard() {
                               dateStr: dStr,
                               dayNum: day,
                               dayOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dObj.getDay()],
-                              status: isPresent ? "P" : isSunday || isHoliday ? "*" : "A",
+                              status: isFuture ? "—" : isPresent ? "P" : isSunday ? "SUN" : isHoliday ? "HOL" : "A",
                               record,
-                              holidayReason: isHoliday
+                              holidayReason: isHoliday,
+                              isFuture,
                             });
                           }}
                           className={`h-13 rounded-lg p-1 border flex flex-col justify-between cursor-pointer transition-all ${
-                            isPresent
-                              ? "bg-emerald-50 border-emerald-300 text-emerald-900"
+                            isFuture
+                              ? "bg-slate-50/60 border-slate-200 text-slate-400 opacity-60 hover:opacity-100 hover:border-slate-300"
+                              : isPresent
+                              ? "bg-emerald-50 border-emerald-300 text-emerald-900 shadow-2xs hover:bg-emerald-100"
                               : isSunday || isHoliday
-                              ? "bg-slate-100 border-slate-200 text-slate-400"
-                              : "bg-rose-50 border-rose-200 text-rose-900"
+                              ? "bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200/70"
+                              : "bg-rose-50 border-rose-200 text-rose-900 hover:bg-rose-100"
                           }`}
                         >
                           <div className="flex justify-between items-center text-[10px] font-bold">
                             <span>{day}</span>
-                            <span>{isPresent ? "P" : isSunday ? "SUN" : isHoliday ? "HOL" : "A"}</span>
+                            <span>{isFuture ? "—" : isPresent ? "P" : isSunday ? "SUN" : isHoliday ? "HOL" : "A"}</span>
                           </div>
                           <span className="text-[9px] truncate font-mono">
-                            {isPresent && record?.entryTime ? formatTime(record.entryTime) : isHoliday || isSunday ? "Off" : "Absent"}
+                            {isFuture
+                              ? "Not Started"
+                              : isPresent && record?.entryTime
+                              ? formatTime(record.entryTime)
+                              : isHoliday || isSunday
+                              ? "Off"
+                              : "Absent"}
                           </span>
                         </div>
                       );
@@ -1874,24 +2001,123 @@ export default function PrincipalDashboard() {
                 </div>
               </div>
 
-              {/* Day Inspector */}
-              {selectedDayDetail && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 text-xs">
-                  <div className="flex justify-between items-center font-bold text-slate-800">
-                    <span>{selectedDayDetail.dateStr} ({selectedDayDetail.dayOfWeek})</span>
-                    <button onClick={() => setSelectedDayDetail(null)} className="text-slate-400 hover:text-slate-700">✕</button>
+              {/* Day Inspector with Class Breakdown */}
+              {selectedDayDetail && (() => {
+                const hourlyLogsForDay = (() => {
+                  const dStr = selectedDayDetail.dateStr;
+                  const monthlyHourly = (studentMonthlyData?.hourlyRecords || []).filter((h: any) => h.date === dStr);
+                  if (monthlyHourly.length > 0) {
+                    return monthlyHourly.map((h: any) => ({
+                      subject: h.qr_schedules?.subject || h.subject || "Subject Lecture",
+                      time: h.qr_schedules
+                        ? `${h.qr_schedules.start_time?.slice(0, 5)} - ${h.qr_schedules.end_time?.slice(0, 5)}`
+                        : "Lecture Period",
+                      faculty: h.qr_schedules?.faculty_name || "—",
+                      markedPresent: h.status === "present" || h.status === "Present" || h.markedPresent,
+                    }));
+                  }
+                  if (dStr === logDate) {
+                    return studentDayHourlyMap.get(selectedStudentForDetails.id) || [];
+                  }
+                  return [];
+                })();
+
+                const attendedCount = hourlyLogsForDay.filter((c: any) => c.markedPresent).length;
+                const totalCount = hourlyLogsForDay.length;
+                const absentCount = Math.max(0, totalCount - attendedCount);
+
+                return (
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 text-xs animate-in fade-in duration-150">
+                    <div className="flex justify-between items-center font-bold text-slate-900 border-b border-slate-200 pb-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-blue-700" />
+                        <span>{selectedDayDetail.dateStr} ({selectedDayDetail.dayOfWeek})</span>
+                      </div>
+                      <button onClick={() => setSelectedDayDetail(null)} className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer">✕</button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {/* Campus Gate Status */}
+                      <div className="p-2.5 rounded-lg bg-white border border-slate-200">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase">Campus / Gate Status</span>
+                        <p className="font-bold text-slate-800 mt-0.5">
+                          {selectedDayDetail.isFuture
+                            ? "Not Started (Upcoming Date)"
+                            : selectedDayDetail.holidayReason
+                            ? `Holiday (${selectedDayDetail.holidayReason})`
+                            : selectedDayDetail.status === "SUN"
+                            ? "Sunday (Weekly Off)"
+                            : selectedDayDetail.status === "P"
+                            ? "Present on Campus"
+                            : "Absent"}
+                        </p>
+                        {selectedDayDetail.record?.entryTime && (
+                          <p className="text-[11px] text-slate-500 font-mono mt-0.5">
+                            Gate Entry: {formatTime(selectedDayDetail.record.entryTime)}
+                            {selectedDayDetail.record.exitTime && ` • Exit: ${formatTime(selectedDayDetail.record.exitTime)}`}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Hourly Class Attendance Summary */}
+                      <div className="p-2.5 rounded-lg bg-white border border-slate-200">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase">Hourly Class Attendance</span>
+                        <p className="font-bold text-slate-800 mt-0.5">
+                          {totalCount > 0 ? (
+                            <span className="font-mono text-blue-700">
+                              {attendedCount} / {totalCount} Attended ({absentCount} Absent)
+                            </span>
+                          ) : selectedDayDetail.isFuture ? (
+                            <span className="text-slate-400">Not Started</span>
+                          ) : selectedDayDetail.holidayReason || selectedDayDetail.status === "SUN" ? (
+                            <span className="text-slate-500">Holiday / No Classes</span>
+                          ) : (
+                            <span className="text-slate-500">No Lecture Logs Logged</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Class by Class Breakdown List */}
+                    {totalCount > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Class-by-Class Breakdown</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                          {hourlyLogsForDay.map((cls: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className={`p-2 rounded-lg border flex items-center justify-between gap-2 text-xs ${
+                                cls.markedPresent
+                                  ? "bg-emerald-50/80 border-emerald-200 text-emerald-950"
+                                  : "bg-rose-50/80 border-rose-200 text-rose-950"
+                              }`}
+                            >
+                              <div>
+                                <p className="font-bold text-slate-900">{cls.subject}</p>
+                                <p className="text-[10px] text-slate-500 font-mono">{cls.time} • {cls.faculty || "Faculty"}</p>
+                              </div>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-black border uppercase ${
+                                cls.markedPresent
+                                  ? "bg-emerald-200 text-emerald-950 border-emerald-300"
+                                  : "bg-rose-200 text-rose-950 border-rose-300"
+                              }`}>
+                                {cls.markedPresent ? "Present" : "Absent"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-slate-600">
-                    Status: <span className="font-bold">{selectedDayDetail.status === "P" ? "Present" : selectedDayDetail.status === "A" ? "Absent" : "Off"}</span>
-                    {selectedDayDetail.record?.entryTime && ` • Entry: ${formatTime(selectedDayDetail.record.entryTime)}`}
-                    {selectedDayDetail.record?.exitTime && ` • Exit: ${formatTime(selectedDayDetail.record.exitTime)}`}
-                  </p>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="pt-2 border-t border-slate-100 flex justify-end">
                 <button
-                  onClick={() => setSelectedStudentForDetails(null)}
+                  onClick={() => {
+                    setSelectedStudentForDetails(null);
+                    setSelectedDayDetail(null);
+                  }}
                   className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer"
                 >
                   Close

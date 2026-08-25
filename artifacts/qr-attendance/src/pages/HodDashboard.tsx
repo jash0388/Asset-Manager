@@ -528,7 +528,9 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "SDC": "Mrs. K. Srinija",
     "APTITUDE": "Mr. K. Bikshapathi",
     "COUNSELLING": "Mrs. B. Gayathri",
-    "SPORTS/LIBRARY": "Mrs. B. Gayathri",
+    "SPORTS/LIBRARY": "—",
+    "LIBRARY": "—",
+    "SPORTS": "—",
     "CLUB ACTIVITIES": "Mrs. B. Gayathri",
   },
   "2B": {
@@ -546,7 +548,9 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "SDC": "Mrs. K. Srinija",
     "APTITUDE": "Mrs. K. Ramya",
     "COUNSELLING": "Mrs. K. Ramya",
-    "SPORTS/LIBRARY": "Mrs. K. Ramya",
+    "SPORTS/LIBRARY": "—",
+    "LIBRARY": "—",
+    "SPORTS": "—",
     "CLUB ACTIVITIES": "Mrs. K. Ramya",
   },
   "2C": {
@@ -565,7 +569,9 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "SDC": "Mrs. K. Srinija",
     "APTITUDE": "Mr. K. Bikshapathi",
     "COUNSELLING": "Mr. K. Bikshapathi",
-    "SPORTS/LIBRARY": "Mr. K. Bikshapathi",
+    "SPORTS/LIBRARY": "—",
+    "LIBRARY": "—",
+    "SPORTS": "—",
     "CLUB ACTIVITIES": "Mr. K. Bikshapathi",
   },
 
@@ -582,9 +588,10 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "ARQA": "Mr. M. Yadaiah",
     "AECS LAB": "Mr. M. Yadaiah",
     "IPR": "Mr. M. Yadaiah",
-    "LIBRARY": "Mrs. G. Sushma",
+    "LIBRARY": "—",
     "COUNSELLING": "Mrs. G. Sushma",
-    "SPORTS": "Mrs. G. Sushma",
+    "SPORTS": "—",
+    "SPORTS/LIBRARY": "—",
     "CLUB ACTIVITIES": "Mrs. G. Sushma",
   },
   "3B": {
@@ -602,8 +609,9 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "IPR": "Mr. Prateek",
     "ARQA": "Mr. T. Shravan Kumar",
     "COUNSELLING": "Mr. Miskeen Ali + Mrs. Naga Rohini",
-    "SPORTS": "Mr. T. Shravan Kumar",
-    "LIBRARY": "Mr. T. Shravan Kumar",
+    "SPORTS": "—",
+    "LIBRARY": "—",
+    "SPORTS/LIBRARY": "—",
     "CLUB ACTIVITIES": "Mr. T. Shravan Kumar",
   },
   "3C": {
@@ -618,8 +626,9 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "ARQA": "Mr. M. Srinivasulu",
     "AECS LAB": "Mr. M. Srinivasulu",
     "IPR": "Mr. M. Srinivasulu",
-    "LIBRARY": "Mr. M. Srinivasulu",
-    "SPORTS": "Mr. M. Srinivasulu",
+    "LIBRARY": "—",
+    "SPORTS": "—",
+    "SPORTS/LIBRARY": "—",
     "COUNSELLING": "Mr. M. Srinivasulu",
     "CLUB ACTIVITIES": "Mr. M. Srinivasulu",
   },
@@ -636,8 +645,9 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "CC": "Mrs. K. Ramya",
     "OE": "Dr. C. Lakshmi Nath",
     "PS-I": "Mr. Miskeen Ali",
-    "SPORTS": "Mrs. A. Sravanthi",
-    "LIBRARY": "Mrs. A. Sravanthi",
+    "SPORTS": "—",
+    "LIBRARY": "—",
+    "SPORTS/LIBRARY": "—",
     "COUNSELLING": "Mrs. A. Sravanthi",
     "CLUB ACTIVITIES": "Mrs. A. Sravanthi",
   },
@@ -652,8 +662,9 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "CC": "Mrs. K. Ramya",
     "OE": "Dr. C. Lakshmi Nath",
     "PS-I": "Dr. Md Abdul Azeem",
-    "SPORTS": "Mrs. K. Sneha",
-    "LIBRARY": "Mrs. K. Sneha",
+    "SPORTS": "—",
+    "LIBRARY": "—",
+    "SPORTS/LIBRARY": "—",
     "COUNSELLING": "Mrs. K. Sneha",
     "CLUB ACTIVITIES": "Mrs. K. Sneha",
   },
@@ -668,6 +679,17 @@ export function getSectionFacultyForSubject(
 ): string {
   const norm = (subject || "").trim().toUpperCase();
   const sec = sectionKey || "3B";
+
+  // No faculty needed for Library, Sports, Free period
+  if (
+    norm.includes("LIBRARY") ||
+    norm.includes("SPORTS") ||
+    norm === "FREE" ||
+    norm === "FREE PERIOD" ||
+    norm === "SELF STUDY"
+  ) {
+    return "—";
+  }
 
   // 1. Check specific slot override e.g. "3B:MON:0"
   if (overrides && dayKey !== undefined && slotIdx !== undefined) {
