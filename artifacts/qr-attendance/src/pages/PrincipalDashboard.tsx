@@ -420,7 +420,26 @@ export default function PrincipalDashboard() {
   // Calculate DS Branch Stats
   const dsTotalStudents = students.length;
   const dsPresentSet = new Set(detailedLogs.map((l) => l.userId || (l as any).user_id));
-  const dsPresentCount = dsPresentSet.size;
+
+  // Set of student IDs marked present in any hourly classroom session
+  const classPresentSet = useMemo(() => {
+    const set = new Set<number>();
+    hourlySessions.forEach((session: any) => {
+      (session.students || []).forEach((st: any) => {
+        if (st.markedPresent) set.add(st.id);
+      });
+    });
+    return set;
+  }, [hourlySessions]);
+
+  // Overall Present Set (Present at Gate OR in Classroom / Hourly Attendance)
+  const overallPresentSet = useMemo(() => {
+    const set = new Set<number>(dsPresentSet);
+    classPresentSet.forEach((id) => set.add(id));
+    return set;
+  }, [dsPresentSet, classPresentSet]);
+
+  const dsPresentCount = overallPresentSet.size;
   const dsAbsentCount = Math.max(0, dsTotalStudents - dsPresentCount);
   const dsAttendancePercent = dsTotalStudents > 0 ? Math.floor((dsPresentCount / dsTotalStudents) * 100) : 0;
 
@@ -435,10 +454,12 @@ export default function PrincipalDashboard() {
   const sectionStats = sections.map((secKey) => {
     const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === secKey);
     const total = secStudents.length;
-    const present = secStudents.filter((s) => dsPresentSet.has(s.id)).length;
+    const gatePresent = secStudents.filter((s) => dsPresentSet.has(s.id)).length;
+    const classPresent = secStudents.filter((s) => classPresentSet.has(s.id)).length;
+    const present = secStudents.filter((s) => overallPresentSet.has(s.id)).length;
     const absent = Math.max(0, total - present);
     const percent = total > 0 ? Math.floor((present / total) * 100) : 0;
-    return { section: secKey, total, present, absent, percent };
+    return { section: secKey, total, present, gatePresent, classPresent, absent, percent };
   });
 
   // Filter Detailed Logs for Table
@@ -967,14 +988,17 @@ export default function PrincipalDashboard() {
                           const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
                           setSectionModalData({
                             title: `Section ${st.section} Roster`,
-                            subtitle: `All ${st.total} Enrolled Students in Data Science Dept (${st.present} Gate Present, ${st.absent} Absent)`,
+                            subtitle: `All ${st.total} Enrolled Students in Data Science Dept (${st.present} Present, ${st.absent} Absent)`,
                             students: secStudents.map((s) => {
                               const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
                               const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
-                              const hourlyPresentCount = hourlyForStudent.filter(h => h.markedPresent).length;
+                              const hourlyPresentCount = hourlyForStudent.filter((h: any) => h.markedPresent).length;
+                              const isGatePresent = dsPresentSet.has(s.id);
+                              const isClassPresent = classPresentSet.has(s.id);
                               return {
                                 student: s,
-                                isPresent: dsPresentSet.has(s.id),
+                                isPresent: isGatePresent || isClassPresent,
+                                isClassPresent,
                                 entryTime: log?.entryTime,
                                 exitTime: log?.exitTime,
                                 hourlyCount: hourlyPresentCount,
@@ -1013,12 +1037,15 @@ export default function PrincipalDashboard() {
                               students: secStudents.map((s) => {
                                 const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
                                 const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
+                                const isGatePresent = dsPresentSet.has(s.id);
+                                const isClassPresent = classPresentSet.has(s.id);
                                 return {
                                   student: s,
-                                  isPresent: dsPresentSet.has(s.id),
+                                  isPresent: isGatePresent || isClassPresent,
+                                  isClassPresent,
                                   entryTime: log?.entryTime,
                                   exitTime: log?.exitTime,
-                                  hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
+                                  hourlyCount: hourlyForStudent.filter((h: any) => h.markedPresent).length,
                                   hourlyTotal: hourlyForStudent.length,
                                   hourlyPeriods: hourlyForStudent,
                                 };
@@ -1034,19 +1061,22 @@ export default function PrincipalDashboard() {
                         {/* Present Button */}
                         <button
                           onClick={() => {
-                            const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && dsPresentSet.has(s.id));
+                            const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && overallPresentSet.has(s.id));
                             setSectionModalData({
-                              title: `Section ${st.section} — Present Students`,
-                              subtitle: `${st.present} Students Gate Present on ${logDate}`,
+                              title: `Section ${st.section} — Present Students (Class & Gate)`,
+                              subtitle: `${st.present} Students Present on ${logDate} (${st.classPresent} In-Class • ${st.gatePresent} Gate Scan)`,
                               students: secStudents.map((s) => {
                                 const log = detailedLogs.find((l) => (l.userId || (l as any).user_id) === s.id);
                                 const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
+                                const isGatePresent = dsPresentSet.has(s.id);
+                                const isClassPresent = classPresentSet.has(s.id);
                                 return {
                                   student: s,
                                   isPresent: true,
+                                  isClassPresent,
                                   entryTime: log?.entryTime,
                                   exitTime: log?.exitTime,
-                                  hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
+                                  hourlyCount: hourlyForStudent.filter((h: any) => h.markedPresent).length,
                                   hourlyTotal: hourlyForStudent.length,
                                   hourlyPeriods: hourlyForStudent,
                                 };
@@ -1057,21 +1087,23 @@ export default function PrincipalDashboard() {
                         >
                           <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Present</p>
                           <p className="text-base font-black text-emerald-700 mt-1">{st.present}</p>
+                          <p className="text-[9px] font-semibold text-emerald-600 truncate mt-0.5">{st.classPresent} In-Class • {st.gatePresent} Gate</p>
                         </button>
 
                         {/* Absent Button */}
                         <button
                           onClick={() => {
-                            const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && !dsPresentSet.has(s.id));
+                            const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section && !overallPresentSet.has(s.id));
                             setSectionModalData({
                               title: `Section ${st.section} — Absent Students`,
-                              subtitle: `${st.absent} Students Absent on ${logDate}`,
+                              subtitle: `${st.absent} Students Absent from both Class & Gate on ${logDate}`,
                               students: secStudents.map((s) => {
                                 const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
                                 return {
                                   student: s,
                                   isPresent: false,
-                                  hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
+                                  isClassPresent: false,
+                                  hourlyCount: 0,
                                   hourlyTotal: hourlyForStudent.length,
                                   hourlyPeriods: hourlyForStudent,
                                 };
@@ -1663,7 +1695,7 @@ export default function PrincipalDashboard() {
                               ? "bg-blue-50 text-blue-700 border-blue-200"
                               : "bg-gray-100 text-gray-500 border-gray-200"
                           }`}>
-                            📚 {item.hourlyCount}/{item.hourlyTotal} Classes
+                            📚 {item.hourlyCount}/{item.hourlyTotal} Periods Present
                           </span>
                         ) : null}
 
@@ -1674,15 +1706,26 @@ export default function PrincipalDashboard() {
                               <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider">LATE</span>
                             )}
                           </span>
-                        ) : null}
+                        ) : (
+                          <span className="text-[11px] font-medium text-gray-400">
+                            No Gate Scan
+                          </span>
+                        )}
 
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                          item.isPresent
-                            ? "bg-emerald-100 text-emerald-700 border-emerald-500/40"
-                            : "bg-rose-50 text-rose-700 border-rose-200"
-                        }`}>
-                          {item.isPresent ? "🟢 GATE PRESENT" : "🔴 GATE ABSENT"}
-                        </span>
+                        {/* Smart Status Badge based on Class and Gate attendance */}
+                        {item.hourlyCount && item.hourlyCount > 0 ? (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-black border bg-emerald-100 text-emerald-800 border-emerald-400 flex items-center gap-1">
+                            🟢 PRESENT IN CLASS
+                          </span>
+                        ) : item.entryTime ? (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-black border bg-amber-100 text-amber-800 border-amber-400 flex items-center gap-1">
+                            🟡 GATE ONLY
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-black border bg-rose-100 text-rose-800 border-rose-300 flex items-center gap-1">
+                            🔴 ABSENT
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))
