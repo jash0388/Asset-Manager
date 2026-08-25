@@ -354,12 +354,28 @@ export default function PrincipalDashboard() {
   const yellowFlagCount = studentAnalyticsList.filter((s) => s.flag === "YELLOW").length;
   const greenFlagCount = studentAnalyticsList.filter((s) => s.flag === "GREEN").length;
 
-  // Fetch Daily Detailed Logs
+  // Fetch Daily Detailed Logs (Gate Attendance)
   const { data: detailedLogs = [], isLoading: logsLoading } = useQuery<AttendanceRecord[]>({
     queryKey: ["attendance-detailed", logDate],
     queryFn: () => customFetch<AttendanceRecord[]>(`/api/attendance?from=${logDate}&to=${logDate}`),
     refetchInterval: 5000,
   });
+
+  // Fetch Class Presence (marked present in hourly classes by faculty + training) - Matches HOD Dashboard 100%
+  const { data: todayClassPresence = [] } = useQuery<any[]>({
+    queryKey: ["principal-today-class-presence", logDate],
+    queryFn: () => customFetch<any[]>(`/api/admin/today-class-presence?date=${logDate}`),
+    refetchInterval: 5000,
+  });
+
+  const classPresentUserIds = useMemo(() => {
+    const set = new Set<number>();
+    (todayClassPresence || []).forEach((r: any) => {
+      const uid = Number(r.user_id || r.userId || r.user?.id);
+      if (uid && !isNaN(uid)) set.add(uid);
+    });
+    return set;
+  }, [todayClassPresence]);
 
   // Fetch Hourly / Period Classroom Attendance for the selected date
   const { data: hourlyHistoryData, isLoading: hourlyLoading } = useQuery<{
@@ -390,7 +406,7 @@ export default function PrincipalDashboard() {
   // Map of userId -> array of attended periods for the day
   const studentDayHourlyMap = useMemo(() => {
     const map = new Map<number, { subject: string; time: string; markedPresent: boolean; faculty: string }[]>();
-    hourlySessions.forEach(session => {
+    hourlySessions.forEach((session: any) => {
       (session.students || []).forEach((st: any) => {
         if (!map.has(st.id)) map.set(st.id, []);
         map.get(st.id)!.push({
@@ -421,23 +437,12 @@ export default function PrincipalDashboard() {
   const dsTotalStudents = students.length;
   const dsPresentSet = new Set(detailedLogs.map((l) => l.userId || (l as any).user_id));
 
-  // Set of student IDs marked present in any hourly classroom session
-  const classPresentSet = useMemo(() => {
-    const set = new Set<number>();
-    hourlySessions.forEach((session: any) => {
-      (session.students || []).forEach((st: any) => {
-        if (st.markedPresent) set.add(st.id);
-      });
-    });
-    return set;
-  }, [hourlySessions]);
-
-  // Overall Present Set (Present at Gate OR in Classroom / Hourly Attendance)
+  // Overall Present Set (Present at Gate OR in Classroom / Hourly Attendance) - EXACT SAME AS HOD DASHBOARD
   const overallPresentSet = useMemo(() => {
     const set = new Set<number>(dsPresentSet);
-    classPresentSet.forEach((id) => set.add(id));
+    classPresentUserIds.forEach((id) => set.add(id));
     return set;
-  }, [dsPresentSet, classPresentSet]);
+  }, [dsPresentSet, classPresentUserIds]);
 
   const dsPresentCount = overallPresentSet.size;
   const dsAbsentCount = Math.max(0, dsTotalStudents - dsPresentCount);
@@ -449,13 +454,13 @@ export default function PrincipalDashboard() {
   const campusAbsentCount = dsAbsentCount;
   const campusAttendancePercent = campusTotalStudents > 0 ? Math.floor((campusPresentCount / campusTotalStudents) * 100) : 0;
 
-  // Section Breakdown for DS
+  // Section Breakdown for DS - EXACT MATCH WITH HOD DASHBOARD
   const sections = ["2A", "2B", "2C", "3A", "3B", "3C", "4A", "4B"];
   const sectionStats = sections.map((secKey) => {
     const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === secKey);
     const total = secStudents.length;
     const gatePresent = secStudents.filter((s) => dsPresentSet.has(s.id)).length;
-    const classPresent = secStudents.filter((s) => classPresentSet.has(s.id)).length;
+    const classPresent = secStudents.filter((s) => classPresentUserIds.has(s.id)).length;
     const present = secStudents.filter((s) => overallPresentSet.has(s.id)).length;
     const absent = Math.max(0, total - present);
     const percent = total > 0 ? Math.floor((present / total) * 100) : 0;
@@ -863,18 +868,22 @@ export default function PrincipalDashboard() {
               <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Campus Enrolled</p>
                 <p className="text-2xl font-black text-gray-900 mt-1">{campusTotalStudents} Students</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Across All 8 Sections</p>
               </div>
               <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
                 <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Present Today</p>
                 <p className="text-2xl font-black text-emerald-700 mt-1">{campusPresentCount} Students</p>
+                <p className="text-[11px] text-emerald-600 mt-0.5 font-semibold">{classPresentUserIds.size} In-Class • {dsPresentSet.size} Gate Scans</p>
               </div>
               <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200">
                 <p className="text-xs font-bold text-rose-700 uppercase tracking-wider">Absent Today</p>
                 <p className="text-2xl font-black text-rose-700 mt-1">{campusAbsentCount} Students</p>
+                <p className="text-[11px] text-rose-600 mt-0.5">Missing from Gate & Class</p>
               </div>
               <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200">
                 <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Campus Attendance Rate</p>
                 <p className="text-2xl font-black text-blue-700 mt-1">{campusAttendancePercent}%</p>
+                <p className="text-[11px] text-blue-600 mt-0.5">Department Overall</p>
               </div>
             </div>
           </div>
