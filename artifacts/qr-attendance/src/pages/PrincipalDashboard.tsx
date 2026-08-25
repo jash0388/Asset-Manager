@@ -680,8 +680,8 @@ export default function PrincipalDashboard() {
             </div>
           </div>
 
-          {/* Simple 3-Label Modality Strip */}
-          <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+          {/* Simple Modality Strip */}
+          <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
               <span className="font-semibold text-slate-600">Class Attendance</span>
               <span className="font-bold text-emerald-700 font-mono">{classPresentUserIds.size} Present</span>
@@ -690,125 +690,10 @@ export default function PrincipalDashboard() {
               <span className="font-semibold text-slate-600">Gate Scans</span>
               <span className="font-bold text-blue-700 font-mono">{dsPresentSet.size} Scanned</span>
             </div>
-            <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="font-semibold text-slate-600">Gate + Class Match</span>
-              <span className="font-bold text-slate-800 font-mono">{bothGateAndClassCount} Matches</span>
-            </div>
           </div>
         </section>
 
-        {/* 3. NEEDS ATTENTION AREA */}
-        <section className="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5 space-y-2.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <span>Needs Attention</span>
-            </div>
-            <span className="text-[11px] font-semibold text-amber-700">
-              {sectionStats.filter(s => s.status !== "Good").length} Issues
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
-            {/* Issue 1: Section 4A */}
-            <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  <p className="font-bold text-slate-900">Section 4A — 54%</p>
-                </div>
-                <p className="text-slate-500 text-[11px] mt-0.5">29 absent out of 63 students.</p>
-              </div>
-              <button
-                onClick={() => {
-                  setActiveTab("sections");
-                  const sec4A = students.filter(s => getSectionDisplayName(s.section).name === "4A");
-                  setSectionModalData({
-                    title: "Section 4A — Students",
-                    subtitle: "54% Present • 29 Absent",
-                    students: sec4A.map(s => {
-                      const log = detailedLogs.find(l => (l.userId || (l as any).user_id) === s.id);
-                      const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
-                      return {
-                        student: s,
-                        isPresent: overallPresentSet.has(s.id),
-                        isClassPresent: classPresentUserIds.has(s.id),
-                        entryTime: log?.entryTime,
-                        exitTime: log?.exitTime,
-                        hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
-                        hourlyTotal: hourlyForStudent.length,
-                        hourlyPeriods: hourlyForStudent,
-                      };
-                    })
-                  });
-                }}
-                className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
-              >
-                View 4A
-              </button>
-            </div>
-
-            {/* Issue 2: Section 3C */}
-            <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  <p className="font-bold text-slate-900">Section 3C — 70%</p>
-                </div>
-                <p className="text-slate-500 text-[11px] mt-0.5">16 absent out of 54 students.</p>
-              </div>
-              <button
-                onClick={() => {
-                  setActiveTab("sections");
-                  const sec3C = students.filter(s => getSectionDisplayName(s.section).name === "3C");
-                  setSectionModalData({
-                    title: "Section 3C — Students",
-                    subtitle: "70% Present • 16 Absent",
-                    students: sec3C.map(s => {
-                      const log = detailedLogs.find(l => (l.userId || (l as any).user_id) === s.id);
-                      const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
-                      return {
-                        student: s,
-                        isPresent: overallPresentSet.has(s.id),
-                        isClassPresent: classPresentUserIds.has(s.id),
-                        entryTime: log?.entryTime,
-                        exitTime: log?.exitTime,
-                        hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
-                        hourlyTotal: hourlyForStudent.length,
-                        hourlyPeriods: hourlyForStudent,
-                      };
-                    })
-                  });
-                }}
-                className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
-              >
-                View 3C
-              </button>
-            </div>
-
-            {/* Issue 3: Critical Attendance */}
-            <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  <p className="font-bold text-slate-900">{redFlagCount} Students — Below 65%</p>
-                </div>
-                <p className="text-slate-500 text-[11px] mt-0.5">Attendance below 65% limit.</p>
-              </div>
-              <button
-                onClick={() => {
-                  setActiveTab("flags");
-                  setRiskFilter("RED");
-                }}
-                className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
-              >
-                View Students
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. ACADEMIC DEPARTMENTS AT A GLANCE */}
+        {/* 3. ACADEMIC DEPARTMENTS AT A GLANCE */}
         <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div>
@@ -910,7 +795,7 @@ export default function PrincipalDashboard() {
                               : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                           }`}
                         >
-                          {isSelected ? "Open" : "View"}
+                          {isSelected ? "Current" : "View"}
                         </button>
                       </td>
                     </tr>
@@ -921,9 +806,119 @@ export default function PrincipalDashboard() {
           </div>
         </section>
 
-        {/* 5. DEPARTMENT DRILL-DOWN TABS */}
+        {/* 4. DEPARTMENT DRILL-DOWN VIEWS */}
         {selectedBranch === "DS" ? (
           <section className="space-y-3">
+            {/* DEPARTMENT SPECIFIC NEEDS ATTENTION */}
+            <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <span>Data Science — Needs Attention</span>
+                </div>
+                <span className="text-[11px] font-semibold text-amber-700">
+                  {sectionStats.filter(s => s.status !== "Good").length} Issues
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+                {/* Issue 1: Section 4A */}
+                <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-500" />
+                      <p className="font-bold text-slate-900">Section 4A — 54%</p>
+                    </div>
+                    <p className="text-slate-500 text-[11px] mt-0.5">29 absent out of 63 students.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setActiveTab("sections");
+                      const sec4A = students.filter(s => getSectionDisplayName(s.section).name === "4A");
+                      setSectionModalData({
+                        title: "Section 4A — Students",
+                        subtitle: "54% Present • 29 Absent",
+                        students: sec4A.map(s => {
+                          const log = detailedLogs.find(l => (l.userId || (l as any).user_id) === s.id);
+                          const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
+                          return {
+                            student: s,
+                            isPresent: overallPresentSet.has(s.id),
+                            isClassPresent: classPresentUserIds.has(s.id),
+                            entryTime: log?.entryTime,
+                            exitTime: log?.exitTime,
+                            hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
+                            hourlyTotal: hourlyForStudent.length,
+                            hourlyPeriods: hourlyForStudent,
+                          };
+                        })
+                      });
+                    }}
+                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                  >
+                    View 4A
+                  </button>
+                </div>
+
+                {/* Issue 2: Section 3C */}
+                <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      <p className="font-bold text-slate-900">Section 3C — 70%</p>
+                    </div>
+                    <p className="text-slate-500 text-[11px] mt-0.5">16 absent out of 54 students.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setActiveTab("sections");
+                      const sec3C = students.filter(s => getSectionDisplayName(s.section).name === "3C");
+                      setSectionModalData({
+                        title: "Section 3C — Students",
+                        subtitle: "70% Present • 16 Absent",
+                        students: sec3C.map(s => {
+                          const log = detailedLogs.find(l => (l.userId || (l as any).user_id) === s.id);
+                          const hourlyForStudent = studentDayHourlyMap.get(s.id) || [];
+                          return {
+                            student: s,
+                            isPresent: overallPresentSet.has(s.id),
+                            isClassPresent: classPresentUserIds.has(s.id),
+                            entryTime: log?.entryTime,
+                            exitTime: log?.exitTime,
+                            hourlyCount: hourlyForStudent.filter(h => h.markedPresent).length,
+                            hourlyTotal: hourlyForStudent.length,
+                            hourlyPeriods: hourlyForStudent,
+                          };
+                        })
+                      });
+                    }}
+                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                  >
+                    View 3C
+                  </button>
+                </div>
+
+                {/* Issue 3: Critical Attendance */}
+                <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-500" />
+                      <p className="font-bold text-slate-900">{redFlagCount} Students — Below 65%</p>
+                    </div>
+                    <p className="text-slate-500 text-[11px] mt-0.5">Attendance below 65% limit.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setActiveTab("flags");
+                      setRiskFilter("RED");
+                    }}
+                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                  >
+                    View Students
+                  </button>
+                </div>
+              </div>
+            </div>
             {/* Simple View Navigation Tabs */}
             <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-thin">
               <button
