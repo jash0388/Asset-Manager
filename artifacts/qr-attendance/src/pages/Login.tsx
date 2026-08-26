@@ -50,7 +50,7 @@ export default function Login() {
       if (/^\d{4}$/.test(code)) {
         navigate("/incharge-dashboard");
       } else {
-        navigate("/mentor");
+        navigate("/faculty");
       }
     } catch (err: any) {
       let msg = err?.message || err?.error || "Invalid access code. Please try again.";

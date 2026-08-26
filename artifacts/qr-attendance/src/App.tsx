@@ -19,6 +19,7 @@ import HourlyAttendance from "@/pages/HourlyAttendance";
 import InchargeDashboard from "@/pages/InchargeDashboard";
 import ParentApp from "@/pages/ParentApp";
 import TrainingSessions from "@/pages/TrainingSessions";
+import FacultyPortal from "@/pages/FacultyPortal";
 import { Analytics } from "@vercel/analytics/react";
 import { useEffect } from "react";
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
@@ -170,9 +171,10 @@ function AppRouter() {
       <Route path="/parent/:uniqueId" component={ParentApp} />
       <Route path="/parents" component={ParentApp} />
 
-      {/* Mentor & Faculty Scanner App */}
+      {/* Mentor & Faculty Scanner App & ERP Portal */}
+      <Route path="/faculty-portal" component={FacultyPortal} />
+      <Route path="/faculty" component={FacultyPortal} />
       <Route path="/mentor" component={MentorApp} />
-      <Route path="/faculty" component={MentorApp} />
       <Route path="/incharge-dashboard" component={InchargeDashboard} />
 
       {/* HOD routes */}
