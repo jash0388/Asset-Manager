@@ -506,6 +506,7 @@ const FACULTY_DIRECTORY: Record<string, {
     ],
     workload: [
       { day: "Monday", periods: [{ slot: "10:00 – 11:00", subject: "Discrete Maths (2C)", section: "DS-2C", room: "Hall 406" }] },
+    ]
   }
 };
 
