@@ -174,8 +174,9 @@ function AppRouter() {
       {/* Mentor & Faculty Scanner App & ERP Portal */}
       <Route path="/faculty-portal" component={FacultyPortal} />
       <Route path="/faculty" component={FacultyPortal} />
-      <Route path="/mentor" component={MentorApp} />
-      <Route path="/incharge-dashboard" component={InchargeDashboard} />
+      <Route path="/mentor" component={FacultyPortal} />
+      <Route path="/incharge-dashboard" component={FacultyPortal} />
+      <Route path="/scanner-view" component={MentorApp} />
 
       {/* HOD routes */}
       <Route path="/hod-dashboard">

@@ -315,6 +315,198 @@ const FACULTY_DIRECTORY: Record<string, {
       { day: "Friday", periods: [{ slot: "12:10 – 01:10", subject: "DBMS (2A)", section: "DS-2A", room: "Hall 402" }] },
       { day: "Saturday", periods: [{ slot: "11:00 – 12:10", subject: "DBMS Practice", section: "DS-2A", room: "Hall 402" }] },
     ]
+  },
+  "3011": {
+    name: "Mrs G Sushma",
+    email: "mrsgsushma@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Class In-charge & Mentor (3A)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "3011",
+    erp: "EMP-SECDS3011",
+    section: "DS-3A",
+    phone: "+91 98490 89012",
+    courses: [
+      { id: "c3011_1", code: "22DS309", name: "Operating Systems (OS)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 52, room: "Hall 301", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Ms. Priyusha"] },
+      { id: "c3011_2", code: "22DS310", name: "Operating Systems Lab", type: "Practical", program: "CSE-DS", section: "DS-3A", strength: 52, room: "Lab-202", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mrs G Sushma", "2nd: Mr Miskeen Ali"] },
+      { id: "c3011_3", code: "22DS311", name: "Web Programming (WP)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 52, room: "Hall 301", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Dr. Sri Hari VLN"] },
+    ],
+    mentees: [
+      { id: 1, name: "GOUNDLA MANEESH", rollNumber: "24N81A6701", section: "DS-3A", studentPhone: "9876543251", fatherPhone: "9123456751", attendancePercent: 93, backlogs: 0, mentorNotes: "Class representative, excellent discipline." },
+      { id: 2, name: "YELAMANCHILI TEJA", rollNumber: "24N81A6702", section: "DS-3A", studentPhone: "9876543252", fatherPhone: "9123456752", attendancePercent: 81, backlogs: 0, mentorNotes: "Good academic standing." },
+      { id: 3, name: "BODDU SAI CHARAN", rollNumber: "24N81A6703", section: "DS-3A", studentPhone: "9876543253", fatherPhone: "9123456753", attendancePercent: 88, backlogs: 0, mentorNotes: "Active in hackathons." },
+      { id: 4, name: "CHILUKA ABHINAV", rollNumber: "24N81A6704", section: "DS-3A", studentPhone: "9876543254", fatherPhone: "9123456754", attendancePercent: 74, backlogs: 1, mentorNotes: "Advised to attend remedial classes." },
+      { id: 5, name: "DODDA HARSHITHA", rollNumber: "24N81A6705", section: "DS-3A", studentPhone: "9876543255", fatherPhone: "9123456755", attendancePercent: 95, backlogs: 0, mentorNotes: "Top mid scores." },
+      { id: 6, name: "GADDAM SHIVA", rollNumber: "24N81A6706", section: "DS-3A", studentPhone: "9876543256", fatherPhone: "9123456756", attendancePercent: 86, backlogs: 0, mentorNotes: "Regular and attentive." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "OS (3A)", section: "DS-3A", room: "Hall 301" }, { slot: "10:00 – 11:00", subject: "WP (3A)", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Tuesday", periods: [{ slot: "10:00 – 11:00", subject: "OS (3A)", section: "DS-3A", room: "Hall 301" }, { slot: "01:55 – 03:55", subject: "OS Lab (3A)", section: "DS-3A", room: "Lab-202" }] },
+      { day: "Wednesday", periods: [{ slot: "11:00 – 12:10", subject: "WP (3A)", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Thursday", periods: [{ slot: "11:00 – 12:10", subject: "OS (3A)", section: "DS-3A", room: "Hall 301" }, { slot: "01:55 – 02:55", subject: "Mentoring Slot", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Friday", periods: [{ slot: "09:00 – 10:00", subject: "OS (3A)", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "Incharge Review Meeting", section: "DS-3A", room: "Hall 301" }] },
+    ]
+  },
+  "3012": {
+    name: "Mr T Shravan Kumar",
+    email: "mrtshravankumar@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Class In-charge & Mentor (3B)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "3012",
+    erp: "EMP-SECDS3012",
+    section: "DS-3B",
+    phone: "+91 98490 67890",
+    courses: [
+      { id: "c3012_1", code: "22DS305", name: "Machine Learning (ML)", type: "Theory", program: "CSE-DS", section: "DS-3B", strength: 52, room: "Hall 302", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mr Miskeen Ali"] },
+      { id: "c3012_2", code: "22DS306", name: "Machine Learning Lab", type: "Practical", program: "CSE-DS", section: "DS-3B", strength: 52, room: "Lab-208", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mr T Shravan Kumar", "2nd: Mrs. CH. Naga Rohini"] },
+    ],
+    mentees: [
+      { id: 1, name: "RATHOD RAJU", rollNumber: "24N81A6753", section: "DS-3B", studentPhone: "9876543201", fatherPhone: "9123456701", attendancePercent: 88, backlogs: 0, mentorNotes: "Active learner." },
+      { id: 2, name: "BUNGA AASRITHA", rollNumber: "24N81A6754", section: "DS-3B", studentPhone: "9876543202", fatherPhone: "9123456702", attendancePercent: 72, backlogs: 1, mentorNotes: "Good in lab work." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "10:00 – 11:00", subject: "ML (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Tuesday", periods: [{ slot: "01:55 – 03:55", subject: "ML Lab (3B)", section: "DS-3B", room: "Lab-208" }] },
+      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "ML (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Thursday", periods: [{ slot: "12:10 – 01:10", subject: "ML (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Friday", periods: [{ slot: "11:00 – 12:10", subject: "ML (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Saturday", periods: [{ slot: "10:00 – 11:00", subject: "Project Review", section: "DS-3B", room: "Lab-208" }] },
+    ]
+  },
+  "3013": {
+    name: "Mr M Yadaiah",
+    email: "mrmyadaiah@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Class In-charge & Mentor (3C)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "3013",
+    erp: "EMP-SECDS3013",
+    section: "DS-3C",
+    phone: "+91 98490 45678",
+    courses: [
+      { id: "c3013_1", code: "22DS307", name: "Data Warehousing & Data Mining (DWDM)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall 306", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs. Swetha"] },
+      { id: "c3013_2", code: "22DS308", name: "Data Mining Lab", type: "Practical", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Lab-206", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mr M Yadaiah", "2nd: Dr. Md Abdul Azeem"] },
+    ],
+    mentees: [
+      { id: 1, name: "MALLIKARJUN GOUD", rollNumber: "24N81A67A6", section: "DS-3C", studentPhone: "9876543231", fatherPhone: "9123456731", attendancePercent: 89, backlogs: 0, mentorNotes: "Regular and disciplined." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "DWDM (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Tuesday", periods: [{ slot: "11:00 – 12:10", subject: "DWDM (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Wednesday", periods: [{ slot: "01:55 – 03:55", subject: "Data Mining Lab (3C)", section: "DS-3C", room: "Lab-206" }] },
+      { day: "Thursday", periods: [{ slot: "12:10 – 01:10", subject: "DWDM (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Friday", periods: [{ slot: "09:00 – 10:00", subject: "DWDM (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "Incharge Review Meeting", section: "DS-3C", room: "Hall 306" }] },
+    ]
+  },
+  "4011": {
+    name: "Mrs A Sravanthi",
+    email: "mrsasravanthi@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Class In-charge & Mentor (4A)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "4011",
+    erp: "EMP-SECDS4011",
+    section: "DS-4A",
+    phone: "+91 98490 78901",
+    courses: [
+      { id: "c4011_1", code: "22DS401", name: "Deep Learning & NLP", type: "Theory", program: "CSE-DS", section: "DS-4A", strength: 42, room: "Hall 401", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Dr. Sri Hari VLN"] },
+      { id: "c4011_2", code: "22DS402", name: "NLP & AI Capstone Lab", type: "Practical", program: "CSE-DS", section: "DS-4A", strength: 42, room: "Lab-203", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mrs A Sravanthi"] },
+    ],
+    mentees: [
+      { id: 1, name: "KOTHA SRIKANTH", rollNumber: "23N81A6701", section: "DS-4A", studentPhone: "9876543271", fatherPhone: "9123456771", attendancePercent: 91, backlogs: 0, mentorNotes: "Placed in Campus Placement." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "10:00 – 11:00", subject: "Deep Learning (4A)", section: "DS-4A", room: "Hall 401" }] },
+      { day: "Wednesday", periods: [{ slot: "01:55 – 03:55", subject: "AI Capstone Lab (4A)", section: "DS-4A", room: "Lab-203" }] },
+      { day: "Friday", periods: [{ slot: "09:00 – 10:00", subject: "NLP (4A)", section: "DS-4A", room: "Hall 401" }] },
+    ]
+  },
+  "4012": {
+    name: "Mrs K Sneha",
+    email: "mrsksneha@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Class In-charge & Mentor (4B)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "4012",
+    erp: "EMP-SECDS4012",
+    section: "DS-4B",
+    phone: "+91 98490 89012",
+    courses: [
+      { id: "c4012_1", code: "22DS403", name: "Big Data Analytics", type: "Theory", program: "CSE-DS", section: "DS-4B", strength: 39, room: "Hall 403", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Dr. C. Lakshmi Nath"] },
+    ],
+    mentees: [
+      { id: 1, name: "GUNTI NAVEEN", rollNumber: "23N81A6788", section: "DS-4B", studentPhone: "9876543281", fatherPhone: "9123456781", attendancePercent: 87, backlogs: 0, mentorNotes: "Good in Big Data tools." },
+    ],
+    workload: [
+      { day: "Tuesday", periods: [{ slot: "10:00 – 11:00", subject: "Big Data (4B)", section: "DS-4B", room: "Hall 403" }] },
+      { day: "Thursday", periods: [{ slot: "09:00 – 10:00", subject: "Big Data (4B)", section: "DS-4B", room: "Hall 403" }] },
+    ]
+  },
+  "2011": {
+    name: "Mrs B Gayathri",
+    email: "mrsbgayathri@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Class In-charge & Mentor (2A)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "2011",
+    erp: "EMP-SECDS2011",
+    section: "DS-2A",
+    phone: "+91 98490 11223",
+    courses: [
+      { id: "c2011_1", code: "22DS201", name: "Data Structures (DS)", type: "Theory", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Hall 402", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs Ch Vijaya Lakshmi"] },
+      { id: "c2011_2", code: "22DS202", name: "Data Structures Lab", type: "Practical", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Lab-205", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mrs B Gayathri"] },
+    ],
+    mentees: [
+      { id: 1, name: "BOLLAM ANANYA", rollNumber: "25N81A6701", section: "DS-2A", studentPhone: "9876543291", fatherPhone: "9123456791", attendancePercent: 94, backlogs: 0, mentorNotes: "Excellent student." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "Data Structures (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Wednesday", periods: [{ slot: "01:55 – 03:55", subject: "DS Lab (2A)", section: "DS-2A", room: "Lab-205" }] },
+    ]
+  },
+  "2012": {
+    name: "Mrs K Ramya",
+    email: "mrskramya@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Class In-charge & Mentor (2B)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "2012",
+    erp: "EMP-SECDS2012",
+    section: "DS-2B",
+    phone: "+91 98490 22334",
+    courses: [
+      { id: "c2012_1", code: "22DS205", name: "Java Programming", type: "Theory", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Hall 404", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mr M Srinivasulu"] },
+    ],
+    mentees: [
+      { id: 1, name: "KANDULA MANISH", rollNumber: "25N81A6756", section: "DS-2B", studentPhone: "9876543301", fatherPhone: "9123456801", attendancePercent: 85, backlogs: 0, mentorNotes: "Attentive in Java." },
+    ],
+    workload: [
+      { day: "Tuesday", periods: [{ slot: "11:00 – 12:10", subject: "Java (2B)", section: "DS-2B", room: "Hall 404" }] },
+      { day: "Thursday", periods: [{ slot: "10:00 – 11:00", subject: "Java (2B)", section: "DS-2B", room: "Hall 404" }] },
+    ]
+  },
+  "2013": {
+    name: "Mr K Bikshapathi",
+    email: "mrkbikshapathi@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Class In-charge & Mentor (2C)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "2013",
+    erp: "EMP-SECDS2013",
+    section: "DS-2C",
+    phone: "+91 98490 33445",
+    courses: [
+      { id: "c2013_1", code: "22DS207", name: "Discrete Mathematics", type: "Theory", program: "CSE-DS", section: "DS-2C", strength: 48, room: "Hall 406", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs K Srinija"] },
+    ],
+    mentees: [
+      { id: 1, name: "PADALA SHIVA", rollNumber: "25N81A67E0", section: "DS-2C", studentPhone: "9876543311", fatherPhone: "9123456811", attendancePercent: 82, backlogs: 0, mentorNotes: "Regular in classes." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "10:00 – 11:00", subject: "Discrete Maths (2C)", section: "DS-2C", room: "Hall 406" }] },
+    ]
   }
 };
 
@@ -323,7 +515,7 @@ function getFacultyProfile(key: string, name?: string, email?: string) {
   if (FACULTY_DIRECTORY[key]) {
     return FACULTY_DIRECTORY[key];
   }
-  const cleanKey = key || "101";
+  const cleanKey = key || "3011";
   const cleanName = name || `Faculty Member (${cleanKey})`;
   const cleanEmail = email || `faculty.${cleanKey}@sphoorthyengg.ac.in`;
 
@@ -335,27 +527,27 @@ function getFacultyProfile(key: string, name?: string, email?: string) {
     department: "Computer Science & Engineering (Data Science)",
     key: cleanKey,
     erp: `EMP-SECDS${cleanKey}`,
-    section: `DS-Section`,
+    section: `DS-3A`,
     phone: "+91 98490 00000",
     courses: [
-      { id: `c_${cleanKey}_1`, code: "22DS301", name: "Data Structures & Algorithms", type: "Theory" as const, program: "CSE-DS", section: "DS-2A", strength: 55, room: "Hall 402", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mr. Miskeen Ali"] },
-      { id: `c_${cleanKey}_2`, code: "22DS302", name: "Data Structures Lab", type: "Practical" as const, program: "CSE-DS", section: "DS-2A", strength: 55, room: "Lab-205", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: " + cleanName] },
-      { id: `c_${cleanKey}_3`, code: "22DS405", name: "Machine Learning Concepts", type: "Theory" as const, program: "CSE-DS", section: "DS-3B", strength: 52, room: "Hall 302", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs. Swetha"] },
+      { id: `c_${cleanKey}_1`, code: "22DS301", name: "Operating Systems & Cloud Architecture", type: "Theory" as const, program: "CSE-DS", section: "DS-3A", strength: 52, room: "Hall 301", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Ms. Priyusha"] },
+      { id: `c_${cleanKey}_2`, code: "22DS302", name: "Operating Systems & Web Lab", type: "Practical" as const, program: "CSE-DS", section: "DS-3A", strength: 52, room: "Lab-202", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: " + cleanName] },
+      { id: `c_${cleanKey}_3`, code: "22DS405", name: "Machine Learning & AI Tools", type: "Theory" as const, program: "CSE-DS", section: "DS-3B", strength: 52, room: "Hall 302", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mr Miskeen Ali"] },
     ],
     mentees: [
-      { id: 1, name: "RATHOD RAJU", rollNumber: "24N81A6753", section: "DS-3B", studentPhone: "9876543201", fatherPhone: "9123456701", attendancePercent: 88, backlogs: 0, mentorNotes: "Good academic performance." },
-      { id: 2, name: "BUNGA AASRITHA", rollNumber: "24N81A6754", section: "DS-3B", studentPhone: "9876543202", fatherPhone: "9123456702", attendancePercent: 72, backlogs: 1, mentorNotes: "Needs improvement in problem solving." },
-      { id: 3, name: "BUSHABOINA ABHINAI", rollNumber: "24N81A6755", section: "DS-3B", studentPhone: "9876543203", fatherPhone: "9123456703", attendancePercent: 94, backlogs: 0, mentorNotes: "Top ranker." },
-      { id: 4, name: "DASARI AHLIKA", rollNumber: "24N81A6756", section: "DS-3B", studentPhone: "9876543204", fatherPhone: "9123456704", attendancePercent: 64, backlogs: 2, mentorNotes: "Attendance shortage warned." },
-      { id: 5, name: "KADARI PRANAY", rollNumber: "24N81A6757", section: "DS-3B", studentPhone: "9876543205", fatherPhone: "9123456705", attendancePercent: 82, backlogs: 0, mentorNotes: "Regular and attentive." },
+      { id: 1, name: "GOUNDLA MANEESH", rollNumber: "24N81A6701", section: "DS-3A", studentPhone: "9876543251", fatherPhone: "9123456751", attendancePercent: 93, backlogs: 0, mentorNotes: "Class representative." },
+      { id: 2, name: "YELAMANCHILI TEJA", rollNumber: "24N81A6702", section: "DS-3A", studentPhone: "9876543252", fatherPhone: "9123456752", attendancePercent: 81, backlogs: 0, mentorNotes: "Good academic standing." },
+      { id: 3, name: "RATHOD RAJU", rollNumber: "24N81A6753", section: "DS-3B", studentPhone: "9876543201", fatherPhone: "9123456701", attendancePercent: 88, backlogs: 0, mentorNotes: "Good progress." },
+      { id: 4, name: "BUNGA AASRITHA", rollNumber: "24N81A6754", section: "DS-3B", studentPhone: "9876543202", fatherPhone: "9123456702", attendancePercent: 72, backlogs: 1, mentorNotes: "Advised to improve." },
+      { id: 5, name: "DASARI AHLIKA", rollNumber: "24N81A6756", section: "DS-3B", studentPhone: "9876543204", fatherPhone: "9123456704", attendancePercent: 64, backlogs: 2, mentorNotes: "Attendance shortage warned." },
     ],
     workload: [
-      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "Theory Class", section: "DS-2A", room: "Hall 402" }, { slot: "11:00 – 12:10", subject: "Elective Class", section: "DS-3B", room: "Hall 302" }] },
-      { day: "Tuesday", periods: [{ slot: "10:00 – 11:00", subject: "Theory Class", section: "DS-2A", room: "Hall 402" }, { slot: "01:55 – 03:55", subject: "Practical Lab", section: "DS-2A", room: "Lab-205" }] },
-      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "Theory Class", section: "DS-3B", room: "Hall 302" }] },
-      { day: "Thursday", periods: [{ slot: "10:00 – 11:00", subject: "Theory Class", section: "DS-3B", room: "Hall 302" }] },
-      { day: "Friday", periods: [{ slot: "11:00 – 12:10", subject: "Theory Class", section: "DS-2A", room: "Hall 402" }] },
-      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "Mentoring & Guidance", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "Theory Class (3A)", section: "DS-3A", room: "Hall 301" }, { slot: "11:00 – 12:10", subject: "Elective Class (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Tuesday", periods: [{ slot: "10:00 – 11:00", subject: "Theory Class (3A)", section: "DS-3A", room: "Hall 301" }, { slot: "01:55 – 03:55", subject: "Practical Lab (3A)", section: "DS-3A", room: "Lab-202" }] },
+      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "Theory Class (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Thursday", periods: [{ slot: "10:00 – 11:00", subject: "Theory Class (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Friday", periods: [{ slot: "11:00 – 12:10", subject: "Theory Class (3A)", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "Mentoring & Guidance", section: "DS-3A", room: "Hall 301" }] },
     ]
   };
 }
@@ -410,8 +602,17 @@ export default function FacultyPortal() {
 
   // Dynamically resolve logged in faculty details
   const facultyProfile = useMemo(() => {
-    const key = mentor?.key || "101";
-    return getFacultyProfile(key, mentor?.name, mentor?.email);
+    let key = mentor?.key;
+    if (!key) {
+      const stored = localStorage.getItem("qr_profile");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          key = parsed.key;
+        } catch {}
+      }
+    }
+    return getFacultyProfile(key || "3011", mentor?.name, mentor?.email);
   }, [mentor]);
 
   const facultyName = facultyProfile.name;

@@ -45,13 +45,9 @@ export default function Login() {
         return;
       }
 
-      // 3 or 4-digit codes are Faculty / Incharge keys
+      // 3 or 4-digit codes are Faculty / Incharge keys -> Go to Faculty Portal
       await loginMentorKey(code);
-      if (/^\d{4}$/.test(code)) {
-        navigate("/incharge-dashboard");
-      } else {
-        navigate("/faculty");
-      }
+      navigate("/faculty");
     } catch (err: any) {
       let msg = err?.message || err?.error || "Invalid access code. Please try again.";
       if (typeof msg === "string" && (msg.includes("<") || msg.includes("<!DOCTYPE") || msg.includes("html"))) {
