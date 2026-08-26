@@ -506,9 +506,19 @@ const FACULTY_DIRECTORY: Record<string, {
     ],
     workload: [
       { day: "Monday", periods: [{ slot: "10:00 – 11:00", subject: "Discrete Maths (2C)", section: "DS-2C", room: "Hall 406" }] },
-    ]
   }
 };
+
+export const OFFICIAL_FACULTY_LIST = Object.entries(FACULTY_DIRECTORY).map(([key, data], idx) => ({
+  id: idx + 1,
+  name: data.name,
+  email: data.email,
+  role: data.role,
+  yearLabel: data.section,
+  section: data.section,
+  rollRange: `Key: ${key} | ${data.department}`,
+  count: data.mentees.length || 27
+}));
 
 // Generic Fallback builder for any key entered
 function getFacultyProfile(key: string, name?: string, email?: string) {
