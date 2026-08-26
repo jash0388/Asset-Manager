@@ -46,7 +46,10 @@ import {
   Eye,
   Send,
   Loader2,
-  FileCheck
+  FileCheck,
+  UserCheck,
+  Building2,
+  CheckSquare
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -100,23 +103,291 @@ const PERIOD_SLOTS = [
   { id: "p8", label: "07:00 PM – 08:30 PM", start: "19:00", end: "20:30", isEvening: true },
 ];
 
+// Comprehensive Real Faculty Dataset (Key 101 to 122 & Incharge Keys)
+const FACULTY_DIRECTORY: Record<string, {
+  name: string;
+  email: string;
+  role: string;
+  designation: string;
+  department: string;
+  key: string;
+  erp: string;
+  section: string;
+  phone: string;
+  courses: Course[];
+  mentees: MenteeStudent[];
+  workload: { day: string; periods: { slot: string; subject: string; section: string; room: string }[] }[];
+}> = {
+  "101": {
+    name: "Mrs. CH. Naga Rohini",
+    email: "mrschnagarohini@gmail.com",
+    role: "Assistant Professor",
+    designation: "Assistant Professor & Subject Faculty",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "101",
+    erp: "EMP-SECDS101",
+    section: "DS-3B",
+    phone: "+91 98490 12345",
+    courses: [
+      { id: "c101_1", code: "22DS301", name: "Computer Organization & Architecture (COA)", type: "Theory", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Hall 402", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mr. Miskeen Ali"] },
+      { id: "c101_2", code: "22DS302", name: "COA & Simulation Lab", type: "Practical", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Lab-205", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mrs. CH. Naga Rohini", "2nd: Mr. M Srinivasulu"] },
+      { id: "c101_3", code: "22DS401", name: "Machine Learning & Neural Nets", type: "Theory", program: "CSE-DS", section: "DS-3B", strength: 52, room: "Hall 302", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mr. Miskeen Ali"] },
+    ],
+    mentees: [
+      { id: 1, name: "RATHOD RAJU", rollNumber: "24N81A6753", section: "DS-3B", studentPhone: "9876543201", fatherPhone: "9123456701", attendancePercent: 88, backlogs: 0, mentorNotes: "Good academic performance, actively participates in coding clubs." },
+      { id: 2, name: "BUNGA AASRITHA", rollNumber: "24N81A6754", section: "DS-3B", studentPhone: "9876543202", fatherPhone: "9123456702", attendancePercent: 72, backlogs: 1, mentorNotes: "Needs support in Probability & Statistics." },
+      { id: 3, name: "BUSHABOINA ABHINAI", rollNumber: "24N81A6755", section: "DS-3B", studentPhone: "9876543203", fatherPhone: "9123456703", attendancePercent: 94, backlogs: 0, mentorNotes: "Top ranker in class mid exams." },
+      { id: 4, name: "DASARI AHLIKA", rollNumber: "24N81A6756", section: "DS-3B", studentPhone: "9876543204", fatherPhone: "9123456704", attendancePercent: 64, backlogs: 2, mentorNotes: "Warned about attendance shortage. Father notified." },
+      { id: 5, name: "KADARI PRANAY", rollNumber: "24N81A6757", section: "DS-3B", studentPhone: "9876543205", fatherPhone: "9123456705", attendancePercent: 82, backlogs: 0, mentorNotes: "Consistent attendance and active in lab sessions." },
+      { id: 6, name: "GOPAL REDDY", rollNumber: "24N81A6758", section: "DS-3B", studentPhone: "9876543206", fatherPhone: "9123456706", attendancePercent: 89, backlogs: 0, mentorNotes: "Good progress in Mini-project." },
+      { id: 7, name: "CHINTA SAI KIRAN", rollNumber: "24N81A6759", section: "DS-3B", studentPhone: "9876543207", fatherPhone: "9123456707", attendancePercent: 78, backlogs: 0, mentorNotes: "Regular for classes." },
+      { id: 8, name: "MOHAMMED SALMAN", rollNumber: "24N81A6760", section: "DS-3B", studentPhone: "9876543208", fatherPhone: "9123456708", attendancePercent: 91, backlogs: 0, mentorNotes: "Excellent lab performance." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "COA (2A)", section: "DS-2A", room: "Hall 402" }, { slot: "11:00 – 12:10", subject: "ML (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Tuesday", periods: [{ slot: "10:00 – 11:00", subject: "COA (2A)", section: "DS-2A", room: "Hall 402" }, { slot: "01:55 – 03:55", subject: "COA Lab (2A)", section: "DS-2A", room: "Lab-205" }] },
+      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "ML (3B)", section: "DS-3B", room: "Hall 302" }, { slot: "12:10 – 01:10", subject: "COA (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Thursday", periods: [{ slot: "10:00 – 11:00", subject: "ML (3B)", section: "DS-3B", room: "Hall 302" }, { slot: "01:55 – 02:55", subject: "Mentoring Slot", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Friday", periods: [{ slot: "11:00 – 12:10", subject: "COA (2A)", section: "DS-2A", room: "Hall 402" }, { slot: "01:55 – 02:55", subject: "ML (3B)", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "Doubt Clearance & Seminars", section: "DS-3B", room: "Hall 302" }] },
+    ]
+  },
+  "102": {
+    name: "Mrs. Swetha",
+    email: "mrsswetha@gmail.com",
+    role: "Assistant Professor",
+    designation: "Assistant Professor & Subject Faculty",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "102",
+    erp: "EMP-SECDS102",
+    section: "DS-3C",
+    phone: "+91 98490 23456",
+    courses: [
+      { id: "c102_1", code: "22DS303", name: "Formal Languages & Automata Theory (FLAT)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall 306", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mr. M Yadaiah"] },
+      { id: "c102_2", code: "22DS304", name: "Compiler Design & Tools", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall 306", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Dr. Sri Hari VLN"] },
+    ],
+    mentees: [
+      { id: 1, name: "VEMULA HARIKA", rollNumber: "24N81A67D3", section: "DS-3C", studentPhone: "9876543211", fatherPhone: "9123456711", attendancePercent: 86, backlogs: 0, mentorNotes: "Good in theoretical concepts." },
+      { id: 2, name: "SURAPU ANUSHA", rollNumber: "24N81A67D4", section: "DS-3C", studentPhone: "9876543212", fatherPhone: "9123456712", attendancePercent: 92, backlogs: 0, mentorNotes: "Excellent academic scores." },
+      { id: 3, name: "GURRAM RAJESH", rollNumber: "24N81A67D5", section: "DS-3C", studentPhone: "9876543213", fatherPhone: "9123456713", attendancePercent: 70, backlogs: 1, mentorNotes: "Needs attendance counseling." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "10:00 – 11:00", subject: "FLAT (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Tuesday", periods: [{ slot: "09:00 – 10:00", subject: "FLAT (3C)", section: "DS-3C", room: "Hall 306" }, { slot: "12:10 – 01:10", subject: "Compiler Design", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Wednesday", periods: [{ slot: "11:00 – 12:10", subject: "FLAT (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Thursday", periods: [{ slot: "09:00 – 10:00", subject: "Compiler Design", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Friday", periods: [{ slot: "10:00 – 11:00", subject: "FLAT (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Saturday", periods: [{ slot: "11:00 – 12:10", subject: "Mentoring & Remedial", section: "DS-3C", room: "Hall 306" }] },
+    ]
+  },
+  "103": {
+    name: "Mr Miskeen Ali",
+    email: "mrmiskeenali@gmail.com",
+    role: "Assistant Professor",
+    designation: "Assistant Professor & Subject Faculty",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "103",
+    erp: "EMP-SECDS103",
+    section: "DS-3B",
+    phone: "+91 98490 34567",
+    courses: [
+      { id: "c103_1", code: "22DS305", name: "Machine Learning (ML)", type: "Theory", program: "CSE-DS", section: "DS-3B", strength: 52, room: "Hall 304", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs. CH. Naga Rohini"] },
+      { id: "c103_2", code: "22DS306", name: "Machine Learning Lab", type: "Practical", program: "CSE-DS", section: "DS-3B", strength: 52, room: "Lab-208", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mr Miskeen Ali", "2nd: Mr. T Shravan Kumar"] },
+    ],
+    mentees: [
+      { id: 1, name: "POTHULA DIVYA", rollNumber: "24N81A6780", section: "DS-3B", studentPhone: "9876543221", fatherPhone: "9123456721", attendancePercent: 91, backlogs: 0, mentorNotes: "Very attentive in laboratory." },
+      { id: 2, name: "KONDURI SNEHA", rollNumber: "24N81A6781", section: "DS-3B", studentPhone: "9876543222", fatherPhone: "9123456722", attendancePercent: 84, backlogs: 0, mentorNotes: "Good progress in ML projects." },
+      { id: 3, name: "BATTULA SHIVANI", rollNumber: "24N81A6782", section: "DS-3B", studentPhone: "9876543223", fatherPhone: "9123456723", attendancePercent: 68, backlogs: 1, mentorNotes: "Needs to improve overall attendance." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "11:00 – 12:10", subject: "ML (3B)", section: "DS-3B", room: "Hall 304" }] },
+      { day: "Tuesday", periods: [{ slot: "01:55 – 03:55", subject: "ML Lab (3B)", section: "DS-3B", room: "Lab-208" }] },
+      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "ML (3B)", section: "DS-3B", room: "Hall 304" }] },
+      { day: "Thursday", periods: [{ slot: "10:00 – 11:00", subject: "ML (3B)", section: "DS-3B", room: "Hall 304" }] },
+      { day: "Friday", periods: [{ slot: "01:55 – 02:55", subject: "ML (3B)", section: "DS-3B", room: "Hall 304" }] },
+      { day: "Saturday", periods: [{ slot: "10:00 – 11:00", subject: "ML Project Review", section: "DS-3B", room: "Lab-208" }] },
+    ]
+  },
+  "104": {
+    name: "Mr M Yadaiah",
+    email: "mrmyadaiah@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Assistant Professor & Class Incharge (3C)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "104",
+    erp: "EMP-SECDS104",
+    section: "DS-3C",
+    phone: "+91 98490 45678",
+    courses: [
+      { id: "c104_1", code: "22DS307", name: "Data Warehousing & Data Mining (DWDM)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall 306", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs. Swetha"] },
+      { id: "c104_2", code: "22DS308", name: "Data Mining Lab", type: "Practical", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Lab-206", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mr M Yadaiah", "2nd: Dr. Md Abdul Azeem"] },
+    ],
+    mentees: [
+      { id: 1, name: "MALLIKARJUN GOUD", rollNumber: "24N81A67A6", section: "DS-3C", studentPhone: "9876543231", fatherPhone: "9123456731", attendancePercent: 89, backlogs: 0, mentorNotes: "Regular and disciplined." },
+      { id: 2, name: "NALLA KAVYA", rollNumber: "24N81A67A7", section: "DS-3C", studentPhone: "9876543232", fatherPhone: "9123456732", attendancePercent: 95, backlogs: 0, mentorNotes: "Excellent student." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "DWDM (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Tuesday", periods: [{ slot: "11:00 – 12:10", subject: "DWDM (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Wednesday", periods: [{ slot: "01:55 – 03:55", subject: "Data Mining Lab (3C)", section: "DS-3C", room: "Lab-206" }] },
+      { day: "Thursday", periods: [{ slot: "12:10 – 01:10", subject: "DWDM (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Friday", periods: [{ slot: "09:00 – 10:00", subject: "DWDM (3C)", section: "DS-3C", room: "Hall 306" }] },
+      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "Incharge Review Meeting", section: "DS-3C", room: "Hall 306" }] },
+    ]
+  },
+  "105": {
+    name: "Mr M Srinivasulu",
+    email: "mrmsrinivasulu@gmail.com",
+    role: "Assistant Professor",
+    designation: "Assistant Professor & Subject Faculty",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "105",
+    erp: "EMP-SECDS105",
+    section: "DS-2B",
+    phone: "+91 98490 56789",
+    courses: [
+      { id: "c105_1", code: "22DS201", name: "Software Engineering (SE)", type: "Theory", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Hall 402", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs. B Gayathri"] },
+      { id: "c105_2", code: "22DS202", name: "Software Engineering Lab", type: "Practical", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Lab-204", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mr M Srinivasulu", "2nd: Mrs. K Ramya"] },
+    ],
+    mentees: [
+      { id: 1, name: "PENDYALA VARUN", rollNumber: "25N81A6784", section: "DS-2B", studentPhone: "9876543241", fatherPhone: "9123456741", attendancePercent: 87, backlogs: 0, mentorNotes: "Active learner." },
+      { id: 2, name: "THOTA SANJAY", rollNumber: "25N81A6785", section: "DS-2B", studentPhone: "9876543242", fatherPhone: "9123456742", attendancePercent: 76, backlogs: 0, mentorNotes: "Regular in classes." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "10:00 – 11:00", subject: "SE (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Tuesday", periods: [{ slot: "11:00 – 12:10", subject: "SE (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Wednesday", periods: [{ slot: "01:55 – 03:55", subject: "SE Lab (2B)", section: "DS-2B", room: "Lab-204" }] },
+      { day: "Thursday", periods: [{ slot: "09:00 – 10:00", subject: "SE (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Friday", periods: [{ slot: "10:00 – 11:00", subject: "SE (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Saturday", periods: [{ slot: "10:00 – 11:00", subject: "SE Mentoring Slot", section: "DS-2B", room: "Hall 408" }] },
+    ]
+  },
+  "108": {
+    name: "Mrs G Sushma",
+    email: "mrsgsushma@gmail.com",
+    role: "Assistant Professor & Class In-charge",
+    designation: "Assistant Professor & Class Incharge (3A)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "108",
+    erp: "EMP-SECDS108",
+    section: "DS-3A",
+    phone: "+91 98490 89012",
+    courses: [
+      { id: "c108_1", code: "22DS309", name: "Operating Systems (OS)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 52, room: "Hall 301", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Ms. Priyusha"] },
+      { id: "c108_2", code: "22DS310", name: "Operating Systems Lab", type: "Practical", program: "CSE-DS", section: "DS-3A", strength: 52, room: "Lab-202", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mrs G Sushma", "2nd: Mr Miskeen Ali"] },
+    ],
+    mentees: [
+      { id: 1, name: "GOUNDLA MANEESH", rollNumber: "24N81A6701", section: "DS-3A", studentPhone: "9876543251", fatherPhone: "9123456751", attendancePercent: 93, backlogs: 0, mentorNotes: "Class representative, excellent discipline." },
+      { id: 2, name: "YELAMANCHILI TEJA", rollNumber: "24N81A6702", section: "DS-3A", studentPhone: "9876543252", fatherPhone: "9123456752", attendancePercent: 81, backlogs: 0, mentorNotes: "Good academic standing." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "OS (3A)", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Tuesday", periods: [{ slot: "10:00 – 11:00", subject: "OS (3A)", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Wednesday", periods: [{ slot: "01:55 – 03:55", subject: "OS Lab (3A)", section: "DS-3A", room: "Lab-202" }] },
+      { day: "Thursday", periods: [{ slot: "11:00 – 12:10", subject: "OS (3A)", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Friday", periods: [{ slot: "09:00 – 10:00", subject: "OS (3A)", section: "DS-3A", room: "Hall 301" }] },
+      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "Incharge Review Meeting", section: "DS-3A", room: "Hall 301" }] },
+    ]
+  },
+  "113": {
+    name: "Mrs Ch Vijaya Lakshmi",
+    email: "mrschvijayalakshmi@gmail.com",
+    role: "Assistant Professor",
+    designation: "Assistant Professor & Subject Faculty",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "113",
+    erp: "EMP-SECDS113",
+    section: "DS-2A",
+    phone: "+91 98490 33445",
+    courses: [
+      { id: "c113_1", code: "22DS203", name: "Database Management Systems (DBMS)", type: "Theory", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Hall 402", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs. B Gayathri"] },
+      { id: "c113_2", code: "22DS204", name: "DBMS & SQL Lab", type: "Practical", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Lab-201", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: Mrs Ch Vijaya Lakshmi", "2nd: Dr. A Balaram"] },
+    ],
+    mentees: [
+      { id: 1, name: "BOPPANA SWETHA", rollNumber: "25N81A6728", section: "DS-2A", studentPhone: "9876543261", fatherPhone: "9123456761", attendancePercent: 88, backlogs: 0, mentorNotes: "Regular and active in SQL queries." },
+      { id: 2, name: "MUPPIDI VAMSHI", rollNumber: "25N81A6729", section: "DS-2A", studentPhone: "9876543262", fatherPhone: "9123456762", attendancePercent: 79, backlogs: 0, mentorNotes: "Good academic progress." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "11:00 – 12:10", subject: "DBMS (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Tuesday", periods: [{ slot: "09:00 – 10:00", subject: "DBMS (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Wednesday", periods: [{ slot: "10:00 – 11:00", subject: "DBMS (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Thursday", periods: [{ slot: "01:55 – 03:55", subject: "DBMS Lab (2A)", section: "DS-2A", room: "Lab-201" }] },
+      { day: "Friday", periods: [{ slot: "12:10 – 01:10", subject: "DBMS (2A)", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Saturday", periods: [{ slot: "11:00 – 12:10", subject: "DBMS Practice", section: "DS-2A", room: "Hall 402" }] },
+    ]
+  }
+};
+
+// Generic Fallback builder for any key entered
+function getFacultyProfile(key: string, name?: string, email?: string) {
+  if (FACULTY_DIRECTORY[key]) {
+    return FACULTY_DIRECTORY[key];
+  }
+  const cleanKey = key || "101";
+  const cleanName = name || `Faculty Member (${cleanKey})`;
+  const cleanEmail = email || `faculty.${cleanKey}@sphoorthyengg.ac.in`;
+
+  return {
+    name: cleanName,
+    email: cleanEmail,
+    role: "Assistant Professor",
+    designation: "Assistant Professor & Subject Faculty",
+    department: "Computer Science & Engineering (Data Science)",
+    key: cleanKey,
+    erp: `EMP-SECDS${cleanKey}`,
+    section: `DS-Section`,
+    phone: "+91 98490 00000",
+    courses: [
+      { id: `c_${cleanKey}_1`, code: "22DS301", name: "Data Structures & Algorithms", type: "Theory" as const, program: "CSE-DS", section: "DS-2A", strength: 55, room: "Hall 402", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mr. Miskeen Ali"] },
+      { id: `c_${cleanKey}_2`, code: "22DS302", name: "Data Structures Lab", type: "Practical" as const, program: "CSE-DS", section: "DS-2A", strength: 55, room: "Lab-205", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["1st: " + cleanName] },
+      { id: `c_${cleanKey}_3`, code: "22DS405", name: "Machine Learning Concepts", type: "Theory" as const, program: "CSE-DS", section: "DS-3B", strength: 52, room: "Hall 302", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: ["Mrs. Swetha"] },
+    ],
+    mentees: [
+      { id: 1, name: "RATHOD RAJU", rollNumber: "24N81A6753", section: "DS-3B", studentPhone: "9876543201", fatherPhone: "9123456701", attendancePercent: 88, backlogs: 0, mentorNotes: "Good academic performance." },
+      { id: 2, name: "BUNGA AASRITHA", rollNumber: "24N81A6754", section: "DS-3B", studentPhone: "9876543202", fatherPhone: "9123456702", attendancePercent: 72, backlogs: 1, mentorNotes: "Needs improvement in problem solving." },
+      { id: 3, name: "BUSHABOINA ABHINAI", rollNumber: "24N81A6755", section: "DS-3B", studentPhone: "9876543203", fatherPhone: "9123456703", attendancePercent: 94, backlogs: 0, mentorNotes: "Top ranker." },
+      { id: 4, name: "DASARI AHLIKA", rollNumber: "24N81A6756", section: "DS-3B", studentPhone: "9876543204", fatherPhone: "9123456704", attendancePercent: 64, backlogs: 2, mentorNotes: "Attendance shortage warned." },
+      { id: 5, name: "KADARI PRANAY", rollNumber: "24N81A6757", section: "DS-3B", studentPhone: "9876543205", fatherPhone: "9123456705", attendancePercent: 82, backlogs: 0, mentorNotes: "Regular and attentive." },
+    ],
+    workload: [
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "Theory Class", section: "DS-2A", room: "Hall 402" }, { slot: "11:00 – 12:10", subject: "Elective Class", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Tuesday", periods: [{ slot: "10:00 – 11:00", subject: "Theory Class", section: "DS-2A", room: "Hall 402" }, { slot: "01:55 – 03:55", subject: "Practical Lab", section: "DS-2A", room: "Lab-205" }] },
+      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "Theory Class", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Thursday", periods: [{ slot: "10:00 – 11:00", subject: "Theory Class", section: "DS-3B", room: "Hall 302" }] },
+      { day: "Friday", periods: [{ slot: "11:00 – 12:10", subject: "Theory Class", section: "DS-2A", room: "Hall 402" }] },
+      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "Mentoring & Guidance", section: "DS-3B", room: "Hall 302" }] },
+    ]
+  };
+}
+
 export default function FacultyPortal() {
   const { mentor, role, logout } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  // Navigation State
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "home" | "academics" | "delegate" | "assignment" | "mids" | "workload" | "mentoring" | "projects" | "events" | "reports"
   >("home");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+
+  // Submenu toggle states
+  const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
+    academics: true,
     assignment: false,
     mids: false,
+    workload: false,
+    mentoring: true,
+    projects: false,
+    events: false,
     reports: false,
   });
 
-  // Current Date / Time
+  const toggleSubmenu = (menu: string) => {
+    setOpenSubmenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
+  };
+
+  // Clock
   const [currentTime, setCurrentTime] = useState<string>("");
   useEffect(() => {
     const updateTime = () => {
@@ -137,68 +408,20 @@ export default function FacultyPortal() {
     return () => clearInterval(interval);
   }, []);
 
-  // Faculty Details (Logged in or Default)
-  const facultyName = mentor?.name || "Mrs. CH. Naga Rohini";
-  const facultyEmail = mentor?.email || "mrschnagarohini@gmail.com";
-  const facultyRole = mentor?.role || "Senior Assistant Professor";
-  const facultyDept = "B.Tech - CSE (Data Science)";
-  const facultyErp = mentor?.key ? `EMP: SECDS${mentor.key}` : "ERP: SECDS101";
+  // Dynamically resolve logged in faculty details
+  const facultyProfile = useMemo(() => {
+    const key = mentor?.key || "101";
+    return getFacultyProfile(key, mentor?.name, mentor?.email);
+  }, [mentor]);
 
-  // Sample Courses Assigned
-  const [courses] = useState<Course[]>([
-    {
-      id: "c1",
-      code: "22DS301",
-      name: "Machine Learning & Neural Nets",
-      type: "Theory",
-      program: "CSE-DS",
-      section: "DS-3B",
-      strength: 62,
-      room: "LH-302",
-      batch: "Regular",
-      addedBy: "HOD (Data Science)",
-      coInstructors: ["Mr. Miskeen Ali"],
-    },
-    {
-      id: "c2",
-      code: "22CY302",
-      name: "Malware Analysis and Detection",
-      type: "Theory",
-      program: "CSE-DS",
-      section: "DS-3B",
-      strength: 64,
-      room: "LH-304",
-      batch: "Regular",
-      addedBy: "HOD (Data Science)",
-      coInstructors: ["Mr. T Shravan Kumar"],
-    },
-    {
-      id: "c3",
-      code: "22DT434",
-      name: "Big Data Analytics Lab",
-      type: "Practical",
-      program: "CSE-DS",
-      section: "DS-3A",
-      strength: 61,
-      room: "PG-322",
-      batch: "Regular",
-      addedBy: "HOD (Data Science)",
-      coInstructors: ["1st: Dr. Raghavendra", "2nd: Mrs. CH. Naga Rohini", "3rd: Mr. Amarnath Goud"],
-    },
-    {
-      id: "c4",
-      code: "22DS435",
-      name: "Cloud Computing & DevOps Lab",
-      type: "Practical",
-      program: "CSE-DS",
-      section: "DS-2B",
-      strength: 58,
-      room: "PG-320",
-      batch: "Regular",
-      addedBy: "HOD (Data Science)",
-      coInstructors: ["1st: Mrs. CH. Naga Rohini", "2nd: Mr. M Srinivasulu"],
-    },
-  ]);
+  const facultyName = facultyProfile.name;
+  const facultyEmail = facultyProfile.email;
+  const facultyRole = facultyProfile.designation;
+  const facultyDept = facultyProfile.department;
+  const facultyErp = facultyProfile.erp;
+  const courses = facultyProfile.courses;
+  const mentees = facultyProfile.mentees;
+  const workload = facultyProfile.workload;
 
   // Attendance Posting Modal State
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
@@ -215,7 +438,6 @@ export default function FacultyPortal() {
   // Initialize Sample Students when Course is picked
   const openAttendanceModal = (course: Course) => {
     setSelectedCourseForAttendance(course);
-    // Generate sample roster
     const names = [
       "RATHOD RAJU", "BUNGA AASRITHA", "BUSHABOINA ABHINAI", "DASARI AHLIKA",
       "KADARI PRANAY", "GOPAL REDDY", "CHINTA SAI KIRAN", "MOHAMMED SALMAN",
@@ -226,8 +448,8 @@ export default function FacultyPortal() {
     ];
 
     const records: StudentAttendanceRecord[] = names.map((name, idx) => {
-      const num = 6200 + idx + 1;
-      const roll = `23N81A${num}`;
+      const num = 6701 + idx;
+      const roll = `24N81A${num}`;
       const held = Math.floor(Math.random() * 6) + 19;
       return {
         id: idx + 1,
@@ -248,33 +470,41 @@ export default function FacultyPortal() {
 
   // Toggle all students present/absent
   const handleMarkAll = (present: boolean) => {
-    setStudentRoster((prev) => prev.map((s) => ({ ...s, status: present })));
+    setStudentRoster((prev) =>
+      prev.map((s) => ({ ...s, status: present }))
+    );
   };
 
   // Toggle single student
-  const handleToggleStudent = (id: number) => {
+  const toggleStudentStatus = (id: number) => {
     setStudentRoster((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: !s.status } : s))
     );
   };
 
-  // Submit Attendance Handler
+  // Submit attendance to backend
   const handleSubmitAttendance = async () => {
+    if (!selectedCourseForAttendance) return;
     setSubmittingAttendance(true);
+
     try {
-      // Simulate API submission
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const slot = PERIOD_SLOTS.find((p) => p.id === selectedPeriod);
+      const presentCount = studentRoster.filter((s) => s.status).length;
+      const totalCount = studentRoster.length;
+
+      // Call API or mock confirmation
+      await new Promise((r) => setTimeout(r, 800));
+
       toast({
         title: "Attendance Posted Successfully!",
-        description: `Marked ${studentRoster.filter((s) => s.status).length} Present, ${
-          studentRoster.filter((s) => !s.status).length
-        } Absent for ${selectedCourseForAttendance?.code} (${selectedPeriod.toUpperCase()}).`,
+        description: `Posted ${selectedCourseForAttendance.code} (${slot?.label}) for ${attendanceDate}. Present: ${presentCount} / ${totalCount}.`,
       });
+
       setAttendanceModalOpen(false);
     } catch (err: any) {
       toast({
-        title: "Error submitting attendance",
-        description: "Please check your network and try again.",
+        title: "Failed to Post Attendance",
+        description: err?.message || "Please check network connection and try again.",
         variant: "destructive",
       });
     } finally {
@@ -282,598 +512,616 @@ export default function FacultyPortal() {
     }
   };
 
-  // Mentees State
-  const [menteesList] = useState<MenteeStudent[]>([
-    {
-      id: 1,
-      name: "ABINAYAA AKILAN",
-      rollNumber: "23N81A6753",
-      section: "23-CSE-DS-B",
-      studentPhone: "7093013526",
-      fatherPhone: "9866683526",
-      motherPhone: "Not set",
-      attendancePercent: 86.4,
-      backlogs: 0,
-      mentorNotes: "Good academic performance, actively participates in coding clubs.",
-    },
-    {
-      id: 2,
-      name: "BUSHABOINA ABHINAI",
-      rollNumber: "23N81A6754",
-      section: "23-CSE-DS-B",
-      studentPhone: "9948211029",
-      fatherPhone: "9848123901",
-      attendancePercent: 78.2,
-      backlogs: 1,
-      mentorNotes: "Needs support in Probability & Statistics.",
-    },
-    {
-      id: 3,
-      name: "DASARI AHLIKA",
-      rollNumber: "23N81A6755",
-      section: "23-CSE-DS-B",
-      studentPhone: "8309112445",
-      fatherPhone: "9440182234",
-      attendancePercent: 91.0,
-      backlogs: 0,
-      mentorNotes: "Top ranker in class mid exams.",
-    },
-    {
-      id: 4,
-      name: "KADARI PRANAY",
-      rollNumber: "23N81A6756",
-      section: "23-CSE-DS-B",
-      studentPhone: "9182345671",
-      fatherPhone: "9849012345",
-      attendancePercent: 64.5,
-      backlogs: 2,
-      mentorNotes: "Warned about attendance shortage. Father notified.",
-    },
-  ]);
-
-  // Filtered Students in Attendance Modal
-  const filteredModalStudents = useMemo(() => {
+  // Filtered students for attendance search
+  const filteredRoster = useMemo(() => {
     if (!searchStudentQuery.trim()) return studentRoster;
     const q = searchStudentQuery.toLowerCase();
     return studentRoster.filter(
-      (s) => s.name.toLowerCase().includes(q) || s.rollNumber.toLowerCase().includes(q)
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.rollNumber.toLowerCase().includes(q)
     );
   }, [studentRoster, searchStudentQuery]);
 
-  const presentCount = useMemo(() => studentRoster.filter((s) => s.status).length, [studentRoster]);
-  const absentCount = useMemo(() => studentRoster.filter((s) => !s.status).length, [studentRoster]);
+  const totalStudentsCount = studentRoster.length;
+  const presentStudentsCount = studentRoster.filter((s) => s.status).length;
+  const absentStudentsCount = totalStudentsCount - presentStudentsCount;
 
-  const toggleSubmenu = (menuKey: string) => {
-    setExpandedMenus((prev) => ({ ...prev, [menuKey]: !prev[menuKey] }));
+  // Delegate Attendance State
+  const [delegatedFaculty, setDelegatedFaculty] = useState("");
+  const [delegatedCourse, setDelegatedCourse] = useState("");
+  const [delegatedDate, setDelegatedDate] = useState("2026-08-27");
+  const [delegationsList, setDelegationsList] = useState<
+    { id: string; course: string; section: string; date: string; delegatedTo: string; status: "Active" | "Completed" }[]
+  >([
+    {
+      id: "del_1",
+      course: "Computer Organization & Architecture",
+      section: "DS-2A",
+      date: "2026-08-25",
+      delegatedTo: "Mr. Miskeen Ali",
+      status: "Completed",
+    },
+  ]);
+
+  const handleCreateDelegation = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!delegatedFaculty || !delegatedCourse) return;
+    setDelegationsList((prev) => [
+      {
+        id: `del_${Date.now()}`,
+        course: delegatedCourse,
+        section: "DS-2A",
+        date: delegatedDate,
+        delegatedTo: delegatedFaculty,
+        status: "Active",
+      },
+      ...prev,
+    ]);
+    toast({
+      title: "Attendance Delegated!",
+      description: `Class delegated to ${delegatedFaculty} for ${delegatedDate}.`,
+    });
+    setDelegatedFaculty("");
+    setDelegatedCourse("");
+  };
+
+  // Mentee Search Filter
+  const [menteeSearch, setMenteeSearch] = useState("");
+  const filteredMentees = useMemo(() => {
+    if (!menteeSearch.trim()) return mentees;
+    const q = menteeSearch.toLowerCase();
+    return mentees.filter(
+      (m) =>
+        m.name.toLowerCase().includes(q) ||
+        m.rollNumber.toLowerCase().includes(q)
+    );
+  }, [mentees, menteeSearch]);
+
+  // Handle Logout
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row text-slate-800 font-sans antialiased selection:bg-blue-600 selection:text-white">
-      {/* ─── DARK NAVY SIDEBAR ────────────────────────────────────────── */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0B1528] text-slate-300 flex flex-col justify-between border-r border-slate-800 shadow-2xl transition-transform duration-300 ease-in-out md:translate-x-0 ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
-      >
-        {/* Brand Header */}
-        <div className="p-4 border-b border-slate-800/80">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-700 to-indigo-800 p-2 flex items-center justify-center shadow-lg border border-blue-500/30">
-              <GraduationCap className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xs font-black tracking-wider text-white uppercase leading-tight">
-                Sphoorthy
-              </h1>
-              <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-                Faculty Portal
-              </p>
-              <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-mono bg-blue-950 text-blue-300 border border-blue-800/60">
-                ERP 2026-27
-              </span>
-            </div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
+      {/* ─────────────────────────────────────────────────────────────
+          TOP APP HEADER BAR (LIGHT & CRISP)
+      ───────────────────────────────────────────────────────────── */}
+      <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 flex items-center justify-between px-4 lg:px-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="hidden lg:flex p-2 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            title="Toggle Sidebar"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          {/* Breadcrumb Navigation */}
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+            <span
+              onClick={() => setActiveTab("home")}
+              className="hover:text-blue-600 cursor-pointer flex items-center gap-1.5 transition-colors"
+            >
+              <Home className="w-4 h-4 text-blue-600" />
+              <span>Home</span>
+            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-slate-900 font-bold capitalize">
+              {activeTab === "home" ? "Faculty Dashboard" : activeTab}
+            </span>
           </div>
         </div>
 
-        {/* Navigation Menu Links */}
-        <div className="flex-1 overflow-y-auto py-3 px-3 space-y-1 text-xs">
-          <div className="px-3 py-1 text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-            Main Menu
-          </div>
-
-          {/* Home */}
+        {/* Header Right Actions */}
+        <div className="flex items-center gap-3">
+          {/* Quick Scanner Access */}
           <button
-            onClick={() => {
-              setActiveTab("home");
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-              activeTab === "home"
-                ? "bg-blue-700 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-            }`}
+            onClick={() => navigate("/mentor")}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition-all shadow-xs"
           >
-            <Home className="w-4 h-4" />
-            <span>Home</span>
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>QR Scanner View</span>
           </button>
 
-          {/* Academics */}
-          <button
-            onClick={() => {
-              setActiveTab("academics");
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-              activeTab === "academics"
-                ? "bg-blue-700 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-            }`}
-          >
-            <LayoutGrid className="w-4 h-4" />
-            <span>Academics</span>
-          </button>
-
-          {/* Delegate Attendance */}
-          <button
-            onClick={() => {
-              setActiveTab("delegate");
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-              activeTab === "delegate"
-                ? "bg-blue-700 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-            }`}
-          >
-            <ArrowRightCircle className="w-4 h-4" />
-            <span>Delegate Attendance</span>
-          </button>
-
-          {/* Assignment (Collapsible) */}
-          <div>
-            <button
-              onClick={() => toggleSubmenu("assignment")}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <FileText className="w-4 h-4" />
-                <span>Assignment</span>
-              </div>
-              <ChevronDown
-                className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
-                  expandedMenus.assignment ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {expandedMenus.assignment && (
-              <div className="pl-8 pr-2 py-1 space-y-1">
-                <button
-                  onClick={() => {
-                    setActiveTab("assignment");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Assignment 1
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("assignment");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Assignment 2
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("assignment");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Presentation
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Mid Examination (Collapsible) */}
-          <div>
-            <button
-              onClick={() => toggleSubmenu("mids")}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-slate-300 hover:bg-slate-800/60 hover:text-white transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <Award className="w-4 h-4" />
-                <span>Mid Examination</span>
-              </div>
-              <ChevronDown
-                className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
-                  expandedMenus.mids ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {expandedMenus.mids && (
-              <div className="pl-8 pr-2 py-1 space-y-1">
-                <button
-                  onClick={() => {
-                    setActiveTab("mids");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Mid 1 Marks Entry
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("mids");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Mid 2 Marks Entry
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("mids");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Improvements
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Faculty Workload */}
-          <button
-            onClick={() => {
-              setActiveTab("workload");
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-              activeTab === "workload"
-                ? "bg-blue-700 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-            }`}
-          >
-            <Tv2 className="w-4 h-4" />
-            <span>Faculty Workload</span>
-          </button>
-
-          {/* Mentoring */}
-          <button
-            onClick={() => {
-              setActiveTab("mentoring");
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-              activeTab === "mentoring"
-                ? "bg-blue-700 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Mentoring</span>
-          </button>
-
-          {/* Student Projects */}
-          <button
-            onClick={() => {
-              setActiveTab("projects");
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-              activeTab === "projects"
-                ? "bg-blue-700 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-            }`}
-          >
-            <FolderGit2 className="w-4 h-4" />
-            <span>Student Projects</span>
-          </button>
-
-          {/* Event Management */}
-          <button
-            onClick={() => {
-              setActiveTab("events");
-              setMobileMenuOpen(false);
-            }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-              activeTab === "events"
-                ? "bg-blue-700 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-            }`}
-          >
-            <Calendar className="w-4 h-4" />
-            <span>Event Management</span>
-          </button>
-
-          {/* Reports (Collapsible) */}
-          <div>
-            <button
-              onClick={() => toggleSubmenu("reports")}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-                activeTab === "reports"
-                  ? "bg-blue-700 text-white shadow-md shadow-blue-900/40"
-                  : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <BarChart3 className="w-4 h-4" />
-                <span>Reports</span>
-              </div>
-              <ChevronDown
-                className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
-                  expandedMenus.reports ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {expandedMenus.reports && (
-              <div className="pl-8 pr-2 py-1 space-y-1">
-                <button
-                  onClick={() => {
-                    setActiveTab("reports");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Attendance Summary
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("reports");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Publish History
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("reports");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-1.5 px-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/40 text-[11px] font-medium cursor-pointer"
-                >
-                  Attendance Report (A/P)
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Footer Profile & Logout */}
-        <div className="p-3 border-t border-slate-800/80 bg-slate-950/40 space-y-2">
-          <div className="flex items-center gap-2.5 px-2 py-1">
-            <div className="w-9 h-9 rounded-full bg-blue-700 text-white font-bold flex items-center justify-center text-sm shadow-md ring-2 ring-blue-500/40">
+          {/* Logged in Profile Badge */}
+          <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-sm">
               {facultyName.charAt(0)}
             </div>
-            <div className="overflow-hidden">
-              <p className="text-xs font-bold text-white truncate">{facultyName}</p>
-              <p className="text-[10px] text-amber-400 font-medium truncate flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-amber-400" />
-                {facultyRole}
-              </p>
+            <div className="hidden md:block text-left">
+              <p className="text-xs font-black text-slate-900 leading-tight">{facultyName}</p>
+              <p className="text-[11px] font-semibold text-slate-600 leading-tight">{facultyRole}</p>
             </div>
-          </div>
-
-          <button
-            onClick={() => {
-              logout();
-              navigate("/login");
-            }}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-900/60 hover:bg-rose-800 text-rose-200 hover:text-white text-xs font-bold transition-all cursor-pointer shadow-sm border border-rose-700/50"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Mobile Menu Backdrop */}
-      {mobileMenuOpen && (
-        <div
-          onClick={() => setMobileMenuOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs md:hidden"
-        />
-      )}
-
-      {/* ─── MAIN CONTENT AREA ────────────────────────────────────────── */}
-      <main className="flex-1 md:ml-72 flex flex-col min-h-screen">
-        {/* Top Navbar */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-3">
             <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 md:hidden cursor-pointer"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                <Home className="w-3.5 h-3.5 text-blue-700" />
-                <span>/</span>
-                <span className="capitalize font-bold text-slate-800">{activeTab}</span>
-                <span>/</span>
-                <span className="text-slate-400">Faculty Dashboard</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200">
-              <div className="w-7 h-7 rounded-full bg-blue-700 text-white font-bold text-xs flex items-center justify-center">
-                {facultyName.charAt(0)}
-              </div>
-              <div className="text-left leading-tight pr-1">
-                <p className="text-xs font-bold text-slate-900">{facultyName}</p>
-                <p className="text-[10px] text-slate-500">{facultyRole}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                logout();
-                navigate("/login");
-              }}
-              className="p-2 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+              onClick={handleLogout}
+              className="p-2 rounded-xl text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors ml-1"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
             </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* View Content Body */}
-        <div className="p-4 sm:p-6 space-y-6 flex-1 max-w-7xl w-full mx-auto">
-          {/* ════════════════ TAB 1: HOME (DASHBOARD) ════════════════ */}
+      {/* ─────────────────────────────────────────────────────────────
+          MAIN APP BODY: SIDEBAR + CONTENT CONTAINER
+      ───────────────────────────────────────────────────────────── */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* ═══════════════════════════════════════════════════════════
+            SIDEBAR (LIGHT EXECUTIVE STYLE)
+        ═══════════════════════════════════════════════════════════ */}
+        <aside
+          className={`bg-white border-r border-slate-200 flex flex-col justify-between transition-all duration-300 z-20 select-none ${
+            sidebarOpen ? "w-64" : "w-20"
+          } hidden lg:flex`}
+        >
+          {/* Top Brand Logo Section */}
+          <div className="p-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+              <Building2 className="w-5 h-5" />
+            </div>
+            {sidebarOpen && (
+              <div className="overflow-hidden">
+                <h1 className="text-sm font-extrabold text-slate-900 tracking-tight leading-tight">
+                  FACULTY ERP
+                </h1>
+                <p className="text-[10px] font-semibold text-slate-600 tracking-wide uppercase">
+                  Academic Portal
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Navigation Menu Links */}
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+            {/* Home Link */}
+            <button
+              onClick={() => setActiveTab("home")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "home"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <Home className="w-4 h-4 shrink-0" />
+              {sidebarOpen && <span>Home</span>}
+            </button>
+
+            {/* Academics (Collapsible) */}
+            <div>
+              <button
+                onClick={() => {
+                  setActiveTab("academics");
+                  toggleSubmenu("academics");
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "academics"
+                    ? "bg-blue-50 text-blue-700 font-extrabold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <LayoutGrid className="w-4 h-4 shrink-0 text-blue-600" />
+                  {sidebarOpen && <span>Academics</span>}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      openSubmenus.academics ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+              {sidebarOpen && openSubmenus.academics && (
+                <div className="pl-9 pr-2 py-1 space-y-0.5">
+                  <button
+                    onClick={() => setActiveTab("academics")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
+                  >
+                    • Assigned Courses
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("academics")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
+                  >
+                    • Attendance Posting
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Delegate Attendance */}
+            <button
+              onClick={() => setActiveTab("delegate")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "delegate"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <ArrowRightCircle className="w-4 h-4 shrink-0" />
+              {sidebarOpen && <span>Delegate Attendance</span>}
+            </button>
+
+            {/* Assignments */}
+            <div>
+              <button
+                onClick={() => {
+                  setActiveTab("assignment");
+                  toggleSubmenu("assignment");
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "assignment"
+                    ? "bg-blue-50 text-blue-700 font-extrabold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <FileText className="w-4 h-4 shrink-0 text-emerald-600" />
+                  {sidebarOpen && <span>Assignment</span>}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      openSubmenus.assignment ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+              {sidebarOpen && openSubmenus.assignment && (
+                <div className="pl-9 pr-2 py-1 space-y-0.5">
+                  <button
+                    onClick={() => setActiveTab("assignment")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                  >
+                    • Assignment Master
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("assignment")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                  >
+                    • Post Marks
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Mid Examination */}
+            <div>
+              <button
+                onClick={() => {
+                  setActiveTab("mids");
+                  toggleSubmenu("mids");
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "mids"
+                    ? "bg-blue-50 text-blue-700 font-extrabold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Award className="w-4 h-4 shrink-0 text-amber-600" />
+                  {sidebarOpen && <span>Mid Examination</span>}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      openSubmenus.mids ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+              {sidebarOpen && openSubmenus.mids && (
+                <div className="pl-9 pr-2 py-1 space-y-0.5">
+                  <button
+                    onClick={() => setActiveTab("mids")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                  >
+                    • Mid Marks Entry
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Faculty Workload */}
+            <button
+              onClick={() => setActiveTab("workload")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "workload"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <CalendarDays className="w-4 h-4 shrink-0 text-sky-600" />
+              {sidebarOpen && <span>Faculty Workload</span>}
+            </button>
+
+            {/* Mentoring */}
+            <div>
+              <button
+                onClick={() => {
+                  setActiveTab("mentoring");
+                  toggleSubmenu("mentoring");
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "mentoring"
+                    ? "bg-blue-50 text-blue-700 font-extrabold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Users className="w-4 h-4 shrink-0 text-indigo-600" />
+                  {sidebarOpen && <span>Mentoring</span>}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      openSubmenus.mentoring ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+              {sidebarOpen && openSubmenus.mentoring && (
+                <div className="pl-9 pr-2 py-1 space-y-0.5">
+                  <button
+                    onClick={() => setActiveTab("mentoring")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                  >
+                    • Assigned Mentees (24)
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("mentoring")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                  >
+                    • WhatsApp Connect
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Student Projects */}
+            <button
+              onClick={() => setActiveTab("projects")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "projects"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <FolderGit2 className="w-4 h-4 shrink-0 text-teal-600" />
+              {sidebarOpen && <span>Student Projects</span>}
+            </button>
+
+            {/* Event Management */}
+            <button
+              onClick={() => setActiveTab("events")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "events"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <Calendar className="w-4 h-4 shrink-0 text-amber-600" />
+              {sidebarOpen && <span>Event Management</span>}
+            </button>
+
+            {/* Reports */}
+            <div>
+              <button
+                onClick={() => {
+                  setActiveTab("reports");
+                  toggleSubmenu("reports");
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "reports"
+                    ? "bg-blue-50 text-blue-700 font-extrabold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="w-4 h-4 shrink-0 text-blue-600" />
+                  {sidebarOpen && <span>Reports</span>}
+                </div>
+                {sidebarOpen && (
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      openSubmenus.reports ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+              {sidebarOpen && openSubmenus.reports && (
+                <div className="pl-9 pr-2 py-1 space-y-0.5">
+                  <button
+                    onClick={() => setActiveTab("reports")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                  >
+                    • Attendance Summary
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("reports")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                  >
+                    • Attendance Report (A/P)
+                  </button>
+                </div>
+              )}
+            </div>
+          </nav>
+
+          {/* Sidebar Footer User Info */}
+          <div className="p-3 border-t border-slate-100 bg-slate-50/70">
+            {sidebarOpen ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                    {facultyName.charAt(0)}
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-black text-slate-900 truncate">{facultyName}</p>
+                    <p className="text-[10px] font-semibold text-slate-600 truncate">{facultyErp}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-1.5 rounded-lg text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="w-full py-2 flex justify-center text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </aside>
+
+        {/* ═══════════════════════════════════════════════════════════
+            MAIN CONTENT AREA
+        ═══════════════════════════════════════════════════════════ */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+          {/* ════════════════ TAB 1: HOME (FACULTY DASHBOARD) ════════════════ */}
           {activeTab === "home" && (
-            <div className="space-y-6 animate-in fade-in duration-150">
-              {/* HERO PROFILE BANNER */}
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white p-6 shadow-xl border border-blue-700/50">
-                {/* Background decorative circles */}
-                <div className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
-                <div className="absolute right-32 top-0 w-48 h-48 rounded-full bg-indigo-500/10 blur-xl pointer-events-none" />
+            <div className="space-y-6">
+              {/* 1. HERO PROFILE BANNER (LIGHT/HIGH DEFINITION GRADIENT) */}
+              <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 text-white p-6 lg:p-8 shadow-xl relative overflow-hidden">
+                {/* Decorative subtle background waves */}
+                <div className="absolute right-0 top-0 bottom-0 w-96 opacity-10 pointer-events-none flex items-center justify-center">
+                  <GraduationCap className="w-80 h-80 text-white" />
+                </div>
 
-                <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                  <div className="flex items-center gap-5">
-                    {/* Faculty Avatar with Camera Icon */}
-                    <div className="relative group">
-                      <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md border-2 border-white/30 flex items-center justify-center text-3xl font-black shadow-xl overflow-hidden ring-4 ring-blue-400/20">
-                        <span className="bg-gradient-to-br from-white to-blue-200 bg-clip-text text-transparent">
-                          {facultyName.charAt(0)}
-                        </span>
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  {/* Left Side: Avatar + Info */}
+                  <div className="flex items-start md:items-center gap-5">
+                    <div className="relative group shrink-0">
+                      <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl bg-white/10 backdrop-blur-md border-2 border-white/20 flex items-center justify-center font-black text-3xl text-white shadow-inner">
+                        {facultyName.charAt(0)}
                       </div>
-                      <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center shadow-md">
-                        <Camera className="w-3.5 h-3.5" />
+                      <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center border-2 border-slate-900 shadow-sm" title="Active">
+                        <Check className="w-4 h-4" />
                       </div>
                     </div>
 
-                    {/* Faculty Profile Details */}
                     <div className="space-y-1.5">
-                      <span className="text-[10px] font-extrabold tracking-widest uppercase text-blue-200 bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-400/30">
+                      <span className="text-[11px] font-black tracking-widest text-blue-200 uppercase bg-blue-900/60 px-2.5 py-0.5 rounded-full border border-blue-400/30">
                         GOOD MORNING
                       </span>
-                      <h2 className="text-2xl font-black tracking-tight text-white">{facultyName}</h2>
-
-                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-white/10 backdrop-blur-xs border border-white/20 text-blue-100">
-                          <GraduationCap className="w-3.5 h-3.5 text-blue-300" />
+                      <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">
+                        {facultyName}
+                      </h2>
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-white/10 backdrop-blur-sm text-xs font-semibold text-blue-100 border border-white/10">
                           {facultyRole}
                         </span>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-white/10 backdrop-blur-xs border border-white/20 text-blue-100">
-                          <BuildingIcon />
+                        <span className="px-2.5 py-0.5 rounded-lg bg-white/10 backdrop-blur-sm text-xs font-semibold text-blue-100 border border-white/10">
                           {facultyDept}
                         </span>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-blue-950/70 border border-blue-400/40 text-amber-300">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-200 text-xs font-bold border border-emerald-400/30 font-mono">
                           {facultyErp}
                         </span>
                       </div>
-
-                      <div className="flex items-center gap-1.5 text-xs text-blue-200/80 pt-1 font-medium">
-                        <Calendar className="w-3.5 h-3.5 text-blue-300" />
-                        <span>{currentTime || "Thursday, 27 August 2026"}</span>
-                      </div>
+                      <p className="text-xs font-medium text-blue-200/80 pt-1 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        {currentTime || "Thursday, August 27, 2026"}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Right Header Metric Strip */}
-                  <div className="hidden lg:flex items-center gap-6 border-l border-white/15 pl-8 py-2">
-                    <div className="text-center">
-                      <p className="text-3xl font-black text-white font-mono">2</p>
+                  {/* Right Side: Quick Stats Badges */}
+                  <div className="grid grid-cols-3 gap-2.5 bg-black/20 backdrop-blur-md p-4 rounded-2xl border border-white/10 shrink-0">
+                    <div className="text-center px-3 py-1">
                       <p className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Theory</p>
+                      <p className="text-2xl font-black text-white">{courses.filter(c => c.type === "Theory").length}</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-black text-white font-mono">0</p>
-                      <p className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">PE</p>
+                    <div className="text-center px-3 py-1 border-x border-white/10">
+                      <p className="text-[10px] font-bold text-cyan-200 uppercase tracking-wider">Practical</p>
+                      <p className="text-2xl font-black text-cyan-300">{courses.filter(c => c.type === "Practical").length}</p>
                     </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-black text-white font-mono">0</p>
-                      <p className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">OE</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-black text-amber-300 font-mono">24</p>
-                      <p className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Mentees</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-black text-emerald-300 font-mono">6</p>
-                      <p className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Workload</p>
+                    <div className="text-center px-3 py-1">
+                      <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Mentees</p>
+                      <p className="text-2xl font-black text-emerald-300">{mentees.length}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* 6 METRICS CARDS GRID */}
+              {/* 2. TOP SUMMARY METRIC CARDS (LIGHT THEME) */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-                {/* 1. Theory */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between hover:shadow-md transition-shadow">
+                {/* Theory Card */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-500">Theory</span>
-                    <p className="text-2xl font-black text-slate-900 mt-0.5">2</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Lecture courses</p>
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Theory</span>
+                    <p className="text-2xl font-black text-blue-700 mt-0.5">{courses.filter(c => c.type === "Theory").length}</p>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                     <BookOpen className="w-5 h-5" />
                   </div>
                 </div>
 
-                {/* 2. PE */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between hover:shadow-md transition-shadow">
+                {/* PE Card */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-500">PE</span>
-                    <p className="text-2xl font-black text-slate-900 mt-0.5">0</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Professional Elective</p>
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">PE</span>
+                    <p className="text-2xl font-black text-cyan-700 mt-0.5">0</p>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
                     <Bookmark className="w-5 h-5" />
                   </div>
                 </div>
 
-                {/* 3. OE */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between hover:shadow-md transition-shadow">
+                {/* OE Card */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-500">OE</span>
-                    <p className="text-2xl font-black text-slate-900 mt-0.5">0</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Open Elective</p>
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">OE</span>
+                    <p className="text-2xl font-black text-emerald-700 mt-0.5">0</p>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                     <Globe className="w-5 h-5" />
                   </div>
                 </div>
 
-                {/* 4. Mentees */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between hover:shadow-md transition-shadow">
+                {/* Mentees Card */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-500">Mentees</span>
-                    <p className="text-2xl font-black text-purple-700 mt-0.5">24</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Assigned mentees</p>
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Mentees</span>
+                    <p className="text-2xl font-black text-indigo-700 mt-0.5">{mentees.length}</p>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
                     <Users className="w-5 h-5" />
                   </div>
                 </div>
 
-                {/* 5. Workload */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between hover:shadow-md transition-shadow">
+                {/* Workload Card */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-500">Workload</span>
-                    <p className="text-2xl font-black text-amber-600 mt-0.5">6</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">This week's entries</p>
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Workload</span>
+                    <p className="text-2xl font-black text-amber-700 mt-0.5">14 Hrs</p>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                    <Tv2 className="w-5 h-5" />
+                    <CalendarDays className="w-5 h-5" />
                   </div>
                 </div>
 
-                {/* 6. Co-Instructor */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between hover:shadow-md transition-shadow">
+                {/* Co-Instructor Card */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-bold text-slate-500">Co-Instructor</span>
-                    <p className="text-2xl font-black text-teal-700 mt-0.5">4</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Additional faculty</p>
+                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Co-Inst</span>
+                    <p className="text-2xl font-black text-teal-700 mt-0.5">2</p>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
                     <UserPlus className="w-5 h-5" />
@@ -881,884 +1129,85 @@ export default function FacultyPortal() {
                 </div>
               </div>
 
-              {/* MY COURSES AT A GLANCE TABLE */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="p-4 sm:px-6 flex items-center justify-between border-b border-slate-100 bg-slate-50/50">
+              {/* 3. MY COURSES AT A GLANCE TABLE CARD */}
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
                   <div className="flex items-center gap-2.5">
-                    <FileCheck className="w-5 h-5 text-blue-700" />
-                    <h3 className="text-sm font-extrabold text-slate-900">My Courses at a Glance</h3>
-                  </div>
-                  <span className="px-3 py-1 rounded-full bg-blue-900 text-white text-xs font-bold">
-                    2 Theory
-                  </span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50/80 text-slate-500 font-extrabold text-[10px] tracking-wider uppercase border-b border-slate-200">
-                        <th className="py-3 px-6">COURSE</th>
-                        <th className="py-3 px-4">TYPE</th>
-                        <th className="py-3 px-4">SECTION</th>
-                        <th className="py-3 px-4">STRENGTH</th>
-                        <th className="py-3 px-6 text-right">GO TO</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
-                      {courses
-                        .filter((c) => c.type === "Theory")
-                        .map((course) => (
-                          <tr
-                            key={course.id}
-                            className="hover:bg-blue-50/40 transition-colors cursor-pointer group"
-                            onClick={() => openAttendanceModal(course)}
-                          >
-                            <td className="py-3.5 px-6">
-                              <span className="font-extrabold text-slate-900 font-mono text-xs group-hover:text-blue-700 transition-colors block">
-                                {course.code}
-                              </span>
-                              <span className="text-slate-500 text-xs">{course.name}</span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-900 text-white">
-                                {course.type}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-200">
-                                24-CSE-DS-{course.section.slice(-1)}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 font-mono font-bold text-slate-800 text-sm">
-                              {course.strength}
-                            </td>
-                            <td className="py-3.5 px-6 text-right">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openAttendanceModal(course);
-                                }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-700 text-blue-700 hover:text-white font-bold text-xs transition-all shadow-2xs cursor-pointer"
-                              >
-                                <span>Attendance</span>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* MENTOR OVERVIEW & QUICK LINKS */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                {/* Mentor Overview Card */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm">
-                        <Users className="w-4 h-4 text-purple-600" />
-                        <span>Mentor Overview</span>
-                      </div>
-                      <button
-                        onClick={() => setActiveTab("mentoring")}
-                        className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        Go to Dashboard <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="w-16 h-16 rounded-xl bg-purple-100/70 border border-purple-200 flex flex-col items-center justify-center text-purple-900">
-                        <span className="text-2xl font-black font-mono leading-none">24</span>
-                        <span className="text-[9px] font-bold uppercase mt-0.5">Total</span>
-                      </div>
-                      <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <p className="text-xs font-extrabold text-slate-800">24 Assigned Mentees</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          B.Tech - CSE (Data Science) - 23-CSE-DS-B
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Links Card */}
-                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
-                  <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm mb-4">
-                    <ExternalLink className="w-4 h-4 text-blue-700" />
-                    <span>Quick Links</span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                    <button
-                      onClick={() => setActiveTab("academics")}
-                      className="p-3 rounded-xl bg-blue-50/70 hover:bg-blue-100 border border-blue-200 text-blue-900 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <LayoutGrid className="w-5 h-5 text-blue-700" />
-                      <span>View Courses</span>
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab("mids")}
-                      className="p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100 border border-amber-200 text-amber-900 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <Award className="w-5 h-5 text-amber-700" />
-                      <span>Exam Marks</span>
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab("mentoring")}
-                      className="p-3 rounded-xl bg-purple-50/70 hover:bg-purple-100 border border-purple-200 text-purple-900 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <Users className="w-5 h-5 text-purple-700" />
-                      <span>Mentoring</span>
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab("workload")}
-                      className="p-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <Tv2 className="w-5 h-5 text-emerald-700" />
-                      <span>Faculty Workload</span>
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab("reports")}
-                      className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer col-span-2 sm:col-span-1"
-                    >
-                      <BarChart3 className="w-5 h-5 text-slate-700" />
-                      <span>Reports</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════ TAB 2: ACADEMICS ════════════════ */}
-          {activeTab === "academics" && (
-            <div className="space-y-6 animate-in fade-in duration-150">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center">
-                    <BookOpen className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-extrabold text-slate-900">
-                      Assigned Course Load <span className="text-slate-400 font-mono">2026-2027</span>
-                    </h2>
-                    <p className="text-xs text-slate-500">Manage theory, practical, and elective courses</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="px-3.5 py-1 rounded-full bg-emerald-700 text-white font-bold text-xs">
-                    6 Courses Total
-                  </span>
-                </div>
-              </div>
-
-              {/* Theory Courses Section */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="p-4 sm:px-6 flex items-center justify-between border-b border-slate-100 bg-blue-50/40">
-                  <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm">
-                    <BookOpen className="w-4 h-4 text-blue-700" />
-                    <span>Theory Courses</span>
-                  </div>
-                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center">
-                    2
-                  </span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50/80 text-slate-500 font-extrabold text-[10px] tracking-wider uppercase border-b border-slate-200">
-                        <th className="py-3 px-6">COURSE</th>
-                        <th className="py-3 px-4">TYPE</th>
-                        <th className="py-3 px-4">PROGRAM</th>
-                        <th className="py-3 px-4">SECTION</th>
-                        <th className="py-3 px-4">STRENGTH</th>
-                        <th className="py-3 px-4">ROOM</th>
-                        <th className="py-3 px-4">BATCH</th>
-                        <th className="py-3 px-6 text-right">ACTION</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
-                      {courses
-                        .filter((c) => c.type === "Theory")
-                        .map((course) => (
-                          <tr key={course.id} className="hover:bg-blue-50/30 transition-colors">
-                            <td className="py-3.5 px-6">
-                              <p className="font-extrabold text-slate-900 font-mono text-xs">{course.code}</p>
-                              <p className="text-slate-500 text-xs">{course.name}</p>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                                {course.type}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 font-bold text-slate-700">{course.program}</td>
-                            <td className="py-3.5 px-4">
-                              <span className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-800 text-[11px] border border-slate-200">
-                                {course.section}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 font-mono font-bold text-slate-800">{course.strength}</td>
-                            <td className="py-3.5 px-4 font-mono text-slate-600">{course.room}</td>
-                            <td className="py-3.5 px-4 text-slate-600">{course.batch}</td>
-                            <td className="py-3.5 px-6 text-right">
-                              <button
-                                onClick={() => openAttendanceModal(course)}
-                                className="px-3.5 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs transition-all shadow-xs cursor-pointer inline-flex items-center gap-1"
-                              >
-                                <CalendarDays className="w-3.5 h-3.5" />
-                                <span>Attendance</span>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Practical Courses Section */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="p-4 sm:px-6 flex items-center justify-between border-b border-slate-100 bg-rose-50/30">
-                  <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm">
-                    <Layers className="w-4 h-4 text-rose-700" />
-                    <span>Practical Courses</span>
-                  </div>
-                  <span className="w-6 h-6 rounded-full bg-rose-100 text-rose-800 font-bold text-xs flex items-center justify-center">
-                    4
-                  </span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50/80 text-slate-500 font-extrabold text-[10px] tracking-wider uppercase border-b border-slate-200">
-                        <th className="py-3 px-6">COURSE</th>
-                        <th className="py-3 px-4">TYPE</th>
-                        <th className="py-3 px-4">SECTION</th>
-                        <th className="py-3 px-4">STRENGTH</th>
-                        <th className="py-3 px-4">ROOM</th>
-                        <th className="py-3 px-6">CO-INSTRUCTORS</th>
-                        <th className="py-3 px-6 text-right">ACTION</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
-                      {courses
-                        .filter((c) => c.type === "Practical")
-                        .map((course) => (
-                          <tr key={course.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="py-3.5 px-6">
-                              <p className="font-extrabold text-slate-900 font-mono text-xs">{course.code}</p>
-                              <p className="text-slate-500 text-xs">{course.name}</p>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                                {course.type}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-800 text-[11px] border border-slate-200">
-                                {course.section}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 font-mono font-bold text-slate-800">{course.strength}</td>
-                            <td className="py-3.5 px-4 font-mono text-slate-600">{course.room}</td>
-                            <td className="py-3.5 px-6">
-                              <div className="flex flex-wrap gap-1">
-                                {course.coInstructors?.map((inst, i) => (
-                                  <span
-                                    key={i}
-                                    className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-900 border border-amber-200"
-                                  >
-                                    {inst}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-6 text-right">
-                              <button
-                                onClick={() => openAttendanceModal(course)}
-                                className="px-3.5 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs transition-all shadow-xs cursor-pointer inline-flex items-center gap-1"
-                              >
-                                <CalendarDays className="w-3.5 h-3.5" />
-                                <span>Attendance</span>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════ TAB 3: MENTORING ════════════════ */}
-          {activeTab === "mentoring" && (
-            <div className="space-y-6 animate-in fade-in duration-150">
-              {/* Mentor Information Header Banner */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-700 to-indigo-800 text-white font-black text-2xl flex items-center justify-center shadow-md">
-                    {facultyName.charAt(0)}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-base font-extrabold text-slate-900">Mentor Information</h3>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800">
-                        Name: <strong className="font-bold">{facultyName}</strong>
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800">
-                        Designation: <strong className="font-bold">{facultyRole}</strong>
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800">
-                        Contact: <strong className="font-bold font-mono">9550224068</strong>
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-purple-100 text-purple-900 border border-purple-200">
-                        Mentees: <strong className="font-bold font-mono">24</strong>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button className="px-3.5 py-2 rounded-xl bg-blue-900 text-white text-xs font-bold hover:bg-blue-800 transition-all cursor-pointer shadow-xs">
-                    + Add / Remove Mentees
-                  </button>
-                  <button className="px-3.5 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition-all cursor-pointer shadow-xs flex items-center gap-1.5">
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>Mentee Group WhatsApp</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Assigned Students (Total: 24) Roster Table */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="p-4 sm:px-6 flex items-center justify-between border-b border-slate-100 bg-slate-50">
-                  <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm">
-                    <Users className="w-4 h-4 text-blue-700" />
-                    <span>Your Assigned Students (Total: 24)</span>
-                  </div>
-                  <span className="text-xs text-slate-500 font-medium">B.Tech - CSE (Data Science)</span>
-                </div>
-
-                <div className="divide-y divide-slate-100">
-                  {menteesList.map((mentee) => (
-                    <div
-                      key={mentee.id}
-                      className="p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors"
-                    >
-                      {/* Student Info */}
-                      <div className="flex items-start gap-4">
-                        <input
-                          type="checkbox"
-                          className="mt-1 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                        <div>
-                          <h4 className="text-sm font-black text-slate-900">{mentee.name}</h4>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs font-mono font-bold text-blue-700">{mentee.rollNumber}</span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-700 border border-slate-200">
-                              {mentee.section}
-                            </span>
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              mentee.attendancePercent >= 75
-                                ? "bg-emerald-100 text-emerald-800"
-                                : "bg-rose-100 text-rose-800"
-                            }`}>
-                              {mentee.attendancePercent}% Attendance
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Contact Numbers */}
-                      <div className="text-xs space-y-0.5 font-medium text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <p>
-                          <span className="text-slate-400">Student:</span>{" "}
-                          <strong className="font-mono text-slate-900">{mentee.studentPhone}</strong>
-                        </p>
-                        <p>
-                          <span className="text-slate-400">Father:</span>{" "}
-                          <strong className="font-mono text-slate-900">{mentee.fatherPhone}</strong>
-                        </p>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <a
-                          href={`https://wa.me/91${mentee.studentPhone}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-[11px] flex items-center gap-1 transition-all"
-                        >
-                          <MessageSquare className="w-3 h-3" /> Student
-                        </a>
-                        <a
-                          href={`https://wa.me/91${mentee.fatherPhone}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-[11px] flex items-center gap-1 transition-all"
-                        >
-                          <MessageSquare className="w-3 h-3" /> Father
-                        </a>
-                        <button className="px-2.5 py-1 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-900 font-bold text-[11px] transition-all cursor-pointer">
-                          Attendance History
-                        </button>
-                        <button className="px-2.5 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold text-[11px] transition-all cursor-pointer">
-                          Consolidated
-                        </button>
-                        <button className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] transition-all cursor-pointer">
-                          Results
-                        </button>
-                        <button className="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-[11px] transition-all cursor-pointer">
-                          Backlogs ({mentee.backlogs})
-                        </button>
-                        <button className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition-all cursor-pointer">
-                          Profile
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════ TAB 4: FACULTY WORKLOAD ════════════════ */}
-          {activeTab === "workload" && (
-            <div className="space-y-6 animate-in fade-in duration-150">
-              {/* Workload Header */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-blue-900 text-white font-black text-2xl flex items-center justify-center font-mono shadow-md">
-                    6
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      TOTAL OCCUPIED
+                    <BookOpen className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      My Courses at a Glance
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">
+                      {courses.length} Assigned
                     </span>
-                    <h3 className="text-base font-extrabold text-slate-900">per Week</h3>
                   </div>
+
+                  <button
+                    onClick={() => setActiveTab("academics")}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 cursor-pointer"
+                  >
+                    <span>View All Courses & Attendance</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
-                {/* Horizontal Stat Badges */}
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-900 font-bold border border-blue-200">
-                    3 Theory
-                  </span>
-                  <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-900 font-bold border border-emerald-200">
-                    3 Practical
-                  </span>
-                  <span className="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-900 font-bold border border-purple-200">
-                    0 Extra
-                  </span>
-                  <span className="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-900 font-bold border border-rose-200">
-                    0 Cancel
-                  </span>
-                  <span className="px-3 py-1.5 rounded-xl bg-cyan-50 text-cyan-900 font-bold border border-cyan-200">
-                    6 Total
-                  </span>
-                  <span className="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-900 font-bold border border-indigo-200">
-                    17 Allotted
-                  </span>
-                </div>
-              </div>
-
-              {/* Weekly Timetable Grid */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="p-4 sm:px-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm">
-                    <CalendarDays className="w-4 h-4 text-blue-700" />
-                    <span>Weekly Workload Schedule</span>
-                  </div>
-                  <span className="text-xs text-slate-500 font-semibold">Semester I (2026-27)</span>
-                </div>
-
+                {/* Courses Table */}
                 <div className="overflow-x-auto">
-                  <table className="w-full text-center text-xs border-collapse min-w-[850px]">
-                    <thead>
-                      <tr className="bg-slate-100/70 text-slate-600 font-bold text-[11px]">
-                        <th className="py-3 px-3 border border-slate-200 w-28 bg-slate-100">Day / Time</th>
-                        <th className="py-3 px-2 border border-slate-200">09:00 - 10:00</th>
-                        <th className="py-3 px-2 border border-slate-200">10:00 - 11:00</th>
-                        <th className="py-3 px-2 border border-slate-200">11:00 - 12:10</th>
-                        <th className="py-3 px-2 border border-slate-200">12:10 - 01:10</th>
-                        <th className="py-3 px-2 border border-slate-200">12:55 - 01:55</th>
-                        <th className="py-3 px-2 border border-slate-200">01:55 - 02:55</th>
-                        <th className="py-3 px-2 border border-slate-200">02:55 - 03:55</th>
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-100 text-slate-600 uppercase text-[11px] font-extrabold tracking-wider border-b border-slate-200">
+                      <tr>
+                        <th className="py-3 px-4">Course</th>
+                        <th className="py-3 px-3">Type</th>
+                        <th className="py-3 px-3">Program</th>
+                        <th className="py-3 px-3">Section</th>
+                        <th className="py-3 px-3">Strength</th>
+                        <th className="py-3 px-3">Room</th>
+                        <th className="py-3 px-3">Batch</th>
+                        <th className="py-3 px-3">Added By</th>
+                        <th className="py-3 px-4 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-xs">
-                      {/* Monday */}
-                      <tr>
-                        <td className="py-3 px-3 font-bold text-slate-900 bg-slate-50 border border-slate-200">
-                          Monday
-                        </td>
-                        <td
-                          colSpan={3}
-                          className="p-1.5 border border-slate-200 bg-emerald-700 text-white rounded-md font-bold text-[11px]"
-                        >
-                          <span className="text-[9px] uppercase tracking-widest text-emerald-200 block">PRACTICAL</span>
-                          22DT434 - Big Data Analytics Lab (PG-322)
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-1.5 border border-slate-200 bg-blue-800 text-white rounded-md font-bold text-[11px]">
-                          <span className="text-[9px] uppercase tracking-widest text-blue-200 block">THEORY</span>
-                          22CY302 - Malware Analysis (LH-304)
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                      </tr>
-
-                      {/* Tuesday */}
-                      <tr>
-                        <td className="py-3 px-3 font-bold text-slate-900 bg-slate-50 border border-slate-200">
-                          Tuesday
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-1.5 border border-slate-200 bg-blue-800 text-white rounded-md font-bold text-[11px]">
-                          <span className="text-[9px] uppercase tracking-widest text-blue-200 block">THEORY</span>
-                          22CY302 - Malware Analysis (LH-304)
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-1.5 border border-slate-200 bg-blue-800 text-white rounded-md font-bold text-[11px]">
-                          <span className="text-[9px] uppercase tracking-widest text-blue-200 block">THEORY</span>
-                          22DS301 - Machine Learning (LH-302)
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                      </tr>
-
-                      {/* Wednesday */}
-                      <tr>
-                        <td className="py-3 px-3 font-bold text-slate-900 bg-slate-50 border border-slate-200">
-                          Wednesday
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                      </tr>
-
-                      {/* Thursday */}
-                      <tr>
-                        <td className="py-3 px-3 font-bold text-slate-900 bg-slate-50 border border-slate-200">
-                          Thursday
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                      </tr>
-
-                      {/* Friday */}
-                      <tr>
-                        <td className="py-3 px-3 font-bold text-slate-900 bg-slate-50 border border-slate-200">
-                          Friday
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-1.5 border border-slate-200 bg-blue-800 text-white rounded-md font-bold text-[11px]">
-                          <span className="text-[9px] uppercase tracking-widest text-blue-200 block">THEORY</span>
-                          22DS301 - Machine Learning (LH-302)
-                        </td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                        <td className="p-2 border border-slate-200 text-slate-300 font-light">+</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════ TAB 5: REPORTS / SUMMARY ════════════════ */}
-          {activeTab === "reports" && (
-            <div className="space-y-6 animate-in fade-in duration-150">
-              <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <BarChart3 className="w-5 h-5 text-blue-700" />
-                    <h3 className="text-sm font-extrabold text-slate-900">Attendance Summary & Reports</h3>
-                  </div>
-                  <button className="px-3 py-1.5 rounded-lg bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 cursor-pointer">
-                    <FileSpreadsheet className="w-3.5 h-3.5" /> Export Excel
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-                  <div>
-                    <label className="font-bold text-slate-700">Course</label>
-                    <select className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-medium">
-                      <option>22CY302 - Malware Analysis (DS-3B)</option>
-                      <option>22DS301 - Machine Learning (DS-3B)</option>
-                      <option>22DT434 - Big Data Analytics Lab (DS-3A)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="font-bold text-slate-700">Section</label>
-                    <select className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-medium">
-                      <option>DS 3B</option>
-                      <option>DS 3A</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="font-bold text-slate-700">From Date</label>
-                    <input
-                      type="date"
-                      defaultValue="2026-08-01"
-                      className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-bold text-slate-700">To Date</label>
-                    <input
-                      type="date"
-                      defaultValue="2026-08-27"
-                      className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-medium"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Fallback for other menu tabs (Assignments, Mids, Projects, Events, Delegate) */}
-          {(activeTab === "delegate" ||
-            activeTab === "assignment" ||
-            activeTab === "mids" ||
-            activeTab === "projects" ||
-            activeTab === "events") && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-xs text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center mx-auto">
-                <FileText className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-extrabold text-slate-900 capitalize">{activeTab} Module</h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                This academic module is active and synced with the Central ERP server for Semester 2026-27.
-              </p>
-              <button
-                onClick={() => setActiveTab("home")}
-                className="px-4 py-2 rounded-xl bg-blue-700 text-white font-bold text-xs cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
-              >
-                <Home className="w-4 h-4" />
-                <span>Return to Dashboard</span>
-              </button>
-            </div>
-          )}
-        </div>
-      </main>
-
-      {/* ════════════════ POST ATTENDANCE MODAL ════════════════ */}
-      {attendanceModalOpen && selectedCourseForAttendance && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden my-6 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
-            {/* Modal Header */}
-            <div className="p-5 border-b border-slate-200 flex items-start justify-between bg-slate-50/80">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center font-bold">
-                  <CalendarDays className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-900">
-                    {selectedCourseForAttendance.code}
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    {selectedCourseForAttendance.name} | Sem {selectedCourseForAttendance.section}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setAttendanceModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200 cursor-pointer"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-5 overflow-y-auto space-y-4 flex-1">
-              {/* Date & Period Controls */}
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  {/* Calendar Input */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">CALENDAR:</span>
-                    <input
-                      type="date"
-                      value={attendanceDate}
-                      onChange={(e) => setAttendanceDate(e.target.value)}
-                      className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 font-mono font-bold text-xs text-slate-800"
-                    />
-
-                    <div className="flex items-center gap-3 ml-2 text-xs font-semibold">
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="attMode"
-                          checked={attendanceMode === "regular"}
-                          onChange={() => setAttendanceMode("regular")}
-                          className="text-blue-600"
-                        />
-                        <span>Regular</span>
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="attMode"
-                          checked={attendanceMode === "adjusted"}
-                          onChange={() => setAttendanceMode("adjusted")}
-                          className="text-blue-600"
-                        />
-                        <span>Adjusted</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Period Pills */}
-                <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                    PERIODS:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PERIOD_SLOTS.map((period) => (
-                      <button
-                        key={period.id}
-                        type="button"
-                        onClick={() => setSelectedPeriod(period.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                          selectedPeriod === period.id
-                            ? "bg-blue-900 text-white border-blue-900 shadow-xs"
-                            : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                        }`}
-                      >
-                        {period.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Student Roll List Header & Summary Counter */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-extrabold text-slate-900">Student Roll List</h4>
-                  <span className="px-2.5 py-0.5 rounded-md bg-slate-200 text-slate-800 font-bold text-xs">
-                    Total: {studentRoster.length}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-xs">
-                    Present: {presentCount}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold text-xs">
-                    Absent: {absentCount}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleMarkAll(true)}
-                    className="text-xs font-bold text-blue-700 hover:underline cursor-pointer"
-                  >
-                    Mark All Present
-                  </button>
-                  <span className="text-slate-300">|</span>
-                  <button
-                    type="button"
-                    onClick={() => handleMarkAll(false)}
-                    className="text-xs font-bold text-rose-600 hover:underline cursor-pointer"
-                  >
-                    Mark All Absent
-                  </button>
-                </div>
-              </div>
-
-              {/* Search Bar */}
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search by Roll Number or Name..."
-                  value={searchStudentQuery}
-                  onChange={(e) => setSearchStudentQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
-                />
-              </div>
-
-              {/* Student Table Roster */}
-              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
-                <div className="max-h-72 overflow-y-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead className="sticky top-0 bg-slate-100/90 backdrop-blur-xs text-slate-500 font-extrabold text-[10px] uppercase tracking-wider border-b border-slate-200 z-10">
-                      <tr>
-                        <th className="py-2.5 px-4 w-12 text-center">S.NO</th>
-                        <th className="py-2.5 px-4">ROLL NUMBER</th>
-                        <th className="py-2.5 px-4">NAME</th>
-                        <th className="py-2.5 px-4 text-center">HELD</th>
-                        <th className="py-2.5 px-6 text-right">STATUS</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
-                      {filteredModalStudents.map((s, idx) => (
-                        <tr
-                          key={s.id}
-                          onClick={() => handleToggleStudent(s.id)}
-                          className={`transition-colors cursor-pointer ${
-                            s.status ? "hover:bg-emerald-50/40" : "bg-rose-50/40 hover:bg-rose-50/70"
-                          }`}
-                        >
-                          <td className="py-2.5 px-4 text-center font-mono text-slate-400 text-[11px]">
-                            {idx + 1}
+                    <tbody className="divide-y divide-slate-100">
+                      {courses.map((course) => (
+                        <tr key={course.id} className="hover:bg-blue-50/30 transition-colors">
+                          <td className="py-3.5 px-4 font-bold text-slate-900">
+                            <div className="flex flex-col">
+                              <span className="font-extrabold text-blue-900">{course.name}</span>
+                              <span className="text-[11px] font-mono text-slate-600 font-semibold">{course.code}</span>
+                            </div>
                           </td>
-                          <td className="py-2.5 px-4 font-mono font-bold text-slate-900">
-                            {s.rollNumber}
-                          </td>
-                          <td className="py-2.5 px-4 font-bold text-slate-800">{s.name}</td>
-                          <td className="py-2.5 px-4 text-center">
-                            <span className={`font-mono text-[11px] font-bold ${
-                              (s.heldCount / s.totalHeld) >= 0.75 ? "text-emerald-700" : "text-rose-700"
-                            }`}>
-                              {s.heldCount}/{s.totalHeld} ({Math.round((s.heldCount / s.totalHeld) * 100)}%)
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-6 text-right">
-                            {/* Toggle Switch */}
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleToggleStudent(s.id);
-                              }}
-                              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                s.status ? "bg-blue-700" : "bg-slate-300"
+                          <td className="py-3.5 px-3">
+                            <span
+                              className={`px-2.5 py-1 rounded-md text-[11px] font-bold ${
+                                course.type === "Theory"
+                                  ? "bg-blue-100 text-blue-800 border border-blue-200"
+                                  : "bg-emerald-100 text-emerald-800 border border-emerald-200"
                               }`}
                             >
-                              <span
-                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                                  s.status ? "translate-x-5" : "translate-x-0"
-                                }`}
-                              />
+                              {course.type}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3 font-semibold text-slate-700">{course.program}</td>
+                          <td className="py-3.5 px-3">
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold border border-slate-200">
+                              {course.section}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3 font-bold text-slate-900">{course.strength}</td>
+                          <td className="py-3.5 px-3 font-semibold text-slate-700">{course.room}</td>
+                          <td className="py-3.5 px-3">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-700">
+                              {course.batch}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3 text-slate-600 font-medium">{course.addedBy}</td>
+                          <td className="py-3.5 px-4 text-center">
+                            <button
+                              onClick={() => openAttendanceModal(course)}
+                              className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all cursor-pointer inline-flex items-center gap-1.5"
+                            >
+                              <CheckSquare className="w-3.5 h-3.5" />
+                              <span>Attendance</span>
                             </button>
                           </td>
                         </tr>
@@ -1767,31 +1216,721 @@ export default function FacultyPortal() {
                   </table>
                 </div>
               </div>
+
+              {/* 4. MENTOR OVERVIEW & QUICK LINKS */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Mentor Overview Card */}
+                <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-indigo-600" />
+                      <span className="font-extrabold text-slate-900 text-sm">Mentor Overview</span>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab("mentoring")}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-700"
+                    >
+                      View All Mentees &rarr;
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-4 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                    <div className="w-16 h-16 rounded-xl bg-indigo-100 border border-indigo-200 flex flex-col items-center justify-center text-indigo-900">
+                      <span className="text-2xl font-black">{mentees.length}</span>
+                      <span className="text-[10px] font-bold uppercase">Mentees</span>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-indigo-950">Assigned Section: <span className="font-black text-blue-700">{facultyProfile.section}</span></p>
+                      <p className="text-[11px] text-slate-600">Counseling & Guidance Group &bull; Bi-weekly Review System</p>
+                      <div className="flex items-center gap-2 pt-1">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          Avg Attendance: 84%
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                          Critical Cases: 2
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Actions Shortcuts */}
+                <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+                  <span className="font-extrabold text-slate-900 text-sm block">Quick Links</span>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      onClick={() => setActiveTab("academics")}
+                      className="p-3 rounded-xl bg-blue-50/70 hover:bg-blue-100 border border-blue-200 text-blue-900 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <BookOpen className="w-5 h-5 text-blue-700" />
+                      <span>View Courses</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("mids")}
+                      className="p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100 border border-amber-200 text-amber-900 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Award className="w-5 h-5 text-amber-700" />
+                      <span>Exam Marks</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("mentoring")}
+                      className="p-3 rounded-xl bg-indigo-50/70 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <Users className="w-5 h-5 text-indigo-700" />
+                      <span>Mentoring</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("workload")}
+                      className="p-3 rounded-xl bg-teal-50/70 hover:bg-teal-100 border border-teal-200 text-teal-900 text-center font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <CalendarDays className="w-5 h-5 text-teal-700" />
+                      <span>Workload</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════ TAB 2: ACADEMICS & POST ATTENDANCE ════════════════ */}
+          {activeTab === "academics" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
+                <div>
+                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Academics & Attendance Posting</h2>
+                  <p className="text-xs text-slate-600 mt-0.5">Select any assigned theory or practical course to post hourly attendance.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs border border-blue-200">
+                    Active Semester: AY 2025–26
+                  </span>
+                </div>
+              </div>
+
+              {/* Course Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {courses.map((course) => (
+                  <div
+                    key={course.id}
+                    className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:border-blue-300 transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <span className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                            {course.code}
+                          </span>
+                          <h3 className="text-lg font-black text-slate-900 mt-1.5 leading-snug">
+                            {course.name}
+                          </h3>
+                        </div>
+                        <span
+                          className={`px-2.5 py-1 rounded-md text-xs font-bold shrink-0 ${
+                            course.type === "Theory"
+                              ? "bg-blue-100 text-blue-900"
+                              : "bg-emerald-100 text-emerald-900"
+                          }`}
+                        >
+                          {course.type}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                          <p className="text-[10px] font-bold text-slate-600 uppercase">Section</p>
+                          <p className="text-sm font-black text-slate-900 mt-0.5">{course.section}</p>
+                        </div>
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                          <p className="text-[10px] font-bold text-slate-600 uppercase">Strength</p>
+                          <p className="text-sm font-black text-slate-900 mt-0.5">{course.strength}</p>
+                        </div>
+                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                          <p className="text-[10px] font-bold text-slate-600 uppercase">Room</p>
+                          <p className="text-sm font-black text-slate-900 mt-0.5">{course.room}</p>
+                        </div>
+                      </div>
+
+                      {course.coInstructors && (
+                        <div className="text-[11px] text-slate-600 bg-slate-50/80 p-2 rounded-lg border border-slate-100">
+                          <span className="font-bold text-slate-700">Co-Instructors: </span>
+                          {course.coInstructors.join(", ")}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => openAttendanceModal(course)}
+                      className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    >
+                      <CheckSquare className="w-4 h-4" />
+                      <span>Post Attendance</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════ TAB 3: DELEGATE ATTENDANCE ════════════════ */}
+          {activeTab === "delegate" && (
+            <div className="space-y-6">
+              <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
+                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Delegate Course Attendance</h2>
+                <p className="text-xs text-slate-600 mt-0.5">Delegate your class periods to a substitute faculty member during leave or official duty.</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Form Card */}
+                <form onSubmit={handleCreateDelegation} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                  <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
+                    Assign Substitute Faculty
+                  </h3>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Select Course</label>
+                    <select
+                      value={delegatedCourse}
+                      onChange={(e) => setDelegatedCourse(e.target.value)}
+                      required
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="">-- Choose Course --</option>
+                      {courses.map((c) => (
+                        <option key={c.id} value={c.name}>
+                          {c.code} – {c.name} ({c.section})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Substitute Faculty</label>
+                    <select
+                      value={delegatedFaculty}
+                      onChange={(e) => setDelegatedFaculty(e.target.value)}
+                      required
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="">-- Select Faculty --</option>
+                      <option value="Mr. Miskeen Ali">Mr. Miskeen Ali</option>
+                      <option value="Mrs. Swetha">Mrs. Swetha</option>
+                      <option value="Mr. M Yadaiah">Mr. M Yadaiah</option>
+                      <option value="Mr. M Srinivasulu">Mr. M Srinivasulu</option>
+                      <option value="Mr. T Shravan Kumar">Mr. T Shravan Kumar</option>
+                      <option value="Mrs. G Sushma">Mrs. G Sushma</option>
+                      <option value="Mrs. B Gayathri">Mrs. B Gayathri</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">Date of Delegation</label>
+                    <input
+                      type="date"
+                      value={delegatedDate}
+                      onChange={(e) => setDelegatedDate(e.target.value)}
+                      required
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+                  >
+                    Confirm & Delegate Class
+                  </button>
+                </form>
+
+                {/* Delegation History Table */}
+                <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                  <h3 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
+                    Active & Past Delegations
+                  </h3>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100 text-slate-600 font-bold uppercase text-[10px]">
+                        <tr>
+                          <th className="py-2.5 px-3">Course</th>
+                          <th className="py-2.5 px-3">Section</th>
+                          <th className="py-2.5 px-3">Date</th>
+                          <th className="py-2.5 px-3">Delegated To</th>
+                          <th className="py-2.5 px-3">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {delegationsList.map((del) => (
+                          <tr key={del.id}>
+                            <td className="py-3 px-3 font-bold text-slate-900">{del.course}</td>
+                            <td className="py-3 px-3">{del.section}</td>
+                            <td className="py-3 px-3 text-slate-600">{del.date}</td>
+                            <td className="py-3 px-3 font-semibold text-blue-700">{del.delegatedTo}</td>
+                            <td className="py-3 px-3">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  del.status === "Active"
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : "bg-gray-100 text-gray-700"
+                                }`}
+                              >
+                                {del.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════ TAB 4: MENTORING ════════════════ */}
+          {activeTab === "mentoring" && (
+            <div className="space-y-6">
+              {/* Mentor Information Header Banner */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-700 to-indigo-800 text-white font-black text-2xl flex items-center justify-center shadow-md">
+                    {facultyName.charAt(0)}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Official Faculty Mentor</span>
+                    <h3 className="text-lg font-extrabold text-slate-900">{facultyName}</h3>
+                    <p className="text-xs text-slate-600 font-medium">{facultyDept} &bull; {facultyProfile.phone}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center">
+                    <p className="text-[10px] font-bold text-slate-600 uppercase">Assigned Mentees</p>
+                    <p className="text-lg font-black text-blue-700 leading-tight">{mentees.length}</p>
+                  </div>
+                  <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center">
+                    <p className="text-[10px] font-bold text-slate-600 uppercase">Section</p>
+                    <p className="text-lg font-black text-slate-900 leading-tight">{facultyProfile.section}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mentee List Table with WhatsApp triggers */}
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
+                <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+                  <div className="flex items-center gap-2.5">
+                    <Users className="w-5 h-5 text-indigo-600" />
+                    <h3 className="text-base font-extrabold text-slate-900">Mentee Student Roster</h3>
+                  </div>
+
+                  <div className="relative w-full sm:w-64">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search Roll No or Name..."
+                      value={menteeSearch}
+                      onChange={(e) => setMenteeSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-100 text-slate-600 uppercase text-[10px] font-extrabold tracking-wider border-b border-slate-200">
+                      <tr>
+                        <th className="py-3 px-4">S.No</th>
+                        <th className="py-3 px-3">Roll Number</th>
+                        <th className="py-3 px-3">Student Name</th>
+                        <th className="py-3 px-3 text-center">Attendance %</th>
+                        <th className="py-3 px-3 text-center">Backlogs</th>
+                        <th className="py-3 px-4 text-center">Quick Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredMentees.map((m, idx) => (
+                        <tr key={m.id} className="hover:bg-blue-50/30 transition-colors">
+                          <td className="py-3 px-4 font-bold text-slate-500">{idx + 1}</td>
+                          <td className="py-3 px-3 font-mono font-bold text-blue-700">{m.rollNumber}</td>
+                          <td className="py-3 px-3 font-bold text-slate-900">{m.name}</td>
+                          <td className="py-3 px-3 text-center">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
+                                m.attendancePercent >= 75
+                                  ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                  : "bg-red-100 text-red-800 border border-red-200"
+                              }`}
+                            >
+                              {m.attendancePercent}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span
+                              className={`px-2 py-0.5 rounded text-xs font-bold ${
+                                m.backlogs === 0 ? "bg-gray-100 text-gray-700" : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {m.backlogs}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              {/* Student WhatsApp */}
+                              <a
+                                href={`https://wa.me/91${m.studentPhone}?text=Hello%20${encodeURIComponent(m.name)},%20this%20is%20your%20Mentor%20${encodeURIComponent(facultyName)}.`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs transition-all"
+                                title="Chat with Student on WhatsApp"
+                              >
+                                <MessageSquare className="w-3 h-3" />
+                                <span>Student WA</span>
+                              </a>
+
+                              {/* Father WhatsApp */}
+                              <a
+                                href={`https://wa.me/91${m.fatherPhone}?text=Respected%20Parent,%20this%20is%20${encodeURIComponent(facultyName)},%20Mentor%20for%20your%20ward%20${encodeURIComponent(m.name)}%20(${m.rollNumber}).`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs transition-all"
+                                title="Chat with Father on WhatsApp"
+                              >
+                                <Phone className="w-3 h-3" />
+                                <span>Father WA</span>
+                              </a>
+
+                              <button
+                                onClick={() => {
+                                  toast({
+                                    title: `Academic Log for ${m.name}`,
+                                    description: m.mentorNotes || "No remarks noted yet.",
+                                  });
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition-all cursor-pointer"
+                              >
+                                History
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════ TAB 5: FACULTY WORKLOAD ════════════════ */}
+          {activeTab === "workload" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
+                <div>
+                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Faculty Weekly Workload Timetable</h2>
+                  <p className="text-xs text-slate-600 mt-0.5">Assigned schedule periods and occupied laboratory hours.</p>
+                </div>
+                <span className="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-900 font-bold border border-blue-200 text-xs">
+                  Weekly Total: 14 Periods
+                </span>
+              </div>
+
+              {/* Timetable Schedule Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {workload.map((w, idx) => (
+                  <div key={idx} className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                      <span className="font-extrabold text-slate-900 text-sm">{w.day}</span>
+                      <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                        {w.periods.length} Classes
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {w.periods.map((p, pIdx) => (
+                        <div key={pIdx} className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-mono font-bold text-slate-500">{p.slot}</span>
+                            <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px]">
+                              {p.section}
+                            </span>
+                          </div>
+                          <p className="text-xs font-black text-slate-900">{p.subject}</p>
+                          <p className="text-[11px] text-slate-500 font-semibold">{p.room}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════ TAB 6: MID EXAMINATIONS ════════════════ */}
+          {activeTab === "mids" && (
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+              <h2 className="text-xl font-extrabold text-slate-900">Mid Examination Marks Entry</h2>
+              <p className="text-xs text-slate-600">Mid-1 and Mid-2 internal marks entry module for active courses.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                {courses.map((c) => (
+                  <div key={c.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-sm text-slate-900">{c.name}</p>
+                      <p className="text-xs text-slate-500">{c.code} &bull; Section {c.section}</p>
+                    </div>
+                    <button
+                      onClick={() => toast({ title: "Mid Marks Entry", description: `Mid-1 Marks portal opened for ${c.code}.` })}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-all"
+                    >
+                      Enter Marks
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════ TAB 7: REPORTS ════════════════ */}
+          {activeTab === "reports" && (
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+              <h2 className="text-xl font-extrabold text-slate-900">Academic Reports & Attendance Registers</h2>
+              <p className="text-xs text-slate-600">Consolidated attendance reports, subject-wise analysis, and monthly attendance sheets.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-200 space-y-2">
+                  <BarChart3 className="w-6 h-6 text-blue-600" />
+                  <h4 className="font-bold text-sm text-blue-950">Consolidated Attendance</h4>
+                  <p className="text-xs text-slate-600">Download complete monthly attendance register in Excel / CSV format.</p>
+                  <button
+                    onClick={() => toast({ title: "Report Download", description: "Consolidated Attendance report generated." })}
+                    className="w-full py-2 rounded-xl bg-blue-600 text-white font-bold text-xs"
+                  >
+                    Generate Report
+                  </button>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2">
+                  <FileCheck className="w-6 h-6 text-emerald-600" />
+                  <h4 className="font-bold text-sm text-emerald-950">Daily Attendance Register</h4>
+                  <p className="text-xs text-slate-600">View hourly present/absent logs marked by period.</p>
+                  <button
+                    onClick={() => toast({ title: "Report Download", description: "Daily Attendance log prepared." })}
+                    className="w-full py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs"
+                  >
+                    View Logs
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          POST ATTENDANCE MODAL (EXACT CVR WORKFLOW & REAL SLOTS)
+      ───────────────────────────────────────────────────────────── */}
+      {attendanceModalOpen && selectedCourseForAttendance && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-5 bg-gradient-to-r from-blue-700 to-indigo-800 text-white flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-blue-200 uppercase tracking-wider block">
+                  Hourly Attendance Portal
+                </span>
+                <h3 className="text-lg font-extrabold">
+                  {selectedCourseForAttendance.name} ({selectedCourseForAttendance.code})
+                </h3>
+                <p className="text-xs text-blue-100/90 font-medium">
+                  Section: {selectedCourseForAttendance.section} &bull; Room: {selectedCourseForAttendance.room}
+                </p>
+              </div>
+              <button
+                onClick={() => setAttendanceModalOpen(false)}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-2.5">
+            {/* Modal Sub-Header (Date, Periods, Radio, Counters) */}
+            <div className="p-5 border-b border-slate-200 bg-slate-50 space-y-4">
+              {/* Top Filters: Mode & Date */}
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                {/* Regular vs Adjusted */}
+                <div className="flex items-center gap-4 text-xs font-bold text-slate-800">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="attendance_mode"
+                      checked={attendanceMode === "regular"}
+                      onChange={() => setAttendanceMode("regular")}
+                      className="text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Regular Class</span>
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="attendance_mode"
+                      checked={attendanceMode === "adjusted"}
+                      onChange={() => setAttendanceMode("adjusted")}
+                      className="text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Adjusted Class</span>
+                  </label>
+                </div>
+
+                {/* Date Picker */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-700">Date:</span>
+                  <input
+                    type="date"
+                    value={attendanceDate}
+                    onChange={(e) => setAttendanceDate(e.target.value)}
+                    className="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:border-blue-500 bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Period Selector Pills */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Select Period / Slot
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {PERIOD_SLOTS.map((slot) => {
+                    const isSelected = selectedPeriod === slot.id;
+                    return (
+                      <button
+                        key={slot.id}
+                        type="button"
+                        onClick={() => setSelectedPeriod(slot.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        {slot.label} {slot.isEvening && "(Evening)"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Summary Counter Badges & Master Toggle */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-xl bg-slate-200/70 text-slate-800 font-bold text-xs">
+                    Total: {totalStudentsCount}
+                  </span>
+                  <span className="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs">
+                    Present: {presentStudentsCount}
+                  </span>
+                  <span className="px-3 py-1 rounded-xl bg-red-100 text-red-800 font-bold text-xs">
+                    Absent: {absentStudentsCount}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleMarkAll(true)}
+                    className="px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer"
+                  >
+                    Mark All Present
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleMarkAll(false)}
+                    className="px-3 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition-all cursor-pointer"
+                  >
+                    Mark All Absent
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Student Search Bar */}
+            <div className="px-5 py-3 border-b border-slate-100 bg-white">
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search Roll No or Student Name..."
+                  value={searchStudentQuery}
+                  onChange={(e) => setSearchStudentQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Student Attendance List Table */}
+            <div className="flex-1 overflow-y-auto px-5 py-2">
+              <table className="w-full text-left text-xs">
+                <thead className="sticky top-0 bg-slate-100 text-slate-600 uppercase text-[10px] font-extrabold tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="py-2.5 px-3">S.No</th>
+                    <th className="py-2.5 px-3">Roll Number</th>
+                    <th className="py-2.5 px-3">Student Name</th>
+                    <th className="py-2.5 px-3 text-center">Held Attendance</th>
+                    <th className="py-2.5 px-3 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredRoster.map((s) => {
+                    const heldRatio = `${s.heldCount}/${s.totalHeld}`;
+                    const heldPct = Math.round((s.heldCount / s.totalHeld) * 100);
+                    return (
+                      <tr key={s.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-2.5 px-3 font-semibold text-slate-500">{s.sNo}</td>
+                        <td className="py-2.5 px-3 font-mono font-bold text-blue-700">{s.rollNumber}</td>
+                        <td className="py-2.5 px-3 font-extrabold text-slate-900">{s.name}</td>
+                        <td className="py-2.5 px-3 text-center font-semibold text-slate-600">
+                          {heldRatio} ({heldPct}%)
+                        </td>
+                        <td className="py-2.5 px-3 text-center">
+                          <button
+                            type="button"
+                            onClick={() => toggleStudentStatus(s.id)}
+                            className={`px-4 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                              s.status
+                                ? "bg-emerald-500 text-white shadow-xs"
+                                : "bg-red-500 text-white shadow-xs"
+                            }`}
+                          >
+                            {s.status ? "Present" : "Absent"}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Modal Footer Actions */}
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => setAttendanceModalOpen(false)}
-                className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
+
               <button
                 type="button"
-                disabled={submittingAttendance}
                 onClick={handleSubmitAttendance}
-                className="px-5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-extrabold text-xs shadow-md transition-all cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+                disabled={submittingAttendance}
+                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
               >
                 {submittingAttendance ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Submitting...</span>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Posting Attendance...</span>
                   </>
                 ) : (
                   <>
-                    <Check className="w-3.5 h-3.5" />
+                    <CheckCircle2 className="w-4 h-4" />
                     <span>Submit Attendance</span>
                   </>
                 )}
@@ -1801,18 +1940,5 @@ export default function FacultyPortal() {
         </div>
       )}
     </div>
-  );
-}
-
-function BuildingIcon() {
-  return (
-    <svg className="w-3.5 h-3.5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-      />
-    </svg>
   );
 }
