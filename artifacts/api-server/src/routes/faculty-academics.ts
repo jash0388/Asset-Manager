@@ -130,12 +130,24 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
     const queryDay = (req.query.day as string)?.toUpperCase() || todayDayCode;
     const queryDate = (req.query.date as string) || todayDateStr;
 
+    // Determine matching day codes (e.g. for Saturday -> ["SAT", "SATURDAY", "Saturday"])
+    const dayVariantsMap: Record<string, string[]> = {
+      SUN: ["SUN", "SUNDAY", "Sunday"],
+      MON: ["MON", "MONDAY", "Monday"],
+      TUE: ["TUE", "TUESDAY", "Tuesday"],
+      WED: ["WED", "WEDNESDAY", "Wednesday"],
+      THUR: ["THUR", "THU", "THURSDAY", "Thursday"],
+      FRI: ["FRI", "FRIDAY", "Friday"],
+      SAT: ["SAT", "SATURDAY", "Saturday"],
+    };
+    const dayVariants = dayVariantsMap[queryDay] || [queryDay];
+
     // Fetch schedules for this mentor on this day
     const { data: schedules, error: schedErr } = await supabase
       .from("qr_schedules")
       .select("*")
       .eq("mentor_id", mentorId)
-      .eq("day_of_week", queryDay)
+      .in("day_of_week", dayVariants)
       .order("start_time");
 
     if (schedErr) throw schedErr;

@@ -598,12 +598,84 @@ export default function FacultyPortal() {
     date: new Date().toISOString().split("T")[0],
     dayCode: "SAT",
     dayName: "Saturday",
-    currentTime: "10:35 AM IST",
+    currentTime: "10:45 AM IST",
     totalScheduledToday: 0,
     attendanceTakenCount: 0,
     classes: [],
     nextWorkingDay: null,
   });
+
+  // Effective today classes: uses live API data if available, or derives from faculty timetable/workload
+  const effectiveTodayClasses: TodayClassItem[] = useMemo(() => {
+    if (todayClassesInfo.classes && todayClassesInfo.classes.length > 0) {
+      return todayClassesInfo.classes;
+    }
+    const dayName = todayClassesInfo.dayName || "Saturday";
+    const dayEntry = workload.find(
+      (w) => w.day.toLowerCase() === dayName.toLowerCase() || w.day.toUpperCase().startsWith((todayClassesInfo.dayCode || "SAT").toUpperCase())
+    );
+    if (!dayEntry || !dayEntry.periods || dayEntry.periods.length === 0) return [];
+
+    const now = new Date();
+    const curHour = now.getHours();
+    const curMin = now.getMinutes();
+    const curTotalMin = curHour * 60 + curMin;
+
+    return dayEntry.periods.map((p, idx) => {
+      const isLab = p.subject.toUpperCase().includes("LAB");
+      const [sPart, ePart] = p.slot.split("–").map((s) => s.trim());
+      let startMin = 9 * 60;
+      let endMin = 10 * 60;
+      if (sPart) {
+        const [sh, sm] = sPart.replace(/[^0-9:]/g, "").split(":").map(Number);
+        if (!isNaN(sh)) startMin = (sh < 8 ? sh + 12 : sh) * 60 + (sm || 0);
+      }
+      if (ePart) {
+        const [eh, em] = ePart.replace(/[^0-9:]/g, "").split(":").map(Number);
+        if (!isNaN(eh)) endMin = (eh < 8 ? eh + 12 : eh) * 60 + (em || 0);
+      }
+
+      let timingStatus: "live" | "upcoming" | "completed" = "upcoming";
+      let isLocked = false;
+      if (curTotalMin < startMin) {
+        timingStatus = "upcoming";
+        isLocked = true;
+      } else if (curTotalMin >= startMin && curTotalMin <= endMin) {
+        timingStatus = "live";
+        isLocked = false;
+      } else {
+        timingStatus = "completed";
+        isLocked = false;
+      }
+
+      return {
+        id: `today_${idx + 1}`,
+        scheduleId: 1000 + idx,
+        code: p.subject.toUpperCase(),
+        name: p.subject,
+        type: isLab ? "Practical" : "Theory",
+        program: "CSE-DS",
+        section: p.section,
+        rawSection: p.section.replace(/[^ABC]/g, "") || "A",
+        year: "III",
+        room: p.room || "Hall 412",
+        startTime: sPart,
+        endTime: ePart,
+        startTimeFormatted: sPart,
+        endTimeFormatted: ePart,
+        slot: p.slot,
+        strength: 55,
+        isAttendanceTaken: false,
+        attendedCount: null,
+        session: null,
+        isLive: timingStatus === "live",
+        timingStatus,
+        isLocked,
+        unlocksAt: sPart,
+        statusLabel: timingStatus === "live" ? "Live Class Now" : timingStatus === "upcoming" ? "Upcoming Today" : "Period Concluded",
+      };
+    });
+  }, [todayClassesInfo.classes, todayClassesInfo.dayName, todayClassesInfo.dayCode, workload]);
 
   // Fetch live courses, mentees, workload, and today's classes from API
   useEffect(() => {
@@ -1621,8 +1693,8 @@ export default function FacultyPortal() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {todayClassesInfo.classes.length > 0 ? (
-                        todayClassesInfo.classes.map((cls) => {
+                      {effectiveTodayClasses.length > 0 ? (
+                        effectiveTodayClasses.map((cls) => {
                           const courseObj: Course = {
                             id: cls.id,
                             code: cls.code,
@@ -1850,7 +1922,7 @@ export default function FacultyPortal() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs">
-                    {todayClassesInfo.classes.length} Classes Today
+                    {effectiveTodayClasses.length} Classes Today
                   </span>
                   <span className="px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5 border border-emerald-200">
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1860,9 +1932,9 @@ export default function FacultyPortal() {
               </div>
 
               {/* Today's Scheduled Class Cards */}
-              {todayClassesInfo.classes.length > 0 ? (
+              {effectiveTodayClasses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {todayClassesInfo.classes.map((cls) => {
+                  {effectiveTodayClasses.map((cls) => {
                     const courseObj: Course = {
                       id: cls.id,
                       code: cls.code,

@@ -67487,7 +67487,17 @@ router7.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, re
     const todayDateStr = istDate.toISOString().split("T")[0];
     const queryDay = req.query.day?.toUpperCase() || todayDayCode;
     const queryDate = req.query.date || todayDateStr;
-    const { data: schedules, error: schedErr } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", queryDay).order("start_time");
+    const dayVariantsMap = {
+      SUN: ["SUN", "SUNDAY", "Sunday"],
+      MON: ["MON", "MONDAY", "Monday"],
+      TUE: ["TUE", "TUESDAY", "Tuesday"],
+      WED: ["WED", "WEDNESDAY", "Wednesday"],
+      THUR: ["THUR", "THU", "THURSDAY", "Thursday"],
+      FRI: ["FRI", "FRIDAY", "Friday"],
+      SAT: ["SAT", "SATURDAY", "Saturday"]
+    };
+    const dayVariants = dayVariantsMap[queryDay] || [queryDay];
+    const { data: schedules, error: schedErr } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).in("day_of_week", dayVariants).order("start_time");
     if (schedErr) throw schedErr;
     const { data: sessions, error: sessErr } = await supabase.from("qr_mentor_sessions").select("*").eq("mentor_id", mentorId).eq("date", queryDate);
     if (sessErr) throw sessErr;
