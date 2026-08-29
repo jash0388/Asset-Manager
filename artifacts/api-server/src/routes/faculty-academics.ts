@@ -111,6 +111,138 @@ router.get("/faculty/attendance-history", authMiddleware, mentorOnly, async (req
   }
 });
 
+// GET /faculty/today-classes — Today's scheduled live classes for logged-in faculty with attendance status
+router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any, res: any) => {
+  const mentorId = req.mentorId!;
+  try {
+    // Determine today's day of week in IST (UTC+5:30)
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(now.getTime() + istOffset);
+    const dayIndex = istDate.getUTCDay(); // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
+    const dayNames = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+    const fullDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const todayDayCode = dayNames[dayIndex];
+    const todayDayName = fullDayNames[dayIndex];
+    const todayDateStr = istDate.toISOString().split("T")[0];
+
+    // Optional query override
+    const queryDay = (req.query.day as string)?.toUpperCase() || todayDayCode;
+    const queryDate = (req.query.date as string) || todayDateStr;
+
+    // Fetch schedules for this mentor on this day
+    const { data: schedules, error: schedErr } = await supabase
+      .from("qr_schedules")
+      .select("*")
+      .eq("mentor_id", mentorId)
+      .eq("day_of_week", queryDay)
+      .order("start_time");
+
+    if (schedErr) throw schedErr;
+
+    // Fetch mentor sessions recorded today
+    const { data: sessions, error: sessErr } = await supabase
+      .from("qr_mentor_sessions")
+      .select("*")
+      .eq("mentor_id", mentorId)
+      .eq("date", queryDate);
+
+    if (sessErr) throw sessErr;
+
+    const schedList = schedules || [];
+    const sessionList = sessions || [];
+
+    // Helper: format 24h to 12h
+    function formatTime(t: string): string {
+      if (!t) return "09:00 AM";
+      const parts = t.split(":");
+      let h = parseInt(parts[0], 10);
+      const m = parts[1] || "00";
+      const ampm = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+      return `${String(h).padStart(2, "0")}:${m} ${ampm}`;
+    }
+
+    const currentHour = istDate.getUTCHours();
+    const currentMin = istDate.getUTCMinutes();
+    const currentTotalMin = currentHour * 60 + currentMin;
+
+    const results = [];
+    for (const s of schedList) {
+      const subjectClean = (s.subject || "").toUpperCase().trim();
+      const isLab = subjectClean.includes("LAB") || subjectClean.includes("PRACTICAL");
+      const isClubOrSports = ["SPORTS", "LIBRARY", "COUNSELLING", "CLUB ACTIVITIES", "SPORTS/LIBRARY"].includes(subjectClean);
+
+      // Section format: DS-4A or DS-2B
+      const sectionLabel = `DS-${s.year === "II" ? "2" : s.year === "III" ? "3" : "4"}${s.section}`;
+      const sectionPattern = `DS ${s.year}/I/${s.section}`;
+
+      // Check if session recorded for this schedule today
+      const matchedSession = sessionList.find(
+        (sess) => sess.schedule_id === s.id
+      );
+
+      // Fetch student count in section
+      const { count } = await supabase
+        .from("qr_users")
+        .select("*", { count: "exact", head: true })
+        .like("section", `%${sectionPattern}%`);
+
+      // Check if live now
+      let isLive = false;
+      if (s.start_time && s.end_time) {
+        const [sh, sm] = s.start_time.split(":").map(Number);
+        const [eh, em] = s.end_time.split(":").map(Number);
+        const startMin = sh * 60 + (sm || 0);
+        const endMin = eh * 60 + (em || 0);
+        if (currentTotalMin >= startMin && currentTotalMin <= endMin) {
+          isLive = true;
+        }
+      }
+
+      results.push({
+        id: String(s.id),
+        scheduleId: s.id,
+        code: subjectClean,
+        name: s.subject || "Course",
+        type: isLab ? "Practical" : (isClubOrSports ? "Activity" : "Theory"),
+        program: "CSE-DS",
+        section: sectionLabel,
+        rawSection: s.section,
+        year: s.year,
+        room: isLab ? "Lab" : "Hall",
+        startTime: s.start_time,
+        endTime: s.end_time,
+        slot: `${formatTime(s.start_time)} – ${formatTime(s.end_time)}`,
+        strength: count || 55,
+        isAttendanceTaken: Boolean(matchedSession),
+        attendedCount: matchedSession ? matchedSession.student_count : null,
+        session: matchedSession || null,
+        isLive,
+      });
+    }
+
+    res.json({
+      date: queryDate,
+      dayCode: queryDay,
+      dayName: todayDayName,
+      totalScheduledToday: results.length,
+      attendanceTakenCount: results.filter((r) => r.isAttendanceTaken).length,
+      classes: results,
+    });
+  } catch (err: any) {
+    req.log?.error?.({ err }, "Get today classes error");
+    res.json({
+      date: new Date().toISOString().split("T")[0],
+      dayCode: "SAT",
+      dayName: "Saturday",
+      totalScheduledToday: 0,
+      attendanceTakenCount: 0,
+      classes: [],
+    });
+  }
+});
+
 // GET /faculty/section-students — Real students in this section from qr_users
 router.get("/faculty/section-students", authMiddleware, mentorOnly, async (req: any, res: any) => {
   const { section, scheduleId } = req.query as Record<string, string>;

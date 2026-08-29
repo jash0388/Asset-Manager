@@ -86,15 +86,55 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
   const today = getTodayDate();
   const section = req.query.section as string | undefined;
   try {
-    let query = supabase.from("qr_users").select("*");
+    let students: any[] = [];
     if (mentorId === -3 && section) {
-      query = query.eq("section", section);
+      const { data } = await supabase.from("qr_users").select("*").eq("section", section).order("name");
+      students = data || [];
     } else {
-      query = query.eq("mentor_id", mentorId);
-    }
-    const { data: students, error: studentError } = await query.order("name");
+      const { data: directStudents } = await supabase.from("qr_users").select("*").eq("mentor_id", mentorId).order("name");
+      if (directStudents && directStudents.length > 0) {
+        students = directStudents;
+      } else {
+        // Find mentor details to query section
+        const { data: mentor } = await supabase.from("qr_mentors").select("key, name").eq("id", mentorId).maybeSingle();
+        const mKey = String(mentor?.key || "").trim();
+        
+        // Lookup assigned section
+        let targetSection = section || "";
+        if (!targetSection) {
+          const SECTION_BY_KEY: Record<string, string> = {
+            "101": "DS II/I/A",
+            "102": "DS II/I/B",
+            "2012": "DS II/I/B",
+            "103": "DS III/I/A",
+            "104": "DS II/I/B",
+            "105": "DS II/I/C",
+            "2013": "DS II/I/C",
+            "106": "DS III/I/B",
+            "107": "DS II/I/A",
+            "108": "DS III/I/C",
+            "109": "DS IV/I/A",
+            "110": "DS IV/I/B",
+            "111": "DS II/I/A",
+            "112": "DS III/I/B",
+          };
+          targetSection = SECTION_BY_KEY[mKey] || "";
+        }
 
-    if (studentError) throw studentError;
+        if (!targetSection) {
+          // Check schedules
+          const { data: scheds } = await supabase.from("qr_schedules").select("year, section").eq("mentor_id", mentorId).limit(1);
+          if (scheds && scheds.length > 0) {
+            targetSection = `DS ${scheds[0].year}/I/${scheds[0].section}`;
+          }
+        }
+
+        if (targetSection) {
+          const { data: secStudents } = await supabase.from("qr_users").select("*").ilike("section", `%${targetSection}%`).order("unique_id");
+          students = secStudents || [];
+        }
+      }
+    }
 
     if (!students || students.length === 0) {
       res.json([]);
@@ -102,13 +142,11 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
     }
 
     const studentIds = students.map((s: any) => s.id);
-    const { data: records, error: recordError } = await supabase
+    const { data: records } = await supabase
       .from("qr_attendance")
       .select("*")
       .eq("date", today)
       .in("user_id", studentIds);
-
-    if (recordError) throw recordError;
 
     const recordsByUser = new Map<number, any>();
     if (records) {
@@ -118,6 +156,12 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
     const result = students.map((s: any) => {
       const rec = recordsByUser.get(s.id);
       return {
+        id: s.id,
+        name: s.name,
+        rollNumber: s.unique_id,
+        uniqueId: s.unique_id,
+        section: s.section,
+        batch: s.batch,
         user: formatUser(s),
         attendanceToday: rec ? formatRecord(rec, s) : null,
         cameToday: !!(rec && rec.entry_time),
@@ -125,7 +169,7 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
     });
     res.json(result);
   } catch (err: any) {
-    req.log.error({ err }, "Mentor students error");
+    req.log?.error?.({ err }, "Mentor students error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

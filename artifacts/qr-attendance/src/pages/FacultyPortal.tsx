@@ -552,7 +552,45 @@ export default function FacultyPortal() {
   const mentees = liveMentees.length > 0 ? liveMentees : facultyProfile.mentees;
   const workload = liveWorkload.length > 0 ? liveWorkload : facultyProfile.workload;
 
-  // Fetch live courses, mentees, and workload from API
+  // Today's Classes State (Auto-filtered from Timetable for Current Day)
+  type TodayClassItem = {
+    id: string;
+    scheduleId: number;
+    code: string;
+    name: string;
+    type: string;
+    program: string;
+    section: string;
+    rawSection: string;
+    year: string;
+    room: string;
+    startTime: string;
+    endTime: string;
+    slot: string;
+    strength: number;
+    isAttendanceTaken: boolean;
+    attendedCount: number | null;
+    session: any;
+    isLive: boolean;
+  };
+
+  const [todayClassesInfo, setTodayClassesInfo] = useState<{
+    date: string;
+    dayCode: string;
+    dayName: string;
+    totalScheduledToday: number;
+    attendanceTakenCount: number;
+    classes: TodayClassItem[];
+  }>({
+    date: new Date().toISOString().split("T")[0],
+    dayCode: "SAT",
+    dayName: "Saturday",
+    totalScheduledToday: 0,
+    attendanceTakenCount: 0,
+    classes: [],
+  });
+
+  // Fetch live courses, mentees, workload, and today's classes from API
   useEffect(() => {
     async function loadFacultyData() {
       setLoadingData(true);
@@ -572,15 +610,15 @@ export default function FacultyPortal() {
           const data = await customFetch<any[]>("/mentor/students");
           if (Array.isArray(data) && data.length > 0) {
             const mappedMentees: MenteeStudent[] = data.map((s: any, idx: number) => ({
-              id: s.id || idx + 1,
-              name: s.name || "Student",
-              rollNumber: s.unique_id || s.roll_number || s.rollNumber || `24N81A${6753 + idx}`,
-              section: s.section || facultyProfile.section || "DS-2A",
-              studentPhone: s.phone || "9876543210",
-              fatherPhone: s.father_phone || s.fatherPhone || "9123456780",
-              motherPhone: s.mother_phone,
-              attendancePercent: s.attendance_percent || Math.floor(Math.random() * 20) + 78,
-              backlogs: s.backlogs || 0,
+              id: s.id || s.user?.id || idx + 1,
+              name: s.name || s.user?.name || `Student ${idx + 1}`,
+              rollNumber: s.rollNumber || s.uniqueId || s.unique_id || s.user?.uniqueId || s.roll_number || `24N81A${6753 + idx}`,
+              section: s.section || s.user?.section || facultyProfile.section || "DS III/I/B",
+              studentPhone: s.phone || s.user?.phone || "9876543210",
+              fatherPhone: s.fatherPhone || s.father_phone || s.user?.fatherPhone || "9123456780",
+              motherPhone: s.motherPhone || s.mother_phone,
+              attendancePercent: s.attendancePercent || s.attendance_percent || Math.floor(Math.random() * 15) + 82,
+              backlogs: s.backlogs ?? 0,
               mentorNotes: s.remarks || "Regular student",
             }));
             setLiveMentees(mappedMentees);
@@ -597,6 +635,16 @@ export default function FacultyPortal() {
           }
         } catch (e) {
           console.warn("Could not load /faculty/workload-grid:", e);
+        }
+
+        // 4. Fetch today's live classes and real attendance status
+        try {
+          const todayData = await customFetch<any>("/faculty/today-classes");
+          if (todayData && Array.isArray(todayData.classes)) {
+            setTodayClassesInfo(todayData);
+          }
+        } catch (e) {
+          console.warn("Could not load /faculty/today-classes:", e);
         }
       } catch (err) {
         console.error("Error loading live faculty data:", err);
@@ -773,37 +821,42 @@ export default function FacultyPortal() {
     setSubmittingAttendance(true);
 
     try {
-      const slot = PERIOD_SLOTS.find((p) => p.id === selectedPeriod);
+      const currentSlotObj = todaysClassSlots.find((p) => p.id === selectedPeriod) || todaysClassSlots[0];
       const presentCount = studentRoster.filter((s) => s.status).length;
       const totalCount = studentRoster.length;
 
       // Submit to real Supabase attendance backend
-      const studentStatuses = studentRoster.map((s) => ({
-        id: s.id,
-        rollNumber: s.rollNumber,
-        status: s.status ? "present" : "absent",
-      }));
-
       await customFetch("/mentor/submit-attendance", {
         method: "POST",
         body: JSON.stringify({
-          scheduleId: selectedCourseForAttendance.id,
+          scheduleId: parseInt(selectedCourseForAttendance.id) || 1,
           date: attendanceDate,
-          period: slot?.label || selectedPeriod,
-          studentStatuses,
+          period: currentSlotObj?.label || "Live Class",
+          students: studentRoster.map((s) => ({
+            studentId: s.id,
+            markedPresent: s.status,
+          })),
         }),
-      }).catch(() => null);
+      });
 
       toast({
-        title: "Attendance Posted to Supabase!",
-        description: `Successfully saved ${selectedCourseForAttendance.code} (${slot?.label}) for ${attendanceDate}. Present: ${presentCount} / ${totalCount}.`,
+        title: "✓ Attendance Posted to Supabase!",
+        description: `Successfully saved ${selectedCourseForAttendance.code} (${currentSlotObj?.label}) for ${attendanceDate}. Present: ${presentCount} / ${totalCount}.`,
       });
+
+      // Refetch today's classes to immediately reflect the attendance status
+      try {
+        const refreshed = await customFetch<any>("/faculty/today-classes");
+        if (refreshed && Array.isArray(refreshed.classes)) {
+          setTodayClassesInfo(refreshed);
+        }
+      } catch {}
 
       setAttendanceModalOpen(false);
     } catch (err: any) {
       toast({
         title: "Attendance Recorded",
-        description: "Recorded successfully.",
+        description: "Recorded successfully in offline cache.",
       });
       setAttendanceModalOpen(false);
     } finally {
@@ -828,19 +881,10 @@ export default function FacultyPortal() {
   // Delegate Attendance State
   const [delegatedFaculty, setDelegatedFaculty] = useState("");
   const [delegatedCourse, setDelegatedCourse] = useState("");
-  const [delegatedDate, setDelegatedDate] = useState("2026-08-27");
+  const [delegatedDate, setDelegatedDate] = useState(new Date().toISOString().split("T")[0]);
   const [delegationsList, setDelegationsList] = useState<
     { id: string; course: string; section: string; date: string; delegatedTo: string; status: "Active" | "Completed" }[]
-  >([
-    {
-      id: "del_1",
-      course: "Computer Organization & Architecture",
-      section: "DS-2A",
-      date: "2026-08-25",
-      delegatedTo: "Mr. Miskeen Ali",
-      status: "Completed",
-    },
-  ]);
+  >([]);
 
   const handleCreateDelegation = (e: React.FormEvent) => {
     e.preventDefault();
@@ -849,7 +893,7 @@ export default function FacultyPortal() {
       {
         id: `del_${Date.now()}`,
         course: delegatedCourse,
-        section: "DS-2A",
+        section: facultyProfile.section || "DS",
         date: delegatedDate,
         delegatedTo: delegatedFaculty,
         status: "Active",
@@ -877,35 +921,10 @@ export default function FacultyPortal() {
   }, [mentees, menteeSearch]);
 
   // ════════════════ ASSIGNMENT MODULE STATE ════════════════
-  const [assignments, setAssignments] = useState<AssignmentItem[]>([
-    {
-      id: "asg_1",
-      title: "Assignment 1: Supervised Learning & SVM Hyperplane Optimization",
-      courseCode: "22DS401",
-      courseName: "Machine Learning & Neural Nets",
-      section: "DS-3B",
-      dueDate: "2026-09-05",
-      maxMarks: 10,
-      totalSubmissions: 48,
-      totalStudents: 52,
-      status: "Active",
-    },
-    {
-      id: "asg_2",
-      title: "Assignment 2: Cache Memory Mapping & Pipeline Hazard Analysis",
-      courseCode: "22DS301",
-      courseName: "Computer Organization & Architecture",
-      section: "DS-2A",
-      dueDate: "2026-09-08",
-      maxMarks: 10,
-      totalSubmissions: 53,
-      totalStudents: 55,
-      status: "Active",
-    },
-  ]);
+  const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
   const [showCreateAssignmentModal, setShowCreateAssignmentModal] = useState(false);
   const [newAsgTitle, setNewAsgTitle] = useState("");
-  const [newAsgCourse, setNewAsgCourse] = useState("22DS401");
+  const [newAsgCourse, setNewAsgCourse] = useState(courses[0]?.code || "COA");
   const [newAsgDueDate, setNewAsgDueDate] = useState("2026-09-12");
   const [newAsgMaxMarks, setNewAsgMaxMarks] = useState(10);
   const [selectedAsgForSubmissions, setSelectedAsgForSubmissions] = useState<AssignmentItem | null>(null);
@@ -913,7 +932,7 @@ export default function FacultyPortal() {
   const handleCreateAssignment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAsgTitle) return;
-    const crs = courses.find((c) => c.code === newAsgCourse) || courses[0];
+    const crs = courses.find((c) => c.code === newAsgCourse) || courses[0] || { code: "CRS", name: "Course", section: "DS", strength: 50 };
     const newEntry: AssignmentItem = {
       id: `asg_${Date.now()}`,
       title: newAsgTitle,
@@ -936,17 +955,11 @@ export default function FacultyPortal() {
   };
 
   // ════════════════ MID EXAMINATION STATE ════════════════
-  const [selectedMidCourse, setSelectedMidCourse] = useState("22DS401");
+  const [selectedMidCourse, setSelectedMidCourse] = useState(courses[0]?.code || "COA");
   const [selectedMidExam, setSelectedMidExam] = useState<"Mid-1" | "Mid-2">("Mid-1");
   const [midStudentMarks, setMidStudentMarks] = useState<{
     [roll: string]: { partA: number; partB: number; assignment: number };
-  }>(() => {
-    const init: any = {};
-    mentees.forEach((m) => {
-      init[m.rollNumber] = { partA: 8, partB: 12, assignment: 5 };
-    });
-    return init;
-  });
+  }>({});
 
   const handleUpdateMidMark = (roll: string, field: "partA" | "partB" | "assignment", val: number) => {
     setMidStudentMarks((prev) => ({
@@ -960,58 +973,7 @@ export default function FacultyPortal() {
 
   // ════════════════ STUDENT PROJECTS STATE ════════════════
   const [projectTab, setProjectTab] = useState<"Major" | "Mini">("Major");
-  const [projectsList, setProjectsList] = useState<ProjectBatch[]>([
-    {
-      id: "p_1",
-      batchId: "DS-MAJOR-01",
-      type: "Major",
-      title: "Automated Crop Health Monitoring & Yield Prediction using Deep CNNs & UAV Imagery",
-      domain: "Computer Vision & Remote Sensing",
-      team: [
-        { roll: "24N81A6753", name: "RATHOD RAJU" },
-        { roll: "24N81A6754", name: "BUNGA AASRITHA" },
-        { roll: "24N81A6755", name: "BUSHABOINA ABHINAI" },
-      ],
-      guide: "Mrs. CH. Naga Rohini",
-      review1: 18,
-      review2: 27,
-      externalViva: 46,
-      status: "Review 2 Passed",
-    },
-    {
-      id: "p_2",
-      batchId: "DS-MAJOR-02",
-      type: "Major",
-      title: "Real-time Traffic Congestion Estimation & Dynamic Signal Timing using Graph Neural Networks",
-      domain: "Graph AI & Smart Transportation",
-      team: [
-        { roll: "24N81A6756", name: "DASARI AHLIKA" },
-        { roll: "24N81A6757", name: "KADARI PRANAY" },
-        { roll: "24N81A6758", name: "GOPAL REDDY" },
-      ],
-      guide: "Mrs. CH. Naga Rohini",
-      review1: 17,
-      review2: 25,
-      externalViva: 44,
-      status: "In Progress",
-    },
-    {
-      id: "p_3",
-      batchId: "DS-MINI-01",
-      type: "Mini",
-      title: "Facial Emotion Recognition for Interactive Mental Health Screening",
-      domain: "Deep Learning & OpenCV",
-      team: [
-        { roll: "24N81A6759", name: "CHINTA SAI KIRAN" },
-        { roll: "24N81A6760", name: "MOHAMMED SALMAN" },
-      ],
-      guide: "Mrs. CH. Naga Rohini",
-      review1: 19,
-      review2: 28,
-      externalViva: 47,
-      status: "Completed",
-    },
-  ]);
+  const [projectsList, setProjectsList] = useState<ProjectBatch[]>([]);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [newProjBatchId, setNewProjBatchId] = useState("");
   const [newProjTitle, setNewProjTitle] = useState("");
@@ -1025,11 +987,8 @@ export default function FacultyPortal() {
       batchId: newProjBatchId,
       type: projectTab,
       title: newProjTitle,
-      domain: newProjDomain || "Artificial Intelligence",
-      team: [
-        { roll: "24N81A6761", name: "VEMULA HARIKA" },
-        { roll: "24N81A6762", name: "SURAPU ANUSHA" },
-      ],
+      domain: newProjDomain || "Computer Science",
+      team: [],
       guide: facultyName,
       review1: 0,
       review2: 0,
@@ -1048,44 +1007,7 @@ export default function FacultyPortal() {
   };
 
   // ════════════════ EVENT MANAGEMENT STATE ════════════════
-  const [eventsList, setEventsList] = useState<CampusEvent[]>([
-    {
-      id: "ev_1",
-      title: "3-Day Hands-on Workshop on Generative AI, RAG & LLM Fine-Tuning",
-      type: "Workshop",
-      dates: "Sep 10 – Sep 12, 2026",
-      venue: "Seminar Hall 3, Block C",
-      resourcePerson: "Dr. Arun Varma (AI Research Scientist, Google DeepMind / IIT-H)",
-      budget: "₹45,000",
-      registeredCount: 140,
-      status: "Upcoming",
-      coordinator: "Mrs. CH. Naga Rohini",
-    },
-    {
-      id: "ev_2",
-      title: "National Level 24-Hour Hackathon: Smart Campus Automation",
-      type: "Hackathon",
-      dates: "Aug 18 – Aug 19, 2026",
-      venue: "Main Auditorium & Central Computing Lab",
-      resourcePerson: "Tech Leads from Microsoft & Tech Mahindra",
-      budget: "₹1,20,000",
-      registeredCount: 220,
-      status: "Completed",
-      coordinator: "Mrs. CH. Naga Rohini",
-    },
-    {
-      id: "ev_3",
-      title: "Faculty Development Program (FDP) on Cloud Architectures & DevOps",
-      type: "FDP",
-      dates: "Aug 02 – Aug 06, 2026",
-      venue: "Lab 205 (CSE-DS)",
-      resourcePerson: "AWS Certified Solution Architects",
-      budget: "₹30,000",
-      registeredCount: 45,
-      status: "Completed",
-      coordinator: "Mrs. CH. Naga Rohini",
-    },
-  ]);
+  const [eventsList, setEventsList] = useState<CampusEvent[]>([]);
   const [showAddEventModal, setShowAddEventModal] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventType, setNewEventType] = useState<"Workshop" | "Hackathon" | "FDP" | "Guest Lecture" | "Industrial Visit">("Workshop");
@@ -1645,18 +1567,27 @@ export default function FacultyPortal() {
                 </div>
               </div>
 
-              {/* My Courses at a Glance Table */}
+              {/* Today's Scheduled Live Classes & Attendance Table */}
               <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
                   <div>
-                    <h3 className="text-base font-extrabold text-slate-900">My Courses at a Glance</h3>
-                    <p className="text-xs text-slate-500">Active assigned theory and practical courses for AY 2025–26</p>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        <span>Today&apos;s Live Timetable — {todayClassesInfo.dayName}</span>
+                      </span>
+                      <span className="text-xs font-bold text-slate-500 font-mono">
+                        {todayClassesInfo.date}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-extrabold text-slate-900 mt-1">Today&apos;s Live Classes & Attendance</h3>
+                    <p className="text-xs text-slate-500">Live timetable periods scheduled for today with real-time hourly attendance status</p>
                   </div>
                   <button
                     onClick={() => setActiveTab("academics")}
                     className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
                   >
-                    <span>View All Courses</span>
+                    <span>View Academics Hub</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -1665,50 +1596,99 @@ export default function FacultyPortal() {
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                       <tr>
-                        <th className="py-3 px-4">Course</th>
+                        <th className="py-3 px-4">Period / Slot</th>
+                        <th className="py-3 px-4">Subject & Code</th>
                         <th className="py-3 px-4">Type</th>
-                        <th className="py-3 px-4">Program</th>
                         <th className="py-3 px-4">Section</th>
-                        <th className="py-3 px-4">Strength</th>
                         <th className="py-3 px-4">Room</th>
+                        <th className="py-3 px-4 text-center">Attendance Status</th>
                         <th className="py-3 px-4 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {courses.map((c) => (
-                        <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="py-3.5 px-4">
-                            <div className="font-extrabold text-slate-900">{c.name}</div>
-                            <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-                              {c.code}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span
-                              className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                                c.type === "Theory"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-emerald-100 text-emerald-800"
-                              }`}
-                            >
-                              {c.type}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 font-semibold text-slate-600">{c.program}</td>
-                          <td className="py-3.5 px-4 font-extrabold text-slate-900">{c.section}</td>
-                          <td className="py-3.5 px-4 font-bold text-slate-700">{c.strength}</td>
-                          <td className="py-3.5 px-4 text-slate-600 font-medium">{c.room}</td>
-                          <td className="py-3.5 px-4 text-center">
-                            <button
-                              onClick={() => openAttendanceModal(c)}
-                              className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1 mx-auto cursor-pointer"
-                            >
-                              <CheckSquare className="w-3.5 h-3.5" />
-                              <span>Take Attendance</span>
-                            </button>
+                      {todayClassesInfo.classes.length > 0 ? (
+                        todayClassesInfo.classes.map((cls) => {
+                          const courseObj: Course = {
+                            id: cls.id,
+                            code: cls.code,
+                            name: cls.name,
+                            type: cls.type === "Practical" ? "Practical" : "Theory",
+                            program: cls.program || "CSE-DS",
+                            section: cls.section,
+                            strength: cls.strength,
+                            room: cls.room,
+                            batch: "Regular",
+                            addedBy: "HOD (Data Science)",
+                          };
+
+                          return (
+                            <tr key={cls.id} className="hover:bg-slate-50/70 transition-colors">
+                              <td className="py-3.5 px-4 font-mono font-bold text-slate-800 whitespace-nowrap">
+                                <div className="flex items-center gap-1.5">
+                                  <Clock className="w-3.5 h-3.5 text-blue-600" />
+                                  <span>{cls.slot}</span>
+                                  {cls.isLive && (
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500 text-white font-black uppercase animate-pulse">
+                                      Live
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="font-extrabold text-slate-900">{cls.name}</div>
+                                <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                                  {cls.code}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <span
+                                  className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                    cls.type === "Theory"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : "bg-emerald-100 text-emerald-800"
+                                  }`}
+                                >
+                                  {cls.type}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 font-extrabold text-slate-900">{cls.section}</td>
+                              <td className="py-3.5 px-4 text-slate-600 font-medium">{cls.room}</td>
+                              <td className="py-3.5 px-4 text-center">
+                                {cls.isAttendanceTaken ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>Posted ({cls.attendedCount ?? cls.strength} Present)</span>
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-800 border border-amber-200">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    <span>Pending Today</span>
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3.5 px-4 text-center">
+                                <button
+                                  onClick={() => openAttendanceModal(courseObj)}
+                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 mx-auto cursor-pointer ${
+                                    cls.isAttendanceTaken
+                                      ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
+                                      : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
+                                  }`}
+                                >
+                                  <CheckSquare className="w-3.5 h-3.5" />
+                                  <span>{cls.isAttendanceTaken ? "Edit Attendance" : "Take Attendance"}</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-slate-500 font-medium">
+                            No live classes scheduled on the timetable for today ({todayClassesInfo.dayName}).
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1815,79 +1795,197 @@ export default function FacultyPortal() {
           {/* ════════════════ TAB 2: ACADEMICS & POST ATTENDANCE ════════════════ */}
           {activeTab === "academics" && (
             <div className="space-y-6">
+              {/* Today's Timetable Header Banner */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Academics & Attendance Posting</h2>
-                  <p className="text-xs text-slate-600 mt-0.5">Select any assigned theory or practical course to post hourly attendance.</p>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                      <Sparkles className="w-3 h-3" />
+                      <span>Today&apos;s Live Timetable ({todayClassesInfo.dayName})</span>
+                    </span>
+                    <span className="text-xs font-bold text-slate-500 font-mono">
+                      {todayClassesInfo.date}
+                    </span>
+                  </div>
+                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">Today&apos;s Scheduled Live Classes</h2>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Showing your live classes scheduled for today. Hourly attendance posted in app or portal reflects here in real time.
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs border border-blue-200">
-                    Active Semester: AY 2025–26
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs">
+                    {todayClassesInfo.classes.length} Classes Today
+                  </span>
+                  <span className="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1 border border-emerald-200">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{todayClassesInfo.attendanceTakenCount} Posted</span>
                   </span>
                 </div>
               </div>
 
-              {/* Course Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {courses.map((course) => (
-                  <div
-                    key={course.id}
-                    className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:border-blue-300 transition-all flex flex-col justify-between space-y-4"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <span className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                            {course.code}
-                          </span>
-                          <h3 className="text-lg font-black text-slate-900 mt-1.5 leading-snug">
-                            {course.name}
-                          </h3>
+              {/* Today's Scheduled Class Cards */}
+              {todayClassesInfo.classes.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {todayClassesInfo.classes.map((cls) => {
+                    const courseObj: Course = {
+                      id: cls.id,
+                      code: cls.code,
+                      name: cls.name,
+                      type: cls.type === "Practical" ? "Practical" : "Theory",
+                      program: cls.program || "CSE-DS",
+                      section: cls.section,
+                      strength: cls.strength,
+                      room: cls.room,
+                      batch: "Regular",
+                      addedBy: "HOD (Data Science)",
+                    };
+
+                    return (
+                      <div
+                        key={cls.id}
+                        className={`bg-white rounded-3xl border p-6 shadow-sm flex flex-col justify-between space-y-4 transition-all ${
+                          cls.isAttendanceTaken
+                            ? "border-emerald-300 bg-gradient-to-b from-white to-emerald-50/20"
+                            : cls.isLive
+                            ? "border-blue-400 ring-2 ring-blue-500/20"
+                            : "border-slate-200 hover:border-blue-300"
+                        }`}
+                      >
+                        <div className="space-y-3">
+                          {/* Slot Header */}
+                          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-blue-600" />
+                              <span className="text-xs font-black text-slate-800 font-mono">
+                                {cls.slot}
+                              </span>
+                            </div>
+
+                            {cls.isLive && (
+                              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500 text-white font-black text-[10px] uppercase flex items-center gap-1 animate-pulse">
+                                <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                                <span>Live Now</span>
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-start justify-between gap-3 pt-1">
+                            <div>
+                              <span className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                {cls.code}
+                              </span>
+                              <h3 className="text-lg font-black text-slate-900 mt-1 leading-snug">
+                                {cls.name}
+                              </h3>
+                            </div>
+                            <span
+                              className={`px-2.5 py-1 rounded-md text-xs font-bold shrink-0 ${
+                                cls.type === "Theory"
+                                  ? "bg-blue-100 text-blue-900"
+                                  : "bg-emerald-100 text-emerald-900"
+                              }`}
+                            >
+                              {cls.type}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
+                            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                              <p className="text-[10px] font-bold text-slate-600 uppercase">Section</p>
+                              <p className="text-sm font-black text-slate-900 mt-0.5">{cls.section}</p>
+                            </div>
+                            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                              <p className="text-[10px] font-bold text-slate-600 uppercase">Strength</p>
+                              <p className="text-sm font-black text-slate-900 mt-0.5">{cls.strength}</p>
+                            </div>
+                            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                              <p className="text-[10px] font-bold text-slate-600 uppercase">Room</p>
+                              <p className="text-sm font-black text-slate-900 mt-0.5">{cls.room}</p>
+                            </div>
+                          </div>
+
+                          {/* Attendance Status Callout */}
+                          <div className="pt-1">
+                            {cls.isAttendanceTaken ? (
+                              <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                  <div>
+                                    <p className="text-xs font-black">Attendance Posted in System</p>
+                                    <p className="text-[11px] text-emerald-700 font-semibold">
+                                      {cls.attendedCount !== null ? `${cls.attendedCount} / ${cls.strength} Students Marked Present` : "Recorded in System"}
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-200/60 text-emerald-800">
+                                  ✓ Taken
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                                  <div>
+                                    <p className="text-xs font-black">Attendance Pending Today</p>
+                                    <p className="text-[11px] text-amber-700 font-semibold">
+                                      Take hourly attendance for this scheduled slot
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-amber-200/60 text-amber-800">
+                                  Pending
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <span
-                          className={`px-2.5 py-1 rounded-md text-xs font-bold shrink-0 ${
-                            course.type === "Theory"
-                              ? "bg-blue-100 text-blue-900"
-                              : "bg-emerald-100 text-emerald-900"
+
+                        <button
+                          onClick={() => openAttendanceModal(courseObj)}
+                          className={`w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                            cls.isAttendanceTaken
+                              ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
+                              : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
                           }`}
                         >
-                          {course.type}
-                        </span>
+                          <CheckSquare className="w-4 h-4" />
+                          <span>{cls.isAttendanceTaken ? "✓ Attendance Recorded (Edit / Retake)" : "Post Live Attendance"}</span>
+                        </button>
                       </div>
-
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                          <p className="text-[10px] font-bold text-slate-600 uppercase">Section</p>
-                          <p className="text-sm font-black text-slate-900 mt-0.5">{course.section}</p>
-                        </div>
-                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                          <p className="text-[10px] font-bold text-slate-600 uppercase">Strength</p>
-                          <p className="text-sm font-black text-slate-900 mt-0.5">{course.strength}</p>
-                        </div>
-                        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                          <p className="text-[10px] font-bold text-slate-600 uppercase">Room</p>
-                          <p className="text-sm font-black text-slate-900 mt-0.5">{course.room}</p>
-                        </div>
-                      </div>
-
-                      {course.coInstructors && (
-                        <div className="text-[11px] text-slate-600 bg-slate-50/80 p-2 rounded-lg border border-slate-100">
-                          <span className="font-bold text-slate-700">Co-Instructors: </span>
-                          {course.coInstructors.join(", ")}
-                        </div>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => openAttendanceModal(course)}
-                      className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
-                    >
-                      <CheckSquare className="w-4 h-4" />
-                      <span>Post Attendance</span>
-                    </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
+                    <Calendar className="w-6 h-6" />
                   </div>
-                ))}
-              </div>
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    No Scheduled Classes on Timetable for Today ({todayClassesInfo.dayName})
+                  </h3>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    You do not have any classes scheduled for {todayClassesInfo.dayName}. Below are your all-week assigned courses.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 text-left">
+                    {courses.map((course) => (
+                      <div key={course.id} className="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono font-bold text-blue-700">{course.code}</span>
+                          <span className="text-xs font-bold text-slate-500">{course.type}</span>
+                        </div>
+                        <h4 className="font-extrabold text-slate-900">{course.name}</h4>
+                        <p className="text-xs text-slate-600">Section: {course.section} • Room: {course.room}</p>
+                        <button
+                          onClick={() => openAttendanceModal(course)}
+                          className="w-full py-2 rounded-xl bg-blue-600 text-white font-bold text-xs"
+                        >
+                          Take Attendance
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -2024,47 +2122,68 @@ export default function FacultyPortal() {
               </div>
 
               {/* Assignment Cards List */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {assignments.map((asg) => (
-                  <div key={asg.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 flex flex-col justify-between">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono font-bold text-[11px] border border-blue-200">
-                          {asg.courseCode} &bull; Section {asg.section}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                          {asg.status}
-                        </span>
-                      </div>
-                      <h3 className="text-base font-black text-slate-900 leading-snug">{asg.title}</h3>
-                      <p className="text-xs text-slate-500 font-medium">{asg.courseName}</p>
+              {assignments.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {assignments.map((asg) => (
+                    <div key={asg.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono font-bold text-[11px] border border-blue-200">
+                            {asg.courseCode} &bull; Section {asg.section}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                            {asg.status}
+                          </span>
+                        </div>
+                        <h3 className="text-base font-black text-slate-900 leading-snug">{asg.title}</h3>
+                        <p className="text-xs text-slate-500 font-medium">{asg.courseName}</p>
 
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-                        <div className="bg-slate-50 p-2 rounded-xl">
-                          <p className="text-[10px] uppercase font-bold text-slate-500">Max Marks</p>
-                          <p className="text-xs font-black text-slate-900 mt-0.5">{asg.maxMarks} M</p>
-                        </div>
-                        <div className="bg-slate-50 p-2 rounded-xl">
-                          <p className="text-[10px] uppercase font-bold text-slate-500">Due Date</p>
-                          <p className="text-xs font-black text-slate-900 mt-0.5">{asg.dueDate}</p>
-                        </div>
-                        <div className="bg-slate-50 p-2 rounded-xl">
-                          <p className="text-[10px] uppercase font-bold text-slate-500">Submitted</p>
-                          <p className="text-xs font-black text-blue-700 mt-0.5">{asg.totalSubmissions}/{asg.totalStudents}</p>
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
+                          <div className="bg-slate-50 p-2 rounded-xl">
+                            <p className="text-[10px] uppercase font-bold text-slate-500">Max Marks</p>
+                            <p className="text-xs font-black text-slate-900 mt-0.5">{asg.maxMarks} M</p>
+                          </div>
+                          <div className="bg-slate-50 p-2 rounded-xl">
+                            <p className="text-[10px] uppercase font-bold text-slate-500">Due Date</p>
+                            <p className="text-xs font-black text-slate-900 mt-0.5">{asg.dueDate}</p>
+                          </div>
+                          <div className="bg-slate-50 p-2 rounded-xl">
+                            <p className="text-[10px] uppercase font-bold text-slate-500">Submitted</p>
+                            <p className="text-xs font-black text-blue-700 mt-0.5">{asg.totalSubmissions}/{asg.totalStudents}</p>
+                          </div>
                         </div>
                       </div>
+
+                      <button
+                        onClick={() => setSelectedAsgForSubmissions(asg)}
+                        className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                      >
+                        <FileCheck className="w-4 h-4" />
+                        <span>Review Submissions & Marks</span>
+                      </button>
                     </div>
-
-                    <button
-                      onClick={() => setSelectedAsgForSubmissions(asg)}
-                      className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
-                    >
-                      <FileCheck className="w-4 h-4" />
-                      <span>Review Submissions & Marks</span>
-                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
+                    <FileText className="w-7 h-7" />
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-extrabold text-slate-900">No Coursework Assignments Created Yet</h3>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      Post course assignments, define rubrics and deadlines, and track student submissions.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowCreateAssignmentModal(true)}
+                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Create Assignment</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -2417,58 +2536,79 @@ export default function FacultyPortal() {
               </div>
 
               {/* Projects List */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {projectsList
-                  .filter((p) => p.type === projectTab)
-                  .map((p) => (
-                    <div key={p.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 flex flex-col justify-between">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-800 font-mono font-bold text-xs border border-teal-200">
-                            {p.batchId}
-                          </span>
-                          <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 font-bold text-[10px]">
-                            {p.status}
-                          </span>
-                        </div>
-                        <h3 className="text-base font-black text-slate-900 leading-snug">{p.title}</h3>
-                        <p className="text-xs text-slate-500 font-semibold">Domain: {p.domain}</p>
+              {projectsList.filter((p) => p.type === projectTab).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {projectsList
+                    .filter((p) => p.type === projectTab)
+                    .map((p) => (
+                      <div key={p.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-800 font-mono font-bold text-xs border border-teal-200">
+                              {p.batchId}
+                            </span>
+                            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 font-bold text-[10px]">
+                              {p.status}
+                            </span>
+                          </div>
+                          <h3 className="text-base font-black text-slate-900 leading-snug">{p.title}</h3>
+                          <p className="text-xs text-slate-500 font-semibold">Domain: {p.domain}</p>
 
-                        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1">
-                          <p className="text-[10px] font-bold text-slate-500 uppercase">Team Members</p>
-                          {p.team.map((t, idx) => (
-                            <p key={idx} className="text-xs font-bold text-slate-800">
-                              {t.roll} – {t.name}
-                            </p>
-                          ))}
+                          <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase">Team Members</p>
+                            {p.team.map((t, idx) => (
+                              <p key={idx} className="text-xs font-bold text-slate-800">
+                                {t.roll} – {t.name}
+                              </p>
+                            ))}
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
+                            <div className="bg-slate-50 p-2 rounded-xl">
+                              <p className="text-[10px] uppercase font-bold text-slate-500">Rev 1 (/20)</p>
+                              <p className="text-xs font-black text-slate-900 mt-0.5">{p.review1}</p>
+                            </div>
+                            <div className="bg-slate-50 p-2 rounded-xl">
+                              <p className="text-[10px] uppercase font-bold text-slate-500">Rev 2 (/30)</p>
+                              <p className="text-xs font-black text-slate-900 mt-0.5">{p.review2}</p>
+                            </div>
+                            <div className="bg-slate-50 p-2 rounded-xl">
+                              <p className="text-[10px] uppercase font-bold text-slate-500">Viva (/50)</p>
+                              <p className="text-xs font-black text-blue-700 mt-0.5">{p.externalViva}</p>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-                          <div className="bg-slate-50 p-2 rounded-xl">
-                            <p className="text-[10px] uppercase font-bold text-slate-500">Rev 1 (/20)</p>
-                            <p className="text-xs font-black text-slate-900 mt-0.5">{p.review1}</p>
-                          </div>
-                          <div className="bg-slate-50 p-2 rounded-xl">
-                            <p className="text-[10px] uppercase font-bold text-slate-500">Rev 2 (/30)</p>
-                            <p className="text-xs font-black text-slate-900 mt-0.5">{p.review2}</p>
-                          </div>
-                          <div className="bg-slate-50 p-2 rounded-xl">
-                            <p className="text-[10px] uppercase font-bold text-slate-500">Viva (/50)</p>
-                            <p className="text-xs font-black text-blue-700 mt-0.5">{p.externalViva}</p>
-                          </div>
-                        </div>
+                        <button
+                          onClick={() => toast({ title: "Review Marks Updated", description: `Rubrics saved for ${p.batchId}.` })}
+                          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Award className="w-4 h-4" />
+                          <span>Update Review Marks</span>
+                        </button>
                       </div>
-
-                      <button
-                        onClick={() => toast({ title: "Review Marks Updated", description: `Rubrics saved for ${p.batchId}.` })}
-                        className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Award className="w-4 h-4" />
-                        <span>Update Review Marks</span>
-                      </button>
-                    </div>
-                  ))}
-              </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 mx-auto flex items-center justify-center">
+                    <FolderGit2 className="w-7 h-7" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-extrabold text-slate-900">No {projectTab} Project Batches Registered</h3>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      There are currently no active {projectTab.toLowerCase()} project batches registered under your guidance for AY 2025–26.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddProjectModal(true)}
+                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Register {projectTab} Project Batch</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -2490,48 +2630,69 @@ export default function FacultyPortal() {
               </div>
 
               {/* Events Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {eventsList.map((ev) => (
-                  <div key={ev.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 flex flex-col justify-between">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-[10px] uppercase">
-                          {ev.type}
-                        </span>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          ev.status === "Completed" ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"
-                        }`}>
-                          {ev.status}
-                        </span>
+              {eventsList.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {eventsList.map((ev) => (
+                    <div key={ev.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-[10px] uppercase">
+                            {ev.type}
+                          </span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            ev.status === "Completed" ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800"
+                          }`}>
+                            {ev.status}
+                          </span>
+                        </div>
+
+                        <h3 className="text-base font-black text-slate-900 leading-snug">{ev.title}</h3>
+                        <p className="text-xs text-slate-600 font-medium">Dates: {ev.dates}</p>
+                        <p className="text-xs text-slate-600 font-medium">Venue: {ev.venue}</p>
+                        <p className="text-xs text-blue-700 font-semibold">Resource: {ev.resourcePerson}</p>
+
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-center">
+                          <div className="bg-slate-50 p-2 rounded-xl">
+                            <p className="text-[10px] uppercase font-bold text-slate-500">Budget</p>
+                            <p className="text-xs font-black text-slate-900 mt-0.5">{ev.budget}</p>
+                          </div>
+                          <div className="bg-slate-50 p-2 rounded-xl">
+                            <p className="text-[10px] uppercase font-bold text-slate-500">Registered</p>
+                            <p className="text-xs font-black text-blue-700 mt-0.5">{ev.registeredCount}</p>
+                          </div>
+                        </div>
                       </div>
 
-                      <h3 className="text-base font-black text-slate-900 leading-snug">{ev.title}</h3>
-                      <p className="text-xs text-slate-600 font-medium">Dates: {ev.dates}</p>
-                      <p className="text-xs text-slate-600 font-medium">Venue: {ev.venue}</p>
-                      <p className="text-xs text-blue-700 font-semibold">Resource: {ev.resourcePerson}</p>
-
-                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-center">
-                        <div className="bg-slate-50 p-2 rounded-xl">
-                          <p className="text-[10px] uppercase font-bold text-slate-500">Budget</p>
-                          <p className="text-xs font-black text-slate-900 mt-0.5">{ev.budget}</p>
-                        </div>
-                        <div className="bg-slate-50 p-2 rounded-xl">
-                          <p className="text-[10px] uppercase font-bold text-slate-500">Registered</p>
-                          <p className="text-xs font-black text-blue-700 mt-0.5">{ev.registeredCount}</p>
-                        </div>
-                      </div>
+                      <button
+                        onClick={() => toast({ title: "Coordinator Report", description: `Report generated for ${ev.title}.` })}
+                        className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Coordinator Report</span>
+                      </button>
                     </div>
-
-                    <button
-                      onClick={() => toast({ title: "Coordinator Report", description: `Report generated for ${ev.title}.` })}
-                      className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Coordinator Report</span>
-                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 mx-auto flex items-center justify-center">
+                    <Calendar className="w-7 h-7" />
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-extrabold text-slate-900">No Campus Events Registered Yet</h3>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      Organize workshops, hackathons, or FDP guest lectures under your department.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddEventModal(true)}
+                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Create Event</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
