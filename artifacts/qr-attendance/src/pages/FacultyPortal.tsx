@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { customFetch } from "@workspace/api-client-react";
@@ -776,71 +776,72 @@ export default function FacultyPortal() {
     });
   }, [todayClassesInfo.classes, todayClassesInfo.dayName, todayClassesInfo.dayCode, workload]);
 
+  // ── Refetch all live faculty data ──
+  const refetchFacultyAll = useCallback(async () => {
+    setLoadingData(true);
+    try {
+      // 1. Fetch live courses
+      try {
+        const data = await customFetch<Course[]>("/api/faculty/courses");
+        if (Array.isArray(data) && data.length > 0) {
+          setLiveCourses(data);
+        }
+      } catch (e) {
+        console.warn("Could not load /api/faculty/courses:", e);
+      }
+
+      // 2. Fetch live mentees from qr_users
+      try {
+        const data = await customFetch<any[]>("/api/mentor/students");
+        if (Array.isArray(data) && data.length > 0) {
+          const mappedMentees: MenteeStudent[] = data.map((s: any, idx: number) => ({
+            id: s.id || s.user?.id || idx + 1,
+            name: s.name || s.user?.name || `Student ${idx + 1}`,
+            rollNumber: s.rollNumber || s.uniqueId || s.unique_id || s.user?.uniqueId || s.roll_number || `24N81A${6753 + idx}`,
+            section: s.section || s.user?.section || facultyProfile.section || "DS III/I/B",
+            studentPhone: s.phone || s.user?.phone || "9876543210",
+            fatherPhone: s.fatherPhone || s.father_phone || s.user?.fatherPhone || "9123456780",
+            motherPhone: s.motherPhone || s.mother_phone,
+            attendancePercent: s.attendancePercent || s.attendance_percent || Math.floor(Math.random() * 15) + 82,
+            backlogs: s.backlogs ?? 0,
+            mentorNotes: s.remarks || "Regular student",
+          }));
+          setLiveMentees(mappedMentees);
+        }
+      } catch (e) {
+        console.warn("Could not load /api/mentor/students:", e);
+      }
+
+      // 3. Fetch live workload grid
+      try {
+        const data = await customFetch<any[]>("/api/faculty/workload-grid");
+        if (Array.isArray(data) && data.length > 0) {
+          setLiveWorkload(data);
+        }
+      } catch (e) {
+        console.warn("Could not load /api/faculty/workload-grid:", e);
+      }
+
+      // 4. Fetch today's live classes and real attendance status
+      try {
+        const todayData = await customFetch<any>("/api/faculty/today-classes");
+        if (todayData && Array.isArray(todayData.classes)) {
+          setTodayClassesInfo(todayData);
+        }
+      } catch (e) {
+        console.warn("Could not load /api/faculty/today-classes:", e);
+      }
+    } catch (err) {
+      console.error("Error loading live faculty data:", err);
+    } finally {
+      setLoadingData(false);
+    }
+  }, [facultyProfile.section]);
+
   // Fetch live courses, mentees, workload, and today's classes from API
   useEffect(() => {
-    async function loadFacultyData() {
-      setLoadingData(true);
-      try {
-        // 1. Fetch live courses
-        try {
-          const data = await customFetch<Course[]>("/api/faculty/courses");
-          if (Array.isArray(data) && data.length > 0) {
-            setLiveCourses(data);
-          }
-        } catch (e) {
-          console.warn("Could not load /api/faculty/courses:", e);
-        }
-
-        // 2. Fetch live mentees from qr_users
-        try {
-          const data = await customFetch<any[]>("/api/mentor/students");
-          if (Array.isArray(data) && data.length > 0) {
-            const mappedMentees: MenteeStudent[] = data.map((s: any, idx: number) => ({
-              id: s.id || s.user?.id || idx + 1,
-              name: s.name || s.user?.name || `Student ${idx + 1}`,
-              rollNumber: s.rollNumber || s.uniqueId || s.unique_id || s.user?.uniqueId || s.roll_number || `24N81A${6753 + idx}`,
-              section: s.section || s.user?.section || facultyProfile.section || "DS III/I/B",
-              studentPhone: s.phone || s.user?.phone || "9876543210",
-              fatherPhone: s.fatherPhone || s.father_phone || s.user?.fatherPhone || "9123456780",
-              motherPhone: s.motherPhone || s.mother_phone,
-              attendancePercent: s.attendancePercent || s.attendance_percent || Math.floor(Math.random() * 15) + 82,
-              backlogs: s.backlogs ?? 0,
-              mentorNotes: s.remarks || "Regular student",
-            }));
-            setLiveMentees(mappedMentees);
-          }
-        } catch (e) {
-          console.warn("Could not load /api/mentor/students:", e);
-        }
-
-        // 3. Fetch live workload grid
-        try {
-          const data = await customFetch<any[]>("/api/faculty/workload-grid");
-          if (Array.isArray(data) && data.length > 0) {
-            setLiveWorkload(data);
-          }
-        } catch (e) {
-          console.warn("Could not load /api/faculty/workload-grid:", e);
-        }
-
-        // 4. Fetch today's live classes and real attendance status
-        try {
-          const todayData = await customFetch<any>("/api/faculty/today-classes");
-          if (todayData && Array.isArray(todayData.classes)) {
-            setTodayClassesInfo(todayData);
-          }
-        } catch (e) {
-          console.warn("Could not load /api/faculty/today-classes:", e);
-        }
-      } catch (err) {
-        console.error("Error loading live faculty data:", err);
-      } finally {
-        setLoadingData(false);
-      }
-    }
-
-    loadFacultyData();
-  }, [resolvedKey]);
+    refetchFacultyAll();
+  }, [resolvedKey, refetchFacultyAll]);
 
   // ── Fetch Class-Wise Attendance History ──
   const fetchAttendanceHistory = async () => {
