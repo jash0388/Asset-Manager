@@ -487,7 +487,7 @@ export const OFFICIAL_FACULTY_LIST = Object.entries(FACULTY_DIRECTORY).map(([key
 }));
 
 export default function FacultyPortal() {
-  const { mentorKey, role, logout } = useAuth();
+  const { mentor, role, logout } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
@@ -519,11 +519,33 @@ export default function FacultyPortal() {
   const [loadingData, setLoadingData] = useState(false);
   const [loadingRoster, setLoadingRoster] = useState(false);
 
-  // Active Faculty Profile Resolution
-  const resolvedKey = mentorKey || "101";
-  const facultyProfile = FACULTY_DIRECTORY[resolvedKey] || FACULTY_DIRECTORY["101"];
-  const facultyName = facultyProfile.name;
-  const facultyDept = facultyProfile.department;
+  // Active Faculty Profile Resolution — reads logged-in mentor from auth context or localStorage
+  const storedProfile = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("qr_profile");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const resolvedKey = String(mentor?.key || storedProfile?.key || "").trim() || "101";
+  const facultyProfile = FACULTY_DIRECTORY[resolvedKey] || {
+    name: mentor?.name || storedProfile?.name || "Faculty Mentor",
+    email: mentor?.email || storedProfile?.email || "",
+    role: "Assistant Professor & Subject Faculty",
+    designation: "Subject Faculty",
+    department: "Computer Science & Engineering (Data Science)",
+    key: resolvedKey,
+    erp: `EMP-SECDS${resolvedKey}`,
+    section: mentor?.section || "DS",
+    phone: "+91 98490 12345",
+    courses: [],
+    mentees: [],
+    workload: []
+  };
+  const facultyName = mentor?.name || storedProfile?.name || facultyProfile.name;
+  const facultyDept = facultyProfile.department || "Computer Science & Engineering (Data Science)";
 
   // Use live data if loaded, fallback to directory
   const courses = liveCourses.length > 0 ? liveCourses : facultyProfile.courses;
@@ -536,23 +558,23 @@ export default function FacultyPortal() {
       setLoadingData(true);
       try {
         // 1. Fetch live courses
-        const resCourses = await customFetch("/faculty/courses");
-        if (resCourses.ok) {
-          const data = await resCourses.json();
+        try {
+          const data = await customFetch<Course[]>("/faculty/courses");
           if (Array.isArray(data) && data.length > 0) {
             setLiveCourses(data);
           }
+        } catch (e) {
+          console.warn("Could not load /faculty/courses:", e);
         }
 
         // 2. Fetch live mentees from qr_users
-        const resMentees = await customFetch("/mentor/students");
-        if (resMentees.ok) {
-          const data = await resMentees.json();
+        try {
+          const data = await customFetch<any[]>("/mentor/students");
           if (Array.isArray(data) && data.length > 0) {
             const mappedMentees: MenteeStudent[] = data.map((s: any, idx: number) => ({
               id: s.id || idx + 1,
               name: s.name || "Student",
-              rollNumber: s.roll_number || s.rollNumber || `24N81A${6753 + idx}`,
+              rollNumber: s.unique_id || s.roll_number || s.rollNumber || `24N81A${6753 + idx}`,
               section: s.section || facultyProfile.section || "DS-2A",
               studentPhone: s.phone || "9876543210",
               fatherPhone: s.father_phone || s.fatherPhone || "9123456780",
@@ -563,15 +585,18 @@ export default function FacultyPortal() {
             }));
             setLiveMentees(mappedMentees);
           }
+        } catch (e) {
+          console.warn("Could not load /mentor/students:", e);
         }
 
         // 3. Fetch live workload grid
-        const resWorkload = await customFetch("/faculty/workload-grid");
-        if (resWorkload.ok) {
-          const data = await resWorkload.json();
+        try {
+          const data = await customFetch<any[]>("/faculty/workload-grid");
           if (Array.isArray(data) && data.length > 0) {
             setLiveWorkload(data);
           }
+        } catch (e) {
+          console.warn("Could not load /faculty/workload-grid:", e);
         }
       } catch (err) {
         console.error("Error loading live faculty data:", err);
@@ -586,50 +611,116 @@ export default function FacultyPortal() {
   // Post Attendance Modal State
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
   const [selectedCourseForAttendance, setSelectedCourseForAttendance] = useState<Course | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState("p1");
+  const [selectedPeriod, setSelectedPeriod] = useState("slot_0");
   const [attendanceMode, setAttendanceMode] = useState<"regular" | "adjusted">("regular");
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split("T")[0]);
   const [studentRoster, setStudentRoster] = useState<StudentAttendanceRecord[]>([]);
   const [searchStudentQuery, setSearchStudentQuery] = useState("");
   const [submittingAttendance, setSubmittingAttendance] = useState(false);
 
+  // Today's Day Name
+  const todayDayName = useMemo(() => {
+    return new Date().toLocaleDateString("en-US", { weekday: "long" });
+  }, []);
+
+  // Today's Live Class Slots for the selected course
+  const todaysClassSlots = useMemo(() => {
+    if (!selectedCourseForAttendance) return [];
+    const todayWork = workload.find(
+      (w) => w.day.toLowerCase() === todayDayName.toLowerCase()
+    );
+    if (todayWork && todayWork.periods.length > 0) {
+      const courseCodeUpper = selectedCourseForAttendance.code.toUpperCase().replace(/\s+/g, "");
+      const courseNameUpper = selectedCourseForAttendance.name.toUpperCase();
+      
+      const matching = todayWork.periods.filter((p) => {
+        const pSubj = p.subject.toUpperCase().replace(/\s+/g, "");
+        return pSubj.includes(courseCodeUpper) || courseCodeUpper.includes(pSubj) || courseNameUpper.includes(p.subject.toUpperCase());
+      });
+
+      if (matching.length > 0) {
+        return matching.map((p, idx) => ({
+          id: `slot_${idx}`,
+          label: p.slot,
+          room: p.room,
+          subject: p.subject,
+          section: p.section,
+          isTodayLive: true,
+        }));
+      }
+
+      return todayWork.periods.map((p, idx) => ({
+        id: `slot_${idx}`,
+        label: p.slot,
+        room: p.room,
+        subject: p.subject,
+        section: p.section,
+        isTodayLive: true,
+      }));
+    }
+
+    // Default fallback if no class scheduled today in timetable
+    return [
+      {
+        id: "slot_0",
+        label: "09:00 AM – 10:00 AM",
+        room: selectedCourseForAttendance.room || "Hall",
+        subject: selectedCourseForAttendance.name,
+        section: selectedCourseForAttendance.section,
+        isTodayLive: true,
+      },
+      {
+        id: "slot_1",
+        label: "11:10 AM – 12:10 PM",
+        room: selectedCourseForAttendance.room || "Hall",
+        subject: selectedCourseForAttendance.name,
+        section: selectedCourseForAttendance.section,
+        isTodayLive: true,
+      },
+    ];
+  }, [selectedCourseForAttendance, workload, todayDayName]);
+
   // Initialize Real Students when Course is picked
   const openAttendanceModal = async (course: Course) => {
     setSelectedCourseForAttendance(course);
+    setSelectedPeriod("slot_0");
     setLoadingRoster(true);
     setAttendanceModalOpen(true);
 
     try {
       // 1. Try fetching real section students from API
-      const res = await customFetch(`/mentor/students-by-schedule?scheduleId=${course.id}`);
-      if (res.ok) {
-        const data = await res.json();
+      try {
+        const data = await customFetch<any[]>(
+          `/faculty/section-students?section=${encodeURIComponent(course.section)}&scheduleId=${course.id}`
+        );
         if (Array.isArray(data) && data.length > 0) {
           const records: StudentAttendanceRecord[] = data.map((s: any, idx: number) => ({
             id: s.id || idx + 1,
             sNo: idx + 1,
-            rollNumber: s.roll_number || s.rollNumber || `24N81A${6753 + idx}`,
+            rollNumber: s.rollNumber || s.unique_id || `24N81A${6753 + idx}`,
             name: s.name || `Student ${idx + 1}`,
-            heldCount: s.attended_classes || s.heldCount || 20,
-            totalHeld: s.total_classes || s.totalHeld || 24,
-            status: s.marked_present !== undefined ? s.marked_present : (s.scanned_today || true),
+            heldCount: s.heldCount || 22,
+            totalHeld: s.totalHeld || 24,
+            status: true,
             phone: s.phone || "9876543210",
-            fatherPhone: s.father_phone || "9123456780",
+            fatherPhone: s.fatherPhone || "9123456780",
           }));
           setStudentRoster(records);
           setLoadingRoster(false);
           return;
         }
+      } catch (e) {
+        console.warn("Could not load /faculty/section-students:", e);
       }
 
-      // 2. Fallback to existing mentees or generated real student roster
+      // 2. Fallback to live mentees
       if (liveMentees.length > 0) {
         const records: StudentAttendanceRecord[] = liveMentees.map((s, idx) => ({
           id: s.id,
           sNo: idx + 1,
           rollNumber: s.rollNumber,
           name: s.name,
-          heldCount: Math.floor(Math.random() * 5) + 19,
+          heldCount: 22,
           totalHeld: 24,
           status: true,
           phone: s.studentPhone,
@@ -650,7 +741,7 @@ export default function FacultyPortal() {
           sNo: idx + 1,
           rollNumber: `24N81A${6753 + idx}`,
           name: name,
-          heldCount: Math.floor(Math.random() * 6) + 19,
+          heldCount: 22,
           totalHeld: 24,
           status: true,
           phone: "9876543210",
@@ -2587,26 +2678,40 @@ export default function FacultyPortal() {
                 </div>
               </div>
 
-              {/* Period Selector Pills */}
+              {/* Period Selector — Only Today's Live Class Slots */}
               <div className="space-y-1.5">
-                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-                  Select Period / Slot
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {PERIOD_SLOTS.map((slot) => {
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-extrabold text-blue-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Today&apos;s Live Class Slots ({todayDayName})</span>
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-500">
+                    Auto-filtered from Timetable
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {todaysClassSlots.map((slot) => {
                     const isSelected = selectedPeriod === slot.id;
                     return (
                       <button
                         key={slot.id}
                         type="button"
                         onClick={() => setSelectedPeriod(slot.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-2 ${
                           isSelected
-                            ? "bg-blue-600 text-white shadow-xs"
-                            : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"
+                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 ring-2 ring-blue-600/30"
+                            : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100"
                         }`}
                       >
-                        {slot.label} {slot.isEvening && "(Evening)"}
+                        <Clock className={`w-3.5 h-3.5 ${isSelected ? "text-white" : "text-blue-600"}`} />
+                        <span>{slot.label}</span>
+                        {slot.isTodayLive && (
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase ${
+                            isSelected ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800"
+                          }`}>
+                            Live Class
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -2631,14 +2736,14 @@ export default function FacultyPortal() {
                   <button
                     type="button"
                     onClick={() => handleMarkAll(true)}
-                    className="px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer"
+                    className="px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
                   >
                     Mark All Present
                   </button>
                   <button
                     type="button"
                     onClick={() => handleMarkAll(false)}
-                    className="px-3 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition-all cursor-pointer"
+                    className="px-3 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold transition-all cursor-pointer"
                   >
                     Mark All Absent
                   </button>
@@ -2647,8 +2752,8 @@ export default function FacultyPortal() {
             </div>
 
             {/* Student Search Bar */}
-            <div className="px-5 py-3 border-b border-slate-100 bg-white">
-              <div className="relative">
+            <div className="px-5 py-3 border-b border-slate-100 bg-white flex items-center justify-between gap-4">
+              <div className="relative flex-1">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
@@ -2658,9 +2763,12 @@ export default function FacultyPortal() {
                   className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500"
                 />
               </div>
+              <span className="text-[11px] font-bold text-slate-500 shrink-0">
+                Showing {filteredRoster.length} students
+              </span>
             </div>
 
-            {/* Student Attendance List Table */}
+            {/* Student Attendance List Table with Interactive Toggle */}
             <div className="flex-1 overflow-y-auto px-5 py-2">
               <table className="w-full text-left text-xs">
                 <thead className="sticky top-0 bg-slate-100 text-slate-600 uppercase text-[10px] font-extrabold tracking-wider border-b border-slate-200">
@@ -2668,8 +2776,8 @@ export default function FacultyPortal() {
                     <th className="py-2.5 px-3">S.No</th>
                     <th className="py-2.5 px-3">Roll Number</th>
                     <th className="py-2.5 px-3">Student Name</th>
-                    <th className="py-2.5 px-3 text-center">Held Attendance</th>
-                    <th className="py-2.5 px-3 text-center">Status</th>
+                    <th className="py-2.5 px-3 text-center">Attendance %</th>
+                    <th className="py-2.5 px-3 text-center">Status (Toggle A / P)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -2685,16 +2793,24 @@ export default function FacultyPortal() {
                           {heldRatio} ({heldPct}%)
                         </td>
                         <td className="py-2.5 px-3 text-center">
+                          {/* Interactive Toggle Switch */}
                           <button
                             type="button"
                             onClick={() => toggleStudentStatus(s.id)}
-                            className={`px-4 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer shadow-xs border ${
                               s.status
-                                ? "bg-emerald-500 text-white shadow-xs"
-                                : "bg-red-500 text-white shadow-xs"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
+                                : "bg-red-50 text-red-700 border-red-300 hover:bg-red-100"
                             }`}
                           >
-                            {s.status ? "Present" : "Absent"}
+                            <div
+                              className={`w-7 h-3.5 rounded-full p-0.5 transition-colors flex items-center ${
+                                s.status ? "bg-emerald-600 justify-end" : "bg-red-500 justify-start"
+                              }`}
+                            >
+                              <div className="w-2.5 h-2.5 rounded-full bg-white shadow-xs"></div>
+                            </div>
+                            <span>{s.status ? "Present" : "Absent"}</span>
                           </button>
                         </td>
                       </tr>
