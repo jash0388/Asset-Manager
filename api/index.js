@@ -67682,8 +67682,17 @@ router7.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, re
       const s = (subj || "").toUpperCase().trim();
       return s.includes("SPORTS") || s.includes("LIBRARY") || s.includes("COUNSELLING") || s.includes("CLUB") || s.includes("ACTIVITIES") || s.includes("APTITUDE") || s.includes("RESEARCH HOUR") || s.includes("DIGITAL LIBRARY");
     };
-    const academicSchedList = schedList.filter((s) => !isActivity(s.subject));
-    const results = academicSchedList.map((s) => buildClassItem2(s, false));
+    const results = academicSchedList.map((s) => buildClassItem2(s, false)).sort((a, b) => {
+      const aIsLive = a.timingStatus === "live";
+      const bIsLive = b.timingStatus === "live";
+      if (aIsLive && !bIsLive) return -1;
+      if (!aIsLive && bIsLive) return 1;
+      const aIsUpcoming = a.timingStatus === "upcoming";
+      const bIsUpcoming = b.timingStatus === "upcoming";
+      if (aIsUpcoming && !bIsUpcoming) return -1;
+      if (!aIsUpcoming && bIsUpcoming) return 1;
+      return 0;
+    });
     let nextWorkingDayInfo = null;
     if (results.length === 0) {
       const nextDayCode = "MON";

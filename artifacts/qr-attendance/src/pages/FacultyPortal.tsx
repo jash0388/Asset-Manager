@@ -73,6 +73,9 @@ interface Course {
   batch: string;
   addedBy: string;
   coInstructors?: string[];
+  isLive?: boolean;
+  isAttendanceTaken?: boolean;
+  timingStatus?: "live" | "upcoming" | "completed" | "future_day";
 }
 
 interface StudentAttendanceRecord {
@@ -656,8 +659,21 @@ export default function FacultyPortal() {
   // Effective today classes: uses live API data if available, or derives from faculty timetable/workload
   const effectiveTodayClasses: TodayClassItem[] = useMemo(() => {
     if (todayClassesInfo?.classes && todayClassesInfo.classes.length > 0) {
-      return todayClassesInfo.classes;
+      return [...todayClassesInfo.classes].sort((a, b) => {
+        const aIsLive = a.timingStatus === "live" || a.isLive;
+        const bIsLive = b.timingStatus === "live" || b.isLive;
+        if (aIsLive && !bIsLive) return -1;
+        if (!aIsLive && bIsLive) return 1;
+
+        const aIsUpcoming = a.timingStatus === "upcoming" || a.isLocked;
+        const bIsUpcoming = b.timingStatus === "upcoming" || b.isLocked;
+        if (aIsUpcoming && !bIsUpcoming) return -1;
+        if (!aIsUpcoming && bIsUpcoming) return 1;
+
+        return 0;
+      });
     }
+
     const dayName = todayClassesInfo?.dayName || "Saturday";
     const dayCode = todayClassesInfo?.dayCode || "SAT";
     const dayEntry = (workload || []).find(
@@ -689,7 +705,7 @@ export default function FacultyPortal() {
     const curMin = now.getMinutes();
     const curTotalMin = curHour * 60 + curMin;
 
-    return academicPeriods.map((p, idx) => {
+    const rawClasses: TodayClassItem[] = academicPeriods.map((p, idx) => {
       const isLab = (p?.subject || "").toUpperCase().includes("LAB");
       const [sPart, ePart] = (p?.slot || "").split("–").map((s) => (s ? s.trim() : ""));
       let startMin = 9 * 60;
@@ -742,6 +758,20 @@ export default function FacultyPortal() {
         unlocksAt: sPart || "09:00 AM",
         statusLabel: timingStatus === "live" ? "Live Class Now" : timingStatus === "upcoming" ? "Upcoming Today" : "Period Concluded",
       };
+    });
+
+    return rawClasses.sort((a, b) => {
+      const aIsLive = a.timingStatus === "live" || a.isLive;
+      const bIsLive = b.timingStatus === "live" || b.isLive;
+      if (aIsLive && !bIsLive) return -1;
+      if (!aIsLive && bIsLive) return 1;
+
+      const aIsUpcoming = a.timingStatus === "upcoming" || a.isLocked;
+      const bIsUpcoming = b.timingStatus === "upcoming" || b.isLocked;
+      if (aIsUpcoming && !bIsUpcoming) return -1;
+      if (!aIsUpcoming && bIsUpcoming) return 1;
+
+      return 0;
     });
   }, [todayClassesInfo.classes, todayClassesInfo.dayName, todayClassesInfo.dayCode, workload]);
 
@@ -1496,6 +1526,10 @@ export default function FacultyPortal() {
 
           {effectiveTodayClasses.length > 0 ? (
             effectiveTodayClasses.map((cls) => {
+              const isLive = cls.timingStatus === "live" || cls.isLive;
+              const isLocked = cls.isLocked && !isLive;
+              const isEndedAndUnmarked = !isLive && !isLocked && !cls.isAttendanceTaken;
+
               const courseObj: Course = {
                 id: cls.id,
                 code: cls.code,
@@ -1507,10 +1541,10 @@ export default function FacultyPortal() {
                 room: cls.room,
                 batch: "Regular",
                 addedBy: "HOD (Data Science)",
+                isLive: isLive,
+                isAttendanceTaken: cls.isAttendanceTaken,
+                timingStatus: cls.timingStatus,
               };
-
-              const isLive = cls.timingStatus === "live" || cls.isLive;
-              const isLocked = cls.isLocked && !isLive;
 
               return (
                 <div
@@ -1573,33 +1607,29 @@ export default function FacultyPortal() {
                         <Lock className="w-3.5 h-3.5" />
                         <span>Locked until {cls.unlocksAt}</span>
                       </button>
-                    ) : (
+                    ) : isLive ? (
                       <button
                         onClick={() => openAttendanceModal(courseObj)}
-                        className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm ${
-                          isLive
-                            ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 font-black text-sm"
-                            : cls.isAttendanceTaken
-                            ? "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200"
-                            : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20"
-                        }`}
+                        className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
                       >
-                        {isLive ? (
-                          <>
-                            <Sparkles className="w-4 h-4" />
-                            <span>Post Live Attendance</span>
-                          </>
-                        ) : cls.isAttendanceTaken ? (
-                          <>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>View / Edit Attendance</span>
-                          </>
-                        ) : (
-                          <>
-                            <UserCheck className="w-3.5 h-3.5" />
-                            <span>Post Attendance</span>
-                          </>
-                        )}
+                        <Sparkles className="w-4 h-4" />
+                        <span>Post Live Attendance</span>
+                      </button>
+                    ) : cls.isAttendanceTaken ? (
+                      <button
+                        onClick={() => openAttendanceModal(courseObj)}
+                        className="w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>View Recorded Attendance</span>
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
+                      >
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Class Ended &bull; Attendance Closed</span>
                       </button>
                     )}
                   </div>
@@ -2523,7 +2553,7 @@ export default function FacultyPortal() {
                           </div>
                         </div>
 
-                        {/* Action Button: Locked if Upcoming, Active if Live or Completed */}
+                        {/* Action Button: Locked if Upcoming, Active if Live, View if Recorded, Closed if Ended */}
                         {isUpcomingLocked ? (
                           <button
                             disabled
@@ -2533,25 +2563,29 @@ export default function FacultyPortal() {
                             <Lock className="w-4 h-4 text-slate-400" />
                             <span>Locked until Class Time ({cls.startTimeFormatted || cls.unlocksAt})</span>
                           </button>
-                        ) : (
+                        ) : isLiveNow ? (
                           <button
                             onClick={() => openAttendanceModal(courseObj)}
-                            className={`w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                              cls.isAttendanceTaken
-                                ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
-                                : isLiveNow
-                                ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
-                                : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
-                            }`}
+                            className="w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
                           >
-                            <CheckSquare className="w-4 h-4" />
-                            <span>
-                              {cls.isAttendanceTaken
-                                ? "✓ Attendance Recorded (Edit / Retake)"
-                                : isLiveNow
-                                ? "🚀 Post Live Attendance Now"
-                                : "Post Attendance (Late Entry)"}
-                            </span>
+                            <Sparkles className="w-4 h-4" />
+                            <span>🚀 Post Live Attendance Now</span>
+                          </button>
+                        ) : cls.isAttendanceTaken ? (
+                          <button
+                            onClick={() => openAttendanceModal(courseObj)}
+                            className="w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>✓ Attendance Recorded (View List)</span>
+                          </button>
+                        ) : (
+                          <button
+                            disabled
+                            className="w-full py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
+                          >
+                            <Clock className="w-4 h-4 text-slate-400" />
+                            <span>Class Ended &bull; Attendance Closed</span>
                           </button>
                         )}
                       </div>
@@ -4137,19 +4171,29 @@ export default function FacultyPortal() {
                       <h4 className="font-extrabold text-sm text-slate-900 leading-snug">{s.name}</h4>
                     </div>
 
+                    {/* Sleek Capsule Toggle Switch for Mobile */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleStudentStatus(s.id);
                       }}
-                      className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 shadow-xs ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-black transition-all shrink-0 shadow-xs border cursor-pointer active:scale-95 ${
                         s.status
-                          ? "bg-emerald-600 text-white shadow-emerald-600/20"
-                          : "bg-red-50 text-red-700 border border-red-200"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                          : "bg-red-50 text-red-700 border-red-300"
                       }`}
                     >
-                      <span>{s.status ? "✓ Present" : "✗ Absent"}</span>
+                      <div
+                        className={`w-7 h-3.5 rounded-full p-0.5 transition-colors flex items-center ${
+                          s.status ? "bg-emerald-600 justify-end" : "bg-red-500 justify-start"
+                        }`}
+                      >
+                        <div className="w-2.5 h-2.5 rounded-full bg-white shadow-xs"></div>
+                      </div>
+                      <span className="w-12 text-left text-[11px] font-black">
+                        {s.status ? "Present" : "Absent"}
+                      </span>
                     </button>
                   </div>
                 ))}
@@ -4207,33 +4251,40 @@ export default function FacultyPortal() {
             </div>
 
             {/* Modal Footer Actions */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setAttendanceModalOpen(false)}
                 className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
               >
-                Cancel
+                Close
               </button>
 
-              <button
-                type="button"
-                onClick={handleSubmitAttendance}
-                disabled={submittingAttendance}
-                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
-              >
-                {submittingAttendance ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Posting Attendance...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Submit Attendance</span>
-                  </>
-                )}
-              </button>
+              {selectedCourseForAttendance?.timingStatus === "completed" && !selectedCourseForAttendance?.isAttendanceTaken && !selectedCourseForAttendance?.isLive ? (
+                <div className="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <span>Class Ended &bull; Attendance Submission Closed</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSubmitAttendance}
+                  disabled={submittingAttendance}
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  {submittingAttendance ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Posting Attendance...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Submit Attendance</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>

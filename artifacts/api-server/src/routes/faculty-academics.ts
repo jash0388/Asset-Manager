@@ -492,9 +492,22 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
       );
     };
 
-    const academicSchedList = schedList.filter((s: any) => !isActivity(s.subject));
+    // Sort so live class is ALWAYS at the top, then upcoming, then completed
+    const results = academicSchedList
+      .map((s) => buildClassItem(s, false))
+      .sort((a, b) => {
+        const aIsLive = a.timingStatus === "live";
+        const bIsLive = b.timingStatus === "live";
+        if (aIsLive && !bIsLive) return -1;
+        if (!aIsLive && bIsLive) return 1;
 
-    const results = academicSchedList.map((s) => buildClassItem(s, false));
+        const aIsUpcoming = a.timingStatus === "upcoming";
+        const bIsUpcoming = b.timingStatus === "upcoming";
+        if (aIsUpcoming && !bIsUpcoming) return -1;
+        if (!aIsUpcoming && bIsUpcoming) return 1;
+
+        return 0;
+      });
 
     // If no classes scheduled for today, fetch upcoming classes for next working day (e.g. Monday)
     let nextWorkingDayInfo: any = null;
