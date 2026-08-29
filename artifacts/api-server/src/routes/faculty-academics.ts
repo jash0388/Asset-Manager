@@ -503,7 +503,7 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
     const academicSchedList = schedList.filter((s: any) => !isActivity(s.subject));
 
     // 1. Process own academic schedules and attach reassignment status
-    let results = academicSchedList.map((s) => {
+    let results: any[] = academicSchedList.map((s) => {
       const item = buildClassItem(s, false);
       const reassignment = classReassignmentsStore.find(
         (r) =>

@@ -21,12 +21,10 @@ import {
   Check,
   ArrowRightLeft,
   Trash2,
-  Download,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
-import { usePwaInstall } from "@/hooks/usePwaInstall";
 
 
 const adminNavLinks = [
@@ -174,7 +172,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { admin, hod, principal, role, logout } = useAuth();
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { canInstall, install } = usePwaInstall();
 
   // ---- Settings modal ----
   const [showSettings, setShowSettings] = useState(false);
@@ -323,15 +320,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         className="lg:relative lg:translate-x-0"
       >
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px 14px 14px", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
-          <img
-            src="/pwa-192x192.png"
-            alt="Sphoorthy Logo"
-            style={{ width: "34px", height: "34px", borderRadius: "8px", objectFit: "contain", background: "#ffffff", padding: "2px", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}
-          />
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "20px 16px 18px", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
+          <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ShieldCheck style={{ width: "20px", height: "20px", color: "#ffffff" }} />
+          </div>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontSize: "13px", fontWeight: "800", color: "#ffffff", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", letterSpacing: "-0.01em" }}>Hourly Attendance</p>
-            <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Sphoorthy Engg College</p>
+            <p style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>QR Attendance</p>
+            <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Campus Control System</p>
           </div>
           <button onClick={() => setMobileOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", display: "flex" }} className="lg:hidden">
             <X style={{ width: "20px", height: "20px" }} />
@@ -442,8 +437,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <img src="/pwa-192x192.png" alt="Logo" className="w-6 h-6 rounded-md object-contain bg-white border border-slate-200 p-0.5 shadow-2xs" />
-              <span className="text-sm font-extrabold text-slate-900 tracking-tight">Hourly Attendance</span>
+              <ShieldCheck className="w-5 h-5 text-blue-600" />
+              <span className="text-sm font-extrabold text-slate-900">QR Attendance</span>
             </div>
           </div>
 

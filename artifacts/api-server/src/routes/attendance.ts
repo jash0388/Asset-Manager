@@ -31,7 +31,7 @@ function getHostelDate(baseDate = new Date()): string {
   return hostelDay.toISOString().slice(0, 10);
 }
 
-async function getCurrentStatus(userId: number): Promise<"inside" | "left"> {
+async function getCurrentStatus(userId: number): Promise<"inside" | "left" | "missed_exit"> {
   const today = getHostelDate();
   const { data: records } = await supabase
     .from("qr_attendance")
@@ -409,7 +409,7 @@ router.post("/scan/batch", async (req: any, res: any) => {
       const date = getHostelDate(scannedAt);
       const ts = scannedAt.toISOString();
 
-      let current: { status: "inside" | "left"; recordId?: number; scanCount: number; lastScanAt?: string };
+      let current: { status: "inside" | "left" | "missed_exit"; recordId?: number; scanCount: number; lastScanAt?: string };
       if (batchStatusCache.has(user.id)) {
         current = batchStatusCache.get(user.id)!;
       } else {
