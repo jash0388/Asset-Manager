@@ -1275,8 +1275,8 @@ export default function FacultyPortal() {
           date: attendanceDate || new Date().toISOString().slice(0, 10),
           slot: classSlot,
           scheduleId: reassignCourse.id,
-          fromFacultyKey: facultyInfo.key,
-          fromFacultyName: facultyInfo.name,
+          fromFacultyKey: resolvedKey || "106",
+          fromFacultyName: facultyName || "Faculty Member",
           toFacultyKey: reassignToFacultyKey,
           toFacultyName: targetName,
           subject: reassignCourse.name,
@@ -1666,21 +1666,43 @@ export default function FacultyPortal() {
 
                   <div className="mt-4 pt-3 border-t border-slate-100">
                     {isLocked ? (
-                      <button
-                        disabled
-                        className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed"
-                      >
-                        <Lock className="w-3.5 h-3.5" />
-                        <span>Locked until {cls.unlocksAt}</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          disabled
+                          className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Locked until {cls.unlocksAt}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openReassignModal(courseObj)}
+                          className="px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                          title="Reassign this upcoming class"
+                        >
+                          <ArrowRightLeft className="w-3.5 h-3.5 text-slate-950" />
+                          <span>Reassign</span>
+                        </button>
+                      </div>
                     ) : isLive ? (
-                      <button
-                        onClick={() => openAttendanceModal(courseObj)}
-                        className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
-                      >
-                        <Sparkles className="w-4 h-4" />
-                        <span>Post Live Attendance</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openAttendanceModal(courseObj)}
+                          className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          <span>Post Live Attendance</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openReassignModal(courseObj)}
+                          className="px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                          title="Reassign this class"
+                        >
+                          <ArrowRightLeft className="w-3.5 h-3.5 text-slate-950" />
+                          <span>Reassign</span>
+                        </button>
+                      </div>
                     ) : cls.isAttendanceTaken ? (
                       <button
                         onClick={() => openAttendanceModal(courseObj)}
@@ -1690,13 +1712,24 @@ export default function FacultyPortal() {
                         <span>View Recorded Attendance</span>
                       </button>
                     ) : (
-                      <button
-                        disabled
-                        className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
-                      >
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Class Ended &bull; Attendance Closed</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          disabled
+                          className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
+                        >
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Class Ended &bull; Attendance Closed</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openReassignModal(courseObj)}
+                          className="px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                          title="Reassign this class"
+                        >
+                          <ArrowRightLeft className="w-3.5 h-3.5 text-slate-950" />
+                          <span>Reassign</span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -2621,22 +2654,44 @@ export default function FacultyPortal() {
 
                         {/* Action Button: Locked if Upcoming, Active if Live, View if Recorded, Closed if Ended */}
                         {isUpcomingLocked ? (
-                          <button
-                            disabled
-                            className="w-full py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
-                            title={`Attendance entry unlocks at ${cls.startTimeFormatted || cls.unlocksAt}`}
-                          >
-                            <Lock className="w-4 h-4 text-slate-400" />
-                            <span>Locked until Class Time ({cls.startTimeFormatted || cls.unlocksAt})</span>
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              disabled
+                              className="flex-1 py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
+                              title={`Attendance entry unlocks at ${cls.startTimeFormatted || cls.unlocksAt}`}
+                            >
+                              <Lock className="w-4 h-4 text-slate-400" />
+                              <span>Locked until Class Time ({cls.startTimeFormatted || cls.unlocksAt})</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openReassignModal(courseObj)}
+                              className="px-4 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                              title="Reassign this upcoming class to substitute faculty"
+                            >
+                              <ArrowRightLeft className="w-4 h-4 text-slate-950" />
+                              <span>Reassign</span>
+                            </button>
+                          </div>
                         ) : isLiveNow ? (
-                          <button
-                            onClick={() => openAttendanceModal(courseObj)}
-                            className="w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
-                          >
-                            <Sparkles className="w-4 h-4" />
-                            <span>🚀 Post Live Attendance Now</span>
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => openAttendanceModal(courseObj)}
+                              className="flex-1 py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
+                            >
+                              <Sparkles className="w-4 h-4" />
+                              <span>🚀 Post Live Attendance Now</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openReassignModal(courseObj)}
+                              className="px-4 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                              title="Reassign this class"
+                            >
+                              <ArrowRightLeft className="w-4 h-4 text-slate-950" />
+                              <span>Reassign</span>
+                            </button>
+                          </div>
                         ) : cls.isAttendanceTaken ? (
                           <button
                             onClick={() => openAttendanceModal(courseObj)}
@@ -2646,13 +2701,24 @@ export default function FacultyPortal() {
                             <span>✓ Attendance Recorded (View List)</span>
                           </button>
                         ) : (
-                          <button
-                            disabled
-                            className="w-full py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
-                          >
-                            <Clock className="w-4 h-4 text-slate-400" />
-                            <span>Class Ended &bull; Attendance Closed</span>
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              disabled
+                              className="flex-1 py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
+                            >
+                              <Clock className="w-4 h-4 text-slate-400" />
+                              <span>Class Ended &bull; Attendance Closed</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openReassignModal(courseObj)}
+                              className="px-4 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                              title="Reassign this class"
+                            >
+                              <ArrowRightLeft className="w-4 h-4 text-slate-950" />
+                              <span>Reassign</span>
+                            </button>
+                          </div>
                         )}
                       </div>
                     );
@@ -4424,9 +4490,9 @@ export default function FacultyPortal() {
                     From Faculty (Assigning Out):
                   </label>
                   <div className="px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-black text-slate-800 flex items-center justify-between">
-                    <span>{facultyInfo.name}</span>
+                    <span>{facultyName || "Faculty Member"}</span>
                     <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                      Key {facultyInfo.key}
+                      Key {resolvedKey || "106"}
                     </span>
                   </div>
                 </div>
