@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 import {
   Home,
@@ -495,6 +496,7 @@ export default function FacultyPortal() {
   const { mentor, role, logout } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Active navigation tab
   const [activeTab, setActiveTab] = useState<
