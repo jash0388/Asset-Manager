@@ -1997,18 +1997,22 @@ export default function HodDashboard() {
     return m > 0 ? `+${h}h ${m}m late` : `+${h}h late`;
   };
 
-  // Helper to map student to mentor from OFFICIAL_FACULTY_LIST
+  // Helper to map student to mentor from SECTION_METADATA_REGISTRY
   const getMentorForStudent = (student: StudentUser) => {
     if (!student) return null;
     const { name: secName } = getSectionDisplayName(student.section);
-    const roll = (student.uniqueId || "").toUpperCase();
 
-    const mentor = OFFICIAL_FACULTY_LIST.find(m => {
-      if (m.section && m.section === secName) return true;
-      if (m.rollRange && roll && m.rollRange.includes(roll)) return true;
-      return false;
-    });
-    return mentor || null;
+    // Look up the section in the registry (e.g. "3B" → classIncharge + mentors)
+    const sectionMeta = SECTION_METADATA_REGISTRY[secName];
+    if (sectionMeta) {
+      return {
+        name: sectionMeta.classIncharge.name,
+        email: sectionMeta.classIncharge.email,
+        section: secName,
+        mentors: sectionMeta.mentors,
+      };
+    }
+    return null;
   };
 
   // Student monthly frequency counts for late comers & absences
@@ -2036,8 +2040,10 @@ export default function HodDashboard() {
   const allProblemItems = useMemo(() => {
     return eligibleSectionStudents.map(st => {
       const rec = consolidatedLogs.find(l => l.userId === st.id);
+      const isClassPresent = classPresentUserIds.has(st.id);
       const isLate = rec ? isLateTime(rec.entryTime) : false;
-      const isUnscanned = !rec;
+      // Student is NOT unscanned if they have a gate record OR faculty marked them present in class
+      const isUnscanned = !rec && !isClassPresent;
       const minutesLate = rec ? getMinutesLate(rec.entryTime) : 0;
       const monthlyLate = studentLateCounts.get(st.id) || 0;
       const monthlyAbs = studentAbsentCounts.get(st.id) || 0;
@@ -2072,9 +2078,10 @@ export default function HodDashboard() {
       return {
         student: st,
         record: rec,
-        status: isUnscanned ? "unscanned" : isLate ? "late" : (rec?.status === "left" || rec?.exitTime) ? "left" : "inside",
+        status: isUnscanned ? "unscanned" : isClassPresent && !rec ? "in_class" : isLate ? "late" : (rec?.status === "left" || rec?.exitTime) ? "left" : "inside",
         isLate,
         isUnscanned,
+        isClassPresent,
         minutesLate,
         monthlyLate,
         monthlyAbs,
@@ -2084,7 +2091,7 @@ export default function HodDashboard() {
         severityLabel,
       };
     });
-  }, [eligibleSectionStudents, consolidatedLogs, logDate, remarksMap, studentLateCounts, studentAbsentCounts]);
+  }, [eligibleSectionStudents, consolidatedLogs, logDate, remarksMap, studentLateCounts, studentAbsentCounts, classPresentUserIds]);
 
   // Statistics for Problem Areas Toolbar
   const problemStats = useMemo(() => {
@@ -2282,6 +2289,8 @@ export default function HodDashboard() {
       const { name: sDisplayName } = getSectionDisplayName(item.student.section);
       const statusText = item.isUnscanned
         ? "Not Scanned (Absent)"
+        : item.status === "in_class"
+        ? "Present (In Class - Hourly)"
         : item.isLate
         ? `Late (${formatLateDuration(item.minutesLate)})`
         : (item.status === "left" || item.record?.exitTime ? "Left" : "Present / On Campus");
@@ -3557,6 +3566,10 @@ export default function HodDashboard() {
                                 {item.isUnscanned ? (
                                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-red-100 border border-red-300 text-red-950">
                                     <X className="w-3 h-3 text-red-700" /> NOT SCANNED
+                                  </span>
+                                ) : item.status === "in_class" ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-emerald-100 border border-emerald-300 text-emerald-950">
+                                    <CheckCircle className="w-3 h-3 text-emerald-700" /> IN CLASS
                                   </span>
                                 ) : (
                                   <div className="space-y-0.5">
