@@ -17,6 +17,10 @@ import {
   Briefcase,
   ChevronDown,
   ChevronRight,
+  Bell,
+  Check,
+  ArrowRightLeft,
+  Trash2,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -229,6 +233,81 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const userDisplayName = role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name ?? "Admin";
   const userEmail = role === "principal" ? principal?.email : role === "hod" ? hod?.email : admin?.email ?? "";
 
+  // ── Notification Popover & Approvals State ──
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [processingNotificationId, setProcessingNotificationId] = useState<string | null>(null);
+  const [clearedNotificationIds, setClearedNotificationIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("qr_cleared_notifications");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const { data: reassignmentsResponse, refetch: refetchLayoutReassignments } = useQuery<any>({
+    queryKey: ["layout-reassignments"],
+    queryFn: async () => {
+      try {
+        const token = localStorage.getItem("qr_token") || "";
+        const res = await fetch("/api/admin/reassignments", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return { reassignments: [] };
+        return await res.json();
+      } catch {
+        return { reassignments: [] };
+      }
+    },
+    refetchInterval: 4000,
+  });
+
+  const rawReassignments = reassignmentsResponse?.reassignments || [];
+  const activeNotifications = useMemo(() => {
+    return rawReassignments.filter((r: any) => !clearedNotificationIds.includes(r.id));
+  }, [rawReassignments, clearedNotificationIds]);
+
+  const pendingCount = useMemo(() => {
+    return activeNotifications.filter((r: any) => r.status === "pending").length;
+  }, [activeNotifications]);
+
+  const handleClearAllNotifications = () => {
+    const allIds = rawReassignments.map((r: any) => r.id);
+    const newCleared = Array.from(new Set([...clearedNotificationIds, ...allIds]));
+    setClearedNotificationIds(newCleared);
+    try {
+      localStorage.setItem("qr_cleared_notifications", JSON.stringify(newCleared));
+    } catch {}
+  };
+
+  const handleClearSingleNotification = (id: string) => {
+    const newCleared = Array.from(new Set([...clearedNotificationIds, id]));
+    setClearedNotificationIds(newCleared);
+    try {
+      localStorage.setItem("qr_cleared_notifications", JSON.stringify(newCleared));
+    } catch {}
+  };
+
+  const handleNotificationAction = async (id: string, action: "accept" | "decline") => {
+    setProcessingNotificationId(id);
+    try {
+      const token = localStorage.getItem("qr_token") || "";
+      await fetch(`/api/admin/reassignments/${id}/action`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action }),
+      });
+      refetchLayoutReassignments();
+    } catch (err) {
+      console.error("Action error:", err);
+    } finally {
+      setProcessingNotificationId(null);
+    }
+  };
+
   return (
     <div style={{ display: "flex", height: "100vh", background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}>
 
@@ -355,31 +434,200 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* ══════════ MAIN CONTENT ══════════ */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-        {/* Mobile top bar */}
-        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "12px 16px", borderBottom: "1px solid #E5E7EB", background: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }} className="lg:hidden flex items-center justify-between">
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button data-testid="mobile-menu-button" onClick={() => setMobileOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", display: "flex" }}>
-              <Menu style={{ width: "24px", height: "24px" }} />
+        {/* Header bar (desktop & mobile) */}
+        <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-200 bg-white shadow-xs z-30 relative">
+          <div className="flex items-center gap-3">
+            <button data-testid="mobile-menu-button" onClick={() => setMobileOpen(true)} className="lg:hidden p-1 text-slate-500 hover:text-slate-900 cursor-pointer">
+              <Menu className="w-5 h-5" />
             </button>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <ShieldCheck style={{ width: "20px", height: "20px", color: "#2563EB" }} />
-              <span style={{ fontSize: "14px", fontWeight: "700", color: "#111827" }}>QR Attendance</span>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-blue-600" />
+              <span className="text-sm font-extrabold text-slate-900">QR Attendance</span>
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="flex items-center gap-2 relative">
+            {/* Notification Bell with Badge and Popover Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen((prev) => !prev)}
+                className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+                  notificationsOpen
+                    ? "bg-blue-50 border-blue-300 text-blue-700 shadow-xs"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                }`}
+                title="Notifications"
+              >
+                <Bell className="w-4.5 h-4.5" />
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-black text-white shadow-xs animate-pulse">
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Popover Dropdown */}
+              {notificationsOpen && (
+                <div
+                  className="absolute right-0 top-11 z-50 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150"
+                  style={{ minWidth: "320px" }}
+                >
+                  {/* Popover Header */}
+                  <div className="p-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-amber-400" />
+                      <span className="text-xs font-black">Notifications & Approvals</span>
+                      {activeNotifications.length > 0 && (
+                        <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full font-extrabold">
+                          {activeNotifications.length}
+                        </span>
+                      )}
+                    </div>
+                    {activeNotifications.length > 0 && (
+                      <button
+                        onClick={handleClearAllNotifications}
+                        className="text-[11px] font-extrabold text-amber-300 hover:text-amber-200 flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Clear All</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Popover Body */}
+                  <div className="p-3 space-y-2.5 overflow-y-auto max-h-[420px] bg-slate-50/50">
+                    {activeNotifications.length === 0 ? (
+                      <div className="p-6 text-center space-y-2 bg-white rounded-xl border border-slate-200/80">
+                        <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                          <Check className="w-5 h-5" />
+                        </div>
+                        <p className="text-xs font-bold text-slate-800">No New Notifications</p>
+                        <p className="text-[11px] text-slate-500">All substitution requests have been cleared or handled.</p>
+                      </div>
+                    ) : (
+                      activeNotifications.map((r: any) => {
+                        const isPending = r.status === "pending";
+                        const isAccepted = r.status === "accepted";
+                        const isDeclined = r.status === "declined";
+
+                        return (
+                          <div
+                            key={r.id}
+                            className={`p-3 rounded-xl border bg-white shadow-xs space-y-2 relative transition-all ${
+                              isPending
+                                ? "border-amber-300 ring-1 ring-amber-200"
+                                : isAccepted
+                                ? "border-emerald-200"
+                                : "border-rose-200"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                {r.date} &bull; {r.slot}
+                              </span>
+
+                              {/* Status Badge with Tick or X mark */}
+                              {isPending ? (
+                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 flex items-center gap-1">
+                                  <Clock className="w-3 h-3 text-amber-600" />
+                                  <span>Pending HOD</span>
+                                </span>
+                              ) : isAccepted ? (
+                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                                  <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
+                                  <span>Accepted</span>
+                                </span>
+                              ) : (
+                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-800 flex items-center gap-1">
+                                  <X className="w-3 h-3 text-rose-600 stroke-[3]" />
+                                  <span>Declined</span>
+                                </span>
+                              )}
+                            </div>
+
+                            <div>
+                              <p className="text-xs font-black text-slate-900">{r.subject} ({r.section})</p>
+                              <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 pt-0.5">
+                                <span className="text-slate-600">{r.fromFacultyName}</span>
+                                <span className="text-indigo-600 font-bold">➔</span>
+                                <span className="text-indigo-900 font-extrabold">{r.toFacultyName}</span>
+                              </div>
+                            </div>
+
+                            {r.reason && (
+                              <p className="text-[10.5px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                <strong className="text-slate-700">Reason:</strong> {r.reason}
+                              </p>
+                            )}
+
+                            {/* Action Buttons for Pending or Status for Accepted/Declined */}
+                            <div className="flex items-center justify-between pt-1 border-t border-slate-100 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleClearSingleNotification(r.id)}
+                                className="text-[10.5px] font-bold text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                              >
+                                Dismiss
+                              </button>
+
+                              {isPending ? (
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleNotificationAction(r.id, "decline")}
+                                    disabled={processingNotificationId === r.id}
+                                    className="px-2.5 py-1 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                                  >
+                                    <X className="w-3 h-3" />
+                                    <span>Decline</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleNotificationAction(r.id, "accept")}
+                                    disabled={processingNotificationId === r.id}
+                                    className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                                  >
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                    <span>Accept</span>
+                                  </button>
+                                </div>
+                              ) : isAccepted ? (
+                                <span className="text-[10.5px] font-bold text-emerald-700 flex items-center gap-1">
+                                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                                  <span>Assigned to {r.toFacultyName}</span>
+                                </span>
+                              ) : (
+                                <span className="text-[10.5px] font-bold text-rose-700 flex items-center gap-1">
+                                  <X className="w-3.5 h-3.5 text-rose-600 stroke-[3]" />
+                                  <span>Reassignment Declined</span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Settings Gear Button */}
             <button
               onClick={openSettings}
-              style={{ padding: "8px 10px", borderRadius: "10px", background: "#f1f5f9", border: "1px solid #cbd5e1", cursor: "pointer", display: "flex", alignItems: "center", justify: "center" }}
+              className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition-all cursor-pointer flex items-center justify-center"
               title="Settings"
             >
-              <Settings style={{ width: "18px", height: "18px", color: "#334155" }} />
+              <Settings className="w-4.5 h-4.5 text-slate-700" />
             </button>
+
+            {/* Logout Button */}
             <button
               onClick={logout}
-              style={{ padding: "8px 12px", borderRadius: "10px", background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b", fontWeight: "700", fontSize: "12px", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+              className="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 font-bold text-xs cursor-pointer flex items-center gap-1.5 transition-all"
             >
-              <LogOut style={{ width: "16px", height: "16px" }} />
+              <LogOut className="w-4 h-4" />
               <span>Logout</span>
             </button>
           </div>

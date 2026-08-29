@@ -57,7 +57,8 @@ import {
   Trash2,
   UploadCloud,
   CheckCheck,
-  Lock
+  Lock,
+  ArrowRightLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -1239,7 +1240,72 @@ export default function FacultyPortal() {
   const presentStudentsCount = studentRoster.filter((s) => s.status).length;
   const absentStudentsCount = totalStudentsCount - presentStudentsCount;
 
-  // Delegate Attendance State
+  // Class Reassignment / Delegation State
+  const [reassignModalOpen, setReassignModalOpen] = useState(false);
+  const [reassignCourse, setReassignCourse] = useState<Course | null>(null);
+  const [reassignToFacultyKey, setReassignToFacultyKey] = useState("108");
+  const [reassignReason, setReassignReason] = useState("Official Duty / Department Meeting");
+  const [reassignCustomReason, setReassignCustomReason] = useState("");
+  const [submittingReassignment, setSubmittingReassignment] = useState(false);
+
+  const openReassignModal = (course: Course) => {
+    setReassignCourse(course);
+    setReassignModalOpen(true);
+  };
+
+  const handleSendReassignment = async () => {
+    if (!reassignCourse) return;
+    setSubmittingReassignment(true);
+
+    const targetFaculty = Object.values(FACULTY_DIRECTORY).find(
+      (f) => f.key === reassignToFacultyKey
+    );
+    const targetName = targetFaculty?.name || "Mrs G Sushma";
+
+    const classSlot =
+      effectiveTodayClasses.find((c) => c.code === reassignCourse.code || c.id === reassignCourse.id)?.slot ||
+      "10:00 – 11:00";
+
+    const reasonText = reassignReason === "Other" ? (reassignCustomReason || "Other Duty") : reassignReason;
+
+    try {
+      await customFetch("/api/faculty/reassignments", {
+        method: "POST",
+        body: JSON.stringify({
+          date: attendanceDate || new Date().toISOString().slice(0, 10),
+          slot: classSlot,
+          scheduleId: reassignCourse.id,
+          fromFacultyKey: facultyInfo.key,
+          fromFacultyName: facultyInfo.name,
+          toFacultyKey: reassignToFacultyKey,
+          toFacultyName: targetName,
+          subject: reassignCourse.name,
+          year: reassignCourse.section?.includes("4") ? "IV" : reassignCourse.section?.includes("3") ? "III" : "II",
+          section: reassignCourse.section,
+          room: reassignCourse.room,
+          reason: reasonText,
+        }),
+      });
+
+      toast({
+        title: "Reassignment Request Sent!",
+        description: `Request to reassign ${reassignCourse.name} to ${targetName} is pending HOD approval.`,
+      });
+
+      setReassignModalOpen(false);
+      setAttendanceModalOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Reassignment Failed",
+        description: err?.message || "Could not send reassignment request.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingReassignment(false);
+    }
+  };
+
+  // Delegate Attendance State (Legacy tab)
   const [delegatedFaculty, setDelegatedFaculty] = useState("");
   const [delegatedCourse, setDelegatedCourse] = useState("");
   const [delegatedDate, setDelegatedDate] = useState(new Date().toISOString().split("T")[0]);
@@ -3981,12 +4047,24 @@ export default function FacultyPortal() {
                   Section: {selectedCourseForAttendance.section} &bull; Room: {selectedCourseForAttendance.room}
                 </p>
               </div>
-              <button
-                onClick={() => setAttendanceModalOpen(false)}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => openReassignModal(selectedCourseForAttendance)}
+                  className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black shadow-md flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                  title="Reassign this class period to another faculty"
+                >
+                  <ArrowRightLeft className="w-3.5 h-3.5 text-slate-950" />
+                  <span>Reassign</span>
+                </button>
+
+                <button
+                  onClick={() => setAttendanceModalOpen(false)}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Modal Sub-Header (Date, Periods, Radio, Counters) — DESKTOP ONLY */}
@@ -4285,6 +4363,172 @@ export default function FacultyPortal() {
                   )}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          REASSIGN CLASS MODAL (SUBSTITUTE FACULTY REQUEST TO HOD)
+      ───────────────────────────────────────────────────────────── */}
+      {reassignModalOpen && reassignCourse && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-5 bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-700 text-white flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-black text-amber-100 uppercase tracking-widest block">
+                  Substitution Request
+                </span>
+                <h3 className="text-lg font-black flex items-center gap-2">
+                  <ArrowRightLeft className="w-5 h-5 text-white" />
+                  <span>Reassign Class Period</span>
+                </h3>
+              </div>
+              <button
+                onClick={() => setReassignModalOpen(false)}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-4 overflow-y-auto">
+              {/* Class Summary Box */}
+              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-amber-800 uppercase tracking-wider">
+                    Selected Class Period
+                  </span>
+                  <span className="font-mono text-xs font-bold text-amber-900 bg-white px-2 py-0.5 rounded-md border border-amber-200">
+                    {attendanceDate}
+                  </span>
+                </div>
+                <h4 className="text-base font-black text-slate-900">{reassignCourse.name} ({reassignCourse.code})</h4>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700 pt-1">
+                  <span className="bg-white px-2 py-0.5 rounded border border-slate-200 font-bold">
+                    Section: {reassignCourse.section}
+                  </span>
+                  <span className="bg-white px-2 py-0.5 rounded border border-slate-200 font-bold">
+                    Room: {reassignCourse.room}
+                  </span>
+                </div>
+              </div>
+
+              {/* Form Controls */}
+              <div className="space-y-3">
+                {/* From Faculty */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    From Faculty (Assigning Out):
+                  </label>
+                  <div className="px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-black text-slate-800 flex items-center justify-between">
+                    <span>{facultyInfo.name}</span>
+                    <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                      Key {facultyInfo.key}
+                    </span>
+                  </div>
+                </div>
+
+                {/* To Faculty Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Reassign To Faculty (Substitute):
+                  </label>
+                  <select
+                    value={reassignToFacultyKey}
+                    onChange={(e) => setReassignToFacultyKey(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500 bg-white"
+                  >
+                    <option value="108">Mrs G Sushma (Assistant Professor &bull; III-A)</option>
+                    <option value="107">Mr K Bikshapathi (Assistant Professor &bull; II-C)</option>
+                    <option value="109">Mrs A Sravanthi (Assistant Professor &bull; IV-A)</option>
+                    <option value="110">Mrs K Sneha (Assistant Professor &bull; IV-B)</option>
+                    <option value="111">Mrs B Narmadha (Assistant Professor &bull; II-B)</option>
+                    <option value="112">Mrs P Sunitha (Assistant Professor &bull; II-A)</option>
+                    <option value="113">Mrs M Sowmya (Assistant Professor &bull; III-C)</option>
+                    <option value="114">Mrs G Sneha (Assistant Professor)</option>
+                    <option value="115">Mrs Ch Sravanthi (Assistant Professor)</option>
+                    <option value="116">Mrs K Sunitha (Assistant Professor)</option>
+                    <option value="117">Mr P Vamsi Krishna (Assistant Professor)</option>
+                    <option value="118">Mr N Sanjeeva Rayudu (Assistant Professor)</option>
+                    <option value="119">Mrs B Swathi (Assistant Professor)</option>
+                    <option value="101">Dr S Nagakishore Bhavanam (Professor & HOD)</option>
+                  </select>
+                </div>
+
+                {/* Reason */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Reason for Reassignment:
+                  </label>
+                  <select
+                    value={reassignReason}
+                    onChange={(e) => setReassignReason(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 bg-white"
+                  >
+                    <option value="Official Duty / Department Meeting">Official Duty / Department Meeting</option>
+                    <option value="Medical Leave / Emergency">Medical Leave / Emergency</option>
+                    <option value="Lab Exam / External Evaluation Duty">Lab Exam / External Evaluation Duty</option>
+                    <option value="Faculty Development Program (FDP)">Faculty Development Program (FDP)</option>
+                    <option value="Other">Other Reason (Specify below)</option>
+                  </select>
+                </div>
+
+                {reassignReason === "Other" && (
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Enter specific reason..."
+                      value={reassignCustomReason}
+                      onChange={(e) => setReassignCustomReason(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium focus:outline-none focus:border-blue-500 bg-white"
+                    />
+                  </div>
+                )}
+
+                {/* Workflow Note */}
+                <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200 text-[11px] text-blue-900 space-y-1">
+                  <p className="font-bold flex items-center gap-1.5 text-blue-800">
+                    <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                    <span>HOD Approval Workflow</span>
+                  </p>
+                  <p className="text-blue-700">
+                    Once submitted, this request will appear in the HOD Dashboard. When the HOD approves it, this class will appear on the substitute faculty&apos;s portal for live attendance.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setReassignModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSendReassignment}
+                disabled={submittingReassignment}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-700 hover:to-indigo-700 disabled:opacity-50 text-white text-xs font-black shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+              >
+                {submittingReassignment ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Sending Request...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>Send Request to HOD</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

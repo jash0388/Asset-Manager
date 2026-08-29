@@ -65585,8 +65585,165 @@ router4.get("/attendance", authMiddleware, async (req, res) => {
 var attendance_default = router4;
 
 // src/routes/mentor.ts
+var import_express6 = __toESM(require_express2(), 1);
+
+// src/routes/faculty-delegate.ts
 var import_express5 = __toESM(require_express2(), 1);
 var router5 = (0, import_express5.Router)();
+var classReassignmentsStore = [
+  {
+    id: "reassign_demo_1",
+    date: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
+    slot: "11:10 \u2013 12:10",
+    scheduleId: 939,
+    fromFacultyKey: "106",
+    fromFacultyName: "Mr T Shravan Kumar",
+    toFacultyKey: "108",
+    toFacultyName: "Mrs G Sushma",
+    subject: "IDS",
+    year: "III",
+    section: "DS-3A",
+    room: "Hall 412",
+    reason: "Official NBA Accreditation Meeting",
+    status: "accepted",
+    createdAt: new Date(Date.now() - 36e5).toISOString(),
+    decidedAt: new Date(Date.now() - 18e5).toISOString(),
+    decidedBy: "Dr. K. Srinivas Rao (HOD)"
+  }
+];
+router5.get("/faculty/reassignments", authMiddleware, async (req, res) => {
+  const { date, facultyKey, status } = req.query;
+  try {
+    let list = [...classReassignmentsStore];
+    if (date) {
+      list = list.filter((r) => r.date === date);
+    }
+    if (facultyKey) {
+      list = list.filter(
+        (r) => r.fromFacultyKey === facultyKey || r.toFacultyKey === facultyKey
+      );
+    }
+    if (status && status !== "all") {
+      list = list.filter((r) => r.status === status);
+    }
+    list.sort((a, b) => {
+      if (a.status === "pending" && b.status !== "pending") return -1;
+      if (a.status !== "pending" && b.status === "pending") return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    res.json(list);
+  } catch (err) {
+    res.json([]);
+  }
+});
+router5.post("/faculty/reassignments", authMiddleware, async (req, res) => {
+  try {
+    const {
+      date,
+      slot,
+      scheduleId,
+      fromFacultyKey,
+      fromFacultyName,
+      toFacultyKey,
+      toFacultyName,
+      subject,
+      year,
+      section,
+      room,
+      reason
+    } = req.body;
+    if (!fromFacultyName || !toFacultyName || !subject) {
+      res.status(400).json({ error: "Missing required reassignment fields" });
+      return;
+    }
+    const newRecord = {
+      id: `reassign_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      date: date || (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
+      slot: slot || "09:00 \u2013 10:00",
+      scheduleId: scheduleId || null,
+      fromFacultyKey: fromFacultyKey || "106",
+      fromFacultyName: fromFacultyName || "Faculty",
+      toFacultyKey: toFacultyKey || "108",
+      toFacultyName: toFacultyName || "Substitute Faculty",
+      subject: subject || "Course",
+      year: year || "III",
+      section: section || "DS-3A",
+      room: room || "Hall 412",
+      reason: reason || "Faculty Leave / Official Assignment",
+      status: "pending",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    classReassignmentsStore.unshift(newRecord);
+    res.status(201).json({
+      success: true,
+      message: "Reassignment request sent to HOD for approval",
+      reassignment: newRecord
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to create reassignment request" });
+  }
+});
+router5.post("/admin/reassignments/:id/action", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { action, decidedBy } = req.body;
+  try {
+    const item = classReassignmentsStore.find((r) => r.id === id);
+    if (!item) {
+      res.status(404).json({ error: "Reassignment request not found" });
+      return;
+    }
+    if (action === "accept" || action === "approve") {
+      item.status = "accepted";
+      item.decidedAt = (/* @__PURE__ */ new Date()).toISOString();
+      item.decidedBy = decidedBy || "Dr. K. Srinivas Rao (HOD)";
+    } else if (action === "decline" || action === "reject") {
+      item.status = "declined";
+      item.decidedAt = (/* @__PURE__ */ new Date()).toISOString();
+      item.decidedBy = decidedBy || "Dr. K. Srinivas Rao (HOD)";
+    } else {
+      res.status(400).json({ error: "Invalid action. Must be accept or decline." });
+      return;
+    }
+    res.json({
+      success: true,
+      message: `Reassignment ${item.status === "accepted" ? "Approved" : "Declined"} successfully`,
+      reassignment: item
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to update reassignment action" });
+  }
+});
+router5.get("/admin/reassignments", authMiddleware, async (req, res) => {
+  try {
+    const pendingCount = classReassignmentsStore.filter((r) => r.status === "pending").length;
+    const acceptedCount = classReassignmentsStore.filter((r) => r.status === "accepted").length;
+    const declinedCount = classReassignmentsStore.filter((r) => r.status === "declined").length;
+    const list = [...classReassignmentsStore].sort((a, b) => {
+      if (a.status === "pending" && b.status !== "pending") return -1;
+      if (a.status !== "pending" && b.status === "pending") return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    res.json({
+      total: list.length,
+      pendingCount,
+      acceptedCount,
+      declinedCount,
+      reassignments: list
+    });
+  } catch (err) {
+    res.json({ total: 0, pendingCount: 0, acceptedCount: 0, declinedCount: 0, reassignments: [] });
+  }
+});
+router5.get("/faculty/delegations", authMiddleware, mentorOnly, async (req, res) => {
+  res.json(classReassignmentsStore);
+});
+router5.get("/faculty/delegated-to-me", authMiddleware, mentorOnly, async (req, res) => {
+  res.json(classReassignmentsStore);
+});
+var faculty_delegate_default = router5;
+
+// src/routes/mentor.ts
+var router6 = (0, import_express6.Router)();
 function getTodayDate() {
   return (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
 }
@@ -65600,7 +65757,7 @@ function formatUser2(u) {
     createdAt: u.created_at
   };
 }
-router5.get("/mentor/app-version", (_req, res) => {
+router6.get("/mentor/app-version", (_req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({
     latestVersionCode: 9,
@@ -65636,7 +65793,7 @@ function formatRecord2(record, user) {
     ...user ? { user: formatUser2(user) } : {}
   };
 }
-router5.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => {
+router6.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   const today = getTodayDate();
   const section = req.query.section;
@@ -65714,7 +65871,7 @@ router5.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => 
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req, res) => {
+router6.get("/mentor/attendance/:userId", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   const userId = parseInt(req.params.userId);
   if (isNaN(userId)) {
@@ -65809,7 +65966,7 @@ function getBufferedTime(timeStr, offsetMinutes) {
   }
 }
 var scheduleOverridesMap = /* @__PURE__ */ new Map();
-router5.get("/mentor/history", authMiddleware, async (req, res) => {
+router6.get("/mentor/history", authMiddleware, async (req, res) => {
   const mentorId = req.mentorId || (req.adminId !== void 0 ? -3 : null);
   if (!mentorId && req.adminId === void 0) {
     res.status(401).json({ error: "Unauthorized access" });
@@ -66020,7 +66177,7 @@ router5.get("/mentor/history", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/mentor/history/export", authMiddleware, async (req, res) => {
+router6.get("/mentor/history/export", authMiddleware, async (req, res) => {
   const mentorId = req.mentorId || (req.adminId !== void 0 ? -3 : null);
   if (!mentorId && req.adminId === void 0) {
     res.status(401).json({ error: "Unauthorized access" });
@@ -66101,7 +66258,7 @@ router5.get("/mentor/history/export", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, res) => {
+router6.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
     const { day, time, date } = getCurrentISTDateTime();
@@ -66242,7 +66399,7 @@ router5.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req, r
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (req, res) => {
+router6.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   const scheduleIdRaw = req.query.scheduleId;
   const scheduleId = parseInt(scheduleIdRaw);
@@ -66359,7 +66516,7 @@ router5.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (r
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.post("/mentor/start-session", authMiddleware, mentorOnly, async (req, res) => {
+router6.post("/mentor/start-session", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   const scheduleId = parseInt(req.body.scheduleId);
   if (isNaN(scheduleId)) {
@@ -66414,7 +66571,7 @@ router5.post("/mentor/start-session", authMiddleware, mentorOnly, async (req, re
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req, res) => {
+router6.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   const scheduleId = parseInt(req.body.scheduleId);
   const studentRecords = req.body.students;
@@ -66503,7 +66660,7 @@ router5.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/app-version", (_req, res) => {
+router6.get("/app-version", (_req, res) => {
   res.json({
     latestVersionCode: 9,
     latestVersionName: "1.9.0",
@@ -66512,7 +66669,7 @@ router5.get("/app-version", (_req, res) => {
     releaseNotes: "v1.9.0: Overhauled Attendance History, Timetable Snapshots, Student Search, and CSV Export!"
   });
 });
-router5.get("/admin/mentors-tracking", authMiddleware, async (req, res) => {
+router6.get("/admin/mentors-tracking", authMiddleware, async (req, res) => {
   try {
     const { data: mentors, error: mentorErr } = await supabase.from("qr_mentors").select("*").order("name");
     if (mentorErr) throw mentorErr;
@@ -66564,10 +66721,10 @@ var SECURE_FACULTY_KEYS = [
   { id: 12, name: "Mrs K Srinija", email: "mrsksrinija@gmail.com", key: "114", inchargeKey: null, role: "Faculty Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67B4 TO 25N81A67D9", count: 26 },
   { id: 7, name: "Mr K Bikshapathi", email: "mrkbikshapathi@gmail.com", key: "107", inchargeKey: "2013", role: "Class In-charge & Mentor", yearLabel: "2nd Year", section: "2C", rollRange: "25N81A67E0 TO 25N81A67G0", count: 19 }
 ];
-router5.get("/admin/faculty-keys", authMiddleware, async (_req, res) => {
+router6.get("/admin/faculty-keys", authMiddleware, async (_req, res) => {
   res.json(SECURE_FACULTY_KEYS);
 });
-router5.get("/admin/schedules", authMiddleware, async (req, res) => {
+router6.get("/admin/schedules", authMiddleware, async (req, res) => {
   try {
     const { data: schedules, error } = await supabase.from("qr_schedules").select("*, qr_mentors(name, email)").order("day_of_week").order("start_time");
     if (error) throw error;
@@ -66577,7 +66734,7 @@ router5.get("/admin/schedules", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.post("/admin/schedules", authMiddleware, async (req, res) => {
+router6.post("/admin/schedules", authMiddleware, async (req, res) => {
   const { mentorId, dayOfWeek, startTime, endTime, section, subject, year } = req.body;
   if (!mentorId || !dayOfWeek || !startTime || !endTime || !section) {
     res.status(400).json({ error: "Missing required fields" });
@@ -66600,7 +66757,7 @@ router5.post("/admin/schedules", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.post("/admin/schedules/sync-slot", authMiddleware, async (req, res) => {
+router6.post("/admin/schedules/sync-slot", authMiddleware, async (req, res) => {
   const {
     sectionKey,
     year,
@@ -66676,7 +66833,7 @@ router5.post("/admin/schedules/sync-slot", authMiddleware, async (req, res) => {
     res.status(500).json({ error: err?.message || "Failed to sync timetable slot" });
   }
 });
-router5.put("/admin/schedules/:id", authMiddleware, async (req, res) => {
+router6.put("/admin/schedules/:id", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid schedule ID" });
@@ -66700,7 +66857,7 @@ router5.put("/admin/schedules/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.delete("/admin/schedules/:id", authMiddleware, async (req, res) => {
+router6.delete("/admin/schedules/:id", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid schedule ID" });
@@ -66715,7 +66872,7 @@ router5.delete("/admin/schedules/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/admin/schedules-with-status", authMiddleware, async (req, res) => {
+router6.get("/admin/schedules-with-status", authMiddleware, async (req, res) => {
   const date = req.query.date;
   if (!date) {
     res.status(400).json({ error: "Date parameter is required" });
@@ -66748,10 +66905,17 @@ router5.get("/admin/schedules-with-status", authMiddleware, async (req, res) => 
       const isStarted = Boolean(session && !session.ended_at && (!hourly || hourly.count === 0));
       const status = isSubmitted ? "submitted" : isStarted ? "started" : "pending";
       const studentCount = hourly ? hourly.presentCount : session ? session.student_count : 0;
+      const reassignment = classReassignmentsStore.find(
+        (r) => r.date === date && (r.scheduleId === s.id || r.fromFacultyKey === s.qr_mentors?.key && r.subject.toUpperCase() === (s.subject || "").toUpperCase()) && r.status === "accepted"
+      );
       return {
         ...s,
         status,
-        studentCount
+        studentCount,
+        isReassigned: Boolean(reassignment),
+        reassignedTo: reassignment ? reassignment.toFacultyName : null,
+        reassignedFrom: reassignment ? reassignment.fromFacultyName : null,
+        reassignmentInfo: reassignment || null
       };
     });
     res.json(mapped);
@@ -66760,7 +66924,7 @@ router5.get("/admin/schedules-with-status", authMiddleware, async (req, res) => 
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, res) => {
+router6.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, res) => {
   const scheduleId = parseInt(req.query.scheduleId);
   if (isNaN(scheduleId)) {
     res.status(400).json({ error: "Invalid schedule ID" });
@@ -66802,7 +66966,7 @@ router5.get("/admin/hourly-attendance-submissions", authMiddleware, async (req, 
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.post("/admin/schedule-override", authMiddleware, async (req, res) => {
+router6.post("/admin/schedule-override", authMiddleware, async (req, res) => {
   const scheduleId = parseInt(req.body.scheduleId);
   if (isNaN(scheduleId)) {
     res.status(400).json({ error: "Schedule ID is required" });
@@ -66820,7 +66984,7 @@ router5.post("/admin/schedule-override", authMiddleware, async (req, res) => {
     override: overrideData
   });
 });
-router5.get("/admin/schedule-overrides", authMiddleware, async (req, res) => {
+router6.get("/admin/schedule-overrides", authMiddleware, async (req, res) => {
   const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
   const list = [];
   scheduleOverridesMap.forEach((val, key) => {
@@ -66831,7 +66995,7 @@ router5.get("/admin/schedule-overrides", authMiddleware, async (req, res) => {
   });
   res.json(list);
 });
-router5.get("/admin/today-class-presence", authMiddleware, async (req, res) => {
+router6.get("/admin/today-class-presence", authMiddleware, async (req, res) => {
   const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
   try {
     const { data: records, error } = await supabase.from("qr_hourly_attendance").select("user_id, schedule_id, marked_present, date").eq("date", dateParam).eq("marked_present", true);
@@ -66867,7 +67031,7 @@ function getCurrentISTHoursMinutes2() {
   const isPast430PM = hours > 16 || hours === 16 && minutes >= 30;
   return { todayDate, isPast430PM };
 }
-router5.get("/parent/student-report", async (req, res) => {
+router6.get("/parent/student-report", async (req, res) => {
   const rollNumberRaw = (req.query.rollNumber || req.query.uniqueId || "").toString().trim();
   if (!rollNumberRaw) {
     res.status(400).json({ error: "Roll number / Student ID is required" });
@@ -67023,7 +67187,7 @@ router5.get("/parent/student-report", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router5.get("/parent/app-version", (_req, res) => {
+router6.get("/parent/app-version", (_req, res) => {
   res.json({
     latestVersionCode: 8,
     latestVersionName: "1.8.0",
@@ -67032,10 +67196,10 @@ router5.get("/parent/app-version", (_req, res) => {
     releaseNotes: "v1.8.0: New Stitch UI + Incharge login (4-digit keys), dark navy design!"
   });
 });
-router5.get("/admin/training-sessions", authMiddleware, async (_req, res) => {
+router6.get("/admin/training-sessions", authMiddleware, async (_req, res) => {
   res.json(getTrainingSessions());
 });
-router5.get("/admin/training-sessions/:id", authMiddleware, async (req, res) => {
+router6.get("/admin/training-sessions/:id", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const session = getTrainingSessionById(id);
   if (!session) {
@@ -67044,7 +67208,7 @@ router5.get("/admin/training-sessions/:id", authMiddleware, async (req, res) => 
   }
   res.json(session);
 });
-router5.post("/admin/training-sessions", authMiddleware, async (req, res) => {
+router6.post("/admin/training-sessions", authMiddleware, async (req, res) => {
   const { name, company, description, studentIds } = req.body;
   if (!name || !name.trim()) {
     res.status(400).json({ error: "Training session name is required" });
@@ -67053,7 +67217,7 @@ router5.post("/admin/training-sessions", authMiddleware, async (req, res) => {
   const created = saveTrainingSession({ name: name.trim(), company: company || "Corporate", description: description || "", studentIds: studentIds || [] });
   res.status(201).json(created);
 });
-router5.put("/admin/training-sessions/:id", authMiddleware, async (req, res) => {
+router6.put("/admin/training-sessions/:id", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const existing = getTrainingSessionById(id);
   if (!existing) {
@@ -67071,7 +67235,7 @@ router5.put("/admin/training-sessions/:id", authMiddleware, async (req, res) => 
   });
   res.json(updated);
 });
-router5.delete("/admin/training-sessions/:id", authMiddleware, async (req, res) => {
+router6.delete("/admin/training-sessions/:id", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const deleted = deleteTrainingSession(id);
   if (!deleted) {
@@ -67080,7 +67244,7 @@ router5.delete("/admin/training-sessions/:id", authMiddleware, async (req, res) 
   }
   res.json({ message: "Training session deleted successfully" });
 });
-router5.post("/admin/training-sessions/:id/trainer-key", authMiddleware, async (req, res) => {
+router6.post("/admin/training-sessions/:id/trainer-key", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const { name, email, key } = req.body;
   if (!name || !key) {
@@ -67094,7 +67258,7 @@ router5.post("/admin/training-sessions/:id/trainer-key", authMiddleware, async (
   }
   res.json(updated);
 });
-router5.get("/admin/training-attendance", authMiddleware, async (req, res) => {
+router6.get("/admin/training-attendance", authMiddleware, async (req, res) => {
   const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
   const trainingIdParam = req.query.trainingId ? parseInt(req.query.trainingId) : void 0;
   const records = getTrainingAttendanceForDate(dateParam, trainingIdParam);
@@ -67116,7 +67280,7 @@ router5.get("/admin/training-attendance", authMiddleware, async (req, res) => {
   });
   res.json(enriched);
 });
-router5.post("/admin/training-sessions/:id/sub-sessions", authMiddleware, async (req, res) => {
+router6.post("/admin/training-sessions/:id/sub-sessions", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const { name, studentIds, startTime, endTime } = req.body;
   if (!name || !name.trim()) {
@@ -67130,7 +67294,7 @@ router5.post("/admin/training-sessions/:id/sub-sessions", authMiddleware, async 
   }
   res.status(201).json(created);
 });
-router5.put("/admin/training-sessions/:id/sub-sessions/:subId", authMiddleware, async (req, res) => {
+router6.put("/admin/training-sessions/:id/sub-sessions/:subId", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const subId = parseInt(req.params.subId);
   const { name, studentIds, startTime, endTime } = req.body;
@@ -67141,7 +67305,7 @@ router5.put("/admin/training-sessions/:id/sub-sessions/:subId", authMiddleware, 
   }
   res.json(updated);
 });
-router5.delete("/admin/training-sessions/:id/sub-sessions/:subId", authMiddleware, async (req, res) => {
+router6.delete("/admin/training-sessions/:id/sub-sessions/:subId", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const subId = parseInt(req.params.subId);
   const deleted = deleteSubSession(id, subId);
@@ -67151,7 +67315,7 @@ router5.delete("/admin/training-sessions/:id/sub-sessions/:subId", authMiddlewar
   }
   res.json({ message: "Sub-session deleted successfully" });
 });
-router5.post("/admin/mark-permission-attendance", authMiddleware, async (req, res) => {
+router6.post("/admin/mark-permission-attendance", authMiddleware, async (req, res) => {
   const { studentIds, scheduleIds, date } = req.body;
   if (!Array.isArray(studentIds) || studentIds.length === 0) {
     res.status(400).json({ error: "Please select at least one student." });
@@ -67191,18 +67355,18 @@ router5.post("/admin/mark-permission-attendance", authMiddleware, async (req, re
     res.status(500).json({ error: err.message || "Failed to mark permission attendance" });
   }
 });
-router5.post("/admin/training-sessions/:id/unlock", authMiddleware, async (req, res) => {
+router6.post("/admin/training-sessions/:id/unlock", authMiddleware, async (req, res) => {
   const id = parseInt(req.params.id);
   const dateParam = (req.body.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
   clearTrainingAttendance(id, dateParam);
   res.json({ message: "Training session attendance unlocked and reset successfully", trainingId: id, date: dateParam });
 });
-var mentor_default = router5;
+var mentor_default = router6;
 
 // src/routes/faculty.ts
-var import_express6 = __toESM(require_express2(), 1);
-var router6 = (0, import_express6.Router)();
-router6.get("/faculty/profile", authMiddleware, mentorOnly, async (req, res) => {
+var import_express7 = __toESM(require_express2(), 1);
+var router7 = (0, import_express7.Router)();
+router7.get("/faculty/profile", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
     const { data: mentor, error: mentorErr } = await supabase.from("qr_mentors").select("id, name, email, key").eq("id", mentorId).single();
@@ -67228,7 +67392,7 @@ router6.get("/faculty/profile", authMiddleware, mentorOnly, async (req, res) => 
     res.status(500).json({ error: "Internal server error" });
   }
 });
-router6.get("/faculty/dashboard-stats", authMiddleware, mentorOnly, async (req, res) => {
+router7.get("/faculty/dashboard-stats", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
     const { data: schedules } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId);
@@ -67265,7 +67429,7 @@ router6.get("/faculty/dashboard-stats", authMiddleware, mentorOnly, async (req, 
     res.json({ theory: 2, pe: 1, oe: 0, mentees: 24, workload: 18, coInstructor: 1 });
   }
 });
-router6.get("/faculty/courses-at-glance", authMiddleware, mentorOnly, async (req, res) => {
+router7.get("/faculty/courses-at-glance", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
     const { data: assignments } = await supabase.from("qr_course_assignments").select("*, qr_courses(*)").eq("mentor_id", mentorId);
@@ -67307,7 +67471,7 @@ router6.get("/faculty/courses-at-glance", authMiddleware, mentorOnly, async (req
     res.json([]);
   }
 });
-router6.get("/faculty/all-mentors", authMiddleware, mentorOnly, async (req, res) => {
+router7.get("/faculty/all-mentors", authMiddleware, mentorOnly, async (req, res) => {
   try {
     const { data: mentors, error } = await supabase.from("qr_mentors").select("id, name, email, key").order("name");
     if (error) throw error;
@@ -67317,12 +67481,12 @@ router6.get("/faculty/all-mentors", authMiddleware, mentorOnly, async (req, res)
     res.json([]);
   }
 });
-var faculty_default = router6;
+var faculty_default = router7;
 
 // src/routes/faculty-academics.ts
-var import_express7 = __toESM(require_express2(), 1);
-var router7 = (0, import_express7.Router)();
-router7.get("/faculty/courses", authMiddleware, mentorOnly, async (req, res) => {
+var import_express8 = __toESM(require_express2(), 1);
+var router8 = (0, import_express8.Router)();
+router8.get("/faculty/courses", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
     const { data: schedules } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId);
@@ -67365,7 +67529,7 @@ router7.get("/faculty/courses", authMiddleware, mentorOnly, async (req, res) => 
     res.json([]);
   }
 });
-router7.get("/faculty/attendance-history", authMiddleware, mentorOnly, async (req, res) => {
+router8.get("/faculty/attendance-history", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   const { from, to, status } = req.query;
   try {
@@ -67472,7 +67636,7 @@ router7.get("/faculty/attendance-history", authMiddleware, mentorOnly, async (re
     res.json([]);
   }
 });
-router7.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async (req, res) => {
+router8.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   const { section, courseCode, from, to } = req.query;
   try {
@@ -67569,7 +67733,7 @@ router7.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, asyn
     });
   }
 });
-router7.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, res) => {
+router8.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, res) => {
   const mentorId = req.mentorId;
   try {
     let formatTime2 = function(t) {
@@ -67682,7 +67846,60 @@ router7.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, re
       const s = (subj || "").toUpperCase().trim();
       return s.includes("SPORTS") || s.includes("LIBRARY") || s.includes("COUNSELLING") || s.includes("CLUB") || s.includes("ACTIVITIES") || s.includes("APTITUDE") || s.includes("RESEARCH HOUR") || s.includes("DIGITAL LIBRARY");
     };
-    const results = academicSchedList.map((s) => buildClassItem2(s, false)).sort((a, b) => {
+    const { data: currentMentor } = await supabase.from("qr_mentors").select("id, key, name, email").eq("id", mentorId).single();
+    const facultyKey = currentMentor?.key ? String(currentMentor.key) : "106";
+    const academicSchedList = schedList.filter((s) => !isActivity(s.subject));
+    let results = academicSchedList.map((s) => {
+      const item = buildClassItem2(s, false);
+      const reassignment = classReassignmentsStore.find(
+        (r) => r.date === queryDate && (r.scheduleId === s.id || r.fromFacultyKey === facultyKey && r.subject.toUpperCase() === (s.subject || "").toUpperCase())
+      );
+      if (reassignment) {
+        return {
+          ...item,
+          reassignment,
+          reassignedTo: reassignment.toFacultyName,
+          reassignmentStatus: reassignment.status,
+          isReassigned: reassignment.status === "accepted"
+        };
+      }
+      return item;
+    });
+    const assignedToMe = classReassignmentsStore.filter(
+      (r) => r.date === queryDate && r.toFacultyKey === facultyKey && r.status === "accepted"
+    );
+    assignedToMe.forEach((r, idx) => {
+      const isLab = (r.subject || "").toUpperCase().includes("LAB");
+      results.push({
+        id: `reassigned_${r.id}`,
+        scheduleId: r.scheduleId || 9999 + idx,
+        code: (r.subject || "SUB").toUpperCase(),
+        name: `${r.subject} (Reassigned)`,
+        type: isLab ? "Practical" : "Theory",
+        program: "CSE-DS",
+        section: r.section,
+        rawSection: r.section.replace(/[^ABC]/g, "") || "A",
+        year: r.year,
+        room: r.room || "Hall 412",
+        startTime: r.slot.split("\u2013")[0]?.trim() || "10:00 AM",
+        endTime: r.slot.split("\u2013")[1]?.trim() || "11:00 AM",
+        startTimeFormatted: r.slot.split("\u2013")[0]?.trim() || "10:00 AM",
+        endTimeFormatted: r.slot.split("\u2013")[1]?.trim() || "11:00 AM",
+        slot: r.slot,
+        strength: 55,
+        isAttendanceTaken: false,
+        attendedCount: null,
+        session: null,
+        isLive: true,
+        timingStatus: "live",
+        isLocked: false,
+        unlocksAt: "Now",
+        statusLabel: `\u26A1 Reassigned from ${r.fromFacultyName} (HOD Approved)`,
+        isSubstitute: true,
+        reassignedFrom: r.fromFacultyName
+      });
+    });
+    results.sort((a, b) => {
       const aIsLive = a.timingStatus === "live";
       const bIsLive = b.timingStatus === "live";
       if (aIsLive && !bIsLive) return -1;
@@ -67732,7 +67949,7 @@ router7.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, re
     });
   }
 });
-router7.get("/faculty/section-students", authMiddleware, mentorOnly, async (req, res) => {
+router8.get("/faculty/section-students", authMiddleware, mentorOnly, async (req, res) => {
   const { section, scheduleId } = req.query;
   try {
     let targetSection = (section || "").trim();
@@ -67780,55 +67997,7 @@ router7.get("/faculty/section-students", authMiddleware, mentorOnly, async (req,
     res.json([]);
   }
 });
-var faculty_academics_default = router7;
-
-// src/routes/faculty-delegate.ts
-var import_express8 = __toESM(require_express2(), 1);
-var router8 = (0, import_express8.Router)();
-router8.get("/faculty/delegations", authMiddleware, mentorOnly, async (req, res) => {
-  const mentorId = req.mentorId;
-  try {
-    const { data: delegations } = await supabase.from("qr_delegate_attendance").select(`
-        *,
-        substitute:qr_mentors!qr_delegate_attendance_substitute_id_fkey(id, name, email)
-      `).eq("delegator_id", mentorId).order("created_at", { ascending: false });
-    res.json(delegations || []);
-  } catch (err) {
-    res.json([]);
-  }
-});
-router8.get("/faculty/delegated-to-me", authMiddleware, mentorOnly, async (req, res) => {
-  const mentorId = req.mentorId;
-  try {
-    const { data: delegations } = await supabase.from("qr_delegate_attendance").select(`
-        *,
-        delegator:qr_mentors!qr_delegate_attendance_delegator_id_fkey(id, name, email)
-      `).eq("substitute_id", mentorId).order("created_at", { ascending: false });
-    res.json(delegations || []);
-  } catch (err) {
-    res.json([]);
-  }
-});
-router8.post("/faculty/delegations", authMiddleware, mentorOnly, async (req, res) => {
-  const mentorId = req.mentorId;
-  const { substituteId, courseAssignmentId, date, periods, notes } = req.body;
-  try {
-    const { data, error } = await supabase.from("qr_delegate_attendance").insert({
-      delegator_id: mentorId,
-      substitute_id: parseInt(substituteId),
-      course_assignment_id: courseAssignmentId ? parseInt(courseAssignmentId) : 1,
-      date: date || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
-      periods: periods || "Regular",
-      notes: notes || "",
-      status: "pending"
-    }).select().single();
-    if (error) throw error;
-    res.status(201).json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message || "Failed to create delegation" });
-  }
-});
-var faculty_delegate_default = router8;
+var faculty_academics_default = router8;
 
 // src/routes/faculty-workload.ts
 var import_express9 = __toESM(require_express2(), 1);

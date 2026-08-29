@@ -50,6 +50,10 @@ type Schedule = {
   qr_mentors?: { name: string; email: string };
   status?: "pending" | "started" | "submitted";
   studentCount?: number;
+  isReassigned?: boolean;
+  reassignedTo?: string | null;
+  reassignedFrom?: string | null;
+  reassignmentInfo?: any;
 };
 
 type HourlyRecord = {
@@ -695,20 +699,37 @@ export default function HourlyAttendance() {
                           </div>
                         </td>
                         <td className="py-1.5 px-3">
-                          <div className="flex items-center justify-between gap-1.5">
-                            <span className="font-bold text-slate-900 truncate max-w-[140px]" title={s.qr_mentors?.name || "Unassigned"}>
-                              {s.qr_mentors?.name || "Unassigned"}
-                            </span>
-                            {(role === "hod" || role === "admin") && (
-                              <button
-                                onClick={(e) => handleOpenAssignModal(e, s)}
-                                className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                                title="Reassign Faculty"
-                              >
-                                <Edit3 className="w-3 h-3" />
-                              </button>
-                            )}
-                          </div>
+                          {s.isReassigned && s.reassignedTo ? (
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1 text-[11px] font-extrabold text-indigo-700">
+                                <span className="text-slate-400 line-through truncate max-w-[85px]" title={s.qr_mentors?.name}>
+                                  {s.qr_mentors?.name || "Original"}
+                                </span>
+                                <span className="text-indigo-600 font-bold">➔</span>
+                                <span className="text-indigo-900 font-black truncate max-w-[110px]" title={s.reassignedTo}>
+                                  {s.reassignedTo}
+                                </span>
+                              </div>
+                              <span className="inline-block text-[8.5px] px-1 py-0.2 rounded bg-indigo-100 text-indigo-800 font-black uppercase tracking-wider">
+                                Reassigned
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between gap-1.5">
+                              <span className="font-bold text-slate-900 truncate max-w-[140px]" title={s.qr_mentors?.name || "Unassigned"}>
+                                {s.qr_mentors?.name || "Unassigned"}
+                              </span>
+                              {(role === "hod" || role === "admin") && (
+                                <button
+                                  onClick={(e) => handleOpenAssignModal(e, s)}
+                                  className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                                  title="Reassign Faculty"
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </td>
                         <td className="py-1.5 px-3">
                           {s.status === "submitted" ? (
@@ -821,10 +842,23 @@ export default function HourlyAttendance() {
                     </h4>
 
                     <div className="flex items-center justify-between text-[11px] text-slate-600">
-                      <span className="truncate">
-                        Faculty: <strong className="text-slate-900">{s.qr_mentors?.name || "Unassigned"}</strong>
-                      </span>
-                      {(role === "hod" || role === "admin") && (
+                      {s.isReassigned && s.reassignedTo ? (
+                        <div className="space-y-0.5 truncate">
+                          <div className="flex items-center gap-1 text-[11px]">
+                            <span className="text-slate-400 line-through truncate max-w-[80px]">{s.qr_mentors?.name}</span>
+                            <span className="text-indigo-600 font-bold">➔</span>
+                            <strong className="text-indigo-900 font-black truncate max-w-[100px]">{s.reassignedTo}</strong>
+                          </div>
+                          <span className="inline-block text-[8px] px-1 py-0.2 rounded bg-indigo-100 text-indigo-800 font-black uppercase">
+                            Reassigned
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="truncate">
+                          Faculty: <strong className="text-slate-900">{s.qr_mentors?.name || "Unassigned"}</strong>
+                        </span>
+                      )}
+                      {(role === "hod" || role === "admin") && !s.isReassigned && (
                         <button
                           onClick={(e) => handleOpenAssignModal(e, s)}
                           className="text-[10.5px] text-blue-700 hover:underline font-bold"

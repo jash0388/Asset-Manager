@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
 import { authMiddleware, mentorOnly } from "../middlewares/auth.js";
+import { classReassignmentsStore } from "./faculty-delegate.js";
 
 const router = Router();
 
@@ -492,22 +493,89 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
       );
     };
 
-    // Sort so live class is ALWAYS at the top, then upcoming, then completed
-    const results = academicSchedList
-      .map((s) => buildClassItem(s, false))
-      .sort((a, b) => {
-        const aIsLive = a.timingStatus === "live";
-        const bIsLive = b.timingStatus === "live";
-        if (aIsLive && !bIsLive) return -1;
-        if (!aIsLive && bIsLive) return 1;
+    const { data: currentMentor } = await supabase
+      .from("qr_mentors")
+      .select("id, key, name, email")
+      .eq("id", mentorId)
+      .single();
 
-        const aIsUpcoming = a.timingStatus === "upcoming";
-        const bIsUpcoming = b.timingStatus === "upcoming";
-        if (aIsUpcoming && !bIsUpcoming) return -1;
-        if (!aIsUpcoming && bIsUpcoming) return 1;
+    const facultyKey = currentMentor?.key ? String(currentMentor.key) : "106";
+    const academicSchedList = schedList.filter((s: any) => !isActivity(s.subject));
 
-        return 0;
+    // 1. Process own academic schedules and attach reassignment status
+    let results = academicSchedList.map((s) => {
+      const item = buildClassItem(s, false);
+      const reassignment = classReassignmentsStore.find(
+        (r) =>
+          r.date === queryDate &&
+          (r.scheduleId === s.id || (r.fromFacultyKey === facultyKey && r.subject.toUpperCase() === (s.subject || "").toUpperCase()))
+      );
+      if (reassignment) {
+        return {
+          ...item,
+          reassignment,
+          reassignedTo: reassignment.toFacultyName,
+          reassignmentStatus: reassignment.status,
+          isReassigned: reassignment.status === "accepted",
+        };
+      }
+      return item;
+    });
+
+    // 2. Check if any classes were reassigned TO this faculty for today
+    const assignedToMe = classReassignmentsStore.filter(
+      (r) =>
+        r.date === queryDate &&
+        r.toFacultyKey === facultyKey &&
+        r.status === "accepted"
+    );
+
+    assignedToMe.forEach((r, idx) => {
+      const isLab = (r.subject || "").toUpperCase().includes("LAB");
+      results.push({
+        id: `reassigned_${r.id}`,
+        scheduleId: r.scheduleId || 9999 + idx,
+        code: (r.subject || "SUB").toUpperCase(),
+        name: `${r.subject} (Reassigned)`,
+        type: isLab ? "Practical" : "Theory",
+        program: "CSE-DS",
+        section: r.section,
+        rawSection: r.section.replace(/[^ABC]/g, "") || "A",
+        year: r.year,
+        room: r.room || "Hall 412",
+        startTime: r.slot.split("–")[0]?.trim() || "10:00 AM",
+        endTime: r.slot.split("–")[1]?.trim() || "11:00 AM",
+        startTimeFormatted: r.slot.split("–")[0]?.trim() || "10:00 AM",
+        endTimeFormatted: r.slot.split("–")[1]?.trim() || "11:00 AM",
+        slot: r.slot,
+        strength: 55,
+        isAttendanceTaken: false,
+        attendedCount: null,
+        session: null,
+        isLive: true,
+        timingStatus: "live",
+        isLocked: false,
+        unlocksAt: "Now",
+        statusLabel: `⚡ Reassigned from ${r.fromFacultyName} (HOD Approved)`,
+        isSubstitute: true,
+        reassignedFrom: r.fromFacultyName,
       });
+    });
+
+    // Sort so live class is ALWAYS at the top, then upcoming, then completed
+    results.sort((a, b) => {
+      const aIsLive = a.timingStatus === "live";
+      const bIsLive = b.timingStatus === "live";
+      if (aIsLive && !bIsLive) return -1;
+      if (!aIsLive && bIsLive) return 1;
+
+      const aIsUpcoming = a.timingStatus === "upcoming";
+      const bIsUpcoming = b.timingStatus === "upcoming";
+      if (aIsUpcoming && !bIsUpcoming) return -1;
+      if (!aIsUpcoming && bIsUpcoming) return 1;
+
+      return 0;
+    });
 
     // If no classes scheduled for today, fetch upcoming classes for next working day (e.g. Monday)
     let nextWorkingDayInfo: any = null;

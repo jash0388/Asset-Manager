@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
 import { authMiddleware, mentorOnly } from "../middlewares/auth.js";
+import { classReassignmentsStore } from "./faculty-delegate.js";
 import {
   getTrainingSessions,
   getTrainingSessionById,
@@ -1571,10 +1572,22 @@ router.get("/admin/schedules-with-status", authMiddleware, async (req: any, res:
       const status = isSubmitted ? "submitted" : isStarted ? "started" : "pending";
       const studentCount = hourly ? hourly.presentCount : (session ? session.student_count : 0);
 
+      // Check if this schedule is reassigned for the selected date
+      const reassignment = classReassignmentsStore.find(
+        (r) =>
+          r.date === date &&
+          (r.scheduleId === s.id || (r.fromFacultyKey === s.qr_mentors?.key && r.subject.toUpperCase() === (s.subject || "").toUpperCase())) &&
+          r.status === "accepted"
+      );
+
       return {
         ...s,
         status,
-        studentCount
+        studentCount,
+        isReassigned: Boolean(reassignment),
+        reassignedTo: reassignment ? reassignment.toFacultyName : null,
+        reassignedFrom: reassignment ? reassignment.fromFacultyName : null,
+        reassignmentInfo: reassignment || null,
       };
     });
 
