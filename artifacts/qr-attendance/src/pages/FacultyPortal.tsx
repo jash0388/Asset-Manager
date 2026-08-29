@@ -848,7 +848,7 @@ export default function FacultyPortal() {
         console.warn("Could not load /faculty/section-students:", e);
       }
 
-      // 2. Fallback to live mentees
+      // 2. Fallback to live mentees if available
       if (liveMentees.length > 0) {
         const records: StudentAttendanceRecord[] = liveMentees.map((s, idx) => ({
           id: s.id,
@@ -863,29 +863,11 @@ export default function FacultyPortal() {
         }));
         setStudentRoster(records);
       } else {
-        const names = [
-          "RATHOD RAJU", "BUNGA AASRITHA", "BUSHABOINA ABHINAI", "DASARI AHLIKA",
-          "KADARI PRANAY", "GOPAL REDDY", "CHINTA SAI KIRAN", "MOHAMMED SALMAN",
-          "VEMULA HARIKA", "SURAPU ANUSHA", "GURRAM RAJESH", "POTHULA DIVYA",
-          "KONDURI SNEHA", "BATTULA SHIVANI", "MALLIKARJUN GOUD", "NALLA KAVYA",
-          "PENDYALA VARUN", "THOTA SANJAY", "GOUNDLA MANEESH", "YELAMANCHILI TEJA",
-          "BOPPANA SWETHA", "MUPPIDI VAMSHI", "ADLA NITHIN", "PABBATHI SAI CHARAN"
-        ];
-        const records: StudentAttendanceRecord[] = names.map((name, idx) => ({
-          id: idx + 1,
-          sNo: idx + 1,
-          rollNumber: `24N81A${6753 + idx}`,
-          name: name,
-          heldCount: 22,
-          totalHeld: 24,
-          status: true,
-          phone: "9876543210",
-          fatherPhone: "9123456780",
-        }));
-        setStudentRoster(records);
+        setStudentRoster([]);
       }
     } catch (err) {
       console.error("Error loading student roster:", err);
+      setStudentRoster([]);
     } finally {
       setLoadingRoster(false);
     }
