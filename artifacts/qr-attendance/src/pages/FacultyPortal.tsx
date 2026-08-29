@@ -1159,20 +1159,14 @@ export default function FacultyPortal() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
       {/* ─────────────────────────────────────────────────────────────
-          TOP APP HEADER BAR (LIGHT & CRISP)
+          TOP APP HEADER BAR (DESKTOP ONLY)
       ───────────────────────────────────────────────────────────── */}
-      <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 flex items-center justify-between px-4 lg:px-6 shadow-sm">
+      <header className="hidden md:flex h-16 bg-white border-b border-slate-200 sticky top-0 z-30 items-center justify-between px-4 lg:px-6 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden lg:flex p-2 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            className="hidden lg:flex p-2 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
             title="Toggle Sidebar"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -1197,7 +1191,7 @@ export default function FacultyPortal() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/mentor")}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition-all shadow-xs"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition-all shadow-xs cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-blue-600" />
             <span>QR Scanner View</span>
@@ -1217,9 +1211,191 @@ export default function FacultyPortal() {
       </header>
 
       {/* ─────────────────────────────────────────────────────────────
-          MAIN BODY LAYOUT (SIDEBAR + CONTENT CANVAS)
+          MOBILE-ONLY VIEW (FOCUSED EXCLUSIVELY ON DATE, TIME & LIVE ATTENDANCE)
       ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="block md:hidden flex-1 overflow-y-auto bg-slate-950 text-white p-4 space-y-4 min-h-screen">
+        {/* Mobile Header Bar */}
+        <div className="flex items-center justify-between bg-slate-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-slate-800 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-md">
+              {facultyName.charAt(0)}
+            </div>
+            <div>
+              <h2 className="text-sm font-black text-white leading-tight">{facultyName}</h2>
+              <p className="text-[11px] font-bold text-blue-400">Key {resolvedKey || "106"} &bull; CSE-DS</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border border-slate-700/60 cursor-pointer"
+            title="Logout"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Live Date & Real-Time Clock Card */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-5 shadow-xl border border-blue-400/20">
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none" />
+          <div className="flex items-center justify-between">
+            <span className="px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-white font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1.5 border border-white/10">
+              <Sparkles className="w-3 h-3 text-amber-300" />
+              <span>Today&apos;s Live Attendance</span>
+            </span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-black">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span>LIVE</span>
+            </div>
+          </div>
+
+          <div className="mt-3">
+            <p className="text-xs font-bold text-blue-100 uppercase tracking-widest">
+              {liveDateStr || todayClassesInfo.dayName}
+            </p>
+            <h1 className="text-2xl font-black text-white tracking-tight mt-0.5 font-mono">
+              {liveTimeStr || todayClassesInfo.currentTime}
+            </h1>
+          </div>
+        </div>
+
+        {/* Today's Classes List (Attendance ONLY) */}
+        <div className="space-y-3 pt-1">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xs font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-blue-400" />
+              <span>Today&apos;s Live Periods ({effectiveTodayClasses.length})</span>
+            </h3>
+            <span className="text-[11px] font-bold text-slate-400">
+              {effectiveTodayClasses.filter(c => c.isAttendanceTaken).length} / {effectiveTodayClasses.length} Recorded
+            </span>
+          </div>
+
+          {effectiveTodayClasses.length > 0 ? (
+            effectiveTodayClasses.map((cls) => {
+              const courseObj: Course = {
+                id: cls.id,
+                code: cls.code,
+                name: cls.name,
+                type: cls.type === "Practical" ? "Practical" : "Theory",
+                program: cls.program || "CSE-DS",
+                section: cls.section,
+                strength: cls.strength,
+                room: cls.room,
+                batch: "Regular",
+                addedBy: "HOD (Data Science)",
+              };
+
+              const isLive = cls.timingStatus === "live" || cls.isLive;
+              const isLocked = cls.isLocked && !isLive;
+
+              return (
+                <div
+                  key={cls.id}
+                  className={`rounded-2xl p-4 transition-all border ${
+                    isLive
+                      ? "bg-slate-900 border-emerald-500/70 shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-500/50"
+                      : isLocked
+                      ? "bg-slate-900/60 border-slate-800 opacity-80"
+                      : "bg-slate-900 border-slate-800"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
+                          {cls.slot}
+                        </span>
+                        {isLive ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500 text-slate-950 font-black uppercase tracking-wider animate-pulse flex items-center gap-1">
+                            <span>●</span> Live Now
+                          </span>
+                        ) : isLocked ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-400 font-bold flex items-center gap-1 border border-slate-700">
+                            <Lock className="w-2.5 h-2.5" /> Upcoming
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/20 text-blue-300 font-bold">
+                            Concluded
+                          </span>
+                        )}
+                      </div>
+
+                      <h4 className="text-base font-black text-white mt-1.5">{cls.name}</h4>
+                      <p className="text-xs font-semibold text-slate-400">
+                        Section: <span className="text-white font-bold">{cls.section}</span> &bull; Room: <span className="text-white font-bold">{cls.room}</span>
+                      </p>
+                    </div>
+
+                    {cls.isAttendanceTaken && (
+                      <div className="shrink-0 text-right">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>{cls.attendedCount ? `${cls.attendedCount} Present` : "Recorded"}</span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-800">
+                    {isLocked ? (
+                      <button
+                        disabled
+                        className="w-full py-2.5 rounded-xl bg-slate-800/40 text-slate-500 font-bold text-xs flex items-center justify-center gap-2 border border-slate-800 cursor-not-allowed"
+                      >
+                        <Lock className="w-3.5 h-3.5" />
+                        <span>Locked until {cls.unlocksAt}</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => openAttendanceModal(courseObj)}
+                        className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
+                          isLive
+                            ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-emerald-500/20 font-black text-sm"
+                            : cls.isAttendanceTaken
+                            ? "bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700"
+                            : "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/20"
+                        }`}
+                      >
+                        {isLive ? (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            <span>Post Live Attendance</span>
+                          </>
+                        ) : cls.isAttendanceTaken ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>View / Edit Attendance</span>
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="w-3.5 h-3.5" />
+                            <span>Post Attendance</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6 text-center space-y-2">
+              <CalendarDays className="w-8 h-8 text-slate-500 mx-auto" />
+              <p className="text-sm font-bold text-slate-300">No live classes scheduled for today</p>
+              {todayClassesInfo.nextWorkingDay && (
+                <p className="text-xs text-blue-400 font-semibold">
+                  Next classes on {todayClassesInfo.nextWorkingDay.dayName}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          DESKTOP FULL PORTAL LAYOUT (SIDEBAR + CONTENT CANVAS)
+      ───────────────────────────────────────────────────────────── */}
+      <div className="hidden md:flex flex-1 overflow-hidden relative">
         {/* SIDEBAR NAVIGATION (CVR ERP HIERARCHY) */}
         <aside
           className={`bg-white border-r border-slate-200 flex flex-col shrink-0 transition-all duration-300 z-20 ${
