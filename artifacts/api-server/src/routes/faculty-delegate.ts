@@ -25,27 +25,7 @@ export interface ClassReassignment {
 }
 
 // In-memory persistent store for dynamic reassignments
-export const classReassignmentsStore: ClassReassignment[] = [
-  {
-    id: "reassign_demo_1",
-    date: new Date().toISOString().slice(0, 10),
-    slot: "11:10 – 12:10",
-    scheduleId: 939,
-    fromFacultyKey: "106",
-    fromFacultyName: "Mr T Shravan Kumar",
-    toFacultyKey: "108",
-    toFacultyName: "Mrs G Sushma",
-    subject: "IDS",
-    year: "III",
-    section: "DS-3A",
-    room: "Hall 412",
-    reason: "Official NBA Accreditation Meeting",
-    status: "accepted",
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    decidedAt: new Date(Date.now() - 1800000).toISOString(),
-    decidedBy: "Dr. K. Srinivas Rao (HOD)",
-  },
-];
+export const classReassignmentsStore: ClassReassignment[] = [];
 
 // GET /faculty/reassignments — Get all reassignments or filter by faculty/date/status
 router.get("/faculty/reassignments", authMiddleware, async (req: any, res: any) => {

@@ -65590,27 +65590,7 @@ var import_express6 = __toESM(require_express2(), 1);
 // src/routes/faculty-delegate.ts
 var import_express5 = __toESM(require_express2(), 1);
 var router5 = (0, import_express5.Router)();
-var classReassignmentsStore = [
-  {
-    id: "reassign_demo_1",
-    date: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
-    slot: "11:10 \u2013 12:10",
-    scheduleId: 939,
-    fromFacultyKey: "106",
-    fromFacultyName: "Mr T Shravan Kumar",
-    toFacultyKey: "108",
-    toFacultyName: "Mrs G Sushma",
-    subject: "IDS",
-    year: "III",
-    section: "DS-3A",
-    room: "Hall 412",
-    reason: "Official NBA Accreditation Meeting",
-    status: "accepted",
-    createdAt: new Date(Date.now() - 36e5).toISOString(),
-    decidedAt: new Date(Date.now() - 18e5).toISOString(),
-    decidedBy: "Dr. K. Srinivas Rao (HOD)"
-  }
-];
+var classReassignmentsStore = [];
 router5.get("/faculty/reassignments", authMiddleware, async (req, res) => {
   const { date, facultyKey, status } = req.query;
   try {
