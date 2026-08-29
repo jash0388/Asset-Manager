@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.SESSION_SECRET || "fallback-dev-secret";
+const JWT_SECRET = process.env.SESSION_SECRET || "fallback-insecure-secret-change-me";
 
 // Bypass is ONLY allowed when explicitly enabled in env (for local dev, never production)
 const BYPASS_ENABLED = process.env.ALLOW_BYPASS_TOKEN === "true";
