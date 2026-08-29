@@ -639,13 +639,18 @@ export default function FacultyPortal() {
 
   // Effective today classes: uses live API data if available, or derives from faculty timetable/workload
   const effectiveTodayClasses: TodayClassItem[] = useMemo(() => {
-    if (todayClassesInfo.classes && todayClassesInfo.classes.length > 0) {
+    if (todayClassesInfo?.classes && todayClassesInfo.classes.length > 0) {
       return todayClassesInfo.classes;
     }
-    const dayName = todayClassesInfo.dayName || "Saturday";
-    const dayEntry = workload.find(
-      (w) => w.day.toLowerCase() === dayName.toLowerCase() || w.day.toUpperCase().startsWith((todayClassesInfo.dayCode || "SAT").toUpperCase())
+    const dayName = todayClassesInfo?.dayName || "Saturday";
+    const dayCode = todayClassesInfo?.dayCode || "SAT";
+    const dayEntry = (workload || []).find(
+      (w) => w?.day && (w.day.toLowerCase() === dayName.toLowerCase() || w.day.toUpperCase().startsWith(dayCode.toUpperCase()))
     );
+    if (!dayEntry || !Array.isArray(dayEntry.periods) || dayEntry.periods.length === 0) {
+      return [];
+    }
+
     const isActivity = (subj: string) => {
       const s = (subj || "").toUpperCase().trim();
       return (
@@ -660,7 +665,7 @@ export default function FacultyPortal() {
       );
     };
 
-    const academicPeriods = dayEntry.periods.filter((p) => !isActivity(p.subject));
+    const academicPeriods = dayEntry.periods.filter((p) => p && !isActivity(p.subject));
     if (academicPeriods.length === 0) return [];
 
     const now = new Date();
@@ -3809,9 +3814,9 @@ export default function FacultyPortal() {
                           <th className="py-3 px-3 border border-slate-200 sticky left-0 bg-slate-100 z-10">S.No</th>
                           <th className="py-3 px-3 border border-slate-200 sticky left-10 bg-slate-100 z-10">Roll Number</th>
                           <th className="py-3 px-3 border border-slate-200 sticky left-32 bg-slate-100 z-10 min-w-[160px]">Student Name</th>
-                          {bookData.dates.map((d) => (
+                          {(bookData.dates || []).map((d) => (
                             <th key={d} className="py-3 px-2 border border-slate-200 text-center font-mono whitespace-nowrap min-w-[50px]">
-                              {d.split("-").slice(1).reverse().join("/")}
+                              {d ? d.split("-").slice(1).reverse().join("/") : ""}
                             </th>
                           ))}
                           <th className="py-3 px-2 border border-slate-200 text-center bg-blue-50 text-blue-900">Held</th>
@@ -3824,8 +3829,8 @@ export default function FacultyPortal() {
                         {bookData.students
                           .filter((s) =>
                             !bookSearchQuery.trim() ||
-                            s.name.toLowerCase().includes(bookSearchQuery.toLowerCase()) ||
-                            s.rollNumber.toLowerCase().includes(bookSearchQuery.toLowerCase())
+                            s.name?.toLowerCase().includes(bookSearchQuery.toLowerCase()) ||
+                            s.rollNumber?.toLowerCase().includes(bookSearchQuery.toLowerCase())
                           )
                           .map((st, idx) => (
                             <tr key={st.id} className="hover:bg-slate-50/80 transition-colors">
@@ -3838,7 +3843,7 @@ export default function FacultyPortal() {
                               <td className="py-2.5 px-3 border border-slate-200 font-extrabold text-slate-900 sticky left-32 bg-white whitespace-nowrap">
                                 {st.name}
                               </td>
-                              {bookData.dates.map((d) => {
+                              {(bookData.dates || []).map((d) => {
                                 const val = st.attendanceByDate?.[d] || "-";
                                 return (
                                   <td key={d} className="py-2.5 px-2 border border-slate-200 text-center font-bold">
