@@ -614,14 +614,29 @@ export default function FacultyPortal() {
     const dayEntry = workload.find(
       (w) => w.day.toLowerCase() === dayName.toLowerCase() || w.day.toUpperCase().startsWith((todayClassesInfo.dayCode || "SAT").toUpperCase())
     );
-    if (!dayEntry || !dayEntry.periods || dayEntry.periods.length === 0) return [];
+    const isActivity = (subj: string) => {
+      const s = (subj || "").toUpperCase().trim();
+      return (
+        s.includes("SPORTS") ||
+        s.includes("LIBRARY") ||
+        s.includes("COUNSELLING") ||
+        s.includes("CLUB") ||
+        s.includes("ACTIVITIES") ||
+        s.includes("APTITUDE") ||
+        s.includes("RESEARCH HOUR") ||
+        s.includes("DIGITAL LIBRARY")
+      );
+    };
+
+    const academicPeriods = dayEntry.periods.filter((p) => !isActivity(p.subject));
+    if (academicPeriods.length === 0) return [];
 
     const now = new Date();
     const curHour = now.getHours();
     const curMin = now.getMinutes();
     const curTotalMin = curHour * 60 + curMin;
 
-    return dayEntry.periods.map((p, idx) => {
+    return academicPeriods.map((p, idx) => {
       const isLab = p.subject.toUpperCase().includes("LAB");
       const [sPart, ePart] = p.slot.split("–").map((s) => s.trim());
       let startMin = 9 * 60;

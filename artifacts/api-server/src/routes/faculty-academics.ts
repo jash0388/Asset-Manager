@@ -255,7 +255,23 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
       };
     }
 
-    const results = schedList.map((s) => buildClassItem(s, false));
+    const isActivity = (subj: string) => {
+      const s = (subj || "").toUpperCase().trim();
+      return (
+        s.includes("SPORTS") ||
+        s.includes("LIBRARY") ||
+        s.includes("COUNSELLING") ||
+        s.includes("CLUB") ||
+        s.includes("ACTIVITIES") ||
+        s.includes("APTITUDE") ||
+        s.includes("RESEARCH HOUR") ||
+        s.includes("DIGITAL LIBRARY")
+      );
+    };
+
+    const academicSchedList = schedList.filter((s: any) => !isActivity(s.subject));
+
+    const results = academicSchedList.map((s) => buildClassItem(s, false));
 
     // If no classes scheduled for today, fetch upcoming classes for next working day (e.g. Monday)
     let nextWorkingDayInfo: any = null;
@@ -269,11 +285,13 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
         .eq("day_of_week", nextDayCode)
         .order("start_time");
 
-      if (nextScheds && nextScheds.length > 0) {
+      const filteredNext = (nextScheds || []).filter((s: any) => !isActivity(s.subject));
+
+      if (filteredNext && filteredNext.length > 0) {
         nextWorkingDayInfo = {
           dayCode: nextDayCode,
           dayName: nextDayName,
-          classes: nextScheds.map((s) => buildClassItem(s, true, nextDayName)),
+          classes: filteredNext.map((s) => buildClassItem(s, true, nextDayName)),
         };
       }
     }

@@ -67506,17 +67506,23 @@ router7.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, re
     const currentHour = istDate.getUTCHours();
     const currentMin = istDate.getUTCMinutes();
     const currentTotalMin = currentHour * 60 + currentMin;
-    const results = schedList.map((s) => buildClassItem2(s, false));
+    const isActivity = (subj) => {
+      const s = (subj || "").toUpperCase().trim();
+      return s.includes("SPORTS") || s.includes("LIBRARY") || s.includes("COUNSELLING") || s.includes("CLUB") || s.includes("ACTIVITIES") || s.includes("APTITUDE") || s.includes("RESEARCH HOUR") || s.includes("DIGITAL LIBRARY");
+    };
+    const academicSchedList = schedList.filter((s) => !isActivity(s.subject));
+    const results = academicSchedList.map((s) => buildClassItem2(s, false));
     let nextWorkingDayInfo = null;
     if (results.length === 0) {
       const nextDayCode = "MON";
       const nextDayName = "Monday";
       const { data: nextScheds } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", nextDayCode).order("start_time");
-      if (nextScheds && nextScheds.length > 0) {
+      const filteredNext = (nextScheds || []).filter((s) => !isActivity(s.subject));
+      if (filteredNext && filteredNext.length > 0) {
         nextWorkingDayInfo = {
           dayCode: nextDayCode,
           dayName: nextDayName,
-          classes: nextScheds.map((s) => buildClassItem2(s, true, nextDayName))
+          classes: filteredNext.map((s) => buildClassItem2(s, true, nextDayName))
         };
       }
     }
