@@ -3944,8 +3944,8 @@ export default function FacultyPortal() {
               </button>
             </div>
 
-            {/* Modal Sub-Header (Date, Periods, Radio, Counters) */}
-            <div className="p-5 border-b border-slate-200 bg-slate-50 space-y-4">
+            {/* Modal Sub-Header (Date, Periods, Radio, Counters) — DESKTOP ONLY */}
+            <div className="hidden md:block p-5 border-b border-slate-200 bg-slate-50 space-y-4">
               {/* Top Filters: Mode & Date */}
               <div className="flex flex-wrap items-center justify-between gap-4">
                 {/* Regular vs Adjusted */}
@@ -4057,8 +4057,36 @@ export default function FacultyPortal() {
               </div>
             </div>
 
+            {/* Mobile Compact Sub-Header — Student Counts & Quick Actions */}
+            <div className="md:hidden px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-black">
+                <span className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800">
+                  {presentStudentsCount} Present
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-red-100 text-red-800">
+                  {absentStudentsCount} Absent
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handleMarkAll(true)}
+                  className="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold shadow-xs active:scale-95"
+                >
+                  All Present
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleMarkAll(false)}
+                  className="px-3 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-bold active:scale-95"
+                >
+                  All Absent
+                </button>
+              </div>
+            </div>
+
             {/* Student Search Bar */}
-            <div className="px-5 py-3 border-b border-slate-100 bg-white flex items-center justify-between gap-4">
+            <div className="px-4 md:px-5 py-3 border-b border-slate-100 bg-white flex items-center justify-between gap-4">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -4066,17 +4094,58 @@ export default function FacultyPortal() {
                   placeholder="Search Roll No or Student Name..."
                   value={searchStudentQuery}
                   onChange={(e) => setSearchStudentQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500"
+                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500 bg-slate-50 md:bg-white"
                 />
               </div>
               <span className="text-[11px] font-bold text-slate-500 shrink-0">
-                Showing {filteredRoster.length} students
+                {filteredRoster.length} students
               </span>
             </div>
 
-            {/* Student Attendance List Table with Interactive Toggle */}
-            <div className="flex-1 overflow-y-auto px-5 py-2">
-              <table className="w-full text-left text-xs">
+            {/* Student Attendance List Container */}
+            <div className="flex-1 overflow-y-auto px-3 md:px-5 py-2">
+              {/* MOBILE VIEW: Touch-Friendly Student Cards */}
+              <div className="block md:hidden space-y-2 pb-2">
+                {filteredRoster.map((s) => (
+                  <div
+                    key={s.id}
+                    onClick={() => toggleStudentStatus(s.id)}
+                    className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer ${
+                      s.status
+                        ? "bg-emerald-50/70 border-emerald-300 shadow-xs"
+                        : "bg-white border-slate-200 shadow-xs"
+                    }`}
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-slate-400 font-mono">#{s.sNo}</span>
+                        <span className="font-mono text-xs font-extrabold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
+                          {s.rollNumber}
+                        </span>
+                      </div>
+                      <h4 className="font-extrabold text-sm text-slate-900 leading-snug">{s.name}</h4>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleStudentStatus(s.id);
+                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 shadow-xs ${
+                        s.status
+                          ? "bg-emerald-600 text-white shadow-emerald-600/20"
+                          : "bg-red-50 text-red-700 border border-red-200"
+                      }`}
+                    >
+                      <span>{s.status ? "✓ Present" : "✗ Absent"}</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* DESKTOP VIEW: Full Data Table */}
+              <table className="hidden md:table w-full text-left text-xs">
                 <thead className="sticky top-0 bg-slate-100 text-slate-600 uppercase text-[10px] font-extrabold tracking-wider border-b border-slate-200">
                   <tr>
                     <th className="py-2.5 px-3">S.No</th>
