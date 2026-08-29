@@ -509,6 +509,22 @@ export default function FacultyPortal() {
   const [historyRecords, setHistoryRecords] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // ── Live Real-Time Clock & Date ──
+  const [liveClock, setLiveClock] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setLiveClock(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const liveDateStr = useMemo(() => {
+    return liveClock.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" });
+  }, [liveClock]);
+
+  const liveTimeStr = useMemo(() => {
+    return liveClock.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+  }, [liveClock]);
+
   // ── Student-Wise History (Attendance Book) State ──
   const [selectedBookSection, setSelectedBookSection] = useState<string>("");
   const [selectedBookCourse, setSelectedBookCourse] = useState<string>("");
