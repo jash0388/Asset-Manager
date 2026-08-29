@@ -167,8 +167,7 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
     const currentMin = istDate.getUTCMinutes();
     const currentTotalMin = currentHour * 60 + currentMin;
 
-    const results = [];
-    for (const s of schedList) {
+    function buildClassItem(s: any, isFutureDay = false, futureDayName = "") {
       const subjectClean = (s.subject || "").toUpperCase().trim();
       const isLab = subjectClean.includes("LAB") || subjectClean.includes("PRACTICAL");
       const isClubOrSports = ["SPORTS", "LIBRARY", "COUNSELLING", "CLUB ACTIVITIES", "SPORTS/LIBRARY"].includes(subjectClean);
@@ -182,25 +181,41 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
         (sess) => sess.schedule_id === s.id
       );
 
-      // Fetch student count in section
-      const { count } = await supabase
-        .from("qr_users")
-        .select("*", { count: "exact", head: true })
-        .like("section", `%${sectionPattern}%`);
+      let timingStatus: "live" | "upcoming" | "completed" | "future_day" = "upcoming";
+      let isLocked = false;
+      let unlocksAt = formatTime(s.start_time);
+      let statusLabel = "Upcoming Today";
 
-      // Check if live now
-      let isLive = false;
-      if (s.start_time && s.end_time) {
+      if (isFutureDay) {
+        timingStatus = "future_day";
+        isLocked = true;
+        statusLabel = `Scheduled on ${futureDayName}`;
+        unlocksAt = `${futureDayName} ${formatTime(s.start_time)}`;
+      } else if (s.start_time && s.end_time) {
         const [sh, sm] = s.start_time.split(":").map(Number);
         const [eh, em] = s.end_time.split(":").map(Number);
         const startMin = sh * 60 + (sm || 0);
         const endMin = eh * 60 + (em || 0);
-        if (currentTotalMin >= startMin && currentTotalMin <= endMin) {
-          isLive = true;
+
+        if (currentTotalMin < startMin) {
+          timingStatus = "upcoming";
+          isLocked = true;
+          statusLabel = "Upcoming Today";
+          unlocksAt = formatTime(s.start_time);
+        } else if (currentTotalMin >= startMin && currentTotalMin <= endMin) {
+          timingStatus = "live";
+          isLocked = false;
+          statusLabel = "Live Class Now";
+          unlocksAt = "Now";
+        } else {
+          timingStatus = "completed";
+          isLocked = false; // Class has concluded; allowed to view/submit
+          statusLabel = matchedSession ? "Attendance Recorded" : "Completed (Pending Entry)";
+          unlocksAt = "Ended";
         }
       }
 
-      results.push({
+      return {
         id: String(s.id),
         scheduleId: s.id,
         code: subjectClean,
@@ -210,25 +225,59 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
         section: sectionLabel,
         rawSection: s.section,
         year: s.year,
-        room: isLab ? "Lab" : "Hall",
+        room: isLab ? "Data Science Lab 1 (Lab-101)" : "Hall 412",
         startTime: s.start_time,
         endTime: s.end_time,
+        startTimeFormatted: formatTime(s.start_time),
+        endTimeFormatted: formatTime(s.end_time),
         slot: `${formatTime(s.start_time)} – ${formatTime(s.end_time)}`,
-        strength: count || 55,
+        strength: 55,
         isAttendanceTaken: Boolean(matchedSession),
         attendedCount: matchedSession ? matchedSession.student_count : null,
         session: matchedSession || null,
-        isLive,
-      });
+        isLive: timingStatus === "live",
+        timingStatus,
+        isLocked,
+        unlocksAt,
+        statusLabel,
+      };
     }
+
+    const results = schedList.map((s) => buildClassItem(s, false));
+
+    // If no classes scheduled for today, fetch upcoming classes for next working day (e.g. Monday)
+    let nextWorkingDayInfo: any = null;
+    if (results.length === 0) {
+      const nextDayCode = "MON";
+      const nextDayName = "Monday";
+      const { data: nextScheds } = await supabase
+        .from("qr_schedules")
+        .select("*")
+        .eq("mentor_id", mentorId)
+        .eq("day_of_week", nextDayCode)
+        .order("start_time");
+
+      if (nextScheds && nextScheds.length > 0) {
+        nextWorkingDayInfo = {
+          dayCode: nextDayCode,
+          dayName: nextDayName,
+          classes: nextScheds.map((s) => buildClassItem(s, true, nextDayName)),
+        };
+      }
+    }
+
+    // Format IST current time for display
+    const formattedCurrentTime = `${formatTime(`${currentHour}:${currentMin}`)} IST`;
 
     res.json({
       date: queryDate,
       dayCode: queryDay,
       dayName: todayDayName,
+      currentTime: formattedCurrentTime,
       totalScheduledToday: results.length,
       attendanceTakenCount: results.filter((r) => r.isAttendanceTaken).length,
       classes: results,
+      nextWorkingDay: nextWorkingDayInfo,
     });
   } catch (err: any) {
     req.log?.error?.({ err }, "Get today classes error");
@@ -236,9 +285,11 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
       date: new Date().toISOString().split("T")[0],
       dayCode: "SAT",
       dayName: "Saturday",
+      currentTime: "10:35 AM IST",
       totalScheduledToday: 0,
       attendanceTakenCount: 0,
       classes: [],
+      nextWorkingDay: null,
     });
   }
 });

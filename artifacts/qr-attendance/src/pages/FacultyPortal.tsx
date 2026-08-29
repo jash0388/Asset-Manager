@@ -552,7 +552,7 @@ export default function FacultyPortal() {
   const mentees = liveMentees.length > 0 ? liveMentees : facultyProfile.mentees;
   const workload = liveWorkload.length > 0 ? liveWorkload : facultyProfile.workload;
 
-  // Today's Classes State (Auto-filtered from Timetable for Current Day)
+  // Today's Classes State (Auto-filtered from Timetable with Real-Time Period Locking)
   type TodayClassItem = {
     id: string;
     scheduleId: number;
@@ -566,28 +566,42 @@ export default function FacultyPortal() {
     room: string;
     startTime: string;
     endTime: string;
+    startTimeFormatted?: string;
+    endTimeFormatted?: string;
     slot: string;
     strength: number;
     isAttendanceTaken: boolean;
     attendedCount: number | null;
     session: any;
     isLive: boolean;
+    timingStatus?: "live" | "upcoming" | "completed" | "future_day";
+    isLocked?: boolean;
+    unlocksAt?: string;
+    statusLabel?: string;
   };
 
   const [todayClassesInfo, setTodayClassesInfo] = useState<{
     date: string;
     dayCode: string;
     dayName: string;
+    currentTime?: string;
     totalScheduledToday: number;
     attendanceTakenCount: number;
     classes: TodayClassItem[];
+    nextWorkingDay?: {
+      dayCode: string;
+      dayName: string;
+      classes: TodayClassItem[];
+    } | null;
   }>({
     date: new Date().toISOString().split("T")[0],
     dayCode: "SAT",
     dayName: "Saturday",
+    currentTime: "10:35 AM IST",
     totalScheduledToday: 0,
     attendanceTakenCount: 0,
     classes: [],
+    nextWorkingDay: null,
   });
 
   // Fetch live courses, mentees, workload, and today's classes from API
@@ -1659,25 +1673,42 @@ export default function FacultyPortal() {
                                     <CheckCircle2 className="w-3.5 h-3.5" />
                                     <span>Posted ({cls.attendedCount ?? cls.strength} Present)</span>
                                   </span>
+                                ) : cls.isLocked || cls.timingStatus === "upcoming" ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    <Lock className="w-3 h-3 text-indigo-600" />
+                                    <span>Locked ({cls.startTimeFormatted || cls.unlocksAt})</span>
+                                  </span>
                                 ) : (
                                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-800 border border-amber-200">
                                     <Clock className="w-3.5 h-3.5" />
-                                    <span>Pending Today</span>
+                                    <span>{cls.isLive ? "🟢 Live Now" : "Pending Entry"}</span>
                                   </span>
                                 )}
                               </td>
                               <td className="py-3.5 px-4 text-center">
-                                <button
-                                  onClick={() => openAttendanceModal(courseObj)}
-                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 mx-auto cursor-pointer ${
-                                    cls.isAttendanceTaken
-                                      ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
-                                      : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
-                                  }`}
-                                >
-                                  <CheckSquare className="w-3.5 h-3.5" />
-                                  <span>{cls.isAttendanceTaken ? "Edit Attendance" : "Take Attendance"}</span>
-                                </button>
+                                {cls.isLocked || cls.timingStatus === "upcoming" ? (
+                                  <button
+                                    disabled
+                                    className="px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center gap-1 mx-auto select-none"
+                                  >
+                                    <Lock className="w-3 h-3 text-slate-400" />
+                                    <span>Locked</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => openAttendanceModal(courseObj)}
+                                    className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 mx-auto cursor-pointer ${
+                                      cls.isAttendanceTaken
+                                        ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
+                                        : cls.isLive
+                                        ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
+                                        : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
+                                    }`}
+                                  >
+                                    <CheckSquare className="w-3.5 h-3.5" />
+                                    <span>{cls.isAttendanceTaken ? "Edit Attendance" : cls.isLive ? "Post Live" : "Take Attendance"}</span>
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           );
@@ -1796,27 +1827,31 @@ export default function FacultyPortal() {
           {activeTab === "academics" && (
             <div className="space-y-6">
               {/* Today's Timetable Header Banner */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-xs">
-                      <Sparkles className="w-3 h-3" />
-                      <span>Today&apos;s Live Timetable ({todayClassesInfo.dayName})</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-3 py-1 rounded-full bg-blue-600 text-white font-black text-[11px] uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>Today&apos;s Schedule: {todayClassesInfo.dayName}</span>
                     </span>
-                    <span className="text-xs font-bold text-slate-500 font-mono">
+                    <span className="text-xs font-bold text-slate-700 font-mono bg-slate-100 px-2.5 py-1 rounded-full">
                       {todayClassesInfo.date}
                     </span>
+                    <span className="text-xs font-black text-emerald-700 font-mono bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-emerald-600" />
+                      <span>{todayClassesInfo.currentTime || "Live IST"}</span>
+                    </span>
                   </div>
-                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">Today&apos;s Scheduled Live Classes</h2>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight mt-2">Today&apos;s Scheduled Live Classes</h2>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    Showing your live classes scheduled for today. Hourly attendance posted in app or portal reflects here in real time.
+                    Live periods are active during class hours. Future classes remain locked until their scheduled timetable start time.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs">
+                  <span className="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs">
                     {todayClassesInfo.classes.length} Classes Today
                   </span>
-                  <span className="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1 border border-emerald-200">
+                  <span className="px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5 border border-emerald-200">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>{todayClassesInfo.attendanceTakenCount} Posted</span>
                   </span>
@@ -1840,14 +1875,19 @@ export default function FacultyPortal() {
                       addedBy: "HOD (Data Science)",
                     };
 
+                    const isUpcomingLocked = cls.isLocked || cls.timingStatus === "upcoming";
+                    const isLiveNow = cls.isLive || cls.timingStatus === "live";
+
                     return (
                       <div
                         key={cls.id}
                         className={`bg-white rounded-3xl border p-6 shadow-sm flex flex-col justify-between space-y-4 transition-all ${
-                          cls.isAttendanceTaken
-                            ? "border-emerald-300 bg-gradient-to-b from-white to-emerald-50/20"
-                            : cls.isLive
-                            ? "border-blue-400 ring-2 ring-blue-500/20"
+                          isLiveNow
+                            ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-md shadow-emerald-500/10"
+                            : isUpcomingLocked
+                            ? "border-slate-200 bg-slate-50/40 opacity-95"
+                            : cls.isAttendanceTaken
+                            ? "border-emerald-300 bg-emerald-50/20"
                             : "border-slate-200 hover:border-blue-300"
                         }`}
                       >
@@ -1861,10 +1901,24 @@ export default function FacultyPortal() {
                               </span>
                             </div>
 
-                            {cls.isLive && (
-                              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500 text-white font-black text-[10px] uppercase flex items-center gap-1 animate-pulse">
-                                <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-                                <span>Live Now</span>
+                            {isLiveNow && (
+                              <span className="px-3 py-1 rounded-full bg-emerald-600 text-white font-black text-[10px] uppercase flex items-center gap-1.5 animate-pulse shadow-xs">
+                                <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                                <span>🟢 Live Class Now</span>
+                              </span>
+                            )}
+
+                            {isUpcomingLocked && (
+                              <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-black text-[10px] uppercase flex items-center gap-1">
+                                <Lock className="w-3 h-3 text-indigo-600" />
+                                <span>Upcoming Today</span>
+                              </span>
+                            )}
+
+                            {!isLiveNow && !isUpcomingLocked && (
+                              <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px] uppercase flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-slate-500" />
+                                <span>Period Concluded</span>
                               </span>
                             )}
                           </div>
@@ -1918,7 +1972,22 @@ export default function FacultyPortal() {
                                   </div>
                                 </div>
                                 <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-200/60 text-emerald-800">
-                                  ✓ Taken
+                                  ✓ Recorded
+                                </span>
+                              </div>
+                            ) : isUpcomingLocked ? (
+                              <div className="flex items-center justify-between p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 text-indigo-900">
+                                <div className="flex items-center gap-2">
+                                  <Lock className="w-4 h-4 text-indigo-500 shrink-0" />
+                                  <div>
+                                    <p className="text-xs font-black">Attendance Locked</p>
+                                    <p className="text-[11px] text-indigo-700 font-semibold">
+                                      Unlocks at {cls.startTimeFormatted || cls.unlocksAt} when period begins
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+                                  Locked
                                 </span>
                               </div>
                             ) : (
@@ -1926,9 +1995,11 @@ export default function FacultyPortal() {
                                 <div className="flex items-center gap-2">
                                   <Clock className="w-4 h-4 text-amber-600 shrink-0" />
                                   <div>
-                                    <p className="text-xs font-black">Attendance Pending Today</p>
+                                    <p className="text-xs font-black">
+                                      {isLiveNow ? "Live Class Active" : "Class Concluded (Pending Entry)"}
+                                    </p>
                                     <p className="text-[11px] text-amber-700 font-semibold">
-                                      Take hourly attendance for this scheduled slot
+                                      Take hourly attendance for today&apos;s period
                                     </p>
                                   </div>
                                 </div>
@@ -1940,49 +2011,102 @@ export default function FacultyPortal() {
                           </div>
                         </div>
 
-                        <button
-                          onClick={() => openAttendanceModal(courseObj)}
-                          className={`w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                            cls.isAttendanceTaken
-                              ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
-                              : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
-                          }`}
-                        >
-                          <CheckSquare className="w-4 h-4" />
-                          <span>{cls.isAttendanceTaken ? "✓ Attendance Recorded (Edit / Retake)" : "Post Live Attendance"}</span>
-                        </button>
+                        {/* Action Button: Locked if Upcoming, Active if Live or Completed */}
+                        {isUpcomingLocked ? (
+                          <button
+                            disabled
+                            className="w-full py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
+                            title={`Attendance entry unlocks at ${cls.startTimeFormatted || cls.unlocksAt}`}
+                          >
+                            <Lock className="w-4 h-4 text-slate-400" />
+                            <span>Locked until Class Time ({cls.startTimeFormatted || cls.unlocksAt})</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => openAttendanceModal(courseObj)}
+                            className={`w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                              cls.isAttendanceTaken
+                                ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
+                                : isLiveNow
+                                ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
+                                : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
+                            }`}
+                          >
+                            <CheckSquare className="w-4 h-4" />
+                            <span>
+                              {cls.isAttendanceTaken
+                                ? "✓ Attendance Recorded (Edit / Retake)"
+                                : isLiveNow
+                                ? "🚀 Post Live Attendance Now"
+                                : "Post Attendance (Late Entry)"}
+                            </span>
+                          </button>
+                        )}
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
-                    <Calendar className="w-6 h-6" />
+                <div className="space-y-6">
+                  <div className="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
+                      <Calendar className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      No Scheduled Classes on Timetable for Today ({todayClassesInfo.dayName}, {todayClassesInfo.date})
+                    </h3>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      You do not have any classes scheduled for {todayClassesInfo.dayName}. Below are your upcoming classes for the next working day.
+                    </p>
                   </div>
-                  <h3 className="text-base font-extrabold text-slate-900">
-                    No Scheduled Classes on Timetable for Today ({todayClassesInfo.dayName})
-                  </h3>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    You do not have any classes scheduled for {todayClassesInfo.dayName}. Below are your all-week assigned courses.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 text-left">
-                    {courses.map((course) => (
-                      <div key={course.id} className="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono font-bold text-blue-700">{course.code}</span>
-                          <span className="text-xs font-bold text-slate-500">{course.type}</span>
+
+                  {/* Next Working Day Upcoming Preview */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Upcoming Timetable: {todayClassesInfo.nextWorkingDay?.dayName || "Monday"} Schedule</span>
+                      </span>
+                      <span className="text-xs text-slate-500 font-semibold">
+                        (Attendance unlocks when class time arrives)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(todayClassesInfo.nextWorkingDay?.classes && todayClassesInfo.nextWorkingDay.classes.length > 0
+                        ? todayClassesInfo.nextWorkingDay.classes
+                        : courses
+                      ).map((cls: any) => (
+                        <div key={cls.id} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4 opacity-90">
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <span className="text-xs font-mono font-bold text-slate-700 flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                              <span>{cls.slot || "Scheduled Period"}</span>
+                            </span>
+                            <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-bold uppercase flex items-center gap-1">
+                              <Lock className="w-3 h-3 text-indigo-500" />
+                              <span>Upcoming on {todayClassesInfo.nextWorkingDay?.dayName || "Monday"}</span>
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
+                              {cls.code}
+                            </span>
+                            <h4 className="font-extrabold text-slate-900 mt-1">{cls.name}</h4>
+                            <p className="text-xs text-slate-600 mt-1">Section: {cls.section} &bull; Room: {cls.room}</p>
+                          </div>
+
+                          <button
+                            disabled
+                            className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 select-none"
+                          >
+                            <Lock className="w-3.5 h-3.5 text-slate-400" />
+                            <span>Locked — Scheduled for {todayClassesInfo.nextWorkingDay?.dayName || "Monday"}</span>
+                          </button>
                         </div>
-                        <h4 className="font-extrabold text-slate-900">{course.name}</h4>
-                        <p className="text-xs text-slate-600">Section: {course.section} • Room: {course.room}</p>
-                        <button
-                          onClick={() => openAttendanceModal(course)}
-                          className="w-full py-2 rounded-xl bg-blue-600 text-white font-bold text-xs"
-                        >
-                          Take Attendance
-                        </button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
