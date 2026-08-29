@@ -10,6 +10,8 @@
   "rewrites": [
     { "source": "/api", "destination": "/api/index.js" },
     { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/((?!api|.*\\.apk|.*\\.json|.*\\.svg|.*\\.jpg|.*\\.js|.*\\.css).*)", "destination": "/index.html" }
+    { "source": "/faculty/(.*)", "destination": "/api/index.js" },
+    { "source": "/mentor/(.*)", "destination": "/api/index.js" },
+    { "source": "/((?!api|faculty-portal|faculty|mentor|.*\\.apk|.*\\.json|.*\\.svg|.*\\.jpg|.*\\.js|.*\\.css).*)", "destination": "/index.html" }
   ]
 }

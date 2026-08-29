@@ -699,17 +699,17 @@ export default function FacultyPortal() {
       try {
         // 1. Fetch live courses
         try {
-          const data = await customFetch<Course[]>("/faculty/courses");
+          const data = await customFetch<Course[]>("/api/faculty/courses");
           if (Array.isArray(data) && data.length > 0) {
             setLiveCourses(data);
           }
         } catch (e) {
-          console.warn("Could not load /faculty/courses:", e);
+          console.warn("Could not load /api/faculty/courses:", e);
         }
 
         // 2. Fetch live mentees from qr_users
         try {
-          const data = await customFetch<any[]>("/mentor/students");
+          const data = await customFetch<any[]>("/api/mentor/students");
           if (Array.isArray(data) && data.length > 0) {
             const mappedMentees: MenteeStudent[] = data.map((s: any, idx: number) => ({
               id: s.id || s.user?.id || idx + 1,
@@ -726,27 +726,27 @@ export default function FacultyPortal() {
             setLiveMentees(mappedMentees);
           }
         } catch (e) {
-          console.warn("Could not load /mentor/students:", e);
+          console.warn("Could not load /api/mentor/students:", e);
         }
 
         // 3. Fetch live workload grid
         try {
-          const data = await customFetch<any[]>("/faculty/workload-grid");
+          const data = await customFetch<any[]>("/api/faculty/workload-grid");
           if (Array.isArray(data) && data.length > 0) {
             setLiveWorkload(data);
           }
         } catch (e) {
-          console.warn("Could not load /faculty/workload-grid:", e);
+          console.warn("Could not load /api/faculty/workload-grid:", e);
         }
 
         // 4. Fetch today's live classes and real attendance status
         try {
-          const todayData = await customFetch<any>("/faculty/today-classes");
+          const todayData = await customFetch<any>("/api/faculty/today-classes");
           if (todayData && Array.isArray(todayData.classes)) {
             setTodayClassesInfo(todayData);
           }
         } catch (e) {
-          console.warn("Could not load /faculty/today-classes:", e);
+          console.warn("Could not load /api/faculty/today-classes:", e);
         }
       } catch (err) {
         console.error("Error loading live faculty data:", err);
@@ -841,7 +841,7 @@ export default function FacultyPortal() {
       // 1. Try fetching real section students from API
       try {
         const data = await customFetch<any[]>(
-          `/faculty/section-students?section=${encodeURIComponent(course.section || "")}&scheduleId=${encodeURIComponent(course.id || "")}`
+          `/api/faculty/section-students?section=${encodeURIComponent(course.section || "")}&scheduleId=${encodeURIComponent(course.id || "")}`
         );
         if (Array.isArray(data) && data.length > 0) {
           const records: StudentAttendanceRecord[] = data.map((s: any, idx: number) => ({
@@ -860,12 +860,12 @@ export default function FacultyPortal() {
           return;
         }
       } catch (e) {
-        console.warn("Could not load /faculty/section-students:", e);
+        console.warn("Could not load /api/faculty/section-students:", e);
       }
 
       // 2. Try fetching from /mentor/students fallback
       try {
-        const mData = await customFetch<any[]>("/mentor/students");
+        const mData = await customFetch<any[]>("/api/mentor/students");
         if (Array.isArray(mData) && mData.length > 0) {
           const records: StudentAttendanceRecord[] = mData.map((s: any, idx: number) => ({
             id: s.id || s.user?.id || idx + 1,
@@ -883,7 +883,7 @@ export default function FacultyPortal() {
           return;
         }
       } catch (e) {
-        console.warn("Could not load /mentor/students fallback:", e);
+        console.warn("Could not load /api/mentor/students fallback:", e);
       }
 
       // 3. Fallback to live mentees if available
@@ -933,7 +933,7 @@ export default function FacultyPortal() {
       const totalCount = studentRoster.length;
 
       // Submit to real Supabase attendance backend
-      await customFetch("/mentor/submit-attendance", {
+      await customFetch("/api/mentor/submit-attendance", {
         method: "POST",
         body: JSON.stringify({
           scheduleId: parseInt(selectedCourseForAttendance.id) || 1,
@@ -953,7 +953,7 @@ export default function FacultyPortal() {
 
       // Refetch today's classes to immediately reflect the attendance status
       try {
-        const refreshed = await customFetch<any>("/faculty/today-classes");
+        const refreshed = await customFetch<any>("/api/faculty/today-classes");
         if (refreshed && Array.isArray(refreshed.classes)) {
           setTodayClassesInfo(refreshed);
         }
