@@ -1110,7 +1110,8 @@ router.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req:
   }
 
   try {
-    const { date } = getCurrentISTDateTime();
+    const defaultDate = getCurrentISTDateTime().date;
+    const date = (req.body.date && typeof req.body.date === "string" && req.body.date.trim()) ? req.body.date.trim() : defaultDate;
 
     // --- TRAINING: write to trainingStore, NOT to qr_hourly_attendance ---
     if (scheduleId < 0) {

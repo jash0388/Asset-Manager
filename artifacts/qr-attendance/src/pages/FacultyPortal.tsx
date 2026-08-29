@@ -494,8 +494,40 @@ export default function FacultyPortal() {
 
   // Active navigation tab
   const [activeTab, setActiveTab] = useState<
-    "home" | "academics" | "delegate" | "assignment" | "mids" | "workload" | "mentoring" | "projects" | "events" | "reports"
+    "home" | "academics" | "delegate" | "assignment" | "mids" | "workload" | "mentoring" | "projects" | "events" | "reports" | "history" | "student_history"
   >("home");
+
+  // ── Class-Wise Attendance History State ──
+  const [historyFromDate, setHistoryFromDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 14);
+    return d.toISOString().split("T")[0];
+  });
+  const [historyToDate, setHistoryToDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [historyStatusFilter, setHistoryStatusFilter] = useState<"all" | "marked" | "skipped">("all");
+  const [historySearchQuery, setHistorySearchQuery] = useState("");
+  const [historyRecords, setHistoryRecords] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // ── Student-Wise History (Attendance Book) State ──
+  const [selectedBookSection, setSelectedBookSection] = useState<string>("");
+  const [selectedBookCourse, setSelectedBookCourse] = useState<string>("");
+  const [bookFromDate, setBookFromDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 14);
+    return d.toISOString().split("T")[0];
+  });
+  const [bookToDate, setBookToDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [bookSearchQuery, setBookSearchQuery] = useState("");
+  const [bookData, setBookData] = useState<{
+    section: string;
+    courseCode: string;
+    fromDate: string;
+    toDate: string;
+    dates: string[];
+    students: any[];
+  } | null>(null);
+  const [loadingBook, setLoadingBook] = useState(false);
 
   // Sidebar collapsible submenus
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({
@@ -757,6 +789,177 @@ export default function FacultyPortal() {
 
     loadFacultyData();
   }, [resolvedKey]);
+
+  // ── Fetch Class-Wise Attendance History ──
+  const fetchAttendanceHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const data = await customFetch<any[]>(
+        `/api/faculty/attendance-history?from=${historyFromDate}&to=${historyToDate}&status=${historyStatusFilter}`
+      );
+      if (Array.isArray(data)) {
+        setHistoryRecords(data);
+      }
+    } catch (e) {
+      console.warn("Could not load attendance history:", e);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  // ── Fetch Student-Wise History (Attendance Book) ──
+  const fetchStudentAttendanceBook = async () => {
+    setLoadingBook(true);
+    try {
+      const sec = selectedBookSection || (courses[0]?.section || "DS-4A");
+      const code = selectedBookCourse || (courses[0]?.code || "ALL");
+      const data = await customFetch<any>(
+        `/api/faculty/student-attendance-book?section=${encodeURIComponent(sec)}&courseCode=${encodeURIComponent(code)}&from=${bookFromDate}&to=${bookToDate}`
+      );
+      if (data && Array.isArray(data.students)) {
+        setBookData(data);
+      }
+    } catch (e) {
+      console.warn("Could not load student attendance book:", e);
+    } finally {
+      setLoadingBook(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "history") {
+      fetchAttendanceHistory();
+    }
+  }, [activeTab, historyFromDate, historyToDate, historyStatusFilter]);
+
+  useEffect(() => {
+    if (activeTab === "student_history") {
+      fetchStudentAttendanceBook();
+    }
+  }, [activeTab, selectedBookSection, selectedBookCourse, bookFromDate, bookToDate]);
+
+  // Set default book course when courses load
+  useEffect(() => {
+    if (courses.length > 0 && !selectedBookSection) {
+      setSelectedBookSection(courses[0].section);
+      setSelectedBookCourse(courses[0].code);
+    }
+  }, [courses]);
+
+  // ── Subject-Wise Class Counts & Attendance Summary Breakdown ──
+  const historySubjectSummary = useMemo(() => {
+    const map = new Map<
+      string,
+      { subject: string; code: string; section: string; total: number; marked: number; skipped: number; totalPresent: number }
+    >();
+
+    historyRecords.forEach((r) => {
+      const key = `${r.subject}_${r.section}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          subject: r.subject,
+          code: r.code,
+          section: r.section,
+          total: 0,
+          marked: 0,
+          skipped: 0,
+          totalPresent: 0,
+        });
+      }
+      const item = map.get(key)!;
+      item.total++;
+      if (r.status === "marked") {
+        item.marked++;
+        item.totalPresent += (r.presentCount || 0);
+      } else if (r.status === "skipped") {
+        item.skipped++;
+      }
+    });
+
+    return Array.from(map.values());
+  }, [historyRecords]);
+
+  // ── Filtered Attendance History Records ──
+  const filteredHistoryRecords = useMemo(() => {
+    return historyRecords.filter((r) => {
+      if (historyStatusFilter !== "all" && r.status !== historyStatusFilter) return false;
+      if (!historySearchQuery.trim()) return true;
+      const q = historySearchQuery.toLowerCase().trim();
+      return (
+        r.subject?.toLowerCase().includes(q) ||
+        r.code?.toLowerCase().includes(q) ||
+        r.section?.toLowerCase().includes(q) ||
+        r.date?.toLowerCase().includes(q) ||
+        r.dayName?.toLowerCase().includes(q) ||
+        r.slot?.toLowerCase().includes(q) ||
+        r.room?.toLowerCase().includes(q)
+      );
+    });
+  }, [historyRecords, historyStatusFilter, historySearchQuery]);
+
+  // ── Download Class-Wise Attendance History CSV ──
+  const downloadHistoryCSV = () => {
+    const toExport = filteredHistoryRecords.length > 0 ? filteredHistoryRecords : historyRecords;
+    if (!toExport || toExport.length === 0) {
+      toast({ title: "No Data", description: "No records found in this date range to export." });
+      return;
+    }
+    const headers = ["Date", "Day", "Time Slot", "Subject", "Course Code", "Section", "Room", "Status", "Present Count", "Total Strength"];
+    const rows = toExport.map((r) => [
+      `"${r.date}"`,
+      `"${r.dayName}"`,
+      `"${r.slot}"`,
+      `"${r.subject}"`,
+      `"${r.code}"`,
+      `"${r.section}"`,
+      `"${r.room}"`,
+      `"${r.status === "marked" ? "Marked" : r.status === "skipped" ? "Skipped / Unmarked" : "Upcoming"}"`,
+      r.presentCount || 0,
+      r.totalStrength || 55,
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Class_Attendance_History_${historyFromDate}_to_${historyToDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast({ title: "✓ History Downloaded", description: `Exported ${toExport.length} records.` });
+  };
+
+  // ── Download Student-Wise Attendance Book Register CSV ──
+  const downloadAttendanceBookCSV = () => {
+    if (!bookData || !bookData.students || bookData.students.length === 0) {
+      toast({ title: "No Data", description: "No student records to export." });
+      return;
+    }
+    const dateHeaders = (bookData.dates || []).map((d) => `"${d}"`);
+    const headers = ["S.No", "Roll Number", "Student Name", "Section", ...dateHeaders, "Total Classes", "Present Count", "Absent Count", "Attendance %"];
+    const rows = bookData.students.map((s) => {
+      const dateCols = (bookData.dates || []).map((d) => `"${s.attendanceByDate?.[d] || "-"}"`);
+      return [
+        s.sNo,
+        `"${s.rollNumber}"`,
+        `"${s.name}"`,
+        `"${s.section}"`,
+        ...dateCols,
+        s.totalClasses,
+        s.presentCount,
+        s.absentCount,
+        `"${s.percentage}%"`,
+      ];
+    });
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Attendance_Book_${bookData.section}_${bookData.fromDate}_to_${bookData.toDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast({ title: "✓ Attendance Book Downloaded", description: `Exported ${bookData.students.length} students across ${(bookData.dates || []).length} class dates.` });
+  };
 
   // Post Attendance Modal State
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
@@ -1583,7 +1786,7 @@ export default function FacultyPortal() {
               {sidebarOpen && <span>Faculty Workload</span>}
             </button>
 
-            {/* Mentoring */}
+            {/* Class In-Charge */}
             <div>
               <button
                 onClick={() => {
@@ -1598,7 +1801,7 @@ export default function FacultyPortal() {
               >
                 <div className="flex items-center gap-3">
                   <Users className="w-4 h-4 shrink-0 text-indigo-600" />
-                  {sidebarOpen && <span>Mentoring</span>}
+                  {sidebarOpen && <span>Class In-Charge</span>}
                 </div>
                 {sidebarOpen && (
                   <ChevronDown
@@ -1614,7 +1817,7 @@ export default function FacultyPortal() {
                     onClick={() => setActiveTab("mentoring")}
                     className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
                   >
-                    • Assigned Mentees (24)
+                    • Assigned Students ({mentees.length})
                   </button>
                   <button
                     onClick={() => setActiveTab("mentoring")}
@@ -1652,22 +1855,22 @@ export default function FacultyPortal() {
               {sidebarOpen && <span>Event Management</span>}
             </button>
 
-            {/* Reports */}
+            {/* Attendance History */}
             <div>
               <button
                 onClick={() => {
-                  setActiveTab("reports");
+                  setActiveTab("history");
                   toggleSubmenu("reports");
                 }}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "reports"
+                  activeTab === "history" || activeTab === "student_history"
                     ? "bg-blue-50 text-blue-700 font-extrabold"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <BarChart3 className="w-4 h-4 shrink-0 text-blue-600" />
-                  {sidebarOpen && <span>Reports</span>}
+                  {sidebarOpen && <span>Attendance History</span>}
                 </div>
                 {sidebarOpen && (
                   <ChevronDown
@@ -1680,16 +1883,24 @@ export default function FacultyPortal() {
               {sidebarOpen && openSubmenus.reports && (
                 <div className="pl-9 pr-2 py-1 space-y-0.5">
                   <button
-                    onClick={() => setActiveTab("reports")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    onClick={() => setActiveTab("history")}
+                    className={`w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+                      activeTab === "history"
+                        ? "text-blue-600 bg-blue-50 font-bold"
+                        : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    }`}
                   >
-                    • Attendance Summary
+                    • Class-Wise History
                   </button>
                   <button
-                    onClick={() => setActiveTab("reports")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    onClick={() => setActiveTab("student_history")}
+                    className={`w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+                      activeTab === "student_history"
+                        ? "text-blue-600 bg-blue-50 font-bold"
+                        : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    }`}
                   >
-                    • Attendance Report (A/P)
+                    • Student-Wise History (Book)
                   </button>
                 </div>
               )}
@@ -2762,7 +2973,7 @@ export default function FacultyPortal() {
                     {facultyName.charAt(0)}
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Official Faculty Mentor</span>
+                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Official Class In-Charge</span>
                     <h3 className="text-lg font-extrabold text-slate-900">{facultyName}</h3>
                     <p className="text-xs text-slate-600 font-medium">{facultyDept} &bull; {facultyProfile.phone}</p>
                   </div>
@@ -2770,7 +2981,7 @@ export default function FacultyPortal() {
 
                 <div className="flex items-center gap-3">
                   <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center">
-                    <p className="text-[10px] font-bold text-slate-600 uppercase">Assigned Mentees</p>
+                    <p className="text-[10px] font-bold text-slate-600 uppercase">Assigned Students</p>
                     <p className="text-lg font-black text-blue-700 leading-tight">{mentees.length}</p>
                   </div>
                   <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 text-center">
@@ -2780,12 +2991,12 @@ export default function FacultyPortal() {
                 </div>
               </div>
 
-              {/* Mentee List Table with WhatsApp triggers */}
+              {/* Student List Table with WhatsApp triggers */}
               <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
                 <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
                   <div className="flex items-center gap-2.5">
                     <Users className="w-5 h-5 text-indigo-600" />
-                    <h3 className="text-base font-extrabold text-slate-900">Mentee Student Roster (24 Students)</h3>
+                    <h3 className="text-base font-extrabold text-slate-900">Assigned Students Roster ({mentees.length} Students)</h3>
                   </div>
 
                   <div className="relative w-full sm:w-64">
@@ -3089,76 +3300,596 @@ export default function FacultyPortal() {
             </div>
           )}
 
-          {/* ════════════════ TAB 10: REPORTS ════════════════ */}
-          {activeTab === "reports" && (
+          {/* ════════════════ TAB 10: CLASS-WISE ATTENDANCE HISTORY ════════════════ */}
+          {activeTab === "history" && (
             <div className="space-y-6">
-              <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Academic Reports & Attendance Registers</h2>
-                  <p className="text-xs text-slate-600 mt-0.5">Consolidated attendance sheets, daily register, and mentee defaulters report.</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <select
-                    value={reportType}
-                    onChange={(e: any) => setReportType(e.target.value)}
-                    className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-slate-900"
-                  >
-                    <option value="summary">Attendance Summary Report</option>
-                    <option value="daily">Daily A/P Matrix Register</option>
-                    <option value="menteeDefaulters">Mentee Defaulters (&lt;75%)</option>
-                    <option value="midsSheet">Mid Examination Consolidated Sheet</option>
-                  </select>
+              {/* Header & Date-Range Controls */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase tracking-wider">
+                        Period-Wise Logs
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">
+                        {historyFromDate} to {historyToDate}
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">Class-Wise Attendance History</h2>
+                    <p className="text-xs text-slate-500">Comprehensive daily logs of all scheduled periods with marked & skipped attendance tracking.</p>
+                  </div>
 
-                  <button
-                    onClick={() => toast({ title: "Report Exported", description: "Report exported as Excel (.xlsx) register." })}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer"
-                  >
-                    <FileSpreadsheet className="w-4 h-4" />
-                    <span>Download Excel</span>
-                  </button>
+                  {/* Export Button */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={downloadHistoryCSV}
+                      disabled={loadingHistory || historyRecords.length === 0}
+                      className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download History (CSV)</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filters Row: Date Range, Search & Status Filter */}
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-100">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                      <span className="font-bold text-slate-500">From:</span>
+                      <input
+                        type="date"
+                        value={historyFromDate}
+                        onChange={(e) => setHistoryFromDate(e.target.value)}
+                        className="bg-transparent font-bold text-slate-900 focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                      <span className="font-bold text-slate-500">To:</span>
+                      <input
+                        type="date"
+                        value={historyToDate}
+                        onChange={(e) => setHistoryToDate(e.target.value)}
+                        className="bg-transparent font-bold text-slate-900 focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      onClick={() => {
+                        const d = new Date();
+                        const today = d.toISOString().split("T")[0];
+                        setHistoryFromDate(today);
+                        setHistoryToDate(today);
+                      }}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={() => {
+                        const d = new Date();
+                        const today = d.toISOString().split("T")[0];
+                        d.setDate(d.getDate() - 7);
+                        setHistoryFromDate(d.toISOString().split("T")[0]);
+                        setHistoryToDate(today);
+                      }}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                    >
+                      Last 7 Days
+                    </button>
+                    <button
+                      onClick={() => {
+                        const d = new Date();
+                        const today = d.toISOString().split("T")[0];
+                        d.setDate(1);
+                        setHistoryFromDate(d.toISOString().split("T")[0]);
+                        setHistoryToDate(today);
+                      }}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                    >
+                      This Month
+                    </button>
+                  </div>
+
+                  {/* Search Bar & Status Toggle Pills */}
+                  <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                    {/* Live Search Input */}
+                    <div className="relative flex-1 sm:w-64">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        placeholder="Search subject, section, date, slot..."
+                        value={historySearchQuery}
+                        onChange={(e) => setHistorySearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500 bg-slate-50"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+                      <button
+                        onClick={() => setHistoryStatusFilter("all")}
+                        className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                          historyStatusFilter === "all" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600"
+                        }`}
+                      >
+                        All ({historyRecords.length})
+                      </button>
+                      <button
+                        onClick={() => setHistoryStatusFilter("marked")}
+                        className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                          historyStatusFilter === "marked" ? "bg-emerald-600 text-white shadow-xs" : "text-emerald-700"
+                        }`}
+                      >
+                        Marked ({historyRecords.filter(r => r.status === "marked").length})
+                      </button>
+                      <button
+                        onClick={() => setHistoryStatusFilter("skipped")}
+                        className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                          historyStatusFilter === "skipped" ? "bg-amber-600 text-white shadow-xs" : "text-amber-700"
+                        }`}
+                      >
+                        Skipped ({historyRecords.filter(r => r.status === "skipped").length})
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Report Preview Table */}
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 text-slate-600 uppercase font-bold text-[10px] tracking-wider">
-                      <tr>
-                        <th className="py-3 px-3">S.No</th>
-                        <th className="py-3 px-3">Roll Number</th>
-                        <th className="py-3 px-3">Student Name</th>
-                        <th className="py-3 px-3 text-center">Total Held</th>
-                        <th className="py-3 px-3 text-center">Attended</th>
-                        <th className="py-3 px-3 text-center">Attendance %</th>
-                        <th className="py-3 px-3 text-center">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {mentees.map((m, idx) => (
-                        <tr key={m.id} className="hover:bg-slate-50">
-                          <td className="py-2.5 px-3 font-semibold text-slate-500">{idx + 1}</td>
-                          <td className="py-2.5 px-3 font-mono font-bold text-blue-700">{m.rollNumber}</td>
-                          <td className="py-2.5 px-3 font-bold text-slate-900">{m.name}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold">24</td>
-                          <td className="py-2.5 px-3 text-center font-bold text-blue-700">
-                            {Math.round((m.attendancePercent * 24) / 100)}
-                          </td>
-                          <td className="py-2.5 px-3 text-center font-black text-slate-900">
-                            {m.attendancePercent}%
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              m.attendancePercent >= 75 ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+              {/* Subject-Wise Hourly Class Attendance Overview Breakdown */}
+              {historySubjectSummary.length > 0 && (
+                <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
+                      <BookOpen className="w-4 h-4 text-blue-600" />
+                      <span>Subject-Wise Hourly Attendance Summary (Held vs Scheduled)</span>
+                    </h4>
+                    <span className="text-[11px] font-bold text-slate-500">
+                      Click any subject card to filter logs
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {historySubjectSummary.map((sub, idx) => {
+                      const deliveryPct = sub.total > 0 ? Math.round((sub.marked / sub.total) * 100) : 0;
+                      const isSelected =
+                        historySearchQuery.toLowerCase() === sub.code.toLowerCase() ||
+                        historySearchQuery.toLowerCase() === sub.subject.toLowerCase();
+
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => setHistorySearchQuery(isSelected ? "" : sub.code)}
+                          className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+                            isSelected
+                              ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
+                              : "bg-slate-50/60 text-slate-800 border-slate-200 hover:border-blue-400 hover:bg-white hover:shadow-xs"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <span className={`font-mono text-[10px] font-black px-2 py-0.5 rounded ${
+                                isSelected ? "bg-white/20 text-white" : "bg-blue-100 text-blue-800"
+                              }`}>
+                                {sub.code}
+                              </span>
+                              <h5 className="font-extrabold text-sm mt-1 leading-snug">{sub.subject}</h5>
+                              <p className={`text-xs font-semibold ${isSelected ? "text-blue-100" : "text-slate-500"}`}>
+                                Section: {sub.section}
+                              </p>
+                            </div>
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
+                              isSelected
+                                ? "bg-white text-blue-700"
+                                : deliveryPct >= 75
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-amber-100 text-amber-800"
                             }`}>
-                              {m.attendancePercent >= 75 ? "Eligible" : "Condonation / Defaulter"}
+                              {deliveryPct}% Held
                             </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </div>
+
+                          <div className={`grid grid-cols-3 gap-1 pt-2 border-t text-center text-[10px] font-bold ${
+                            isSelected ? "border-white/20 text-blue-100" : "border-slate-200 text-slate-500"
+                          }`}>
+                            <div>
+                              <p className="uppercase">Scheduled</p>
+                              <p className={`text-sm font-black ${isSelected ? "text-white" : "text-slate-900"}`}>{sub.total}</p>
+                            </div>
+                            <div>
+                              <p className="uppercase">Marked</p>
+                              <p className={`text-sm font-black ${isSelected ? "text-emerald-300" : "text-emerald-600"}`}>{sub.marked}</p>
+                            </div>
+                            <div>
+                              <p className="uppercase">Skipped</p>
+                              <p className={`text-sm font-black ${isSelected ? "text-amber-300" : "text-amber-600"}`}>{sub.skipped}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
+              )}
+
+              {/* KPI Summary Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase">Total Periods</p>
+                    <p className="text-xl font-black text-slate-900 mt-0.5">{filteredHistoryRecords.length}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <CalendarDays className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-emerald-600 uppercase">Attendance Taken</p>
+                    <p className="text-xl font-black text-emerald-700 mt-0.5">
+                      {filteredHistoryRecords.filter(r => r.status === "marked").length}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-amber-600 uppercase">Skipped / Pending</p>
+                    <p className="text-xl font-black text-amber-700 mt-0.5">
+                      {filteredHistoryRecords.filter(r => r.status === "skipped").length}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <AlertCircle className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-indigo-600 uppercase">Compliance Rate</p>
+                    <p className="text-xl font-black text-indigo-700 mt-0.5">
+                      {filteredHistoryRecords.length > 0
+                        ? Math.round((filteredHistoryRecords.filter(r => r.status === "marked").length / filteredHistoryRecords.length) * 100)
+                        : 0}%
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <Award className="w-5 h-5" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Class-Wise Attendance Records Table */}
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
+                {loadingHistory ? (
+                  <div className="py-12 text-center text-slate-500 space-y-2">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
+                    <p className="text-xs font-bold">Loading attendance history records...</p>
+                  </div>
+                ) : filteredHistoryRecords.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-600 uppercase font-bold text-[10px] tracking-wider">
+                        <tr>
+                          <th className="py-3 px-4">Date & Day</th>
+                          <th className="py-3 px-4">Time Slot</th>
+                          <th className="py-3 px-4">Subject & Code</th>
+                          <th className="py-3 px-4">Section & Room</th>
+                          <th className="py-3 px-4 text-center">Attendance Status</th>
+                          <th className="py-3 px-4 text-center">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredHistoryRecords.map((rec) => {
+                          const courseObj: Course = {
+                            id: String(rec.scheduleId || rec.id),
+                            code: rec.code,
+                            name: rec.subject,
+                            type: "Theory",
+                            program: "CSE-DS",
+                            section: rec.section,
+                            strength: rec.totalStrength || 55,
+                            room: rec.room,
+                            batch: "Regular",
+                            addedBy: "HOD (Data Science)",
+                          };
+
+                          return (
+                            <tr key={rec.id} className="hover:bg-slate-50/70 transition-colors">
+                              <td className="py-3.5 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                                <div>{rec.date}</div>
+                                <span className="text-[11px] font-semibold text-slate-500 font-sans">{rec.dayName}</span>
+                              </td>
+                              <td className="py-3.5 px-4 font-mono text-slate-700 whitespace-nowrap font-semibold">
+                                <div className="flex items-center gap-1.5">
+                                  <Clock className="w-3.5 h-3.5 text-blue-600" />
+                                  <span>{rec.slot}</span>
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="font-extrabold text-slate-900">{rec.subject}</div>
+                                <span className="font-mono text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                                  {rec.code}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="font-bold text-slate-800">{rec.section}</div>
+                                <span className="text-[11px] text-slate-500 font-medium">{rec.room}</span>
+                              </td>
+                              <td className="py-3.5 px-4 text-center">
+                                {rec.status === "marked" ? (
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>Recorded ({rec.presentCount} Present)</span>
+                                  </span>
+                                ) : rec.status === "skipped" ? (
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                                    <span>Skipped / Not Taken</span>
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
+                                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>Upcoming</span>
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3.5 px-4 text-center">
+                                <button
+                                  onClick={() => openAttendanceModal(courseObj)}
+                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer ${
+                                    rec.status === "marked"
+                                      ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
+                                      : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                                  }`}
+                                >
+                                  {rec.status === "marked" ? (
+                                    <>
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span>Edit / View</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserCheck className="w-3.5 h-3.5" />
+                                      <span>Post Late Attendance</span>
+                                    </>
+                                  )}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-slate-500 space-y-2">
+                    <CalendarDays className="w-10 h-10 mx-auto text-slate-400" />
+                    <p className="text-sm font-bold text-slate-800">No attendance records found for this filter.</p>
+                    <p className="text-xs text-slate-500">Try adjusting your search query, date range, or status filter.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════ TAB 11: STUDENT-WISE ATTENDANCE BOOK ════════════════ */}
+          {activeTab === "student_history" && (
+            <div className="space-y-6">
+              {/* Header & Register Controls */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase tracking-wider">
+                        Master Register
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">
+                        {bookData?.section || "Course Register"} &bull; {bookFromDate} to {bookToDate}
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
+                      Student-Wise Attendance Book Register
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      Physical attendance book matrix with dates across columns, student roster, daily &apos;P&apos; / &apos;A&apos; markers, and cumulative attendance %.
+                    </p>
+                  </div>
+
+                  {/* Download Register Button */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={downloadAttendanceBookCSV}
+                      disabled={loadingBook || !bookData || !bookData.students || bookData.students.length === 0}
+                      className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download Attendance Book (CSV)</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filter Controls: Course Dropdown, Date Range, Search */}
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-100">
+                  <div className="flex flex-wrap items-center gap-3">
+                    {/* Course / Section Dropdown */}
+                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                      <span className="font-bold text-slate-500">Class:</span>
+                      <select
+                        value={selectedBookCourse}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSelectedBookCourse(val);
+                          const matched = courses.find(c => c.code === val);
+                          if (matched) setSelectedBookSection(matched.section);
+                        }}
+                        className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer"
+                      >
+                        {courses.map((c) => (
+                          <option key={c.id} value={c.code}>
+                            {c.name} ({c.section})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* From Date */}
+                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                      <span className="font-bold text-slate-500">From:</span>
+                      <input
+                        type="date"
+                        value={bookFromDate}
+                        onChange={(e) => setBookFromDate(e.target.value)}
+                        className="bg-transparent font-bold text-slate-900 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* To Date */}
+                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                      <span className="font-bold text-slate-500">To:</span>
+                      <input
+                        type="date"
+                        value={bookToDate}
+                        onChange={(e) => setBookToDate(e.target.value)}
+                        className="bg-transparent font-bold text-slate-900 focus:outline-none"
+                      />
+                    </div>
+
+                    <button
+                      onClick={fetchStudentAttendanceBook}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
+                    >
+                      Apply Range
+                    </button>
+                  </div>
+
+                  {/* Student Search Box */}
+                  <div className="relative w-full sm:w-64">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search Roll No or Name..."
+                      value={bookSearchQuery}
+                      onChange={(e) => setBookSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500 bg-slate-50"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Attendance Book Matrix Grid */}
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-700">
+                      Showing {bookData?.students?.length || 0} Students &bull; {(bookData?.dates || []).length} Conducted Class Dates
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs font-bold">
+                    <span className="inline-flex items-center gap-1 text-emerald-700">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      <span>P = Present</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-red-700">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                      <span>A = Absent</span>
+                    </span>
+                  </div>
+                </div>
+
+                {loadingBook ? (
+                  <div className="py-12 text-center text-slate-500 space-y-2">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-emerald-600" />
+                    <p className="text-xs font-bold">Generating Attendance Book Matrix...</p>
+                  </div>
+                ) : bookData && bookData.students && bookData.students.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider">
+                        <tr>
+                          <th className="py-3 px-3 border border-slate-200 sticky left-0 bg-slate-100 z-10">S.No</th>
+                          <th className="py-3 px-3 border border-slate-200 sticky left-10 bg-slate-100 z-10">Roll Number</th>
+                          <th className="py-3 px-3 border border-slate-200 sticky left-32 bg-slate-100 z-10 min-w-[160px]">Student Name</th>
+                          {bookData.dates.map((d) => (
+                            <th key={d} className="py-3 px-2 border border-slate-200 text-center font-mono whitespace-nowrap min-w-[50px]">
+                              {d.split("-").slice(1).reverse().join("/")}
+                            </th>
+                          ))}
+                          <th className="py-3 px-2 border border-slate-200 text-center bg-blue-50 text-blue-900">Held</th>
+                          <th className="py-3 px-2 border border-slate-200 text-center bg-emerald-50 text-emerald-900">P</th>
+                          <th className="py-3 px-2 border border-slate-200 text-center bg-red-50 text-red-900">A</th>
+                          <th className="py-3 px-3 border border-slate-200 text-center bg-indigo-50 text-indigo-900">Att %</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {bookData.students
+                          .filter((s) =>
+                            !bookSearchQuery.trim() ||
+                            s.name.toLowerCase().includes(bookSearchQuery.toLowerCase()) ||
+                            s.rollNumber.toLowerCase().includes(bookSearchQuery.toLowerCase())
+                          )
+                          .map((st, idx) => (
+                            <tr key={st.id} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="py-2.5 px-3 border border-slate-200 font-semibold text-slate-500 sticky left-0 bg-white">
+                                {idx + 1}
+                              </td>
+                              <td className="py-2.5 px-3 border border-slate-200 font-mono font-bold text-blue-700 sticky left-10 bg-white whitespace-nowrap">
+                                {st.rollNumber}
+                              </td>
+                              <td className="py-2.5 px-3 border border-slate-200 font-extrabold text-slate-900 sticky left-32 bg-white whitespace-nowrap">
+                                {st.name}
+                              </td>
+                              {bookData.dates.map((d) => {
+                                const val = st.attendanceByDate?.[d] || "-";
+                                return (
+                                  <td key={d} className="py-2.5 px-2 border border-slate-200 text-center font-bold">
+                                    {val === "P" ? (
+                                      <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-black text-[11px]">
+                                        P
+                                      </span>
+                                    ) : val === "A" ? (
+                                      <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-800 font-black text-[11px]">
+                                        A
+                                      </span>
+                                    ) : (
+                                      <span className="text-slate-400">-</span>
+                                    )}
+                                  </td>
+                                );
+                              })}
+                              <td className="py-2.5 px-2 border border-slate-200 text-center font-bold text-slate-700 bg-blue-50/30">
+                                {st.totalClasses}
+                              </td>
+                              <td className="py-2.5 px-2 border border-slate-200 text-center font-black text-emerald-700 bg-emerald-50/30">
+                                {st.presentCount}
+                              </td>
+                              <td className="py-2.5 px-2 border border-slate-200 text-center font-black text-red-700 bg-red-50/30">
+                                {st.absentCount}
+                              </td>
+                              <td className="py-2.5 px-3 border border-slate-200 text-center font-black bg-indigo-50/30">
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+                                    st.percentage >= 75
+                                      ? "bg-emerald-100 text-emerald-800"
+                                      : st.percentage >= 65
+                                      ? "bg-amber-100 text-amber-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {st.percentage}%
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-slate-500 space-y-2">
+                    <Users className="w-10 h-10 mx-auto text-slate-400" />
+                    <p className="text-sm font-bold text-slate-800">No students found in this course register.</p>
+                    <p className="text-xs text-slate-500">Select a class section and date range to load the attendance book.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
