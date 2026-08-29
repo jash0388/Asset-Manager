@@ -1312,12 +1312,17 @@ export default function FacultyPortal() {
     }
   };
 
-  const handleCancelReassignment = async (reassignId: string) => {
-    if (!reassignId) return;
+  const handleCancelReassignment = async (reassignId?: string) => {
+    const idToCancel = reassignId || (reassignCourse as any)?.reassignment?.id || reassignCourse?.id;
     setCancellingReassignment(true);
     try {
-      await customFetch(`/api/faculty/reassignments/${reassignId}/cancel`, {
+      await customFetch(`/api/faculty/reassignments/${idToCancel || "active"}/cancel`, {
         method: "POST",
+        body: JSON.stringify({
+          id: idToCancel,
+          scheduleId: reassignCourse?.id,
+          date: attendanceDate,
+        }),
       });
       toast({
         title: "Request Cancelled",

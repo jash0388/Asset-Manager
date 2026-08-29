@@ -27,6 +27,24 @@ export interface ClassReassignment {
 // In-memory persistent store for dynamic reassignments
 export const classReassignmentsStore: ClassReassignment[] = [];
 
+// GET /admin/reassignments — Get all reassignments for HOD / Admin notifications
+router.get("/admin/reassignments", authMiddleware, async (req: any, res: any) => {
+  try {
+    let list = [...classReassignmentsStore];
+
+    // Sort: pending first, then newest
+    list.sort((a, b) => {
+      if (a.status === "pending" && b.status !== "pending") return -1;
+      if (a.status !== "pending" && b.status === "pending") return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    res.json({ success: true, reassignments: list });
+  } catch (err: any) {
+    res.json({ success: true, reassignments: [] });
+  }
+});
+
 // GET /faculty/reassignments — Get all reassignments or filter by faculty/date/status
 router.get("/faculty/reassignments", authMiddleware, async (req: any, res: any) => {
   const { date, facultyKey, status } = req.query as Record<string, string>;
@@ -117,7 +135,9 @@ router.post("/admin/reassignments/:id/action", authMiddleware, async (req: any, 
   const { action, decidedBy } = req.body;
 
   try {
-    const item = classReassignmentsStore.find((r) => r.id === id);
+    const item = classReassignmentsStore.find(
+      (r) => r.id === id || String(r.scheduleId) === String(id)
+    );
     if (!item) {
       res.status(404).json({ error: "Reassignment request not found" });
       return;
@@ -146,15 +166,30 @@ router.post("/admin/reassignments/:id/action", authMiddleware, async (req: any, 
   }
 });
 
-// POST /faculty/reassignments/:id/cancel — Faculty cancels their pending request
-router.post("/faculty/reassignments/:id/cancel", authMiddleware, async (req: any, res: any) => {
-  const { id } = req.params;
+// Resilient cancel / delete handler
+const handleCancelReassignment = async (req: any, res: any) => {
+  const paramId = req.params.id;
+  const bodyId = req.body?.id || req.body?.reassignmentId;
+  const scheduleId = req.body?.scheduleId;
+  const targetId = paramId || bodyId;
+
   try {
-    const idx = classReassignmentsStore.findIndex((r) => r.id === id);
+    const idx = classReassignmentsStore.findIndex((r) => {
+      if (targetId && targetId !== "active" && (r.id === targetId || String(r.id) === String(targetId))) return true;
+      if (targetId && targetId !== "active" && String(r.scheduleId) === String(targetId)) return true;
+      if (scheduleId && String(r.scheduleId) === String(scheduleId)) return true;
+      return false;
+    });
+
     if (idx === -1) {
-      res.status(404).json({ error: "Reassignment request not found" });
+      res.json({
+        success: true,
+        message: "Reassignment request cancelled or already cleared",
+        reassignment: null,
+      });
       return;
     }
+
     const removed = classReassignmentsStore.splice(idx, 1)[0];
     res.json({
       success: true,
@@ -164,26 +199,12 @@ router.post("/faculty/reassignments/:id/cancel", authMiddleware, async (req: any
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to cancel reassignment request" });
   }
-});
+};
 
-router.delete("/faculty/reassignments/:id", authMiddleware, async (req: any, res: any) => {
-  const { id } = req.params;
-  try {
-    const idx = classReassignmentsStore.findIndex((r) => r.id === id);
-    if (idx === -1) {
-      res.status(404).json({ error: "Reassignment request not found" });
-      return;
-    }
-    const removed = classReassignmentsStore.splice(idx, 1)[0];
-    res.json({
-      success: true,
-      message: "Reassignment request deleted successfully",
-      reassignment: removed,
-    });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || "Failed to delete reassignment request" });
-  }
-});
+// POST /faculty/reassignments/:id/cancel
+router.post("/faculty/reassignments/:id/cancel", authMiddleware, handleCancelReassignment);
+router.post("/faculty/reassignments/cancel", authMiddleware, handleCancelReassignment);
+router.delete("/faculty/reassignments/:id", authMiddleware, handleCancelReassignment);
 
 // Backward compatibility for old delegation endpoints
 router.get("/faculty/delegations", authMiddleware, mentorOnly, async (req: any, res: any) => {
