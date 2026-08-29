@@ -56,7 +56,8 @@ import {
   Edit3,
   Trash2,
   UploadCloud,
-  CheckCheck
+  CheckCheck,
+  Lock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
