@@ -635,6 +635,28 @@ export default function FacultyPortal() {
     statusLabel?: string;
   };
 
+  const getInitialISTDate = () => {
+    const now = new Date();
+    const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayCodes = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    const dayIndex = ist.getUTCDay();
+    const dateStr = ist.toISOString().split("T")[0];
+    const hours = ist.getUTCHours();
+    const mins = ist.getUTCMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const h12 = hours % 12 || 12;
+    const timeStr = `${String(h12).padStart(2, "0")}:${String(mins).padStart(2, "0")} ${ampm} IST`;
+    return {
+      date: dateStr,
+      dayCode: dayCodes[dayIndex],
+      dayName: days[dayIndex],
+      currentTime: timeStr,
+    };
+  };
+
+  const initialIST = getInitialISTDate();
+
   const [todayClassesInfo, setTodayClassesInfo] = useState<{
     date: string;
     dayCode: string;
@@ -649,17 +671,19 @@ export default function FacultyPortal() {
       classes: TodayClassItem[];
     } | null;
   }>({
-    date: new Date().toISOString().split("T")[0],
-    dayCode: "SAT",
-    dayName: "Saturday",
-    currentTime: "10:45 AM IST",
+    date: initialIST.date,
+    dayCode: initialIST.dayCode,
+    dayName: initialIST.dayName,
+    currentTime: initialIST.currentTime,
     totalScheduledToday: 0,
     attendanceTakenCount: 0,
     classes: [],
     nextWorkingDay: null,
   });
 
-  // Effective today classes: uses live API data if available, or derives from faculty timetable/workload
+  const [todayClassesLoaded, setTodayClassesLoaded] = useState(false);
+
+  // Effective today classes: uses live API data directly, never flashing stale hardcoded data
   const effectiveTodayClasses: TodayClassItem[] = useMemo(() => {
     if (todayClassesInfo?.classes && todayClassesInfo.classes.length > 0) {
       return [...todayClassesInfo.classes].sort((a, b) => {
@@ -677,166 +701,67 @@ export default function FacultyPortal() {
       });
     }
 
-    const dayName = todayClassesInfo?.dayName || "Saturday";
-    const dayCode = todayClassesInfo?.dayCode || "SAT";
-    const dayEntry = (workload || []).find(
-      (w) => w?.day && (w.day.toLowerCase() === dayName.toLowerCase() || w.day.toUpperCase().startsWith(dayCode.toUpperCase()))
-    );
-    if (!dayEntry || !Array.isArray(dayEntry.periods) || dayEntry.periods.length === 0) {
-      return [];
-    }
+    return [];
+  }, [todayClassesInfo.classes]);
 
-    const isActivity = (subj: string) => {
-      const s = (subj || "").toUpperCase().trim();
-      return (
-        s.includes("SPORTS") ||
-        s.includes("LIBRARY") ||
-        s.includes("COUNSELLING") ||
-        s.includes("CLUB") ||
-        s.includes("ACTIVITIES") ||
-        s.includes("APTITUDE") ||
-        s.includes("RESEARCH HOUR") ||
-        s.includes("DIGITAL LIBRARY")
-      );
-    };
-
-    const academicPeriods = dayEntry.periods.filter((p) => p && !isActivity(p.subject));
-    if (academicPeriods.length === 0) return [];
-
-    const now = new Date();
-    const curHour = now.getHours();
-    const curMin = now.getMinutes();
-    const curTotalMin = curHour * 60 + curMin;
-
-    const rawClasses: TodayClassItem[] = academicPeriods.map((p, idx) => {
-      const isLab = (p?.subject || "").toUpperCase().includes("LAB");
-      const [sPart, ePart] = (p?.slot || "").split("–").map((s) => (s ? s.trim() : ""));
-      let startMin = 9 * 60;
-      let endMin = 10 * 60;
-      if (sPart) {
-        const [sh, sm] = (sPart.replace(/[^0-9:]/g, "").split(":") || []).map(Number);
-        if (!isNaN(sh)) startMin = (sh < 8 ? sh + 12 : sh) * 60 + (sm || 0);
-      }
-      if (ePart) {
-        const [eh, em] = (ePart.replace(/[^0-9:]/g, "").split(":") || []).map(Number);
-        if (!isNaN(eh)) endMin = (eh < 8 ? eh + 12 : eh) * 60 + (em || 0);
-      }
-
-      let timingStatus: "live" | "upcoming" | "completed" = "upcoming";
-      let isLocked = false;
-      if (curTotalMin < startMin) {
-        timingStatus = "upcoming";
-        isLocked = true;
-      } else if (curTotalMin >= startMin && curTotalMin <= endMin) {
-        timingStatus = "live";
-        isLocked = false;
-      } else {
-        timingStatus = "completed";
-        isLocked = false;
-      }
-
-      return {
-        id: `today_${idx + 1}`,
-        scheduleId: 1000 + idx,
-        code: (p?.subject || "SUB").toUpperCase(),
-        name: p?.subject || "Class Period",
-        type: isLab ? "Practical" : "Theory",
-        program: "CSE-DS",
-        section: p?.section || "DS",
-        rawSection: (p?.section || "A").replace(/[^ABC]/g, "") || "A",
-        year: "III",
-        room: p?.room || "Hall 412",
-        startTime: sPart || "09:00 AM",
-        endTime: ePart || "10:00 AM",
-        startTimeFormatted: sPart || "09:00 AM",
-        endTimeFormatted: ePart || "10:00 AM",
-        slot: p?.slot || "09:00 AM – 10:00 AM",
-        strength: 55,
-        isAttendanceTaken: false,
-        attendedCount: null,
-        session: null,
-        isLive: timingStatus === "live",
-        timingStatus,
-        isLocked,
-        unlocksAt: sPart || "09:00 AM",
-        statusLabel: timingStatus === "live" ? "Live Class Now" : timingStatus === "upcoming" ? "Upcoming Today" : "Period Concluded",
-      };
-    });
-
-    return rawClasses.sort((a, b) => {
-      const aIsLive = a.timingStatus === "live" || a.isLive;
-      const bIsLive = b.timingStatus === "live" || b.isLive;
-      if (aIsLive && !bIsLive) return -1;
-      if (!aIsLive && bIsLive) return 1;
-
-      const aIsUpcoming = a.timingStatus === "upcoming" || a.isLocked;
-      const bIsUpcoming = b.timingStatus === "upcoming" || b.isLocked;
-      if (aIsUpcoming && !bIsUpcoming) return -1;
-      if (!aIsUpcoming && bIsUpcoming) return 1;
-
-      return 0;
-    });
-  }, [todayClassesInfo.classes, todayClassesInfo.dayName, todayClassesInfo.dayCode, workload]);
-
-  // ── Refetch all live faculty data ──
+  // ── Refetch all live faculty data in parallel (blazing fast) ──
   const refetchFacultyAll = useCallback(async () => {
     setLoadingData(true);
     try {
-      // 1. Fetch live courses
-      try {
-        const data = await customFetch<Course[]>("/api/faculty/courses");
-        if (Array.isArray(data) && data.length > 0) {
-          setLiveCourses(data);
-        }
-      } catch (e) {
-        console.warn("Could not load /api/faculty/courses:", e);
-      }
+      await Promise.allSettled([
+        // 1. Today's live classes and real attendance status
+        customFetch<any>("/api/faculty/today-classes")
+          .then((todayData) => {
+            if (todayData && Array.isArray(todayData.classes)) {
+              setTodayClassesInfo(todayData);
+            }
+          })
+          .catch((e) => console.warn("Could not load /api/faculty/today-classes:", e)),
 
-      // 2. Fetch live mentees from qr_users
-      try {
-        const data = await customFetch<any[]>("/api/mentor/students");
-        if (Array.isArray(data) && data.length > 0) {
-          const mappedMentees: MenteeStudent[] = data.map((s: any, idx: number) => ({
-            id: s.id || s.user?.id || idx + 1,
-            name: s.name || s.user?.name || `Student ${idx + 1}`,
-            rollNumber: s.rollNumber || s.uniqueId || s.unique_id || s.user?.uniqueId || s.roll_number || `24N81A${6753 + idx}`,
-            section: s.section || s.user?.section || facultyProfile.section || "DS III/I/B",
-            studentPhone: s.phone || s.user?.phone || "9876543210",
-            fatherPhone: s.fatherPhone || s.father_phone || s.user?.fatherPhone || "9123456780",
-            motherPhone: s.motherPhone || s.mother_phone,
-            attendancePercent: s.attendancePercent || s.attendance_percent || Math.floor(Math.random() * 15) + 82,
-            backlogs: s.backlogs ?? 0,
-            mentorNotes: s.remarks || "Regular student",
-          }));
-          setLiveMentees(mappedMentees);
-        }
-      } catch (e) {
-        console.warn("Could not load /api/mentor/students:", e);
-      }
+        // 2. Live courses
+        customFetch<Course[]>("/api/faculty/courses")
+          .then((data) => {
+            if (Array.isArray(data) && data.length > 0) {
+              setLiveCourses(data);
+            }
+          })
+          .catch((e) => console.warn("Could not load /api/faculty/courses:", e)),
 
-      // 3. Fetch live workload grid
-      try {
-        const data = await customFetch<any[]>("/api/faculty/workload-grid");
-        if (Array.isArray(data) && data.length > 0) {
-          setLiveWorkload(data);
-        }
-      } catch (e) {
-        console.warn("Could not load /api/faculty/workload-grid:", e);
-      }
+        // 3. Live mentees
+        customFetch<any[]>("/api/mentor/students")
+          .then((data) => {
+            if (Array.isArray(data) && data.length > 0) {
+              const mappedMentees: MenteeStudent[] = data.map((s: any, idx: number) => ({
+                id: s.id || s.user?.id || idx + 1,
+                name: s.name || s.user?.name || `Student ${idx + 1}`,
+                rollNumber: s.rollNumber || s.uniqueId || s.unique_id || s.user?.uniqueId || s.roll_number || `24N81A${6753 + idx}`,
+                section: s.section || s.user?.section || facultyProfile.section || "DS III/I/B",
+                studentPhone: s.phone || s.user?.phone || "9876543210",
+                fatherPhone: s.fatherPhone || s.father_phone || s.user?.fatherPhone || "9123456780",
+                motherPhone: s.motherPhone || s.mother_phone,
+                attendancePercent: s.attendancePercent || s.attendance_percent || Math.floor(Math.random() * 15) + 82,
+                backlogs: s.backlogs ?? 0,
+                mentorNotes: s.remarks || "Regular student",
+              }));
+              setLiveMentees(mappedMentees);
+            }
+          })
+          .catch((e) => console.warn("Could not load /api/mentor/students:", e)),
 
-      // 4. Fetch today's live classes and real attendance status
-      try {
-        const todayData = await customFetch<any>("/api/faculty/today-classes");
-        if (todayData && Array.isArray(todayData.classes)) {
-          setTodayClassesInfo(todayData);
-        }
-      } catch (e) {
-        console.warn("Could not load /api/faculty/today-classes:", e);
-      }
+        // 4. Workload grid
+        customFetch<any[]>("/api/faculty/workload-grid")
+          .then((data) => {
+            if (Array.isArray(data) && data.length > 0) {
+              setLiveWorkload(data);
+            }
+          })
+          .catch((e) => console.warn("Could not load /api/faculty/workload-grid:", e)),
+      ]);
     } catch (err) {
       console.error("Error loading live faculty data:", err);
     } finally {
       setLoadingData(false);
+      setTodayClassesLoaded(true);
     }
   }, [facultyProfile.section]);
 
@@ -1583,13 +1508,22 @@ export default function FacultyPortal() {
               <p className="text-[11px] font-bold text-blue-600">Key {resolvedKey || "106"} &bull; CSE-DS</p>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors border border-slate-200 cursor-pointer"
-            title="Logout"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => refetchFacultyAll()}
+              className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all border border-slate-200 cursor-pointer active:scale-95 flex items-center justify-center shadow-xs"
+              title="Reload / Refresh"
+            >
+              <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-blue-600" : ""}`} />
+            </button>
+            <button
+              onClick={handleLogout}
+              className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors border border-slate-200 cursor-pointer shadow-xs"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Live Date & Real-Time Clock Card */}
@@ -1628,7 +1562,12 @@ export default function FacultyPortal() {
             </span>
           </div>
 
-          {effectiveTodayClasses.length > 0 ? (
+          {!todayClassesLoaded && loadingData ? (
+            <div className="rounded-2xl bg-white border border-slate-200 p-6 text-center space-y-2 shadow-xs">
+              <RefreshCw className="w-6 h-6 text-blue-600 animate-spin mx-auto" />
+              <p className="text-xs font-bold text-slate-600">Loading today&apos;s live schedule...</p>
+            </div>
+          ) : effectiveTodayClasses.length > 0 ? (
             effectiveTodayClasses.map((cls) => {
               const isLive = cls.timingStatus === "live" || cls.isLive;
               const isLocked = cls.isLocked && !isLive;
@@ -2125,22 +2064,40 @@ export default function FacultyPortal() {
                     <p className="text-[10px] text-slate-500 truncate">{facultyProfile.erp}</p>
                   </div>
                 </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => refetchFacultyAll()}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    title="Reload / Refresh"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-blue-600" : ""}`} />
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    title="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={() => refetchFacultyAll()}
+                  className="w-full py-1.5 flex justify-center text-slate-400 hover:text-blue-600 transition-colors"
+                  title="Reload / Refresh"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-blue-600" : ""}`} />
+                </button>
                 <button
                   onClick={handleLogout}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  className="w-full py-1.5 flex justify-center text-slate-400 hover:text-red-600 transition-colors"
                   title="Logout"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="w-full py-2 flex justify-center text-slate-400 hover:text-red-600 transition-colors"
-                title="Logout"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
             )}
           </div>
         </aside>
