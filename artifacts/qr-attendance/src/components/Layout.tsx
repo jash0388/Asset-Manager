@@ -448,18 +448,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2 relative">
-            {/* PWA Install Button */}
-            {canInstall && (
-              <button
-                type="button"
-                onClick={install}
-                className="h-8 flex items-center gap-1.5 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
-                title="Install Hourly Attendance App"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Install App</span>
-              </button>
-            )}
             {/* Notification Bell with Badge and Popover Dropdown */}
             <div className="relative">
               <button
