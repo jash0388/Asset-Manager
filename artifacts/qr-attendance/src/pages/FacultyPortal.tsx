@@ -841,19 +841,19 @@ export default function FacultyPortal() {
       // 1. Try fetching real section students from API
       try {
         const data = await customFetch<any[]>(
-          `/faculty/section-students?section=${encodeURIComponent(course.section)}&scheduleId=${course.id}`
+          `/faculty/section-students?section=${encodeURIComponent(course.section || "")}&scheduleId=${encodeURIComponent(course.id || "")}`
         );
         if (Array.isArray(data) && data.length > 0) {
           const records: StudentAttendanceRecord[] = data.map((s: any, idx: number) => ({
             id: s.id || idx + 1,
             sNo: idx + 1,
-            rollNumber: s.rollNumber || s.unique_id || `24N81A${6753 + idx}`,
+            rollNumber: s.rollNumber || s.unique_id || s.uniqueId || `Student-${idx + 1}`,
             name: s.name || `Student ${idx + 1}`,
             heldCount: s.heldCount || 22,
             totalHeld: s.totalHeld || 24,
             status: true,
             phone: s.phone || "9876543210",
-            fatherPhone: s.fatherPhone || "9123456780",
+            fatherPhone: s.fatherPhone || s.father_phone || "9123456780",
           }));
           setStudentRoster(records);
           setLoadingRoster(false);
@@ -863,7 +863,30 @@ export default function FacultyPortal() {
         console.warn("Could not load /faculty/section-students:", e);
       }
 
-      // 2. Fallback to live mentees if available
+      // 2. Try fetching from /mentor/students fallback
+      try {
+        const mData = await customFetch<any[]>("/mentor/students");
+        if (Array.isArray(mData) && mData.length > 0) {
+          const records: StudentAttendanceRecord[] = mData.map((s: any, idx: number) => ({
+            id: s.id || s.user?.id || idx + 1,
+            sNo: idx + 1,
+            rollNumber: s.rollNumber || s.uniqueId || s.user?.uniqueId || `Student-${idx + 1}`,
+            name: s.name || s.user?.name || `Student ${idx + 1}`,
+            heldCount: 22,
+            totalHeld: 24,
+            status: true,
+            phone: s.phone || s.user?.phone || "9876543210",
+            fatherPhone: s.fatherPhone || s.user?.fatherPhone || "9123456780",
+          }));
+          setStudentRoster(records);
+          setLoadingRoster(false);
+          return;
+        }
+      } catch (e) {
+        console.warn("Could not load /mentor/students fallback:", e);
+      }
+
+      // 3. Fallback to live mentees if available
       if (liveMentees.length > 0) {
         const records: StudentAttendanceRecord[] = liveMentees.map((s, idx) => ({
           id: s.id,

@@ -67554,34 +67554,43 @@ router7.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, re
 router7.get("/faculty/section-students", authMiddleware, mentorOnly, async (req, res) => {
   const { section, scheduleId } = req.query;
   try {
-    let targetSection = section || "";
-    if (!targetSection && scheduleId) {
-      const { data: sched } = await supabase.from("qr_schedules").select("year, section").eq("id", scheduleId).single();
+    let targetSection = (section || "").trim();
+    if (!targetSection && scheduleId && !isNaN(Number(scheduleId))) {
+      const { data: sched } = await supabase.from("qr_schedules").select("year, section").eq("id", Number(scheduleId)).single();
       if (sched) {
         targetSection = `DS ${sched.year}/I/${sched.section}`;
       }
     }
-    let query = supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id");
+    let query = supabase.from("qr_users").select("id, name, unique_id, section, batch, phone, father_phone").order("unique_id");
     if (targetSection) {
       const m = targetSection.match(/([2-4]|II|III|IV)[-\s/]*([A-C])/i);
       if (m) {
         const y = m[1] === "2" || m[1].toUpperCase() === "II" ? "II" : m[1] === "3" || m[1].toUpperCase() === "III" ? "III" : "IV";
         const sec = m[2].toUpperCase();
-        query = query.like("section", `%${y}/I/${sec}%`);
-      } else {
-        query = query.ilike("section", `%${targetSection}%`);
+        query = query.or(`section.ilike.%${y}/I/${sec}%,section.ilike.%${y}%${sec}%`);
+      } else if (targetSection.includes("4") || targetSection.toUpperCase().includes("IV")) {
+        query = query.like("section", "%IV%");
+      } else if (targetSection.includes("3") || targetSection.toUpperCase().includes("III")) {
+        query = query.like("section", "%III%");
+      } else if (targetSection.includes("2") || targetSection.toUpperCase().includes("II")) {
+        query = query.like("section", "%II%");
       }
     }
     const { data: users, error } = await query.limit(100);
     if (error) throw error;
-    const students = (users || []).map((u, idx) => ({
+    let userList = users || [];
+    if (userList.length === 0) {
+      const { data: fallbackUsers } = await supabase.from("qr_users").select("id, name, unique_id, section, batch, phone, father_phone").order("unique_id").limit(60);
+      userList = fallbackUsers || [];
+    }
+    const students = userList.map((u, idx) => ({
       id: u.id,
       rollNumber: u.unique_id,
       name: u.name,
       section: u.section,
       batch: u.batch,
-      phone: "9876543210",
-      fatherPhone: "9123456780",
+      phone: u.phone || "9876543210",
+      fatherPhone: u.father_phone || "9123456780",
       heldCount: 22,
       totalHeld: 24,
       status: true
