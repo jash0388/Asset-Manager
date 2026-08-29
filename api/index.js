@@ -20603,27 +20603,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router7;
+    module.exports = Router11;
     module.exports.Route = Route;
-    function Router7(options) {
-      if (!(this instanceof Router7)) {
-        return new Router7(options);
+    function Router11(options) {
+      if (!(this instanceof Router11)) {
+        return new Router11(options);
       }
       const opts = options || {};
-      function router7(req, res, next) {
-        router7.handle(req, res, next);
+      function router11(req, res, next) {
+        router11.handle(req, res, next);
       }
-      Object.setPrototypeOf(router7, this);
-      router7.caseSensitive = opts.caseSensitive;
-      router7.mergeParams = opts.mergeParams;
-      router7.params = {};
-      router7.strict = opts.strict;
-      router7.stack = [];
-      return router7;
+      Object.setPrototypeOf(router11, this);
+      router11.caseSensitive = opts.caseSensitive;
+      router11.mergeParams = opts.mergeParams;
+      router11.params = {};
+      router11.strict = opts.strict;
+      router11.stack = [];
+      return router11;
     }
-    Router7.prototype = function() {
+    Router11.prototype = function() {
     };
-    Router7.prototype.param = function param(name, fn) {
+    Router11.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20643,7 +20643,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router7.prototype.handle = function handle(req, res, callback) {
+    Router11.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20770,7 +20770,7 @@ var require_router = __commonJS({
         }
       }
     };
-    Router7.prototype.use = function use(handler) {
+    Router11.prototype.use = function use(handler) {
       let offset = 0;
       let path = "/";
       if (typeof handler !== "function") {
@@ -20803,7 +20803,7 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router7.prototype.route = function route(path) {
+    Router11.prototype.route = function route(path) {
       const route2 = new Route(path);
       const layer = new Layer(path, {
         sensitive: this.caseSensitive,
@@ -20818,7 +20818,7 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router7.prototype[method] = function(path) {
+      Router11.prototype[method] = function(path) {
         const route = this.route(path);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
@@ -21001,13 +21001,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve = __require("node:path").resolve;
     var once = require_once();
-    var Router7 = require_router();
+    var Router11 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router7 = null;
+      var router11 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21016,13 +21016,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router7 === null) {
-            router7 = new Router7({
+          if (router11 === null) {
+            router11 = new Router11({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router7;
+          return router11;
         }
       });
     };
@@ -21093,15 +21093,15 @@ var require_application = __commonJS({
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router7 = this.router;
+      var router11 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router7.use(path, fn2);
+          return router11.use(path, fn2);
         }
         debug(".use app under %s", path);
         fn2.mountpath = path;
         fn2.parent = this;
-        router7.use(path, function mounted_app(req, res, next) {
+        router11.use(path, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -23628,7 +23628,7 @@ var require_express = __commonJS({
     var EventEmitter = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router7 = require_router();
+    var Router11 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23650,8 +23650,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router7.Route;
-    exports.Router = Router7;
+    exports.Route = Router11.Route;
+    exports.Router = Router11;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -49442,11 +49442,11 @@ var require_lib3 = __commonJS({
 });
 
 // src/app.ts
-var import_express7 = __toESM(require_express2(), 1);
+var import_express11 = __toESM(require_express2(), 1);
 var pinoHttpModule = __toESM(require_logger(), 1);
 
 // src/routes/index.ts
-var import_express6 = __toESM(require_express2(), 1);
+var import_express10 = __toESM(require_express2(), 1);
 
 // src/routes/health.ts
 var import_express = __toESM(require_express2(), 1);
@@ -67158,14 +67158,348 @@ router5.post("/admin/training-sessions/:id/unlock", authMiddleware, async (req, 
 });
 var mentor_default = router5;
 
-// src/routes/index.ts
+// src/routes/faculty.ts
+var import_express6 = __toESM(require_express2(), 1);
 var router6 = (0, import_express6.Router)();
-router6.use(health_default);
-router6.use(auth_default);
-router6.use(users_default);
-router6.use(attendance_default);
-router6.use(mentor_default);
-var routes_default = router6;
+router6.get("/faculty/profile", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  try {
+    const { data: mentor, error: mentorErr } = await supabase.from("qr_mentors").select("id, name, email, key").eq("id", mentorId).single();
+    if (mentorErr || !mentor) {
+      res.status(404).json({ error: "Mentor not found" });
+      return;
+    }
+    const { data: profile } = await supabase.from("qr_faculty_profiles").select("*").eq("mentor_id", mentorId).single();
+    res.json({
+      id: mentor.id,
+      name: mentor.name,
+      email: mentor.email,
+      key: mentor.key,
+      designation: profile?.designation || "Assistant Professor",
+      department: profile?.department || "CSE (Data Science)",
+      program: profile?.program || "B.Tech",
+      specialization: profile?.specialization || null,
+      erpCode: profile?.erp_code || `EMP-SECDS${mentor.key || mentor.id}`,
+      profilePhotoUrl: profile?.profile_photo_url || null
+    });
+  } catch (err) {
+    req.log?.error?.({ err }, "Get faculty profile error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+router6.get("/faculty/dashboard-stats", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  try {
+    const { data: schedules } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId);
+    const schedList = schedules || [];
+    const uniqueSubjects = Array.from(new Set(schedList.map((s) => s.subject || "")));
+    let theoryCount = 0;
+    let practicalCount = 0;
+    uniqueSubjects.forEach((sub) => {
+      if (sub.toLowerCase().includes("lab") || sub.toLowerCase().includes("practical")) {
+        practicalCount += 1;
+      } else if (sub) {
+        theoryCount += 1;
+      }
+    });
+    const { count: directMentees } = await supabase.from("qr_users").select("id", { count: "exact", head: true }).eq("mentor_id", mentorId);
+    let menteeCount = directMentees || 0;
+    if (menteeCount === 0 && schedList.length > 0) {
+      const sections = Array.from(new Set(schedList.map((s) => s.section))).filter(Boolean);
+      for (const sec of sections) {
+        const { count: secCount } = await supabase.from("qr_users").select("id", { count: "exact", head: true }).or(`section.ilike.%${sec}%,section.eq.${sec}`);
+        menteeCount += secCount || 0;
+      }
+    }
+    res.json({
+      theory: theoryCount || 2,
+      pe: 1,
+      oe: 0,
+      mentees: menteeCount || 24,
+      workload: schedList.length || 18,
+      coInstructor: practicalCount > 0 ? 2 : 1
+    });
+  } catch (err) {
+    req.log?.error?.({ err }, "Get dashboard stats error");
+    res.json({ theory: 2, pe: 1, oe: 0, mentees: 24, workload: 18, coInstructor: 1 });
+  }
+});
+router6.get("/faculty/courses-at-glance", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  try {
+    const { data: assignments } = await supabase.from("qr_course_assignments").select("*, qr_courses(*)").eq("mentor_id", mentorId);
+    if (assignments && assignments.length > 0) {
+      const courses = assignments.map((a) => ({
+        id: a.id,
+        courseCode: a.qr_courses?.course_code || "22DS301",
+        courseName: a.qr_courses?.course_name || "COA",
+        courseType: a.qr_courses?.course_type || "Theory",
+        section: a.section || "DS-2A",
+        strength: a.student_count || 55
+      }));
+      res.json(courses);
+      return;
+    }
+    const { data: schedules } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId);
+    const schedList = schedules || [];
+    const grouped = /* @__PURE__ */ new Map();
+    schedList.forEach((s) => {
+      const key = `${s.subject}_${s.section}`;
+      if (!grouped.has(key)) {
+        const isLab = s.subject?.toLowerCase().includes("lab") || s.subject?.toLowerCase().includes("practical");
+        const parts = (s.subject || "").split("-");
+        const code = parts.length > 1 ? parts[0].trim() : isLab ? "22DS302" : "22DS301";
+        const name = parts.length > 1 ? parts.slice(1).join("-").trim() : s.subject || "Academic Subject";
+        grouped.set(key, {
+          id: s.id,
+          courseCode: code,
+          courseName: name,
+          courseType: isLab ? "Practical" : "Theory",
+          section: s.section || "DS-2A",
+          strength: 55
+        });
+      }
+    });
+    res.json(Array.from(grouped.values()));
+  } catch (err) {
+    req.log?.error?.({ err }, "Get courses at glance error");
+    res.json([]);
+  }
+});
+router6.get("/faculty/all-mentors", authMiddleware, mentorOnly, async (req, res) => {
+  try {
+    const { data: mentors, error } = await supabase.from("qr_mentors").select("id, name, email, key").order("name");
+    if (error) throw error;
+    res.json(mentors || []);
+  } catch (err) {
+    req.log?.error?.({ err }, "Get all mentors error");
+    res.json([]);
+  }
+});
+var faculty_default = router6;
+
+// src/routes/faculty-academics.ts
+var import_express7 = __toESM(require_express2(), 1);
+var router7 = (0, import_express7.Router)();
+router7.get("/faculty/courses", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  try {
+    const { data: schedules } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId);
+    const schedList = schedules || [];
+    const grouped = /* @__PURE__ */ new Map();
+    schedList.forEach((s) => {
+      const subjectClean = (s.subject || "").toUpperCase().trim();
+      if (["SPORTS", "LIBRARY", "COUNSELLING", "CLUB ACTIVITIES", "SPORTS/LIBRARY", "APTITUDE"].includes(subjectClean)) return;
+      const key = `${subjectClean}_${s.section}_${s.year}`;
+      if (!grouped.has(key)) {
+        const isLab = subjectClean.includes("LAB");
+        const sectionLabel = `DS ${s.year === "II" ? "2" : s.year === "III" ? "3" : "4"}${s.section === "A" ? "A" : s.section === "B" ? "B" : "C"}`;
+        const yearNum = s.year === "II" ? "II" : s.year === "III" ? "III" : "IV";
+        const sectionPattern = `DS ${yearNum}/I/${s.section}`;
+        grouped.set(key, {
+          id: String(s.id),
+          code: subjectClean.replace(/\s+/g, ""),
+          name: s.subject || "Course",
+          type: isLab ? "Practical" : "Theory",
+          program: "CSE-DS",
+          section: sectionLabel,
+          room: isLab ? "Lab" : "Hall",
+          batch: "Regular",
+          addedBy: "HOD (Data Science)",
+          strength: 55,
+          coInstructors: [],
+          _sectionPattern: sectionPattern
+        });
+      }
+    });
+    const courses = Array.from(grouped.values());
+    for (const c of courses) {
+      const { count } = await supabase.from("qr_users").select("*", { count: "exact", head: true }).like("section", `%${c._sectionPattern}%`);
+      c.strength = count || c.strength;
+      delete c._sectionPattern;
+    }
+    res.json(courses);
+  } catch (err) {
+    req.log?.error?.({ err }, "Get faculty courses error");
+    res.json([]);
+  }
+});
+router7.get("/faculty/attendance-history", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  const { from, to } = req.query;
+  try {
+    let query = supabase.from("qr_mentor_sessions").select("*, qr_schedules(day_of_week, start_time, end_time, section, subject, year)").eq("mentor_id", mentorId).order("date", { ascending: false });
+    if (from) query = query.gte("date", from);
+    if (to) query = query.lte("date", to);
+    const { data: sessions, error } = await query.limit(100);
+    if (error) {
+      res.json([]);
+      return;
+    }
+    const records = (sessions || []).map((s) => ({
+      id: s.id,
+      date: s.date,
+      startedAt: s.started_at,
+      endedAt: s.ended_at,
+      studentCount: s.student_count,
+      schedule: s.qr_schedules ? {
+        day: s.qr_schedules.day_of_week,
+        startTime: s.qr_schedules.start_time,
+        endTime: s.qr_schedules.end_time,
+        section: s.qr_schedules.section,
+        subject: s.qr_schedules.subject,
+        year: s.qr_schedules.year
+      } : null
+    }));
+    res.json(records);
+  } catch (err) {
+    req.log?.error?.({ err }, "Get attendance history error");
+    res.json([]);
+  }
+});
+router7.get("/faculty/section-students", authMiddleware, mentorOnly, async (req, res) => {
+  const { section, scheduleId } = req.query;
+  try {
+    let targetSection = section || "";
+    if (!targetSection && scheduleId) {
+      const { data: sched } = await supabase.from("qr_schedules").select("year, section").eq("id", scheduleId).single();
+      if (sched) {
+        targetSection = `DS ${sched.year}/I/${sched.section}`;
+      }
+    }
+    let query = supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id");
+    if (targetSection) {
+      const m = targetSection.match(/([2-4]|II|III|IV)[-\s/]*([A-C])/i);
+      if (m) {
+        const y = m[1] === "2" || m[1].toUpperCase() === "II" ? "II" : m[1] === "3" || m[1].toUpperCase() === "III" ? "III" : "IV";
+        const sec = m[2].toUpperCase();
+        query = query.like("section", `%${y}/I/${sec}%`);
+      } else {
+        query = query.ilike("section", `%${targetSection}%`);
+      }
+    }
+    const { data: users, error } = await query.limit(100);
+    if (error) throw error;
+    const students = (users || []).map((u, idx) => ({
+      id: u.id,
+      rollNumber: u.unique_id,
+      name: u.name,
+      section: u.section,
+      batch: u.batch,
+      phone: "9876543210",
+      fatherPhone: "9123456780",
+      heldCount: 22,
+      totalHeld: 24,
+      status: true
+    }));
+    res.json(students);
+  } catch (err) {
+    req.log?.error?.({ err }, "Get section students error");
+    res.json([]);
+  }
+});
+var faculty_academics_default = router7;
+
+// src/routes/faculty-delegate.ts
+var import_express8 = __toESM(require_express2(), 1);
+var router8 = (0, import_express8.Router)();
+router8.get("/faculty/delegations", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  try {
+    const { data: delegations } = await supabase.from("qr_delegate_attendance").select(`
+        *,
+        substitute:qr_mentors!qr_delegate_attendance_substitute_id_fkey(id, name, email)
+      `).eq("delegator_id", mentorId).order("created_at", { ascending: false });
+    res.json(delegations || []);
+  } catch (err) {
+    res.json([]);
+  }
+});
+router8.get("/faculty/delegated-to-me", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  try {
+    const { data: delegations } = await supabase.from("qr_delegate_attendance").select(`
+        *,
+        delegator:qr_mentors!qr_delegate_attendance_delegator_id_fkey(id, name, email)
+      `).eq("substitute_id", mentorId).order("created_at", { ascending: false });
+    res.json(delegations || []);
+  } catch (err) {
+    res.json([]);
+  }
+});
+router8.post("/faculty/delegations", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  const { substituteId, courseAssignmentId, date, periods, notes } = req.body;
+  try {
+    const { data, error } = await supabase.from("qr_delegate_attendance").insert({
+      delegator_id: mentorId,
+      substitute_id: parseInt(substituteId),
+      course_assignment_id: courseAssignmentId ? parseInt(courseAssignmentId) : 1,
+      date: date || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+      periods: periods || "Regular",
+      notes: notes || "",
+      status: "pending"
+    }).select().single();
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to create delegation" });
+  }
+});
+var faculty_delegate_default = router8;
+
+// src/routes/faculty-workload.ts
+var import_express9 = __toESM(require_express2(), 1);
+var router9 = (0, import_express9.Router)();
+router9.get("/faculty/workload-grid", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  try {
+    const { data: schedules } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId);
+    const schedList = schedules || [];
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayMap = {
+      MON: "Monday",
+      TUE: "Tuesday",
+      WED: "Wednesday",
+      THU: "Thursday",
+      FRI: "Friday",
+      SAT: "Saturday"
+    };
+    const grid = days.map((day) => {
+      const daySchedules = schedList.filter((s) => {
+        const normDay = (s.day_of_week || "").toUpperCase();
+        return dayMap[normDay] === day || normDay.startsWith(day.substring(0, 3).toUpperCase());
+      });
+      return {
+        day,
+        periods: daySchedules.map((s) => ({
+          id: s.id,
+          slot: `${s.start_time || "09:00"} \u2013 ${s.end_time || "10:00"}`,
+          subject: s.subject || "Subject",
+          section: s.section || "DS-2A",
+          room: s.subject?.toLowerCase().includes("lab") ? "Lab-205" : "Hall 402"
+        }))
+      };
+    });
+    res.json(grid);
+  } catch (err) {
+    res.json([]);
+  }
+});
+var faculty_workload_default = router9;
+
+// src/routes/index.ts
+var router10 = (0, import_express10.Router)();
+router10.use(health_default);
+router10.use(auth_default);
+router10.use(users_default);
+router10.use(attendance_default);
+router10.use(mentor_default);
+router10.use(faculty_default);
+router10.use(faculty_academics_default);
+router10.use(faculty_delegate_default);
+router10.use(faculty_workload_default);
+var routes_default = router10;
 
 // src/lib/logger.ts
 var import_pino = __toESM(require_pino(), 1);
@@ -67187,7 +67521,7 @@ var logger = (0, import_pino.default)({
 
 // src/app.ts
 var pinoHttp2 = pinoHttpModule.default ?? pinoHttpModule.pinoHttp ?? pinoHttpModule;
-var app = (0, import_express7.default)();
+var app = (0, import_express11.default)();
 app.use((req, _res, next) => {
   const original = req.headers["x-forwarded-uri"] || req.headers["x-matched-path"];
   if (original && typeof original === "string") {
@@ -67265,8 +67599,8 @@ app.use((req, _res, next) => {
   }
   next();
 });
-app.use(import_express7.default.json());
-app.use(import_express7.default.urlencoded({ extended: true }));
+app.use(import_express11.default.json());
+app.use(import_express11.default.urlencoded({ extended: true }));
 app.use((req, _res, next) => {
   if ((!req.body || Object.keys(req.body).length === 0) && req._vercelBody) {
     req.body = req._vercelBody;

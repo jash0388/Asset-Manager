@@ -107,6 +107,10 @@ router.get("/faculty/attendance-history", authMiddleware, mentorOnly, async (req
     res.json(records);
   } catch (err: any) {
     req.log?.error?.({ err }, "Get attendance history error");
+    res.json([]);
+  }
+});
+
 // GET /faculty/section-students — Real students in this section from qr_users
 router.get("/faculty/section-students", authMiddleware, mentorOnly, async (req: any, res: any) => {
   const { section, scheduleId } = req.query as Record<string, string>;
