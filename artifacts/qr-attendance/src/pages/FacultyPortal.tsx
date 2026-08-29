@@ -1247,6 +1247,7 @@ export default function FacultyPortal() {
   const [reassignReason, setReassignReason] = useState("Official Duty / Department Meeting");
   const [reassignCustomReason, setReassignCustomReason] = useState("");
   const [submittingReassignment, setSubmittingReassignment] = useState(false);
+  const [cancellingReassignment, setCancellingReassignment] = useState(false);
 
   const openReassignModal = (course: Course) => {
     setReassignCourse(course);
@@ -1294,6 +1295,9 @@ export default function FacultyPortal() {
 
       setReassignModalOpen(false);
       setAttendanceModalOpen(false);
+      refetchFacultyAll();
+      queryClient.invalidateQueries({ queryKey: ["faculty-today-classes"] });
+      queryClient.invalidateQueries({ queryKey: ["layout-reassignments"] });
     } catch (err: any) {
       toast({
         title: "Reassignment Failed",
@@ -1302,6 +1306,32 @@ export default function FacultyPortal() {
       });
     } finally {
       setSubmittingReassignment(false);
+    }
+  };
+
+  const handleCancelReassignment = async (reassignId: string) => {
+    if (!reassignId) return;
+    setCancellingReassignment(true);
+    try {
+      await customFetch(`/api/faculty/reassignments/${reassignId}/cancel`, {
+        method: "POST",
+      });
+      toast({
+        title: "Request Cancelled",
+        description: "Your substitution request has been cancelled.",
+      });
+      setReassignModalOpen(false);
+      refetchFacultyAll();
+      queryClient.invalidateQueries({ queryKey: ["faculty-today-classes"] });
+      queryClient.invalidateQueries({ queryKey: ["layout-reassignments"] });
+    } catch (err: any) {
+      toast({
+        title: "Cancel Failed",
+        description: err?.message || "Could not cancel request.",
+        variant: "destructive",
+      });
+    } finally {
+      setCancellingReassignment(false);
     }
   };
 
@@ -1674,15 +1704,27 @@ export default function FacultyPortal() {
                           <Lock className="w-3.5 h-3.5" />
                           <span>Locked until {cls.unlocksAt}</span>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => openReassignModal(courseObj)}
-                          className="px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                          title="Reassign this upcoming class"
-                        >
-                          <ArrowRightLeft className="w-3.5 h-3.5 text-slate-950" />
-                          <span>Reassign</span>
-                        </button>
+                        {cls.reassignmentStatus === "pending" ? (
+                          <button
+                            type="button"
+                            onClick={() => openReassignModal(courseObj)}
+                            className="px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                            title="Reassignment request is pending HOD approval — Click to view or cancel"
+                          >
+                            <Clock className="w-3.5 h-3.5 text-amber-700 animate-pulse" />
+                            <span>Pending Approval</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openReassignModal(courseObj)}
+                            className="px-3.5 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                            title="Reassign this upcoming class"
+                          >
+                            <ArrowRightLeft className="w-3.5 h-3.5 text-sky-600" />
+                            <span>Reassign</span>
+                          </button>
+                        )}
                       </div>
                     ) : isLive ? (
                       <div className="flex items-center gap-2">
@@ -1693,15 +1735,27 @@ export default function FacultyPortal() {
                           <Sparkles className="w-4 h-4" />
                           <span>Post Live Attendance</span>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => openReassignModal(courseObj)}
-                          className="px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                          title="Reassign this class"
-                        >
-                          <ArrowRightLeft className="w-3.5 h-3.5 text-slate-950" />
-                          <span>Reassign</span>
-                        </button>
+                        {cls.reassignmentStatus === "pending" ? (
+                          <button
+                            type="button"
+                            onClick={() => openReassignModal(courseObj)}
+                            className="px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                            title="Reassignment request is pending HOD approval — Click to view or cancel"
+                          >
+                            <Clock className="w-3.5 h-3.5 text-amber-700 animate-pulse" />
+                            <span>Pending Approval</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openReassignModal(courseObj)}
+                            className="px-3.5 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                            title="Reassign this class"
+                          >
+                            <ArrowRightLeft className="w-3.5 h-3.5 text-sky-600" />
+                            <span>Reassign</span>
+                          </button>
+                        )}
                       </div>
                     ) : cls.isAttendanceTaken ? (
                       <button
@@ -1712,24 +1766,13 @@ export default function FacultyPortal() {
                         <span>View Recorded Attendance</span>
                       </button>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <button
-                          disabled
-                          className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
-                        >
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Class Ended &bull; Attendance Closed</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openReassignModal(courseObj)}
-                          className="px-3.5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                          title="Reassign this class"
-                        >
-                          <ArrowRightLeft className="w-3.5 h-3.5 text-slate-950" />
-                          <span>Reassign</span>
-                        </button>
-                      </div>
+                      <button
+                        disabled
+                        className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
+                      >
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Class Ended &bull; Attendance Closed</span>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -2663,15 +2706,27 @@ export default function FacultyPortal() {
                               <Lock className="w-4 h-4 text-slate-400" />
                               <span>Locked until Class Time ({cls.startTimeFormatted || cls.unlocksAt})</span>
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => openReassignModal(courseObj)}
-                              className="px-4 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                              title="Reassign this upcoming class to substitute faculty"
-                            >
-                              <ArrowRightLeft className="w-4 h-4 text-slate-950" />
-                              <span>Reassign</span>
-                            </button>
+                            {cls.reassignmentStatus === "pending" ? (
+                              <button
+                                type="button"
+                                onClick={() => openReassignModal(courseObj)}
+                                className="px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                                title="Reassignment request is pending HOD approval — Click to view or cancel"
+                              >
+                                <Clock className="w-4 h-4 text-amber-700 animate-pulse" />
+                                <span>Pending Approval</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => openReassignModal(courseObj)}
+                                className="px-4 py-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                                title="Reassign this upcoming class to substitute faculty"
+                              >
+                                <ArrowRightLeft className="w-4 h-4 text-sky-600" />
+                                <span>Reassign</span>
+                              </button>
+                            )}
                           </div>
                         ) : isLiveNow ? (
                           <div className="flex items-center gap-2">
@@ -2682,15 +2737,27 @@ export default function FacultyPortal() {
                               <Sparkles className="w-4 h-4" />
                               <span>🚀 Post Live Attendance Now</span>
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => openReassignModal(courseObj)}
-                              className="px-4 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                              title="Reassign this class"
-                            >
-                              <ArrowRightLeft className="w-4 h-4 text-slate-950" />
-                              <span>Reassign</span>
-                            </button>
+                            {cls.reassignmentStatus === "pending" ? (
+                              <button
+                                type="button"
+                                onClick={() => openReassignModal(courseObj)}
+                                className="px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                                title="Reassignment request is pending HOD approval — Click to view or cancel"
+                              >
+                                <Clock className="w-4 h-4 text-amber-700 animate-pulse" />
+                                <span>Pending Approval</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => openReassignModal(courseObj)}
+                                className="px-4 py-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                                title="Reassign this class"
+                              >
+                                <ArrowRightLeft className="w-4 h-4 text-sky-600" />
+                                <span>Reassign</span>
+                              </button>
+                            )}
                           </div>
                         ) : cls.isAttendanceTaken ? (
                           <button
@@ -2701,24 +2768,13 @@ export default function FacultyPortal() {
                             <span>✓ Attendance Recorded (View List)</span>
                           </button>
                         ) : (
-                          <div className="flex items-center gap-2">
-                            <button
-                              disabled
-                              className="flex-1 py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
-                            >
-                              <Clock className="w-4 h-4 text-slate-400" />
-                              <span>Class Ended &bull; Attendance Closed</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openReassignModal(courseObj)}
-                              className="px-4 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 text-xs font-black shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
-                              title="Reassign this class"
-                            >
-                              <ArrowRightLeft className="w-4 h-4 text-slate-950" />
-                              <span>Reassign</span>
-                            </button>
-                          </div>
+                          <button
+                            disabled
+                            className="w-full py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
+                          >
+                            <Clock className="w-4 h-4 text-slate-400" />
+                            <span>Class Ended &bull; Attendance Closed</span>
+                          </button>
                         )}
                       </div>
                     );
@@ -4114,19 +4170,21 @@ export default function FacultyPortal() {
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => openReassignModal(selectedCourseForAttendance)}
-                  className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black shadow-md flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
-                  title="Reassign this class period to another faculty"
-                >
-                  <ArrowRightLeft className="w-3.5 h-3.5 text-slate-950" />
-                  <span>Reassign</span>
-                </button>
+                {selectedCourseForAttendance.timingStatus !== "completed" && !selectedCourseForAttendance.isAttendanceTaken && (
+                  <button
+                    type="button"
+                    onClick={() => openReassignModal(selectedCourseForAttendance)}
+                    className="px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 border border-sky-300"
+                    title="Reassign this class period to another faculty"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5 text-sky-800" />
+                    <span>Reassign</span>
+                  </button>
+                )}
 
                 <button
                   onClick={() => setAttendanceModalOpen(false)}
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -4437,168 +4495,245 @@ export default function FacultyPortal() {
       {/* ─────────────────────────────────────────────────────────────
           REASSIGN CLASS MODAL (SUBSTITUTE FACULTY REQUEST TO HOD)
       ───────────────────────────────────────────────────────────── */}
-      {reassignModalOpen && reassignCourse && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-            {/* Modal Header */}
-            <div className="p-5 bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-700 text-white flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-black text-amber-100 uppercase tracking-widest block">
-                  Substitution Request
-                </span>
-                <h3 className="text-lg font-black flex items-center gap-2">
-                  <ArrowRightLeft className="w-5 h-5 text-white" />
-                  <span>Reassign Class Period</span>
-                </h3>
-              </div>
-              <button
-                onClick={() => setReassignModalOpen(false)}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {reassignModalOpen && reassignCourse && (() => {
+        const existingPendingReassignment =
+          (reassignCourse as any)?.reassignment ||
+          effectiveTodayClasses.find(
+            (c) =>
+              (c.id === reassignCourse.id || c.code === reassignCourse.code) &&
+              c.reassignmentStatus === "pending"
+          )?.reassignment;
 
-            {/* Modal Content */}
-            <div className="p-6 space-y-4 overflow-y-auto">
-              {/* Class Summary Box */}
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-amber-800 uppercase tracking-wider">
-                    Selected Class Period
-                  </span>
-                  <span className="font-mono text-xs font-bold text-amber-900 bg-white px-2 py-0.5 rounded-md border border-amber-200">
-                    {attendanceDate}
-                  </span>
-                </div>
-                <h4 className="text-base font-black text-slate-900">{reassignCourse.name} ({reassignCourse.code})</h4>
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700 pt-1">
-                  <span className="bg-white px-2 py-0.5 rounded border border-slate-200 font-bold">
-                    Section: {reassignCourse.section}
-                  </span>
-                  <span className="bg-white px-2 py-0.5 rounded border border-slate-200 font-bold">
-                    Room: {reassignCourse.room}
-                  </span>
-                </div>
-              </div>
+        const isPendingView = Boolean(
+          existingPendingReassignment &&
+          (existingPendingReassignment.status === "pending" || (reassignCourse as any).reassignmentStatus === "pending")
+        );
 
-              {/* Form Controls */}
-              <div className="space-y-3">
-                {/* From Faculty */}
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+              {/* Modal Header */}
+              <div className="p-5 bg-gradient-to-r from-blue-700 via-indigo-700 to-sky-600 text-white flex items-center justify-between">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    From Faculty (Assigning Out):
-                  </label>
-                  <div className="px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-black text-slate-800 flex items-center justify-between">
-                    <span>{facultyName || "Faculty Member"}</span>
-                    <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                      Key {resolvedKey || "106"}
+                  <span className="text-[10px] font-black text-sky-200 uppercase tracking-widest block">
+                    {isPendingView ? "Request Sent • Pending Approval" : "Substitution Request"}
+                  </span>
+                  <h3 className="text-lg font-black flex items-center gap-2">
+                    <ArrowRightLeft className="w-5 h-5 text-white" />
+                    <span>{isPendingView ? "Class Reassignment Status" : "Reassign Class Period"}</span>
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setReassignModalOpen(false)}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6 space-y-4 overflow-y-auto">
+                {/* Class Summary Box */}
+                <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-sky-800 uppercase tracking-wider">
+                      Selected Class Period
+                    </span>
+                    <span className="font-mono text-xs font-bold text-sky-900 bg-white px-2 py-0.5 rounded-md border border-sky-200">
+                      {attendanceDate}
+                    </span>
+                  </div>
+                  <h4 className="text-base font-black text-slate-900">{reassignCourse.name} ({reassignCourse.code})</h4>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700 pt-1">
+                    <span className="bg-white px-2 py-0.5 rounded border border-slate-200 font-bold">
+                      Section: {reassignCourse.section}
+                    </span>
+                    <span className="bg-white px-2 py-0.5 rounded border border-slate-200 font-bold">
+                      Room: {reassignCourse.room}
                     </span>
                   </div>
                 </div>
 
-                {/* To Faculty Selector */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Reassign To Faculty (Substitute):
-                  </label>
-                  <select
-                    value={reassignToFacultyKey}
-                    onChange={(e) => setReassignToFacultyKey(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500 bg-white"
-                  >
-                    <option value="108">Mrs G Sushma (Assistant Professor &bull; III-A)</option>
-                    <option value="107">Mr K Bikshapathi (Assistant Professor &bull; II-C)</option>
-                    <option value="109">Mrs A Sravanthi (Assistant Professor &bull; IV-A)</option>
-                    <option value="110">Mrs K Sneha (Assistant Professor &bull; IV-B)</option>
-                    <option value="111">Mrs B Narmadha (Assistant Professor &bull; II-B)</option>
-                    <option value="112">Mrs P Sunitha (Assistant Professor &bull; II-A)</option>
-                    <option value="113">Mrs M Sowmya (Assistant Professor &bull; III-C)</option>
-                    <option value="114">Mrs G Sneha (Assistant Professor)</option>
-                    <option value="115">Mrs Ch Sravanthi (Assistant Professor)</option>
-                    <option value="116">Mrs K Sunitha (Assistant Professor)</option>
-                    <option value="117">Mr P Vamsi Krishna (Assistant Professor)</option>
-                    <option value="118">Mr N Sanjeeva Rayudu (Assistant Professor)</option>
-                    <option value="119">Mrs B Swathi (Assistant Professor)</option>
-                    <option value="101">Dr S Nagakishore Bhavanam (Professor & HOD)</option>
-                  </select>
-                </div>
+                {isPendingView ? (
+                  /* ── Pending State View with Cancel Button ── */
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-300 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-200 text-amber-900">
+                          <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping" />
+                          <span>Request Sent • Waiting for HOD Approval</span>
+                        </span>
+                      </div>
 
-                {/* Reason */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Reason for Reassignment:
-                  </label>
-                  <select
-                    value={reassignReason}
-                    onChange={(e) => setReassignReason(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 bg-white"
-                  >
-                    <option value="Official Duty / Department Meeting">Official Duty / Department Meeting</option>
-                    <option value="Medical Leave / Emergency">Medical Leave / Emergency</option>
-                    <option value="Lab Exam / External Evaluation Duty">Lab Exam / External Evaluation Duty</option>
-                    <option value="Faculty Development Program (FDP)">Faculty Development Program (FDP)</option>
-                    <option value="Other">Other Reason (Specify below)</option>
-                  </select>
-                </div>
+                      <div className="bg-white p-3.5 rounded-xl border border-amber-200 space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-500">Reassigned To (Substitute):</span>
+                          <span className="font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
+                            {existingPendingReassignment?.toFacultyName || "Substitute Faculty"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-500">From Faculty:</span>
+                          <span className="font-bold text-slate-800">
+                            {existingPendingReassignment?.fromFacultyName || facultyName}
+                          </span>
+                        </div>
+                        {existingPendingReassignment?.reason && (
+                          <div>
+                            <span className="font-bold text-slate-500 block">Reason:</span>
+                            <p className="font-semibold text-slate-700 mt-0.5 bg-slate-50 p-2 rounded border border-slate-100">
+                              {existingPendingReassignment.reason}
+                            </p>
+                          </div>
+                        )}
+                      </div>
 
-                {reassignReason === "Other" && (
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Enter specific reason..."
-                      value={reassignCustomReason}
-                      onChange={(e) => setReassignCustomReason(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium focus:outline-none focus:border-blue-500 bg-white"
-                    />
+                      <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
+                        Your request is waiting for HOD review in the notification panel. You can cancel this request at any time before the HOD takes action.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  /* ── Normal Reassignment Form ── */
+                  <div className="space-y-3">
+                    {/* From Faculty */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        From Faculty (Assigning Out):
+                      </label>
+                      <div className="px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-black text-slate-800 flex items-center justify-between">
+                        <span>{facultyName || "Faculty Member"}</span>
+                        <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                          Key {resolvedKey || "106"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* To Faculty Selector */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Reassign To Faculty (Substitute):
+                      </label>
+                      <select
+                        value={reassignToFacultyKey}
+                        onChange={(e) => setReassignToFacultyKey(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500 bg-white"
+                      >
+                        <option value="108">Mrs G Sushma (Assistant Professor &bull; III-A)</option>
+                        <option value="107">Mr K Bikshapathi (Assistant Professor &bull; II-C)</option>
+                        <option value="109">Mrs A Sravanthi (Assistant Professor &bull; IV-A)</option>
+                        <option value="110">Mrs K Sneha (Assistant Professor &bull; IV-B)</option>
+                        <option value="111">Mrs B Narmadha (Assistant Professor &bull; II-B)</option>
+                        <option value="112">Mrs P Sunitha (Assistant Professor &bull; II-A)</option>
+                        <option value="113">Mrs M Sowmya (Assistant Professor &bull; III-C)</option>
+                        <option value="114">Mrs G Sneha (Assistant Professor)</option>
+                        <option value="115">Mrs Ch Sravanthi (Assistant Professor)</option>
+                        <option value="116">Mrs K Sunitha (Assistant Professor)</option>
+                        <option value="117">Mr P Vamsi Krishna (Assistant Professor)</option>
+                        <option value="118">Mr N Sanjeeva Rayudu (Assistant Professor)</option>
+                        <option value="119">Mrs B Swathi (Assistant Professor)</option>
+                        <option value="101">Dr S Nagakishore Bhavanam (Professor & HOD)</option>
+                      </select>
+                    </div>
+
+                    {/* Reason */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Reason for Reassignment:
+                      </label>
+                      <select
+                        value={reassignReason}
+                        onChange={(e) => setReassignReason(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 bg-white"
+                      >
+                        <option value="Official Duty / Department Meeting">Official Duty / Department Meeting</option>
+                        <option value="Medical Leave / Emergency">Medical Leave / Emergency</option>
+                        <option value="Lab Exam / External Evaluation Duty">Lab Exam / External Evaluation Duty</option>
+                        <option value="Faculty Development Program (FDP)">Faculty Development Program (FDP)</option>
+                        <option value="Other">Other Reason (Specify below)</option>
+                      </select>
+                    </div>
+
+                    {reassignReason === "Other" && (
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Enter specific reason..."
+                          value={reassignCustomReason}
+                          onChange={(e) => setReassignCustomReason(e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium focus:outline-none focus:border-blue-500 bg-white"
+                        />
+                      </div>
+                    )}
+
+                    {/* Workflow Note */}
+                    <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200 text-[11px] text-blue-900 space-y-1">
+                      <p className="font-bold flex items-center gap-1.5 text-blue-800">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                        <span>HOD Approval Workflow</span>
+                      </p>
+                      <p className="text-blue-700">
+                        Once submitted, this request will appear in the HOD Dashboard notification bar. When approved, this class will appear on the substitute faculty&apos;s portal.
+                      </p>
+                    </div>
                   </div>
                 )}
+              </div>
 
-                {/* Workflow Note */}
-                <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200 text-[11px] text-blue-900 space-y-1">
-                  <p className="font-bold flex items-center gap-1.5 text-blue-800">
-                    <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                    <span>HOD Approval Workflow</span>
-                  </p>
-                  <p className="text-blue-700">
-                    Once submitted, this request will appear in the HOD Dashboard. When the HOD approves it, this class will appear on the substitute faculty&apos;s portal for live attendance.
-                  </p>
-                </div>
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setReassignModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+
+                {isPendingView ? (
+                  <button
+                    type="button"
+                    onClick={() => handleCancelReassignment(existingPendingReassignment?.id)}
+                    disabled={cancellingReassignment}
+                    className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-black shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+                  >
+                    {cancellingReassignment ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Cancelling Request...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4" />
+                        <span>Cancel Reassignment Request</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSendReassignment}
+                    disabled={submittingReassignment}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white text-xs font-black shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+                  >
+                    {submittingReassignment ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Sending Request...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Send Request to HOD</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => setReassignModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSendReassignment}
-                disabled={submittingReassignment}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-700 hover:to-indigo-700 disabled:opacity-50 text-white text-xs font-black shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95"
-              >
-                {submittingReassignment ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Sending Request...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    <span>Send Request to HOD</span>
-                  </>
-                )}
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ─────────────────────────────────────────────────────────────
           CREATE ASSIGNMENT MODAL

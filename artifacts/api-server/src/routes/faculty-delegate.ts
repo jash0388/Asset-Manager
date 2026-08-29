@@ -146,28 +146,42 @@ router.post("/admin/reassignments/:id/action", authMiddleware, async (req: any, 
   }
 });
 
-// GET /admin/reassignments — Get list for HOD Dashboard & Notification Badge
-router.get("/admin/reassignments", authMiddleware, async (req: any, res: any) => {
+// POST /faculty/reassignments/:id/cancel — Faculty cancels their pending request
+router.post("/faculty/reassignments/:id/cancel", authMiddleware, async (req: any, res: any) => {
+  const { id } = req.params;
   try {
-    const pendingCount = classReassignmentsStore.filter((r) => r.status === "pending").length;
-    const acceptedCount = classReassignmentsStore.filter((r) => r.status === "accepted").length;
-    const declinedCount = classReassignmentsStore.filter((r) => r.status === "declined").length;
-
-    const list = [...classReassignmentsStore].sort((a, b) => {
-      if (a.status === "pending" && b.status !== "pending") return -1;
-      if (a.status !== "pending" && b.status === "pending") return 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-
+    const idx = classReassignmentsStore.findIndex((r) => r.id === id);
+    if (idx === -1) {
+      res.status(404).json({ error: "Reassignment request not found" });
+      return;
+    }
+    const removed = classReassignmentsStore.splice(idx, 1)[0];
     res.json({
-      total: list.length,
-      pendingCount,
-      acceptedCount,
-      declinedCount,
-      reassignments: list,
+      success: true,
+      message: "Reassignment request cancelled successfully",
+      reassignment: removed,
     });
   } catch (err: any) {
-    res.json({ total: 0, pendingCount: 0, acceptedCount: 0, declinedCount: 0, reassignments: [] });
+    res.status(500).json({ error: err.message || "Failed to cancel reassignment request" });
+  }
+});
+
+router.delete("/faculty/reassignments/:id", authMiddleware, async (req: any, res: any) => {
+  const { id } = req.params;
+  try {
+    const idx = classReassignmentsStore.findIndex((r) => r.id === id);
+    if (idx === -1) {
+      res.status(404).json({ error: "Reassignment request not found" });
+      return;
+    }
+    const removed = classReassignmentsStore.splice(idx, 1)[0];
+    res.json({
+      success: true,
+      message: "Reassignment request deleted successfully",
+      reassignment: removed,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || "Failed to delete reassignment request" });
   }
 });
 

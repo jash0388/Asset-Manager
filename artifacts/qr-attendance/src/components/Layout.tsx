@@ -23,7 +23,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { customFetch } from "@workspace/api-client-react";
 
 
 const adminNavLinks = [
@@ -232,6 +233,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const userDisplayName = role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name ?? "Admin";
   const userEmail = role === "principal" ? principal?.email : role === "hod" ? hod?.email : admin?.email ?? "";
+  const queryClient = useQueryClient();
 
   // ── Notification Popover & Approvals State ──
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -249,17 +251,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
     queryKey: ["layout-reassignments"],
     queryFn: async () => {
       try {
-        const token = localStorage.getItem("qr_token") || "";
-        const res = await fetch("/api/admin/reassignments", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return { reassignments: [] };
-        return await res.json();
+        return await customFetch("/api/admin/reassignments");
       } catch {
         return { reassignments: [] };
       }
     },
-    refetchInterval: 4000,
+    refetchInterval: 3000,
+    staleTime: 2000,
   });
 
   const rawReassignments = reassignmentsResponse?.reassignments || [];
@@ -291,16 +289,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const handleNotificationAction = async (id: string, action: "accept" | "decline") => {
     setProcessingNotificationId(id);
     try {
-      const token = localStorage.getItem("qr_token") || "";
-      await fetch(`/api/admin/reassignments/${id}/action`, {
+      await customFetch(`/api/admin/reassignments/${id}/action`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ action }),
       });
       refetchLayoutReassignments();
+      queryClient.invalidateQueries({ queryKey: ["layout-reassignments"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-schedules-list-status"] });
+      queryClient.invalidateQueries({ queryKey: ["hourly-attendance-schedules"] });
     } catch (err) {
       console.error("Action error:", err);
     } finally {
