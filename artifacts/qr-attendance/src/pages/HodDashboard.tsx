@@ -71,6 +71,7 @@ import {
   Phone,
   Award,
   School,
+  QrCode,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -1123,6 +1124,13 @@ export default function HodDashboard() {
     refetchInterval: 5000,
   });
 
+  // Fetch full hourly details (present + absent records with schedule info) for missed class display
+  const { data: hourlyDetails = [] } = useQuery<any[]>({
+    queryKey: ["admin-today-hourly-details", selectedDate],
+    queryFn: () => customFetch<any[]>(`/api/admin/today-hourly-details?date=${selectedDate}`),
+    refetchInterval: 10000,
+  });
+
   const classPresentUserIds = useMemo(() => {
     const set = new Set<number>();
     (todayClassPresence || []).forEach(r => {
@@ -1131,6 +1139,24 @@ export default function HodDashboard() {
     });
     return set;
   }, [todayClassPresence]);
+
+  // Build per-student hourly details: which classes they attended, which they missed, and if they scanned QR
+  const studentHourlyMap = useMemo(() => {
+    const map = new Map<number, { attended: any[]; missed: any[]; scannedQr: boolean }>();
+    (hourlyDetails || []).forEach((r: any) => {
+      const uid = Number(r.userId);
+      if (!uid || isNaN(uid)) return;
+      if (!map.has(uid)) map.set(uid, { attended: [], missed: [], scannedQr: false });
+      const entry = map.get(uid)!;
+      if (r.scannedQr) entry.scannedQr = true;
+      if (r.markedPresent) {
+        entry.attended.push(r);
+      } else {
+        entry.missed.push(r);
+      }
+    });
+    return map;
+  }, [hourlyDetails]);
 
   const queryClient = useQueryClient();
 
@@ -2085,13 +2111,14 @@ export default function HodDashboard() {
         minutesLate,
         monthlyLate,
         monthlyAbs,
+        hourlyInfo: studentHourlyMap.get(st.id),
         mentor,
         remark,
         severityScore,
         severityLabel,
       };
     });
-  }, [eligibleSectionStudents, consolidatedLogs, logDate, remarksMap, studentLateCounts, studentAbsentCounts, classPresentUserIds]);
+  }, [eligibleSectionStudents, consolidatedLogs, logDate, remarksMap, studentLateCounts, studentAbsentCounts, classPresentUserIds, studentHourlyMap]);
 
   // Statistics for Problem Areas Toolbar
   const problemStats = useMemo(() => {
@@ -2402,6 +2429,24 @@ export default function HodDashboard() {
     } catch {
       return "—";
     }
+  };
+
+  const formatScheduleTime = (timeStr: string | null | undefined) => {
+    if (!timeStr) return "";
+    const trimmed = timeStr.trim();
+    if (/AM|PM/i.test(trimmed)) return trimmed;
+    const parts = trimmed.split(":");
+    if (parts.length >= 2) {
+      let hours = parseInt(parts[0], 10);
+      const mins = parts[1].padStart(2, "0");
+      if (!isNaN(hours)) {
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours}:${mins} ${ampm}`;
+      }
+    }
+    return trimmed;
   };
 
   const handleDirectCSVDownload = (studentName: string, month: string, records: AttendanceRecord[]) => {
@@ -3564,13 +3609,43 @@ export default function HodDashboard() {
                               {/* Entry Time & Delay */}
                               <td className="py-3 px-3 text-center">
                                 {item.isUnscanned ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-red-100 border border-red-300 text-red-950">
-                                    <X className="w-3 h-3 text-red-700" /> NOT SCANNED
-                                  </span>
+                                  <div className="space-y-1">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-red-100 border border-red-300 text-red-950">
+                                      <X className="w-3 h-3 text-red-700" /> NOT SCANNED
+                                    </span>
+                                    {item.hourlyInfo?.missed && item.hourlyInfo.missed.length > 0 && (
+                                      <div className="flex flex-col items-center gap-0.5 mt-1">
+                                        {item.hourlyInfo.missed.map((mc: any, mIdx: number) => (
+                                          <span key={mIdx} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 border border-rose-200 text-rose-800">
+                                            <XCircle className="w-2.5 h-2.5 text-rose-500 flex-shrink-0" />
+                                            Missed {mc.subject || "Class"} {formatScheduleTime(mc.startTime) ? `(${formatScheduleTime(mc.startTime)})` : ""}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
                                 ) : item.status === "in_class" ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-emerald-100 border border-emerald-300 text-emerald-950">
-                                    <CheckCircle className="w-3 h-3 text-emerald-700" /> IN CLASS
-                                  </span>
+                                  <div className="space-y-1">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-emerald-100 border border-emerald-300 text-emerald-950">
+                                      <CheckCircle className="w-3 h-3 text-emerald-700" /> IN CLASS
+                                    </span>
+                                    {item.record && (
+                                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-blue-800 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">
+                                        <QrCode className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                                        <span>QR: {formatTime(item.record.entryTime)}</span>
+                                      </div>
+                                    )}
+                                    {item.hourlyInfo?.missed && item.hourlyInfo.missed.length > 0 && (
+                                      <div className="flex flex-col items-center gap-0.5 mt-1">
+                                        {item.hourlyInfo.missed.map((mc: any, mIdx: number) => (
+                                          <span key={mIdx} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 border border-rose-200 text-rose-800">
+                                            <XCircle className="w-2.5 h-2.5 text-rose-500 flex-shrink-0" />
+                                            Missed {mc.subject || "Class"} {formatScheduleTime(mc.startTime) ? `(${formatScheduleTime(mc.startTime)})` : ""}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
                                 ) : (
                                   <div className="space-y-0.5">
                                     <div className="inline-flex items-center justify-center gap-1.5">
@@ -3593,6 +3668,16 @@ export default function HodDashboard() {
                                       <span className="block text-[11px] font-semibold text-amber-900">
                                         +{item.minutesLate}m delay
                                       </span>
+                                    )}
+                                    {item.hourlyInfo?.missed && item.hourlyInfo.missed.length > 0 && (
+                                      <div className="flex flex-col items-center gap-0.5 mt-1">
+                                        {item.hourlyInfo.missed.map((mc: any, mIdx: number) => (
+                                          <span key={mIdx} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 border border-rose-200 text-rose-800">
+                                            <XCircle className="w-2.5 h-2.5 text-rose-500 flex-shrink-0" />
+                                            Missed {mc.subject || "Class"} {formatScheduleTime(mc.startTime) ? `(${formatScheduleTime(mc.startTime)})` : ""}
+                                          </span>
+                                        ))}
+                                      </div>
                                     )}
                                   </div>
                                 )}
@@ -5585,52 +5670,102 @@ export default function HodDashboard() {
                 filteredDrawerStudents.map((item, idx) => {
                   const s = item.student;
                   const record = item.record;
+                  const hourlyInfo = studentHourlyMap.get(s.id);
+                  const missedClasses = hourlyInfo?.missed || [];
+                  const hasGateRecord = Boolean(record?.entryTime);
                   
                   return (
-                    <div key={s.id} className="p-4 flex items-center justify-between gap-4 hover:bg-gray-50 rounded-xl transition-all">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-800 uppercase">
-                          {s.name.charAt(0)}
+                    <div key={s.id} className="p-3 hover:bg-gray-50 rounded-xl transition-all space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-800 uppercase">
+                            {s.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-800">{s.name}</p>
+                            <p className="text-xs text-slate-500 font-mono mt-0.5">{s.uniqueId}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800">{s.name}</p>
-                          <p className="text-xs text-slate-550 font-mono mt-0.5">{s.uniqueId}</p>
+
+                        <div className="flex flex-col items-end gap-1.5 text-right">
+                          {item.status === "present" ? (
+                            <>
+                              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                                {hasGateRecord && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    <QrCode className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                                    QR Scanned
+                                  </span>
+                                )}
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+                                  <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                  {record?.exitTime
+                                    ? "Left Campus"
+                                    : isExitTimeOver(record?.date, record?.exitTime)
+                                      ? "Present"
+                                      : "Still on Campus"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 text-gray-500 text-[10px]">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5 text-blue-500" /> 
+                                  In: {formatTime(record?.entryTime)}
+                                  {isLateTime(record?.entryTime) && (
+                                    <span className="ml-1.5 px-1 py-0.2 rounded bg-amber-500/20 text-amber-600 text-[8px] font-black uppercase tracking-wider">LATE</span>
+                                  )}
+                                </span>
+                                {record?.exitTime ? (
+                                  <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-500" /> Out: {formatTime(record?.exitTime)}</span>
+                                ) : (
+                                  <span className="flex items-center gap-1 text-gray-400 font-medium">Out: —</span>
+                                )}
+                              </div>
+                              {hourlyInfo && hourlyInfo.attended.length > 0 && (
+                                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                  📚 {hourlyInfo.attended.length} class{hourlyInfo.attended.length > 1 ? "es" : ""} attended
+                                </span>
+                              )}
+                            </>
+                          ) : item.status === "in_class" ? (
+                            <>
+                              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                                {hasGateRecord && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    <QrCode className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                                    QR Scanned • In: {formatTime(record?.entryTime)}
+                                  </span>
+                                )}
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">
+                                  <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                  In Class
+                                </span>
+                              </div>
+                              {hourlyInfo && hourlyInfo.attended.length > 0 && (
+                                <span className="text-[9px] text-emerald-600 font-semibold">
+                                  📚 {hourlyInfo.attended.length} class{hourlyInfo.attended.length > 1 ? "es" : ""} attended
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">
+                              <XCircle className="w-3 h-3 text-red-500" />
+                              Absent
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-1.5 text-right">
-                        {item.status === "present" ? (
-                          <>
-                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
-                              <CheckCircle className="w-3 h-3 text-emerald-600" />
-                              {record?.exitTime
-                                ? "Left Campus"
-                                : isExitTimeOver(record?.date, record?.exitTime)
-                                  ? "Present"
-                                  : "Still on Campus"}
+                      {/* Missed classes row — ONLY shown when attendance was submitted/taken for a class and student was absent */}
+                      {missedClasses.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 pl-12 pt-1 border-t border-gray-100">
+                          {missedClasses.map((mc: any, mcIdx: number) => (
+                            <span key={mcIdx} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
+                              <XCircle className="w-3 h-3 text-rose-500 flex-shrink-0" />
+                              Missed {mc.subject || "Class"} {formatScheduleTime(mc.startTime) ? `(${formatScheduleTime(mc.startTime)})` : ""}
                             </span>
-                            <div className="flex items-center gap-3 text-gray-500 text-[10px]">
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5 text-blue-500" /> 
-                                In: {formatTime(record?.entryTime)}
-                                {isLateTime(record?.entryTime) && (
-                                  <span className="ml-1.5 px-1 py-0.2 rounded bg-amber-500/20 text-amber-600 text-[8px] font-black uppercase tracking-wider">LATE</span>
-                                )}
-                              </span>
-                              {record?.exitTime ? (
-                                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-500" /> Out: {formatTime(record?.exitTime)}</span>
-                              ) : (
-                                <span className="flex items-center gap-1 text-gray-400 font-medium">Out: —</span>
-                              )}
-                            </div>
-                          </>
-                        ) : (
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">
-                            <XCircle className="w-3 h-3 text-red-500" />
-                            Absent
-                          </span>
-                        )}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })

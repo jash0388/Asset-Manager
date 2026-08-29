@@ -1738,6 +1738,55 @@ router.get("/admin/today-class-presence", authMiddleware, async (req: any, res: 
   }
 });
 
+// 5d. Full hourly attendance details for date — includes schedule info + absent records for missed classes
+router.get("/admin/today-hourly-details", authMiddleware, async (req: any, res: any) => {
+  const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes().todayDate;
+  try {
+    // Get all hourly attendance records for this date (present AND absent)
+    const { data: records, error } = await supabase
+      .from("qr_hourly_attendance")
+      .select("user_id, schedule_id, marked_present, scanned_qr, date, marked_at")
+      .eq("date", dateParam);
+
+    if (error) throw error;
+
+    // Get schedule info for all schedule_ids in the records
+    const scheduleIds = [...new Set((records || []).map((r: any) => r.schedule_id).filter(Boolean))];
+    let schedulesMap: Record<number, any> = {};
+    if (scheduleIds.length > 0) {
+      const { data: schedules } = await supabase
+        .from("qr_schedules")
+        .select("id, subject, section, start_time, end_time, day_of_week, year")
+        .in("id", scheduleIds);
+      if (schedules) {
+        schedules.forEach((s: any) => { schedulesMap[s.id] = s; });
+      }
+    }
+
+    // Build response with schedule details
+    const enriched = (records || []).map((r: any) => {
+      const sched = schedulesMap[r.schedule_id];
+      return {
+        userId: r.user_id,
+        scheduleId: r.schedule_id,
+        markedPresent: r.marked_present,
+        scannedQr: r.scanned_qr || false,
+        date: r.date,
+        markedAt: r.marked_at,
+        subject: sched?.subject || null,
+        startTime: sched?.start_time || null,
+        endTime: sched?.end_time || null,
+        section: sched?.section || null,
+      };
+    });
+
+    res.json(enriched);
+  } catch (err: any) {
+    req.log.error({ err }, "Error fetching today hourly details");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 function getCurrentISTHoursMinutes(): { todayDate: string; isPast430PM: boolean } {
   const now = new Date();

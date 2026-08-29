@@ -67028,6 +67028,42 @@ router6.get("/admin/today-class-presence", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+router6.get("/admin/today-hourly-details", authMiddleware, async (req, res) => {
+  const dateParam = (req.query.date || "").toString().trim() || getCurrentISTHoursMinutes2().todayDate;
+  try {
+    const { data: records, error } = await supabase.from("qr_hourly_attendance").select("user_id, schedule_id, marked_present, scanned_qr, date, marked_at").eq("date", dateParam);
+    if (error) throw error;
+    const scheduleIds = [...new Set((records || []).map((r) => r.schedule_id).filter(Boolean))];
+    let schedulesMap = {};
+    if (scheduleIds.length > 0) {
+      const { data: schedules } = await supabase.from("qr_schedules").select("id, subject, section, start_time, end_time, day_of_week, year").in("id", scheduleIds);
+      if (schedules) {
+        schedules.forEach((s) => {
+          schedulesMap[s.id] = s;
+        });
+      }
+    }
+    const enriched = (records || []).map((r) => {
+      const sched = schedulesMap[r.schedule_id];
+      return {
+        userId: r.user_id,
+        scheduleId: r.schedule_id,
+        markedPresent: r.marked_present,
+        scannedQr: r.scanned_qr || false,
+        date: r.date,
+        markedAt: r.marked_at,
+        subject: sched?.subject || null,
+        startTime: sched?.start_time || null,
+        endTime: sched?.end_time || null,
+        section: sched?.section || null
+      };
+    });
+    res.json(enriched);
+  } catch (err) {
+    req.log.error({ err }, "Error fetching today hourly details");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 function getCurrentISTHoursMinutes2() {
   const now = /* @__PURE__ */ new Date();
   const istOffset = 5.5 * 60 * 60 * 1e3;
