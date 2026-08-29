@@ -674,16 +674,16 @@ export default function FacultyPortal() {
     const curTotalMin = curHour * 60 + curMin;
 
     return academicPeriods.map((p, idx) => {
-      const isLab = p.subject.toUpperCase().includes("LAB");
-      const [sPart, ePart] = p.slot.split("–").map((s) => s.trim());
+      const isLab = (p?.subject || "").toUpperCase().includes("LAB");
+      const [sPart, ePart] = (p?.slot || "").split("–").map((s) => (s ? s.trim() : ""));
       let startMin = 9 * 60;
       let endMin = 10 * 60;
       if (sPart) {
-        const [sh, sm] = sPart.replace(/[^0-9:]/g, "").split(":").map(Number);
+        const [sh, sm] = (sPart.replace(/[^0-9:]/g, "").split(":") || []).map(Number);
         if (!isNaN(sh)) startMin = (sh < 8 ? sh + 12 : sh) * 60 + (sm || 0);
       }
       if (ePart) {
-        const [eh, em] = ePart.replace(/[^0-9:]/g, "").split(":").map(Number);
+        const [eh, em] = (ePart.replace(/[^0-9:]/g, "").split(":") || []).map(Number);
         if (!isNaN(eh)) endMin = (eh < 8 ? eh + 12 : eh) * 60 + (em || 0);
       }
 
@@ -703,19 +703,19 @@ export default function FacultyPortal() {
       return {
         id: `today_${idx + 1}`,
         scheduleId: 1000 + idx,
-        code: p.subject.toUpperCase(),
-        name: p.subject,
+        code: (p?.subject || "SUB").toUpperCase(),
+        name: p?.subject || "Class Period",
         type: isLab ? "Practical" : "Theory",
         program: "CSE-DS",
-        section: p.section,
-        rawSection: p.section.replace(/[^ABC]/g, "") || "A",
+        section: p?.section || "DS",
+        rawSection: (p?.section || "A").replace(/[^ABC]/g, "") || "A",
         year: "III",
-        room: p.room || "Hall 412",
-        startTime: sPart,
-        endTime: ePart,
-        startTimeFormatted: sPart,
-        endTimeFormatted: ePart,
-        slot: p.slot,
+        room: p?.room || "Hall 412",
+        startTime: sPart || "09:00 AM",
+        endTime: ePart || "10:00 AM",
+        startTimeFormatted: sPart || "09:00 AM",
+        endTimeFormatted: ePart || "10:00 AM",
+        slot: p?.slot || "09:00 AM – 10:00 AM",
         strength: 55,
         isAttendanceTaken: false,
         attendedCount: null,
@@ -723,7 +723,7 @@ export default function FacultyPortal() {
         isLive: timingStatus === "live",
         timingStatus,
         isLocked,
-        unlocksAt: sPart,
+        unlocksAt: sPart || "09:00 AM",
         statusLabel: timingStatus === "live" ? "Live Class Now" : timingStatus === "upcoming" ? "Upcoming Today" : "Period Concluded",
       };
     });
@@ -984,35 +984,35 @@ export default function FacultyPortal() {
   // Today's Live Class Slots for the selected course
   const todaysClassSlots = useMemo(() => {
     if (!selectedCourseForAttendance) return [];
-    const todayWork = workload.find(
-      (w) => w.day.toLowerCase() === todayDayName.toLowerCase()
+    const todayWork = (workload || []).find(
+      (w) => (w?.day || "").toLowerCase() === (todayDayName || "").toLowerCase()
     );
-    if (todayWork && todayWork.periods.length > 0) {
-      const courseCodeUpper = selectedCourseForAttendance.code.toUpperCase().replace(/\s+/g, "");
-      const courseNameUpper = selectedCourseForAttendance.name.toUpperCase();
+    if (todayWork && Array.isArray(todayWork.periods) && todayWork.periods.length > 0) {
+      const courseCodeUpper = (selectedCourseForAttendance.code || "").toUpperCase().replace(/\s+/g, "");
+      const courseNameUpper = (selectedCourseForAttendance.name || "").toUpperCase();
       
       const matching = todayWork.periods.filter((p) => {
-        const pSubj = p.subject.toUpperCase().replace(/\s+/g, "");
-        return pSubj.includes(courseCodeUpper) || courseCodeUpper.includes(pSubj) || courseNameUpper.includes(p.subject.toUpperCase());
+        const pSubj = (p?.subject || "").toUpperCase().replace(/\s+/g, "");
+        return pSubj.includes(courseCodeUpper) || courseCodeUpper.includes(pSubj) || (p?.subject && courseNameUpper.includes(p.subject.toUpperCase()));
       });
 
       if (matching.length > 0) {
         return matching.map((p, idx) => ({
           id: `slot_${idx}`,
-          label: p.slot,
-          room: p.room,
-          subject: p.subject,
-          section: p.section,
+          label: p?.slot || "09:00 AM – 10:00 AM",
+          room: p?.room || "Hall 412",
+          subject: p?.subject || selectedCourseForAttendance.name,
+          section: p?.section || selectedCourseForAttendance.section,
           isTodayLive: true,
         }));
       }
 
       return todayWork.periods.map((p, idx) => ({
         id: `slot_${idx}`,
-        label: p.slot,
-        room: p.room,
-        subject: p.subject,
-        section: p.section,
+        label: p?.slot || "09:00 AM – 10:00 AM",
+        room: p?.room || "Hall 412",
+        subject: p?.subject || selectedCourseForAttendance.name,
+        section: p?.section || selectedCourseForAttendance.section,
         isTodayLive: true,
       }));
     }
