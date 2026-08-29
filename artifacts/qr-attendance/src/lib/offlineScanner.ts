@@ -176,6 +176,11 @@ export function extractCleanId(raw: string): string {
       if (last) return decodeURIComponent(last).trim().toUpperCase();
     } catch {}
   }
+  // Barcode handling: ID card barcodes have variable prefixes (]C1, ]C0, etc.)
+  // The roll number is always the LAST 10 characters (e.g. 24N81A6758)
+  if (trimmed.length > 10) {
+    return trimmed.slice(-10).toUpperCase();
+  }
   return trimmed.toUpperCase();
 }
 

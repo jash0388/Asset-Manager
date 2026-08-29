@@ -273,13 +273,24 @@ export default function SecurityApp() {
     setScanning(true);
     ensureCtx();
     try {
-      const { Html5Qrcode } = await import("html5-qrcode");
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import("html5-qrcode");
       if (!scannerRef.current) return;
 
-      const scanner = new Html5Qrcode("sec-qr-reader");
+      // Support both QR codes AND 1D barcodes (Code 128, Code 39, EAN, etc.)
+      const formatsToSupport = [
+        Html5QrcodeSupportedFormats.QR_CODE,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.CODABAR,
+      ];
+
+      const scanner = new Html5Qrcode("sec-qr-reader", { formatsToSupport });
       scannerInstanceRef.current = scanner;
 
-      const config = { fps: 10, qrbox: { width: 240, height: 240 } };
+      // Wider scan region to accommodate horizontal 1D barcodes
+      const config = { fps: 12, qrbox: { width: 280, height: 200 } };
       const onScanSuccess = (text: string) => handleScan(text);
 
       try {

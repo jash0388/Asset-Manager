@@ -165,10 +165,23 @@ export default function Scanner() {
     }, 1000);
   };
 
+  // Extract roll number from scanned data.
+  // QR codes contain just the roll number (10 chars like 24N81A6758).
+  // Barcodes on ID cards have variable prefixes (]C1, ]C0, etc.) —
+  // the roll number is always the LAST 10 characters.
+  const extractRollNumber = (raw: string): string => {
+    const cleaned = (raw ?? "").trim();
+    if (!cleaned) return "";
+    // If it's exactly 10 chars or looks like a plain roll number, use as-is
+    if (cleaned.length <= 10) return cleaned;
+    // For barcodes with any prefix, take the last 10 characters
+    return cleaned.slice(-10);
+  };
+
   const handleScan = (decodedText: string) => {
     if (isProcessingRef.current || scanMutation.isPending) return;
 
-    const uid = (decodedText ?? "").trim();
+    const uid = extractRollNumber(decodedText);
     if (!uid) return;
 
     const now = Date.now();
@@ -236,7 +249,7 @@ export default function Scanner() {
           }
           showResult({
             success: false,
-            message: err?.data?.error ?? err?.message ?? "Invalid QR code",
+            message: err?.data?.error ?? err?.message ?? "Invalid QR code or barcode",
           });
         },
       }
@@ -253,10 +266,20 @@ export default function Scanner() {
     try { if (ctx && ctx.state === "suspended") await ctx.resume(); } catch {}
 
     try {
-      const { Html5Qrcode } = await import("html5-qrcode");
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import("html5-qrcode");
       if (!scannerRef.current) return;
 
-      const scanner = new Html5Qrcode("qr-reader");
+      // Support both QR codes AND 1D barcodes (Code 128, Code 39, EAN, etc.)
+      const formatsToSupport = [
+        Html5QrcodeSupportedFormats.QR_CODE,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.CODABAR,
+      ];
+
+      const scanner = new Html5Qrcode("qr-reader", { formatsToSupport });
       scannerInstanceRef.current = scanner;
 
       const cameras = await Html5Qrcode.getCameras();
@@ -268,9 +291,10 @@ export default function Scanner() {
 
       const cameraId = cameras.find((c) => c.label.toLowerCase().includes("back"))?.id ?? cameras[cameras.length - 1].id;
 
+      // Use wider scan region to accommodate horizontal 1D barcodes
       await scanner.start(
         cameraId,
-        { fps: 10, qrbox: { width: 240, height: 240 } },
+        { fps: 12, qrbox: { width: 280, height: 200 } },
         (text) => { handleScan(text); },
         undefined
       );
@@ -321,8 +345,8 @@ export default function Scanner() {
             <QrCode className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-gray-900">QR Scanner</h1>
-            <p className="text-xs text-gray-500">Scan student ID card to mark attendance</p>
+            <h1 className="text-base font-bold text-gray-900">QR & Barcode Scanner</h1>
+            <p className="text-xs text-gray-500">Scan QR code or barcode on ID card</p>
           </div>
         </div>
       </div>
@@ -506,9 +530,9 @@ export default function Scanner() {
         {/* Instructions */}
         <div className="mt-4 w-full space-y-2">
           {[
-            "Point camera at QR code on ID card",
-            "Hold steady until scan is detected",
-            "Scan again after the confirmation to mark the student inside",
+            "Point camera at QR code or barcode on ID card",
+            "Hold steady — works with both QR codes & barcodes",
+            "Same student scanned via QR + barcode counts only once",
           ].map((tip, i) => (
             <div key={i} className="flex items-start gap-3 px-4 py-3 rounded-lg bg-white border border-gray-200">
               <span className="w-5 h-5 rounded-full bg-blue-900/60 text-blue-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
