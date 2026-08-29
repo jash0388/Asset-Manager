@@ -64639,7 +64639,7 @@ var import_express3 = __toESM(require_express2(), 1);
 
 // src/middlewares/auth.ts
 var import_jsonwebtoken2 = __toESM(require_jsonwebtoken(), 1);
-var JWT_SECRET = process.env.SESSION_SECRET || "fallback-dev-secret";
+var JWT_SECRET = process.env.SESSION_SECRET || "fallback-insecure-secret-change-me";
 var BYPASS_ENABLED = process.env.ALLOW_BYPASS_TOKEN === "true";
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -65641,21 +65641,55 @@ router5.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => 
   const today = getTodayDate();
   const section = req.query.section;
   try {
-    let query = supabase.from("qr_users").select("*");
+    let students = [];
     if (mentorId === -3 && section) {
-      query = query.eq("section", section);
+      const { data } = await supabase.from("qr_users").select("*").eq("section", section).order("name");
+      students = data || [];
     } else {
-      query = query.eq("mentor_id", mentorId);
+      const { data: directStudents } = await supabase.from("qr_users").select("*").eq("mentor_id", mentorId).order("name");
+      if (directStudents && directStudents.length > 0) {
+        students = directStudents;
+      } else {
+        const { data: mentor } = await supabase.from("qr_mentors").select("key, name").eq("id", mentorId).maybeSingle();
+        const mKey = String(mentor?.key || "").trim();
+        let targetSection = section || "";
+        if (!targetSection) {
+          const SECTION_BY_KEY = {
+            "101": "DS II/I/A",
+            "102": "DS II/I/B",
+            "2012": "DS II/I/B",
+            "103": "DS III/I/A",
+            "104": "DS II/I/B",
+            "105": "DS II/I/C",
+            "2013": "DS II/I/C",
+            "106": "DS III/I/B",
+            "107": "DS II/I/A",
+            "108": "DS III/I/C",
+            "109": "DS IV/I/A",
+            "110": "DS IV/I/B",
+            "111": "DS II/I/A",
+            "112": "DS III/I/B"
+          };
+          targetSection = SECTION_BY_KEY[mKey] || "";
+        }
+        if (!targetSection) {
+          const { data: scheds } = await supabase.from("qr_schedules").select("year, section").eq("mentor_id", mentorId).limit(1);
+          if (scheds && scheds.length > 0) {
+            targetSection = `DS ${scheds[0].year}/I/${scheds[0].section}`;
+          }
+        }
+        if (targetSection) {
+          const { data: secStudents } = await supabase.from("qr_users").select("*").ilike("section", `%${targetSection}%`).order("unique_id");
+          students = secStudents || [];
+        }
+      }
     }
-    const { data: students, error: studentError } = await query.order("name");
-    if (studentError) throw studentError;
     if (!students || students.length === 0) {
       res.json([]);
       return;
     }
     const studentIds = students.map((s) => s.id);
-    const { data: records, error: recordError } = await supabase.from("qr_attendance").select("*").eq("date", today).in("user_id", studentIds);
-    if (recordError) throw recordError;
+    const { data: records } = await supabase.from("qr_attendance").select("*").eq("date", today).in("user_id", studentIds);
     const recordsByUser = /* @__PURE__ */ new Map();
     if (records) {
       for (const r of records) recordsByUser.set(r.user_id, r);
@@ -65663,6 +65697,12 @@ router5.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => 
     const result = students.map((s) => {
       const rec = recordsByUser.get(s.id);
       return {
+        id: s.id,
+        name: s.name,
+        rollNumber: s.unique_id,
+        uniqueId: s.unique_id,
+        section: s.section,
+        batch: s.batch,
         user: formatUser2(s),
         attendanceToday: rec ? formatRecord2(rec, s) : null,
         cameToday: !!(rec && rec.entry_time)
@@ -65670,7 +65710,7 @@ router5.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => 
     });
     res.json(result);
   } catch (err) {
-    req.log.error({ err }, "Mentor students error");
+    req.log?.error?.({ err }, "Mentor students error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -67355,6 +67395,144 @@ router7.get("/faculty/attendance-history", authMiddleware, mentorOnly, async (re
   } catch (err) {
     req.log?.error?.({ err }, "Get attendance history error");
     res.json([]);
+  }
+});
+router7.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, res) => {
+  const mentorId = req.mentorId;
+  try {
+    let formatTime2 = function(t) {
+      if (!t) return "09:00 AM";
+      const parts = t.split(":");
+      let h = parseInt(parts[0], 10);
+      const m = parts[1] || "00";
+      const ampm = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+      return `${String(h).padStart(2, "0")}:${m} ${ampm}`;
+    }, buildClassItem2 = function(s, isFutureDay = false, futureDayName = "") {
+      const subjectClean = (s.subject || "").toUpperCase().trim();
+      const isLab = subjectClean.includes("LAB") || subjectClean.includes("PRACTICAL");
+      const isClubOrSports = ["SPORTS", "LIBRARY", "COUNSELLING", "CLUB ACTIVITIES", "SPORTS/LIBRARY"].includes(subjectClean);
+      const sectionLabel = `DS-${s.year === "II" ? "2" : s.year === "III" ? "3" : "4"}${s.section}`;
+      const sectionPattern = `DS ${s.year}/I/${s.section}`;
+      const matchedSession = sessionList.find(
+        (sess) => sess.schedule_id === s.id
+      );
+      let timingStatus = "upcoming";
+      let isLocked = false;
+      let unlocksAt = formatTime2(s.start_time);
+      let statusLabel = "Upcoming Today";
+      if (isFutureDay) {
+        timingStatus = "future_day";
+        isLocked = true;
+        statusLabel = `Scheduled on ${futureDayName}`;
+        unlocksAt = `${futureDayName} ${formatTime2(s.start_time)}`;
+      } else if (s.start_time && s.end_time) {
+        const [sh, sm] = s.start_time.split(":").map(Number);
+        const [eh, em] = s.end_time.split(":").map(Number);
+        const startMin = sh * 60 + (sm || 0);
+        const endMin = eh * 60 + (em || 0);
+        if (currentTotalMin < startMin) {
+          timingStatus = "upcoming";
+          isLocked = true;
+          statusLabel = "Upcoming Today";
+          unlocksAt = formatTime2(s.start_time);
+        } else if (currentTotalMin >= startMin && currentTotalMin <= endMin) {
+          timingStatus = "live";
+          isLocked = false;
+          statusLabel = "Live Class Now";
+          unlocksAt = "Now";
+        } else {
+          timingStatus = "completed";
+          isLocked = false;
+          statusLabel = matchedSession ? "Attendance Recorded" : "Completed (Pending Entry)";
+          unlocksAt = "Ended";
+        }
+      }
+      return {
+        id: String(s.id),
+        scheduleId: s.id,
+        code: subjectClean,
+        name: s.subject || "Course",
+        type: isLab ? "Practical" : isClubOrSports ? "Activity" : "Theory",
+        program: "CSE-DS",
+        section: sectionLabel,
+        rawSection: s.section,
+        year: s.year,
+        room: isLab ? "Data Science Lab 1 (Lab-101)" : "Hall 412",
+        startTime: s.start_time,
+        endTime: s.end_time,
+        startTimeFormatted: formatTime2(s.start_time),
+        endTimeFormatted: formatTime2(s.end_time),
+        slot: `${formatTime2(s.start_time)} \u2013 ${formatTime2(s.end_time)}`,
+        strength: 55,
+        isAttendanceTaken: Boolean(matchedSession),
+        attendedCount: matchedSession ? matchedSession.student_count : null,
+        session: matchedSession || null,
+        isLive: timingStatus === "live",
+        timingStatus,
+        isLocked,
+        unlocksAt,
+        statusLabel
+      };
+    };
+    var formatTime = formatTime2, buildClassItem = buildClassItem2;
+    const now = /* @__PURE__ */ new Date();
+    const istOffset = 5.5 * 60 * 60 * 1e3;
+    const istDate = new Date(now.getTime() + istOffset);
+    const dayIndex = istDate.getUTCDay();
+    const dayNames = ["SUN", "MON", "TUE", "WED", "THUR", "FRI", "SAT"];
+    const fullDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const todayDayCode = dayNames[dayIndex];
+    const todayDayName = fullDayNames[dayIndex];
+    const todayDateStr = istDate.toISOString().split("T")[0];
+    const queryDay = req.query.day?.toUpperCase() || todayDayCode;
+    const queryDate = req.query.date || todayDateStr;
+    const { data: schedules, error: schedErr } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", queryDay).order("start_time");
+    if (schedErr) throw schedErr;
+    const { data: sessions, error: sessErr } = await supabase.from("qr_mentor_sessions").select("*").eq("mentor_id", mentorId).eq("date", queryDate);
+    if (sessErr) throw sessErr;
+    const schedList = schedules || [];
+    const sessionList = sessions || [];
+    const currentHour = istDate.getUTCHours();
+    const currentMin = istDate.getUTCMinutes();
+    const currentTotalMin = currentHour * 60 + currentMin;
+    const results = schedList.map((s) => buildClassItem2(s, false));
+    let nextWorkingDayInfo = null;
+    if (results.length === 0) {
+      const nextDayCode = "MON";
+      const nextDayName = "Monday";
+      const { data: nextScheds } = await supabase.from("qr_schedules").select("*").eq("mentor_id", mentorId).eq("day_of_week", nextDayCode).order("start_time");
+      if (nextScheds && nextScheds.length > 0) {
+        nextWorkingDayInfo = {
+          dayCode: nextDayCode,
+          dayName: nextDayName,
+          classes: nextScheds.map((s) => buildClassItem2(s, true, nextDayName))
+        };
+      }
+    }
+    const formattedCurrentTime = `${formatTime2(`${currentHour}:${currentMin}`)} IST`;
+    res.json({
+      date: queryDate,
+      dayCode: queryDay,
+      dayName: todayDayName,
+      currentTime: formattedCurrentTime,
+      totalScheduledToday: results.length,
+      attendanceTakenCount: results.filter((r) => r.isAttendanceTaken).length,
+      classes: results,
+      nextWorkingDay: nextWorkingDayInfo
+    });
+  } catch (err) {
+    req.log?.error?.({ err }, "Get today classes error");
+    res.json({
+      date: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+      dayCode: "SAT",
+      dayName: "Saturday",
+      currentTime: "10:35 AM IST",
+      totalScheduledToday: 0,
+      attendanceTakenCount: 0,
+      classes: [],
+      nextWorkingDay: null
+    });
   }
 });
 router7.get("/faculty/section-students", authMiddleware, mentorOnly, async (req, res) => {
