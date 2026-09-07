@@ -313,11 +313,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         width: "240px",
         background: "linear-gradient(160deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%)",
         display: "flex", flexDirection: "column",
-        transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
         transition: "transform 0.2s ease",
         boxShadow: "4px 0 24px rgba(37,99,235,0.25)",
       }}
-        className="lg:relative lg:translate-x-0"
+        className={`lg:!relative lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "20px 16px 18px", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
