@@ -171,7 +171,19 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
 export function Layout({ children }: { children: React.ReactNode }) {
   const { admin, hod, principal, role, logout } = useAuth();
   const [location] = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const handler = (e: MediaQueryListEvent) => {
+      setIsDesktop(e.matches);
+      if (e.matches) setSidebarOpen(true);
+      else setSidebarOpen(false);
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // ---- Settings modal ----
   const [showSettings, setShowSettings] = useState(false);
@@ -309,14 +321,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* ══════════ SIDEBAR ══════════ */}
       <aside style={{
-        position: "fixed", inset: "0 auto 0 0", zIndex: 50,
+        position: isDesktop && sidebarOpen ? "relative" as const : "fixed" as const,
+        ...(!(isDesktop && sidebarOpen) && { inset: "0 auto 0 0" }),
+        zIndex: 50,
         width: "240px",
         background: "linear-gradient(160deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%)",
-        display: "flex", flexDirection: "column",
+        display: "flex", flexDirection: "column" as const,
+        transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
         transition: "transform 0.2s ease",
         boxShadow: "4px 0 24px rgba(37,99,235,0.25)",
+        flexShrink: 0,
       }}
-        className={`lg:!relative lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "20px 16px 18px", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
@@ -327,7 +342,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <p style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>QR Attendance</p>
             <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Campus Control System</p>
           </div>
-          <button onClick={() => setMobileOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", display: "flex" }} className="lg:hidden">
+          <button onClick={() => setSidebarOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", display: "flex" }}>
             <X style={{ width: "20px", height: "20px" }} />
           </button>
         </div>
@@ -350,7 +365,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div
                   data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
                   onClick={() => {
-                    setMobileOpen(false);
+                    if (!isDesktop) setSidebarOpen(false);
                     if (href.includes("tab=") || href === "/hod-dashboard" || href === "/principal-dashboard") {
                       window.history.pushState({}, "", href);
                       window.dispatchEvent(new Event("popstate"));
@@ -377,7 +392,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Training Sessions Tree Nav — HOD & Admin only */}
           {(role === "hod" || role === "admin") && (
-            <TrainingNavTree location={location} onNavigate={() => setMobileOpen(false)} />
+            <TrainingNavTree location={location} onNavigate={() => { if (!isDesktop) setSidebarOpen(false); }} />
           )}
         </nav>
 
@@ -423,8 +438,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Mobile overlay */}
-      {mobileOpen && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(0,0,0,0.4)" }} onClick={() => setMobileOpen(false)} className="lg:hidden" />
+      {sidebarOpen && !isDesktop && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(0,0,0,0.4)" }} onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* ══════════ MAIN CONTENT ══════════ */}
@@ -432,9 +447,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Header bar (desktop & mobile) */}
         <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-200 bg-white shadow-xs z-30 relative">
           <div className="flex items-center gap-3">
-            <button data-testid="mobile-menu-button" onClick={() => setMobileOpen(true)} className="lg:hidden p-1 text-slate-500 hover:text-slate-900 cursor-pointer">
-              <Menu className="w-5 h-5" />
-            </button>
+            {!sidebarOpen && (
+              <button data-testid="mobile-menu-button" onClick={() => setSidebarOpen(true)} className="p-1 text-slate-500 hover:text-slate-900 cursor-pointer">
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-blue-600" />
               <span className="text-sm font-extrabold text-slate-900">QR Attendance</span>
