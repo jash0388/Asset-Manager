@@ -25,11 +25,11 @@ const EXACT_TIMETABLES: Record<string, { year: "II" | "III" | "IV"; section: "A"
     section: "A",
     schedule: {
       "MON": ["JAVA/DBMS LAB", "JAVA/DBMS LAB", "MSF", "JAVA", "SE", "COA"],
-      "TUE": ["SE/JAVA LAB", "SE/JAVA LAB", "MSF", "COA", "DBMS", "SPORTS/LIBRARY"],
-      "WED": ["DBMS/SE LAB", "DBMS/SE LAB", "MSF", "JAVA", "DBMS", "SE"],
-      "THUR": ["SDC", "Free", "JAVA", "DBMS", "SE", "COUNSELLING"],
-      "FRI": ["DBMS", "COA", "JAVA", "SE", "APTITUDE", "Free"],
-      "SAT": ["CM LAB", "CM LAB", "COA", "MSF", "CLUB ACTIVITIES", "Free"],
+      "TUE": ["SE/JAVA LAB", "SE/JAVA LAB", "MSF", "COA", "DBMS", "SE"],
+      "WED": ["DBMS/SE LAB", "DBMS/SE LAB", "MSF", "JAVA", "DBMS", "SPORTS/LIBRARY"],
+      "THUR": ["SDC", "SDC", "JAVA", "DBMS", "SE", "COUNSELLING"],
+      "FRI": ["DBMS", "COA", "JAVA", "SE", "APTITUDE", "APTITUDE"],
+      "SAT": ["CM LAB", "CM LAB", "COA", "MSF", "CLUB ACTIVITIES", "CLUB ACTIVITIES"],
     }
   },
   "2B": {
@@ -38,10 +38,10 @@ const EXACT_TIMETABLES: Record<string, { year: "II" | "III" | "IV"; section: "A"
     schedule: {
       "MON": ["MSF", "SE", "SE/JAVA LAB", "SE/JAVA LAB", "COA", "DBMS"],
       "TUE": ["CM LAB", "CM LAB", "JAVA/DBMS LAB", "JAVA/DBMS LAB", "SE", "DBMS"],
-      "WED": ["COA", "JAVA", "SDC", "SDC", "MSF", "SPORTS/LIBRARY"],
+      "WED": ["COA", "JAVA", "SDC", "SDC", "MSF", "DBMS"],
       "THUR": ["DBMS", "JAVA", "COA", "SE", "MSF", "COUNSELLING"],
-      "FRI": ["JAVA", "MSF", "DBMS", "DBMS/SE LAB", "SE", "JAVA"],
-      "SAT": ["APTITUDE", "Free", "DBMS/SE LAB", "DBMS/SE LAB", "CLUB ACTIVITIES", "Free"],
+      "FRI": ["JAVA", "MSF", "DBMS", "COA", "SE", "JAVA"],
+      "SAT": ["APTITUDE", "APTITUDE", "DBMS/SE LAB", "DBMS/SE LAB", "CLUB ACTIVITIES", "CLUB ACTIVITIES"],
     }
   },
   "2C": {
@@ -52,20 +52,20 @@ const EXACT_TIMETABLES: Record<string, { year: "II" | "III" | "IV"; section: "A"
       "TUE": ["JAVA", "MSF", "SE", "COUNSELLING", "COA", "DBMS"],
       "WED": ["CM LAB", "CM LAB", "JAVA/SE LAB", "JAVA/SE LAB", "JAVA", "COA"],
       "THUR": ["JAVA", "COA", "SE/DBMS LAB", "SE/DBMS LAB", "SE", "MSF"],
-      "FRI": ["MSF", "SE", "DBMS/JAVA LAB", "DBMS/JAVA LAB", "DBMS", "SPORTS/LIBRARY"],
-      "SAT": ["MSF", "DBMS", "APTITUDE", "Free", "CLUB ACTIVITIES", "Free"],
+      "FRI": ["MSF", "DBMS", "DBMS/JAVA LAB", "DBMS/JAVA LAB", "SE", "SPORTS/LIBRARY"],
+      "SAT": ["MSF", "DBMS", "APTITUDE", "APTITUDE", "CLUB ACTIVITIES", "CLUB ACTIVITIES"],
     }
   },
   "3A": {
     year: "III",
     section: "A",
     schedule: {
-      "MON": ["KAFKA", "KAFKA", "ADA", "CN", "CN/R PROGRAMMING LAB", "CN/R PROGRAMMING LAB"],
-      "TUE": ["CN", "WP", "DEVOPS", "COUNSELLING", "R PROGRAMMING/CN LAB", "R PROGRAMMING/CN LAB"],
-      "WED": ["ARQA", "CN", "CN", "ADA", "DEVOPS", "SPORTS"],
-      "THUR": ["IDS", "WP", "DEVOPS", "LIBRARY", "ADA", "WP"],
-      "FRI": ["DEVOPS", "IDS", "IDS", "CN", "AECS LAB", "AECS LAB"],
-      "SAT": ["WP", "Free", "IPR", "Free", "CLUB ACTIVITIES", "Free"],
+      "MON": ["KAFKA", "KAFKA", "ADA", "IDS", "CN/R PROGRAMMING LAB", "CN/R PROGRAMMING LAB"],
+      "TUE": ["CN", "ADA", "DEVOPS", "COUNSELLING", "R PROGRAMMING/CN LAB", "R PROGRAMMING/CN LAB"],
+      "WED": ["ARQA", "WP", "CN", "ADA", "DEVOPS", "SPORTS"],
+      "THUR": ["IDS", "CN", "DEVOPS", "LIBRARY", "ADA", "WP"],
+      "FRI": ["DEVOPS", "WP", "IDS", "CN", "AECS LAB", "AECS LAB"],
+      "SAT": ["WP", "IDS", "IPR", "IPR", "CLUB ACTIVITIES", "CLUB ACTIVITIES"],
     }
   },
   "3B": {
@@ -75,9 +75,9 @@ const EXACT_TIMETABLES: Record<string, { year: "II" | "III" | "IV"; section: "A"
       "MON": ["CN", "DEVOPS", "WP", "COUNSELLING", "ADA", "SPORTS"],
       "TUE": ["WP", "IDS", "CN", "LIBRARY", "DEVOPS", "ADA"],
       "WED": ["IDS", "ARQA", "WP", "DEVOPS", "CN/R PROGRAMMING LAB", "CN/R PROGRAMMING LAB"],
-      "THUR": ["ADA", "WP", "CN", "IDS", "R PROGRAMMING/CN LAB", "R PROGRAMMING/CN LAB"],
+      "THUR": ["ADA", "WP", "CN", "IDS", "R PROGRAMMING /CN LAB", "R PROGRAMMING /CN LAB"],
       "FRI": ["KAFKA", "KAFKA", "CN", "ADA", "IDS", "DEVOPS"],
-      "SAT": ["AECS LAB", "AECS LAB", "IPR", "Free", "CLUB ACTIVITIES", "Free"],
+      "SAT": ["AECS LAB", "AECS LAB", "IPR", "IPR", "CLUB ACTIVITIES", "CLUB ACTIVITIES"],
     }
   },
   "3C": {
@@ -89,7 +89,7 @@ const EXACT_TIMETABLES: Record<string, { year: "II" | "III" | "IV"; section: "A"
       "WED": ["ADA", "DEVOPS", "ARQA", "IDS", "WP", "CN"],
       "THUR": ["CN/R PROGRAMMING LAB", "CN/R PROGRAMMING LAB", "AECS LAB", "AECS LAB", "DEVOPS", "WP"],
       "FRI": ["R PROGRAMMING/CN LAB", "R PROGRAMMING/CN LAB", "COUNSELLING", "IDS", "CN", "ADA"],
-      "SAT": ["KAFKA", "Free", "IPR", "Free", "CLUB ACTIVITIES", "Free"],
+      "SAT": ["KAFKA", "KAFKA", "IPR", "IPR", "CLUB ACTIVITIES", "CLUB ACTIVITIES"],
     }
   },
   "4A": {
@@ -98,10 +98,10 @@ const EXACT_TIMETABLES: Record<string, { year: "II" | "III" | "IV"; section: "A"
     schedule: {
       "MON": ["PA", "WSMA", "OE", "CC", "PS-I", "PS-I"],
       "TUE": ["PA Lab", "PA Lab", "CC", "NLP", "PS-I", "SPORTS"],
-      "WED": ["PA", "WSMA", "OE", "NLP", "CC", "COUNSELLING"],
-      "THUR": ["WSMA Lab", "WSMA Lab", "NLP", "CC", "PS-I", "Free"],
-      "FRI": ["WSMA", "PA", "NLP", "OE", "PS-I", "Free"],
-      "SAT": ["PA", "WSMA", "OE", "LIBRARY", "CLUB ACTIVITIES", "Free"],
+      "WED": ["PA", "WSMA", "OE", "NLP", "CC", "PS-I"],
+      "THUR": ["WSMA Lab", "WSMA Lab", "NLP", "CC", "PS-I", "PS-I"],
+      "FRI": ["WSMA", "PA", "NLP", "OE", "PS-I", "COUNSELLING"],
+      "SAT": ["PA", "WSMA", "OE", "LIBRARY", "CLUB ACTIVITIES", "CLUB ACTIVITIES"],
     }
   },
   "4B": {
@@ -111,9 +111,9 @@ const EXACT_TIMETABLES: Record<string, { year: "II" | "III" | "IV"; section: "A"
       "MON": ["PA", "WSMA", "NLP", "OE", "PS-I", "PS-I"],
       "TUE": ["PA LAB", "PA LAB", "OE", "CC", "PS-I", "SPORTS"],
       "WED": ["PA", "WSMA", "CC", "OE", "NLP", "PS-I"],
-      "THUR": ["WSMA LAB", "WSMA LAB", "CC", "NLP", "PS-I", "COUNSELLING"],
-      "FRI": ["WSMA", "PA", "OE", "LIBRARY", "CC", "Free"],
-      "SAT": ["PA", "WSMA", "NLP", "PS-I", "CLUB ACTIVITIES", "Free"],
+      "THUR": ["WSMA LAB", "WSMA LAB", "CC", "NLP", "PS-I", "PS-I"],
+      "FRI": ["WSMA", "PA", "OE", "LIBRARY", "CC", "COUNSELLING"],
+      "SAT": ["PA", "WSMA", "NLP", "PS-I", "CLUB ACTIVITIES", "CLUB ACTIVITIES"],
     }
   }
 };
@@ -136,6 +136,8 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "APTITUDE": 7,        // Mr. K. Bikshapathi
     "COUNSELLING": 11,    // Mrs. B. Gayathri
     "SPORTS/LIBRARY": 11, // Mrs. B. Gayathri
+    "LIBRARY": 11,        // Mrs. B. Gayathri
+    "SPORTS": 11,         // Mrs. B. Gayathri
     "CLUB ACTIVITIES": 11,// Mrs. B. Gayathri
   },
   "2B": {
@@ -154,6 +156,8 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "APTITUDE": 12,       // Mrs. K. Ramya
     "COUNSELLING": 12,    // Mrs. K. Ramya
     "SPORTS/LIBRARY": 12, // Mrs. K. Ramya
+    "LIBRARY": 12,        // Mrs. K. Ramya
+    "SPORTS": 12,         // Mrs. K. Ramya
     "CLUB ACTIVITIES": 12,// Mrs. K. Ramya
   },
   "2C": {
@@ -172,20 +176,22 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "APTITUDE": 7,        // Mr. K. Bikshapathi
     "COUNSELLING": 7,     // Mr. K. Bikshapathi
     "SPORTS/LIBRARY": 7,  // Mr. K. Bikshapathi
+    "LIBRARY": 7,         // Mr. K. Bikshapathi
+    "SPORTS": 7,          // Mr. K. Bikshapathi
     "CLUB ACTIVITIES": 7, // Mr. K. Bikshapathi
   },
   "3A": {
     "CN": 10,             // Mrs. K. Sneha
     "CN/R PROGRAMMING LAB": 10, // Mrs. K. Sneha
-    "R PROGRAMMING/CN LAB": 10, // Mrs. K. Sneha
+    "R PROGRAMMING/CN LAB": 6,  // Mr. T. Shravan Kumar
     "ADA": 17,            // Dr. Md Abdul Azeem
     "WP": 8,              // Mrs. G. Sushma
     "DEVOPS": 3,          // Mr. Miskeen Ali
     "IDS": 6,             // Mr. T. Shravan Kumar
     "KAFKA": 12,          // Mrs. K. Ramya
     "ARQA": 4,            // Mr. M. Yadaiah
-    "AECS LAB": 4,        // Mr. M. Yadaiah
-    "IPR": 4,             // Mr. M. Yadaiah
+    "AECS LAB": 21,       // Ms. Vaidehi
+    "IPR": 20,            // Mr. Prateek
     "LIBRARY": 8,         // Mrs. G. Sushma
     "COUNSELLING": 8,     // Mrs. G. Sushma
     "SPORTS": 8,          // Mrs. G. Sushma
@@ -201,6 +207,7 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "KAFKA": 12,          // Mrs. K. Ramya
     "CN/R PROGRAMMING LAB": 10, // Mrs. K. Sneha
     "R PROGRAMMING/CN LAB": 9,  // Mrs. A. Sravanthi
+    "R PROGRAMMING /CN LAB": 9, // Mrs. A. Sravanthi
     "R PROGRAMMING LAB": 9,     // Mrs. A. Sravanthi
     "AECS LAB": 21,       // Ms. Vaidehi
     "IPR": 20,            // Mr. Prateek
@@ -211,21 +218,22 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "CLUB ACTIVITIES": 6, // Mr. T. Shravan Kumar
   },
   "3C": {
-    "CN": 10,             // Mrs. K. Sneha
-    "CN/R PROGRAMMING LAB": 10, // Mrs. K. Sneha
-    "R PROGRAMMING/CN LAB": 10, // Mrs. K. Sneha
+    "CN": 11,             // Mrs. B. Gayathri
+    "CN LAB": 11,         // Mrs. B. Gayathri
+    "CN/R PROGRAMMING LAB": 11, // Mrs. B. Gayathri
+    "R PROGRAMMING/CN LAB": 9,  // Mrs. A. Sravanthi
     "ADA": 17,            // Dr. Md Abdul Azeem
-    "WP": 8,              // Mrs. G. Sushma
+    "WP": 14,             // Mrs. K. Srinija
     "IDS": 9,             // Mrs. A. Sravanthi
     "DEVOPS": 3,          // Mr. Miskeen Ali
     "KAFKA": 12,          // Mrs. K. Ramya
     "ARQA": 5,            // Mr. M. Srinivasulu
-    "AECS LAB": 5,        // Mr. M. Srinivasulu
-    "IPR": 5,             // Mr. M. Srinivasulu
-    "LIBRARY": 5,         // Mr. M. Srinivasulu
-    "SPORTS": 5,          // Mr. M. Srinivasulu
-    "COUNSELLING": 5,     // Mr. M. Srinivasulu
-    "CLUB ACTIVITIES": 5, // Mr. M. Srinivasulu
+    "AECS LAB": 21,       // Ms. Vaidehi
+    "IPR": 20,            // Mr. Prateek
+    "LIBRARY": 4,         // Mr. M. Yadaiah
+    "SPORTS": 4,          // Mr. M. Yadaiah
+    "COUNSELLING": 4,     // Mr. M. Yadaiah
+    "CLUB ACTIVITIES": 4, // Mr. M. Yadaiah
   },
   "4A": {
     "PA": 6,              // Mr. T. Shravan Kumar
@@ -276,6 +284,7 @@ async function executeSync() {
   const DAYS = ["MON", "TUE", "WED", "THUR", "FRI", "SAT"];
   let updatedCount = 0;
   let insertedCount = 0;
+  const validScheduleIds = new Set<number>();
 
   for (const [secKey, secDef] of Object.entries(EXACT_TIMETABLES)) {
     const { year, section, schedule } = secDef;
@@ -307,6 +316,7 @@ async function executeSync() {
         );
 
         if (match) {
+          validScheduleIds.add(match.id);
           if (match.mentor_id !== mentorId || match.subject !== subj || match.end_time.slice(0, 5) !== endTime.slice(0, 5)) {
             const { error: updErr } = await supabase
               .from("qr_schedules")
@@ -325,7 +335,7 @@ async function executeSync() {
             }
           }
         } else {
-          const { error: insErr } = await supabase
+          const { data: insData, error: insErr } = await supabase
             .from("qr_schedules")
             .insert({
               mentor_id: mentorId,
@@ -335,11 +345,14 @@ async function executeSync() {
               section: section,
               subject: subj,
               year: year
-            });
+            })
+            .select("id")
+            .single();
 
           if (insErr) {
             console.error(`Failed to insert [${year}-${section}] ${day} ${startTime}:`, insErr);
           } else {
+            if (insData?.id) validScheduleIds.add(insData.id);
             insertedCount++;
             console.log(`Inserted [${year}-${section}] ${day} ${startTime.slice(0,5)}-${endTime.slice(0,5)} -> ${subj} (mentor: ${mentorId})`);
           }
@@ -350,7 +363,40 @@ async function executeSync() {
     }
   }
 
-  console.log(`\n=== Master Sync Completed: ${updatedCount} updated, ${insertedCount} inserted ===`);
+  // Check for obsolete schedules in qr_schedules
+  let deletedCount = 0;
+  for (const s of existingSchedules || []) {
+    if (!validScheduleIds.has(s.id)) {
+      // Check if it has any attendance or session records
+      const { count: hourlyCount } = await supabase
+        .from("qr_hourly_attendance")
+        .select("id", { count: "exact", head: true })
+        .eq("schedule_id", s.id);
+
+      const { count: sessionCount } = await supabase
+        .from("qr_mentor_sessions")
+        .select("id", { count: "exact", head: true })
+        .eq("schedule_id", s.id);
+
+      if ((hourlyCount || 0) === 0 && (sessionCount || 0) === 0) {
+        const { error: delErr } = await supabase
+          .from("qr_schedules")
+          .delete()
+          .eq("id", s.id);
+
+        if (delErr) {
+          console.error(`Failed to delete orphan schedule ${s.id} [${s.year}-${s.section} ${s.day_of_week} ${s.start_time}]:`, delErr);
+        } else {
+          deletedCount++;
+          console.log(`Deleted orphan schedule ${s.id} [${s.year}-${s.section} ${s.day_of_week} ${s.start_time}]: ${s.subject}`);
+        }
+      } else {
+        console.warn(`Preserving schedule ${s.id} with historical records: hourly=${hourlyCount}, sessions=${sessionCount}`);
+      }
+    }
+  }
+
+  console.log(`\n=== Master Sync Completed: ${updatedCount} updated, ${insertedCount} inserted, ${deletedCount} deleted ===`);
 }
 
 executeSync();
