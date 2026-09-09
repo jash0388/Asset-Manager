@@ -67686,18 +67686,29 @@ router8.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, asyn
     const targetSection = (section || "").trim();
     let userQuery = supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id");
     if (targetSection) {
-      const is4 = targetSection.includes("4") || targetSection.toUpperCase().includes("IV");
-      const is3 = targetSection.includes("3") || targetSection.toUpperCase().includes("III");
-      const is2 = targetSection.includes("2") || targetSection.toUpperCase().includes("II");
-      const isB = targetSection.toUpperCase().includes("B");
-      const isC = targetSection.toUpperCase().includes("C");
-      const secLetter = isC ? "C" : isB ? "B" : "A";
-      const yearRoman = is4 ? "IV" : is3 ? "III" : is2 ? "II" : "";
+      const upperTarget = targetSection.toUpperCase().replace(/\s+/g, "");
+      let yearNum = 0;
+      let secLetter = "A";
+      const shortMatch = upperTarget.match(/DS[- ]?(\d)([ABC])/i);
+      if (shortMatch) {
+        yearNum = parseInt(shortMatch[1]);
+        secLetter = shortMatch[2].toUpperCase();
+      } else {
+        if (upperTarget.includes("IV")) yearNum = 4;
+        else if (upperTarget.includes("III")) yearNum = 3;
+        else if (/II(?!I)/.test(upperTarget)) yearNum = 2;
+        if (upperTarget.endsWith("C") || upperTarget.includes("/C")) secLetter = "C";
+        else if (upperTarget.endsWith("B") || upperTarget.includes("/B")) secLetter = "B";
+        else secLetter = "A";
+      }
+      const romanMap = { 2: "II", 3: "III", 4: "IV" };
+      const yearRoman = romanMap[yearNum] || "";
       if (yearRoman) {
-        userQuery = userQuery.ilike("section", `%${yearRoman}%${secLetter}%`);
+        const exactSection = `DS ${yearRoman}/I/${secLetter}`;
+        userQuery = userQuery.eq("section", exactSection);
       }
     }
-    const { data: users, error: userErr } = await userQuery.limit(100);
+    const { data: users, error: userErr } = await userQuery.limit(200);
     let studentList = users || [];
     if (studentList.length === 0) {
       const { data: fallbackUsers } = await supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id").limit(60);
@@ -68004,18 +68015,34 @@ router8.get("/faculty/section-students", authMiddleware, mentorOnly, async (req,
     }
     let query = supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id");
     if (targetSection) {
-      const is4 = targetSection.includes("4") || targetSection.toUpperCase().includes("IV");
-      const is3 = targetSection.includes("3") || targetSection.toUpperCase().includes("III");
-      const is2 = targetSection.includes("2") || targetSection.toUpperCase().includes("II");
-      const isB = targetSection.toUpperCase().includes("B");
-      const isC = targetSection.toUpperCase().includes("C");
-      const secLetter = isC ? "C" : isB ? "B" : "A";
-      const yearRoman = is4 ? "IV" : is3 ? "III" : is2 ? "II" : "";
+      // Convert short format (DS-2B, DS-3A, etc.) to exact DB format (DS II/I/B, DS III/I/A, etc.)
+      const upperTarget = targetSection.toUpperCase().replace(/\s+/g, "");
+      // Extract year number: check for digits or roman numerals
+      let yearNum = 0;
+      let secLetter = "A";
+      // Try to parse from short format like "DS-2B" or "DS2B"
+      const shortMatch = upperTarget.match(/DS[- ]?(\d)([ABC])/i);
+      if (shortMatch) {
+        yearNum = parseInt(shortMatch[1]);
+        secLetter = shortMatch[2].toUpperCase();
+      } else {
+        // Already in DB format like "DS IV/I/B" or "DS II/I/A"
+        if (upperTarget.includes("IV")) yearNum = 4;
+        else if (upperTarget.includes("III")) yearNum = 3;
+        else if (/II(?!I)/.test(upperTarget)) yearNum = 2;
+        if (upperTarget.endsWith("C") || upperTarget.includes("/C")) secLetter = "C";
+        else if (upperTarget.endsWith("B") || upperTarget.includes("/B")) secLetter = "B";
+        else secLetter = "A";
+      }
+      const romanMap = { 2: "II", 3: "III", 4: "IV" };
+      const yearRoman = romanMap[yearNum] || "";
       if (yearRoman) {
-        query = query.ilike("section", `%${yearRoman}%${secLetter}%`);
+        // Use exact match with the known DB format: "DS II/I/A", "DS III/I/B", etc.
+        const exactSection = `DS ${yearRoman}/I/${secLetter}`;
+        query = query.eq("section", exactSection);
       }
     }
-    const { data: users, error } = await query.limit(100);
+    const { data: users, error } = await query.limit(200);
     if (error) throw error;
     let userList = users || [];
     if (userList.length === 0) {
