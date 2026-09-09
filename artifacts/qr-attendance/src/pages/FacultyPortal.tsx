@@ -1048,7 +1048,7 @@ export default function FacultyPortal() {
 
       // 2. Try fetching from /mentor/students fallback
       try {
-        const mData = await customFetch<any[]>("/api/mentor/students");
+        const mData = await customFetch<any[]>(`/api/mentor/students?section=${encodeURIComponent(course.section || "")}`);
         if (Array.isArray(mData) && mData.length > 0) {
           const records: StudentAttendanceRecord[] = mData.map((s: any, idx: number) => ({
             id: s.id || s.user?.id || idx + 1,
@@ -1069,9 +1069,15 @@ export default function FacultyPortal() {
         console.warn("Could not load /api/mentor/students fallback:", e);
       }
 
-      // 3. Fallback to live mentees if available
-      if (liveMentees.length > 0) {
-        const records: StudentAttendanceRecord[] = liveMentees.map((s, idx) => ({
+      // 3. Fallback to live mentees only if they match this course section
+      const matchingMentees = liveMentees.filter((m) => {
+        if (!m.section) return false;
+        const normCourse = (course.section || "").replace(/[^0-9A-Za-z]/g, "").toUpperCase();
+        const normMentee = m.section.replace(/[^0-9A-Za-z]/g, "").toUpperCase();
+        return normMentee.includes(normCourse) || normCourse.includes(normMentee);
+      });
+      if (matchingMentees.length > 0) {
+        const records: StudentAttendanceRecord[] = matchingMentees.map((s, idx) => ({
           id: s.id,
           sNo: idx + 1,
           rollNumber: s.rollNumber,

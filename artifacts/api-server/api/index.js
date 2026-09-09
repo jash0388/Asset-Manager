@@ -65587,6 +65587,41 @@ var attendance_default = router4;
 // src/routes/mentor.ts
 var import_express6 = __toESM(require_express2(), 1);
 
+// src/lib/section-utils.ts
+function normalizeSection(section, year, secLetter) {
+  if (year && secLetter) {
+    const yStr = String(year).trim().toUpperCase();
+    const sStr = String(secLetter).trim().toUpperCase();
+    const digitToRoman = { "2": "II", "3": "III", "4": "IV" };
+    const yRoman = digitToRoman[yStr] || yStr;
+    return `DS ${yRoman}/I/${sStr}`;
+  }
+  if (!section) return "";
+  const s = String(section).trim();
+  if (/^DS\s+(?:IV|III|II)\/I\/[A-C]$/i.test(s)) {
+    return s.toUpperCase().replace(/\s+/, " ");
+  }
+  const upper = s.toUpperCase().replace(/\s+/g, "");
+  let parsedYear = "";
+  let parsedSec = "";
+  const digitMatch = upper.match(/(?:DS[-_ ]?)?([234])[-_ ]?([ABC])/i);
+  if (digitMatch) {
+    const digitMap = { "2": "II", "3": "III", "4": "IV" };
+    parsedYear = digitMap[digitMatch[1]];
+    parsedSec = digitMatch[2].toUpperCase();
+  } else {
+    const romanMatch = upper.match(/(?:DS[-_ ]?)?(IV|III|II)[-_ /I]*([ABC])/i);
+    if (romanMatch) {
+      parsedYear = romanMatch[1].toUpperCase();
+      parsedSec = romanMatch[2].toUpperCase();
+    }
+  }
+  if (parsedYear && parsedSec) {
+    return `DS ${parsedYear}/I/${parsedSec}`;
+  }
+  return s;
+}
+
 // src/routes/faculty-delegate.ts
 var import_express5 = __toESM(require_express2(), 1);
 var router5 = (0, import_express5.Router)();
@@ -65806,45 +65841,49 @@ router6.get("/mentor/students", authMiddleware, mentorOnly, async (req, res) => 
   const section = req.query.section;
   try {
     let students = [];
-    if (mentorId === -3 && section) {
-      const { data } = await supabase.from("qr_users").select("*").eq("section", section).order("name");
-      students = data || [];
+    if (section) {
+      const canonicalSection = normalizeSection(section);
+      if (canonicalSection) {
+        const { data } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", canonicalSection).order("unique_id");
+        students = data || [];
+      }
     } else {
-      const { data: directStudents } = await supabase.from("qr_users").select("*").eq("mentor_id", mentorId).order("name");
+      const { data: directStudents } = await supabase.from("qr_users").select("*").eq("role", "student").eq("mentor_id", mentorId).order("name");
       if (directStudents && directStudents.length > 0) {
         students = directStudents;
       } else {
         const { data: mentor } = await supabase.from("qr_mentors").select("key, name").eq("id", mentorId).maybeSingle();
         const mKey = String(mentor?.key || "").trim();
-        let targetSection = section || "";
-        if (!targetSection) {
-          const SECTION_BY_KEY = {
-            "101": "DS II/I/A",
-            "102": "DS II/I/B",
-            "2012": "DS II/I/B",
-            "103": "DS III/I/A",
-            "104": "DS II/I/B",
-            "105": "DS II/I/C",
-            "2013": "DS II/I/C",
-            "106": "DS III/I/B",
-            "107": "DS II/I/A",
-            "108": "DS III/I/C",
-            "109": "DS IV/I/A",
-            "110": "DS IV/I/B",
-            "111": "DS II/I/A",
-            "112": "DS III/I/B"
-          };
-          targetSection = SECTION_BY_KEY[mKey] || "";
-        }
-        if (!targetSection) {
+        let targetSection2 = "";
+        const SECTION_BY_KEY = {
+          "101": "DS II/I/A",
+          "102": "DS II/I/B",
+          "2012": "DS II/I/B",
+          "103": "DS III/I/A",
+          "104": "DS II/I/B",
+          "105": "DS II/I/C",
+          "2013": "DS II/I/C",
+          "106": "DS III/I/B",
+          "107": "DS II/I/A",
+          "108": "DS III/I/C",
+          "109": "DS IV/I/A",
+          "110": "DS IV/I/B",
+          "111": "DS II/I/A",
+          "112": "DS III/I/B"
+        };
+        targetSection2 = SECTION_BY_KEY[mKey] || "";
+        if (!targetSection2) {
           const { data: scheds } = await supabase.from("qr_schedules").select("year, section").eq("mentor_id", mentorId).limit(1);
           if (scheds && scheds.length > 0) {
-            targetSection = `DS ${scheds[0].year}/I/${scheds[0].section}`;
+            targetSection2 = normalizeSection(null, scheds[0].year, scheds[0].section);
           }
         }
-        if (targetSection) {
-          const { data: secStudents } = await supabase.from("qr_users").select("*").ilike("section", `%${targetSection}%`).order("unique_id");
-          students = secStudents || [];
+        if (targetSection2) {
+          const canonical = normalizeSection(targetSection2);
+          if (canonical) {
+            const { data: secStudents } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", canonical).order("unique_id");
+            students = secStudents || [];
+          }
         }
       }
     }
@@ -66474,13 +66513,9 @@ router6.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (r
       res.status(404).json({ error: "Schedule not found or access denied" });
       return;
     }
-    const dbSection = `DS ${schedule.year}/I/${schedule.section}`;
-    let { data: students, error: studentErr } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", dbSection).order("unique_id", { ascending: true });
-    if (!students || students.length === 0) {
-      const { data: fallbackStudents } = await supabase.from("qr_users").select("*").eq("role", "student").order("unique_id", { ascending: true }).limit(50);
-      students = fallbackStudents || [];
-    }
-    if (studentErr && (!students || students.length === 0)) throw studentErr;
+    const dbSection = normalizeSection(null, schedule.year, schedule.section);
+    const { data: students, error: studentErr } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", dbSection).order("unique_id", { ascending: true });
+    if (studentErr) throw studentErr;
     if (!students || students.length === 0) {
       res.json([]);
       return;
@@ -67683,26 +67718,16 @@ router8.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, asyn
   const mentorId = req.mentorId;
   const { section, courseCode, from, to } = req.query;
   try {
-    const targetSection = (section || "").trim();
-    let userQuery = supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id");
-    if (targetSection) {
-      const is4 = targetSection.includes("4") || targetSection.toUpperCase().includes("IV");
-      const is3 = targetSection.includes("3") || targetSection.toUpperCase().includes("III");
-      const is2 = targetSection.includes("2") || targetSection.toUpperCase().includes("II");
-      const isB = targetSection.toUpperCase().includes("B");
-      const isC = targetSection.toUpperCase().includes("C");
-      const secLetter = isC ? "C" : isB ? "B" : "A";
-      const yearRoman = is4 ? "IV" : is3 ? "III" : is2 ? "II" : "";
-      if (yearRoman) {
-        userQuery = userQuery.ilike("section", `%${yearRoman}%${secLetter}%`);
-      }
+    const rawSection = (section || "").trim();
+    const canonicalSection = normalizeSection(rawSection);
+    if (!canonicalSection) {
+      res.json({ students: [], dates: [], matrix: {} });
+      return;
     }
-    const { data: users, error: userErr } = await userQuery.limit(100);
-    let studentList = users || [];
-    if (studentList.length === 0) {
-      const { data: fallbackUsers } = await supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id").limit(60);
-      studentList = fallbackUsers || [];
-    }
+    let userQuery = supabase.from("qr_users").select("id, name, unique_id, section, batch").eq("role", "student").eq("section", canonicalSection).order("unique_id");
+    const { data: users, error: userErr } = await userQuery.limit(200);
+    if (userErr) throw userErr;
+    const studentList = users || [];
     let sessQuery = supabase.from("qr_mentor_sessions").select("id, date, schedule_id").eq("mentor_id", mentorId).order("date", { ascending: true });
     if (from) sessQuery = sessQuery.gte("date", from);
     if (to) sessQuery = sessQuery.lte("date", to);
@@ -67995,33 +68020,25 @@ router8.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req, re
 router8.get("/faculty/section-students", authMiddleware, mentorOnly, async (req, res) => {
   const { section, scheduleId } = req.query;
   try {
-    let targetSection = (section || "").trim();
-    if (!targetSection && scheduleId && !isNaN(Number(scheduleId))) {
+    let targetSection2 = (section || "").trim();
+    let schedYear;
+    let schedSec;
+    if (scheduleId && !isNaN(Number(scheduleId))) {
       const { data: sched } = await supabase.from("qr_schedules").select("year, section").eq("id", Number(scheduleId)).single();
       if (sched) {
-        targetSection = `DS ${sched.year}/I/${sched.section}`;
+        schedYear = sched.year;
+        schedSec = sched.section;
       }
     }
-    let query = supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id");
-    if (targetSection) {
-      const is4 = targetSection.includes("4") || targetSection.toUpperCase().includes("IV");
-      const is3 = targetSection.includes("3") || targetSection.toUpperCase().includes("III");
-      const is2 = targetSection.includes("2") || targetSection.toUpperCase().includes("II");
-      const isB = targetSection.toUpperCase().includes("B");
-      const isC = targetSection.toUpperCase().includes("C");
-      const secLetter = isC ? "C" : isB ? "B" : "A";
-      const yearRoman = is4 ? "IV" : is3 ? "III" : is2 ? "II" : "";
-      if (yearRoman) {
-        query = query.ilike("section", `%${yearRoman}%${secLetter}%`);
-      }
+    const canonicalSection = normalizeSection(targetSection2, schedYear, schedSec);
+    if (!canonicalSection) {
+      res.json([]);
+      return;
     }
-    const { data: users, error } = await query.limit(100);
+    let query = supabase.from("qr_users").select("id, name, unique_id, section, batch").eq("role", "student").eq("section", canonicalSection).order("unique_id");
+    const { data: users, error } = await query.limit(200);
     if (error) throw error;
-    let userList = users || [];
-    if (userList.length === 0) {
-      const { data: fallbackUsers } = await supabase.from("qr_users").select("id, name, unique_id, section, batch").order("unique_id").limit(60);
-      userList = fallbackUsers || [];
-    }
+    const userList = users || [];
     const students = userList.map((u, idx) => ({
       id: u.id,
       rollNumber: u.unique_id,

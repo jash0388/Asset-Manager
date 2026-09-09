@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
+import { normalizeSection } from "../lib/section-utils.js";
 import { authMiddleware, mentorOnly } from "../middlewares/auth.js";
 import { classReassignmentsStore } from "./faculty-delegate.js";
 import {
@@ -88,11 +89,19 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
   const section = req.query.section as string | undefined;
   try {
     let students: any[] = [];
-    if (mentorId === -3 && section) {
-      const { data } = await supabase.from("qr_users").select("*").eq("section", section).order("name");
-      students = data || [];
+    if (section) {
+      const canonicalSection = normalizeSection(section);
+      if (canonicalSection) {
+        const { data } = await supabase
+          .from("qr_users")
+          .select("*")
+          .eq("role", "student")
+          .eq("section", canonicalSection)
+          .order("unique_id");
+        students = data || [];
+      }
     } else {
-      const { data: directStudents } = await supabase.from("qr_users").select("*").eq("mentor_id", mentorId).order("name");
+      const { data: directStudents } = await supabase.from("qr_users").select("*").eq("role", "student").eq("mentor_id", mentorId).order("name");
       if (directStudents && directStudents.length > 0) {
         students = directStudents;
       } else {
@@ -101,38 +110,39 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
         const mKey = String(mentor?.key || "").trim();
         
         // Lookup assigned section
-        let targetSection = section || "";
-        if (!targetSection) {
-          const SECTION_BY_KEY: Record<string, string> = {
-            "101": "DS II/I/A",
-            "102": "DS II/I/B",
-            "2012": "DS II/I/B",
-            "103": "DS III/I/A",
-            "104": "DS II/I/B",
-            "105": "DS II/I/C",
-            "2013": "DS II/I/C",
-            "106": "DS III/I/B",
-            "107": "DS II/I/A",
-            "108": "DS III/I/C",
-            "109": "DS IV/I/A",
-            "110": "DS IV/I/B",
-            "111": "DS II/I/A",
-            "112": "DS III/I/B",
-          };
-          targetSection = SECTION_BY_KEY[mKey] || "";
-        }
+        let targetSection = "";
+        const SECTION_BY_KEY: Record<string, string> = {
+          "101": "DS II/I/A",
+          "102": "DS II/I/B",
+          "2012": "DS II/I/B",
+          "103": "DS III/I/A",
+          "104": "DS II/I/B",
+          "105": "DS II/I/C",
+          "2013": "DS II/I/C",
+          "106": "DS III/I/B",
+          "107": "DS II/I/A",
+          "108": "DS III/I/C",
+          "109": "DS IV/I/A",
+          "110": "DS IV/I/B",
+          "111": "DS II/I/A",
+          "112": "DS III/I/B",
+        };
+        targetSection = SECTION_BY_KEY[mKey] || "";
 
         if (!targetSection) {
           // Check schedules
           const { data: scheds } = await supabase.from("qr_schedules").select("year, section").eq("mentor_id", mentorId).limit(1);
           if (scheds && scheds.length > 0) {
-            targetSection = `DS ${scheds[0].year}/I/${scheds[0].section}`;
+            targetSection = normalizeSection(null, scheds[0].year, scheds[0].section);
           }
         }
 
         if (targetSection) {
-          const { data: secStudents } = await supabase.from("qr_users").select("*").ilike("section", `%${targetSection}%`).order("unique_id");
-          students = secStudents || [];
+          const canonical = normalizeSection(targetSection);
+          if (canonical) {
+            const { data: secStudents } = await supabase.from("qr_users").select("*").eq("role", "student").eq("section", canonical).order("unique_id");
+            students = secStudents || [];
+          }
         }
       }
     }
@@ -928,27 +938,17 @@ router.get("/mentor/students-by-schedule", authMiddleware, mentorOnly, async (re
     }
 
     // Map year & section (e.g. 'II', 'A' -> 'DS II/I/A')
-    const dbSection = `DS ${schedule.year}/I/${schedule.section}`;
+    const dbSection = normalizeSection(null, schedule.year, schedule.section);
 
-    // Fetch students in this section or fallback to all students
-    let { data: students, error: studentErr } = await supabase
+    // Fetch students in this section
+    const { data: students, error: studentErr } = await supabase
       .from("qr_users")
       .select("*")
       .eq("role", "student")
       .eq("section", dbSection)
       .order("unique_id", { ascending: true });
 
-    if (!students || students.length === 0) {
-      const { data: fallbackStudents } = await supabase
-        .from("qr_users")
-        .select("*")
-        .eq("role", "student")
-        .order("unique_id", { ascending: true })
-        .limit(50);
-      students = fallbackStudents || [];
-    }
-
-    if (studentErr && (!students || students.length === 0)) throw studentErr;
+    if (studentErr) throw studentErr;
 
     if (!students || students.length === 0) {
       res.json([]);

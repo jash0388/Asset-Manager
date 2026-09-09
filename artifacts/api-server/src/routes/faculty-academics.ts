@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { supabase } from "../lib/supabase.js";
+import { normalizeSection } from "../lib/section-utils.js";
 import { authMiddleware, mentorOnly } from "../middlewares/auth.js";
 import { classReassignmentsStore } from "./faculty-delegate.js";
 
@@ -207,37 +208,22 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
   const { section, courseCode, from, to } = req.query as Record<string, string>;
 
   try {
-    const targetSection = (section || "").trim();
+    const rawSection = (section || "").trim();
+    const canonicalSection = normalizeSection(rawSection);
+    if (!canonicalSection) {
+      res.json({ students: [], dates: [], matrix: {} });
+      return;
+    }
     let userQuery = supabase
       .from("qr_users")
       .select("id, name, unique_id, section, batch")
+      .eq("role", "student")
+      .eq("section", canonicalSection)
       .order("unique_id");
 
-    if (targetSection) {
-      const is4 = targetSection.includes("4") || targetSection.toUpperCase().includes("IV");
-      const is3 = targetSection.includes("3") || targetSection.toUpperCase().includes("III");
-      const is2 = targetSection.includes("2") || targetSection.toUpperCase().includes("II");
-      const isB = targetSection.toUpperCase().includes("B");
-      const isC = targetSection.toUpperCase().includes("C");
-      const secLetter = isC ? "C" : isB ? "B" : "A";
-      const yearRoman = is4 ? "IV" : is3 ? "III" : is2 ? "II" : "";
-
-      if (yearRoman) {
-        userQuery = userQuery.ilike("section", `%${yearRoman}%${secLetter}%`);
-      }
-    }
-
-    const { data: users, error: userErr } = await userQuery.limit(100);
-    let studentList = users || [];
-
-    if (studentList.length === 0) {
-      const { data: fallbackUsers } = await supabase
-        .from("qr_users")
-        .select("id, name, unique_id, section, batch")
-        .order("unique_id")
-        .limit(60);
-      studentList = fallbackUsers || [];
-    }
+    const { data: users, error: userErr } = await userQuery.limit(200);
+    if (userErr) throw userErr;
+    const studentList = users || [];
 
     // 2. Fetch mentor sessions in date range
     let sessQuery = supabase
@@ -633,48 +619,39 @@ router.get("/faculty/section-students", authMiddleware, mentorOnly, async (req: 
   const { section, scheduleId } = req.query as Record<string, string>;
   try {
     let targetSection = (section || "").trim();
-    if (!targetSection && scheduleId && !isNaN(Number(scheduleId))) {
+    let schedYear: string | undefined;
+    let schedSec: string | undefined;
+
+    if (scheduleId && !isNaN(Number(scheduleId))) {
       const { data: sched } = await supabase
         .from("qr_schedules")
         .select("year, section")
         .eq("id", Number(scheduleId))
         .single();
       if (sched) {
-        targetSection = `DS ${sched.year}/I/${sched.section}`;
+        schedYear = sched.year;
+        schedSec = sched.section;
       }
+    }
+
+    const canonicalSection = normalizeSection(targetSection, schedYear, schedSec);
+
+    if (!canonicalSection) {
+      res.json([]);
+      return;
     }
 
     let query = supabase
       .from("qr_users")
       .select("id, name, unique_id, section, batch")
+      .eq("role", "student")
+      .eq("section", canonicalSection)
       .order("unique_id");
 
-    if (targetSection) {
-      const is4 = targetSection.includes("4") || targetSection.toUpperCase().includes("IV");
-      const is3 = targetSection.includes("3") || targetSection.toUpperCase().includes("III");
-      const is2 = targetSection.includes("2") || targetSection.toUpperCase().includes("II");
-      const isB = targetSection.toUpperCase().includes("B");
-      const isC = targetSection.toUpperCase().includes("C");
-      const secLetter = isC ? "C" : isB ? "B" : "A";
-      const yearRoman = is4 ? "IV" : is3 ? "III" : is2 ? "II" : "";
-
-      if (yearRoman) {
-        query = query.ilike("section", `%${yearRoman}%${secLetter}%`);
-      }
-    }
-
-    const { data: users, error } = await query.limit(100);
+    const { data: users, error } = await query.limit(200);
     if (error) throw error;
 
-    let userList = users || [];
-    if (userList.length === 0) {
-      const { data: fallbackUsers } = await supabase
-        .from("qr_users")
-        .select("id, name, unique_id, section, batch")
-        .order("unique_id")
-        .limit(60);
-      userList = fallbackUsers || [];
-    }
+    const userList = users || [];
 
     const students = userList.map((u: any, idx: number) => ({
       id: u.id,
