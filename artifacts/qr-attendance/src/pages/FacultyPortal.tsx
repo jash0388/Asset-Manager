@@ -274,7 +274,6 @@ const FACULTY_DIRECTORY: Record<string, {
       { id: "c105_1", code: "SE", name: "Software Engineering (SE)", type: "Theory", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c105_2", code: "SE", name: "Software Engineering (SE)", type: "Theory", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c105_3", code: "IPR", name: "Intellectual Property Rights (IPR)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c105_4", code: "ARQA", name: "Applied Research & Quality Assurance (ARQA)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c105_5", code: "SE/JAVA LAB", name: "SE/JAVA Lab", type: "Practical", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c105_6", code: "AECS LAB", name: "AECS Lab", type: "Practical", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
     ],
@@ -302,12 +301,12 @@ const FACULTY_DIRECTORY: Record<string, {
     ],
     mentees: [],
     workload: [
-      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }, { slot: "12:10 – 13:10", subject: "COUNSELLING", section: "DS-3B", room: "Hall" }, { slot: "15:00 – 16:00", subject: "SPORTS", section: "DS-3B", room: "Ground" }] },
-      { day: "Tuesday", periods: [{ slot: "09:00 – 11:00", subject: "PA LAB", section: "DS-4A/4B", room: "Lab" }, { slot: "12:10 – 13:10", subject: "LIBRARY", section: "DS-3B", room: "Library" }] },
+      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }] },
+      { day: "Tuesday", periods: [{ slot: "09:00 – 11:00", subject: "PA LAB", section: "DS-4A/4B", room: "Lab" }] },
       { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }, { slot: "10:00 – 11:00", subject: "ARQA", section: "DS-3B", room: "Hall" }] },
       { day: "Thursday", periods: [{ slot: "09:00 – 10:00", subject: "IDS", section: "DS-3A", room: "Hall" }] },
       { day: "Friday", periods: [{ slot: "10:00 – 11:00", subject: "IDS/PA", section: "DS-3A/4B", room: "Hall" }, { slot: "11:10 – 12:10", subject: "IDS", section: "DS-3A", room: "Hall" }, { slot: "12:10 – 13:10", subject: "CN", section: "DS-3A", room: "Hall" }] },
-      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }, { slot: "10:00 – 11:00", subject: "IDS", section: "DS-3A", room: "Hall" }, { slot: "14:00 – 16:00", subject: "CLUB ACTIVITIES", section: "DS-3B", room: "Hall" }] },
+      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }, { slot: "10:00 – 11:00", subject: "IDS", section: "DS-3A", room: "Hall" }] },
     ]
   },
   "107": {
@@ -573,6 +572,7 @@ export default function FacultyPortal() {
   const [liveWorkload, setLiveWorkload] = useState<{ day: string; periods: { slot: string; subject: string; section: string; room: string }[] }[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [loadingRoster, setLoadingRoster] = useState(false);
+  const [attendanceAlreadyRecorded, setAttendanceAlreadyRecorded] = useState(false);
 
   // Active Faculty Profile Resolution — reads logged-in mentor from auth context or localStorage
   const storedProfile = useMemo(() => {
@@ -739,7 +739,7 @@ export default function FacultyPortal() {
                 studentPhone: s.phone || s.user?.phone || "9876543210",
                 fatherPhone: s.fatherPhone || s.father_phone || s.user?.fatherPhone || "9123456780",
                 motherPhone: s.motherPhone || s.mother_phone,
-                attendancePercent: s.attendancePercent || s.attendance_percent || Math.floor(Math.random() * 15) + 82,
+                attendancePercent: s.attendancePercent ?? s.attendance_percent ?? 0,
                 backlogs: s.backlogs ?? 0,
                 mentorNotes: s.remarks || "Regular student",
               }));
@@ -1014,19 +1014,24 @@ export default function FacultyPortal() {
   }, [selectedCourseForAttendance, workload, todayDayName]);
 
   // Initialize Real Students when Course is picked
-  const openAttendanceModal = async (course: Course) => {
+  const openAttendanceModal = async (course: Course, recordDate?: string) => {
     setSelectedCourseForAttendance(course);
     setSelectedPeriod("slot_0");
     setLoadingRoster(true);
     setAttendanceModalOpen(true);
+    setAttendanceAlreadyRecorded(false);
+
+    const targetDate = recordDate || todayClassesInfo?.date || new Date().toISOString().split("T")[0];
 
     try {
       // 1. Try fetching real section students from API
       try {
         const data = await customFetch<any[]>(
-          `/api/faculty/section-students?section=${encodeURIComponent(course.section || "")}&scheduleId=${encodeURIComponent(course.id || "")}`
+          `/api/faculty/section-students?section=${encodeURIComponent(course.section || "")}&scheduleId=${encodeURIComponent(course.id || "")}&date=${encodeURIComponent(targetDate)}`
         );
         if (Array.isArray(data) && data.length > 0) {
+          const isRecorded = data[0]?.isRecorded === true;
+          setAttendanceAlreadyRecorded(isRecorded);
           const records: StudentAttendanceRecord[] = data.map((s: any, idx: number) => ({
             id: s.id || idx + 1,
             sNo: idx + 1,
@@ -1034,7 +1039,7 @@ export default function FacultyPortal() {
             name: s.name || `Student ${idx + 1}`,
             heldCount: s.heldCount || 22,
             totalHeld: s.totalHeld || 24,
-            status: true,
+            status: s.status !== undefined ? s.status : true,
             phone: s.phone || "9876543210",
             fatherPhone: s.fatherPhone || s.father_phone || "9123456780",
           }));
@@ -1682,7 +1687,7 @@ export default function FacultyPortal() {
                     ) : isLive ? (
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => openAttendanceModal(courseObj)}
+                          onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
                           className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
                         >
                           <Sparkles className="w-4 h-4" />
@@ -1712,7 +1717,7 @@ export default function FacultyPortal() {
                       </div>
                     ) : cls.isAttendanceTaken ? (
                       <button
-                        onClick={() => openAttendanceModal(courseObj)}
+                        onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
                         className="w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -2128,7 +2133,7 @@ export default function FacultyPortal() {
 
                     <div className="space-y-1.5">
                       <span className="text-[11px] font-extrabold uppercase tracking-widest text-blue-200 bg-white/10 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
-                        GOOD MORNING
+                        {(() => { const h = liveClock.getHours(); return h < 12 ? "GOOD MORNING" : h < 17 ? "GOOD AFTERNOON" : "GOOD EVENING"; })()}
                       </span>
                       <h2 className="text-2xl lg:text-3xl font-black tracking-tight">{facultyName}</h2>
                       <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -2344,7 +2349,7 @@ export default function FacultyPortal() {
                                   </button>
                                 ) : (
                                   <button
-                                    onClick={() => openAttendanceModal(courseObj)}
+                                    onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
                                     className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 mx-auto cursor-pointer ${
                                       cls.isAttendanceTaken
                                         ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
@@ -2702,7 +2707,7 @@ export default function FacultyPortal() {
                         ) : isLiveNow ? (
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => openAttendanceModal(courseObj)}
+                              onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
                               className="flex-1 py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
                             >
                               <Sparkles className="w-4 h-4" />
@@ -2732,7 +2737,7 @@ export default function FacultyPortal() {
                           </div>
                         ) : cls.isAttendanceTaken ? (
                           <button
-                            onClick={() => openAttendanceModal(courseObj)}
+                            onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
                             className="w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
                           >
                             <CheckCircle2 className="w-4 h-4" />
@@ -3860,7 +3865,7 @@ export default function FacultyPortal() {
                               </td>
                               <td className="py-3.5 px-4 text-center">
                                 <button
-                                  onClick={() => openAttendanceModal(courseObj)}
+                                  onClick={() => openAttendanceModal(courseObj, rec.date)}
                                   className={`px-3 py-1.5 rounded-xl font-bold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer ${
                                     rec.status === "marked"
                                       ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
@@ -3940,17 +3945,16 @@ export default function FacultyPortal() {
                     <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
                       <span className="font-bold text-slate-500">Class:</span>
                       <select
-                        value={selectedBookCourse}
+                        value={`${selectedBookCourse}___${selectedBookSection}`}
                         onChange={(e) => {
-                          const val = e.target.value;
-                          setSelectedBookCourse(val);
-                          const matched = courses.find(c => c.code === val);
-                          if (matched) setSelectedBookSection(matched.section);
+                          const parts = e.target.value.split("___");
+                          setSelectedBookCourse(parts[0]);
+                          setSelectedBookSection(parts[1] || "");
                         }}
                         className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer"
                       >
                         {courses.map((c) => (
-                          <option key={c.id} value={c.code}>
+                          <option key={c.id} value={`${c.code}___${c.section}`}>
                             {c.name} ({c.section})
                           </option>
                         ))}
@@ -4006,7 +4010,15 @@ export default function FacultyPortal() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-700">
-                      Showing {bookData?.students?.length || 0} Students &bull; {(bookData?.dates || []).length} Conducted Class Dates
+                      Showing {bookData?.students?.length || 0} Students &bull; {(() => {
+                        const allDatesInRange: string[] = [];
+                        const start = new Date(bookFromDate + "T00:00:00");
+                        const end = new Date(bookToDate + "T00:00:00");
+                        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                          allDatesInRange.push(d.toISOString().split("T")[0]);
+                        }
+                        return allDatesInRange.length;
+                      })()} Days &bull; {(bookData?.dates || []).length} Classes Conducted
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-xs font-bold">
@@ -4018,6 +4030,10 @@ export default function FacultyPortal() {
                       <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
                       <span>A = Absent</span>
                     </span>
+                    <span className="inline-flex items-center gap-1 text-slate-500">
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                      <span>- = No Class</span>
+                    </span>
                   </div>
                 </div>
 
@@ -4026,7 +4042,17 @@ export default function FacultyPortal() {
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-emerald-600" />
                     <p className="text-xs font-bold">Generating Attendance Book Matrix...</p>
                   </div>
-                ) : bookData && bookData.students && bookData.students.length > 0 ? (
+                ) : bookData && bookData.students && bookData.students.length > 0 ? (() => {
+                  // Generate ALL dates in the selected range
+                  const allDatesInRange: string[] = [];
+                  const start = new Date(bookFromDate + "T00:00:00");
+                  const end = new Date(bookToDate + "T00:00:00");
+                  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    allDatesInRange.push(d.toISOString().split("T")[0]);
+                  }
+                  const conductedDatesSet = new Set(bookData.dates || []);
+
+                  return (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider">
@@ -4034,11 +4060,18 @@ export default function FacultyPortal() {
                           <th className="py-3 px-3 border border-slate-200 sticky left-0 bg-slate-100 z-10">S.No</th>
                           <th className="py-3 px-3 border border-slate-200 sticky left-10 bg-slate-100 z-10">Roll Number</th>
                           <th className="py-3 px-3 border border-slate-200 sticky left-32 bg-slate-100 z-10 min-w-[160px]">Student Name</th>
-                          {(bookData.dates || []).map((d) => (
-                            <th key={d} className="py-3 px-2 border border-slate-200 text-center font-mono whitespace-nowrap min-w-[50px]">
-                              {d ? d.split("-").slice(1).reverse().join("/") : ""}
-                            </th>
-                          ))}
+                          {allDatesInRange.map((d) => {
+                            const isConducted = conductedDatesSet.has(d);
+                            const dayNum = new Date(d + "T00:00:00").getDate();
+                            const monthNum = new Date(d + "T00:00:00").getMonth() + 1;
+                            return (
+                              <th key={d} className={`py-3 px-2 border border-slate-200 text-center font-mono whitespace-nowrap min-w-[38px] ${isConducted ? "bg-blue-50" : "bg-slate-50 text-slate-400"}`}>
+                                <div className="flex flex-col items-center leading-tight">
+                                  <span className="text-[9px]">{monthNum}/{dayNum}</span>
+                                </div>
+                              </th>
+                            );
+                          })}
                           <th className="py-3 px-2 border border-slate-200 text-center bg-blue-50 text-blue-900">Held</th>
                           <th className="py-3 px-2 border border-slate-200 text-center bg-emerald-50 text-emerald-900">P</th>
                           <th className="py-3 px-2 border border-slate-200 text-center bg-red-50 text-red-900">A</th>
@@ -4063,20 +4096,25 @@ export default function FacultyPortal() {
                               <td className="py-2.5 px-3 border border-slate-200 font-extrabold text-slate-900 sticky left-32 bg-white whitespace-nowrap">
                                 {st.name}
                               </td>
-                              {(bookData.dates || []).map((d) => {
+                              {allDatesInRange.map((d) => {
+                                const isConducted = conductedDatesSet.has(d);
                                 const val = st.attendanceByDate?.[d] || "-";
                                 return (
-                                  <td key={d} className="py-2.5 px-2 border border-slate-200 text-center font-bold">
-                                    {val === "P" ? (
-                                      <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-black text-[11px]">
-                                        P
-                                      </span>
-                                    ) : val === "A" ? (
-                                      <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-800 font-black text-[11px]">
-                                        A
-                                      </span>
+                                  <td key={d} className={`py-2.5 px-2 border border-slate-200 text-center font-bold ${!isConducted ? "bg-slate-50/50" : ""}`}>
+                                    {isConducted ? (
+                                      val === "P" ? (
+                                        <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-black text-[11px]">
+                                          P
+                                        </span>
+                                      ) : val === "A" ? (
+                                        <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-800 font-black text-[11px]">
+                                          A
+                                        </span>
+                                      ) : (
+                                        <span className="text-slate-400">-</span>
+                                      )
                                     ) : (
-                                      <span className="text-slate-400">-</span>
+                                      <span className="text-slate-300">-</span>
                                     )}
                                   </td>
                                 );
@@ -4108,7 +4146,8 @@ export default function FacultyPortal() {
                       </tbody>
                     </table>
                   </div>
-                ) : (
+                  );
+                })() : (
                   <div className="py-12 text-center text-slate-500 space-y-2">
                     <Users className="w-10 h-10 mx-auto text-slate-400" />
                     <p className="text-sm font-bold text-slate-800">No students found in this course register.</p>
@@ -4437,6 +4476,31 @@ export default function FacultyPortal() {
                 <div className="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                   <span>Class Ended &bull; Attendance Submission Closed</span>
+                </div>
+              ) : attendanceAlreadyRecorded ? (
+                <div className="flex items-center gap-3">
+                  <div className="text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Already Recorded ✓</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSubmitAttendance}
+                    disabled={submittingAttendance}
+                    className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-blue-600 hover:text-white disabled:bg-slate-300 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-slate-300"
+                  >
+                    {submittingAttendance ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Updating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ArrowRightLeft className="w-3.5 h-3.5" />
+                        <span>Update</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               ) : (
                 <button

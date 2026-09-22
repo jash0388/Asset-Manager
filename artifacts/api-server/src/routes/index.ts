@@ -8,6 +8,7 @@ import facultyRouter from "./faculty.js";
 import facultyAcademicsRouter from "./faculty-academics.js";
 import facultyDelegateRouter from "./faculty-delegate.js";
 import facultyWorkloadRouter from "./faculty-workload.js";
+import notebookAttendanceRouter from "./notebook-attendance.js";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use(facultyRouter);
 router.use(facultyAcademicsRouter);
 router.use(facultyDelegateRouter);
 router.use(facultyWorkloadRouter);
+router.use(notebookAttendanceRouter);
 
 export default router;

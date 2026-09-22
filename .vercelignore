@@ -10,3 +10,12 @@ attached_assets
 .turbo
 *.log
 brain
+*.apk
+*.zip
+*.xlsx
+final_fresh_qrs
+SPHN_Student_QR_Codes*
+student_qr_codes
+artifacts/student-parents-portal
+artifacts/student-parents-portal/node_modules
+

@@ -24,8 +24,23 @@ router.get("/faculty/workload-grid", authMiddleware, mentorOnly, async (req: any
       SAT: "Saturday",
     };
 
+    const isActivity = (subj: string) => {
+      const s = (subj || "").toUpperCase().trim();
+      return (
+        s.includes("SPORTS") ||
+        s.includes("LIBRARY") ||
+        s.includes("COUNSELLING") ||
+        s.includes("CLUB") ||
+        s.includes("ACTIVITIES") ||
+        s.includes("APTITUDE") ||
+        s.includes("RESEARCH HOUR") ||
+        s.includes("DIGITAL LIBRARY")
+      );
+    };
+
     const grid = days.map((day) => {
       const daySchedules = schedList.filter((s: any) => {
+        if (isActivity(s.subject)) return false;
         const normDay = (s.day_of_week || "").toUpperCase();
         return dayMap[normDay] === day || normDay.startsWith(day.substring(0, 3).toUpperCase());
       });

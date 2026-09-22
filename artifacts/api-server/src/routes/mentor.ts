@@ -153,6 +153,8 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
     }
 
     const studentIds = students.map((s: any) => s.id);
+
+    // Today's daily attendance (entry/exit)
     const { data: records } = await supabase
       .from("qr_attendance")
       .select("*")
@@ -164,8 +166,28 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
       for (const r of records) recordsByUser.set(r.user_id, r);
     }
 
+    // Hourly attendance stats for real attendance percentage
+    const { data: hourlyRecords } = await supabase
+      .from("qr_hourly_attendance")
+      .select("user_id, status")
+      .in("user_id", studentIds);
+
+    const hourlyStats = new Map<number, { total: number; present: number }>();
+    if (hourlyRecords) {
+      for (const hr of hourlyRecords) {
+        const existing = hourlyStats.get(hr.user_id) || { total: 0, present: 0 };
+        existing.total++;
+        if (hr.status === true || hr.status === "present") existing.present++;
+        hourlyStats.set(hr.user_id, existing);
+      }
+    }
+
     const result = students.map((s: any) => {
       const rec = recordsByUser.get(s.id);
+      const stats = hourlyStats.get(s.id);
+      const totalClasses = stats?.total || 0;
+      const presentCount = stats?.present || 0;
+      const attendancePercent = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0;
       return {
         id: s.id,
         name: s.name,
@@ -173,9 +195,14 @@ router.get("/mentor/students", authMiddleware, mentorOnly, async (req: any, res:
         uniqueId: s.unique_id,
         section: s.section,
         batch: s.batch,
+        phone: s.phone,
+        fatherPhone: s.father_phone,
         user: formatUser(s),
         attendanceToday: rec ? formatRecord(rec, s) : null,
         cameToday: !!(rec && rec.entry_time),
+        attendancePercent,
+        totalClasses,
+        presentCount,
       };
     });
     res.json(result);

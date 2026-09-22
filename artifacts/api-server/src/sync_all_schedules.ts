@@ -227,7 +227,7 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "IDS": 9,             // Mrs. A. Sravanthi
     "DEVOPS": 3,          // Mr. Miskeen Ali
     "KAFKA": 12,          // Mrs. K. Ramya
-    "ARQA": 5,            // Mr. M. Srinivasulu
+    "ARQA": 4,            // Mr. M. Yadaiah
     "AECS LAB": 21,       // Ms. Vaidehi
     "IPR": 20,            // Mr. Prateek
     "LIBRARY": 4,         // Mr. M. Yadaiah

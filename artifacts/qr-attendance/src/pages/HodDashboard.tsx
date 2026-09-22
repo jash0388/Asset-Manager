@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
+import { useSearch } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
+import StudentProfileModal from "@/components/StudentProfileModal";
 import { OFFICIAL_FACULTY_LIST } from "./MentorApp";
 import {
   Calendar,
@@ -626,7 +628,7 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "IDS": "Mrs. A. Sravanthi",
     "DEVOPS": "Mr. Miskeen Ali",
     "KAFKA": "Mrs. K. Ramya",
-    "ARQA": "Mr. M. Srinivasulu",
+    "ARQA": "Mr. M. Yadaiah",
     "AECS LAB": "Ms. Vaidehi",
     "IPR": "Mr. Prateek",
     "LIBRARY": "Mr. M. Yadaiah",
@@ -748,6 +750,7 @@ export function getTimetableSubjectDetails(rawSubject: string, section?: string,
 }
 
 export default function HodDashboard() {
+  const search = useSearch();
   const [activeTab, setActiveTab] = useState<"summary" | "logs" | "mentors" | "schedules" | "flags" | "student-analytics">((): any => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
@@ -776,20 +779,20 @@ export default function HodDashboard() {
 
   useEffect(() => {
     const handleUrlChange = () => {
-      const params = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams(search || window.location.search);
       const tab = params.get("tab");
       if (tab === "flags") {
         setActiveTab("flags");
       } else if (tab === "student-analytics") {
         setActiveTab("student-analytics");
       } else if (!params.has("tab")) {
-        setActiveTab("summary");
+        setActiveTab((prev) => (prev === "flags" || prev === "student-analytics" ? "summary" : prev));
       }
     };
     handleUrlChange();
     window.addEventListener("popstate", handleUrlChange);
     return () => window.removeEventListener("popstate", handleUrlChange);
-  }, []);
+  }, [search]);
   
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date().toISOString().split("T")[0];
@@ -6803,409 +6806,15 @@ export default function HodDashboard() {
             </div>
           </div>
         )}
-        {/* Student Profile & Attendance Details Modal - LIGHT MODE REDESIGN */}
+
+        {/* Student Profile & Attendance Details Modal - FULL SCREEN REDESIGN */}
         {selectedStudentForDetails && (
-          <div className="fixed inset-0 z-50 bg-white backdrop-blur-sm flex flex-col p-4 sm:p-8 md:p-10 overflow-y-auto animate-fadeIn font-sans">
-            <div className="max-w-4xl mx-auto w-full space-y-6 bg-white border border-gray-300 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 my-auto">
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-gray-200 pb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-600 border border-blue-400 flex items-center justify-center text-2xl font-black text-gray-900 shadow-md">
-                    {selectedStudentForDetails.name ? selectedStudentForDetails.name.charAt(0) : "S"}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-                      {selectedStudentForDetails.name || (selectedStudentForDetails as any).full_name || (selectedStudentForDetails as any).username || selectedStudentForDetails.uniqueId || "Student"}
-                      <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900 border border-blue-300 uppercase tracking-wider">
-                        Student Profile
-                      </span>
-                    </h2>
-                    <p className="text-sm font-bold text-slate-700 mt-1">
-                      Department of CSE Data Science
-                    </p>
-                  </div>
-                </div>
-                
-                <button
-                  onClick={() => setSelectedStudentForDetails(null)}
-                  className="p-2 rounded-xl bg-gray-100 border border-gray-300 hover:bg-gray-200 text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-xs"
-                >
-                  <XCircle className="w-7 h-7" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="space-y-6">
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-2xl bg-gray-100 border border-gray-300">
-                    <p className="text-xs font-black text-slate-700 uppercase">Roll Number</p>
-                    <p className="text-base font-black text-slate-900 font-mono mt-1">
-                      {selectedStudentForDetails.uniqueId || selectedStudentForDetails.unique_id || "N/A"}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-gray-100 border border-gray-300">
-                    <p className="text-xs font-black text-slate-700 uppercase">Section & Year</p>
-                    <p className="text-base font-black text-slate-900 mt-1">
-                      Sec {getSectionDisplayName(selectedStudentForDetails.section).name} ({getSectionDisplayName(selectedStudentForDetails.section).yearLabel})
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-gray-100 border border-gray-300">
-                    <p className="text-xs font-black text-slate-700 uppercase">Department</p>
-                    <p className="text-base font-black text-blue-700 mt-1">
-                      CSE Data Science
-                    </p>
-                  </div>
-                </div>
-
-                {/* Interactive Monthly Attendance Register Grid & Day Details */}
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <label className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                        Select Month:
-                      </label>
-                      <CustomMonthSelector
-                        value={studentModalMonth}
-                        onChange={(val) => {
-                          setStudentModalMonth(val);
-                          setSelectedDayDetail(null);
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      onClick={() => handleDirectCSVDownload(selectedStudentForDetails.name, studentModalMonth, studentMonthlyRecords)}
-                      className="text-xs font-black text-emerald-800 hover:text-emerald-900 flex items-center gap-1.5 cursor-pointer transition-colors bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-300 shadow-xs"
-                    >
-                      <FileSpreadsheet className="w-4 h-4" />
-                      Download Register (.csv)
-                    </button>
-                  </div>
-
-                  {/* Monthly Stats Summary Bar */}
-                  {(() => {
-                    const [sYearStr, sMonthStr] = studentModalMonth.split("-");
-                    const sYearNum = parseInt(sYearStr);
-                    const sMonthNum = parseInt(sMonthStr);
-                    const sDaysInMonth = new Date(sYearNum, sMonthNum, 0).getDate();
-
-                    const formatDateLocal = (d: Date) => {
-                      const y = d.getFullYear();
-                      const m = String(d.getMonth() + 1).padStart(2, "0");
-                      const day = String(d.getDate()).padStart(2, "0");
-                      return `${y}-${m}-${day}`;
-                    };
-
-                    const todayStr = formatDateLocal(new Date());
-
-                    const studentAttendanceByDate = new Map<string, AttendanceRecord>();
-                    (studentMonthlyRecords || []).forEach(r => {
-                      if (!r.date) return;
-                      const rawDateStr = typeof r.date === "string" ? r.date.slice(0, 10) : formatDateLocal(new Date(r.date));
-                      if (rawDateStr) {
-                        studentAttendanceByDate.set(rawDateStr, r);
-                      }
-                    });
-
-                    const monthDaysList = [];
-                    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-                    let studentPresentCount = 0;
-                    let studentAbsentCount = 0;
-                    let studentHolidayCount = 0;
-                    let studentWorkingDaysCount = 0;
-
-                    for (let day = 1; day <= sDaysInMonth; day++) {
-                      const dObj = new Date(sYearNum, sMonthNum - 1, day, 12, 0, 0);
-                      const dateStr = formatDateLocal(dObj);
-                      const dayOfWeek = daysOfWeek[dObj.getDay()];
-                      const isSunday = dObj.getDay() === 0;
-                      const isDeclaredHoliday = Boolean(holidays[dateStr]);
-                      const isSundayOrHoliday = isSunday || isDeclaredHoliday;
-                      const isFuture = dateStr > todayStr;
-                      
-                      const record = studentAttendanceByDate.get(dateStr);
-                      const isPresent = Boolean(record);
-
-                      let status: "P" | "A" | "*" | "—" = "A";
-                      if (isFuture) {
-                        status = "—";
-                      } else if (isSundayOrHoliday) {
-                        if (isPresent) {
-                          status = "P";
-                          studentPresentCount++;
-                        } else {
-                          status = "*";
-                          studentHolidayCount++;
-                        }
-                      } else {
-                        studentWorkingDaysCount++;
-                        if (isPresent) {
-                          status = "P";
-                          studentPresentCount++;
-                        } else {
-                          status = "A";
-                          studentAbsentCount++;
-                        }
-                      }
-
-                      monthDaysList.push({
-                        dayNum: day,
-                        dateStr,
-                        dayOfWeek,
-                        status,
-                        isSundayOrHoliday,
-                        isFuture,
-                        holidayReason: isDeclaredHoliday ? holidays[dateStr] : isSunday ? "Sunday" : undefined,
-                        record
-                      });
-                    }
-
-                    const calcWorkingDays = studentWorkingDaysCount > 0 ? studentWorkingDaysCount : 1;
-                    const studentMonthlyPercent = Math.floor((studentPresentCount / calcWorkingDays) * 100);
-
-                    // Dynamic stay time math
-                    const presentDaysWithDuration = (studentMonthlyRecords || []).filter(r => r.durationMinutes && r.durationMinutes > 0);
-                    const totalDurationMinutes = presentDaysWithDuration.reduce((sum, r) => sum + (r.durationMinutes || 0), 0);
-                    const avgDurationMinutes = presentDaysWithDuration.length > 0 ? Math.round(totalDurationMinutes / presentDaysWithDuration.length) : 0;
-                    const avgDurationStr = avgDurationMinutes > 0 ? `${Math.floor(avgDurationMinutes / 60)}h ${avgDurationMinutes % 60}m` : "No checkout logs";
-
-                    const hourlyForSelectedDay = (studentHourlyRecords || []).filter((hr: any) => {
-                      if (!hr.date || !selectedDayDetail) return false;
-                      return hr.date.slice(0, 10) === selectedDayDetail.dateStr;
-                    });
-
-                    return (
-                      <div className="space-y-6">
-                        {/* Stats Row & Visual Pie Chart */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                          {/* Pie Chart Card */}
-                          <div className="p-5 rounded-2xl bg-gray-100 border border-gray-300 flex flex-col items-center justify-center space-y-3">
-                            <p className="text-xs font-black text-slate-800 uppercase tracking-wider">Attendance Breakdown</p>
-                            <div className="relative flex items-center justify-center">
-                              {/* Inline SVG Pie Chart */}
-                              <svg width="120" height="120" viewBox="0 0 36 36" className="transform -rotate-90">
-                                <path
-                                  className="text-gray-700"
-                                  strokeWidth="3"
-                                  stroke="currentColor"
-                                  fill="none"
-                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                />
-                                <path
-                                  className={studentMonthlyPercent >= 75 ? "text-emerald-600" : studentMonthlyPercent >= 65 ? "text-amber-600" : "text-rose-600"}
-                                  strokeDasharray={`${studentMonthlyPercent}, 100`}
-                                  strokeWidth="3.2"
-                                  strokeLinecap="round"
-                                  stroke="currentColor"
-                                  fill="none"
-                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                />
-                              </svg>
-                              <div className="absolute flex flex-col items-center justify-center">
-                                <span className="text-2xl font-black text-slate-900">{studentMonthlyPercent}%</span>
-                                <span className="text-[9px] font-black text-slate-700 uppercase">Monthly</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Present Days Card */}
-                          <div className="p-5 rounded-2xl bg-gray-100 border border-gray-300 text-center space-y-2">
-                            <p className="text-xs font-black text-emerald-800 uppercase">Present Days (P)</p>
-                            <p className="text-3xl font-black text-slate-900">{studentPresentCount} Days</p>
-                            <p className="text-xs text-slate-700 font-extrabold">Attended out of {calcWorkingDays} working days</p>
-                          </div>
-
-                          {/* Absent Days Card */}
-                          <div className="p-5 rounded-2xl bg-gray-100 border border-gray-300 text-center space-y-2">
-                            <p className="text-xs font-black text-rose-800 uppercase">Absent Days (A)</p>
-                            <p className="text-3xl font-black text-slate-900">{studentAbsentCount} Days</p>
-                            <p className="text-xs text-slate-700 font-extrabold">Missed classes</p>
-                          </div>
-
-                          {/* Average College stay time */}
-                          <div className="p-5 rounded-2xl bg-gray-100 border border-gray-300 text-center space-y-2">
-                            <p className="text-xs font-black text-blue-800 uppercase">Avg Daily Campus Stay</p>
-                            <p className="text-3xl font-black text-slate-900">{avgDurationStr}</p>
-                            <p className="text-xs text-slate-700 font-extrabold">Calculated from gate logs</p>
-                          </div>
-                        </div>
-
-                        {/* Daily Register Grid */}
-                        <div>
-                          <p className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
-                            <span>Daily Register Grid (Click any date to view Entry/Exit times)</span>
-                            <span className="text-slate-700 font-bold">P = Present | A = Absent | * = Holiday | — = Future</span>
-                          </p>
-                          
-                          <div className="grid grid-cols-7 gap-1.5 bg-gray-100 p-4 rounded-2xl border border-gray-300">
-                            {monthDaysList.map((d) => {
-                              const isSelected = selectedDayDetail?.dateStr === d.dateStr;
-                              return (
-                                <button
-                                  key={d.dateStr}
-                                  onClick={() => setSelectedDayDetail(d)}
-                                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1.5 ${
-                                    isSelected
-                                      ? "ring-2 ring-blue-500 scale-105 z-10 shadow-lg"
-                                      : "hover:scale-102"
-                                  } ${
-                                    d.status === "P"
-                                      ? "bg-emerald-100 border-emerald-300 text-emerald-950"
-                                      : d.status === "*"
-                                      ? "bg-purple-100 border-purple-300 text-purple-950"
-                                      : d.status === "—"
-                                      ? "bg-gray-200 border-gray-300 text-slate-600 opacity-80"
-                                      : "bg-rose-100 border-rose-300 text-rose-950"
-                                  }`}
-                                >
-                                  <span className="text-[10px] font-mono font-bold text-slate-700">
-                                    {d.dayNum} {d.dayOfWeek}
-                                  </span>
-                                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black ${
-                                    d.status === "P"
-                                      ? "bg-emerald-600 text-white shadow-xs"
-                                      : d.status === "*"
-                                      ? "bg-amber-500 text-slate-950 shadow-xs"
-                                      : d.status === "—"
-                                      ? "bg-gray-300 text-slate-800"
-                                      : "bg-rose-600 text-white shadow-xs"
-                                  }`}>
-                                    {d.status}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Selected Day Detail Card */}
-                        {selectedDayDetail ? (
-                          <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-slate-900 space-y-2 animate-fadeIn shadow-xs">
-                            <div className="flex items-center justify-between border-b border-blue-200 pb-2">
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-600" />
-                                <h5 className="text-sm font-black text-slate-900">
-                                  Date: <span className="font-mono text-blue-900">{selectedDayDetail.dateStr}</span> ({selectedDayDetail.dayOfWeek})
-                                </h5>
-                              </div>
-                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
-                                selectedDayDetail.status === "P"
-                                  ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
-                                  : selectedDayDetail.status === "*"
-                                  ? "bg-purple-100 text-purple-900 border border-purple-300"
-                                  : selectedDayDetail.status === "—"
-                                  ? "bg-gray-200 text-slate-800 border border-gray-300"
-                                  : "bg-rose-100 text-rose-900 border border-rose-300"
-                              }`}>
-                                {selectedDayDetail.status === "P"
-                                  ? "🟢 PRESENT"
-                                  : selectedDayDetail.status === "*"
-                                  ? `🟨 HOLIDAY (${selectedDayDetail.holidayReason || "Sunday"})`
-                                  : selectedDayDetail.status === "—"
-                                  ? "🗓️ FUTURE DATE (Not Occurred Yet)"
-                                  : "🔴 ABSENT"}
-                              </span>
-                            </div>
-
-                            {selectedDayDetail.record ? (
-                              <div className="grid grid-cols-3 gap-3 pt-1 text-xs">
-                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
-                                  <p className="text-[10px] font-bold text-gray-500 uppercase flex items-center justify-between">
-                                    <span>Entry Time (In)</span>
-                                    {isLateTime(selectedDayDetail.record.entryTime) && (
-                                      <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase tracking-wider animate-pulse">LATE</span>
-                                    )}
-                                  </p>
-                                  <p className="text-sm font-bold text-emerald-700 mt-0.5">
-                                    {selectedDayDetail.record.entryTime ? formatTime(selectedDayDetail.record.entryTime) : "—"}
-                                  </p>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
-                                  <p className="text-[10px] font-bold text-gray-500 uppercase">Exit Time (Out)</p>
-                                  <p className="text-sm font-bold text-blue-700 mt-0.5">
-                                    {selectedDayDetail.record.exitTime ? formatTime(selectedDayDetail.record.exitTime) : "—"}
-                                  </p>
-                                </div>
-                                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200">
-                                  <p className="text-[10px] font-bold text-gray-500 uppercase">Duration / Status</p>
-                                  <p className="text-xs font-bold text-gray-800 mt-1">
-                                    {selectedDayDetail.record.durationMinutes
-                                      ? `${Math.floor(selectedDayDetail.record.durationMinutes / 60)}h ${selectedDayDetail.record.durationMinutes % 60}m`
-                                      : selectedDayDetail.record.status === "inside"
-                                      ? "Still on Campus"
-                                      : "Completed"}
-                                  </p>
-                                </div>
-                              </div>
-                            ) : (
-                              <p className="text-xs text-gray-500 italic pt-1">
-                                {selectedDayDetail.status === "*"
-                                  ? `College was closed on this day (${selectedDayDetail.holidayReason || "Sunday"}). No attendance recorded.`
-                                  : selectedDayDetail.status === "—"
-                                  ? "This date is in the future. Attendance will be recorded when the student scans on this day."
-                                  : "No QR scan records registered for this date (Absent)."}
-                              </p>
-                            )}
-
-                             {/* Hourly Period Attendance */}
-                             <div className="space-y-2 pt-2.5 border-t border-gray-200">
-                               <h6 className="text-[11px] font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
-                                 <Clock className="w-3.5 h-3.5 text-blue-700" />
-                                 Hourly Period Attendance
-                               </h6>
-                               {hourlyForSelectedDay.length > 0 ? (
-                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1">
-                                   {hourlyForSelectedDay.map((hr: any) => (
-                                     <div key={hr.id} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/60 border border-gray-200">
-                                       <div className="space-y-0.5">
-                                         <p className="text-xs font-bold text-gray-900">
-                                           {hr.qr_schedules?.subject || "Unknown Subject"}
-                                         </p>
-                                         <p className="text-[10px] text-gray-400 font-medium font-mono">
-                                           Period: {hr.qr_schedules?.start_time?.slice(0, 5)} - {hr.qr_schedules?.end_time?.slice(0, 5)}
-                                         </p>
-                                       </div>
-                                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${
-                                         hr.marked_present
-                                           ? "bg-emerald-950/80 text-emerald-700 border-emerald-900/30"
-                                           : "bg-red-950/80 text-red-700 border-red-900/30"
-                                       }`}>
-                                         {hr.marked_present ? "PRESENT" : "ABSENT"}
-                                       </span>
-                                     </div>
-                                   ))}
-                                 </div>
-                               ) : (
-                                 <p className="text-xs text-gray-400 italic">
-                                   No period-wise attendance records for this date.
-                                 </p>
-                               )}
-                             </div>
-                          </div>
-                        ) : (
-                          <p className="text-xs text-gray-500 italic text-center py-2.5 bg-gray-50 rounded-xl border border-gray-200">
-                            💡 Click on any date box above (P, A, *, or —) to view exact Entry & Exit scan timestamps for that day.
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="pt-4 border-t border-gray-200 flex justify-end">
-                <button
-                  onClick={() => setSelectedStudentForDetails(null)}
-                  className="px-6 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold transition-all cursor-pointer"
-                >
-                  Close Profile
-                </button>
-              </div>
-            </div>
-          </div>
+          <StudentProfileModal
+            student={selectedStudentForDetails}
+            onClose={() => setSelectedStudentForDetails(null)}
+            initialMonth={studentModalMonth}
+            holidays={holidays}
+          />
         )}
       </div>
       {/* ════════ SCANNER SETTINGS MODAL ════════ */}

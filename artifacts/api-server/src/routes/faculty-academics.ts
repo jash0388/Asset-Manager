@@ -210,7 +210,7 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
   try {
     const rawSection = (section || "").trim();
     const canonicalSection = normalizeSection(rawSection);
-    if (!canonicalSection) {
+    if (!canonicalSection && !rawSection) {
       res.json({ students: [], dates: [], matrix: {} });
       return;
     }
@@ -218,11 +218,39 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
       .from("qr_users")
       .select("id, name, unique_id, section, batch")
       .eq("role", "student")
-      .eq("section", canonicalSection)
       .order("unique_id");
 
-    const { data: users, error: userErr } = await userQuery.limit(200);
+    if (canonicalSection) {
+      userQuery = userQuery.eq("section", canonicalSection);
+    }
+
+    let { data: users, error: userErr } = await userQuery.limit(200);
     if (userErr) throw userErr;
+
+    if (!users || users.length === 0) {
+      const digitMatch = rawSection.match(/([234])\s*[-_ ]?\s*([ABC])/i);
+      const romanMatch = rawSection.match(/(IV|III|II)\s*[-_ ]?\s*([ABC])/i);
+      let pattern = "";
+      if (digitMatch) {
+        const roman = ({ "2": "II", "3": "III", "4": "IV" } as Record<string, string>)[digitMatch[1]] || digitMatch[1];
+        pattern = `%${roman}%${digitMatch[2].toUpperCase()}%`;
+      } else if (romanMatch) {
+        pattern = `%${romanMatch[1].toUpperCase()}%${romanMatch[2].toUpperCase()}%`;
+      }
+      if (pattern) {
+        const { data: fbUsers } = await supabase
+          .from("qr_users")
+          .select("id, name, unique_id, section, batch")
+          .eq("role", "student")
+          .ilike("section", pattern)
+          .order("unique_id")
+          .limit(200);
+        if (fbUsers && fbUsers.length > 0) {
+          users = fbUsers;
+        }
+      }
+    }
+
     const studentList = users || [];
 
     // 2. Fetch mentor sessions in date range
@@ -271,15 +299,8 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
             attendanceByDate[d] = "A";
           }
         } else {
-          // Default deterministic state based on roll
-          const charCode = s.unique_id ? s.unique_id.charCodeAt(s.unique_id.length - 1) : idx;
-          const isPresent = (charCode + d.charCodeAt(d.length - 1)) % 7 !== 0;
-          if (isPresent) {
-            attendanceByDate[d] = "P";
-            presentCount++;
-          } else {
-            attendanceByDate[d] = "A";
-          }
+          // No record found — mark as absent (no fake data)
+          attendanceByDate[d] = "-";
         }
       });
 
@@ -301,7 +322,7 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
     });
 
     res.json({
-      section: targetSection || "All Sections",
+      section: canonicalSection || rawSection || "All Sections",
       courseCode: courseCode || "ALL",
       fromDate: from || (effectiveDates[0] || "2026-08-25"),
       toDate: to || (effectiveDates[effectiveDates.length - 1] || "2026-08-29"),
@@ -645,26 +666,83 @@ router.get("/faculty/section-students", authMiddleware, mentorOnly, async (req: 
       .from("qr_users")
       .select("id, name, unique_id, section, batch")
       .eq("role", "student")
-      .eq("section", canonicalSection)
       .order("unique_id");
 
-    const { data: users, error } = await query.limit(200);
+    if (canonicalSection) {
+      query = query.eq("section", canonicalSection);
+    }
+
+    let { data: users, error } = await query.limit(200);
     if (error) throw error;
+
+    if (!users || users.length === 0) {
+      const digitMatch = targetSection.match(/([234])\s*[-_ ]?\s*([ABC])/i);
+      const romanMatch = targetSection.match(/(IV|III|II)\s*[-_ ]?\s*([ABC])/i);
+      let pattern = "";
+      if (digitMatch) {
+        const roman = ({ "2": "II", "3": "III", "4": "IV" } as Record<string, string>)[digitMatch[1]] || digitMatch[1];
+        pattern = `%${roman}%${digitMatch[2].toUpperCase()}%`;
+      } else if (romanMatch) {
+        pattern = `%${romanMatch[1].toUpperCase()}%${romanMatch[2].toUpperCase()}%`;
+      }
+      if (pattern) {
+        const { data: fbUsers } = await supabase
+          .from("qr_users")
+          .select("id, name, unique_id, section, batch")
+          .eq("role", "student")
+          .ilike("section", pattern)
+          .order("unique_id")
+          .limit(200);
+        if (fbUsers && fbUsers.length > 0) {
+          users = fbUsers;
+        }
+      }
+    }
 
     const userList = users || [];
 
-    const students = userList.map((u: any, idx: number) => ({
-      id: u.id,
-      rollNumber: u.unique_id,
-      name: u.name,
-      section: u.section,
-      batch: u.batch,
-      phone: "9876543210",
-      fatherPhone: "9123456780",
-      heldCount: 22,
-      totalHeld: 24,
-      status: true,
-    }));
+    // Check if attendance is already recorded for this schedule and date in qr_hourly_attendance
+    const istDate = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+    const todayDateStr = istDate.toISOString().split("T")[0];
+    const queryDate = ((req.query.date as string) || "").trim() || todayDateStr;
+
+    const hourlyMap = new Map<number, boolean>();
+    let isAlreadyRecorded = false;
+
+    if (scheduleId && !isNaN(Number(scheduleId))) {
+      const { data: hourlyRecs, error: hrErr } = await supabase
+        .from("qr_hourly_attendance")
+        .select("user_id, marked_present")
+        .eq("schedule_id", Number(scheduleId))
+        .eq("date", queryDate);
+
+      if (!hrErr && hourlyRecs && hourlyRecs.length > 0) {
+        isAlreadyRecorded = true;
+        for (const hr of hourlyRecs) {
+          hourlyMap.set(hr.user_id, hr.marked_present === true);
+        }
+      }
+    }
+
+    const students = userList.map((u: any, idx: number) => {
+      let isPresent = true;
+      if (isAlreadyRecorded) {
+        isPresent = hourlyMap.has(u.id) ? Boolean(hourlyMap.get(u.id)) : false;
+      }
+      return {
+        id: u.id,
+        rollNumber: u.unique_id,
+        name: u.name,
+        section: u.section,
+        batch: u.batch,
+        phone: "9876543210",
+        fatherPhone: "9123456780",
+        heldCount: 22,
+        totalHeld: 24,
+        status: isPresent,
+        isRecorded: isAlreadyRecorded,
+      };
+    });
 
     res.json(students);
   } catch (err: any) {

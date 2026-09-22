@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
+import StudentProfileModal from "@/components/StudentProfileModal";
 import {
   Building2,
   Users,
@@ -146,88 +147,7 @@ class TrainingErrorBoundary extends Component<{ children: ReactNode }, { hasErro
   }
 }
 
-// ─── Student Profile Modal ───────────────────────────────────────────────────
-function StudentProfileModal({ student, trainingStartDate, onClose }: { student: Student; trainingStartDate?: string; onClose: () => void }) {
-  const { data: report, isLoading } = useQuery({
-    queryKey: ["parent-report", student.uniqueId],
-    queryFn: () => apiFetch(`/api/parent/student-report?rollNumber=${encodeURIComponent(student.uniqueId)}`),
-    enabled: !!student.uniqueId,
-  });
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[88vh] overflow-hidden shadow-2xl flex flex-col border border-slate-200">
-        <div className="bg-slate-900 text-white p-5 flex items-start justify-between border-b border-slate-800">
-          <div>
-            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-0.5">STUDENT ATTENDANCE PROFILE</span>
-            <h2 className="text-lg font-black text-white">{student.name}</h2>
-            <p className="text-xs text-slate-300 font-mono mt-0.5">{student.uniqueId} • {student.section || "N/A"}</p>
-            
-            <div className="mt-2.5 flex items-center gap-2 flex-wrap">
-              <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
-                🏢 Started: {trainingStartDate || "August 19, 2026"}
-              </span>
-              <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
-                📱 Attendance: Faculty App
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="p-5 overflow-y-auto space-y-4">
-          {isLoading && (
-            <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-              <span className="text-xs font-semibold">Loading student attendance records...</span>
-            </div>
-          )}
-          {report && (
-            <>
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { label: "Tracked Days", value: report.stats?.totalDays ?? "—", color: "text-blue-900", bg: "bg-blue-50 border-blue-200" },
-                  { label: "Present Days", value: report.stats?.presentDays ?? "—", color: "text-emerald-900", bg: "bg-emerald-50 border-emerald-200" },
-                  { label: "Absent Days", value: report.stats?.absentDays ?? "—", color: "text-rose-900", bg: "bg-rose-50 border-rose-200" },
-                  { label: "Attendance %", value: report.stats?.attendancePercentage ? `${report.stats.attendancePercentage}%` : "—", color: "text-indigo-900", bg: "bg-indigo-50 border-indigo-200" },
-                ].map(stat => (
-                  <div key={stat.label} className={`text-center p-2.5 rounded-xl border ${stat.bg}`}>
-                    <div className={`text-base font-black ${stat.color}`}>{stat.value}</div>
-                    <div className="text-[10px] text-slate-600 font-semibold mt-0.5">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1 text-xs">
-                <span className="text-[10.5px] font-bold text-slate-600 uppercase tracking-wider block">TODAY'S CAMPUS GATE ENTRY ({report.today?.date || "Today"})</span>
-                {report.today?.entryTime ? (
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="font-semibold text-slate-800">
-                      🟢 <strong>Entry:</strong> {new Date(report.today.entryTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}
-                    </span>
-                    <span className="font-semibold text-slate-800">
-                      ⚫ <strong>Exit:</strong> {report.today.exitTime ? new Date(report.today.exitTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }) : "Inside Campus"}
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                      Status: {report.today.gateStatus || "PRESENT"}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="text-rose-700 font-semibold">❌ No gate scan record recorded for today</div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Manage Sub-Sessions / Batches Modal ──────────────────────────────────────
 function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
@@ -1554,7 +1474,6 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
       {selectedStudent && (
         <StudentProfileModal
           student={selectedStudent}
-          trainingStartDate="August 19, 2026"
           onClose={() => setSelectedStudent(null)}
         />
       )}
