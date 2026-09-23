@@ -756,6 +756,9 @@ export default function HodDashboard() {
     const tab = params.get("tab");
     if (tab === "flags") return "flags";
     if (tab === "student-analytics") return "student-analytics";
+    if (tab === "logs") return "logs";
+    if (tab === "mentors") return "mentors";
+    if (tab === "schedules") return "schedules";
     return "summary";
   });
 
@@ -785,6 +788,14 @@ export default function HodDashboard() {
         setActiveTab("flags");
       } else if (tab === "student-analytics") {
         setActiveTab("student-analytics");
+      } else if (tab === "logs") {
+        setActiveTab("logs");
+      } else if (tab === "mentors") {
+        setActiveTab("mentors");
+      } else if (tab === "schedules") {
+        setActiveTab("schedules");
+      } else if (tab === "summary") {
+        setActiveTab("summary");
       } else if (!params.has("tab")) {
         setActiveTab((prev) => (prev === "flags" || prev === "student-analytics" ? "summary" : prev));
       }
@@ -2637,93 +2648,95 @@ export default function HodDashboard() {
     <Layout>
       <div className="px-4 py-3 max-w-6xl mx-auto space-y-3 font-sans">
         
-        {/* Header section (only show when NOT on Risk Flag Analytics tab) */}
-        {activeTab !== "flags" && (
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                <GraduationCap className="w-5 h-5 text-white" />
+        {/* Header section & Top Module Navigation Bar (only show on main HOD Dashboard views) */}
+        {activeTab !== "flags" && activeTab !== "student-analytics" && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                  <GraduationCap className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-extrabold text-gray-800 tracking-tight leading-tight">HOD Dashboard</h1>
+                  <p className="text-[11px] text-gray-400 font-medium -mt-0.5">Department of Data Science (DS)</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-extrabold text-gray-800 tracking-tight leading-tight">HOD Dashboard</h1>
-                <p className="text-[11px] text-gray-400 font-medium -mt-0.5">Department of Data Science (DS)</p>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={openPwdModal}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:border-blue-400 hover:shadow-md text-gray-500 hover:text-blue-600 font-semibold text-xs transition-all cursor-pointer"
+                  title="Change scanner passcode"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Settings</span>
+                </button>
+                <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-2.5 py-2 shadow-sm hover:border-blue-400 transition-colors">
+                  <Calendar className="w-3.5 h-3.5 text-blue-600 pointer-events-none" />
+                  <input
+                    type="date"
+                    value={activeTab === "summary" ? selectedDate : logDate}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setSelectedDate(e.target.value);
+                        setLogDate(e.target.value);
+                      }
+                    }}
+                    className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer [color-scheme:light]"
+                  />
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2">
+
+            {/* Top Module Navigation Bar */}
+            <div className="flex flex-wrap items-center bg-slate-100/90 border border-slate-200 p-1 rounded-xl w-fit shadow-2xs gap-1">
               <button
-                onClick={openPwdModal}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:border-blue-400 hover:shadow-md text-gray-500 hover:text-blue-600 font-semibold text-xs transition-all"
-                title="Change scanner passcode"
+                onClick={() => setActiveTab("summary")}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "summary"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                }`}
               >
-                <Settings className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Settings</span>
+                <Grid3X3 className="w-3.5 h-3.5" />
+                Summary
               </button>
-              <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-2.5 py-2 shadow-sm hover:border-blue-400 transition-colors">
-                <Calendar className="w-3.5 h-3.5 text-blue-600 pointer-events-none" />
-                <input
-                  type="date"
-                  value={activeTab === "summary" ? selectedDate : logDate}
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setSelectedDate(e.target.value);
-                      setLogDate(e.target.value);
-                    }
-                  }}
-                  className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer [color-scheme:light]"
-                />
-              </div>
+              <button
+                onClick={() => setActiveTab("logs")}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "logs"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                }`}
+              >
+                <ClipboardList className="w-3.5 h-3.5" />
+                Logs
+              </button>
+              <button
+                onClick={() => setActiveTab("mentors")}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "mentors"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                }`}
+              >
+                <GraduationCap className="w-3.5 h-3.5" />
+                Mentors
+              </button>
+              <button
+                onClick={() => setActiveTab("schedules")}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "schedules"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                Timetable
+              </button>
             </div>
           </div>
         )}
-
-        {/* Top Module Navigation Bar */}
-        <div className="flex flex-wrap items-center bg-slate-100/90 border border-slate-200 p-1 rounded-xl w-fit shadow-2xs gap-0.5">
-          <button
-            onClick={() => setActiveTab("summary")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "summary"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-            }`}
-          >
-            <Grid3X3 className="w-3.5 h-3.5" />
-            Summary
-          </button>
-          <button
-            onClick={() => setActiveTab("logs")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "logs"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-            }`}
-          >
-            <ClipboardList className="w-3.5 h-3.5" />
-            Logs
-          </button>
-          <button
-            onClick={() => setActiveTab("mentors")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "mentors"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-            }`}
-          >
-            <GraduationCap className="w-3.5 h-3.5" />
-            Mentors
-          </button>
-          <button
-            onClick={() => setActiveTab("schedules")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "schedules"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-            }`}
-          >
-            <Calendar className="w-3.5 h-3.5" />
-            Timetable
-          </button>
-        </div>
 
         {activeTab === "summary" ? (
           <>
@@ -2887,385 +2900,309 @@ export default function HodDashboard() {
             )}
           </>
         ) : activeTab === "logs" ? (
-          <div className="space-y-2.5">
-            {/* ── ACTIONABLE COMMAND CENTER HEADER & FILTER BAR ── */}
-            <div className="bg-white border border-gray-200 p-2.5 sm:p-3 rounded-xl shadow-xs space-y-2.5">
-              {/* Header Strip */}
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse" />
-                    <h2 className="text-sm font-black text-gray-900 tracking-tight">
-                      Daily Problem Areas & Student Accountability
-                    </h2>
-                    <span className="px-2.5 py-1 rounded-md bg-rose-100 border border-rose-300 text-rose-950 text-xs font-black">
-                      {problemStats.lateCount + problemStats.unscannedCount} Attention Needed
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-700 mt-1 font-semibold">
-                    College starts: <span className="font-black text-gray-950">09:00 AM</span> • Late threshold: <span className="font-black text-amber-950 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">09:30 AM</span> • Unscanned marked <span className="font-black text-red-950 bg-red-100 px-1.5 py-0.5 rounded border border-red-300">Absent</span>
-                  </p>
+          <div className="space-y-3.5">
+            {/* ── 1. CLEAN TOP HEADER STRIP ── */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center flex-shrink-0">
+                  <ClipboardList className="w-5 h-5" />
                 </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <button
-                    onClick={() => {
-                      setBulkMessageType("late");
-                      setBulkMessageModalOpen(true);
-                    }}
-                    className="h-8 flex items-center gap-1.5 px-3 rounded-lg bg-rose-100 hover:bg-rose-200 border-2 border-rose-400 text-rose-950 font-black text-xs transition-all shadow-xs cursor-pointer"
-                    title="Send bulk WhatsApp/SMS notice to parents of late or unscanned students"
-                  >
-                    <Send className="w-3.5 h-3.5 text-rose-700" />
-                    <span>Notify Parents</span>
-                    {selectedStudentIds.length > 0 && (
-                      <span className="px-1.5 py-0.2 bg-rose-200 text-rose-950 border border-rose-300 rounded text-[10px] font-black">
-                        {selectedStudentIds.length}
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-base font-extrabold text-slate-900 tracking-tight">
+                      Daily Student Attendance Logs
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold">
+                      {problemStats.totalEnrolled} Students
+                    </span>
+                    {problemStats.lateCount + problemStats.unscannedCount > 0 && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                        {problemStats.lateCount + problemStats.unscannedCount} Attention Needed
                       </span>
                     )}
-                  </button>
-
-                  <button
-                    onClick={handleExportProblemCsv}
-                    className="h-8 flex items-center gap-1.5 px-2.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 border-2 border-emerald-400 text-emerald-950 font-black text-xs transition-colors shadow-xs cursor-pointer"
-                    title="Export detailed problem report with delay minutes, mentor and remarks"
-                  >
-                    <Download className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>Problem Report</span>
-                  </button>
-
-                  <button
-                    onClick={() => setHolidayModalOpen(true)}
-                    className="h-8 flex items-center gap-1 px-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
-                  >
-                    <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Holidays</span>
-                  </button>
-
-                  <button
-                    onClick={() => setExportModalOpen(true)}
-                    className="h-8 flex items-center gap-1.5 px-2.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-950 border-2 border-blue-400 font-black text-xs transition-colors cursor-pointer"
-                    title="Open Monthly Attendance Register"
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-blue-700" />
-                    <span>Register</span>
-                  </button>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    College Start: <span className="font-semibold text-slate-700">09:00 AM</span> • Late Cutoff: <span className="font-semibold text-slate-700">09:30 AM</span> • Attendance Date: <span className="font-semibold text-slate-700 font-mono">{logDate}</span>
+                  </p>
                 </div>
               </div>
 
-              {/* Filters Row: Date, Section, Mentor, Sort, Search */}
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
-                  {/* Date Input */}
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={logDate}
-                      onChange={(e) => {
-                        setLogDate(e.target.value);
-                        setLogCurrentPage(1);
-                      }}
-                      className="h-8 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 [color-scheme:light] cursor-pointer"
-                      title="Select Attendance Date"
-                    />
-                  </div>
-
-                  {/* Section Select */}
-                  <div className="relative">
-                    <select
-                      value={selectedSectionFilter}
-                      onChange={(e) => {
-                        setSelectedSectionFilter(e.target.value);
-                        setLogCurrentPage(1);
-                      }}
-                      className="h-8 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 cursor-pointer"
-                    >
-                      <option value="All">All Sections ({deptStudents.length})</option>
-                      <option value="2A">2A CSE Data Science</option>
-                      <option value="2B">2B CSE Data Science</option>
-                      <option value="2C">2C CSE Data Science</option>
-                      <option value="3A">3A CSE Data Science</option>
-                      <option value="3B">3B CSE Data Science</option>
-                      <option value="3C">3C CSE Data Science</option>
-                      <option value="3D">3D CSE Data Science</option>
-                      <option value="4A">4A CSE Data Science</option>
-                      <option value="4B">4B CSE Data Science</option>
-                    </select>
-                  </div>
-
-                  {/* Mentor Filter */}
-                  <div className="relative">
-                    <select
-                      value={selectedMentorFilter}
-                      onChange={(e) => {
-                        setSelectedMentorFilter(e.target.value);
-                        setLogCurrentPage(1);
-                      }}
-                      className="h-8 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-bold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 cursor-pointer"
-                      title="Filter students by assigned faculty mentor"
-                    >
-                      <option value="All">All Faculty Mentors</option>
-                      {OFFICIAL_FACULTY_LIST.map((m) => (
-                        <option key={m.id} value={m.name}>
-                          {m.name} ({m.section || m.role})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Sort Field */}
-                  <div className="relative">
-                    <select
-                      value={logSortField}
-                      onChange={(e) => {
-                        setLogSortField(e.target.value as any);
-                        setLogCurrentPage(1);
-                      }}
-                      className="h-8 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
-                      title="Sort logs"
-                    >
-                      <option value="severity">🔥 Sort: Problem Severity (Repeat & Delay)</option>
-                      <option value="entryTime">🕒 Sort: Entry Time</option>
-                      <option value="name">👤 Sort: Student Name</option>
-                      <option value="uniqueId">🆔 Sort: Roll Number</option>
-                      <option value="section">🏫 Sort: Section</option>
-                    </select>
-                  </div>
-
-                  {/* Search Input with quick clear */}
-                  <div className="relative flex-1 min-w-[180px] max-w-sm">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search student, roll, mentor, remark..."
-                      value={logSearchQuery}
-                      onChange={(e) => {
-                        setLogSearchQuery(e.target.value);
-                        setLogCurrentPage(1);
-                      }}
-                      className="w-full h-8 pl-8 pr-7 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 text-xs font-medium focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                    />
-                    {logSearchQuery && (
-                      <button
-                        onClick={() => {
-                          setLogSearchQuery("");
-                          setLogCurrentPage(1);
-                        }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* View Mode Pills (Light tinted backgrounds with Dark Colored text - No White text!) */}
-              <div className="flex items-center gap-1.5 pt-1 border-t border-gray-100 overflow-x-auto text-[11px]">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mr-1 flex items-center gap-1">
-                  <SlidersHorizontal className="w-3 h-3" /> Focus:
-                </span>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
-                  onClick={() => { setLogViewMode("problems"); setLogCurrentPage(1); }}
-                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    logViewMode === "problems"
-                      ? "bg-rose-200 border-2 border-rose-600 text-rose-950 ring-2 ring-rose-300"
-                      : "bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-950"
-                  }`}
+                  onClick={() => {
+                    setBulkMessageType("late");
+                    setBulkMessageModalOpen(true);
+                  }}
+                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                  title="Send bulk notice to parents"
                 >
-                  <Flame className="w-3.5 h-3.5 text-rose-700" />
-                  <span>Problem Areas ({problemStats.lateCount + problemStats.unscannedCount})</span>
+                  <Send className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Notify Parents</span>
+                  {selectedStudentIds.length > 0 && (
+                    <span className="px-1.5 py-0.5 bg-rose-600 text-white rounded-full text-[10px] font-black">
+                      {selectedStudentIds.length}
+                    </span>
+                  )}
                 </button>
+
                 <button
-                  onClick={() => { setLogViewMode("late"); setLogCurrentPage(1); }}
-                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    logViewMode === "late"
-                      ? "bg-amber-200 border-2 border-amber-600 text-amber-950 ring-2 ring-amber-300"
-                      : "bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950"
-                  }`}
+                  onClick={handleExportProblemCsv}
+                  className="h-9 flex items-center gap-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+                  title="Export Attendance Logs as CSV"
                 >
-                  <span>Late Comers ({problemStats.lateCount})</span>
+                  <Download className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Export CSV</span>
                 </button>
+
                 <button
-                  onClick={() => { setLogViewMode("unscanned"); setLogCurrentPage(1); }}
-                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    logViewMode === "unscanned"
-                      ? "bg-red-200 border-2 border-red-600 text-red-950 ring-2 ring-red-300"
-                      : "bg-red-50 hover:bg-red-100 border border-red-300 text-red-950"
-                  }`}
+                  onClick={() => setExportModalOpen(true)}
+                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                  title="Open Monthly Attendance Register"
                 >
-                  <span>Not Scanned ({problemStats.unscannedCount})</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-slate-300" />
+                  <span>Monthly Register</span>
                 </button>
+
                 <button
-                  onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
-                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer ${
-                    logViewMode === "all"
-                      ? "bg-slate-200 border-2 border-slate-600 text-slate-950 ring-2 ring-slate-300"
-                      : "bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-900"
-                  }`}
+                  onClick={() => setHolidayModalOpen(true)}
+                  className="h-9 flex items-center gap-1.5 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-xs transition-colors cursor-pointer"
+                  title="Configure Holidays"
                 >
-                  Full Registry ({eligibleSectionStudents.length})
-                </button>
-                <button
-                  onClick={() => { setLogViewMode("comparison"); setLogCurrentPage(1); }}
-                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    logViewMode === "comparison"
-                      ? "bg-indigo-200 border-2 border-indigo-600 text-indigo-950 ring-2 ring-indigo-300"
-                      : "bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-950"
-                  }`}
-                >
-                  <BarChart2 className="w-3.5 h-3.5 text-indigo-700" />
-                  <span>Section Comparison</span>
-                </button>
-                <button
-                  onClick={() => { setLogViewMode("trend"); setLogCurrentPage(1); }}
-                  className={`px-3 py-1 rounded-full font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    logViewMode === "trend"
-                      ? "bg-purple-200 border-2 border-purple-600 text-purple-950 ring-2 ring-purple-300"
-                      : "bg-purple-50 hover:bg-purple-100 border border-purple-300 text-purple-950"
-                  }`}
-                >
-                  <TrendingUp className="w-3.5 h-3.5 text-purple-700" />
-                  <span>Weekly Trend</span>
+                  <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Holidays</span>
                 </button>
               </div>
             </div>
 
-            {/* ── DAILY PROBLEM SEVERITY KPI COUNTER STRIP ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              {/* Late Comers */}
-              <div
-                onClick={() => { setLogViewMode("late"); setLogCurrentPage(1); }}
-                className={`bg-white rounded-2xl p-3.5 shadow-xs cursor-pointer transition-all border-2 ${
-                  logViewMode === "late"
-                    ? "border-amber-500 ring-2 ring-amber-200"
-                    : "border-gray-200 hover:border-amber-400"
-                }`}
-              >
+            {/* ── 2. LOW-PROFILE 4-CARD KPI STRIP ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Scanned</span>
+                <div className="text-2xl font-black text-slate-900 mt-1">{problemStats.scannedCount}</div>
+                <div className="text-xs text-slate-500 font-medium mt-0.5">{problemStats.attendanceRate}% of strength</div>
+              </div>
+
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                    <span>Late Arrivals</span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-amber-950 text-xs font-black">
-                    {">9:30 AM"}
-                  </span>
+                  <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">On-Time Arrivals</span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">&lt;9:30 AM</span>
                 </div>
-                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
-                  {problemStats.lateCount}
+                <div className="text-2xl font-black text-emerald-700 mt-1">{Math.max(0, problemStats.scannedCount - problemStats.lateCount)}</div>
+                <div className="text-xs text-emerald-600 font-medium mt-0.5">{problemStats.punctualityRate}% punctuality score</div>
+              </div>
+
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Late Arrivals</span>
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">&gt;9:30 AM</span>
                 </div>
-                <div className="text-xs text-amber-950 font-bold mt-1.5 flex items-center gap-1">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                  <span>{problemStats.chronicLateCount} Repeat Offenders</span>
+                <div className="text-2xl font-black text-amber-700 mt-1">{problemStats.lateCount}</div>
+                <div className="text-xs text-amber-600 font-medium mt-0.5">{problemStats.chronicLateCount} repeat late</div>
+              </div>
+
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-rose-600 uppercase tracking-wider block">Not Scanned</span>
+                  <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">Absent</span>
+                </div>
+                <div className="text-2xl font-black text-rose-700 mt-1">{problemStats.unscannedCount}</div>
+                <div className="text-xs text-rose-600 font-medium mt-0.5">0 gate scans today</div>
+              </div>
+            </div>
+
+            {/* ── 3. UNIFIED CONTROL & FILTER BAR ── */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs space-y-3">
+              {/* Top Row: Status Tabs + Subview switcher */}
+              <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      logViewMode === "all"
+                        ? "bg-slate-900 text-white shadow-xs"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/70"
+                    }`}
+                  >
+                    All Students ({problemStats.totalEnrolled})
+                  </button>
+                  <button
+                    onClick={() => { setLogViewMode("problems"); setLogCurrentPage(1); }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      logViewMode === "problems"
+                        ? "bg-rose-700 text-white shadow-xs"
+                        : "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                    }`}
+                  >
+                    <Flame className="w-3 h-3 text-rose-500" />
+                    <span>Attention Needed ({problemStats.lateCount + problemStats.unscannedCount})</span>
+                  </button>
+                  <button
+                    onClick={() => { setLogViewMode("late"); setLogCurrentPage(1); }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      logViewMode === "late"
+                        ? "bg-amber-600 text-white shadow-xs"
+                        : "bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200"
+                    }`}
+                  >
+                    Late Arrivals ({problemStats.lateCount})
+                  </button>
+                  <button
+                    onClick={() => { setLogViewMode("unscanned"); setLogCurrentPage(1); }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      logViewMode === "unscanned"
+                        ? "bg-rose-600 text-white shadow-xs"
+                        : "bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    Not Scanned ({problemStats.unscannedCount})
+                  </button>
+                </div>
+
+                {/* Sub-view switcher */}
+                <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+                  <button
+                    onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                      logViewMode !== "comparison" && logViewMode !== "trend"
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    title="Student Logs Table"
+                  >
+                    <LayoutList className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Table</span>
+                  </button>
+                  <button
+                    onClick={() => { setLogViewMode("comparison"); setLogCurrentPage(1); }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                      logViewMode === "comparison"
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    title="Section Punctuality Comparison"
+                  >
+                    <BarChart2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Section Matrix</span>
+                  </button>
+                  <button
+                    onClick={() => { setLogViewMode("trend"); setLogCurrentPage(1); }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                      logViewMode === "trend"
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    title="Weekly Attendance & Late Trend"
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Trend</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Not Scanned */}
-              <div
-                onClick={() => { setLogViewMode("unscanned"); setLogCurrentPage(1); }}
-                className={`bg-white rounded-2xl p-3.5 shadow-xs cursor-pointer transition-all border-2 ${
-                  logViewMode === "unscanned"
-                    ? "border-red-500 ring-2 ring-red-200"
-                    : "border-gray-200 hover:border-red-400"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-red-950 uppercase tracking-wider flex items-center gap-1.5">
-                    <XCircle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
-                    <span>Not Scanned</span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-red-100 border border-red-300 text-red-950 text-xs font-black">
-                    Absent
-                  </span>
-                </div>
-                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
-                  {problemStats.unscannedCount}
-                </div>
-                <div className="text-xs text-red-950 font-bold mt-1.5 flex items-center gap-1">
-                  <AlertOctagon className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
-                  <span>0 Gate Scans Today</span>
-                </div>
-              </div>
+              {/* Bottom Row: Filters & Search */}
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
+                <div className="flex flex-wrap items-center gap-2 flex-1">
+                  {/* Section Filter */}
+                  <select
+                    value={selectedSectionFilter}
+                    onChange={(e) => {
+                      setSelectedSectionFilter(e.target.value);
+                      setLogCurrentPage(1);
+                    }}
+                    className="h-8.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                  >
+                    <option value="All">All Sections ({deptStudents.length})</option>
+                    <option value="2A">2A CSE Data Science</option>
+                    <option value="2B">2B CSE Data Science</option>
+                    <option value="2C">2C CSE Data Science</option>
+                    <option value="3A">3A CSE Data Science</option>
+                    <option value="3B">3B CSE Data Science</option>
+                    <option value="3C">3C CSE Data Science</option>
+                    <option value="3D">3D CSE Data Science</option>
+                    <option value="4A">4A CSE Data Science</option>
+                    <option value="4B">4B CSE Data Science</option>
+                  </select>
 
-              {/* Excuses / Documented Remarks */}
-              <div className="bg-white rounded-2xl p-3.5 shadow-xs border-2 border-gray-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-blue-950 uppercase tracking-wider flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                    <span>Excused / Remarks</span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-blue-100 border border-blue-300 text-blue-950 text-xs font-black">
-                    Valid
-                  </span>
-                </div>
-                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
-                  {problemStats.excusedCount}
-                </div>
-                <div className="text-xs text-blue-950 font-bold mt-1.5 flex items-center gap-1 truncate">
-                  <CheckCircle className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                  <span>Bus Delay / Medical / OD</span>
-                </div>
-              </div>
+                  {/* Mentor Filter */}
+                  <select
+                    value={selectedMentorFilter}
+                    onChange={(e) => {
+                      setSelectedMentorFilter(e.target.value);
+                      setLogCurrentPage(1);
+                    }}
+                    className="h-8.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                  >
+                    <option value="All">All Faculty Mentors</option>
+                    {OFFICIAL_FACULTY_LIST.map((m) => (
+                      <option key={m.id} value={m.name}>
+                        {m.name} ({m.section || m.role})
+                      </option>
+                    ))}
+                  </select>
 
-              {/* Punctual & On Campus */}
-              <div className="bg-white rounded-2xl p-3.5 shadow-xs border-2 border-gray-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                    <span>On-Time Arrivals</span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-black">
-                    &lt;9:30 AM
-                  </span>
+                  {/* Sort Field */}
+                  <select
+                    value={logSortField}
+                    onChange={(e) => {
+                      setLogSortField(e.target.value as any);
+                      setLogCurrentPage(1);
+                    }}
+                    className="h-8.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                  >
+                    <option value="entryTime">Sort: Entry Time</option>
+                    <option value="severity">Sort: Problem Severity</option>
+                    <option value="name">Sort: Student Name</option>
+                    <option value="uniqueId">Sort: Roll Number</option>
+                    <option value="section">Sort: Section</option>
+                  </select>
                 </div>
-                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
-                  {Math.max(0, problemStats.scannedCount - problemStats.lateCount)}
-                </div>
-                <div className="text-xs text-emerald-950 font-bold mt-1.5 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse flex-shrink-0" />
-                  <span>{problemStats.onCampusCount} Active Inside</span>
-                </div>
-              </div>
 
-              {/* Punctuality Rate Index */}
-              <div className="bg-white rounded-2xl p-3.5 shadow-xs border-2 border-gray-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-purple-950 uppercase tracking-wider flex items-center gap-1.5">
-                    <BarChart2 className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
-                    <span>Punctuality Score</span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md bg-purple-100 border border-purple-300 text-purple-950 text-xs font-black">
-                    Score
-                  </span>
-                </div>
-                <div className="text-3xl font-black text-gray-950 font-mono mt-2 tracking-tight">
-                  {problemStats.punctualityRate}%
-                </div>
-                <div className="text-xs text-purple-950 font-bold mt-1.5 flex items-center gap-1">
-                  <TrendingUp className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
-                  <span>{problemStats.attendanceRate}% Gate Scanned</span>
+                {/* Search Bar */}
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search name, roll number..."
+                    value={logSearchQuery}
+                    onChange={(e) => {
+                      setLogSearchQuery(e.target.value);
+                      setLogCurrentPage(1);
+                    }}
+                    className="w-full h-8.5 pl-8.5 pr-7 py-1 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+                  />
+                  {logSearchQuery && (
+                    <button
+                      onClick={() => {
+                        setLogSearchQuery("");
+                        setLogCurrentPage(1);
+                      }}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* ── SECTION COMPARISON VIEW ── */}
             {logViewMode === "comparison" && (
-              <Card className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <div>
-                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                       <BarChart2 className="w-4 h-4 text-indigo-600" />
                       Section-Wise Punctuality & Accountability Matrix
                     </h3>
-                    <p className="text-[11px] text-gray-500">Hold class in-charges and mentors accountable for late comers and unscanned students.</p>
+                    <p className="text-[11px] text-slate-500">Hold class in-charges and mentors accountable for late comers and unscanned students.</p>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-gray-50 text-gray-600 text-[10px] font-bold uppercase tracking-wider border-b border-gray-200">
+                      <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
                         <th className="py-2.5 px-3">Section</th>
                         <th className="py-2.5 px-3">Class In-charge / Mentor</th>
                         <th className="py-2.5 px-3 text-center">Strength</th>
@@ -3273,45 +3210,45 @@ export default function HodDashboard() {
                         <th className="py-2.5 px-3 text-center">Late Comers</th>
                         <th className="py-2.5 px-3 text-center">Unscanned</th>
                         <th className="py-2.5 px-3 text-center">Punctuality %</th>
-                        <th className="py-2.5 px-3 text-center">Health Status</th>
+                        <th className="py-2.5 px-3 text-center">Status</th>
                         <th className="py-2.5 px-3 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 font-medium">
+                    <tbody className="divide-y divide-slate-100 font-medium">
                       {sectionComparisonStats.map((row) => (
-                        <tr key={row.secName} className="hover:bg-indigo-50/30 transition-colors">
-                          <td className="py-2.5 px-3 font-extrabold text-gray-900">
-                            <span className="px-2 py-0.5 rounded bg-gray-100 border border-gray-200 font-mono text-xs">
+                        <tr key={row.secName} className="hover:bg-indigo-50/20 transition-colors">
+                          <td className="py-2.5 px-3 font-extrabold text-slate-900">
+                            <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-xs">
                               {row.secName}
                             </span>
                           </td>
                           <td className="py-2.5 px-3">
-                            <span className="font-bold text-gray-800">{row.mentor?.name || "Not Assigned"}</span>
-                            <p className="text-[10px] text-gray-400 font-mono">{row.mentor?.email || "—"}</p>
+                            <span className="font-bold text-slate-800">{row.mentor?.name || "Not Assigned"}</span>
+                            <p className="text-[10px] text-slate-400 font-mono">{row.mentor?.email || "—"}</p>
                           </td>
-                          <td className="py-2.5 px-3 text-center font-bold text-gray-700">{row.total}</td>
+                          <td className="py-2.5 px-3 text-center font-bold text-slate-700">{row.total}</td>
                           <td className="py-2.5 px-3 text-center font-bold text-blue-700">{row.scanned}</td>
                           <td className="py-2.5 px-3 text-center">
-                            <span className={`px-2 py-0.5 rounded-full font-black text-xs ${
-                              row.late > 4 ? "bg-amber-100 text-amber-950 border border-amber-400" : row.late > 0 ? "bg-amber-50 text-amber-800" : "text-gray-400"
+                            <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
+                              row.late > 4 ? "bg-amber-100 text-amber-900 border border-amber-300" : row.late > 0 ? "bg-amber-50 text-amber-800" : "text-slate-400"
                             }`}>
                               {row.late}
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-center">
-                            <span className={`px-2 py-0.5 rounded-full font-black text-xs ${
-                              row.unscanned > 5 ? "bg-red-100 text-red-800 border border-red-300" : row.unscanned > 0 ? "bg-red-50 text-red-700" : "text-gray-400"
+                            <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
+                              row.unscanned > 5 ? "bg-rose-100 text-rose-800 border border-rose-300" : row.unscanned > 0 ? "bg-rose-50 text-rose-700" : "text-slate-400"
                             }`}>
                               {row.unscanned}
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-center">
                             <div className="flex items-center justify-center gap-1.5">
-                              <span className="font-black text-gray-900">{row.punctualityRate}%</span>
-                              <div className="w-12 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <span className="font-bold text-slate-900">{row.punctualityRate}%</span>
+                              <div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                 <div
                                   className={`h-full rounded-full ${
-                                    row.punctualityRate >= 85 ? "bg-emerald-500" : row.punctualityRate >= 70 ? "bg-amber-500" : "bg-red-500"
+                                    row.punctualityRate >= 85 ? "bg-emerald-500" : row.punctualityRate >= 70 ? "bg-amber-500" : "bg-rose-500"
                                   }`}
                                   style={{ width: `${row.punctualityRate}%` }}
                                 />
@@ -3320,16 +3257,16 @@ export default function HodDashboard() {
                           </td>
                           <td className="py-2.5 px-3 text-center">
                             {row.status === "critical" ? (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-300 flex items-center justify-center gap-1 w-max mx-auto">
-                                <AlertOctagon className="w-3 h-3" /> Critical Attention
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                Critical
                               </span>
                             ) : row.status === "warning" ? (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center justify-center gap-1 w-max mx-auto">
-                                <AlertTriangle className="w-3 h-3" /> Needs Review
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                Warning
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center justify-center gap-1 w-max mx-auto">
-                                <Check className="w-3 h-3" /> Good Health
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                Good
                               </span>
                             )}
                           </td>
@@ -3342,7 +3279,7 @@ export default function HodDashboard() {
                               }}
                               className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-[11px] transition-colors cursor-pointer"
                             >
-                              Filter Section →
+                              Filter →
                             </button>
                           </td>
                         </tr>
@@ -3350,59 +3287,59 @@ export default function HodDashboard() {
                     </tbody>
                   </table>
                 </div>
-              </Card>
+              </div>
             )}
 
             {/* ── WEEKLY TREND VIEW ── */}
             {logViewMode === "trend" && (
-              <Card className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <div>
-                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                       <TrendingUp className="w-4 h-4 text-purple-600" />
                       6-Day Department Punctuality & Late Arrival Trend
                     </h3>
-                    <p className="text-[11px] text-gray-500">Track day-by-day late entries to evaluate whether corrective actions are working.</p>
+                    <p className="text-[11px] text-slate-500">Track day-by-day late entries to evaluate whether corrective actions are working.</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
                   {weeklyTrendData.map((d) => (
-                    <div key={d.dateStr} className="p-3 bg-gray-50 rounded-xl border border-gray-200 text-center space-y-1">
-                      <span className="text-[11px] font-black text-gray-800 block">{d.dayName}</span>
-                      <span className="text-[10px] text-gray-400 font-mono block">{d.dateStr}</span>
+                    <div key={d.dateStr} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-1">
+                      <span className="text-[11px] font-black text-slate-800 block">{d.dayName}</span>
+                      <span className="text-[10px] text-slate-400 font-mono block">{d.dateStr}</span>
                       
-                      <div className="pt-1.5 border-t border-gray-200 space-y-1 text-xs">
+                      <div className="pt-1.5 border-t border-slate-200 space-y-1 text-xs">
                         <div className="flex justify-between items-center text-[11px]">
-                          <span className="text-amber-800 font-bold">Late Comers:</span>
-                          <span className="font-black text-amber-950 px-1.5 py-0.2 bg-amber-100 rounded">{d.lateCount}</span>
+                          <span className="text-amber-800 font-medium">Late:</span>
+                          <span className="font-bold text-amber-950 px-1.5 py-0.2 bg-amber-100 rounded">{d.lateCount}</span>
                         </div>
                         <div className="flex justify-between items-center text-[11px]">
-                          <span className="text-red-700 font-bold">Unscanned:</span>
-                          <span className="font-black text-red-800 px-1.5 py-0.2 bg-red-100 rounded">{d.unscannedCount}</span>
+                          <span className="text-rose-700 font-medium">Unscanned:</span>
+                          <span className="font-bold text-rose-800 px-1.5 py-0.2 bg-rose-100 rounded">{d.unscannedCount}</span>
                         </div>
                         <div className="flex justify-between items-center text-[11px]">
-                          <span className="text-purple-700 font-bold">On-Time %:</span>
-                          <span className="font-black text-purple-900">{d.punctuality}%</span>
+                          <span className="text-purple-700 font-medium">On-Time %:</span>
+                          <span className="font-bold text-purple-900">{d.punctuality}%</span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </Card>
+              </div>
             )}
 
-            {/* ── ACTIONABLE PROBLEM REGISTRY TABLE ── */}
+            {/* ── 4. STREAMLINED TABLE ── */}
             {logsLoading ? (
-              <div className="bg-white border border-gray-200 p-12 flex flex-col items-center justify-center gap-3 rounded-2xl shadow-xs">
+              <div className="bg-white border border-slate-200 p-12 flex flex-col items-center justify-center gap-3 rounded-2xl shadow-xs">
                 <Loader2 className="w-7 h-7 text-blue-600 animate-spin" />
-                <p className="text-xs font-semibold text-gray-500">Loading daily problem areas & accountability registry...</p>
+                <p className="text-xs font-semibold text-slate-500">Loading daily student attendance records...</p>
               </div>
             ) : (
-              <Card className="bg-white border border-gray-200 rounded-xl shadow-xs overflow-hidden">
+              <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
                 {/* Bulk Select Bar */}
-                <div className="p-2 sm:px-3 bg-slate-50 border-b border-gray-200 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-gray-700">
-                  <div className="flex items-center gap-3">
+                <div className="p-2.5 px-4 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-600">
+                  <div className="flex items-center gap-2.5 flex-wrap">
                     <button
                       onClick={() => {
                         if (selectedStudentIds.length === sortedProblemItems.length) {
@@ -3411,12 +3348,12 @@ export default function HodDashboard() {
                           setSelectedStudentIds(sortedProblemItems.map(i => i.student.id));
                         }
                       }}
-                      className="flex items-center gap-1.5 text-xs text-gray-700 hover:text-gray-900 font-bold cursor-pointer"
+                      className="flex items-center gap-1.5 font-bold text-slate-700 hover:text-slate-900 cursor-pointer"
                     >
                       {selectedStudentIds.length > 0 && selectedStudentIds.length === sortedProblemItems.length ? (
                         <CheckSquare className="w-4 h-4 text-blue-600" />
                       ) : (
-                        <Square className="w-4 h-4 text-gray-400" />
+                        <Square className="w-4 h-4 text-slate-400" />
                       )}
                       <span>Select All ({sortedProblemItems.length})</span>
                     </button>
@@ -3426,9 +3363,9 @@ export default function HodDashboard() {
                         const lateIds = sortedProblemItems.filter(i => i.isLate).map(i => i.student.id);
                         setSelectedStudentIds(lateIds);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 border border-amber-400 text-amber-950 text-xs font-black transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-semibold transition-colors cursor-pointer"
                     >
-                      Select All Late ({sortedProblemItems.filter(i => i.isLate).length})
+                      Select Late ({sortedProblemItems.filter(i => i.isLate).length})
                     </button>
 
                     <button
@@ -3436,28 +3373,28 @@ export default function HodDashboard() {
                         const unscannedIds = sortedProblemItems.filter(i => i.isUnscanned).map(i => i.student.id);
                         setSelectedStudentIds(unscannedIds);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-red-100 hover:bg-red-200 border border-red-400 text-red-950 text-xs font-black transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-xs font-semibold transition-colors cursor-pointer"
                     >
-                      Select All Unscanned ({sortedProblemItems.filter(i => i.isUnscanned).length})
+                      Select Unscanned ({sortedProblemItems.filter(i => i.isUnscanned).length})
                     </button>
                   </div>
 
                   {selectedStudentIds.length > 0 && (
                     <div className="flex items-center gap-2">
-                      <span className="text-blue-700 font-black">{selectedStudentIds.length} Selected</span>
+                      <span className="font-bold text-blue-700">{selectedStudentIds.length} Selected</span>
                       <button
                         onClick={() => {
                           setBulkMessageType("custom");
                           setBulkMessageModalOpen(true);
                         }}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer"
                       >
                         <Send className="w-3 h-3" />
                         <span>Broadcast to {selectedStudentIds.length} Parents</span>
                       </button>
                       <button
                         onClick={() => setSelectedStudentIds([])}
-                        className="text-gray-400 hover:text-gray-600 text-xs cursor-pointer"
+                        className="text-slate-400 hover:text-slate-600 text-xs font-medium cursor-pointer"
                       >
                         Clear
                       </button>
@@ -3465,9 +3402,9 @@ export default function HodDashboard() {
                   )}
                 </div>
 
-                <div className="overflow-x-auto max-h-[580px] overflow-y-auto scroll-smooth scrollbar-thin">
-                  <table className="w-full text-left border-collapse relative">
-                    <thead className="sticky top-0 z-20 bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-slate-50/90 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
                       <tr>
                         <th className="py-3 px-3 text-center w-10">Select</th>
                         <th
@@ -3485,10 +3422,10 @@ export default function HodDashboard() {
                         </th>
 
                         <th
-                          className="py-3 px-3 text-center cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          className="py-3 px-3 cursor-pointer hover:bg-slate-100 transition-colors select-none"
                           onClick={() => handleSort("section")}
                         >
-                          <div className="flex items-center justify-center gap-1.5">
+                          <div className="flex items-center gap-1.5">
                             <span>Class & Mentor</span>
                             {logSortField === "section" ? (
                               logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
@@ -3499,11 +3436,11 @@ export default function HodDashboard() {
                         </th>
 
                         <th
-                          className="py-3 px-3 text-center cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          className="py-3 px-3 cursor-pointer hover:bg-slate-100 transition-colors select-none"
                           onClick={() => handleSort("entryTime")}
                         >
-                          <div className="flex items-center justify-center gap-1.5">
-                            <span>Entry Time & Delay</span>
+                          <div className="flex items-center gap-1.5">
+                            <span>Gate Timing</span>
                             {logSortField === "entryTime" ? (
                               logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
                             ) : (
@@ -3512,23 +3449,9 @@ export default function HodDashboard() {
                           </div>
                         </th>
 
-                        <th
-                          className="py-3 px-3 text-center cursor-pointer hover:bg-slate-100 transition-colors select-none"
-                          onClick={() => handleSort("severity")}
-                        >
-                          <div className="flex items-center justify-center gap-1.5">
-                            <span>Severity & Frequency</span>
-                            {logSortField === "severity" ? (
-                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
-                            ) : (
-                              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-                            )}
-                          </div>
-                        </th>
+                        <th className="py-3 px-3 text-center">Status</th>
 
-                        <th className="py-3 px-3 text-center">
-                          <span>HOD Remarks</span>
-                        </th>
+                        <th className="py-3 px-3 text-center">HOD Remark</th>
 
                         <th className="py-3 px-3 text-center">Actions</th>
                       </tr>
@@ -3537,7 +3460,7 @@ export default function HodDashboard() {
                       {paginatedProblemItems.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="py-12 text-center text-slate-400 text-xs font-medium">
-                            No students match the current problem area and filter query.
+                            No students match the current filters.
                           </td>
                         </tr>
                       ) : (
@@ -3553,10 +3476,10 @@ export default function HodDashboard() {
                               className={`transition-colors group ${
                                 isSelected
                                   ? "bg-blue-50/70"
-                                  : item.severityScore === 4
-                                  ? "bg-rose-50/20 hover:bg-rose-50/40"
+                                  : item.isUnscanned
+                                  ? "hover:bg-rose-50/30"
                                   : item.isLate
-                                  ? "bg-amber-50/15 hover:bg-amber-50/30"
+                                  ? "hover:bg-amber-50/30"
                                   : "hover:bg-slate-50/60"
                               }`}
                             >
@@ -3583,14 +3506,14 @@ export default function HodDashboard() {
                               <td className="py-3 px-4">
                                 <div
                                   onClick={() => setSelectedStudentForDetails(user)}
-                                  className="flex items-center gap-2.5 cursor-pointer"
+                                  className="flex items-center gap-3 cursor-pointer group"
                                   title="Click to view student profile"
                                 >
-                                  <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase flex-shrink-0">
+                                  <div className="w-8.5 h-8.5 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase flex-shrink-0 group-hover:border-blue-400 group-hover:bg-blue-50 transition-colors">
                                     {user.name.charAt(0)}
                                   </div>
                                   <div>
-                                    <p className="text-xs font-bold text-slate-900 group-hover:text-blue-700 transition-colors leading-tight">
+                                    <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
                                       {user.name}
                                     </p>
                                     <p className="text-[11px] text-slate-500 font-mono mt-0.5">
@@ -3601,153 +3524,73 @@ export default function HodDashboard() {
                               </td>
 
                               {/* Class & Assigned Mentor */}
-                              <td className="py-3 px-3 text-center">
-                                <span className="inline-block px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-bold font-mono">
+                              <td className="py-3 px-3">
+                                <span className="inline-block px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[11px] font-bold font-mono">
                                   {sDisplayName}
                                 </span>
-                                <p className="text-[11px] font-medium text-slate-600 mt-1 truncate max-w-[140px] mx-auto flex items-center justify-center gap-1" title={item.mentor?.name || "Not Assigned"}>
-                                  <User className="w-3 h-3 text-indigo-500 flex-shrink-0" />
-                                  <span className="truncate">{item.mentor?.name || "Not Assigned"}</span>
+                                <p className="text-[11px] text-slate-600 mt-0.5 truncate max-w-[140px]" title={item.mentor?.name || "Not Assigned"}>
+                                  {item.mentor?.name || "—"}
                                 </p>
                               </td>
 
-                              {/* Entry Time & Delay */}
-                              <td className="py-3 px-3 text-center">
+                              {/* Gate Scan Timing */}
+                              <td className="py-3 px-3">
                                 {item.isUnscanned ? (
-                                  <div className="space-y-1">
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-red-100 border border-red-300 text-red-950">
-                                      <X className="w-3 h-3 text-red-700" /> NOT SCANNED
-                                    </span>
-                                    {item.hourlyInfo?.missed && item.hourlyInfo.missed.length > 0 && (
-                                      <div className="flex flex-col items-center gap-0.5 mt-1">
-                                        {item.hourlyInfo.missed.map((mc: any, mIdx: number) => (
-                                          <span key={mIdx} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 border border-rose-200 text-rose-800">
-                                            <XCircle className="w-2.5 h-2.5 text-rose-500 flex-shrink-0" />
-                                            Missed {mc.subject || "Class"} {formatScheduleTime(mc.startTime) ? `(${formatScheduleTime(mc.startTime)})` : ""}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                ) : item.status === "in_class" ? (
-                                  <div className="space-y-1">
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black bg-emerald-100 border border-emerald-300 text-emerald-950">
-                                      <CheckCircle className="w-3 h-3 text-emerald-700" /> IN CLASS
-                                    </span>
-                                    {item.record && (
-                                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-blue-800 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">
-                                        <QrCode className="w-3 h-3 text-blue-600 flex-shrink-0" />
-                                        <span>QR: {formatTime(item.record.entryTime)}</span>
-                                      </div>
-                                    )}
-                                    {item.hourlyInfo?.missed && item.hourlyInfo.missed.length > 0 && (
-                                      <div className="flex flex-col items-center gap-0.5 mt-1">
-                                        {item.hourlyInfo.missed.map((mc: any, mIdx: number) => (
-                                          <span key={mIdx} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 border border-rose-200 text-rose-800">
-                                            <XCircle className="w-2.5 h-2.5 text-rose-500 flex-shrink-0" />
-                                            Missed {mc.subject || "Class"} {formatScheduleTime(mc.startTime) ? `(${formatScheduleTime(mc.startTime)})` : ""}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 border border-rose-200 text-rose-700">
+                                    <XCircle className="w-3 h-3 text-rose-500" /> Not Scanned
+                                  </span>
                                 ) : (
-                                  <div className="space-y-0.5">
-                                    <div className="inline-flex items-center justify-center gap-1.5">
-                                      <span className="font-mono text-xs font-bold text-slate-900">{formatTime(item.record?.entryTime)}</span>
-                                      {item.isLate ? (
-                                        <span className="px-1.5 py-0.5 rounded bg-amber-100 border border-amber-300 text-amber-950 text-[10px] font-black uppercase tracking-wider">
-                                          LATE
-                                        </span>
-                                      ) : isInside ? (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-900 text-[10px] font-bold">
-                                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" /> Inside
-                                        </span>
-                                      ) : (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-medium">
-                                          Left
+                                  <div>
+                                    <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-900">
+                                      <Clock className="w-3 h-3 text-slate-400" />
+                                      <span>{formatTime(item.record?.entryTime)}</span>
+                                      {item.isLate && (
+                                        <span className="px-1.5 py-0.2 rounded bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-bold">
+                                          +{item.minutesLate}m
                                         </span>
                                       )}
                                     </div>
-                                    {item.minutesLate > 0 && (
-                                      <span className="block text-[11px] font-semibold text-amber-900">
-                                        +{item.minutesLate}m delay
+                                    {isInside && (
+                                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-semibold mt-0.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Inside Campus
                                       </span>
-                                    )}
-                                    {item.hourlyInfo?.missed && item.hourlyInfo.missed.length > 0 && (
-                                      <div className="flex flex-col items-center gap-0.5 mt-1">
-                                        {item.hourlyInfo.missed.map((mc: any, mIdx: number) => (
-                                          <span key={mIdx} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-50 border border-rose-200 text-rose-800">
-                                            <XCircle className="w-2.5 h-2.5 text-rose-500 flex-shrink-0" />
-                                            Missed {mc.subject || "Class"} {formatScheduleTime(mc.startTime) ? `(${formatScheduleTime(mc.startTime)})` : ""}
-                                          </span>
-                                        ))}
-                                      </div>
                                     )}
                                   </div>
                                 )}
                               </td>
 
-                              {/* Severity & Repeat Offenses */}
+                              {/* Status */}
                               <td className="py-3 px-3 text-center">
-                                {item.severityScore === 4 ? (
-                                  <div className="inline-block text-center">
-                                    <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 border border-rose-200 text-rose-800 inline-flex items-center gap-1 justify-center">
-                                      <ShieldAlert className="w-3 h-3 text-rose-600" /> Chronic Offender
-                                    </span>
-                                    <span className="text-[10px] text-rose-700 font-medium block mt-0.5">
-                                      {item.isLate ? `${item.monthlyLate} late entries this mo.` : `${item.monthlyAbs} total absences`}
-                                    </span>
-                                  </div>
-                                ) : item.severityScore === 3 ? (
-                                  <div className="inline-block text-center">
-                                    <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-50 border border-amber-200 text-amber-800 inline-block">
-                                      {item.isLate ? `Repeat Late (${item.monthlyLate}x)` : `Unscanned (${item.monthlyAbs} abs)`}
-                                    </span>
-                                    <span className="text-[10px] text-amber-700 font-medium block mt-0.5">
-                                      {item.monthlyLate} late this month
-                                    </span>
-                                  </div>
+                                {item.isUnscanned ? (
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 border border-rose-200 text-rose-800">
+                                    Absent
+                                  </span>
                                 ) : item.isLate ? (
-                                  <span className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-blue-50 border border-blue-200 text-blue-800 inline-block">
-                                    1st Late Today
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 border border-amber-200 text-amber-800">
+                                    Late
                                   </span>
                                 ) : (
-                                  <span className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-50 border border-emerald-200 text-emerald-800 inline-block">
+                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 border border-emerald-200 text-emerald-800">
                                     Punctual
                                   </span>
                                 )}
                               </td>
 
-                              {/* HOD Remarks / Valid Reason */}
+                              {/* HOD Remarks */}
                               <td className="py-3 px-3 text-center">
                                 {item.remark ? (
-                                  <div
+                                  <button
                                     onClick={() => {
                                       setRemarkModalData(item);
                                       setRemarkInput(item.remark?.text || "");
                                       setRemarkPreset(item.remark?.preset || "College Bus Delayed");
                                       setRemarkIsExcused(item.remark?.isExcused ?? true);
                                     }}
-                                    className="p-1.5 rounded-lg bg-blue-50/70 border border-blue-200 hover:border-blue-300 cursor-pointer transition-all max-w-[180px] mx-auto text-left"
+                                    className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-900 text-[11px] font-semibold transition-all max-w-[150px] truncate text-left cursor-pointer"
                                     title="Click to edit remark"
                                   >
-                                    <div className="flex items-center justify-between gap-1">
-                                      <span className="text-[11px] font-bold text-blue-900 truncate">
-                                        {item.remark.preset}
-                                      </span>
-                                      {item.remark.isExcused && (
-                                        <span className="px-1 py-0.2 rounded bg-emerald-100 text-emerald-800 text-[9px] font-bold flex-shrink-0">
-                                          Excused
-                                        </span>
-                                      )}
-                                    </div>
-                                    {item.remark.text && item.remark.text !== item.remark.preset && (
-                                      <p className="text-[10px] text-slate-600 truncate mt-0.5 font-normal">
-                                        {item.remark.text}
-                                      </p>
-                                    )}
-                                  </div>
+                                    {item.remark.preset}
+                                  </button>
                                 ) : (
                                   <button
                                     type="button"
@@ -3757,10 +3600,9 @@ export default function HodDashboard() {
                                       setRemarkPreset("College Bus Delayed");
                                       setRemarkIsExcused(true);
                                     }}
-                                    className="h-7 px-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 border border-slate-200 text-xs font-medium inline-flex items-center gap-1 transition-colors cursor-pointer"
+                                    className="px-2.5 py-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-dashed border-slate-300 text-[11px] font-medium transition-colors cursor-pointer"
                                   >
-                                    <Plus className="w-3 h-3 text-slate-400" />
-                                    <span>Add Remark</span>
+                                    + Add Note
                                   </button>
                                 )}
                               </td>
@@ -3774,16 +3616,16 @@ export default function HodDashboard() {
                                       setBulkMessageType(item.isLate ? "late" : "unscanned");
                                       setBulkMessageModalOpen(true);
                                     }}
-                                    className="w-7 h-7 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer"
-                                    title={`Send notice to ${user.name}'s parent`}
+                                    className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                    title={`Send parent notice to ${user.name}`}
                                   >
                                     <Send className="w-3.5 h-3.5" />
                                   </button>
 
                                   <button
                                     onClick={() => setSelectedStudentForDetails(user)}
-                                    className="w-7 h-7 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-colors cursor-pointer"
-                                    title="View student profile & attendance history"
+                                    className="p-1.5 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                                    title="Open student profile"
                                   >
                                     <Eye className="w-3.5 h-3.5" />
                                   </button>
@@ -3798,16 +3640,16 @@ export default function HodDashboard() {
                 </div>
 
                 {/* ── PAGINATION CONTROLS ── */}
-                <div className="p-2.5 sm:p-3 bg-gray-50 border-t border-gray-200 flex flex-wrap items-center justify-between gap-2.5 text-xs">
-                  <div className="text-gray-500 font-medium">
-                    Showing <span className="font-bold text-gray-900">{sortedProblemItems.length === 0 ? 0 : (safeCurrentPage - 1) * logPageSize + 1}</span> to{" "}
-                    <span className="font-bold text-gray-900">{Math.min(safeCurrentPage * logPageSize, sortedProblemItems.length)}</span> of{" "}
-                    <span className="font-bold text-gray-900">{sortedProblemItems.length}</span> students
+                <div className="p-3 px-4 bg-slate-50/90 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-600">
+                  <div className="font-medium">
+                    Showing <span className="font-bold text-slate-900">{sortedProblemItems.length === 0 ? 0 : (safeCurrentPage - 1) * logPageSize + 1}</span> to{" "}
+                    <span className="font-bold text-slate-900">{Math.min(safeCurrentPage * logPageSize, sortedProblemItems.length)}</span> of{" "}
+                    <span className="font-bold text-slate-900">{sortedProblemItems.length}</span> students
                   </div>
 
                   <div className="flex items-center gap-3">
                     {/* Rows per page */}
-                    <div className="flex items-center gap-1 text-gray-600">
+                    <div className="flex items-center gap-1 text-slate-600">
                       <span className="text-[11px]">Rows:</span>
                       <select
                         value={logPageSize}
@@ -3815,7 +3657,7 @@ export default function HodDashboard() {
                           setLogPageSize(Number(e.target.value));
                           setLogCurrentPage(1);
                         }}
-                        className="h-7 px-1.5 rounded bg-white border border-gray-300 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                        className="h-7 px-1.5 rounded-lg bg-white border border-slate-300 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
                       >
                         <option value={15}>15</option>
                         <option value={25}>25</option>
@@ -3829,7 +3671,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(1)}
                         disabled={safeCurrentPage === 1}
-                        className="p-1 rounded bg-white border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="First Page"
                       >
                         <ChevronsLeft className="w-3.5 h-3.5" />
@@ -3838,20 +3680,20 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={safeCurrentPage === 1}
-                        className="p-1 rounded bg-white border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Previous Page"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
                       </button>
 
-                      <span className="px-2 font-bold text-gray-700 text-xs">
+                      <span className="px-2 font-bold text-slate-800 text-xs">
                         Page {safeCurrentPage} of {totalPages}
                       </span>
 
                       <button
                         onClick={() => setLogCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={safeCurrentPage === totalPages}
-                        className="p-1 rounded bg-white border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Next Page"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -3860,7 +3702,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(totalPages)}
                         disabled={safeCurrentPage === totalPages}
-                        className="p-1 rounded bg-white border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Last Page"
                       >
                         <ChevronsRight className="w-3.5 h-3.5" />
@@ -3868,7 +3710,7 @@ export default function HodDashboard() {
                     </div>
                   </div>
                 </div>
-              </Card>
+              </div>
             )}
           </div>
         ) : activeTab === "mentors" ? (
