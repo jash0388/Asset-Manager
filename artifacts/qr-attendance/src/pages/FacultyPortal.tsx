@@ -78,6 +78,7 @@ interface Course {
   isLive?: boolean;
   isAttendanceTaken?: boolean;
   timingStatus?: "live" | "upcoming" | "completed" | "future_day";
+  slot?: string;
 }
 
 interface StudentAttendanceRecord {
@@ -148,11 +149,11 @@ interface AssignmentItem {
 const PERIOD_SLOTS = [
   { id: "p1", label: "09:00 AM – 10:00 AM", start: "09:00", end: "10:00" },
   { id: "p2", label: "10:00 AM – 11:00 AM", start: "10:00", end: "11:00" },
-  { id: "p3", label: "11:00 AM – 12:10 PM", start: "11:00", end: "12:10" },
+  { id: "p3", label: "11:10 AM – 12:10 PM", start: "11:10", end: "12:10" },
   { id: "p4", label: "12:10 PM – 01:10 PM", start: "12:10", end: "13:10" },
-  { id: "p5", label: "12:55 PM – 01:55 PM", start: "12:55", end: "13:55" },
-  { id: "p6", label: "01:55 PM – 02:55 PM", start: "13:55", end: "14:55" },
-  { id: "p7", label: "02:55 PM – 03:55 PM", start: "14:55", end: "15:55" },
+  { id: "p5", label: "02:00 PM – 03:00 PM", start: "14:00", end: "15:00" },
+  { id: "p6", label: "03:00 PM – 04:00 PM", start: "15:00", end: "16:00" },
+  { id: "p7", label: "04:00 PM – 05:00 PM", start: "16:00", end: "17:00" },
   { id: "p8", label: "07:00 PM – 08:30 PM", start: "19:00", end: "20:30", isEvening: true },
 ];
 
@@ -241,7 +242,7 @@ const FACULTY_DIRECTORY: Record<string, {
     name: "Mr M Yadaiah",
     email: "mrmyadaiah@gmail.com",
     role: "Assistant Professor & Subject Faculty",
-    designation: "Subject Faculty (JAVA, IPR)",
+    designation: "Subject Faculty (JAVA)",
     department: "Computer Science & Engineering (Data Science)",
     key: "104",
     erp: "EMP-SECDS104",
@@ -250,34 +251,95 @@ const FACULTY_DIRECTORY: Record<string, {
     courses: [
       { id: "c104_1", code: "JAVA", name: "JAVA Programming", type: "Theory", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c104_2", code: "JAVA", name: "JAVA Programming", type: "Theory", program: "CSE-DS", section: "DS-2C", strength: 45, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c104_3", code: "IPR", name: "Intellectual Property Rights (IPR)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c104_4", code: "IPR", name: "Intellectual Property Rights (IPR)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c104_6", code: "JAVA/DBMS LAB", name: "JAVA/DBMS Lab", type: "Practical", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c104_7", code: "JAVA/SE LAB", name: "JAVA/SE Lab", type: "Practical", program: "CSE-DS", section: "DS-2C", strength: 45, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c104_8", code: "AECS LAB", name: "AECS Lab", type: "Practical", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c104_3", code: "JAVA/DBMS LAB", name: "JAVA/DBMS Lab", type: "Practical", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Lab-101", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c104_4", code: "JAVA/SE LAB", name: "JAVA/SE Lab", type: "Practical", program: "CSE-DS", section: "DS-2C", strength: 45, room: "Lab-101", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
     ],
     mentees: [],
-    workload: []
+    workload: [
+      {
+        day: "Monday",
+        periods: [
+          { slot: "15:00 – 16:00", subject: "JAVA", section: "DS-2C", room: "Hall" },
+        ],
+      },
+      {
+        day: "Tuesday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "JAVA", section: "DS-2C", room: "Hall" },
+          { slot: "11:10 – 13:10", subject: "JAVA/DBMS LAB", section: "DS-2B", room: "Lab-101" },
+        ],
+      },
+      {
+        day: "Wednesday",
+        periods: [
+          { slot: "10:00 – 11:00", subject: "JAVA", section: "DS-2B", room: "Hall" },
+          { slot: "11:10 – 13:10", subject: "JAVA/SE LAB", section: "DS-2C", room: "Lab-101" },
+          { slot: "14:00 – 15:00", subject: "JAVA", section: "DS-2C", room: "Hall" },
+        ],
+      },
+      {
+        day: "Thursday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "JAVA", section: "DS-2C", room: "Hall" },
+          { slot: "10:00 – 11:00", subject: "JAVA", section: "DS-2B", room: "Hall" },
+        ],
+      },
+      {
+        day: "Friday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "JAVA", section: "DS-2B", room: "Hall" },
+          { slot: "15:00 – 16:00", subject: "JAVA", section: "DS-2B", room: "Hall" },
+        ],
+      },
+    ],
   },
   "105": {
     name: "Mr M Srinivasulu",
     email: "mrmsrinivasulu@gmail.com",
     role: "Assistant Professor & Class In-charge",
-    designation: "Class In-charge & Mentor (III-C)",
+    designation: "Class In-charge & Mentor (II-B)",
     department: "Computer Science & Engineering (Data Science)",
     key: "105",
     erp: "EMP-SECDS105",
-    section: "DS III/I/C",
+    section: "DS II/I/B",
     phone: "+91 98490 12349",
     courses: [
       { id: "c105_1", code: "SE", name: "Software Engineering (SE)", type: "Theory", program: "CSE-DS", section: "DS-2A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c105_2", code: "SE", name: "Software Engineering (SE)", type: "Theory", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c105_3", code: "IPR", name: "Intellectual Property Rights (IPR)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c105_5", code: "SE/JAVA LAB", name: "SE/JAVA Lab", type: "Practical", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c105_6", code: "AECS LAB", name: "AECS Lab", type: "Practical", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c105_3", code: "SE/JAVA LAB", name: "SE/JAVA Lab", type: "Practical", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Lab-101", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
     ],
     mentees: [],
-    workload: []
+    workload: [
+      {
+        day: "Monday",
+        periods: [
+          { slot: "10:00 – 11:00", subject: "SE", section: "DS-2B", room: "Hall" },
+          { slot: "11:10 – 13:10", subject: "SE/JAVA LAB", section: "DS-2B", room: "Lab-101" },
+          { slot: "14:00 – 15:00", subject: "SE", section: "DS-2A", room: "Hall" },
+        ],
+      },
+      {
+        day: "Tuesday",
+        periods: [
+          { slot: "14:00 – 15:00", subject: "SE", section: "DS-2B", room: "Hall" },
+          { slot: "15:00 – 16:00", subject: "SE", section: "DS-2A", room: "Hall" },
+        ],
+      },
+      {
+        day: "Thursday",
+        periods: [
+          { slot: "12:10 – 13:10", subject: "SE", section: "DS-2B", room: "Hall" },
+          { slot: "14:00 – 15:00", subject: "SE", section: "DS-2A", room: "Hall" },
+        ],
+      },
+      {
+        day: "Friday",
+        periods: [
+          { slot: "12:10 – 13:10", subject: "SE", section: "DS-2A", room: "Hall" },
+          { slot: "14:00 – 15:00", subject: "SE", section: "DS-2B", room: "Hall" },
+        ],
+      },
+    ],
   },
   "106": {
     name: "Mr T Shravan Kumar",
@@ -293,19 +355,52 @@ const FACULTY_DIRECTORY: Record<string, {
       { id: "c106_1", code: "PA", name: "Predictive Analytics (PA)", type: "Theory", program: "CSE-DS", section: "DS-4A", strength: 63, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c106_2", code: "PA", name: "Predictive Analytics (PA)", type: "Theory", program: "CSE-DS", section: "DS-4B", strength: 60, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c106_3", code: "IDS", name: "Introduction to Data Science (IDS)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c106_4", code: "CN", name: "Computer Networks (CN)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c106_6", code: "PA LAB", name: "Predictive Analytics Lab", type: "Practical", program: "CSE-DS", section: "DS-4A", strength: 63, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c106_7", code: "PA LAB", name: "Predictive Analytics Lab", type: "Practical", program: "CSE-DS", section: "DS-4B", strength: 60, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c106_4", code: "PA LAB", name: "Predictive Analytics Lab", type: "Practical", program: "CSE-DS", section: "DS-4A/4B", strength: 63, room: "Lab-102", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c106_5", code: "R PROG/CN LAB", name: "R Programming/CN Lab", type: "Practical", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Lab-101", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
     ],
     mentees: [],
     workload: [
-      { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }] },
-      { day: "Tuesday", periods: [{ slot: "09:00 – 11:00", subject: "PA LAB", section: "DS-4A/4B", room: "Lab" }] },
-      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }] },
-      { day: "Thursday", periods: [{ slot: "09:00 – 10:00", subject: "IDS", section: "DS-3A", room: "Hall" }] },
-      { day: "Friday", periods: [{ slot: "10:00 – 11:00", subject: "IDS/PA", section: "DS-3A/4B", room: "Hall" }, { slot: "11:10 – 12:10", subject: "IDS", section: "DS-3A", room: "Hall" }, { slot: "12:10 – 13:10", subject: "CN", section: "DS-3A", room: "Hall" }] },
-      { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }, { slot: "10:00 – 11:00", subject: "IDS", section: "DS-3A", room: "Hall" }] },
-    ]
+      {
+        day: "Monday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" },
+          { slot: "12:10 – 13:10", subject: "IDS", section: "DS-3A", room: "Hall" },
+        ],
+      },
+      {
+        day: "Tuesday",
+        periods: [
+          { slot: "09:00 – 11:00", subject: "PA LAB", section: "DS-4A/4B", room: "Lab-102" },
+          { slot: "14:00 – 16:00", subject: "R PROGRAMMING/CN LAB", section: "DS-3A", room: "Lab-101" },
+        ],
+      },
+      {
+        day: "Wednesday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" },
+        ],
+      },
+      {
+        day: "Thursday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "IDS", section: "DS-3A", room: "Hall" },
+        ],
+      },
+      {
+        day: "Friday",
+        periods: [
+          { slot: "10:00 – 11:00", subject: "PA", section: "DS-4A/4B", room: "Hall" },
+          { slot: "11:10 – 12:10", subject: "IDS", section: "DS-3A", room: "Hall" },
+        ],
+      },
+      {
+        day: "Saturday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" },
+          { slot: "10:00 – 11:00", subject: "IDS", section: "DS-3A", room: "Hall" },
+        ],
+      },
+    ],
   },
   "107": {
     name: "Mr K Bikshapathi",
@@ -321,11 +416,52 @@ const FACULTY_DIRECTORY: Record<string, {
       { id: "c107_1", code: "WSMA", name: "Web Services & Micro-services Architecture (WSMA)", type: "Theory", program: "CSE-DS", section: "DS-4A", strength: 63, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c107_2", code: "WSMA", name: "Web Services & Micro-services Architecture (WSMA)", type: "Theory", program: "CSE-DS", section: "DS-4B", strength: 60, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c107_3", code: "SE", name: "Software Engineering (SE)", type: "Theory", program: "CSE-DS", section: "DS-2C", strength: 45, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c107_4", code: "WSMA LAB", name: "WSMA Lab", type: "Practical", program: "CSE-DS", section: "DS-4A", strength: 63, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c107_5", code: "WSMA LAB", name: "WSMA Lab", type: "Practical", program: "CSE-DS", section: "DS-4B", strength: 60, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c107_4", code: "WSMA LAB", name: "WSMA Lab", type: "Practical", program: "CSE-DS", section: "DS-4A/4B", strength: 63, room: "Lab-102", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c107_5", code: "SE/DBMS LAB", name: "SE/DBMS Lab", type: "Practical", program: "CSE-DS", section: "DS-2C", strength: 45, room: "Lab-101", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
     ],
     mentees: [],
-    workload: []
+    workload: [
+      {
+        day: "Monday",
+        periods: [
+          { slot: "10:00 – 11:00", subject: "WSMA", section: "DS-4A/4B", room: "Hall" },
+          { slot: "14:00 – 15:00", subject: "SE", section: "DS-2C", room: "Hall" },
+        ],
+      },
+      {
+        day: "Tuesday",
+        periods: [
+          { slot: "11:10 – 12:10", subject: "SE", section: "DS-2C", room: "Hall" },
+        ],
+      },
+      {
+        day: "Wednesday",
+        periods: [
+          { slot: "10:00 – 11:00", subject: "WSMA", section: "DS-4A/4B", room: "Hall" },
+        ],
+      },
+      {
+        day: "Thursday",
+        periods: [
+          { slot: "09:00 – 11:00", subject: "WSMA LAB", section: "DS-4A/4B", room: "Lab-102" },
+          { slot: "11:10 – 13:10", subject: "SE/DBMS LAB", section: "DS-2C", room: "Lab-101" },
+          { slot: "14:00 – 15:00", subject: "SE", section: "DS-2C", room: "Hall" },
+        ],
+      },
+      {
+        day: "Friday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "WSMA", section: "DS-4A/4B", room: "Hall" },
+          { slot: "14:00 – 15:00", subject: "SE", section: "DS-2C", room: "Hall" },
+        ],
+      },
+      {
+        day: "Saturday",
+        periods: [
+          { slot: "10:00 – 11:00", subject: "WSMA", section: "DS-4A/4B", room: "Hall" },
+        ],
+      },
+    ],
   },
   "108": {
     name: "Mrs G Sushma",
@@ -505,6 +641,409 @@ const FACULTY_DIRECTORY: Record<string, {
   },
 };
 
+// Comprehensive Master Timetable across All Years & Sections (Yadaiah Solution)
+const DEPARTMENT_MASTER_SCHEDULE: Record<
+  string,
+  Record<string, { subject: string; faculty: string; room: string }[]>
+> = {
+  Monday: {
+    "DS-2A": [
+      { subject: "JAVA/DBMS LAB", faculty: "Dr. A. Balaram", room: "Lab-101" },
+      { subject: "JAVA/DBMS LAB", faculty: "Dr. A. Balaram", room: "Lab-101" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 401" },
+      { subject: "JAVA", faculty: "Dr. A. Balaram", room: "Hall 401" },
+      { subject: "SE", faculty: "Mr M Srinivasulu", room: "Hall 401" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 401" },
+    ],
+    "DS-2B": [
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 402" },
+      { subject: "SE", faculty: "Mr M Srinivasulu", room: "Hall 402" },
+      { subject: "SE/JAVA LAB", faculty: "Mr M Srinivasulu", room: "Lab-101" },
+      { subject: "SE/JAVA LAB", faculty: "Mr M Srinivasulu", room: "Lab-101" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 402" },
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 402" },
+    ],
+    "DS-2C": [
+      { subject: "DBMS", faculty: "Mrs G Sushma", room: "Hall 403" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 403" },
+      { subject: "SDC", faculty: "Mrs K Srinija", room: "Hall 403" },
+      { subject: "SDC", faculty: "Mrs K Srinija", room: "Hall 403" },
+      { subject: "SE", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+      { subject: "JAVA", faculty: "Mr M Yadaiah", room: "Hall 403" },
+    ],
+    "DS-3A": [
+      { subject: "KAFKA", faculty: "Mrs K Ramya", room: "Hall 411" },
+      { subject: "KAFKA", faculty: "Mrs K Ramya", room: "Hall 411" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 411" },
+      { subject: "IDS", faculty: "Mr T Shravan Kumar", room: "Hall 411" },
+      { subject: "CN/R PROG LAB", faculty: "Mrs K Sneha", room: "Lab-102" },
+      { subject: "CN/R PROG LAB", faculty: "Mrs K Sneha", room: "Lab-102" },
+    ],
+    "DS-3B": [
+      { subject: "CN", faculty: "Mrs K Sneha", room: "Hall 412" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 412" },
+      { subject: "WP", faculty: "Mrs G Sushma", room: "Hall 412" },
+      { subject: "COUNSELLING", faculty: "Mr T Shravan Kumar", room: "Hall 412" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 412" },
+      { subject: "SPORTS", faculty: "Mr T Shravan Kumar", room: "Ground" },
+    ],
+    "DS-3C": [
+      { subject: "CN", faculty: "Mrs B Gayathri", room: "Hall 417" },
+      { subject: "IDS", faculty: "Mrs A Sravanthi", room: "Hall 417" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 417" },
+      { subject: "LIBRARY", faculty: "Mr M Yadaiah", room: "Library" },
+      { subject: "WP", faculty: "Mrs K Srinija", room: "Hall 417" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 417" },
+    ],
+    "DS-4A": [
+      { subject: "PA", faculty: "Mr T Shravan Kumar", room: "Hall 421" },
+      { subject: "WSMA", faculty: "Mr K Bikshapathi", room: "Hall 421" },
+      { subject: "OE", faculty: "Dr. C. Lakshmi Nath", room: "Hall 421" },
+      { subject: "CC", faculty: "Mrs K Ramya", room: "Hall 421" },
+      { subject: "PS-I", faculty: "Mr Miskeen Ali", room: "Hall 421" },
+      { subject: "PS-I", faculty: "Mr Miskeen Ali", room: "Hall 421" },
+    ],
+    "DS-4B": [
+      { subject: "PA", faculty: "Mr T Shravan Kumar", room: "Hall 422" },
+      { subject: "WSMA", faculty: "Mr K Bikshapathi", room: "Hall 422" },
+      { subject: "NLP", faculty: "Mrs B Gayathri", room: "Hall 422" },
+      { subject: "OE", faculty: "Dr. C. Lakshmi Nath", room: "Hall 422" },
+      { subject: "PS-I", faculty: "Dr. Md Abdul Azeem", room: "Hall 422" },
+      { subject: "PS-I", faculty: "Dr. Md Abdul Azeem", room: "Hall 422" },
+    ],
+  },
+  Tuesday: {
+    "DS-2A": [
+      { subject: "SE/JAVA LAB", faculty: "Dr. A. Balaram", room: "Lab-101" },
+      { subject: "SE/JAVA LAB", faculty: "Dr. A. Balaram", room: "Lab-101" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 401" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 401" },
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 401" },
+      { subject: "SE", faculty: "Mr M Srinivasulu", room: "Hall 401" },
+    ],
+    "DS-2B": [
+      { subject: "CM LAB", faculty: "Dr. Sri Hari VLN", room: "Lab-102" },
+      { subject: "CM LAB", faculty: "Dr. Sri Hari VLN", room: "Lab-102" },
+      { subject: "JAVA/DBMS LAB", faculty: "Mr M Yadaiah", room: "Lab-101" },
+      { subject: "JAVA/DBMS LAB", faculty: "Mr M Yadaiah", room: "Lab-101" },
+      { subject: "SE", faculty: "Mr M Srinivasulu", room: "Hall 402" },
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 402" },
+    ],
+    "DS-2C": [
+      { subject: "JAVA", faculty: "Mr M Yadaiah", room: "Hall 403" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 403" },
+      { subject: "SE", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+      { subject: "COUNSELLING", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 403" },
+      { subject: "DBMS", faculty: "Mrs G Sushma", room: "Hall 403" },
+    ],
+    "DS-3A": [
+      { subject: "CN", faculty: "Mrs K Sneha", room: "Hall 411" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 411" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 411" },
+      { subject: "COUNSELLING", faculty: "Mrs G Sushma", room: "Hall 411" },
+      { subject: "R PROG/CN LAB", faculty: "Mr T Shravan Kumar", room: "Lab-101" },
+      { subject: "R PROG/CN LAB", faculty: "Mr T Shravan Kumar", room: "Lab-101" },
+    ],
+    "DS-3B": [
+      { subject: "WP", faculty: "Mrs G Sushma", room: "Hall 412" },
+      { subject: "IDS", faculty: "Mrs A Sravanthi", room: "Hall 412" },
+      { subject: "CN", faculty: "Mrs K Sneha", room: "Hall 412" },
+      { subject: "LIBRARY", faculty: "Mr T Shravan Kumar", room: "Library" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 412" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 412" },
+    ],
+    "DS-3C": [
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 417" },
+      { subject: "CN", faculty: "Mrs B Gayathri", room: "Hall 417" },
+      { subject: "WP", faculty: "Mrs K Srinija", room: "Hall 417" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 417" },
+      { subject: "IDS", faculty: "Mrs A Sravanthi", room: "Hall 417" },
+      { subject: "SPORTS", faculty: "Mr M Yadaiah", room: "Ground" },
+    ],
+    "DS-4A": [
+      { subject: "PA LAB", faculty: "Mr T Shravan Kumar", room: "Lab-102" },
+      { subject: "PA LAB", faculty: "Mr T Shravan Kumar", room: "Lab-102" },
+      { subject: "CC", faculty: "Mrs K Ramya", room: "Hall 421" },
+      { subject: "NLP", faculty: "Mrs B Gayathri", room: "Hall 421" },
+      { subject: "PS-I", faculty: "Mr Miskeen Ali", room: "Hall 421" },
+      { subject: "SPORTS", faculty: "Mrs A Sravanthi", room: "Ground" },
+    ],
+    "DS-4B": [
+      { subject: "PA LAB", faculty: "Mr T Shravan Kumar", room: "Lab-102" },
+      { subject: "PA LAB", faculty: "Mr T Shravan Kumar", room: "Lab-102" },
+      { subject: "OE", faculty: "Dr. C. Lakshmi Nath", room: "Hall 422" },
+      { subject: "CC", faculty: "Mrs K Ramya", room: "Hall 422" },
+      { subject: "PS-I", faculty: "Dr. Md Abdul Azeem", room: "Hall 422" },
+      { subject: "SPORTS", faculty: "Mrs K Sneha", room: "Ground" },
+    ],
+  },
+  Wednesday: {
+    "DS-2A": [
+      { subject: "DBMS/SE LAB", faculty: "Mrs Ch Vijaya Lakshmi", room: "Lab-101" },
+      { subject: "DBMS/SE LAB", faculty: "Mrs Ch Vijaya Lakshmi", room: "Lab-101" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 401" },
+      { subject: "JAVA", faculty: "Dr. A. Balaram", room: "Hall 401" },
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 401" },
+      { subject: "SPORTS", faculty: "Mrs B Gayathri", room: "Ground" },
+    ],
+    "DS-2B": [
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 402" },
+      { subject: "JAVA", faculty: "Mr M Yadaiah", room: "Hall 402" },
+      { subject: "SDC", faculty: "Mrs K Srinija", room: "Hall 402" },
+      { subject: "SDC", faculty: "Mrs K Srinija", room: "Hall 402" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 402" },
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 402" },
+    ],
+    "DS-2C": [
+      { subject: "CM LAB", faculty: "Dr. Sri Hari VLN", room: "Lab-102" },
+      { subject: "CM LAB", faculty: "Dr. Sri Hari VLN", room: "Lab-102" },
+      { subject: "JAVA/SE LAB", faculty: "Mr M Yadaiah", room: "Lab-101" },
+      { subject: "JAVA/SE LAB", faculty: "Mr M Yadaiah", room: "Lab-101" },
+      { subject: "JAVA", faculty: "Mr M Yadaiah", room: "Hall 403" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 403" },
+    ],
+    "DS-3A": [
+      { subject: "ARQA", faculty: "Mrs. Swathi", room: "Hall 411" },
+      { subject: "WP", faculty: "Mrs G Sushma", room: "Hall 411" },
+      { subject: "CN", faculty: "Mrs K Sneha", room: "Hall 411" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 411" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 411" },
+      { subject: "SPORTS", faculty: "Mrs G Sushma", room: "Ground" },
+    ],
+    "DS-3B": [
+      { subject: "IDS", faculty: "Mrs A Sravanthi", room: "Hall 412" },
+      { subject: "ARQA", faculty: "Mrs. Swathi", room: "Hall 412" },
+      { subject: "WP", faculty: "Mrs G Sushma", room: "Hall 412" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 412" },
+      { subject: "CN/R PROG LAB", faculty: "Mrs K Sneha", room: "Lab-101" },
+      { subject: "CN/R PROG LAB", faculty: "Mrs K Sneha", room: "Lab-101" },
+    ],
+    "DS-3C": [
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 417" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 417" },
+      { subject: "ARQA", faculty: "Mrs. Swathi", room: "Hall 417" },
+      { subject: "IDS", faculty: "Mrs A Sravanthi", room: "Hall 417" },
+      { subject: "WP", faculty: "Mrs K Srinija", room: "Hall 417" },
+      { subject: "CN", faculty: "Mrs B Gayathri", room: "Hall 417" },
+    ],
+    "DS-4A": [
+      { subject: "PA", faculty: "Mr T Shravan Kumar", room: "Hall 421" },
+      { subject: "WSMA", faculty: "Mr K Bikshapathi", room: "Hall 421" },
+      { subject: "OE", faculty: "Dr. C. Lakshmi Nath", room: "Hall 421" },
+      { subject: "NLP", faculty: "Mrs B Gayathri", room: "Hall 421" },
+      { subject: "CC", faculty: "Mrs K Ramya", room: "Hall 421" },
+      { subject: "PS-I", faculty: "Mr Miskeen Ali", room: "Hall 421" },
+    ],
+    "DS-4B": [
+      { subject: "PA", faculty: "Mr T Shravan Kumar", room: "Hall 422" },
+      { subject: "WSMA", faculty: "Mr K Bikshapathi", room: "Hall 422" },
+      { subject: "CC", faculty: "Mrs K Ramya", room: "Hall 422" },
+      { subject: "OE", faculty: "Dr. C. Lakshmi Nath", room: "Hall 422" },
+      { subject: "NLP", faculty: "Mrs B Gayathri", room: "Hall 422" },
+      { subject: "PS-I", faculty: "Dr. Md Abdul Azeem", room: "Hall 422" },
+    ],
+  },
+  Thursday: {
+    "DS-2A": [
+      { subject: "SDC", faculty: "Mrs K Srinija", room: "Hall 401" },
+      { subject: "SDC", faculty: "Mrs K Srinija", room: "Hall 401" },
+      { subject: "JAVA", faculty: "Dr. A. Balaram", room: "Hall 401" },
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 401" },
+      { subject: "SE", faculty: "Mr M Srinivasulu", room: "Hall 401" },
+      { subject: "COUNSELLING", faculty: "Mrs B Gayathri", room: "Hall 401" },
+    ],
+    "DS-2B": [
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 402" },
+      { subject: "JAVA", faculty: "Mr M Yadaiah", room: "Hall 402" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 402" },
+      { subject: "SE", faculty: "Mr M Srinivasulu", room: "Hall 402" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 402" },
+      { subject: "COUNSELLING", faculty: "Mrs K Ramya", room: "Hall 402" },
+    ],
+    "DS-2C": [
+      { subject: "JAVA", faculty: "Mr M Yadaiah", room: "Hall 403" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 403" },
+      { subject: "SE/DBMS LAB", faculty: "Mr K Bikshapathi", room: "Lab-101" },
+      { subject: "SE/DBMS LAB", faculty: "Mr K Bikshapathi", room: "Lab-101" },
+      { subject: "SE", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 403" },
+    ],
+    "DS-3A": [
+      { subject: "IDS", faculty: "Mr T Shravan Kumar", room: "Hall 411" },
+      { subject: "CN", faculty: "Mrs K Sneha", room: "Hall 411" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 411" },
+      { subject: "LIBRARY", faculty: "Mrs G Sushma", room: "Library" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 411" },
+      { subject: "WP", faculty: "Mrs G Sushma", room: "Hall 411" },
+    ],
+    "DS-3B": [
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 412" },
+      { subject: "WP", faculty: "Mrs G Sushma", room: "Hall 412" },
+      { subject: "CN", faculty: "Mrs K Sneha", room: "Hall 412" },
+      { subject: "IDS", faculty: "Mrs A Sravanthi", room: "Hall 412" },
+      { subject: "R PROG/CN LAB", faculty: "Mrs A Sravanthi", room: "Lab-101" },
+      { subject: "R PROG/CN LAB", faculty: "Mrs A Sravanthi", room: "Lab-101" },
+    ],
+    "DS-3C": [
+      { subject: "CN/R PROG LAB", faculty: "Mrs B Gayathri", room: "Lab-102" },
+      { subject: "CN/R PROG LAB", faculty: "Mrs B Gayathri", room: "Lab-102" },
+      { subject: "AECS LAB", faculty: "Ms. Vaidehi", room: "Lab-103" },
+      { subject: "AECS LAB", faculty: "Ms. Vaidehi", room: "Lab-103" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 417" },
+      { subject: "WP", faculty: "Mrs K Srinija", room: "Hall 417" },
+    ],
+    "DS-4A": [
+      { subject: "WSMA LAB", faculty: "Mr K Bikshapathi", room: "Lab-102" },
+      { subject: "WSMA LAB", faculty: "Mr K Bikshapathi", room: "Lab-102" },
+      { subject: "NLP", faculty: "Mrs B Gayathri", room: "Hall 421" },
+      { subject: "CC", faculty: "Mrs K Ramya", room: "Hall 421" },
+      { subject: "PS-I", faculty: "Mr Miskeen Ali", room: "Hall 421" },
+      { subject: "PS-I", faculty: "Mr Miskeen Ali", room: "Hall 421" },
+    ],
+    "DS-4B": [
+      { subject: "WSMA LAB", faculty: "Mr K Bikshapathi", room: "Lab-102" },
+      { subject: "WSMA LAB", faculty: "Mr K Bikshapathi", room: "Lab-102" },
+      { subject: "CC", faculty: "Mrs K Ramya", room: "Hall 422" },
+      { subject: "NLP", faculty: "Mrs B Gayathri", room: "Hall 422" },
+      { subject: "PS-I", faculty: "Dr. Md Abdul Azeem", room: "Hall 422" },
+      { subject: "PS-I", faculty: "Dr. Md Abdul Azeem", room: "Hall 422" },
+    ],
+  },
+  Friday: {
+    "DS-2A": [
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 401" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 401" },
+      { subject: "JAVA", faculty: "Dr. A. Balaram", room: "Hall 401" },
+      { subject: "SE", faculty: "Mr M Srinivasulu", room: "Hall 401" },
+      { subject: "APTITUDE", faculty: "Mr K Bikshapathi", room: "Hall 401" },
+      { subject: "APTITUDE", faculty: "Mr K Bikshapathi", room: "Hall 401" },
+    ],
+    "DS-2B": [
+      { subject: "JAVA", faculty: "Mr M Yadaiah", room: "Hall 402" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 402" },
+      { subject: "DBMS", faculty: "Mrs Ch Vijaya Lakshmi", room: "Hall 402" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 402" },
+      { subject: "SE", faculty: "Mr M Srinivasulu", room: "Hall 402" },
+      { subject: "JAVA", faculty: "Mr M Yadaiah", room: "Hall 402" },
+    ],
+    "DS-2C": [
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 403" },
+      { subject: "DBMS", faculty: "Mrs G Sushma", room: "Hall 403" },
+      { subject: "DBMS/JAVA LAB", faculty: "Mrs G Sushma", room: "Lab-101" },
+      { subject: "DBMS/JAVA LAB", faculty: "Mrs G Sushma", room: "Lab-101" },
+      { subject: "SE", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+      { subject: "SPORTS", faculty: "Mr K Bikshapathi", room: "Ground" },
+    ],
+    "DS-3A": [
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 411" },
+      { subject: "WP", faculty: "Mrs G Sushma", room: "Hall 411" },
+      { subject: "IDS", faculty: "Mr T Shravan Kumar", room: "Hall 411" },
+      { subject: "CN", faculty: "Mrs K Sneha", room: "Hall 411" },
+      { subject: "AECS LAB", faculty: "Ms. Vaidehi", room: "Lab-103" },
+      { subject: "AECS LAB", faculty: "Ms. Vaidehi", room: "Lab-103" },
+    ],
+    "DS-3B": [
+      { subject: "KAFKA", faculty: "Mrs K Ramya", room: "Hall 412" },
+      { subject: "KAFKA", faculty: "Mrs K Ramya", room: "Hall 412" },
+      { subject: "CN", faculty: "Mrs K Sneha", room: "Hall 412" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 412" },
+      { subject: "IDS", faculty: "Mrs A Sravanthi", room: "Hall 412" },
+      { subject: "DEVOPS", faculty: "Mr Miskeen Ali", room: "Hall 412" },
+    ],
+    "DS-3C": [
+      { subject: "R PROG/CN LAB", faculty: "Mrs A Sravanthi", room: "Lab-101" },
+      { subject: "R PROG/CN LAB", faculty: "Mrs A Sravanthi", room: "Lab-101" },
+      { subject: "COUNSELLING", faculty: "Mr M Yadaiah", room: "Hall 417" },
+      { subject: "IDS", faculty: "Mrs A Sravanthi", room: "Hall 417" },
+      { subject: "CN", faculty: "Mrs B Gayathri", room: "Hall 417" },
+      { subject: "ADA", faculty: "Dr. Md Abdul Azeem", room: "Hall 417" },
+    ],
+    "DS-4A": [
+      { subject: "WSMA", faculty: "Mr K Bikshapathi", room: "Hall 421" },
+      { subject: "PA", faculty: "Mr T Shravan Kumar", room: "Hall 421" },
+      { subject: "NLP", faculty: "Mrs B Gayathri", room: "Hall 421" },
+      { subject: "OE", faculty: "Dr. C. Lakshmi Nath", room: "Hall 421" },
+      { subject: "PS-I", faculty: "Mr Miskeen Ali", room: "Hall 421" },
+      { subject: "COUNSELLING", faculty: "Mrs A Sravanthi", room: "Hall 421" },
+    ],
+    "DS-4B": [
+      { subject: "WSMA", faculty: "Mr K Bikshapathi", room: "Hall 422" },
+      { subject: "PA", faculty: "Mr T Shravan Kumar", room: "Hall 422" },
+      { subject: "OE", faculty: "Dr. C. Lakshmi Nath", room: "Hall 422" },
+      { subject: "LIBRARY", faculty: "Mrs K Sneha", room: "Library" },
+      { subject: "CC", faculty: "Mrs K Ramya", room: "Hall 422" },
+      { subject: "COUNSELLING", faculty: "Mrs K Sneha", room: "Hall 422" },
+    ],
+  },
+  Saturday: {
+    "DS-2A": [
+      { subject: "CM LAB", faculty: "Dr. Sri Hari VLN", room: "Lab-102" },
+      { subject: "CM LAB", faculty: "Dr. Sri Hari VLN", room: "Lab-102" },
+      { subject: "COA", faculty: "Mrs. CH. Naga Rohini", room: "Hall 401" },
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 401" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs B Gayathri", room: "Hall 401" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs B Gayathri", room: "Hall 401" },
+    ],
+    "DS-2B": [
+      { subject: "APTITUDE", faculty: "Mrs K Ramya", room: "Hall 402" },
+      { subject: "APTITUDE", faculty: "Mrs K Ramya", room: "Hall 402" },
+      { subject: "DBMS/SE LAB", faculty: "Mrs Ch Vijaya Lakshmi", room: "Lab-101" },
+      { subject: "DBMS/SE LAB", faculty: "Mrs Ch Vijaya Lakshmi", room: "Lab-101" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs K Ramya", room: "Hall 402" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs K Ramya", room: "Hall 402" },
+    ],
+    "DS-2C": [
+      { subject: "MSF", faculty: "Mr. Rakesh Goud", room: "Hall 403" },
+      { subject: "DBMS", faculty: "Mrs G Sushma", room: "Hall 403" },
+      { subject: "APTITUDE", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+      { subject: "APTITUDE", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mr K Bikshapathi", room: "Hall 403" },
+    ],
+    "DS-3A": [
+      { subject: "WP", faculty: "Mrs G Sushma", room: "Hall 411" },
+      { subject: "IDS", faculty: "Mr T Shravan Kumar", room: "Hall 411" },
+      { subject: "IPR", faculty: "Mr. Prateek", room: "Hall 411" },
+      { subject: "IPR", faculty: "Mr. Prateek", room: "Hall 411" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs G Sushma", room: "Hall 411" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs G Sushma", room: "Hall 411" },
+    ],
+    "DS-3B": [
+      { subject: "AECS LAB", faculty: "Ms. Vaidehi", room: "Lab-103" },
+      { subject: "AECS LAB", faculty: "Ms. Vaidehi", room: "Lab-103" },
+      { subject: "IPR", faculty: "Mr. Prateek", room: "Hall 412" },
+      { subject: "IPR", faculty: "Mr. Prateek", room: "Hall 412" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mr T Shravan Kumar", room: "Hall 412" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mr T Shravan Kumar", room: "Hall 412" },
+    ],
+    "DS-3C": [
+      { subject: "KAFKA", faculty: "Mrs K Ramya", room: "Hall 417" },
+      { subject: "KAFKA", faculty: "Mrs K Ramya", room: "Hall 417" },
+      { subject: "IPR", faculty: "Mr. Prateek", room: "Hall 417" },
+      { subject: "IPR", faculty: "Mr. Prateek", room: "Hall 417" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mr M Yadaiah", room: "Hall 417" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mr M Yadaiah", room: "Hall 417" },
+    ],
+    "DS-4A": [
+      { subject: "PA", faculty: "Mr T Shravan Kumar", room: "Hall 421" },
+      { subject: "WSMA", faculty: "Mr K Bikshapathi", room: "Hall 421" },
+      { subject: "OE", faculty: "Dr. C. Lakshmi Nath", room: "Hall 421" },
+      { subject: "LIBRARY", faculty: "Mrs A Sravanthi", room: "Library" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs A Sravanthi", room: "Hall 421" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs A Sravanthi", room: "Hall 421" },
+    ],
+    "DS-4B": [
+      { subject: "PA", faculty: "Mr T Shravan Kumar", room: "Hall 422" },
+      { subject: "WSMA", faculty: "Mr K Bikshapathi", room: "Hall 422" },
+      { subject: "NLP", faculty: "Mrs B Gayathri", room: "Hall 422" },
+      { subject: "PS-I", faculty: "Dr. Md Abdul Azeem", room: "Hall 422" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs K Sneha", room: "Hall 422" },
+      { subject: "CLUB ACTIVITIES", faculty: "Mrs K Sneha", room: "Hall 422" },
+    ],
+  },
+};
+
 export const OFFICIAL_FACULTY_LIST = Object.entries(FACULTY_DIRECTORY).map(([key, data], idx) => ({
   id: idx + 1,
   name: data.name,
@@ -599,6 +1138,14 @@ export default function FacultyPortal() {
   const [loadingRoster, setLoadingRoster] = useState(false);
   const [attendanceAlreadyRecorded, setAttendanceAlreadyRecorded] = useState(false);
 
+  // Master Day Timetable State (Yadaiah Solution)
+  const [selectedDayForMasterTable, setSelectedDayForMasterTable] = useState<string>(() => {
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const today = dayNames[new Date().getDay()];
+    return DEPARTMENT_MASTER_SCHEDULE[today] ? today : "Monday";
+  });
+  const [masterTableSearch, setMasterTableSearch] = useState<string>("");
+
   // Active Faculty Profile Resolution — reads logged-in mentor from auth context or localStorage
   const storedProfile = useMemo(() => {
     try {
@@ -636,6 +1183,11 @@ export default function FacultyPortal() {
   type TodayClassItem = {
     id: string;
     scheduleId: number;
+    secondaryScheduleId?: number | null;
+    scheduleIds?: number[];
+    isDoubleHourLab?: boolean;
+    reassignmentStatus?: string;
+    reassignment?: any;
     code: string;
     name: string;
     type: string;
@@ -708,10 +1260,46 @@ export default function FacultyPortal() {
 
   const [todayClassesLoaded, setTodayClassesLoaded] = useState(false);
 
-  // Effective today classes: uses live API data directly, never flashing stale hardcoded data
+  // Effective today classes: uses live API data directly, consolidating 2-hour lab periods (Srinija feedback)
   const effectiveTodayClasses: TodayClassItem[] = useMemo(() => {
     if (todayClassesInfo?.classes && todayClassesInfo.classes.length > 0) {
-      return [...todayClassesInfo.classes].sort((a, b) => {
+      const rawList = [...todayClassesInfo.classes];
+      const merged: TodayClassItem[] = [];
+
+      for (let i = 0; i < rawList.length; i++) {
+        const current = rawList[i];
+        const next = rawList[i + 1];
+
+        const isLab = (current.code || "").toUpperCase().includes("LAB") || (current.name || "").toUpperCase().includes("LAB") || current.type === "Practical";
+
+        if (
+          isLab &&
+          next &&
+          (next.code === current.code || next.name === current.name) &&
+          next.section === current.section &&
+          !current.isDoubleHourLab &&
+          !next.isDoubleHourLab
+        ) {
+          // Merge two consecutive periods for the same lab into one single 2-hour card
+          const currentStart = current.slot ? current.slot.split("–")[0].trim() : "11:10 AM";
+          const nextEnd = next.slot && next.slot.includes("–") ? next.slot.split("–")[1].trim() : next.slot;
+          merged.push({
+            ...current,
+            id: current.id,
+            scheduleId: Number(current.scheduleId || current.id) || 0,
+            secondaryScheduleId: next.scheduleId ? Number(next.scheduleId) : (next.id ? Number(next.id) : null),
+            slot: `${currentStart} – ${nextEnd}`,
+            isDoubleHourLab: true,
+            isAttendanceTaken: current.isAttendanceTaken || next.isAttendanceTaken,
+            attendedCount: current.attendedCount ?? next.attendedCount,
+          });
+          i++; // Skip the duplicate second hour
+        } else {
+          merged.push(current);
+        }
+      }
+
+      return merged.sort((a, b) => {
         const aIsLive = a.timingStatus === "live" || a.isLive;
         const bIsLive = b.timingStatus === "live" || b.isLive;
         if (aIsLive && !bIsLive) return -1;
@@ -966,6 +1554,15 @@ export default function FacultyPortal() {
     toast({ title: "✓ Attendance Book Downloaded", description: `Exported ${bookData.students.length} students across ${(bookData.dates || []).length} class dates.` });
   };
 
+  // ── Print Cumulative Attendance Register / Save PDF (Sneha Feedback) ──
+  const handlePrintCumulativeAttendance = () => {
+    if (!bookData || !bookData.students || bookData.students.length === 0) {
+      toast({ title: "No Data", description: "No student records to print." });
+      return;
+    }
+    window.print();
+  };
+
   // Post Attendance Modal State
   const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
   const [selectedCourseForAttendance, setSelectedCourseForAttendance] = useState<Course | null>(null);
@@ -1151,13 +1748,15 @@ export default function FacultyPortal() {
       const presentCount = studentRoster.filter((s) => s.status).length;
       const totalCount = studentRoster.length;
 
-      // Submit to real Supabase attendance backend
+      // Submit to real Supabase attendance backend (including 2nd period for 2-hour labs)
+      const secSchedId = (selectedCourseForAttendance as any).secondaryScheduleId;
       await customFetch("/api/mentor/submit-attendance", {
         method: "POST",
         body: JSON.stringify({
           scheduleId: parseInt(selectedCourseForAttendance.id) || 1,
+          secondaryScheduleId: secSchedId ? parseInt(secSchedId) : undefined,
           date: attendanceDate,
-          period: currentSlotObj?.label || "Live Class",
+          period: currentSlotObj?.label || selectedCourseForAttendance.slot || "Live Class",
           students: studentRoster.map((s) => ({
             studentId: s.id,
             markedPresent: s.status,
@@ -2496,6 +3095,270 @@ export default function FacultyPortal() {
                       <p className="text-[10px] text-slate-500">Excel / PDF Export</p>
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* ════════ DEPARTMENT MASTER DAY TIMETABLE (Yadaiah Solution) ════════ */}
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="p-2 rounded-xl bg-blue-100 text-blue-800">
+                        <CalendarDays className="w-5 h-5 text-blue-600" />
+                      </span>
+                      <div>
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                          Department Master Day Timetable
+                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
+                            All Years &amp; Sections
+                          </span>
+                        </h3>
+                        <p className="text-xs text-slate-600">
+                          Complete central schedule for CSE (Data Science). Real-time view for cross-checking faculty assignments, room allotments, and slot coordination.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Day Selector Pills & Search */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                      {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((day) => {
+                        const isSelected = selectedDayForMasterTable === day;
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => setSelectedDayForMasterTable(day)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                              isSelected
+                                ? "bg-blue-600 text-white shadow-xs"
+                                : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                            }`}
+                          >
+                            {day.slice(0, 3)}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="relative min-w-[200px]">
+                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={masterTableSearch}
+                        onChange={(e) => setMasterTableSearch(e.target.value)}
+                        placeholder="Filter faculty or subject..."
+                        className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Day Schedule Matrix Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse min-w-[960px]">
+                    <thead>
+                      <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-extrabold uppercase tracking-wider text-[11px]">
+                        <th className="py-3.5 px-4 w-32 border-r border-slate-200">Section</th>
+                        <th className="py-3.5 px-3 text-center border-r border-slate-200">
+                          <div>Period 1</div>
+                          <div className="text-[10px] text-slate-500 font-mono font-normal">09:00 – 10:00</div>
+                        </th>
+                        <th className="py-3.5 px-3 text-center border-r border-slate-200">
+                          <div>Period 2</div>
+                          <div className="text-[10px] text-slate-500 font-mono font-normal">10:00 – 11:00</div>
+                        </th>
+                        <th className="py-3.5 px-3 text-center border-r border-slate-200">
+                          <div>Period 3</div>
+                          <div className="text-[10px] text-slate-500 font-mono font-normal">11:10 – 12:10</div>
+                        </th>
+                        <th className="py-3.5 px-3 text-center border-r border-slate-200">
+                          <div>Period 4</div>
+                          <div className="text-[10px] text-slate-500 font-mono font-normal">12:10 – 13:10</div>
+                        </th>
+                        <th className="py-3.5 px-2 text-center bg-slate-100/70 border-r border-slate-200 text-slate-500 w-16">
+                          <div className="text-[10px] font-bold">LUNCH</div>
+                          <div className="text-[9px] font-mono text-slate-500">13:10–14:00</div>
+                        </th>
+                        <th className="py-3.5 px-3 text-center border-r border-slate-200">
+                          <div>Period 5</div>
+                          <div className="text-[10px] text-slate-500 font-mono font-normal">14:00 – 15:00</div>
+                        </th>
+                        <th className="py-3.5 px-3 text-center">
+                          <div>Period 6</div>
+                          <div className="text-[10px] text-slate-500 font-mono font-normal">15:00 – 16:00</div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {(() => {
+                        const daySchedule = DEPARTMENT_MASTER_SCHEDULE[selectedDayForMasterTable] || {};
+                        const sectionKeys = Object.keys(daySchedule);
+
+                        if (sectionKeys.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={8} className="py-8 text-center text-slate-500 font-medium">
+                                No classes scheduled for {selectedDayForMasterTable}.
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return sectionKeys.map((sec) => {
+                          const periods = daySchedule[sec] || [];
+                          const isIIYear = sec.startsWith("DS-2");
+                          const isIIIYear = sec.startsWith("DS-3");
+                          const yearBadgeClass = isIIYear
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : isIIIYear
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : "bg-purple-50 text-purple-700 border-purple-200";
+                          const yearLabel = isIIYear ? "II Year" : isIIIYear ? "III Year" : "IV Year";
+
+                          return (
+                            <tr key={sec} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="py-3 px-4 font-bold text-slate-900 border-r border-slate-100 bg-slate-50/30">
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-black text-slate-800">{sec}</span>
+                                  <span className={`inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold border ${yearBadgeClass} w-fit`}>
+                                    {yearLabel}
+                                  </span>
+                                </div>
+                              </td>
+
+                              {/* Periods 1 to 4 */}
+                              {[0, 1, 2, 3].map((pIdx) => {
+                                const slot = periods[pIdx];
+                                if (!slot) {
+                                  return (
+                                    <td key={pIdx} className="py-2.5 px-2 text-center text-slate-300 border-r border-slate-100">
+                                      —
+                                    </td>
+                                  );
+                                }
+                                const isLab = slot.subject.toUpperCase().includes("LAB") || slot.room.toUpperCase().includes("LAB");
+                                const matchesSearch = masterTableSearch && (
+                                  slot.subject.toLowerCase().includes(masterTableSearch.toLowerCase()) ||
+                                  slot.faculty.toLowerCase().includes(masterTableSearch.toLowerCase()) ||
+                                  slot.room.toLowerCase().includes(masterTableSearch.toLowerCase())
+                                );
+                                const isCurrentFaculty = facultyName && slot.faculty.toLowerCase().includes(facultyName.toLowerCase().replace(/^(mr|mrs|dr)\.?\s+/i, ""));
+
+                                return (
+                                  <td
+                                    key={pIdx}
+                                    className={`py-2 px-2.5 border-r border-slate-100 transition-all ${
+                                      matchesSearch
+                                        ? "bg-amber-50/80 ring-2 ring-amber-400/50"
+                                        : isCurrentFaculty
+                                        ? "bg-blue-50/40 ring-1 ring-blue-300"
+                                        : ""
+                                    }`}
+                                  >
+                                    <div className="space-y-0.5">
+                                      <div className="flex items-center justify-between gap-1">
+                                        <span className={`text-[11px] font-black truncate ${isLab ? "text-indigo-700" : "text-slate-900"}`}>
+                                          {slot.subject}
+                                        </span>
+                                        {isLab && (
+                                          <span className="px-1 py-0.2 rounded text-[9px] font-black bg-indigo-100 text-indigo-700">
+                                            LAB
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[11px] text-slate-600 font-semibold truncate" title={slot.faculty}>
+                                        {slot.faculty}
+                                      </p>
+                                      <p className="text-[10px] text-slate-500 font-mono">{slot.room}</p>
+                                    </div>
+                                  </td>
+                                );
+                              })}
+
+                              {/* Lunch Column */}
+                              <td className="py-2 px-1 text-center bg-slate-100/50 border-r border-slate-100 text-[10px] font-bold text-slate-500">
+                                <span className="rotate-180 writing-mode-vertical inline-block tracking-widest text-[9px] py-1 text-slate-500">
+                                  BREAK
+                                </span>
+                              </td>
+
+                              {/* Periods 5 and 6 */}
+                              {[4, 5].map((pIdx) => {
+                                const slot = periods[pIdx];
+                                if (!slot) {
+                                  return (
+                                    <td key={pIdx} className="py-2.5 px-2 text-center text-slate-300 border-r border-slate-100 last:border-r-0">
+                                      —
+                                    </td>
+                                  );
+                                }
+                                const isLab = slot.subject.toUpperCase().includes("LAB") || slot.room.toUpperCase().includes("LAB");
+                                const matchesSearch = masterTableSearch && (
+                                  slot.subject.toLowerCase().includes(masterTableSearch.toLowerCase()) ||
+                                  slot.faculty.toLowerCase().includes(masterTableSearch.toLowerCase()) ||
+                                  slot.room.toLowerCase().includes(masterTableSearch.toLowerCase())
+                                );
+                                const isCurrentFaculty = facultyName && slot.faculty.toLowerCase().includes(facultyName.toLowerCase().replace(/^(mr|mrs|dr)\.?\s+/i, ""));
+
+                                return (
+                                  <td
+                                    key={pIdx}
+                                    className={`py-2 px-2.5 border-r border-slate-100 last:border-r-0 transition-all ${
+                                      matchesSearch
+                                        ? "bg-amber-50/80 ring-2 ring-amber-400/50"
+                                        : isCurrentFaculty
+                                        ? "bg-blue-50/40 ring-1 ring-blue-300"
+                                        : ""
+                                    }`}
+                                  >
+                                    <div className="space-y-0.5">
+                                      <div className="flex items-center justify-between gap-1">
+                                        <span className={`text-[11px] font-black truncate ${isLab ? "text-indigo-700" : "text-slate-900"}`}>
+                                          {slot.subject}
+                                        </span>
+                                        {isLab && (
+                                          <span className="px-1 py-0.2 rounded text-[9px] font-black bg-indigo-100 text-indigo-700">
+                                            LAB
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[11px] text-slate-600 font-semibold truncate" title={slot.faculty}>
+                                        {slot.faculty}
+                                      </p>
+                                      <p className="text-[10px] text-slate-500 font-mono">{slot.room}</p>
+                                    </div>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          );
+                        });
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Footer Legend */}
+                <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" />
+                      <span className="font-semibold text-slate-700">Practical / Lab Session (2-Hour Merged Block)</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" />
+                      <span className="font-semibold text-slate-700">Theory Lecture (1-Hour Period)</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />
+                      <span className="font-semibold text-slate-700">Matching Search Filter</span>
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Department Master Timetable • CSE (Data Science)
+                  </span>
                 </div>
               </div>
             </div>
@@ -3950,15 +4813,24 @@ export default function FacultyPortal() {
                     </p>
                   </div>
 
-                  {/* Download Register Button */}
+                  {/* Download & Print Register Buttons (Sneha Feedback) */}
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={handlePrintCumulativeAttendance}
+                      disabled={loadingBook || !bookData || !bookData.students || bookData.students.length === 0}
+                      className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                      title="Print official cumulative attendance register or Save as PDF"
+                    >
+                      <Printer className="w-4 h-4" />
+                      <span>Print Cumulative Attendance (PDF)</span>
+                    </button>
                     <button
                       onClick={downloadAttendanceBookCSV}
                       disabled={loadingBook || !bookData || !bookData.students || bookData.students.length === 0}
                       className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
-                      <span>Download Attendance Book (CSV)</span>
+                      <span>Download Register (CSV)</span>
                     </button>
                   </div>
                 </div>
@@ -4679,20 +5551,46 @@ export default function FacultyPortal() {
                         onChange={(e) => setReassignToFacultyKey(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500 bg-white"
                       >
-                        <option value="108">Mrs G Sushma (Assistant Professor &bull; III-A)</option>
-                        <option value="107">Mr K Bikshapathi (Assistant Professor &bull; II-C)</option>
-                        <option value="109">Mrs A Sravanthi (Assistant Professor &bull; IV-A)</option>
-                        <option value="110">Mrs K Sneha (Assistant Professor &bull; IV-B)</option>
-                        <option value="111">Mrs B Narmadha (Assistant Professor &bull; II-B)</option>
-                        <option value="112">Mrs P Sunitha (Assistant Professor &bull; II-A)</option>
-                        <option value="113">Mrs M Sowmya (Assistant Professor &bull; III-C)</option>
-                        <option value="114">Mrs G Sneha (Assistant Professor)</option>
-                        <option value="115">Mrs Ch Sravanthi (Assistant Professor)</option>
-                        <option value="116">Mrs K Sunitha (Assistant Professor)</option>
-                        <option value="117">Mr P Vamsi Krishna (Assistant Professor)</option>
-                        <option value="118">Mr N Sanjeeva Rayudu (Assistant Professor)</option>
-                        <option value="119">Mrs B Swathi (Assistant Professor)</option>
-                        <option value="101">Dr S Nagakishore Bhavanam (Professor & HOD)</option>
+                        <optgroup label="── 🎓 II Year Faculty ──">
+                          <option value="101" disabled={resolvedKey === "101"}>Mrs. CH. Naga Rohini (Asst. Prof &bull; COA, MSF){resolvedKey === "101" ? " — (You)" : ""}</option>
+                          <option value="104" disabled={resolvedKey === "104"}>Mr M Yadaiah (Asst. Prof &bull; JAVA){resolvedKey === "104" ? " — (You)" : ""}</option>
+                          <option value="105" disabled={resolvedKey === "105"}>Mr M Srinivasulu (Asst. Prof &bull; SE &bull; II-B){resolvedKey === "105" ? " — (You)" : ""}</option>
+                          <option value="113" disabled={resolvedKey === "113"}>Mrs Ch Vijaya Lakshmi (Asst. Prof &bull; DBMS, JAVA){resolvedKey === "113" ? " — (You)" : ""}</option>
+                          <option value="107" disabled={resolvedKey === "107"}>Mr K Bikshapathi (Asst. Prof &bull; SE &bull; II-C){resolvedKey === "107" ? " — (You)" : ""}</option>
+                          <option value="111" disabled={resolvedKey === "111"}>Mrs B Gayathri (Asst. Prof &bull; II-A In-Charge){resolvedKey === "111" ? " — (You)" : ""}</option>
+                          <option value="112" disabled={resolvedKey === "112"}>Mrs K Ramya (Asst. Prof &bull; II-B In-Charge){resolvedKey === "112" ? " — (You)" : ""}</option>
+                          <option value="114" disabled={resolvedKey === "114"}>Mrs K Srinija (Asst. Prof &bull; SDC){resolvedKey === "114" ? " — (You)" : ""}</option>
+                          <option value="116" disabled={resolvedKey === "116"}>Dr. A. Balaram (Assoc. Prof &bull; JAVA){resolvedKey === "116" ? " — (You)" : ""}</option>
+                          <option value="118" disabled={resolvedKey === "118"}>Mr. Rakesh Goud (Asst. Prof &bull; MSF){resolvedKey === "118" ? " — (You)" : ""}</option>
+                          <option value="119" disabled={resolvedKey === "119"}>Dr. Sri Hari VLN (Assoc. Prof &bull; CM Lab){resolvedKey === "119" ? " — (You)" : ""}</option>
+                        </optgroup>
+
+                        <optgroup label="── 🎓 III Year Faculty ──">
+                          <option value="108" disabled={resolvedKey === "108"}>Mrs G Sushma (Asst. Prof &bull; WP &bull; III-A){resolvedKey === "108" ? " — (You)" : ""}</option>
+                          <option value="106" disabled={resolvedKey === "106"}>Mr T Shravan Kumar (Asst. Prof &bull; IDS &bull; III-B){resolvedKey === "106" ? " — (You)" : ""}</option>
+                          <option value="103" disabled={resolvedKey === "103"}>Mr Miskeen Ali (Asst. Prof &bull; DevOps){resolvedKey === "103" ? " — (You)" : ""}</option>
+                          <option value="109" disabled={resolvedKey === "109"}>Mrs A Sravanthi (Asst. Prof &bull; IDS, R-Lab){resolvedKey === "109" ? " — (You)" : ""}</option>
+                          <option value="110" disabled={resolvedKey === "110"}>Mrs K Sneha (Asst. Prof &bull; CN, CN-Lab){resolvedKey === "110" ? " — (You)" : ""}</option>
+                          <option value="123" disabled={resolvedKey === "123"}>Mrs. Swathi (Asst. Prof &bull; ARQA III-A/B/C){resolvedKey === "123" ? " — (You)" : ""}</option>
+                          <option value="117" disabled={resolvedKey === "117"}>Dr. Md Abdul Azeem (Assoc. Prof &bull; ADA){resolvedKey === "117" ? " — (You)" : ""}</option>
+                          <option value="120" disabled={resolvedKey === "120"}>Mr. Prateek (Asst. Prof &bull; IPR){resolvedKey === "120" ? " — (You)" : ""}</option>
+                          <option value="121" disabled={resolvedKey === "121"}>Ms. Vaidehi (Asst. Prof &bull; AECS Lab){resolvedKey === "121" ? " — (You)" : ""}</option>
+                        </optgroup>
+
+                        <optgroup label="── 🎓 IV Year Faculty ──">
+                          <option value="106" disabled={resolvedKey === "106"}>Mr T Shravan Kumar (Asst. Prof &bull; PA, PA Lab){resolvedKey === "106" ? " — (You)" : ""}</option>
+                          <option value="107" disabled={resolvedKey === "107"}>Mr K Bikshapathi (Asst. Prof &bull; WSMA, WSMA Lab){resolvedKey === "107" ? " — (You)" : ""}</option>
+                          <option value="111" disabled={resolvedKey === "111"}>Mrs B Gayathri (Asst. Prof &bull; NLP){resolvedKey === "111" ? " — (You)" : ""}</option>
+                          <option value="112" disabled={resolvedKey === "112"}>Mrs K Ramya (Asst. Prof &bull; CC){resolvedKey === "112" ? " — (You)" : ""}</option>
+                          <option value="103" disabled={resolvedKey === "103"}>Mr Miskeen Ali (Asst. Prof &bull; PS-I &bull; IV-A){resolvedKey === "103" ? " — (You)" : ""}</option>
+                          <option value="117" disabled={resolvedKey === "117"}>Dr. Md Abdul Azeem (Assoc. Prof &bull; PS-I &bull; IV-B){resolvedKey === "117" ? " — (You)" : ""}</option>
+                        </optgroup>
+
+                        <optgroup label="── 🏛️ Department / Optional Faculty ──">
+                          <option value="122" disabled={resolvedKey === "122"}>Dr. C. Lakshmi Nath (Professor & HOD){resolvedKey === "122" ? " — (You)" : ""}</option>
+                          <option value="102" disabled={resolvedKey === "102"}>Mrs. Swetha (Assistant Professor){resolvedKey === "102" ? " — (You)" : ""}</option>
+                          <option value="115" disabled={resolvedKey === "115"}>Ms. Priyusha (Assistant Professor){resolvedKey === "115" ? " — (You)" : ""}</option>
+                        </optgroup>
                       </select>
                     </div>
 

@@ -1243,6 +1243,54 @@ router.post("/mentor/submit-attendance", authMiddleware, mentorOnly, async (req:
         });
     }
 
+    // If this is a 2-hour lab session with a secondary schedule slot, record for secondary slot as well
+    const secondaryScheduleId = req.body.secondaryScheduleId ? parseInt(req.body.secondaryScheduleId) : undefined;
+    if (secondaryScheduleId && !isNaN(secondaryScheduleId) && secondaryScheduleId !== scheduleId) {
+      const secondaryUpsert = studentRecords.map((record: any) => ({
+        schedule_id: secondaryScheduleId,
+        user_id: record.studentId,
+        date: date,
+        marked_present: !!record.markedPresent,
+        marked_by_teacher: true,
+        scanned_qr: false
+      }));
+      if (secondaryUpsert.length > 0) {
+        await supabase
+          .from("qr_hourly_attendance")
+          .upsert(secondaryUpsert, {
+            onConflict: "schedule_id,user_id,date"
+          });
+      }
+      const { data: existSec } = await supabase
+        .from("qr_mentor_sessions")
+        .select("id")
+        .eq("schedule_id", secondaryScheduleId)
+        .eq("date", date)
+        .maybeSingle();
+
+      if (existSec) {
+        await supabase
+          .from("qr_mentor_sessions")
+          .update({
+            ended_at: nowIso,
+            student_count: presentCount,
+            mentor_id: mentorId
+          })
+          .eq("id", existSec.id);
+      } else {
+        await supabase
+          .from("qr_mentor_sessions")
+          .insert({
+            mentor_id: mentorId,
+            schedule_id: secondaryScheduleId,
+            date: date,
+            started_at: nowIso,
+            ended_at: nowIso,
+            student_count: presentCount
+          });
+      }
+    }
+
     res.json({ message: "Attendance submitted successfully", presentCount });
   } catch (err: any) {
     req.log.error({ err }, "Submit attendance error");

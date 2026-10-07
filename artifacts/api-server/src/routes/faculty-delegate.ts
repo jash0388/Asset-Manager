@@ -53,6 +53,10 @@ router.get("/faculty/reassignments", authMiddleware, async (req: any, res: any) 
 
     if (date) {
       list = list.filter((r) => r.date === date);
+    } else {
+      // Emergency swaps are strictly date-bound: do not show past-date reassignments as active
+      const todayIso = new Date().toISOString().slice(0, 10);
+      list = list.filter((r) => r.date >= todayIso);
     }
     if (facultyKey) {
       list = list.filter(

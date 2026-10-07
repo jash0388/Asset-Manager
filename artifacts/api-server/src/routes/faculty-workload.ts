@@ -20,6 +20,7 @@ router.get("/faculty/workload-grid", authMiddleware, mentorOnly, async (req: any
       TUE: "Tuesday",
       WED: "Wednesday",
       THU: "Thursday",
+      THUR: "Thursday",
       FRI: "Friday",
       SAT: "Saturday",
     };
@@ -43,15 +44,15 @@ router.get("/faculty/workload-grid", authMiddleware, mentorOnly, async (req: any
         if (isActivity(s.subject)) return false;
         const normDay = (s.day_of_week || "").toUpperCase();
         return dayMap[normDay] === day || normDay.startsWith(day.substring(0, 3).toUpperCase());
-      });
+      }).sort((a: any, b: any) => (a.start_time || "").localeCompare(b.start_time || ""));
 
       return {
         day,
         periods: daySchedules.map((s: any) => ({
           id: s.id,
-          slot: `${s.start_time || "09:00"} – ${s.end_time || "10:00"}`,
+          slot: `${s.start_time ? s.start_time.slice(0, 5) : "09:00"} – ${s.end_time ? s.end_time.slice(0, 5) : "10:00"}`,
           subject: s.subject || "Subject",
-          section: s.section || "DS-2A",
+          section: s.section ? (s.section.startsWith("DS") ? s.section : `DS-${s.year === "II" ? "2" : s.year === "III" ? "3" : "4"}${s.section}`) : "DS-2A",
           room: s.subject?.toLowerCase().includes("lab") ? "Lab-205" : "Hall 402",
         })),
       };

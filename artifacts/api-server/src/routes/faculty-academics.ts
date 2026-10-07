@@ -421,7 +421,7 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
 
       // Check if session recorded for this schedule today
       const matchedSession = sessionList.find(
-        (sess) => sess.schedule_id === s.id
+        (sess) => sess.schedule_id === s.id || (s.secondary_schedule_id && sess.schedule_id === s.secondary_schedule_id)
       );
 
       let timingStatus: "live" | "upcoming" | "completed" | "future_day" = "upcoming";
@@ -461,6 +461,9 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
       return {
         id: String(s.id),
         scheduleId: s.id,
+        secondaryScheduleId: s.secondary_schedule_id || null,
+        scheduleIds: s.secondary_schedule_id ? [s.id, s.secondary_schedule_id] : [s.id],
+        isDoubleHourLab: Boolean(s.secondary_schedule_id),
         code: subjectClean,
         name: s.subject || "Course",
         type: isLab ? "Practical" : (isClubOrSports ? "Activity" : "Theory"),
@@ -507,7 +510,40 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
       .single();
 
     const facultyKey = currentMentor?.key ? String(currentMentor.key) : "106";
-    const academicSchedList = schedList.filter((s: any) => !isActivity(s.subject));
+    const rawAcademicScheds = schedList.filter((s: any) => !isActivity(s.subject));
+
+    // Consolidate contiguous 2-hour lab periods (Srinija feedback: one attendance card for 2-hour labs)
+    const academicSchedList: any[] = [];
+    const sortedScheds = [...rawAcademicScheds].sort((a: any, b: any) =>
+      (a.start_time || "").localeCompare(b.start_time || "")
+    );
+
+    for (let i = 0; i < sortedScheds.length; i++) {
+      const current = sortedScheds[i];
+      const next = sortedScheds[i + 1];
+
+      const currentSubj = (current.subject || "").toUpperCase().trim();
+      const isLab = currentSubj.includes("LAB") || currentSubj.includes("PRACTICAL");
+
+      if (
+        isLab &&
+        next &&
+        (next.subject || "").toUpperCase().trim() === currentSubj &&
+        next.section === current.section &&
+        next.year === current.year &&
+        (current.end_time || "").slice(0, 5) === (next.start_time || "").slice(0, 5)
+      ) {
+        // Merge the two contiguous lab periods into one single 2-hour card
+        academicSchedList.push({
+          ...current,
+          end_time: next.end_time,
+          secondary_schedule_id: next.id,
+        });
+        i++; // Skip second period so it is not duplicated
+      } else {
+        academicSchedList.push(current);
+      }
+    }
 
     // 1. Process own academic schedules and attach reassignment status
     let results: any[] = academicSchedList.map((s) => {
@@ -515,7 +551,7 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
       const reassignment = classReassignmentsStore.find(
         (r) =>
           r.date === queryDate &&
-          (r.scheduleId === s.id || (r.fromFacultyKey === facultyKey && r.subject.toUpperCase() === (s.subject || "").toUpperCase()))
+          (r.scheduleId === s.id || (s.secondary_schedule_id && r.scheduleId === s.secondary_schedule_id) || (r.fromFacultyKey === facultyKey && r.subject.toUpperCase() === (s.subject || "").toUpperCase()))
       );
       if (reassignment) {
         return {
