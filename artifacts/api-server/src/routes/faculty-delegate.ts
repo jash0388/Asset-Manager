@@ -14,6 +14,7 @@ export interface ClassReassignment {
   toFacultyKey: string;
   toFacultyName: string;
   subject: string;
+  originalSubject?: string;
   year: string;
   section: string;
   room: string;
@@ -92,6 +93,7 @@ router.post("/faculty/reassignments", authMiddleware, async (req: any, res: any)
       toFacultyKey,
       toFacultyName,
       subject,
+      originalSubject,
       year,
       section,
       room,
@@ -113,6 +115,7 @@ router.post("/faculty/reassignments", authMiddleware, async (req: any, res: any)
       toFacultyKey: toFacultyKey || "108",
       toFacultyName: toFacultyName || "Substitute Faculty",
       subject: subject || "Course",
+      originalSubject: originalSubject || subject || "Course",
       year: year || "III",
       section: section || "DS-3A",
       room: room || "Hall 412",
@@ -125,7 +128,7 @@ router.post("/faculty/reassignments", authMiddleware, async (req: any, res: any)
 
     res.status(201).json({
       success: true,
-      message: "Reassignment request sent to HOD for approval",
+      message: "Reassignment request sent to substitute faculty for acceptance",
       reassignment: newRecord,
     });
   } catch (err: any) {
@@ -133,8 +136,8 @@ router.post("/faculty/reassignments", authMiddleware, async (req: any, res: any)
   }
 });
 
-// POST /admin/reassignments/:id/action — HOD accepts or declines request
-router.post("/admin/reassignments/:id/action", authMiddleware, async (req: any, res: any) => {
+// POST /faculty/reassignments/:id/action & /admin/reassignments/:id/action — Faculty or HOD accepts/declines request
+const handleReassignmentAction = async (req: any, res: any) => {
   const { id } = req.params;
   const { action, decidedBy } = req.body;
 
@@ -150,11 +153,11 @@ router.post("/admin/reassignments/:id/action", authMiddleware, async (req: any, 
     if (action === "accept" || action === "approve") {
       item.status = "accepted";
       item.decidedAt = new Date().toISOString();
-      item.decidedBy = decidedBy || "Dr. K. Srinivas Rao (HOD)";
+      item.decidedBy = decidedBy || (req.user?.name ? `${req.user.name} (Substitute Faculty)` : "Substitute Faculty");
     } else if (action === "decline" || action === "reject") {
       item.status = "declined";
       item.decidedAt = new Date().toISOString();
-      item.decidedBy = decidedBy || "Dr. K. Srinivas Rao (HOD)";
+      item.decidedBy = decidedBy || (req.user?.name ? `${req.user.name} (Substitute Faculty)` : "Substitute Faculty");
     } else {
       res.status(400).json({ error: "Invalid action. Must be accept or decline." });
       return;
@@ -162,13 +165,17 @@ router.post("/admin/reassignments/:id/action", authMiddleware, async (req: any, 
 
     res.json({
       success: true,
-      message: `Reassignment ${item.status === "accepted" ? "Approved" : "Declined"} successfully`,
+      message: `Reassignment request ${item.status === "accepted" ? "Accepted" : "Declined"} successfully`,
       reassignment: item,
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to update reassignment action" });
   }
-});
+};
+
+router.post("/admin/reassignments/:id/action", authMiddleware, handleReassignmentAction);
+router.post("/faculty/reassignments/:id/action", authMiddleware, handleReassignmentAction);
+router.post("/faculty/reassignments/:id/respond", authMiddleware, handleReassignmentAction);
 
 // Resilient cancel / delete handler
 const handleCancelReassignment = async (req: any, res: any) => {

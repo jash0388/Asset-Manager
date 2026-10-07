@@ -641,6 +641,230 @@ const FACULTY_DIRECTORY: Record<string, {
   },
 };
 
+// Section-specific official faculty rosters (6 members per section with subjects)
+interface SectionTeacher {
+  key: string;
+  name: string;
+  subject: string;
+  designation: string;
+}
+
+const SECTION_FACULTY_ROSTER: Record<string, SectionTeacher[]> = {
+  "DS-2A": [
+    { key: "116", name: "Dr. A. Balaram", subject: "JAVA / JAVA LAB", designation: "Assoc. Professor" },
+    { key: "118", name: "Mr. Rakesh Goud", subject: "MSF", designation: "Asst. Professor" },
+    { key: "105", name: "Mr M Srinivasulu", subject: "SE", designation: "Asst. Professor" },
+    { key: "101", name: "Mrs. CH. Naga Rohini", subject: "COA", designation: "Asst. Professor" },
+    { key: "113", name: "Mrs Ch Vijaya Lakshmi", subject: "DBMS", designation: "Asst. Professor" },
+    { key: "114", name: "Mrs K Srinija", subject: "SDC", designation: "Asst. Professor" },
+  ],
+  "DS-2B": [
+    { key: "118", name: "Mr. Rakesh Goud", subject: "MSF", designation: "Asst. Professor" },
+    { key: "105", name: "Mr M Srinivasulu", subject: "SE / SE LAB", designation: "Asst. Professor" },
+    { key: "101", name: "Mrs. CH. Naga Rohini", subject: "COA", designation: "Asst. Professor" },
+    { key: "113", name: "Mrs Ch Vijaya Lakshmi", subject: "DBMS", designation: "Asst. Professor" },
+    { key: "119", name: "Dr. Sri Hari VLN", subject: "CM LAB", designation: "Assoc. Professor" },
+    { key: "104", name: "Mr M Yadaiah", subject: "JAVA / DBMS LAB", designation: "Asst. Professor" },
+  ],
+  "DS-2C": [
+    { key: "108", name: "Mrs G Sushma", subject: "DBMS", designation: "Asst. Professor" },
+    { key: "101", name: "Mrs. CH. Naga Rohini", subject: "COA", designation: "Asst. Professor" },
+    { key: "114", name: "Mrs K Srinija", subject: "SDC / JAVA LAB", designation: "Asst. Professor" },
+    { key: "107", name: "Mr K Bikshapathi", subject: "SE", designation: "Asst. Professor" },
+    { key: "104", name: "Mr M Yadaiah", subject: "JAVA / JAVA LAB", designation: "Asst. Professor" },
+    { key: "118", name: "Mr. Rakesh Goud", subject: "MSF", designation: "Asst. Professor" },
+  ],
+  "DS-3A": [
+    { key: "112", name: "Mrs K Ramya", subject: "KAFKA", designation: "Asst. Professor" },
+    { key: "117", name: "Dr. Md Abdul Azeem", subject: "ADA", designation: "Assoc. Professor" },
+    { key: "106", name: "Mr T Shravan Kumar", subject: "IDS", designation: "Asst. Professor" },
+    { key: "110", name: "Mrs K Sneha", subject: "CN / CN LAB", designation: "Asst. Professor" },
+    { key: "123", name: "Mrs. Swathi", subject: "ARQA", designation: "Asst. Professor" },
+    { key: "108", name: "Mrs G Sushma", subject: "WP", designation: "Asst. Professor" },
+  ],
+  "DS-3B": [
+    { key: "110", name: "Mrs K Sneha", subject: "CN / CN LAB", designation: "Asst. Professor" },
+    { key: "103", name: "Mr Miskeen Ali", subject: "DEVOPS", designation: "Asst. Professor" },
+    { key: "108", name: "Mrs G Sushma", subject: "WP", designation: "Asst. Professor" },
+    { key: "106", name: "Mr T Shravan Kumar", subject: "IDS", designation: "Asst. Professor" },
+    { key: "117", name: "Dr. Md Abdul Azeem", subject: "ADA", designation: "Assoc. Professor" },
+    { key: "123", name: "Mrs. Swathi", subject: "ARQA", designation: "Asst. Professor" },
+  ],
+  "DS-3C": [
+    { key: "111", name: "Mrs B Gayathri", subject: "CN", designation: "Asst. Professor" },
+    { key: "109", name: "Mrs A Sravanthi", subject: "IDS / R-LAB", designation: "Asst. Professor" },
+    { key: "103", name: "Mr Miskeen Ali", subject: "DEVOPS", designation: "Asst. Professor" },
+    { key: "114", name: "Mrs K Srinija", subject: "WP", designation: "Asst. Professor" },
+    { key: "117", name: "Dr. Md Abdul Azeem", subject: "ADA", designation: "Assoc. Professor" },
+    { key: "123", name: "Mrs. Swathi", subject: "ARQA", designation: "Asst. Professor" },
+  ],
+  "DS-4A": [
+    { key: "106", name: "Mr T Shravan Kumar", subject: "PA / PA LAB", designation: "Asst. Professor" },
+    { key: "107", name: "Mr K Bikshapathi", subject: "WSMA / WSMA LAB", designation: "Asst. Professor" },
+    { key: "122", name: "Dr. C. Lakshmi Nath", subject: "OE", designation: "Professor & HOD" },
+    { key: "112", name: "Mrs K Ramya", subject: "CC", designation: "Asst. Professor" },
+    { key: "103", name: "Mr Miskeen Ali", subject: "PS-I", designation: "Asst. Professor" },
+    { key: "111", name: "Mrs B Gayathri", subject: "NLP", designation: "Asst. Professor" },
+  ],
+  "DS-4B": [
+    { key: "106", name: "Mr T Shravan Kumar", subject: "PA / PA LAB", designation: "Asst. Professor" },
+    { key: "107", name: "Mr K Bikshapathi", subject: "WSMA / WSMA LAB", designation: "Asst. Professor" },
+    { key: "111", name: "Mrs B Gayathri", subject: "NLP", designation: "Asst. Professor" },
+    { key: "122", name: "Dr. C. Lakshmi Nath", subject: "OE", designation: "Professor & HOD" },
+    { key: "117", name: "Dr. Md Abdul Azeem", subject: "PS-I", designation: "Assoc. Professor" },
+    { key: "112", name: "Mrs K Ramya", subject: "CC", designation: "Asst. Professor" },
+  ],
+};
+
+function normalizeSectionKey(rawSec?: string): string {
+  const s = (rawSec || "").toUpperCase();
+  if (s.includes("2A") || s.includes("II-A") || s.includes("2-A")) return "DS-2A";
+  if (s.includes("2B") || s.includes("II-B") || s.includes("2-B")) return "DS-2B";
+  if (s.includes("2C") || s.includes("II-C") || s.includes("2-C")) return "DS-2C";
+  if (s.includes("3A") || s.includes("III-A") || s.includes("3-A")) return "DS-3A";
+  if (s.includes("3B") || s.includes("III-B") || s.includes("3-B")) return "DS-3B";
+  if (s.includes("3C") || s.includes("III-C") || s.includes("3-C")) return "DS-3C";
+  if (s.includes("4A") || s.includes("IV-A") || s.includes("4-A")) return "DS-4A";
+  if (s.includes("4B") || s.includes("IV-B") || s.includes("4-B")) return "DS-4B";
+  return "DS-2A";
+}
+
+// Year-Wise Academic Directory Data (Courses -> Next Section -> Next Students Details -> Next Faculty)
+const YEAR_WISE_DIRECTORY_DATA = {
+  II: {
+    year: "II" as const,
+    title: "II Year B.Tech — Computer Science & Engineering (Data Science)",
+    academicYear: "2026 – 2027 (Semesters III & IV)",
+    batch: "2024 – 2028 Batch",
+    courses: [
+      { code: "JAVA", title: "Java Programming", type: "Theory", credits: 4, hours: "4 Hrs / Week", syllabusBrief: "OOP Concepts, Exception Handling, Collections Framework, Multithreading, Streams" },
+      { code: "DBMS", title: "Database Management Systems", type: "Theory", credits: 4, hours: "4 Hrs / Week", syllabusBrief: "Relational Algebra, SQL, Normalization (1NF–BCNF), Transactions, Indexing" },
+      { code: "SE", title: "Software Engineering", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "SDLC Models, Agile / Scrum, Requirements Engineering, UML Design Patterns" },
+      { code: "COA", title: "Computer Organization & Architecture", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "Instruction Sets, ALU Design, Pipelining, Memory Hierarchy & Cache Memory" },
+      { code: "MSF", title: "Mathematical & Statistical Foundations", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "Probability Distributions, Hypothesis Testing, Linear Regression, Matrix Operations" },
+      { code: "JAVA/DBMS LAB", title: "Java & Database Systems Laboratory", type: "Practical", credits: 2, hours: "3 Hrs / Week", syllabusBrief: "Hands-on Java Application Development & PostgreSQL Database Integration" },
+      { code: "SDC", title: "Skill Development Course", type: "Skill", credits: 2, hours: "2 Hrs / Week", syllabusBrief: "Python for Data Analysis, Pandas, NumPy, Data Cleaning & Pre-processing" },
+      { code: "CM LAB", title: "Computational Methods Lab", type: "Practical", credits: 1.5, hours: "2 Hrs / Week", syllabusBrief: "Numerical Methods, Curve Fitting, MATLAB / Scientific Python Implementations" },
+    ],
+    sections: [
+      { name: "Section II-A", key: "DS-2A", room: "Hall 401", incharge: "Dr. A. Balaram", inchargeKey: "116", strength: 58, rollRange: "23071A6701 – 23071A6758", crName: "K. Sai Teja (23071A6724)" },
+      { name: "Section II-B", key: "DS-2B", room: "Hall 402", incharge: "Mr M Srinivasulu", inchargeKey: "105", strength: 55, rollRange: "23071A6759 – 23071A67B4", crName: "M. Rahul Reddy (23071A6778)" },
+      { name: "Section II-C", key: "DS-2C", room: "Hall 403", incharge: "Mr K Bikshapathi", inchargeKey: "107", strength: 52, rollRange: "23071A67B5 – 23071A67G6", crName: "P. Ananya (23071A67C1)" },
+    ],
+    students: [
+      { rollNo: "23071A6701", name: "A. Harshavardhan", section: "DS-2A", mentor: "Dr. A. Balaram", attendance: 88, status: "Regular" as const },
+      { rollNo: "23071A6702", name: "B. Navya Sri", section: "DS-2A", mentor: "Dr. A. Balaram", attendance: 92, status: "Regular" as const },
+      { rollNo: "23071A6703", name: "C. Rohit Kumar", section: "DS-2A", mentor: "Mrs. CH. Naga Rohini", attendance: 78, status: "Regular" as const },
+      { rollNo: "23071A6704", name: "D. Sneha Latha", section: "DS-2A", mentor: "Mrs. CH. Naga Rohini", attendance: 85, status: "Regular" as const },
+      { rollNo: "23071A6705", name: "E. Tarun Teja", section: "DS-2A", mentor: "Mrs Ch Vijaya Lakshmi", attendance: 81, status: "Regular" as const },
+      { rollNo: "23071A6759", name: "F. Bhanu Prakash", section: "DS-2B", mentor: "Mr M Srinivasulu", attendance: 84, status: "Regular" as const },
+      { rollNo: "23071A6760", name: "G. Keerthana", section: "DS-2B", mentor: "Mr M Srinivasulu", attendance: 90, status: "Regular" as const },
+      { rollNo: "23071A6761", name: "H. Vignesh", section: "DS-2B", mentor: "Mr M Yadaiah", attendance: 76, status: "Regular" as const },
+      { rollNo: "23071A6762", name: "J. Deepthi", section: "DS-2B", mentor: "Mr M Yadaiah", attendance: 93, status: "Regular" as const },
+      { rollNo: "23071A67B5", name: "K. Karthik", section: "DS-2C", mentor: "Mr K Bikshapathi", attendance: 87, status: "Regular" as const },
+      { rollNo: "23071A67B6", name: "L. Priyanka", section: "DS-2C", mentor: "Mr K Bikshapathi", attendance: 89, status: "Regular" as const },
+      { rollNo: "23071A67B7", name: "M. Sandeep", section: "DS-2C", mentor: "Mrs G Sushma", attendance: 74, status: "Regular" as const },
+      { rollNo: "23071A67B8", name: "N. Varshini", section: "DS-2C", mentor: "Mrs G Sushma", attendance: 91, status: "Regular" as const },
+    ],
+    faculty: [
+      { name: "Dr. A. Balaram", key: "116", designation: "Associate Professor & In-Charge (II-A)", courses: "JAVA, JAVA/DBMS LAB", sections: "DS-2A", erp: "EMP-SECDS116", phone: "+91 98490 12360" },
+      { name: "Mr M Srinivasulu", key: "105", designation: "Assistant Professor & In-Charge (II-B)", courses: "SE, SE/JAVA LAB", sections: "DS-2A, DS-2B", erp: "EMP-SECDS105", phone: "+91 98490 12349" },
+      { name: "Mr K Bikshapathi", key: "107", designation: "Assistant Professor & In-Charge (II-C)", courses: "SE, SE/DBMS LAB", sections: "DS-2C", erp: "EMP-SECDS107", phone: "+91 98490 12351" },
+      { name: "Mr M Yadaiah", key: "104", designation: "Assistant Professor", courses: "JAVA, JAVA/DBMS LAB", sections: "DS-2B, DS-2C", erp: "EMP-SECDS104", phone: "+91 98490 12348" },
+      { name: "Mrs. CH. Naga Rohini", key: "101", designation: "Assistant Professor", courses: "COA", sections: "DS-2A, DS-2B, DS-2C", erp: "EMP-SECDS101", phone: "+91 98490 12345" },
+      { name: "Mrs Ch Vijaya Lakshmi", key: "113", designation: "Assistant Professor", courses: "DBMS", sections: "DS-2A, DS-2B", erp: "EMP-SECDS113", phone: "+91 98490 12357" },
+      { name: "Mrs G Sushma", key: "108", designation: "Assistant Professor", courses: "DBMS", sections: "DS-2C", erp: "EMP-SECDS108", phone: "+91 98490 12352" },
+      { name: "Mr. Rakesh Goud", key: "118", designation: "Assistant Professor", courses: "MSF", sections: "DS-2A, DS-2B, DS-2C", erp: "EMP-SECDS118", phone: "+91 98490 12362" },
+      { name: "Mrs K Srinija", key: "114", designation: "Assistant Professor", courses: "SDC, JAVA LAB", sections: "DS-2A, DS-2C", erp: "EMP-SECDS114", phone: "+91 98490 12358" },
+      { name: "Dr. Sri Hari VLN", key: "119", designation: "Associate Professor", courses: "CM LAB", sections: "DS-2B", erp: "EMP-SECDS119", phone: "+91 98490 12363" },
+    ],
+  },
+  III: {
+    year: "III" as const,
+    title: "III Year B.Tech — Computer Science & Engineering (Data Science)",
+    academicYear: "2026 – 2027 (Semesters V & VI)",
+    batch: "2023 – 2027 Batch",
+    courses: [
+      { code: "IDS", title: "Introduction to Data Science", type: "Theory", credits: 4, hours: "4 Hrs / Week", syllabusBrief: "Data Science Lifecycle, Exploratory Data Analysis, Feature Engineering, Supervised Learning" },
+      { code: "CN", title: "Computer Networks", type: "Theory", credits: 4, hours: "4 Hrs / Week", syllabusBrief: "OSI & TCP/IP Reference Models, Routing Protocols (OSPF, BGP), Congestion Control, Sockets" },
+      { code: "WP", title: "Web Programming", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "Modern JavaScript (ES6+), React.js Component Architecture, Node.js REST APIs" },
+      { code: "DEVOPS", title: "DevOps Practices & CI/CD", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "Git Version Control, Docker Containers, Kubernetes Cluster Management, Jenkins CI/CD" },
+      { code: "ADA", title: "Analysis & Design of Algorithms", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "Divide & Conquer, Dynamic Programming, Greedy Algorithms, Graph Algorithms, NP-Completeness" },
+      { code: "ARQA", title: "Aptitude, Reasoning & Quantitative Ability", type: "Skill", credits: 2, hours: "2 Hrs / Week", syllabusBrief: "Campus Recruitment Preparation, Quantitative Mathematics, Verbal & Logical Reasoning" },
+      { code: "KAFKA", title: "Stream Processing with Apache Kafka", type: "Theory", credits: 2, hours: "2 Hrs / Week", syllabusBrief: "Publish-Subscribe Messaging, Topics & Partitions, Kafka Streams, Real-Time Ingestion" },
+      { code: "CN/R PROG LAB", title: "Computer Networks & R Programming Lab", type: "Practical", credits: 2, hours: "3 Hrs / Week", syllabusBrief: "Network Simulation via Cisco Packet Tracer & Statistical Data Modeling in R" },
+    ],
+    sections: [
+      { name: "Section III-A", key: "DS-3A", room: "Hall 411", incharge: "Mrs G Sushma", inchargeKey: "108", strength: 62, rollRange: "22071A6701 – 22071A6762", crName: "N. Sai Charan (22071A6731)" },
+      { name: "Section III-B", key: "DS-3B", room: "Hall 412", incharge: "Mr T Shravan Kumar", inchargeKey: "106", strength: 60, rollRange: "22071A6763 – 22071A67C2", crName: "K. Divya Sree (22071A6789)" },
+      { name: "Section III-C", key: "DS-3C", room: "Hall 417", incharge: "Mrs A Sravanthi", inchargeKey: "109", strength: 57, rollRange: "22071A67C3 – 22071A67H0", crName: "R. Akhil Varma (22071A67D5)" },
+    ],
+    students: [
+      { rollNo: "22071A6701", name: "A. Vinay Kumar", section: "DS-3A", mentor: "Mrs G Sushma", attendance: 86, status: "Regular" as const },
+      { rollNo: "22071A6702", name: "B. Manasa", section: "DS-3A", mentor: "Mrs G Sushma", attendance: 91, status: "Regular" as const },
+      { rollNo: "22071A6703", name: "C. Sai Kiran", section: "DS-3A", mentor: "Mrs K Sneha", attendance: 83, status: "Regular" as const },
+      { rollNo: "22071A6704", name: "D. Akhila", section: "DS-3A", mentor: "Mrs K Sneha", attendance: 94, status: "Regular" as const },
+      { rollNo: "22071A6763", name: "E. Pradeep", section: "DS-3B", mentor: "Mr T Shravan Kumar", attendance: 89, status: "Regular" as const },
+      { rollNo: "22071A6764", name: "F. Mounika", section: "DS-3B", mentor: "Mr T Shravan Kumar", attendance: 87, status: "Regular" as const },
+      { rollNo: "22071A6765", name: "G. Charan Teja", section: "DS-3B", mentor: "Mr Miskeen Ali", attendance: 79, status: "Regular" as const },
+      { rollNo: "22071A67C3", name: "H. Sravani", section: "DS-3C", mentor: "Mrs A Sravanthi", attendance: 92, status: "Regular" as const },
+      { rollNo: "22071A67C4", name: "J. Naveen", section: "DS-3C", mentor: "Mrs A Sravanthi", attendance: 85, status: "Regular" as const },
+      { rollNo: "22071A67C5", name: "K. Rithika", section: "DS-3C", mentor: "Mrs B Gayathri", attendance: 90, status: "Regular" as const },
+    ],
+    faculty: [
+      { name: "Mr T Shravan Kumar", key: "106", designation: "Assistant Professor & In-Charge (III-B)", courses: "IDS, R PROG LAB", sections: "DS-3A, DS-3B", erp: "EMP-SECDS106", phone: "+91 98490 12350" },
+      { name: "Mrs G Sushma", key: "108", designation: "Assistant Professor & In-Charge (III-A)", courses: "WP", sections: "DS-3A, DS-3B", erp: "EMP-SECDS108", phone: "+91 98490 12352" },
+      { name: "Mrs A Sravanthi", key: "109", designation: "Assistant Professor & In-Charge (III-C)", courses: "IDS, R-LAB", sections: "DS-3C", erp: "EMP-SECDS109", phone: "+91 98490 12353" },
+      { name: "Mrs K Sneha", key: "110", designation: "Assistant Professor", courses: "CN, CN LAB", sections: "DS-3A, DS-3B", erp: "EMP-SECDS110", phone: "+91 98490 12354" },
+      { name: "Mrs B Gayathri", key: "111", designation: "Assistant Professor", courses: "CN", sections: "DS-3C", erp: "EMP-SECDS111", phone: "+91 98490 12355" },
+      { name: "Mr Miskeen Ali", key: "103", designation: "Assistant Professor", courses: "DEVOPS", sections: "DS-3A, DS-3B, DS-3C", erp: "EMP-SECDS103", phone: "+91 98490 12347" },
+      { name: "Dr. Md Abdul Azeem", key: "117", designation: "Associate Professor", courses: "ADA", sections: "DS-3A, DS-3B, DS-3C", erp: "EMP-SECDS117", phone: "+91 98490 12361" },
+      { name: "Mrs. Swathi", key: "123", designation: "Assistant Professor", courses: "ARQA", sections: "DS-3A, DS-3B, DS-3C", erp: "EMP-SECDS123", phone: "+91 98490 12367" },
+      { name: "Mrs K Srinija", key: "114", designation: "Assistant Professor", courses: "WP", sections: "DS-3C", erp: "EMP-SECDS114", phone: "+91 98490 12358" },
+      { name: "Mrs K Ramya", key: "112", designation: "Assistant Professor", courses: "KAFKA", sections: "DS-3A", erp: "EMP-SECDS112", phone: "+91 98490 12356" },
+    ],
+  },
+  IV: {
+    year: "IV" as const,
+    title: "IV Year B.Tech — Computer Science & Engineering (Data Science)",
+    academicYear: "2026 – 2027 (Semesters VII & VIII)",
+    batch: "2022 – 2026 Batch",
+    courses: [
+      { code: "PA", title: "Predictive Analytics", type: "Theory", credits: 4, hours: "4 Hrs / Week", syllabusBrief: "Time Series Forecasting, ARIMA, Random Forests, Gradient Boosting (XGBoost), Model Validation" },
+      { code: "WSMA", title: "Web Services & Micro-services Architecture", type: "Theory", credits: 4, hours: "4 Hrs / Week", syllabusBrief: "SOAP & RESTful APIs, Spring Boot Microservices, Service Discovery, API Gateway, Docker" },
+      { code: "NLP", title: "Natural Language Processing", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "Tokenization, POS Tagging, Word Embeddings (Word2Vec, GloVe), Transformers, BERT / GPT" },
+      { code: "CC", title: "Cloud Computing", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "AWS / Azure Infrastructure, Serverless Computing, IAM, Cloud Security, Load Balancing" },
+      { code: "OE", title: "Open Elective (Managerial Economics)", type: "Theory", credits: 3, hours: "3 Hrs / Week", syllabusBrief: "Demand Analysis, Cost-Volume-Profit Analysis, Market Structures, Project Capital Budgeting" },
+      { code: "PS-I", title: "Project Work Stage - I", type: "Practical", credits: 4, hours: "6 Hrs / Week", syllabusBrief: "Capstone Project Problem Formulation, Literature Survey, Architecture Design & Prototype" },
+      { code: "PA LAB", title: "Predictive Analytics Laboratory", type: "Practical", credits: 2, hours: "3 Hrs / Week", syllabusBrief: "Scikit-Learn, PyTorch, Model Deployment via FastAPI, Hyper-parameter Tuning" },
+      { code: "WSMA LAB", title: "Micro-services Laboratory", type: "Practical", credits: 2, hours: "3 Hrs / Week", syllabusBrief: "Microservice Containerization, Postman Automation, Kafka Event-Driven Architecture" },
+    ],
+    sections: [
+      { name: "Section IV-A", key: "DS-4A", room: "Hall 421", incharge: "Mr K Bikshapathi", inchargeKey: "107", strength: 64, rollRange: "21071A6701 – 21071A6764", crName: "G. Vamshi (21071A6729)" },
+      { name: "Section IV-B", key: "DS-4B", room: "Hall 422", incharge: "Mr T Shravan Kumar", inchargeKey: "106", strength: 61, rollRange: "21071A6765 – 21071A67C5", crName: "K. Tejaswini (21071A6784)" },
+    ],
+    students: [
+      { rollNo: "21071A6701", name: "A. Ajay Kumar", section: "DS-4A", mentor: "Mr K Bikshapathi", attendance: 90, status: "Regular" as const },
+      { rollNo: "21071A6702", name: "B. Bhavani", section: "DS-4A", mentor: "Mr K Bikshapathi", attendance: 93, status: "Regular" as const },
+      { rollNo: "21071A6703", name: "C. Chandra Sekhar", section: "DS-4A", mentor: "Mr T Shravan Kumar", attendance: 84, status: "Regular" as const },
+      { rollNo: "21071A6704", name: "D. Divya", section: "DS-4A", mentor: "Mr T Shravan Kumar", attendance: 91, status: "Regular" as const },
+      { rollNo: "21071A6765", name: "E. Eswar Prasad", section: "DS-4B", mentor: "Dr. C. Lakshmi Nath", attendance: 88, status: "Regular" as const },
+      { rollNo: "21071A6766", name: "F. Fathima Begum", section: "DS-4B", mentor: "Dr. C. Lakshmi Nath", attendance: 95, status: "Regular" as const },
+      { rollNo: "21071A6767", name: "G. Goutham", section: "DS-4B", mentor: "Mrs B Gayathri", attendance: 82, status: "Regular" as const },
+      { rollNo: "21071A6768", name: "H. Haritha", section: "DS-4B", mentor: "Mrs K Ramya", attendance: 89, status: "Regular" as const },
+    ],
+    faculty: [
+      { name: "Mr T Shravan Kumar", key: "106", designation: "Assistant Professor", courses: "PA, PA LAB", sections: "DS-4A, DS-4B", erp: "EMP-SECDS106", phone: "+91 98490 12350" },
+      { name: "Mr K Bikshapathi", key: "107", designation: "Assistant Professor & In-Charge (IV-A)", courses: "WSMA, WSMA LAB", sections: "DS-4A, DS-4B", erp: "EMP-SECDS107", phone: "+91 98490 12351" },
+      { name: "Mrs B Gayathri", key: "111", designation: "Assistant Professor", courses: "NLP", sections: "DS-4A, DS-4B", erp: "EMP-SECDS111", phone: "+91 98490 12355" },
+      { name: "Mrs K Ramya", key: "112", designation: "Assistant Professor", courses: "CC", sections: "DS-4A, DS-4B", erp: "EMP-SECDS112", phone: "+91 98490 12356" },
+      { name: "Dr. C. Lakshmi Nath", key: "122", designation: "Professor & HOD", courses: "OE", sections: "DS-4A, DS-4B", erp: "EMP-SECDS122", phone: "+91 98490 12366" },
+      { name: "Mr Miskeen Ali", key: "103", designation: "Assistant Professor", courses: "PS-I", sections: "DS-4A", erp: "EMP-SECDS103", phone: "+91 98490 12347" },
+      { name: "Dr. Md Abdul Azeem", key: "117", designation: "Associate Professor", courses: "PS-I", sections: "DS-4B", erp: "EMP-SECDS117", phone: "+91 98490 12361" },
+    ],
+  },
+};
+
 // Comprehensive Master Timetable across All Years & Sections (Yadaiah Solution)
 const DEPARTMENT_MASTER_SCHEDULE: Record<
   string,
@@ -1063,7 +1287,7 @@ export default function FacultyPortal() {
 
   // Active navigation tab
   const [activeTab, setActiveTab] = useState<
-    "home" | "academics" | "delegate" | "assignment" | "mids" | "workload" | "mentoring" | "projects" | "events" | "reports" | "history" | "student_history"
+    "home" | "academics" | "delegate" | "assignment" | "mids" | "workload" | "mentoring" | "projects" | "events" | "reports" | "history" | "student_history" | "directory"
   >("home");
 
   // ── Class-Wise Attendance History State ──
@@ -1145,6 +1369,12 @@ export default function FacultyPortal() {
     return DEPARTMENT_MASTER_SCHEDULE[today] ? today : "Monday";
   });
   const [masterTableSearch, setMasterTableSearch] = useState<string>("");
+
+  // Year-Wise Academic Directory State (Srinidhi Review Solution)
+  const [selectedDirectoryYear, setSelectedDirectoryYear] = useState<"II" | "III" | "IV">("II");
+  const [directorySectionFilter, setDirectorySectionFilter] = useState<string>("all");
+  const [directorySearchQuery, setDirectorySearchQuery] = useState<string>("");
+  const [directoryActiveTab, setDirectoryActiveTab] = useState<"all" | "courses" | "sections" | "students" | "faculty">("all");
 
   // Active Faculty Profile Resolution — reads logged-in mentor from auth context or localStorage
   const storedProfile = useMemo(() => {
@@ -1803,17 +2033,118 @@ export default function FacultyPortal() {
   const presentStudentsCount = studentRoster.filter((s) => s.status).length;
   const absentStudentsCount = totalStudentsCount - presentStudentsCount;
 
-  // Class Reassignment / Delegation State
+  // Class Reassignment / Delegation State & Faculty-to-Faculty Approval Workflow
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
   const [reassignCourse, setReassignCourse] = useState<Course | null>(null);
   const [reassignToFacultyKey, setReassignToFacultyKey] = useState("108");
+  const [reassignSubject, setReassignSubject] = useState("");
   const [reassignReason, setReassignReason] = useState("Official Duty / Department Meeting");
   const [reassignCustomReason, setReassignCustomReason] = useState("");
   const [submittingReassignment, setSubmittingReassignment] = useState(false);
   const [cancellingReassignment, setCancellingReassignment] = useState(false);
+  const [reassignmentsList, setReassignmentsList] = useState<any[]>([]);
+  const [loadingReassignments, setLoadingReassignments] = useState(false);
+  const [processingReassignId, setProcessingReassignId] = useState<string | null>(null);
+
+  // Poll / fetch live reassignment requests for current faculty
+  const fetchMyReassignments = useCallback(async () => {
+    try {
+      setLoadingReassignments(true);
+      const res = await customFetch<any>(`/api/faculty/reassignments?facultyKey=${resolvedKey}`);
+      if (Array.isArray(res)) {
+        setReassignmentsList(res);
+      } else if (res && Array.isArray(res.reassignments)) {
+        setReassignmentsList(res.reassignments);
+      }
+    } catch (e) {
+      console.warn("Could not fetch reassignments:", e);
+    } finally {
+      setLoadingReassignments(false);
+    }
+  }, [resolvedKey]);
+
+  useEffect(() => {
+    fetchMyReassignments();
+    const timer = setInterval(fetchMyReassignments, 12000);
+    return () => clearInterval(timer);
+  }, [fetchMyReassignments]);
+
+  const incomingRequests = useMemo(() => {
+    return reassignmentsList.filter(
+      (r: any) =>
+        (r.toFacultyKey === resolvedKey ||
+          (r.toFacultyName && facultyName && r.toFacultyName.toLowerCase().includes(facultyName.toLowerCase().replace(/^(mr|mrs|dr)\.?\s+/i, "")))) &&
+        r.status === "pending"
+    );
+  }, [reassignmentsList, resolvedKey, facultyName]);
+
+  const outgoingPendingRequests = useMemo(() => {
+    return reassignmentsList.filter(
+      (r: any) => r.fromFacultyKey === resolvedKey && r.status === "pending"
+    );
+  }, [reassignmentsList, resolvedKey]);
+
+  const handleAcceptReassignment = async (reassignId: string) => {
+    setProcessingReassignId(reassignId);
+    try {
+      await customFetch(`/api/faculty/reassignments/${reassignId}/action`, {
+        method: "POST",
+        body: JSON.stringify({ action: "accept", decidedBy: facultyName }),
+      });
+      toast({
+        title: "Reassignment Accepted!",
+        description: "The class period has been approved and added to your schedule.",
+      });
+      fetchMyReassignments();
+      refetchFacultyAll();
+      queryClient.invalidateQueries({ queryKey: ["faculty-today-classes"] });
+      queryClient.invalidateQueries({ queryKey: ["layout-reassignments"] });
+    } catch (err: any) {
+      toast({
+        title: "Action Failed",
+        description: err?.message || "Could not accept reassignment request.",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingReassignId(null);
+    }
+  };
+
+  const handleDeclineReassignment = async (reassignId: string) => {
+    setProcessingReassignId(reassignId);
+    try {
+      await customFetch(`/api/faculty/reassignments/${reassignId}/action`, {
+        method: "POST",
+        body: JSON.stringify({ action: "decline", decidedBy: facultyName }),
+      });
+      toast({
+        title: "Reassignment Declined",
+        description: "The request has been declined.",
+      });
+      fetchMyReassignments();
+      refetchFacultyAll();
+      queryClient.invalidateQueries({ queryKey: ["faculty-today-classes"] });
+      queryClient.invalidateQueries({ queryKey: ["layout-reassignments"] });
+    } catch (err: any) {
+      toast({
+        title: "Action Failed",
+        description: err?.message || "Could not decline reassignment request.",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingReassignId(null);
+    }
+  };
 
   const openReassignModal = (course: Course) => {
     setReassignCourse(course);
+    const secKey = normalizeSectionKey(course.section);
+    const roster = SECTION_FACULTY_ROSTER[secKey] || SECTION_FACULTY_ROSTER["DS-2A"];
+    const otherFaculty = roster.find((f) => f.key !== resolvedKey) || roster[0];
+    if (otherFaculty) {
+      setReassignToFacultyKey(otherFaculty.key);
+      setReassignSubject(otherFaculty.subject);
+    }
     setReassignModalOpen(true);
   };
 
@@ -1824,7 +2155,7 @@ export default function FacultyPortal() {
     const targetFaculty = Object.values(FACULTY_DIRECTORY).find(
       (f) => f.key === reassignToFacultyKey
     );
-    const targetName = targetFaculty?.name || "Mrs G Sushma";
+    const targetName = targetFaculty?.name || "Substitute Faculty";
 
     const classSlot =
       effectiveTodayClasses.find((c) => c.code === reassignCourse.code || c.id === reassignCourse.id)?.slot ||
@@ -1843,7 +2174,8 @@ export default function FacultyPortal() {
           fromFacultyName: facultyName || "Faculty Member",
           toFacultyKey: reassignToFacultyKey,
           toFacultyName: targetName,
-          subject: reassignCourse.name,
+          subject: reassignSubject || targetFaculty?.courses?.[0]?.code || reassignCourse.name,
+          originalSubject: reassignCourse.name,
           year: reassignCourse.section?.includes("4") ? "IV" : reassignCourse.section?.includes("3") ? "III" : "II",
           section: reassignCourse.section,
           room: reassignCourse.room,
@@ -1853,11 +2185,12 @@ export default function FacultyPortal() {
 
       toast({
         title: "Reassignment Request Sent!",
-        description: `Request to reassign ${reassignCourse.name} to ${targetName} is pending HOD approval.`,
+        description: `Request sent to ${targetName} for ${reassignSubject || reassignCourse.name}. Waiting for their acceptance.`,
       });
 
       setReassignModalOpen(false);
       setAttendanceModalOpen(false);
+      fetchMyReassignments();
       refetchFacultyAll();
       queryClient.invalidateQueries({ queryKey: ["faculty-today-classes"] });
       queryClient.invalidateQueries({ queryKey: ["layout-reassignments"] });
@@ -2455,21 +2788,47 @@ export default function FacultyPortal() {
                   >
                     • Attendance Posting
                   </button>
+                  <button
+                    onClick={() => setActiveTab("directory")}
+                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
+                  >
+                    • Year-Wise Directory
+                  </button>
                 </div>
               )}
             </div>
 
-            {/* Delegate Attendance */}
+            {/* Delegate Attendance with Live Approval Badge */}
             <button
               onClick={() => setActiveTab("delegate")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "delegate"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
-              <ArrowRightCircle className="w-4 h-4 shrink-0" />
-              {sidebarOpen && <span>Delegate Attendance</span>}
+              <div className="flex items-center gap-3">
+                <ArrowRightCircle className="w-4 h-4 shrink-0" />
+                {sidebarOpen && <span>Delegate Attendance</span>}
+              </div>
+              {sidebarOpen && incomingRequests.length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-amber-950 animate-pulse">
+                  {incomingRequests.length}
+                </span>
+              )}
+            </button>
+
+            {/* Year-Wise Academic Directory (Srinidhi Review) */}
+            <button
+              onClick={() => setActiveTab("directory")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "directory"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <Layers className="w-4 h-4 shrink-0 text-indigo-600" />
+              {sidebarOpen && <span>Year-Wise Directory</span>}
             </button>
 
             {/* Assignments */}
@@ -2795,6 +3154,104 @@ export default function FacultyPortal() {
                 </div>
               </div>
 
+              {/* INCOMING REASSIGNMENT REQUESTS (Srinidhi Review: Faculty-to-Faculty Approval Workflow) */}
+              {incomingRequests.length > 0 && (
+                <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 p-0.5 rounded-3xl shadow-lg animate-in slide-in-from-top-2">
+                  <div className="bg-white rounded-[23px] p-5 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                          <ArrowRightLeft className="w-5 h-5 animate-pulse" />
+                        </span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-black text-slate-900">
+                              Incoming Class Reassignment Requests
+                            </h3>
+                            <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black animate-bounce">
+                              {incomingRequests.length} Awaiting Your Approval
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500">
+                            A colleague requested you to substitute their class period. Accept or decline to approve the schedule swap.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab("delegate")}
+                        className="text-xs font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer shrink-0"
+                      >
+                        <span>Manage in Delegate Hub</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {incomingRequests.map((req: any) => (
+                        <div
+                          key={req.id}
+                          className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-3 flex flex-col justify-between"
+                        >
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-bold text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded">
+                                From: {req.fromFacultyName || "Faculty Colleague"}
+                              </span>
+                              <span className="font-mono text-[11px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-amber-200">
+                                {req.date}
+                              </span>
+                            </div>
+                            <div className="pt-1">
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-sm font-black text-slate-900">
+                                  {req.subject || req.originalSubject}
+                                </span>
+                                {req.originalSubject && req.originalSubject !== req.subject && (
+                                  <span className="text-[10px] font-bold text-slate-500">
+                                    (Original: {req.originalSubject})
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-600 font-semibold">
+                                Section {req.section} • Room {req.room || "TBA"} • Slot {req.timeSlot || req.period || "Scheduled Slot"}
+                              </p>
+                              {req.reason && (
+                                <p className="text-[11px] text-slate-600 italic mt-1 bg-white/70 p-2 rounded-lg border border-amber-100">
+                                  &ldquo;{req.reason}&rdquo;
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-2 border-t border-amber-200/60">
+                            <button
+                              onClick={() => handleAcceptReassignment(req.id)}
+                              disabled={processingReassignId === req.id}
+                              className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-black shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                            >
+                              {processingReassignId === req.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Check className="w-3.5 h-3.5" />
+                              )}
+                              <span>Accept & Approve</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeclineReassignment(req.id)}
+                              disabled={processingReassignId === req.id}
+                              className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                              <span className="sr-only sm:not-sr-only">Decline</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* 6 Top Stats Metrics Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
@@ -3093,6 +3550,15 @@ export default function FacultyPortal() {
                       <BarChart3 className="w-6 h-6 text-slate-700 group-hover:scale-110 transition-transform" />
                       <p className="text-xs font-black text-slate-900">Reports Register</p>
                       <p className="text-[10px] text-slate-500">Excel / PDF Export</p>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("directory")}
+                      className="p-4 rounded-2xl bg-indigo-50/60 hover:bg-indigo-100/60 border border-indigo-200 text-left space-y-2 transition-all group cursor-pointer"
+                    >
+                      <GraduationCap className="w-6 h-6 text-indigo-600 group-hover:scale-110 transition-transform" />
+                      <p className="text-xs font-black text-slate-900">Year-Wise Directory</p>
+                      <p className="text-[10px] text-slate-500">Curriculum & faculty</p>
                     </button>
                   </div>
                 </div>
@@ -3822,6 +4288,213 @@ export default function FacultyPortal() {
                     </table>
                   </div>
                 </div>
+              </div>
+
+              {/* ── INCOMING REASSIGNMENT REQUESTS (FACULTY-TO-FACULTY APPROVAL WORKFLOW) ── */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                      <ArrowRightLeft className="w-4 h-4" />
+                    </span>
+                    <div>
+                      <h3 className="text-sm font-extrabold text-slate-900">
+                        Incoming Class Period Requests (Requires Your Approval)
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        When a colleague sends a substitution request, you must accept it to activate the period swap.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-xs shrink-0 self-start sm:self-auto">
+                    {incomingRequests.length} Pending Approval
+                  </span>
+                </div>
+
+                {incomingRequests.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {incomingRequests.map((req: any) => (
+                      <div
+                        key={req.id}
+                        className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3 flex flex-col justify-between shadow-xs"
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded">
+                              From: {req.fromFacultyName || "Faculty Colleague"}
+                            </span>
+                            <span className="font-mono text-[11px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-amber-200">
+                              {req.date}
+                            </span>
+                          </div>
+
+                          <div>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-sm font-black text-slate-900">
+                                {req.subject || req.originalSubject}
+                              </span>
+                              {req.originalSubject && req.originalSubject !== req.subject && (
+                                <span className="text-[10px] font-bold text-slate-500">
+                                  (Orig: {req.originalSubject})
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-600 font-medium mt-0.5">
+                              Section {req.section} • Room {req.room || "TBA"} • Slot {req.timeSlot || req.period || "Live Timetable"}
+                            </p>
+                            {req.reason && (
+                              <p className="text-[11px] text-slate-600 italic mt-1.5 bg-white p-2.5 rounded-xl border border-amber-100">
+                                Reason: &ldquo;{req.reason}&rdquo;
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-2 border-t border-amber-200/60">
+                          <button
+                            onClick={() => handleAcceptReassignment(req.id)}
+                            disabled={processingReassignId === req.id}
+                            className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-black shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                          >
+                            {processingReassignId === req.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Check className="w-3.5 h-3.5" />
+                            )}
+                            <span>Accept Request</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeclineReassignment(req.id)}
+                            disabled={processingReassignId === req.id}
+                            className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Decline</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-slate-500 space-y-1.5 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                    <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500" />
+                    <p className="text-xs font-bold text-slate-700">No pending substitution requests</p>
+                    <p className="text-[11px] text-slate-500">
+                      When a faculty member assigns a class to you, it will appear here for your approval.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* ── OUTGOING CLASS PERIOD REASSIGNMENTS SENT BY YOU ── */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="text-sm font-extrabold text-slate-900">
+                      Outgoing Class Period Reassignments Sent by You
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Track the status of class periods you requested colleagues to cover.
+                    </p>
+                  </div>
+                  {courses.length > 0 && (
+                    <button
+                      onClick={() => openReassignModal(courses[0])}
+                      className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
+                    >
+                      <ArrowRightLeft className="w-3.5 h-3.5" />
+                      <span>Reassign a Period</span>
+                    </button>
+                  )}
+                </div>
+
+                {reassignmentsList.filter((r: any) => r.fromFacultyKey === resolvedKey).length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-600 font-bold uppercase text-[10px]">
+                        <tr>
+                          <th className="py-2.5 px-3">Subject / Course</th>
+                          <th className="py-2.5 px-3">Section & Room</th>
+                          <th className="py-2.5 px-3">Date & Slot</th>
+                          <th className="py-2.5 px-3">Substitute Faculty</th>
+                          <th className="py-2.5 px-3 text-center">Status</th>
+                          <th className="py-2.5 px-3 text-center">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {reassignmentsList
+                          .filter((r: any) => r.fromFacultyKey === resolvedKey)
+                          .map((r: any) => (
+                            <tr key={r.id}>
+                              <td className="py-3 px-3">
+                                <span className="font-bold text-slate-900 block">
+                                  {r.subject || r.originalSubject}
+                                </span>
+                                {r.originalSubject && r.originalSubject !== r.subject && (
+                                  <span className="text-[10px] text-slate-500">
+                                    Original: {r.originalSubject}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3 px-3 text-slate-700 font-medium">
+                                Sec {r.section} • {r.room || "Room TBA"}
+                              </td>
+                              <td className="py-3 px-3 text-slate-600 font-mono text-[11px]">
+                                {r.date} {r.timeSlot ? `• ${r.timeSlot}` : ""}
+                              </td>
+                              <td className="py-3 px-3 font-semibold text-blue-700">
+                                {r.toFacultyName || "Faculty Member"}
+                              </td>
+                              <td className="py-3 px-3 text-center">
+                                <span
+                                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-black inline-flex items-center gap-1 ${
+                                    r.status === "approved"
+                                      ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                      : r.status === "declined"
+                                      ? "bg-rose-100 text-rose-800 border border-rose-200"
+                                      : "bg-amber-100 text-amber-800 border border-amber-200"
+                                  }`}
+                                >
+                                  {r.status === "approved" ? (
+                                    <>
+                                      <CheckCircle2 className="w-3 h-3" />
+                                      <span>Accepted & Approved</span>
+                                    </>
+                                  ) : r.status === "declined" ? (
+                                    <>
+                                      <XCircle className="w-3 h-3" />
+                                      <span>Declined</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                                      <span>Pending Colleague Acceptance</span>
+                                    </>
+                                  )}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 text-center">
+                                {r.status === "pending" ? (
+                                  <button
+                                    onClick={() => handleCancelReassignment(r.id)}
+                                    className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-bold cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                ) : (
+                                  <span className="text-slate-400 text-[11px]">—</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="py-6 text-center text-slate-500 text-xs bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                    You haven&apos;t sent any period reassignment requests.
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -5054,6 +5727,519 @@ export default function FacultyPortal() {
               </div>
             </div>
           )}
+
+          {/* ════════════════ TAB 9: YEAR-WISE ACADEMIC DIRECTORY (SRINIDHI REVIEW) ════════════════ */}
+          {activeTab === "directory" && (() => {
+            const curYearData = YEAR_WISE_DIRECTORY_DATA[selectedDirectoryYear];
+            const q = directorySearchQuery.trim().toLowerCase();
+
+            // Filter Courses
+            const filteredCourses = curYearData.courses.filter((c) => {
+              if (!q) return true;
+              return (
+                c.code.toLowerCase().includes(q) ||
+                c.title.toLowerCase().includes(q) ||
+                c.type.toLowerCase().includes(q) ||
+                c.syllabusBrief.toLowerCase().includes(q)
+              );
+            });
+
+            // Filter Sections
+            const filteredSections = curYearData.sections.filter((sec) => {
+              if (directorySectionFilter !== "all" && sec.key !== directorySectionFilter) {
+                return false;
+              }
+              if (!q) return true;
+              return (
+                sec.name.toLowerCase().includes(q) ||
+                sec.key.toLowerCase().includes(q) ||
+                sec.room.toLowerCase().includes(q) ||
+                sec.incharge.toLowerCase().includes(q) ||
+                sec.crName.toLowerCase().includes(q)
+              );
+            });
+
+            // Filter Students
+            const filteredStudents = curYearData.students.filter((st) => {
+              if (directorySectionFilter !== "all" && st.section !== directorySectionFilter) {
+                return false;
+              }
+              if (!q) return true;
+              return (
+                st.name.toLowerCase().includes(q) ||
+                st.rollNo.toLowerCase().includes(q) ||
+                st.mentor.toLowerCase().includes(q) ||
+                st.section.toLowerCase().includes(q)
+              );
+            });
+
+            // Filter Faculty
+            const filteredFaculty = curYearData.faculty.filter((fac) => {
+              if (directorySectionFilter !== "all" && !fac.sections.includes(directorySectionFilter)) {
+                return false;
+              }
+              if (!q) return true;
+              return (
+                fac.name.toLowerCase().includes(q) ||
+                fac.courses.toLowerCase().includes(q) ||
+                fac.designation.toLowerCase().includes(q) ||
+                fac.erp.toLowerCase().includes(q)
+              );
+            });
+
+            return (
+              <div className="space-y-6">
+                {/* ── Directory Header Banner with Year Switcher ── */}
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-blue-900 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-indigo-800/40">
+                  <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 text-xs font-bold uppercase tracking-wider border border-blue-400/30 flex items-center gap-1.5">
+                          <GraduationCap className="w-3.5 h-3.5" />
+                          <span>Department Academic Catalog</span>
+                        </span>
+                        <span className="text-xs font-mono text-slate-300">
+                          {curYearData.batch}
+                        </span>
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                        {curYearData.title}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-blue-200/90 font-medium">
+                        {curYearData.academicYear} • Structured catalog of Courses, Sections, Students & Faculty
+                      </p>
+                    </div>
+
+                    {/* Year Selector Buttons */}
+                    <div className="flex flex-wrap items-center gap-2 bg-white/10 p-1.5 rounded-2xl backdrop-blur-md border border-white/15 shrink-0">
+                      {(["II", "III", "IV"] as const).map((yr) => {
+                        const isSelected = selectedDirectoryYear === yr;
+                        return (
+                          <button
+                            key={yr}
+                            onClick={() => {
+                              setSelectedDirectoryYear(yr);
+                              setDirectorySectionFilter("all");
+                            }}
+                            className={`px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                              isSelected
+                                ? "bg-white text-indigo-950 shadow-lg scale-102"
+                                : "text-white/80 hover:text-white hover:bg-white/10"
+                            }`}
+                          >
+                            <span>{yr} Year B.Tech</span>
+                            {isSelected && (
+                              <span className="w-2 h-2 rounded-full bg-blue-600" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Summary Metric Pills */}
+                  <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/10 text-xs">
+                    <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                      <span className="text-blue-200 text-[10px] uppercase font-bold block">Curriculum Courses</span>
+                      <span className="text-xl font-black text-white mt-0.5 block">{curYearData.courses.length} Subjects</span>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                      <span className="text-blue-200 text-[10px] uppercase font-bold block">Class Sections</span>
+                      <span className="text-xl font-black text-white mt-0.5 block">{curYearData.sections.length} Sections</span>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                      <span className="text-blue-200 text-[10px] uppercase font-bold block">Total Cohort Strength</span>
+                      <span className="text-xl font-black text-white mt-0.5 block">
+                        {curYearData.sections.reduce((acc, curr) => acc + curr.strength, 0)} Students
+                      </span>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-3 border border-white/10">
+                      <span className="text-blue-200 text-[10px] uppercase font-bold block">Designated Faculty</span>
+                      <span className="text-xl font-black text-white mt-0.5 block">{curYearData.faculty.length} Faculty</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Sub-navigation & Live Filter Controls ── */}
+                <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  {/* Category Filter Tabs */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                      { id: "all", label: "All Overview", icon: Layers },
+                      { id: "courses", label: "1. Courses", icon: BookOpen },
+                      { id: "sections", label: "2. Sections", icon: Building2 },
+                      { id: "students", label: "3. Students", icon: Users },
+                      { id: "faculty", label: "4. Faculty", icon: GraduationCap },
+                    ].map((tab) => {
+                      const Icon = tab.icon;
+                      const active = directoryActiveTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setDirectoryActiveTab(tab.id as any)}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                            active
+                              ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                          <span>{tab.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Search and Section Filters */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    {/* Section Filter */}
+                    <select
+                      value={directorySectionFilter}
+                      onChange={(e) => setDirectorySectionFilter(e.target.value)}
+                      className="px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer"
+                    >
+                      <option value="all">All Sections ({curYearData.sections.length})</option>
+                      {curYearData.sections.map((sec) => (
+                        <option key={sec.key} value={sec.key}>
+                          {sec.name} ({sec.key})
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Search Input */}
+                    <div className="relative min-w-[200px]">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={directorySearchQuery}
+                        onChange={(e) => setDirectorySearchQuery(e.target.value)}
+                        placeholder="Search directory..."
+                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-blue-500"
+                      />
+                      {directorySearchQuery && (
+                        <button
+                          onClick={() => setDirectorySearchQuery("")}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ════════════ 1. COURSES & CURRICULUM ════════════ */}
+                {(directoryActiveTab === "all" || directoryActiveTab === "courses") && (
+                  <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black text-xs">
+                          1
+                        </span>
+                        <div>
+                          <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-blue-600" />
+                            <span>Academic Courses & Curriculum — {selectedDirectoryYear} Year</span>
+                          </h3>
+                          <p className="text-xs text-slate-500">
+                            Prescribed course catalog, contact hours, credits and syllabus topics
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                        {filteredCourses.length} Subjects
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 text-slate-600 font-bold uppercase text-[10px]">
+                          <tr>
+                            <th className="py-2.5 px-3">Course Code</th>
+                            <th className="py-2.5 px-3">Subject Title</th>
+                            <th className="py-2.5 px-3">Type</th>
+                            <th className="py-2.5 px-3">Credits</th>
+                            <th className="py-2.5 px-3">Weekly Hours</th>
+                            <th className="py-2.5 px-3">Key Syllabus Modules</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {filteredCourses.map((c) => (
+                            <tr key={c.code} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="py-3 px-3 font-mono font-black text-blue-700">
+                                {c.code}
+                              </td>
+                              <td className="py-3 px-3 font-bold text-slate-900">
+                                {c.title}
+                              </td>
+                              <td className="py-3 px-3">
+                                <span
+                                  className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                    c.type === "Theory"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : c.type === "Practical"
+                                      ? "bg-emerald-100 text-emerald-800"
+                                      : "bg-purple-100 text-purple-800"
+                                  }`}
+                                >
+                                  {c.type}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 font-bold text-slate-700">
+                                {c.credits} Credits
+                              </td>
+                              <td className="py-3 px-3 text-slate-600 font-medium">
+                                {c.hours}
+                              </td>
+                              <td className="py-3 px-3 text-slate-600 text-[11px] max-w-xs truncate" title={c.syllabusBrief}>
+                                {c.syllabusBrief}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* ════════════ 2. CLASS SECTIONS & ROOMS ════════════ */}
+                {(directoryActiveTab === "all" || directoryActiveTab === "sections") && (
+                  <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-black text-xs">
+                          2
+                        </span>
+                        <div>
+                          <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-purple-600" />
+                            <span>Class Sections & Classrooms — {selectedDirectoryYear} Year</span>
+                          </h3>
+                          <p className="text-xs text-slate-500">
+                            Class in-charge faculty, allocated room halls, and student cohort roll ranges
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                        {filteredSections.length} Sections
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {filteredSections.map((sec) => (
+                        <div
+                          key={sec.key}
+                          className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/30 border border-slate-200 hover:border-blue-300 transition-all space-y-3 shadow-xs"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-xs">
+                                {sec.key.replace("DS-", "")}
+                              </span>
+                              <div>
+                                <h4 className="text-sm font-black text-slate-900">{sec.name}</h4>
+                                <span className="text-[10px] font-mono text-slate-500">{sec.key}</span>
+                              </div>
+                            </div>
+                            <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 font-mono text-xs font-black text-slate-800 shadow-2xs">
+                              {sec.room}
+                            </span>
+                          </div>
+
+                          <div className="space-y-1.5 text-xs pt-1 border-t border-slate-200/60">
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-500">Class In-Charge:</span>
+                              <span className="font-bold text-blue-900">{sec.incharge}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-500">Cohort Strength:</span>
+                              <span className="font-black text-slate-900">{sec.strength} Students</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-500">Roll Range:</span>
+                              <span className="font-mono text-[11px] font-bold text-slate-700">{sec.rollRange}</span>
+                            </div>
+                            <div className="flex items-center justify-between pt-1">
+                              <span className="text-slate-500">Class Rep (CR):</span>
+                              <span className="font-semibold text-slate-800 text-[11px]">{sec.crName}</span>
+                            </div>
+                          </div>
+
+                          <div className="pt-2">
+                            <button
+                              onClick={() => {
+                                setDirectorySectionFilter(sec.key);
+                                setDirectoryActiveTab("students");
+                              }}
+                              className="w-full py-2 rounded-xl bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <span>View Section Roster</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ════════════ 3. STUDENTS DETAILS & ROSTER ════════════ */}
+                {(directoryActiveTab === "all" || directoryActiveTab === "students") && (
+                  <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-xs">
+                          3
+                        </span>
+                        <div>
+                          <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                            <Users className="w-4 h-4 text-emerald-600" />
+                            <span>Students Details & Roster — {selectedDirectoryYear} Year</span>
+                          </h3>
+                          <p className="text-xs text-slate-500">
+                            Student roll numbers, designated faculty mentors, and attendance standing
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                        {filteredStudents.length} Students Shown
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 text-slate-600 font-bold uppercase text-[10px]">
+                          <tr>
+                            <th className="py-2.5 px-3">Roll Number</th>
+                            <th className="py-2.5 px-3">Student Name</th>
+                            <th className="py-2.5 px-3">Section</th>
+                            <th className="py-2.5 px-3">Faculty Mentor</th>
+                            <th className="py-2.5 px-3 text-center">Attendance %</th>
+                            <th className="py-2.5 px-3 text-center">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {filteredStudents.length > 0 ? (
+                            filteredStudents.map((st) => (
+                              <tr key={st.rollNo} className="hover:bg-slate-50/80 transition-colors">
+                                <td className="py-3 px-3 font-mono font-bold text-slate-900">
+                                  {st.rollNo}
+                                </td>
+                                <td className="py-3 px-3 font-semibold text-slate-900">
+                                  {st.name}
+                                </td>
+                                <td className="py-3 px-3">
+                                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono font-bold text-[11px]">
+                                    {st.section}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-3 font-medium text-blue-900">
+                                  {st.mentor}
+                                </td>
+                                <td className="py-3 px-3 text-center">
+                                  <span
+                                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+                                      st.attendance >= 85
+                                        ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                        : st.attendance >= 75
+                                        ? "bg-blue-100 text-blue-800 border border-blue-200"
+                                        : "bg-amber-100 text-amber-800 border border-amber-200"
+                                    }`}
+                                  >
+                                    {st.attendance}%
+                                  </span>
+                                </td>
+                                <td className="py-3 px-3 text-center">
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
+                                    {st.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">
+                                No students match the selected section / search criteria.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* ════════════ 4. ASSIGNED FACULTY ════════════ */}
+                {(directoryActiveTab === "all" || directoryActiveTab === "faculty") && (
+                  <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xs">
+                          4
+                        </span>
+                        <div>
+                          <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                            <GraduationCap className="w-4 h-4 text-indigo-600" />
+                            <span>Assigned Faculty Directory — {selectedDirectoryYear} Year</span>
+                          </h3>
+                          <p className="text-xs text-slate-500">
+                            Official subject teachers, course allocations, employee ERP IDs & contacts
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                        {filteredFaculty.length} Faculty
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 text-slate-600 font-bold uppercase text-[10px]">
+                          <tr>
+                            <th className="py-2.5 px-3">Faculty Name</th>
+                            <th className="py-2.5 px-3">Designation / Role</th>
+                            <th className="py-2.5 px-3">Assigned Courses</th>
+                            <th className="py-2.5 px-3">Sections</th>
+                            <th className="py-2.5 px-3">ERP Employee ID</th>
+                            <th className="py-2.5 px-3">Contact</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {filteredFaculty.map((fac) => (
+                            <tr key={fac.key} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="py-3 px-3 font-bold text-slate-900">
+                                {fac.name}
+                              </td>
+                              <td className="py-3 px-3 text-slate-600 font-medium">
+                                {fac.designation}
+                              </td>
+                              <td className="py-3 px-3 font-mono font-bold text-blue-700">
+                                {fac.courses}
+                              </td>
+                              <td className="py-3 px-3">
+                                <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-800 font-mono font-bold text-[11px] border border-indigo-200">
+                                  {fac.sections}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 font-mono text-slate-700 text-[11px]">
+                                {fac.erp}
+                              </td>
+                              <td className="py-3 px-3 text-slate-600 font-mono text-[11px]">
+                                {fac.phone}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </main>
       </div>
 
@@ -5493,7 +6679,7 @@ export default function FacultyPortal() {
                       <div className="flex items-center justify-between">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-200 text-amber-900">
                           <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping" />
-                          <span>Request Sent • Waiting for HOD Approval</span>
+                          <span>Request Sent • Waiting for Colleague Acceptance</span>
                         </span>
                       </div>
 
@@ -5521,7 +6707,7 @@ export default function FacultyPortal() {
                       </div>
 
                       <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
-                        Your request is waiting for HOD review in the notification panel. You can cancel this request at any time before the HOD takes action.
+                        Your substitution request has been sent to {existingPendingReassignment?.toFacultyName || "the assigned colleague"}. Once they click &quot;Accept&quot;, this period is approved and transferred to their timetable. You can cancel at any time before acceptance.
                       </p>
                     </div>
                   </div>
@@ -5541,57 +6727,72 @@ export default function FacultyPortal() {
                       </div>
                     </div>
 
-                    {/* To Faculty Selector */}
+                    {/* To Faculty Selector (Srinidhi Review: ONLY Related Section/Year Members) */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Reassign To Faculty (Substitute):
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-bold text-slate-700">
+                          Reassign To Faculty (Section {normalizeSectionKey(reassignCourse.section)} Only):
+                        </label>
+                        <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                          {(() => {
+                            const secKey = normalizeSectionKey(reassignCourse.section);
+                            const roster = SECTION_FACULTY_ROSTER[secKey] || [];
+                            return `${roster.length} Section Teachers`;
+                          })()}
+                        </span>
+                      </div>
                       <select
                         value={reassignToFacultyKey}
-                        onChange={(e) => setReassignToFacultyKey(e.target.value)}
+                        onChange={(e) => {
+                          const chosenKey = e.target.value;
+                          setReassignToFacultyKey(chosenKey);
+                          const secKey = normalizeSectionKey(reassignCourse.section);
+                          const roster = SECTION_FACULTY_ROSTER[secKey] || [];
+                          const matched = roster.find((f) => f.key === chosenKey);
+                          if (matched) {
+                            setReassignSubject(matched.subject);
+                          }
+                        }}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500 bg-white"
                       >
-                        <optgroup label="── 🎓 II Year Faculty ──">
-                          <option value="101" disabled={resolvedKey === "101"}>Mrs. CH. Naga Rohini (Asst. Prof &bull; COA, MSF){resolvedKey === "101" ? " — (You)" : ""}</option>
-                          <option value="104" disabled={resolvedKey === "104"}>Mr M Yadaiah (Asst. Prof &bull; JAVA){resolvedKey === "104" ? " — (You)" : ""}</option>
-                          <option value="105" disabled={resolvedKey === "105"}>Mr M Srinivasulu (Asst. Prof &bull; SE &bull; II-B){resolvedKey === "105" ? " — (You)" : ""}</option>
-                          <option value="113" disabled={resolvedKey === "113"}>Mrs Ch Vijaya Lakshmi (Asst. Prof &bull; DBMS, JAVA){resolvedKey === "113" ? " — (You)" : ""}</option>
-                          <option value="107" disabled={resolvedKey === "107"}>Mr K Bikshapathi (Asst. Prof &bull; SE &bull; II-C){resolvedKey === "107" ? " — (You)" : ""}</option>
-                          <option value="111" disabled={resolvedKey === "111"}>Mrs B Gayathri (Asst. Prof &bull; II-A In-Charge){resolvedKey === "111" ? " — (You)" : ""}</option>
-                          <option value="112" disabled={resolvedKey === "112"}>Mrs K Ramya (Asst. Prof &bull; II-B In-Charge){resolvedKey === "112" ? " — (You)" : ""}</option>
-                          <option value="114" disabled={resolvedKey === "114"}>Mrs K Srinija (Asst. Prof &bull; SDC){resolvedKey === "114" ? " — (You)" : ""}</option>
-                          <option value="116" disabled={resolvedKey === "116"}>Dr. A. Balaram (Assoc. Prof &bull; JAVA){resolvedKey === "116" ? " — (You)" : ""}</option>
-                          <option value="118" disabled={resolvedKey === "118"}>Mr. Rakesh Goud (Asst. Prof &bull; MSF){resolvedKey === "118" ? " — (You)" : ""}</option>
-                          <option value="119" disabled={resolvedKey === "119"}>Dr. Sri Hari VLN (Assoc. Prof &bull; CM Lab){resolvedKey === "119" ? " — (You)" : ""}</option>
-                        </optgroup>
-
-                        <optgroup label="── 🎓 III Year Faculty ──">
-                          <option value="108" disabled={resolvedKey === "108"}>Mrs G Sushma (Asst. Prof &bull; WP &bull; III-A){resolvedKey === "108" ? " — (You)" : ""}</option>
-                          <option value="106" disabled={resolvedKey === "106"}>Mr T Shravan Kumar (Asst. Prof &bull; IDS &bull; III-B){resolvedKey === "106" ? " — (You)" : ""}</option>
-                          <option value="103" disabled={resolvedKey === "103"}>Mr Miskeen Ali (Asst. Prof &bull; DevOps){resolvedKey === "103" ? " — (You)" : ""}</option>
-                          <option value="109" disabled={resolvedKey === "109"}>Mrs A Sravanthi (Asst. Prof &bull; IDS, R-Lab){resolvedKey === "109" ? " — (You)" : ""}</option>
-                          <option value="110" disabled={resolvedKey === "110"}>Mrs K Sneha (Asst. Prof &bull; CN, CN-Lab){resolvedKey === "110" ? " — (You)" : ""}</option>
-                          <option value="123" disabled={resolvedKey === "123"}>Mrs. Swathi (Asst. Prof &bull; ARQA III-A/B/C){resolvedKey === "123" ? " — (You)" : ""}</option>
-                          <option value="117" disabled={resolvedKey === "117"}>Dr. Md Abdul Azeem (Assoc. Prof &bull; ADA){resolvedKey === "117" ? " — (You)" : ""}</option>
-                          <option value="120" disabled={resolvedKey === "120"}>Mr. Prateek (Asst. Prof &bull; IPR){resolvedKey === "120" ? " — (You)" : ""}</option>
-                          <option value="121" disabled={resolvedKey === "121"}>Ms. Vaidehi (Asst. Prof &bull; AECS Lab){resolvedKey === "121" ? " — (You)" : ""}</option>
-                        </optgroup>
-
-                        <optgroup label="── 🎓 IV Year Faculty ──">
-                          <option value="106" disabled={resolvedKey === "106"}>Mr T Shravan Kumar (Asst. Prof &bull; PA, PA Lab){resolvedKey === "106" ? " — (You)" : ""}</option>
-                          <option value="107" disabled={resolvedKey === "107"}>Mr K Bikshapathi (Asst. Prof &bull; WSMA, WSMA Lab){resolvedKey === "107" ? " — (You)" : ""}</option>
-                          <option value="111" disabled={resolvedKey === "111"}>Mrs B Gayathri (Asst. Prof &bull; NLP){resolvedKey === "111" ? " — (You)" : ""}</option>
-                          <option value="112" disabled={resolvedKey === "112"}>Mrs K Ramya (Asst. Prof &bull; CC){resolvedKey === "112" ? " — (You)" : ""}</option>
-                          <option value="103" disabled={resolvedKey === "103"}>Mr Miskeen Ali (Asst. Prof &bull; PS-I &bull; IV-A){resolvedKey === "103" ? " — (You)" : ""}</option>
-                          <option value="117" disabled={resolvedKey === "117"}>Dr. Md Abdul Azeem (Assoc. Prof &bull; PS-I &bull; IV-B){resolvedKey === "117" ? " — (You)" : ""}</option>
-                        </optgroup>
-
-                        <optgroup label="── 🏛️ Department / Optional Faculty ──">
-                          <option value="122" disabled={resolvedKey === "122"}>Dr. C. Lakshmi Nath (Professor & HOD){resolvedKey === "122" ? " — (You)" : ""}</option>
-                          <option value="102" disabled={resolvedKey === "102"}>Mrs. Swetha (Assistant Professor){resolvedKey === "102" ? " — (You)" : ""}</option>
-                          <option value="115" disabled={resolvedKey === "115"}>Ms. Priyusha (Assistant Professor){resolvedKey === "115" ? " — (You)" : ""}</option>
-                        </optgroup>
+                        {(() => {
+                          const secKey = normalizeSectionKey(reassignCourse.section);
+                          const roster = SECTION_FACULTY_ROSTER[secKey] || SECTION_FACULTY_ROSTER["DS-2A"];
+                          return roster.map((fac) => {
+                            const isSelf = fac.key === resolvedKey;
+                            return (
+                              <option key={fac.key} value={fac.key} disabled={isSelf}>
+                                {fac.name} — {fac.subject} ({fac.designation}){isSelf ? " — (You)" : ""}
+                              </option>
+                            );
+                          });
+                        })()}
                       </select>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Showing only official teaching faculty assigned to Section {normalizeSectionKey(reassignCourse.section)}.
+                      </p>
+                    </div>
+
+                    {/* Subject to be Taught (Lakshmi Mam Feedback: Changes with Faculty Name) */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Subject to be Taught by Substitute:
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={reassignSubject}
+                          onChange={(e) => setReassignSubject(e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-black text-slate-900 bg-white focus:outline-none focus:border-blue-500"
+                          placeholder="Subject title / code"
+                        />
+                        <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2.5 py-2 rounded-xl border border-emerald-200 shrink-0">
+                          Auto-swapped
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        ⚡ Automatically updated to match the substitute faculty&apos;s curriculum ({reassignSubject || "Course"}).
+                      </p>
                     </div>
 
                     {/* Reason */}
@@ -5624,14 +6825,14 @@ export default function FacultyPortal() {
                       </div>
                     )}
 
-                    {/* Workflow Note */}
-                    <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200 text-[11px] text-blue-900 space-y-1">
-                      <p className="font-bold flex items-center gap-1.5 text-blue-800">
-                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                        <span>HOD Approval Workflow</span>
+                    {/* Workflow Note (Srinidhi Review: Faculty-to-Faculty Approval Workflow) */}
+                    <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-[11px] text-indigo-950 space-y-1.5">
+                      <p className="font-extrabold flex items-center gap-1.5 text-indigo-900">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Faculty-to-Faculty Reassignment & Approval Workflow</span>
                       </p>
-                      <p className="text-blue-700">
-                        Once submitted, this request will appear in the HOD Dashboard notification bar. When approved, this class will appear on the substitute faculty&apos;s portal.
+                      <p className="text-indigo-800 leading-relaxed">
+                        Once submitted, this request is dispatched to the substitute faculty member. When they accept the request in their portal, the period swap will be approved and activated on both timetables.
                       </p>
                     </div>
                   </div>

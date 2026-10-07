@@ -551,15 +551,29 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
       const reassignment = classReassignmentsStore.find(
         (r) =>
           r.date === queryDate &&
-          (r.scheduleId === s.id || (s.secondary_schedule_id && r.scheduleId === s.secondary_schedule_id) || (r.fromFacultyKey === facultyKey && r.subject.toUpperCase() === (s.subject || "").toUpperCase()))
+          (
+            (r.scheduleId && (String(r.scheduleId) === String(s.id) || (s.secondary_schedule_id && String(r.scheduleId) === String(s.secondary_schedule_id)))) ||
+            (
+              r.fromFacultyKey === facultyKey &&
+              (
+                r.subject.toUpperCase() === (s.subject || "").toUpperCase() ||
+                (r.originalSubject && r.originalSubject.toUpperCase() === (s.subject || "").toUpperCase())
+              )
+            )
+          )
       );
       if (reassignment) {
         return {
           ...item,
           reassignment,
           reassignedTo: reassignment.toFacultyName,
+          reassignedSubject: reassignment.subject,
           reassignmentStatus: reassignment.status,
           isReassigned: reassignment.status === "accepted",
+          statusLabel:
+            reassignment.status === "accepted"
+              ? `⚡ Reassigned to ${reassignment.toFacultyName} (Subject: ${reassignment.subject}) • Accepted`
+              : `⏳ Reassignment Request Sent to ${reassignment.toFacultyName} • Pending Acceptance`,
         };
       }
       return item;
@@ -579,7 +593,7 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
         id: `reassigned_${r.id}`,
         scheduleId: r.scheduleId || 9999 + idx,
         code: (r.subject || "SUB").toUpperCase(),
-        name: `${r.subject} (Reassigned)`,
+        name: `${r.subject} (Reassigned from ${r.fromFacultyName})`,
         type: isLab ? "Practical" : "Theory",
         program: "CSE-DS",
         section: r.section,
@@ -599,7 +613,7 @@ router.get("/faculty/today-classes", authMiddleware, mentorOnly, async (req: any
         timingStatus: "live",
         isLocked: false,
         unlocksAt: "Now",
-        statusLabel: `⚡ Reassigned from ${r.fromFacultyName} (HOD Approved)`,
+        statusLabel: `⚡ Reassigned from ${r.fromFacultyName} • Accepted`,
         isSubstitute: true,
         reassignedFrom: r.fromFacultyName,
       });
