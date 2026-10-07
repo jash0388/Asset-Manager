@@ -241,7 +241,7 @@ const FACULTY_DIRECTORY: Record<string, {
     name: "Mr M Yadaiah",
     email: "mrmyadaiah@gmail.com",
     role: "Assistant Professor & Subject Faculty",
-    designation: "Subject Faculty (JAVA, IPR, ARQA)",
+    designation: "Subject Faculty (JAVA, IPR)",
     department: "Computer Science & Engineering (Data Science)",
     key: "104",
     erp: "EMP-SECDS104",
@@ -252,7 +252,6 @@ const FACULTY_DIRECTORY: Record<string, {
       { id: "c104_2", code: "JAVA", name: "JAVA Programming", type: "Theory", program: "CSE-DS", section: "DS-2C", strength: 45, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c104_3", code: "IPR", name: "Intellectual Property Rights (IPR)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c104_4", code: "IPR", name: "Intellectual Property Rights (IPR)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c104_5", code: "ARQA", name: "Applied Research & Quality Assurance (ARQA)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c104_6", code: "JAVA/DBMS LAB", name: "JAVA/DBMS Lab", type: "Practical", program: "CSE-DS", section: "DS-2B", strength: 55, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c104_7", code: "JAVA/SE LAB", name: "JAVA/SE Lab", type: "Practical", program: "CSE-DS", section: "DS-2C", strength: 45, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c104_8", code: "AECS LAB", name: "AECS Lab", type: "Practical", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
@@ -295,7 +294,6 @@ const FACULTY_DIRECTORY: Record<string, {
       { id: "c106_2", code: "PA", name: "Predictive Analytics (PA)", type: "Theory", program: "CSE-DS", section: "DS-4B", strength: 60, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c106_3", code: "IDS", name: "Introduction to Data Science (IDS)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c106_4", code: "CN", name: "Computer Networks (CN)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
-      { id: "c106_5", code: "ARQA", name: "Applied Research & Quality Assurance (ARQA)", type: "Theory", program: "CSE-DS", section: "DS-3B", strength: 50, room: "Hall", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c106_6", code: "PA LAB", name: "Predictive Analytics Lab", type: "Practical", program: "CSE-DS", section: "DS-4A", strength: 63, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
       { id: "c106_7", code: "PA LAB", name: "Predictive Analytics Lab", type: "Practical", program: "CSE-DS", section: "DS-4B", strength: 60, room: "Lab", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
     ],
@@ -303,7 +301,7 @@ const FACULTY_DIRECTORY: Record<string, {
     workload: [
       { day: "Monday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }] },
       { day: "Tuesday", periods: [{ slot: "09:00 – 11:00", subject: "PA LAB", section: "DS-4A/4B", room: "Lab" }] },
-      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }, { slot: "10:00 – 11:00", subject: "ARQA", section: "DS-3B", room: "Hall" }] },
+      { day: "Wednesday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }] },
       { day: "Thursday", periods: [{ slot: "09:00 – 10:00", subject: "IDS", section: "DS-3A", room: "Hall" }] },
       { day: "Friday", periods: [{ slot: "10:00 – 11:00", subject: "IDS/PA", section: "DS-3A/4B", room: "Hall" }, { slot: "11:10 – 12:10", subject: "IDS", section: "DS-3A", room: "Hall" }, { slot: "12:10 – 13:10", subject: "CN", section: "DS-3A", room: "Hall" }] },
       { day: "Saturday", periods: [{ slot: "09:00 – 10:00", subject: "PA", section: "DS-4A/4B", room: "Hall" }, { slot: "10:00 – 11:00", subject: "IDS", section: "DS-3A", room: "Hall" }] },
@@ -478,6 +476,33 @@ const FACULTY_DIRECTORY: Record<string, {
   "120": { name: "Mr. Prateek", email: "mrprateek@gmail.com", role: "Assistant Professor", designation: "Subject Faculty", department: "Computer Science & Engineering (Data Science)", key: "120", erp: "EMP-SECDS120", section: "DS", phone: "+91 98490 12364", courses: [], mentees: [], workload: [] },
   "121": { name: "Ms. Vaidehi", email: "msvaidehi@gmail.com", role: "Assistant Professor", designation: "Subject Faculty", department: "Computer Science & Engineering (Data Science)", key: "121", erp: "EMP-SECDS121", section: "DS", phone: "+91 98490 12365", courses: [], mentees: [], workload: [] },
   "122": { name: "Dr. C. Lakshmi Nath", email: "lakshminath@sphoorthyengg.ac.in", role: "Professor & HOD", designation: "Head of Department", department: "Computer Science & Engineering (Data Science)", key: "122", erp: "EMP-SECDS122", section: "DS", phone: "+91 98490 12366", courses: [], mentees: [], workload: [] },
+  "123": {
+    name: "Mrs. Swathi",
+    email: "swathi@sphoorthyengg.ac.in",
+    role: "Assistant Professor & Subject Faculty",
+    designation: "Subject Faculty (ARQA)",
+    department: "Computer Science & Engineering (Data Science)",
+    key: "123",
+    erp: "EMP-SECDS123",
+    section: "DS III (A/B/C)",
+    phone: "+91 98490 12367",
+    courses: [
+      { id: "c123_1", code: "ARQA", name: "Automated Testing & Quality Assurance (ARQA)", type: "Theory", program: "CSE-DS", section: "DS-3A", strength: 55, room: "Hall 401", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c123_2", code: "ARQA", name: "Automated Testing & Quality Assurance (ARQA)", type: "Theory", program: "CSE-DS", section: "DS-3B", strength: 50, room: "Hall 402", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+      { id: "c123_3", code: "ARQA", name: "Automated Testing & Quality Assurance (ARQA)", type: "Theory", program: "CSE-DS", section: "DS-3C", strength: 54, room: "Hall 417", batch: "Regular", addedBy: "HOD (Data Science)", coInstructors: [] },
+    ],
+    mentees: [],
+    workload: [
+      {
+        day: "Wednesday",
+        periods: [
+          { slot: "09:00 – 10:00", subject: "ARQA", section: "DS-3A", room: "Hall 401" },
+          { slot: "10:00 – 11:00", subject: "ARQA", section: "DS-3B", room: "Hall 402" },
+          { slot: "11:10 – 12:10", subject: "ARQA", section: "DS-3C", room: "Hall 417" },
+        ]
+      }
+    ]
+  },
 };
 
 export const OFFICIAL_FACULTY_LIST = Object.entries(FACULTY_DIRECTORY).map(([key, data], idx) => ({

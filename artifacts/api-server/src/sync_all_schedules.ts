@@ -189,7 +189,7 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "DEVOPS": 3,          // Mr. Miskeen Ali
     "IDS": 6,             // Mr. T. Shravan Kumar
     "KAFKA": 12,          // Mrs. K. Ramya
-    "ARQA": 4,            // Mr. M. Yadaiah
+    "ARQA": 23,            // Mrs. Swathi
     "AECS LAB": 21,       // Ms. Vaidehi
     "IPR": 20,            // Mr. Prateek
     "LIBRARY": 8,         // Mrs. G. Sushma
@@ -211,7 +211,7 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "R PROGRAMMING LAB": 9,     // Mrs. A. Sravanthi
     "AECS LAB": 21,       // Ms. Vaidehi
     "IPR": 20,            // Mr. Prateek
-    "ARQA": 6,            // Mr. T. Shravan Kumar
+    "ARQA": 23,            // Mrs. Swathi
     "COUNSELLING": 6,     // Mr. T. Shravan Kumar
     "SPORTS": 6,          // Mr. T. Shravan Kumar
     "LIBRARY": 6,         // Mr. T. Shravan Kumar
@@ -227,7 +227,7 @@ const EXACT_FACULTY_MAP: Record<string, Record<string, number>> = {
     "IDS": 9,             // Mrs. A. Sravanthi
     "DEVOPS": 3,          // Mr. Miskeen Ali
     "KAFKA": 12,          // Mrs. K. Ramya
-    "ARQA": 4,            // Mr. M. Yadaiah
+    "ARQA": 23,            // Mrs. Swathi
     "AECS LAB": 21,       // Ms. Vaidehi
     "IPR": 20,            // Mr. Prateek
     "LIBRARY": 4,         // Mr. M. Yadaiah

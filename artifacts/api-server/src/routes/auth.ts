@@ -315,6 +315,7 @@ const FACULTY_PIN_MAP: Record<string, { id: number; name: string; email: string;
   "120": { id: 20, name: "Mr. Prateek", email: "mrprateek@gmail.com", key: "120", section: "DS III/I/A", bcryptHash: bcrypt.hashSync("120", 10) },
   "121": { id: 21, name: "Ms. Vaidehi", email: "msvaidehi@gmail.com", key: "121", section: "DS III/I/A", bcryptHash: bcrypt.hashSync("121", 10) },
   "122": { id: 22, name: "Dr. C. Lakshmi Nath", email: "lakshminath@sphoorthyengg.ac.in", key: "122", section: "DS IV/I/B", bcryptHash: bcrypt.hashSync("122", 10) },
+  "123": { id: 23, name: "Mrs. Swathi", email: "swathi@sphoorthyengg.ac.in", key: "123", section: "DS III (A/B/C)", bcryptHash: bcrypt.hashSync("123", 10) },
   // 4-digit incharge PINs
   "4011": { id: 9, name: "Mrs A Sravanthi", email: "mrsasravanthi@gmail.com", key: "4011", section: "DS IV/I/A", bcryptHash: bcrypt.hashSync("4011", 10) },
   "4012": { id: 10, name: "Mrs K Sneha", email: "mrsksneha@gmail.com", key: "4012", section: "DS IV/I/B", bcryptHash: bcrypt.hashSync("4012", 10) },

@@ -36,7 +36,7 @@ const newSchedules: NewSchedule[] = [
   { mentor_id: 3, day_of_week: "TUE", start_time: "14:00:00", end_time: "15:00:00", section: "A", subject: "DevOps", year: "III" },
   { mentor_id: 8, day_of_week: "TUE", start_time: "15:00:00", end_time: "16:00:00", section: "A", subject: "Sports", year: "III" },
   // WED
-  { mentor_id: 8, day_of_week: "WED", start_time: "09:00:00", end_time: "10:00:00", section: "A", subject: "ARQA", year: "III" },
+  { mentor_id: 23, day_of_week: "WED", start_time: "09:00:00", end_time: "10:00:00", section: "A", subject: "ARQA", year: "III" },
   { mentor_id: 8, day_of_week: "WED", start_time: "10:00:00", end_time: "11:00:00", section: "A", subject: "WP", year: "III" },
   { mentor_id: 3, day_of_week: "WED", start_time: "11:10:00", end_time: "12:10:00", section: "A", subject: "DevOps", year: "III" },
   { mentor_id: 2, day_of_week: "WED", start_time: "12:10:00", end_time: "13:10:00", section: "A", subject: "ADA", year: "III" },
@@ -85,7 +85,7 @@ const newSchedules: NewSchedule[] = [
   { mentor_id: 8, day_of_week: "TUE", start_time: "15:00:00", end_time: "16:00:00", section: "B", subject: "WP", year: "III" },
   // WED
   { mentor_id: 9, day_of_week: "WED", start_time: "09:00:00", end_time: "10:00:00", section: "B", subject: "IDS", year: "III" },
-  { mentor_id: 6, day_of_week: "WED", start_time: "10:00:00", end_time: "11:00:00", section: "B", subject: "ARQA", year: "III" },
+  { mentor_id: 23, day_of_week: "WED", start_time: "10:00:00", end_time: "11:00:00", section: "B", subject: "ARQA", year: "III" },
   { mentor_id: 8, day_of_week: "WED", start_time: "11:10:00", end_time: "12:10:00", section: "B", subject: "WP", year: "III" },
   { mentor_id: 10, day_of_week: "WED", start_time: "12:10:00", end_time: "13:10:00", section: "B", subject: "CN", year: "III" },
   { mentor_id: 10, day_of_week: "WED", start_time: "14:00:00", end_time: "15:00:00", section: "B", subject: "CN Lab", year: "III" },
@@ -138,7 +138,7 @@ const newSchedules: NewSchedule[] = [
   // WED
   { mentor_id: 11, day_of_week: "WED", start_time: "09:00:00", end_time: "10:00:00", section: "C", subject: "CN", year: "III" },
   { mentor_id: 2, day_of_week: "WED", start_time: "10:00:00", end_time: "11:00:00", section: "C", subject: "ADA", year: "III" },
-  { mentor_id: 4, day_of_week: "WED", start_time: "11:10:00", end_time: "12:10:00", section: "C", subject: "ARQA", year: "III" },
+  { mentor_id: 23, day_of_week: "WED", start_time: "11:10:00", end_time: "12:10:00", section: "C", subject: "ARQA", year: "III" },
   { mentor_id: 4, day_of_week: "WED", start_time: "12:10:00", end_time: "13:10:00", section: "C", subject: "Library", year: "III" },
   { mentor_id: 9, day_of_week: "WED", start_time: "14:00:00", end_time: "15:00:00", section: "C", subject: "IDS", year: "III" },
   { mentor_id: 3, day_of_week: "WED", start_time: "15:00:00", end_time: "16:00:00", section: "C", subject: "DevOps", year: "III" },

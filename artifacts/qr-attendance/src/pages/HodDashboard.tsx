@@ -589,7 +589,7 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "DEVOPS": "Mr. Miskeen Ali",
     "IDS": "Mr. T. Shravan Kumar",
     "KAFKA": "Mrs. K. Ramya",
-    "ARQA": "Mr. M. Yadaiah",
+    "ARQA": "Mrs. Swathi",
     "AECS LAB": "Ms. Vaidehi",
     "IPR": "Mr. Prateek",
     "LIBRARY": "Mrs. G. Sushma",
@@ -612,7 +612,7 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "R PROGRAMMING LAB": "Mrs. A. Sravanthi",
     "AECS LAB": "Ms. Vaidehi",
     "IPR": "Mr. Prateek",
-    "ARQA": "Mr. T. Shravan Kumar",
+    "ARQA": "Mrs. Swathi",
     "COUNSELLING": "Mr. T. Shravan Kumar",
     "SPORTS": "Mr. T. Shravan Kumar",
     "LIBRARY": "Mr. T. Shravan Kumar",
@@ -629,7 +629,7 @@ export const SECTION_FACULTY_ALLOCATION_MATRIX: Record<string, Record<string, st
     "IDS": "Mrs. A. Sravanthi",
     "DEVOPS": "Mr. Miskeen Ali",
     "KAFKA": "Mrs. K. Ramya",
-    "ARQA": "Mr. M. Yadaiah",
+    "ARQA": "Mrs. Swathi",
     "AECS LAB": "Ms. Vaidehi",
     "IPR": "Mr. Prateek",
     "LIBRARY": "Mr. M. Yadaiah",
@@ -1244,6 +1244,7 @@ export default function HodDashboard() {
     "Dr. Sri Hari VLN",
     "Dr. C. Lakshmi Nath",
     "Dr. A. Balaram",
+    "Mrs. Swathi",
   ];
 
   const SLOT_TIME_MAP = [
