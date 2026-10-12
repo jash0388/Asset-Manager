@@ -84,7 +84,7 @@ function TrainingMenu({ location, sessions }: { location: string; sessions: any[
     <div className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className={`flex items-center gap-2 h-8 px-3.5 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+        className={`flex items-center gap-2 h-9 px-4 rounded-[8px] text-[14px] font-medium transition-all cursor-pointer whitespace-nowrap ${
           isOnTraining ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]" : "text-ink-600 hover:text-ink-900"
         }`}
       >
@@ -301,7 +301,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <button
             data-testid="mobile-menu-button"
             onClick={() => setMobileNavOpen(o => !o)}
-            className="lg:hidden -ml-1 h-10 w-10 rounded-full flex items-center justify-center text-ink-600 hover:bg-ink-100 cursor-pointer"
+            className="lg:hidden -ml-1 h-11 w-11 rounded-full flex items-center justify-center text-ink-600 hover:bg-ink-100 cursor-pointer"
           >
             {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -363,7 +363,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       )}
                     </div>
                     {activeNotifications.length > 0 && (
-                      <button onClick={handleClearAllNotifications} className="text-[11px] font-semibold text-ink-500 hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer">
+                      <button onClick={handleClearAllNotifications} className="text-[12px] font-semibold text-ink-500 hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer">
                         <Trash2 className="w-3 h-3" /> Clear all
                       </button>
                     )}
@@ -404,13 +404,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                               <p className="text-[11px] text-ink-600 bg-ink-50 px-2.5 py-1.5 rounded-lg"><span className="font-semibold">Reason:</span> {r.reason}</p>
                             )}
                             <div className="flex items-center justify-between pt-2 border-t border-ink-100 gap-2">
-                              <button type="button" onClick={() => handleClearSingleNotification(r.id)} className="text-[11px] font-semibold text-ink-400 hover:text-ink-700 transition-colors cursor-pointer">Dismiss</button>
+                              <button type="button" onClick={() => handleClearSingleNotification(r.id)} className="text-[12px] font-semibold text-ink-400 hover:text-ink-700 transition-colors cursor-pointer">Dismiss</button>
                               {isPending ? (
                                 <div className="flex items-center gap-1.5">
                                   <button type="button" onClick={() => handleNotificationAction(r.id, "decline")} disabled={processingNotificationId === r.id}
-                                    className="px-3 py-1.5 rounded-lg border border-ink-200 text-ink-700 hover:bg-ink-50 text-[11px] font-semibold transition-all cursor-pointer">Decline</button>
+                                    className="px-3.5 py-2 rounded-lg border border-ink-200 text-ink-700 hover:bg-ink-50 text-[12px] font-semibold transition-all cursor-pointer">Decline</button>
                                   <button type="button" onClick={() => handleNotificationAction(r.id, "accept")} disabled={processingNotificationId === r.id}
-                                    className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-95">
+                                    className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-95">
                                     <Check className="w-3 h-3" /> Accept
                                   </button>
                                 </div>
@@ -441,7 +441,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="relative">
               <button
                 onClick={() => { setProfileOpen(p => !p); setNotificationsOpen(false); }}
-                className="flex items-center gap-2.5 rounded-full pl-1 pr-2.5 h-10 hover:bg-black/[0.04] transition-colors cursor-pointer"
+                className="flex items-center gap-2.5 rounded-full pl-1 pr-2.5 h-11 hover:bg-black/[0.04] transition-colors cursor-pointer"
               >
                 <span className="h-8 w-8 rounded-full bg-gradient-to-b from-[#a1a1a6] to-[#8e8e93] text-white text-[12px] font-semibold flex items-center justify-center">{initials}</span>
                 <span className="hidden md:block text-left leading-tight max-w-[160px]">
@@ -459,11 +459,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       <p className="text-xs text-ink-500 truncate">{userEmail}</p>
                     </div>
                     {(role === "hod" || role === "principal" || role === "admin") && (
-                      <button onClick={openSettings} className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-ink-700 hover:bg-ink-50 cursor-pointer">
+                      <button onClick={openSettings} className="w-full flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] text-ink-700 hover:bg-ink-50 cursor-pointer">
                         <Settings className="w-4 h-4 text-ink-400" /> Settings
                       </button>
                     )}
-                    <button data-testid="logout-button" onClick={logout} className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-rose-600 hover:bg-rose-50 cursor-pointer">
+                    <button data-testid="logout-button" onClick={logout} className="w-full flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] text-rose-600 hover:bg-rose-50 cursor-pointer">
                       <LogOut className="w-4 h-4" /> Log out
                     </button>
                   </div>
@@ -495,7 +495,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </Link>
             )}
-            <button onClick={logout} className="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer">
+            <button onClick={logout} className="w-full flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer">
               <LogOut className="w-[18px] h-[18px]" /> Log out
             </button>
           </div>
@@ -520,7 +520,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <p className="text-xs text-ink-500">Account & scanner passcode</p>
                 </div>
               </div>
-              <button onClick={() => setShowSettings(false)} className="h-8 w-8 rounded-lg bg-ink-50 hover:bg-ink-100 text-ink-500 flex items-center justify-center cursor-pointer">
+              <button onClick={() => setShowSettings(false)} className="h-9 w-9 rounded-lg bg-ink-50 hover:bg-ink-100 text-ink-500 flex items-center justify-center cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -541,7 +541,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     onChange={e => { setSettingsCurrentPwd(e.target.value); setSettingsError(""); }}
                     className={passwordInputCls} autoFocus />
                   {settingsError && <p className="text-rose-600 text-xs font-semibold text-center mt-2">{settingsError}</p>}
-                  <button type="submit" className="w-full mt-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors cursor-pointer">Change passcode</button>
+                  <button type="submit" className="w-full mt-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[15px] transition-colors cursor-pointer">Change passcode</button>
                 </form>
               )}
 
@@ -562,15 +562,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   {settingsError && <p className="text-rose-600 text-xs font-semibold text-center">{settingsError}</p>}
                   {settingsSuccess && <p className="text-emerald-600 text-sm font-semibold text-center">{settingsSuccess}</p>}
                   <div className="flex gap-2.5">
-                    <button type="button" onClick={() => setSettingsStep("verify")} className="flex-1 py-3 rounded-xl bg-ink-50 hover:bg-ink-100 text-ink-700 font-semibold text-sm cursor-pointer">Back</button>
-                    <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm cursor-pointer">Save passcode</button>
+                    <button type="button" onClick={() => setSettingsStep("verify")} className="flex-1 py-3 rounded-xl bg-ink-50 hover:bg-ink-100 text-ink-700 font-semibold text-[15px] cursor-pointer">Back</button>
+                    <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[15px] cursor-pointer">Save passcode</button>
                   </div>
                 </form>
               )}
 
               <button
                 onClick={() => { setShowSettings(false); logout(); }}
-                className="w-full mt-4 py-3 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                className="w-full mt-4 py-3 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold text-[15px] flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 Log out of account

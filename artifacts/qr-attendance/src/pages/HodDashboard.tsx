@@ -136,7 +136,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+        className="px-5 py-3 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-[15px] font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
       >
         <Calendar className="w-4 h-4 text-blue-600" />
         <span>{monthNames[month - 1]} {year}</span>
@@ -150,7 +150,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &larr;
               </button>
@@ -158,7 +158,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &rarr;
               </button>
@@ -172,7 +172,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     key={mName}
                     type="button"
                     onClick={() => handleSelectMonth(idx)}
-                    className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       isSelected 
                         ? "bg-blue-600 text-white shadow-sm" 
                         : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-slate-700"
@@ -2762,7 +2762,7 @@ export default function HodDashboard() {
                     className="bg-transparent text-[13px] font-medium text-ink-900 outline-none cursor-pointer [color-scheme:light]"
                   />
                 </label>
-                <button onClick={openPwdModal} className="flex items-center gap-2 h-9 rounded-[10px] bg-white px-3 text-[13px] font-medium text-ink-900 shadow-[0_0_0_0.5px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)] hover:bg-ink-50 transition-colors cursor-pointer" title="Change scanner passcode">
+                <button onClick={openPwdModal} className="flex items-center gap-2 h-10 rounded-[10px] bg-white px-3.5 text-[14px] font-medium text-ink-900 shadow-[0_0_0_0.5px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)] hover:bg-ink-50 transition-colors cursor-pointer" title="Change scanner passcode">
                   <Settings className="w-4 h-4 text-ink-500" />
                   <span className="hidden sm:inline">Scanner Passcode</span>
                 </button>
@@ -2779,7 +2779,7 @@ export default function HodDashboard() {
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`h-8 min-w-[96px] px-4 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer ${
+                  className={`h-9 min-w-[96px] px-5 rounded-[8px] text-[14px] font-medium transition-all cursor-pointer ${
                     activeTab === key
                       ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]"
                       : "text-ink-600 hover:text-ink-900"
@@ -2812,10 +2812,10 @@ export default function HodDashboard() {
                       </h2>
                     </div>
                     <div className="relative mt-10 flex flex-wrap items-center gap-2">
-                      <button onClick={() => setActiveTab("logs")} className="h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium transition-colors cursor-pointer">
+                      <button onClick={() => setActiveTab("logs")} className="h-12 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[16px] font-medium transition-colors cursor-pointer">
                         Open today's log
                       </button>
-                      <button onClick={() => setActiveTab("flags")} className="h-11 px-5 rounded-full text-blue-600 hover:bg-blue-50 text-[15px] font-medium flex items-center gap-1 transition-colors cursor-pointer">
+                      <button onClick={() => setActiveTab("flags")} className="h-12 px-6 rounded-full text-blue-600 hover:bg-blue-50 text-[16px] font-medium flex items-center gap-1 transition-colors cursor-pointer">
                         Review risk flags <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -2898,12 +2898,12 @@ export default function HodDashboard() {
                                   <span className={`h-2 w-2 rounded-full ${status.dot}`} />
                                   {status.label}
                                 </span>
-                                <button onClick={() => handleCellClick("Total", s)} className="text-[13px] font-medium text-blue-600 hover:underline cursor-pointer">
+                                <button onClick={() => handleCellClick("Total", s)} className="text-[14px] font-medium text-blue-600 hover:underline cursor-pointer">
                                   View class
                                 </button>
                               </div>
                               <p className="mt-6 text-[56px] leading-none font-bold tracking-[-0.04em] text-ink-900">{s.displayName}</p>
-                              <button onClick={() => handleCellClick("PR", s)} title="Present Students" className="mt-2 self-start text-[15px] text-ink-500 hover:text-ink-900 transition-colors cursor-pointer">
+                              <button onClick={() => handleCellClick("PR", s)} title="Present Students" className="mt-2 self-start text-[16px] text-ink-500 hover:text-ink-900 transition-colors cursor-pointer">
                                 {percent}% present today
                               </button>
                               <div className="mt-7 pt-5 border-t border-black/[0.06] flex items-center justify-between">
@@ -2917,7 +2917,7 @@ export default function HodDashboard() {
                                     <span className="h-8 w-8 rounded-full bg-[#34c759]/15 text-[#248a3d] flex items-center justify-center"><CheckCircle className="w-4 h-4" /></span>
                                   )}
                                 </div>
-                                <button onClick={() => handleCellClick("AB", s)} className="text-[14px] font-medium text-ink-700 hover:text-blue-600 flex items-center gap-0.5 transition-colors cursor-pointer">
+                                <button onClick={() => handleCellClick("AB", s)} className="text-[15px] font-medium text-ink-700 hover:text-blue-600 flex items-center gap-0.5 transition-colors cursor-pointer">
                                   {s.absentStudents.length === 0 ? "Everyone's here" : `${s.absentStudents.length} absent`}
                                   <ChevronRight className="w-4 h-4" />
                                 </button>
@@ -2967,7 +2967,7 @@ export default function HodDashboard() {
                     setBulkMessageType("late");
                     setBulkMessageModalOpen(true);
                   }}
-                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                  className="h-10 flex items-center gap-1.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-[13px] transition-colors shadow-2xs cursor-pointer"
                   title="Send bulk notice to parents"
                 >
                   <Send className="w-3.5 h-3.5 text-rose-600" />
@@ -2981,7 +2981,7 @@ export default function HodDashboard() {
 
                 <button
                   onClick={handleExportProblemCsv}
-                  className="h-9 flex items-center gap-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+                  className="h-10 flex items-center gap-1.5 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-[13px] transition-colors shadow-2xs cursor-pointer"
                   title="Export Attendance Logs as CSV"
                 >
                   <Download className="w-3.5 h-3.5 text-slate-500" />
@@ -2990,7 +2990,7 @@ export default function HodDashboard() {
 
                 <button
                   onClick={() => setExportModalOpen(true)}
-                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                  className="h-10 flex items-center gap-1.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[13px] transition-colors shadow-xs cursor-pointer"
                   title="Open Monthly Attendance Register"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-slate-300" />
@@ -2999,7 +2999,7 @@ export default function HodDashboard() {
 
                 <button
                   onClick={() => setHolidayModalOpen(true)}
-                  className="h-9 flex items-center gap-1.5 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-xs transition-colors cursor-pointer"
+                  className="h-10 flex items-center gap-1.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-[13px] transition-colors cursor-pointer"
                   title="Configure Holidays"
                 >
                   <Calendar className="w-3.5 h-3.5 text-slate-500" />
@@ -3051,7 +3051,7 @@ export default function HodDashboard() {
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
                     onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       logViewMode === "all"
                         ? "bg-slate-900 text-white shadow-xs"
                         : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/70"
@@ -3061,7 +3061,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("problems"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                       logViewMode === "problems"
                         ? "bg-rose-700 text-white shadow-xs"
                         : "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
@@ -3072,7 +3072,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("late"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       logViewMode === "late"
                         ? "bg-amber-600 text-white shadow-xs"
                         : "bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200"
@@ -3082,7 +3082,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("unscanned"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       logViewMode === "unscanned"
                         ? "bg-rose-600 text-white shadow-xs"
                         : "bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200"
@@ -3096,7 +3096,7 @@ export default function HodDashboard() {
                 <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200">
                   <button
                     onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                       logViewMode !== "comparison" && logViewMode !== "trend"
                         ? "bg-white text-slate-900 shadow-2xs"
                         : "text-slate-600 hover:text-slate-900"
@@ -3108,7 +3108,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("comparison"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                       logViewMode === "comparison"
                         ? "bg-white text-slate-900 shadow-2xs"
                         : "text-slate-600 hover:text-slate-900"
@@ -3120,7 +3120,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("trend"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                       logViewMode === "trend"
                         ? "bg-white text-slate-900 shadow-2xs"
                         : "text-slate-600 hover:text-slate-900"
@@ -3310,7 +3310,7 @@ export default function HodDashboard() {
                                 setLogViewMode("problems");
                                 setLogCurrentPage(1);
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-[11px] transition-colors cursor-pointer"
+                              className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-[12px] transition-colors cursor-pointer"
                             >
                               Filter →
                             </button>
@@ -3396,7 +3396,7 @@ export default function HodDashboard() {
                         const lateIds = sortedProblemItems.filter(i => i.isLate).map(i => i.student.id);
                         setSelectedStudentIds(lateIds);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-semibold transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[13px] font-semibold transition-colors cursor-pointer"
                     >
                       Select Late ({sortedProblemItems.filter(i => i.isLate).length})
                     </button>
@@ -3406,7 +3406,7 @@ export default function HodDashboard() {
                         const unscannedIds = sortedProblemItems.filter(i => i.isUnscanned).map(i => i.student.id);
                         setSelectedStudentIds(unscannedIds);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-xs font-semibold transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-[13px] font-semibold transition-colors cursor-pointer"
                     >
                       Select Unscanned ({sortedProblemItems.filter(i => i.isUnscanned).length})
                     </button>
@@ -3420,14 +3420,14 @@ export default function HodDashboard() {
                           setBulkMessageType("custom");
                           setBulkMessageModalOpen(true);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-[13px] transition-colors shadow-2xs cursor-pointer"
                       >
                         <Send className="w-3 h-3" />
                         <span>Broadcast to {selectedStudentIds.length} Parents</span>
                       </button>
                       <button
                         onClick={() => setSelectedStudentIds([])}
-                        className="text-slate-400 hover:text-slate-600 text-xs font-medium cursor-pointer"
+                        className="text-slate-400 hover:text-slate-600 text-[13px] font-medium cursor-pointer"
                       >
                         Clear
                       </button>
@@ -3619,7 +3619,7 @@ export default function HodDashboard() {
                                       setRemarkPreset(item.remark?.preset || "College Bus Delayed");
                                       setRemarkIsExcused(item.remark?.isExcused ?? true);
                                     }}
-                                    className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-900 text-[11px] font-semibold transition-all max-w-[150px] truncate text-left cursor-pointer"
+                                    className="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-900 text-[12px] font-semibold transition-all max-w-[150px] truncate text-left cursor-pointer"
                                     title="Click to edit remark"
                                   >
                                     {item.remark.preset}
@@ -3633,7 +3633,7 @@ export default function HodDashboard() {
                                       setRemarkPreset("College Bus Delayed");
                                       setRemarkIsExcused(true);
                                     }}
-                                    className="px-2.5 py-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-dashed border-slate-300 text-[11px] font-medium transition-colors cursor-pointer"
+                                    className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-dashed border-slate-300 text-[12px] font-medium transition-colors cursor-pointer"
                                   >
                                     + Add Note
                                   </button>
@@ -3649,7 +3649,7 @@ export default function HodDashboard() {
                                       setBulkMessageType(item.isLate ? "late" : "unscanned");
                                       setBulkMessageModalOpen(true);
                                     }}
-                                    className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                    className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
                                     title={`Send parent notice to ${user.name}`}
                                   >
                                     <Send className="w-3.5 h-3.5" />
@@ -3657,7 +3657,7 @@ export default function HodDashboard() {
 
                                   <button
                                     onClick={() => setSelectedStudentForDetails(user)}
-                                    className="p-1.5 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                                    className="p-2 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
                                     title="Open student profile"
                                   >
                                     <Eye className="w-3.5 h-3.5" />
@@ -3704,7 +3704,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(1)}
                         disabled={safeCurrentPage === 1}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="First Page"
                       >
                         <ChevronsLeft className="w-3.5 h-3.5" />
@@ -3713,7 +3713,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={safeCurrentPage === 1}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Previous Page"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
@@ -3726,7 +3726,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={safeCurrentPage === totalPages}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Next Page"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -3735,7 +3735,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(totalPages)}
                         disabled={safeCurrentPage === totalPages}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Last Page"
                       >
                         <ChevronsRight className="w-3.5 h-3.5" />
@@ -3878,7 +3878,7 @@ export default function HodDashboard() {
                       setMentorsSearchQuery("");
                       setMentorsPage(1);
                     }}
-                    className="px-2 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 transition-colors cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-[13px] font-bold border border-red-200 transition-colors cursor-pointer"
                     title="Reset all filters"
                   >
                     Reset
@@ -3904,7 +3904,7 @@ export default function HodDashboard() {
                 <div className="flex items-center rounded-[10px] bg-black/[0.05] p-[3px]">
                   <button
                     onClick={() => setMentorsViewMode("table")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                       mentorsViewMode === "table"
                         ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                         : "text-slate-500 hover:text-slate-800"
@@ -3915,7 +3915,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => setMentorsViewMode("card")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                       mentorsViewMode === "card"
                         ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                         : "text-slate-500 hover:text-slate-800"
@@ -4036,14 +4036,14 @@ export default function HodDashboard() {
                                   </span>
                                   <button
                                     onClick={() => toggleRevealKey(m.id)}
-                                    className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                                     title={isKeyRevealed ? "Hide Passkey" : "Show Passkey"}
                                   >
                                     {isKeyRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                                   </button>
                                   <button
                                     onClick={() => handleCopyKey(key, m.id)}
-                                    className={`p-1 rounded transition-colors cursor-pointer ${
+                                    className={`p-1.5 rounded transition-colors cursor-pointer ${
                                       isCopied ? "bg-emerald-100 text-emerald-800" : "hover:bg-slate-100 text-slate-500 hover:text-slate-800"
                                     }`}
                                     title="Copy Passkey"
@@ -4059,7 +4059,7 @@ export default function HodDashboard() {
                               <div className="flex items-center justify-end gap-1">
                                 <button
                                   onClick={() => setSelectedMentorForModal({ ...m, key })}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-2.5 py-1 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[11.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                   title="View Mentor Details"
                                 >
                                   <span>View</span>
@@ -4077,7 +4077,7 @@ export default function HodDashboard() {
                                     setEditKeyInput(key || "");
                                     setEditMentorModalOpen(true);
                                   }}
-                                  className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
+                                  className="p-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
                                   title="Edit Passkey / Assignment"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -4102,7 +4102,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setMentorsPage((p) => Math.max(1, p - 1))}
                         disabled={mentorsPage === 1}
-                        className="h-8 px-3 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Prev
                       </button>
@@ -4112,7 +4112,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setMentorsPage((p) => Math.min(totalMentorsPages, p + 1))}
                         disabled={mentorsPage >= totalMentorsPages}
-                        className="h-8 px-3 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Next
                       </button>
@@ -4176,7 +4176,7 @@ export default function HodDashboard() {
                           {key && (
                             <button
                               onClick={() => toggleRevealKey(m.id)}
-                              className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
+                              className="p-1.5 text-slate-500 hover:text-slate-800 cursor-pointer"
                               title={isKeyRevealed ? "Hide" : "Show"}
                             >
                               {isKeyRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
@@ -4187,7 +4187,7 @@ export default function HodDashboard() {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => setSelectedMentorForModal({ ...m, key })}
-                            className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 text-slate-700 text-[10.5px] font-bold border border-slate-200 cursor-pointer"
+                            className="px-2.5 py-1 rounded bg-slate-100 hover:bg-blue-50 text-slate-700 text-[11.5px] font-bold border border-slate-200 cursor-pointer"
                           >
                             Details
                           </button>
@@ -4204,7 +4204,7 @@ export default function HodDashboard() {
                               setEditKeyInput(key || "");
                               setEditMentorModalOpen(true);
                             }}
-                            className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer"
+                            className="p-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer"
                             title="Edit"
                           >
                             <Edit3 className="w-3 h-3" />
@@ -4257,7 +4257,7 @@ export default function HodDashboard() {
                       {/* Print / Export Timetable */}
                       <button
                         onClick={() => setTimetablePrintModalOpen(true)}
-                        className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                        className="px-3.5 py-2 rounded-lg bg-slate-50 border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-[13px] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                       >
                         <Printer className="w-3.5 h-3.5 text-blue-600" />
                         <span>Print / Export</span>
@@ -4270,7 +4270,7 @@ export default function HodDashboard() {
                           setNewHolidayReason("");
                           setHolidayModalOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-purple-50 border border-purple-300 hover:bg-purple-100 text-purple-900 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                        className="px-3.5 py-2 rounded-lg bg-purple-50 border border-purple-300 hover:bg-purple-100 text-purple-900 font-bold text-[13px] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                         title="Declare Holidays & Examination Dates"
                       >
                         <Calendar className="w-3.5 h-3.5 text-purple-700" />
@@ -4280,7 +4280,7 @@ export default function HodDashboard() {
                       {/* Assign New Class */}
                       <button
                         onClick={() => setNewClassModalOpen(true)}
-                        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95"
+                        className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[13px] flex items-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Assign Class</span>
@@ -4291,7 +4291,7 @@ export default function HodDashboard() {
                         <button
                           onClick={() => setTimetableViewMode("grid")}
                           title="Weekly Matrix Grid View"
-                          className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                          className={`p-1.5 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                             timetableViewMode === "grid" ? "bg-white text-blue-600 shadow-2xs" : "text-slate-500 hover:text-slate-900"
                           }`}
                         >
@@ -4300,7 +4300,7 @@ export default function HodDashboard() {
                         <button
                           onClick={() => setTimetableViewMode("list")}
                           title="Management List View"
-                          className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                          className={`p-1.5 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                             timetableViewMode === "list" ? "bg-white text-blue-600 shadow-2xs" : "text-slate-500 hover:text-slate-900"
                           }`}
                         >
@@ -4317,7 +4317,7 @@ export default function HodDashboard() {
                     </span>
                     <button
                       onClick={() => setSelectedTimetableSection("All")}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex-shrink-0 ${
                         selectedTimetableSection === "All"
                           ? "bg-blue-600 text-white shadow-2xs"
                           : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
@@ -4329,7 +4329,7 @@ export default function HodDashboard() {
                       <button
                         key={sec}
                         onClick={() => setSelectedTimetableSection(sec)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                        className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex-shrink-0 ${
                           selectedTimetableSection === sec
                             ? "bg-blue-600 text-white shadow-2xs"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
@@ -4628,7 +4628,7 @@ export default function HodDashboard() {
                                       currentFaculty: faculty,
                                       room: isLab ? activeSecMeta.labRoom : activeSecMeta.lectureHall,
                                     })}
-                                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                    className="px-2.5 py-1 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[11px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
                                   >
                                     <Edit3 className="w-2.5 h-2.5" />
                                     <span>Reassign</span>
@@ -4685,7 +4685,7 @@ export default function HodDashboard() {
                             <td className="py-2 px-3 text-center">
                               <button
                                 onClick={() => handleToggleScheduleOverride(s.id, isUnlocked, extendedMins)}
-                                className={`px-2 py-0.5 rounded-lg font-bold text-[10px] inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] inline-flex items-center gap-1 transition-all cursor-pointer border ${
                                   isUnlocked
                                     ? "bg-emerald-600 text-white border-emerald-700"
                                     : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200"
@@ -4698,7 +4698,7 @@ export default function HodDashboard() {
                             <td className="py-2 px-2 text-center">
                               <button
                                 onClick={() => handleOpenAssignModal(s)}
-                                className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-600 hover:bg-blue-500 text-white inline-flex items-center gap-0.5 cursor-pointer"
+                                className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-blue-600 hover:bg-blue-500 text-white inline-flex items-center gap-0.5 cursor-pointer"
                               >
                                 <UserPlus className="w-3 h-3" />
                                 Assign
@@ -4831,7 +4831,7 @@ export default function HodDashboard() {
                   <div className="flex items-center rounded-[10px] bg-black/[0.05] p-[3px]">
                     <button
                       onClick={() => setAnalyticsViewMode("table")}
-                      className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                         analyticsViewMode === "table"
                           ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                           : "text-slate-500 hover:text-slate-800"
@@ -4842,7 +4842,7 @@ export default function HodDashboard() {
                     </button>
                     <button
                       onClick={() => setAnalyticsViewMode("card")}
-                      className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                         analyticsViewMode === "card"
                           ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                           : "text-slate-500 hover:text-slate-800"
@@ -4970,7 +4970,7 @@ export default function HodDashboard() {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(s);
                                   }}
-                                  className="px-3 py-1 rounded-full bg-black/[0.05] hover:bg-blue-500 hover:text-white text-blue-600 text-[12px] font-medium transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-3.5 py-1.5 rounded-full bg-black/[0.05] hover:bg-blue-500 hover:text-white text-blue-600 text-[13px] font-medium transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                 >
                                   <span>Report</span>
                                   <ChevronRight className="w-3 h-3" />
@@ -4995,7 +4995,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setAnalyticsPage((p) => Math.max(1, p - 1))}
                         disabled={analyticsPage === 1}
-                        className="h-8 px-3 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Prev
                       </button>
@@ -5005,7 +5005,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setAnalyticsPage((p) => Math.min(totalAnalyticsPages, p + 1))}
                         disabled={analyticsPage >= totalAnalyticsPages}
-                        className="h-8 px-3 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Next
                       </button>
@@ -5296,7 +5296,7 @@ export default function HodDashboard() {
                 <div className="flex items-center rounded-[10px] bg-black/[0.05] p-[3px]">
                   <button
                     onClick={() => setRiskViewMode("table")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                       riskViewMode === "table"
                         ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                         : "text-slate-500 hover:text-slate-800"
@@ -5307,7 +5307,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => setRiskViewMode("card")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                       riskViewMode === "card"
                         ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                         : "text-slate-500 hover:text-slate-800"
@@ -5426,7 +5426,7 @@ export default function HodDashboard() {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(item.student);
                                   }}
-                                  className="px-3 py-1 rounded-full bg-black/[0.05] hover:bg-blue-500 hover:text-white text-blue-600 text-[12px] font-medium transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-3.5 py-1.5 rounded-full bg-black/[0.05] hover:bg-blue-500 hover:text-white text-blue-600 text-[13px] font-medium transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                 >
                                   <span>View</span>
                                   <ChevronRight className="w-3 h-3" />
@@ -5451,7 +5451,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setRiskPage((p) => Math.max(1, p - 1))}
                         disabled={riskPage === 1}
-                        className="h-8 px-3 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Prev
                       </button>
@@ -5461,7 +5461,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setRiskPage((p) => Math.min(totalRiskPages, p + 1))}
                         disabled={riskPage >= totalRiskPages}
-                        className="h-8 px-3 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[13px] font-medium"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Next
                       </button>
@@ -5695,7 +5695,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setReassignSlotModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg transition-colors cursor-pointer"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -5735,7 +5735,7 @@ export default function HodDashboard() {
                     <button
                       type="button"
                       onClick={() => setEditedSubjectInput("Free")}
-                      className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-colors cursor-pointer"
+                      className="px-3.5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold border border-slate-200 transition-colors cursor-pointer"
                     >
                       Set Free
                     </button>
@@ -5825,14 +5825,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setReassignSlotModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                    className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingReassignment || (!selectedFacultyName && !customFacultyTextInput.trim())}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200 cursor-pointer"
+                    className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200 cursor-pointer"
                   >
                     {savingReassignment ? (
                       <>
@@ -5863,7 +5863,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1.5"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -5906,14 +5906,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setAssignModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                    className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-[13px] font-bold transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={assigning || !selectedMentorId}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
+                    className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
                   >
                     {assigning ? (
                       <>
@@ -5944,7 +5944,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1.5"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -6053,14 +6053,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setNewClassModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                    className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-[13px] font-bold transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creatingClass || !newMentorId || !newSubject}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
+                    className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
                   >
                     {creatingClass ? (
                       <>
@@ -6099,14 +6099,14 @@ export default function HodDashboard() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => window.print()}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[13px] flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                   >
                     <Printer className="w-4 h-4" />
                     <span>Print Document</span>
                   </button>
                   <button
                     onClick={() => setTimetablePrintModalOpen(false)}
-                    className="p-2 text-slate-400 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
+                    className="p-2.5 text-slate-400 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -6342,7 +6342,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setExportModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1.5"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -6358,7 +6358,7 @@ export default function HodDashboard() {
                     <button
                       type="button"
                       onClick={() => setExportDateMode("month")}
-                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      className={`py-2.5 rounded-lg text-[13px] font-bold transition-all ${
                         exportDateMode === "month"
                           ? "bg-emerald-600 text-white shadow-md"
                           : "text-gray-500 hover:text-gray-800"
@@ -6369,7 +6369,7 @@ export default function HodDashboard() {
                     <button
                       type="button"
                       onClick={() => setExportDateMode("range")}
-                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      className={`py-2.5 rounded-lg text-[13px] font-bold transition-all ${
                         exportDateMode === "range"
                           ? "bg-emerald-600 text-white shadow-md"
                           : "text-gray-500 hover:text-gray-800"
@@ -6584,7 +6584,7 @@ export default function HodDashboard() {
                 <button
                   type="button"
                   onClick={() => setExportModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-[13px] font-bold transition-colors"
                 >
                   Cancel
                 </button>
@@ -6592,7 +6592,7 @@ export default function HodDashboard() {
                   type="button"
                   onClick={handleGenerateCsv}
                   disabled={isExporting || (exportType === "student" && !exportStudentId)}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[13px] font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isExporting ? (
                     <>
@@ -6628,7 +6628,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setHolidayModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
                   title="Close"
                 >
                   <X className="w-4 h-4" />
@@ -6652,7 +6652,7 @@ export default function HodDashboard() {
                             d.setMonth(d.getMonth() - 1);
                             setCalendarViewDate(d);
                           }}
-                          className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
+                          className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
                           title="Previous Month"
                         >
                           <ChevronLeft className="w-4 h-4" />
@@ -6667,7 +6667,7 @@ export default function HodDashboard() {
                             d.setMonth(d.getMonth() + 1);
                             setCalendarViewDate(d);
                           }}
-                          className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
+                          className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
                           title="Next Month"
                         >
                           <ChevronRight className="w-4 h-4" />
@@ -6681,7 +6681,7 @@ export default function HodDashboard() {
                             setCalendarViewDate(new Date());
                             setSelectedCalendarDate(new Date().toISOString().split("T")[0]);
                           }}
-                          className="px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-all cursor-pointer shadow-2xs"
+                          className="px-3 py-1.5 rounded-md bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-all cursor-pointer shadow-2xs"
                         >
                           Today
                         </button>
@@ -6738,7 +6738,7 @@ export default function HodDashboard() {
                                 setNewHolidayReason("");
                               }
                             }}
-                            className={`min-h-[46px] p-1 rounded-lg border text-left flex flex-col justify-between transition-all cursor-pointer relative group ${
+                            className={`min-h-[46px] p-1.5 rounded-lg border text-left flex flex-col justify-between transition-all cursor-pointer relative group ${
                               isSelected
                                 ? "ring-2 ring-blue-600 border-blue-500 bg-blue-50/60 font-bold"
                                 : isDeclared
@@ -6810,7 +6810,7 @@ export default function HodDashboard() {
                         <button
                           type="button"
                           onClick={() => handleRemoveHoliday(selectedCalendarDate)}
-                          className="p-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 transition-colors cursor-pointer"
                           title="Delete Holiday"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -6833,7 +6833,7 @@ export default function HodDashboard() {
                           <button
                             type="button"
                             onClick={() => setNewHolidayType("holiday")}
-                            className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2.5 rounded-xl text-[13px] font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                               newHolidayType === "holiday"
                                 ? "bg-purple-600 text-white border-purple-600 shadow-2xs"
                                 : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
@@ -6844,7 +6844,7 @@ export default function HodDashboard() {
                           <button
                             type="button"
                             onClick={() => setNewHolidayType("exam")}
-                            className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2.5 rounded-xl text-[13px] font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                               newHolidayType === "exam"
                                 ? "bg-violet-700 text-white border-violet-700 shadow-2xs"
                                 : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
@@ -6891,7 +6891,7 @@ export default function HodDashboard() {
                       <button
                         type="submit"
                         disabled={!selectedCalendarDate}
-                        className={`w-full py-2.5 rounded-xl font-bold text-xs text-white transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer ${
+                        className={`w-full py-3 rounded-xl font-bold text-[13px] text-white transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer ${
                           newHolidayType === "exam" ? "bg-violet-700 hover:bg-violet-600" : "bg-purple-600 hover:bg-purple-500"
                         }`}
                       >
@@ -6915,7 +6915,7 @@ export default function HodDashboard() {
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("ALL")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
+                        className={`px-3 py-1.5 rounded font-bold cursor-pointer transition-colors ${
                           holidayFilterTab === "ALL" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
@@ -6924,7 +6924,7 @@ export default function HodDashboard() {
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("holiday")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
+                        className={`px-3 py-1.5 rounded font-bold cursor-pointer transition-colors ${
                           holidayFilterTab === "holiday" ? "bg-purple-600 text-white" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
@@ -6933,7 +6933,7 @@ export default function HodDashboard() {
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("exam")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
+                        className={`px-3 py-1.5 rounded font-bold cursor-pointer transition-colors ${
                           holidayFilterTab === "exam" ? "bg-violet-700 text-white" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
@@ -6980,7 +6980,7 @@ export default function HodDashboard() {
                                 e.stopPropagation();
                                 handleRemoveHoliday(dStr);
                               }}
-                              className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -7030,7 +7030,7 @@ export default function HodDashboard() {
                   <p className="text-xs text-gray-500">{pwdStep === "verify" ? "Verify your identity first" : "Enter your new passcode"}</p>
                 </div>
               </div>
-              <button onClick={() => setShowPwdModal(false)} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors text-lg font-light">×</button>
+              <button onClick={() => setShowPwdModal(false)} className="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors text-lg font-light">×</button>
             </div>
 
             {/* Step 1: Verify */}
@@ -7048,7 +7048,7 @@ export default function HodDashboard() {
                   />
                   {pwdError && <p className="text-red-500 text-xs font-semibold text-center mt-2">{pwdError}</p>}
                 </div>
-                <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-600/20">
+                <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-[15px] transition-all shadow-md shadow-blue-600/20">
                   Verify & Continue →
                 </button>
                 <p className="text-center text-xs text-gray-400">Forgot? Use master code to access.</p>
@@ -7086,8 +7086,8 @@ export default function HodDashboard() {
                 {pwdError && <p className="text-red-500 text-xs font-semibold text-center">{pwdError}</p>}
                 {pwdSuccess && <p className="text-emerald-600 text-sm font-bold text-center">{pwdSuccess}</p>}
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setPwdStep("verify")} className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm transition-colors">← Back</button>
-                  <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-600/20">Save Passcode</button>
+                  <button type="button" onClick={() => setPwdStep("verify")} className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-[15px] transition-colors">← Back</button>
+                  <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-[15px] transition-all shadow-md shadow-blue-600/20">Save Passcode</button>
                 </div>
                 <p className="text-center text-xs text-gray-400">Master override always works as a backup.</p>
               </form>
@@ -7116,7 +7116,7 @@ export default function HodDashboard() {
               </div>
               <button
                 onClick={() => setSelectedMentorForModal(null)}
-                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-9 h-9 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
               >
                 ×
               </button>
@@ -7169,7 +7169,7 @@ export default function HodDashboard() {
                 {selectedMentorForModal.key && (
                   <button
                     onClick={() => handleCopyKey(selectedMentorForModal.key, selectedMentorForModal.id)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs transition-colors cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-[13px] transition-colors cursor-pointer"
                   >
                     {copiedKeyId === String(selectedMentorForModal.id) ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedKeyId === String(selectedMentorForModal.id) ? "Copied!" : "Copy Key"}</span>
@@ -7182,7 +7182,7 @@ export default function HodDashboard() {
             <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
               <button
                 onClick={() => setSelectedMentorForModal(null)}
-                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold text-xs text-gray-800 transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold text-[13px] text-gray-800 transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -7211,7 +7211,7 @@ export default function HodDashboard() {
               </div>
               <button
                 onClick={() => setEditMentorModalOpen(false)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
               >
                 ×
               </button>
@@ -7267,7 +7267,7 @@ export default function HodDashboard() {
               <button
                 type="button"
                 onClick={() => setEditMentorModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-[13px] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -7291,7 +7291,7 @@ export default function HodDashboard() {
                   }
                 }}
                 disabled={isSavingKey}
-                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-[13px] transition-colors shadow-xs cursor-pointer"
               >
                 {isSavingKey ? "Saving..." : "Save Changes"}
               </button>
@@ -7320,7 +7320,7 @@ export default function HodDashboard() {
               </div>
               <button
                 onClick={() => setBulkMessageModalOpen(false)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
               >
                 ×
               </button>
@@ -7384,7 +7384,7 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setBulkBroadcastChannel("whatsapp")}
-                    className={`flex-1 py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`flex-1 py-2.5 px-3.5 rounded-lg border font-bold text-[13px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       bulkBroadcastChannel === "whatsapp"
                         ? "bg-emerald-50 border-emerald-400 text-emerald-800 ring-1 ring-emerald-300"
                         : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
@@ -7396,7 +7396,7 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setBulkBroadcastChannel("sms")}
-                    className={`flex-1 py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`flex-1 py-2.5 px-3.5 rounded-lg border font-bold text-[13px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       bulkBroadcastChannel === "sms"
                         ? "bg-blue-50 border-blue-400 text-blue-800 ring-1 ring-blue-300"
                         : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
@@ -7455,7 +7455,7 @@ export default function HodDashboard() {
               <button
                 type="button"
                 onClick={() => setBulkMessageModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-[13px] transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -7474,7 +7474,7 @@ export default function HodDashboard() {
                   }, 800);
                 }}
                 disabled={bulkBroadcastSending || (bulkMessageType === "custom" && selectedStudentIds.length === 0)}
-                className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-xs transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-[13px] transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
                 {bulkBroadcastSending ? (
                   <>
@@ -7513,7 +7513,7 @@ export default function HodDashboard() {
               </div>
               <button
                 onClick={() => setRemarkModalData(null)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
               >
                 ×
               </button>
@@ -7542,7 +7542,7 @@ export default function HodDashboard() {
                         setRemarkPreset(preset);
                         if (!remarkInput || remarkInput === remarkPreset) setRemarkInput(preset);
                       }}
-                      className={`p-2 rounded-lg border text-left font-bold text-[11px] transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-lg border text-left font-bold text-[12px] transition-all cursor-pointer ${
                         remarkPreset === preset
                           ? "bg-blue-50 border-blue-400 text-blue-900 ring-1 ring-blue-200"
                           : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
@@ -7596,7 +7596,7 @@ export default function HodDashboard() {
                     localStorage.setItem("hod_student_remarks_v1", JSON.stringify(updated));
                     setRemarkModalData(null);
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs transition-colors cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-[13px] transition-colors cursor-pointer"
                 >
                   Delete Remark
                 </button>
@@ -7606,7 +7606,7 @@ export default function HodDashboard() {
                 <button
                   type="button"
                   onClick={() => setRemarkModalData(null)}
-                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-[13px] transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -7627,7 +7627,7 @@ export default function HodDashboard() {
                     localStorage.setItem("hod_student_remarks_v1", JSON.stringify(updated));
                     setRemarkModalData(null);
                   }}
-                  className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                  className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[13px] transition-colors shadow-xs cursor-pointer"
                 >
                   Save Remark
                 </button>

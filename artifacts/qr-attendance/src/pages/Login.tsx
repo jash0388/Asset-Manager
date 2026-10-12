@@ -104,7 +104,7 @@ export default function Login() {
                 type="submit"
                 disabled={submitting || !adminCode.trim()}
                 aria-label="Sign in"
-                className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-ink-200 text-white flex items-center justify-center transition-colors cursor-pointer disabled:cursor-default"
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-ink-200 text-white flex items-center justify-center transition-colors cursor-pointer disabled:cursor-default"
               >
                 {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
               </button>

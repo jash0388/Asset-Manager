@@ -165,7 +165,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+        className="px-3.5 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 text-[13px] font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
       >
         <Calendar className="w-3.5 h-3.5 text-blue-600" />
         <span>{monthNames[month - 1]} {year}</span>
@@ -179,7 +179,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-xs"
+                className="p-1.5 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-[13px]"
               >
                 &larr;
               </button>
@@ -187,7 +187,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-xs"
+                className="p-1.5 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-[13px]"
               >
                 &rarr;
               </button>
@@ -201,7 +201,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     key={mName}
                     type="button"
                     onClick={() => handleSelectMonth(idx)}
-                    className={`py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
+                    className={`py-2 rounded-lg text-[13px] font-semibold cursor-pointer ${
                       isSelected 
                         ? "bg-blue-600 text-white shadow-xs" 
                         : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-gray-700"
@@ -614,14 +614,14 @@ export default function PrincipalDashboard() {
             </label>
             <button
               onClick={() => setExportModalOpen(true)}
-              className="h-9 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-10 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <FileSpreadsheet className="w-4 h-4" />
               Export
             </button>
             <button
               onClick={() => logout()}
-              className="h-9 px-3 rounded-full text-ink-600 hover:bg-black/[0.05] text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-10 px-3.5 rounded-full text-ink-600 hover:bg-black/[0.05] text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               Log out
@@ -649,10 +649,10 @@ export default function PrincipalDashboard() {
               </h2>
             </div>
             <div className="relative mt-10 flex flex-wrap items-center gap-2">
-              <button onClick={() => setExportModalOpen(true)} className="h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium transition-colors cursor-pointer">
+              <button onClick={() => setExportModalOpen(true)} className="h-12 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[16px] font-medium transition-colors cursor-pointer">
                 Export report
               </button>
-              <button onClick={openCriticalStudents} className="h-11 px-5 rounded-full text-blue-600 hover:bg-blue-50 text-[15px] font-medium flex items-center gap-1 transition-colors cursor-pointer">
+              <button onClick={openCriticalStudents} className="h-12 px-6 rounded-full text-blue-600 hover:bg-blue-50 text-[16px] font-medium flex items-center gap-1 transition-colors cursor-pointer">
                 Critical students <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -804,7 +804,7 @@ export default function PrincipalDashboard() {
                             e.stopPropagation();
                             setSelectedBranch(dept.code);
                           }}
-                          className={`px-3 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                          className={`px-3.5 py-1.5 rounded text-[12px] font-bold cursor-pointer transition-colors ${
                             isSelected
                               ? "bg-blue-700 text-white"
                               : "bg-slate-100 hover:bg-slate-200 text-slate-700"
@@ -869,7 +869,7 @@ export default function PrincipalDashboard() {
                         })
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-3 py-1.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[12px] cursor-pointer whitespace-nowrap"
                   >
                     View 4A
                   </button>
@@ -907,7 +907,7 @@ export default function PrincipalDashboard() {
                         })
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-3 py-1.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[12px] cursor-pointer whitespace-nowrap"
                   >
                     View 3C
                   </button>
@@ -948,7 +948,7 @@ export default function PrincipalDashboard() {
                         students: criticalStudents,
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-3 py-1.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[12px] cursor-pointer whitespace-nowrap"
                   >
                     View Students
                   </button>
@@ -959,7 +959,7 @@ export default function PrincipalDashboard() {
             <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-thin">
               <button
                 onClick={() => setActiveTab("sections")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "sections"
                     ? "bg-blue-700 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -971,7 +971,7 @@ export default function PrincipalDashboard() {
 
               <button
                 onClick={() => setActiveTab("hourly")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "hourly"
                     ? "bg-blue-700 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -983,7 +983,7 @@ export default function PrincipalDashboard() {
 
               <button
                 onClick={() => setActiveTab("flags")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "flags"
                     ? "bg-blue-700 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -995,7 +995,7 @@ export default function PrincipalDashboard() {
 
               <button
                 onClick={() => setActiveTab("logs")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "logs"
                     ? "bg-blue-700 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -1108,7 +1108,7 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 cursor-pointer"
+                                className="px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 cursor-pointer"
                               >
                                 {st.present}
                               </button>
@@ -1133,7 +1133,7 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 cursor-pointer"
+                                className="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 cursor-pointer"
                               >
                                 {st.absent}
                               </button>
@@ -1191,7 +1191,7 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] cursor-pointer"
+                                className="px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[12px] cursor-pointer"
                               >
                                 View Students
                               </button>
@@ -1235,7 +1235,7 @@ export default function PrincipalDashboard() {
                         <button
                           key={sec}
                           onClick={() => setHourlySectionFilter(sec)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
+                          className={`px-3 py-1.5 rounded-lg text-[13px] font-bold cursor-pointer transition-colors ${
                             hourlySectionFilter === sec
                               ? "bg-blue-700 text-white"
                               : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -1322,7 +1322,7 @@ export default function PrincipalDashboard() {
 
                                 <button
                                   onClick={() => setExpandedHourlyScheduleId(isExpanded ? null : session.scheduleId)}
-                                  className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer"
+                                  className="px-3.5 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[13px] font-bold cursor-pointer"
                                 >
                                   {isExpanded ? "Hide" : `Students (${studentList.length})`}
                                 </button>
@@ -1428,7 +1428,7 @@ export default function PrincipalDashboard() {
                           setRiskFilter("ALL");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                        className={`px-3.5 py-2 rounded-lg text-[13px] font-bold cursor-pointer transition-all ${
                           riskFilter === "ALL" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
@@ -1439,7 +1439,7 @@ export default function PrincipalDashboard() {
                           setRiskFilter("RED");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                        className={`px-3.5 py-2 rounded-lg text-[13px] font-bold cursor-pointer transition-all ${
                           riskFilter === "RED" ? "bg-rose-700 text-white" : "bg-rose-100 text-rose-800 hover:bg-rose-200"
                         }`}
                       >
@@ -1450,7 +1450,7 @@ export default function PrincipalDashboard() {
                           setRiskFilter("YELLOW");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                        className={`px-3.5 py-2 rounded-lg text-[13px] font-bold cursor-pointer transition-all ${
                           riskFilter === "YELLOW" ? "bg-amber-600 text-white" : "bg-amber-100 text-amber-800 hover:bg-amber-200"
                         }`}
                       >
@@ -1461,7 +1461,7 @@ export default function PrincipalDashboard() {
                           setRiskFilter("GREEN");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                        className={`px-3.5 py-2 rounded-lg text-[13px] font-bold cursor-pointer transition-all ${
                           riskFilter === "GREEN" ? "bg-emerald-700 text-white" : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
                         }`}
                       >
@@ -1535,7 +1535,7 @@ export default function PrincipalDashboard() {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(item.student);
                                   }}
-                                  className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] cursor-pointer"
+                                  className="px-3 py-1.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[12px] cursor-pointer"
                                 >
                                   View
                                 </button>
@@ -1558,7 +1558,7 @@ export default function PrincipalDashboard() {
                         <button
                           disabled={flagsPage <= 1}
                           onClick={() => setFlagsPage((p) => Math.max(1, p - 1))}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                          className="px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
                         >
                           Previous
                         </button>
@@ -1568,7 +1568,7 @@ export default function PrincipalDashboard() {
                         <button
                           disabled={flagsPage >= totalFlagsPages}
                           onClick={() => setFlagsPage((p) => Math.min(totalFlagsPages, p + 1))}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                          className="px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
                         >
                           Next
                         </button>
@@ -1718,7 +1718,7 @@ export default function PrincipalDashboard() {
             </p>
             <button
               onClick={() => setSelectedBranch("DS")}
-              className="px-3.5 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-blue-700 text-white text-[13px] font-bold cursor-pointer"
             >
               Open Data Science (DS)
             </button>
@@ -1746,7 +1746,7 @@ export default function PrincipalDashboard() {
                       setSectionModalData(null);
                       setSectionModalPage(1);
                     }}
-                    className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                    className="text-slate-400 hover:text-slate-700 p-1.5 cursor-pointer"
                   >
                     <XCircle className="w-5 h-5" />
                   </button>
@@ -1830,7 +1830,7 @@ export default function PrincipalDashboard() {
                     <button
                       disabled={sectionModalPage <= 1}
                       onClick={() => setSectionModalPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                      className="px-3 py-1.5 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
                     >
                       Previous
                     </button>
@@ -1840,7 +1840,7 @@ export default function PrincipalDashboard() {
                     <button
                       disabled={sectionModalPage >= totalSectionModalPages}
                       onClick={() => setSectionModalPage((p) => Math.min(totalSectionModalPages, p + 1))}
-                      className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                      className="px-3 py-1.5 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
                     >
                       Next
                     </button>
@@ -1849,7 +1849,7 @@ export default function PrincipalDashboard() {
                         setSectionModalData(null);
                         setSectionModalPage(1);
                       }}
-                      className="ml-2 px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold cursor-pointer"
+                      className="ml-2 px-3.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold cursor-pointer"
                     >
                       Close
                     </button>
@@ -1926,7 +1926,7 @@ export default function PrincipalDashboard() {
               <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
                   onClick={() => setExportModalOpen(false)}
-                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
+                  className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold"
                 >
                   Cancel
                 </button>

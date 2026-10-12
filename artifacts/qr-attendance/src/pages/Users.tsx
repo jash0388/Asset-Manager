@@ -85,7 +85,7 @@ function QrModal({ userId, name, onClose }: { userId: number; name: string; onCl
             <button
               data-testid="download-qr"
               onClick={handleDownload}
-              className="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-3 px-5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition-colors"
             >
               <Download className="w-4 h-4" />
               Download PNG
@@ -244,7 +244,7 @@ export default function Users() {
                   setIsPrinting(false);
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-gray-50 text-gray-700 text-[13px] font-bold transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
             >
               <Download className="w-3.5 h-3.5" />
               {isPrinting ? "Generating PDF..." : "Print All"}
@@ -252,7 +252,7 @@ export default function Users() {
             <button
               data-testid="add-user-button"
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-bold transition-colors shadow-xs"
             >
               <UserPlus className="w-3.5 h-3.5" />
               Add User
@@ -310,14 +310,14 @@ export default function Users() {
                   data-testid="create-user-submit"
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="flex-1 py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-[#0071e3] text-white text-xs font-bold transition-colors"
+                  className="flex-1 py-2 px-3.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-[#0071e3] text-white text-[13px] font-bold transition-colors"
                 >
                   {createMutation.isPending ? "Creating..." : "Create"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="py-1.5 px-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold border border-gray-200"
+                  className="py-2 px-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-[13px] font-bold border border-gray-200"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -345,7 +345,7 @@ export default function Users() {
                 key={r}
                 data-testid={`filter-${r || "all"}`}
                 onClick={() => setRoleFilter(r)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                className={`px-3.5 py-2 rounded-lg text-[13px] font-bold transition-colors ${
                   roleFilter === r
                     ? "bg-blue-600 text-white shadow-xs"
                     : "bg-white text-gray-600 hover:text-gray-900 border border-gray-200"
@@ -420,7 +420,7 @@ export default function Users() {
                           <button
                             data-testid={`view-qr-${user.id}`}
                             onClick={() => { setQrUserId(user.id); setQrUserName(user.name); }}
-                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors border border-gray-200"
+                            className="p-2 rounded-lg bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors border border-gray-200"
                             title="View QR Code"
                           >
                             <QrCode className="w-3.5 h-3.5" />
@@ -428,7 +428,7 @@ export default function Users() {
                           <button
                             data-testid={`delete-user-${user.id}`}
                             onClick={() => handleDelete(user.id, user.name)}
-                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors border border-gray-200"
+                            className="p-2 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors border border-gray-200"
                             title="Delete user"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

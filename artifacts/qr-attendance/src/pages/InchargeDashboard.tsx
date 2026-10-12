@@ -143,7 +143,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+        className="px-5 py-3 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-[15px] font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
       >
         <Calendar className="w-4 h-4 text-blue-600" />
         <span>{monthNames[month - 1]} {year}</span>
@@ -157,7 +157,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &larr;
               </button>
@@ -165,7 +165,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &rarr;
               </button>
@@ -179,7 +179,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     key={mName}
                     type="button"
                     onClick={() => handleSelectMonth(idx)}
-                    className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       isSelected 
                         ? "bg-blue-600 text-white shadow-sm" 
                         : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-slate-700"
@@ -691,7 +691,7 @@ export default function InchargeDashboard() {
               setPermissionSuccessMsg("");
             }}
             style={{ backgroundColor: "#10b981", color: "#ffffff", borderColor: "#10b981" }}
-            className="px-3.5 sm:px-4 py-2 rounded-xl font-extrabold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 hover:opacity-95"
+            className="px-4 sm:px-5 py-2.5 rounded-xl font-extrabold text-[13px] border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 hover:opacity-95"
             title="Mark attendance for students taking permission / On-Duty"
           >
             <ClipboardCheck className="w-4 h-4 text-white" />
@@ -702,7 +702,7 @@ export default function InchargeDashboard() {
           <button
             onClick={() => navigate("/mentor")}
             style={{ backgroundColor: "#2563eb", color: "#ffffff", borderColor: "#2563eb" }}
-            className="px-3.5 sm:px-4 py-2 rounded-xl font-bold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+            className="px-4 sm:px-5 py-2.5 rounded-xl font-bold text-[13px] border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
           >
             <Clock className="w-3.5 h-3.5 text-white" />
             <span className="hidden sm:inline">Take Class Attendance</span>
@@ -712,7 +712,7 @@ export default function InchargeDashboard() {
           <button
             onClick={logout}
             style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
-            className="px-3 py-2 rounded-xl font-bold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+            className="px-3.5 py-2.5 rounded-xl font-bold text-[13px] border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
           >
             <LogOut className="w-4 h-4 text-slate-600" />
             <span className="hidden sm:inline">Logout</span>
@@ -727,7 +727,7 @@ export default function InchargeDashboard() {
           <button
             onClick={() => navigate("/incharge-dashboard")}
             style={{ backgroundColor: "#2563eb", color: "#ffffff" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+            className="px-5 py-2.5 rounded-xl font-bold text-[13px] flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
           >
             <Award className="w-3.5 h-3.5" />
             Class Incharge Portal
@@ -735,7 +735,7 @@ export default function InchargeDashboard() {
           <button
             onClick={() => navigate("/mentor")}
             style={{ backgroundColor: "#f1f5f9", color: "#334155" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-gray-200"
+            className="px-5 py-2.5 rounded-xl font-bold text-[13px] flex items-center gap-1.5 transition-all cursor-pointer hover:bg-gray-200"
           >
             <Clock className="w-3.5 h-3.5 text-slate-550" />
             Take Class Attendance
@@ -766,7 +766,7 @@ export default function InchargeDashboard() {
                   backgroundColor: selectedYearFilter === "ALL" ? "#2563eb" : "transparent",
                   color: selectedYearFilter === "ALL" ? "#ffffff" : "#475569",
                 }}
-                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                className="px-3.5 py-2 rounded-lg transition-all cursor-pointer"
               >
                 All Years
               </button>
@@ -776,7 +776,7 @@ export default function InchargeDashboard() {
                   backgroundColor: selectedYearFilter === "4" ? "#2563eb" : "transparent",
                   color: selectedYearFilter === "4" ? "#ffffff" : "#475569",
                 }}
-                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                className="px-3.5 py-2 rounded-lg transition-all cursor-pointer"
               >
                 4th Yr
               </button>
@@ -786,7 +786,7 @@ export default function InchargeDashboard() {
                   backgroundColor: selectedYearFilter === "3" ? "#2563eb" : "transparent",
                   color: selectedYearFilter === "3" ? "#ffffff" : "#475569",
                 }}
-                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                className="px-3.5 py-2 rounded-lg transition-all cursor-pointer"
               >
                 3rd Yr
               </button>
@@ -796,7 +796,7 @@ export default function InchargeDashboard() {
                   backgroundColor: selectedYearFilter === "2" ? "#2563eb" : "transparent",
                   color: selectedYearFilter === "2" ? "#ffffff" : "#475569",
                 }}
-                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                className="px-3.5 py-2 rounded-lg transition-all cursor-pointer"
               >
                 2nd Yr
               </button>
@@ -808,7 +808,7 @@ export default function InchargeDashboard() {
                 backgroundColor: viewScope === "MENTORED" ? "#2563eb" : "#f1f5f9",
                 color: viewScope === "MENTORED" ? "#ffffff" : "#334155",
               }}
-              className="px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border border-transparent shadow-xs"
+              className="px-4 py-2.5 rounded-xl text-[13px] font-black transition-all cursor-pointer border border-transparent shadow-xs"
             >
               My Mentored ({analyticsList.length})
             </button>
@@ -818,7 +818,7 @@ export default function InchargeDashboard() {
                 backgroundColor: viewScope === "FULL_SECTION" ? "#2563eb" : "#f1f5f9",
                 color: viewScope === "FULL_SECTION" ? "#ffffff" : "#334155",
               }}
-              className="px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border border-transparent shadow-xs"
+              className="px-4 py-2.5 rounded-xl text-[13px] font-black transition-all cursor-pointer border border-transparent shadow-xs"
             >
               Full Sec {activeAllocation.section}
             </button>
@@ -1028,7 +1028,7 @@ export default function InchargeDashboard() {
               </div>
               <button
                 onClick={() => setPermissionModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all cursor-pointer"
+                className="w-9 h-9 rounded-full bg-white hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all cursor-pointer"
               >
                 ✕
               </button>
@@ -1087,7 +1087,7 @@ export default function InchargeDashboard() {
                         const allIds = modalFilteredStudents.map(s => s.id);
                         setSelectedStudentIds(Array.from(new Set([...selectedStudentIds, ...allIds])));
                       }}
-                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer"
+                      className="px-3 py-1.5 text-[12px] font-extrabold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer"
                     >
                       Select All Visible ({modalFilteredStudents.length})
                     </button>
@@ -1095,7 +1095,7 @@ export default function InchargeDashboard() {
                       <button
                         type="button"
                         onClick={() => setSelectedStudentIds([])}
-                        className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all cursor-pointer"
+                        className="px-3 py-1.5 text-[12px] font-extrabold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all cursor-pointer"
                       >
                         Clear
                       </button>
@@ -1174,7 +1174,7 @@ export default function InchargeDashboard() {
                         const allSids = daySchedules.map(s => s.id);
                         setSelectedScheduleIds(allSids);
                       }}
-                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-all cursor-pointer"
+                      className="px-3 py-1.5 text-[12px] font-extrabold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-all cursor-pointer"
                     >
                       All Periods ({daySchedules.length})
                     </button>
@@ -1184,7 +1184,7 @@ export default function InchargeDashboard() {
                         const morningSids = daySchedules.filter(s => (s.start_time || "") < "13:00:00").map(s => s.id);
                         setSelectedScheduleIds(morningSids);
                       }}
-                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition-all cursor-pointer"
+                      className="px-3 py-1.5 text-[12px] font-extrabold rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition-all cursor-pointer"
                     >
                       Morning (9 AM - 1 PM)
                     </button>
@@ -1194,7 +1194,7 @@ export default function InchargeDashboard() {
                         const afternoonSids = daySchedules.filter(s => (s.start_time || "") >= "13:00:00").map(s => s.id);
                         setSelectedScheduleIds(afternoonSids);
                       }}
-                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 transition-all cursor-pointer"
+                      className="px-3 py-1.5 text-[12px] font-extrabold rounded-lg bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 transition-all cursor-pointer"
                     >
                       Afternoon (1 PM - 4:30 PM)
                     </button>
@@ -1202,7 +1202,7 @@ export default function InchargeDashboard() {
                       <button
                         type="button"
                         onClick={() => setSelectedScheduleIds([])}
-                        className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all cursor-pointer"
+                        className="px-3 py-1.5 text-[12px] font-extrabold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all cursor-pointer"
                       >
                         Clear
                       </button>
@@ -1276,7 +1276,7 @@ export default function InchargeDashboard() {
                       key={preset}
                       type="button"
                       onClick={() => setPermissionReason(preset)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-lg text-[12px] font-bold border transition-all cursor-pointer ${
                         permissionReason === preset
                           ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
                           : "bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200"
@@ -1313,7 +1313,7 @@ export default function InchargeDashboard() {
                   type="button"
                   onClick={() => setPermissionModalOpen(false)}
                   disabled={permissionSubmitting}
-                  className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-100 transition-all cursor-pointer"
+                  className="px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 text-[13px] font-bold hover:bg-gray-100 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1322,7 +1322,7 @@ export default function InchargeDashboard() {
                   onClick={handleMarkPermissionAttendance}
                   disabled={permissionSubmitting || selectedStudentIds.length === 0 || selectedScheduleIds.length === 0}
                   style={{ backgroundColor: "#10b981", borderColor: "#10b981" }}
-                  className="px-5 py-2.5 rounded-xl font-extrabold text-xs text-white border shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600"
+                  className="px-6 py-3 rounded-xl font-extrabold text-[13px] text-white border shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600"
                 >
                   {permissionSubmitting ? (
                     <>

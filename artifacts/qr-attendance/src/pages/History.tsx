@@ -179,14 +179,14 @@ function HistoryPanel({ userId }: { userId: number }) {
           <div className="flex items-end gap-2">
             <button
               onClick={() => setApplied({ ...(from ? { from } : {}), ...(to ? { to } : {}) })}
-              className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-xs"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-bold transition-colors shadow-xs"
             >
               Apply
             </button>
             <button
               onClick={exportCsv}
               disabled={!records.length}
-              className="px-3 py-1.5 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 text-gray-700 text-xs font-bold border border-gray-200 shadow-xs flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 text-gray-700 text-[13px] font-bold border border-gray-200 shadow-xs flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" /> Export
             </button>
@@ -294,7 +294,7 @@ export default function History() {
                     data-testid={`search-result-${user.id}`}
                     key={user.id}
                     onClick={() => { setSelectedUserId(user.id); setQuery(""); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 text-left transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-gray-50 text-left transition-colors"
                   >
                     <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
                       {user.name.charAt(0).toUpperCase()}

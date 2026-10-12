@@ -2416,7 +2416,7 @@ export default function FacultyPortal() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden lg:flex p-2 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+            className="hidden lg:flex p-2.5 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
             title="Toggle Sidebar"
           >
             <Menu className="w-5 h-5" />
@@ -2442,7 +2442,7 @@ export default function FacultyPortal() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/mentor")}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-bold transition-all shadow-xs cursor-pointer"
+            className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-[13px] font-bold transition-all shadow-xs cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-blue-600" />
             <span>QR Scanner View</span>
@@ -2614,7 +2614,7 @@ export default function FacultyPortal() {
                       <div className="flex items-center gap-2">
                         <button
                           disabled
-                          className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
+                          className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-400 font-bold text-[13px] flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
                         >
                           <Lock className="w-3.5 h-3.5" />
                           <span>Locked until {cls.unlocksAt}</span>
@@ -2623,7 +2623,7 @@ export default function FacultyPortal() {
                           <button
                             type="button"
                             onClick={() => openReassignModal(courseObj)}
-                            className="px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                            className="px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-[13px] font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                             title="Reassignment request is pending HOD approval — Click to view or cancel"
                           >
                             <Clock className="w-3.5 h-3.5 text-amber-700 animate-pulse" />
@@ -2633,7 +2633,7 @@ export default function FacultyPortal() {
                           <button
                             type="button"
                             onClick={() => openReassignModal(courseObj)}
-                            className="px-3.5 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                            className="px-4 py-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-[13px] font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                             title="Reassign this upcoming class"
                           >
                             <ArrowRightLeft className="w-3.5 h-3.5 text-sky-600" />
@@ -2645,7 +2645,7 @@ export default function FacultyPortal() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
-                          className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                          className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 font-black text-[15px] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
                         >
                           <Sparkles className="w-4 h-4" />
                           <span>Post Live Attendance</span>
@@ -2654,7 +2654,7 @@ export default function FacultyPortal() {
                           <button
                             type="button"
                             onClick={() => openReassignModal(courseObj)}
-                            className="px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                            className="px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-[13px] font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                             title="Reassignment request is pending HOD approval — Click to view or cancel"
                           >
                             <Clock className="w-3.5 h-3.5 text-amber-700 animate-pulse" />
@@ -2664,7 +2664,7 @@ export default function FacultyPortal() {
                           <button
                             type="button"
                             onClick={() => openReassignModal(courseObj)}
-                            className="px-3.5 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                            className="px-4 py-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-[13px] font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                             title="Reassign this class"
                           >
                             <ArrowRightLeft className="w-3.5 h-3.5 text-sky-600" />
@@ -2675,7 +2675,7 @@ export default function FacultyPortal() {
                     ) : cls.isAttendanceTaken ? (
                       <button
                         onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
-                        className="w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200"
+                        className="w-full py-3 rounded-xl font-bold text-[13px] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                         <span>View Recorded Attendance</span>
@@ -2683,7 +2683,7 @@ export default function FacultyPortal() {
                     ) : (
                       <button
                         disabled
-                        className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
+                        className="w-full py-3 rounded-xl bg-slate-100 text-slate-400 font-bold text-[13px] flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed select-none"
                       >
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
                         <span>Class Ended &bull; Attendance Closed</span>
@@ -2739,7 +2739,7 @@ export default function FacultyPortal() {
             {/* Home Link */}
             <button
               onClick={() => setActiveTab("home")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                 activeTab === "home"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2756,7 +2756,7 @@ export default function FacultyPortal() {
                   setActiveTab("academics");
                   toggleSubmenu("academics");
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                   activeTab === "academics"
                     ? "bg-blue-50 text-blue-700 font-extrabold"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2778,19 +2778,19 @@ export default function FacultyPortal() {
                 <div className="pl-9 pr-2 py-1 space-y-0.5">
                   <button
                     onClick={() => setActiveTab("academics")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
+                    className="w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
                   >
                     • Assigned Courses
                   </button>
                   <button
                     onClick={() => setActiveTab("academics")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
+                    className="w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
                   >
                     • Attendance Posting
                   </button>
                   <button
                     onClick={() => setActiveTab("directory")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
+                    className="w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 transition-colors"
                   >
                     • Year-Wise Directory
                   </button>
@@ -2801,7 +2801,7 @@ export default function FacultyPortal() {
             {/* Delegate Attendance with Live Approval Badge */}
             <button
               onClick={() => setActiveTab("delegate")}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                 activeTab === "delegate"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2821,7 +2821,7 @@ export default function FacultyPortal() {
             {/* Year-Wise Academic Directory (Srinidhi Review) */}
             <button
               onClick={() => setActiveTab("directory")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                 activeTab === "directory"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2838,7 +2838,7 @@ export default function FacultyPortal() {
                   setActiveTab("assignment");
                   toggleSubmenu("assignment");
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                   activeTab === "assignment"
                     ? "bg-blue-50 text-blue-700 font-extrabold"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2860,13 +2860,13 @@ export default function FacultyPortal() {
                 <div className="pl-9 pr-2 py-1 space-y-0.5">
                   <button
                     onClick={() => setActiveTab("assignment")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    className="w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
                   >
                     • Assignment Master
                   </button>
                   <button
                     onClick={() => setActiveTab("assignment")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    className="w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
                   >
                     • Post Marks
                   </button>
@@ -2881,7 +2881,7 @@ export default function FacultyPortal() {
                   setActiveTab("mids");
                   toggleSubmenu("mids");
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                   activeTab === "mids"
                     ? "bg-blue-50 text-blue-700 font-extrabold"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2903,7 +2903,7 @@ export default function FacultyPortal() {
                 <div className="pl-9 pr-2 py-1 space-y-0.5">
                   <button
                     onClick={() => setActiveTab("mids")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    className="w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
                   >
                     • Mid Marks Entry
                   </button>
@@ -2914,7 +2914,7 @@ export default function FacultyPortal() {
             {/* Faculty Workload */}
             <button
               onClick={() => setActiveTab("workload")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                 activeTab === "workload"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2931,7 +2931,7 @@ export default function FacultyPortal() {
                   setActiveTab("mentoring");
                   toggleSubmenu("mentoring");
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                   activeTab === "mentoring"
                     ? "bg-blue-50 text-blue-700 font-extrabold"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2953,13 +2953,13 @@ export default function FacultyPortal() {
                 <div className="pl-9 pr-2 py-1 space-y-0.5">
                   <button
                     onClick={() => setActiveTab("mentoring")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    className="w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
                   >
                     • Assigned Students ({mentees.length})
                   </button>
                   <button
                     onClick={() => setActiveTab("mentoring")}
-                    className="w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
+                    className="w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
                   >
                     • WhatsApp Connect
                   </button>
@@ -2970,7 +2970,7 @@ export default function FacultyPortal() {
             {/* Student Projects */}
             <button
               onClick={() => setActiveTab("projects")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                 activeTab === "projects"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -2983,7 +2983,7 @@ export default function FacultyPortal() {
             {/* Event Management */}
             <button
               onClick={() => setActiveTab("events")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                 activeTab === "events"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -3000,7 +3000,7 @@ export default function FacultyPortal() {
                   setActiveTab("history");
                   toggleSubmenu("reports");
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                   activeTab === "history" || activeTab === "student_history"
                     ? "bg-blue-50 text-blue-700 font-extrabold"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -3022,7 +3022,7 @@ export default function FacultyPortal() {
                 <div className="pl-9 pr-2 py-1 space-y-0.5">
                   <button
                     onClick={() => setActiveTab("history")}
-                    className={`w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+                    className={`w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold transition-colors cursor-pointer ${
                       activeTab === "history"
                         ? "text-blue-600 bg-blue-50 font-bold"
                         : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
@@ -3032,7 +3032,7 @@ export default function FacultyPortal() {
                   </button>
                   <button
                     onClick={() => setActiveTab("student_history")}
-                    className={`w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+                    className={`w-full text-left py-2 px-2.5 rounded-lg text-[12px] font-semibold transition-colors cursor-pointer ${
                       activeTab === "student_history"
                         ? "text-blue-600 bg-blue-50 font-bold"
                         : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
@@ -3061,14 +3061,14 @@ export default function FacultyPortal() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => refetchFacultyAll()}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                     title="Reload / Refresh"
                   >
                     <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-blue-600" : ""}`} />
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                     title="Logout"
                   >
                     <LogOut className="w-4 h-4" />
@@ -3079,14 +3079,14 @@ export default function FacultyPortal() {
               <div className="flex flex-col items-center gap-2">
                 <button
                   onClick={() => refetchFacultyAll()}
-                  className="w-full py-1.5 flex justify-center text-slate-400 hover:text-blue-600 transition-colors"
+                  className="w-full py-2 flex justify-center text-slate-400 hover:text-blue-600 transition-colors"
                   title="Reload / Refresh"
                 >
                   <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-blue-600" : ""}`} />
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="w-full py-1.5 flex justify-center text-slate-400 hover:text-red-600 transition-colors"
+                  className="w-full py-2 flex justify-center text-slate-400 hover:text-red-600 transition-colors"
                   title="Logout"
                 >
                   <LogOut className="w-4 h-4" />
@@ -3166,7 +3166,7 @@ export default function FacultyPortal() {
                       </div>
                       <button
                         onClick={() => setActiveTab("delegate")}
-                        className="text-xs font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer shrink-0"
+                        className="text-[13px] font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer shrink-0"
                       >
                         <span>Manage in Delegate Hub</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -3214,7 +3214,7 @@ export default function FacultyPortal() {
                             <button
                               onClick={() => handleAcceptReassignment(req.id)}
                               disabled={processingReassignId === req.id}
-                              className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-black shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                              className="flex-1 py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-[13px] font-black shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                             >
                               {processingReassignId === req.id ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -3226,7 +3226,7 @@ export default function FacultyPortal() {
                             <button
                               onClick={() => handleDeclineReassignment(req.id)}
                               disabled={processingReassignId === req.id}
-                              className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
+                              className="py-2.5 px-3.5 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-[13px] font-bold transition-all cursor-pointer"
                             >
                               <X className="w-3.5 h-3.5" />
                               <span className="sr-only sm:not-sr-only">Decline</span>
@@ -3320,7 +3320,7 @@ export default function FacultyPortal() {
                   </div>
                   <button
                     onClick={() => setActiveTab("academics")}
-                    className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+                    className="text-[13px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
                   >
                     <span>View Academics Hub</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -3410,7 +3410,7 @@ export default function FacultyPortal() {
                                 {cls.isLocked || cls.timingStatus === "upcoming" ? (
                                   <button
                                     disabled
-                                    className="px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center gap-1 mx-auto select-none"
+                                    className="px-3.5 py-2 rounded-xl font-bold text-[13px] bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center gap-1 mx-auto select-none"
                                   >
                                     <Lock className="w-3 h-3 text-slate-400" />
                                     <span>Locked</span>
@@ -3418,7 +3418,7 @@ export default function FacultyPortal() {
                                 ) : (
                                   <button
                                     onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
-                                    className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-1 mx-auto cursor-pointer ${
+                                    className={`px-3.5 py-2 rounded-xl font-bold text-[13px] shadow-xs transition-all flex items-center gap-1 mx-auto cursor-pointer ${
                                       cls.isAttendanceTaken
                                         ? "bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
                                         : cls.isLive
@@ -3474,7 +3474,7 @@ export default function FacultyPortal() {
 
                   <button
                     onClick={() => setActiveTab("mentoring")}
-                    className="w-full py-3 rounded-xl bg-white text-indigo-950 hover:bg-indigo-50 font-black text-xs transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-white text-indigo-950 hover:bg-indigo-50 font-black text-[13px] transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
                   >
                     <span>Open Mentoring Hub</span>
                     <ArrowRight className="w-4 h-4" />
@@ -3583,7 +3583,7 @@ export default function FacultyPortal() {
                             key={day}
                             type="button"
                             onClick={() => setSelectedDayForMasterTable(day)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                               isSelected
                                 ? "bg-blue-600 text-white shadow-xs"
                                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
@@ -4017,7 +4017,7 @@ export default function FacultyPortal() {
                           <div className="flex items-center gap-2">
                             <button
                               disabled
-                              className="flex-1 py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
+                              className="flex-1 py-3 rounded-xl font-bold text-[13px] bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
                               title={`Attendance entry unlocks at ${cls.startTimeFormatted || cls.unlocksAt}`}
                             >
                               <Lock className="w-4 h-4 text-slate-400" />
@@ -4027,7 +4027,7 @@ export default function FacultyPortal() {
                               <button
                                 type="button"
                                 onClick={() => openReassignModal(courseObj)}
-                                className="px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                                className="px-5 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-[13px] font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                                 title="Reassignment request is pending HOD approval — Click to view or cancel"
                               >
                                 <Clock className="w-4 h-4 text-amber-700 animate-pulse" />
@@ -4037,7 +4037,7 @@ export default function FacultyPortal() {
                               <button
                                 type="button"
                                 onClick={() => openReassignModal(courseObj)}
-                                className="px-4 py-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                                className="px-5 py-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-[13px] font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                                 title="Reassign this upcoming class to substitute faculty"
                               >
                                 <ArrowRightLeft className="w-4 h-4 text-sky-600" />
@@ -4049,7 +4049,7 @@ export default function FacultyPortal() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
-                              className="flex-1 py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
+                              className="flex-1 py-3 rounded-xl font-extrabold text-[13px] shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
                             >
                               <Sparkles className="w-4 h-4" />
                               <span>🚀 Post Live Attendance Now</span>
@@ -4058,7 +4058,7 @@ export default function FacultyPortal() {
                               <button
                                 type="button"
                                 onClick={() => openReassignModal(courseObj)}
-                                className="px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                                className="px-5 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 active:scale-95 text-[13px] font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                                 title="Reassignment request is pending HOD approval — Click to view or cancel"
                               >
                                 <Clock className="w-4 h-4 text-amber-700 animate-pulse" />
@@ -4068,7 +4068,7 @@ export default function FacultyPortal() {
                               <button
                                 type="button"
                                 onClick={() => openReassignModal(courseObj)}
-                                className="px-4 py-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-xs font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                                className="px-5 py-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 active:scale-95 text-[13px] font-extrabold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                                 title="Reassign this class"
                               >
                                 <ArrowRightLeft className="w-4 h-4 text-sky-600" />
@@ -4079,7 +4079,7 @@ export default function FacultyPortal() {
                         ) : cls.isAttendanceTaken ? (
                           <button
                             onClick={() => openAttendanceModal(courseObj, todayClassesInfo?.date)}
-                            className="w-full py-3 rounded-xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
+                            className="w-full py-3 rounded-xl font-extrabold text-[13px] shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer bg-slate-100 hover:bg-emerald-600 hover:text-white text-emerald-800 border border-emerald-300"
                           >
                             <CheckCircle2 className="w-4 h-4" />
                             <span>✓ Attendance Recorded (View List)</span>
@@ -4087,7 +4087,7 @@ export default function FacultyPortal() {
                         ) : (
                           <button
                             disabled
-                            className="w-full py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
+                            className="w-full py-3 rounded-xl font-bold text-[13px] bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-xs select-none"
                           >
                             <Clock className="w-4 h-4 text-slate-400" />
                             <span>Class Ended &bull; Attendance Closed</span>
@@ -4150,7 +4150,7 @@ export default function FacultyPortal() {
 
                           <button
                             disabled
-                            className="w-full py-2.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 select-none"
+                            className="w-full py-3 rounded-xl bg-slate-100 text-slate-400 font-bold text-[13px] border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 select-none"
                           >
                             <Lock className="w-3.5 h-3.5 text-slate-400" />
                             <span>Locked — Scheduled for {todayClassesInfo.nextWorkingDay?.dayName || "Monday"}</span>
@@ -4228,7 +4228,7 @@ export default function FacultyPortal() {
 
                   <button
                     type="submit"
-                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] shadow-md shadow-blue-500/20 transition-all cursor-pointer"
                   >
                     Confirm & Delegate Class
                   </button>
@@ -4341,7 +4341,7 @@ export default function FacultyPortal() {
                           <button
                             onClick={() => handleAcceptReassignment(req.id)}
                             disabled={processingReassignId === req.id}
-                            className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-black shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                            className="flex-1 py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-[13px] font-black shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                           >
                             {processingReassignId === req.id ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -4353,7 +4353,7 @@ export default function FacultyPortal() {
                           <button
                             onClick={() => handleDeclineReassignment(req.id)}
                             disabled={processingReassignId === req.id}
-                            className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer"
+                            className="py-2.5 px-3.5 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-[13px] font-bold transition-all cursor-pointer"
                           >
                             <X className="w-3.5 h-3.5" />
                             <span>Decline</span>
@@ -4387,7 +4387,7 @@ export default function FacultyPortal() {
                   {courses.length > 0 && (
                     <button
                       onClick={() => openReassignModal(courses[0])}
-                      className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] flex items-center gap-1.5 shadow-xs cursor-pointer self-start sm:self-auto"
                     >
                       <ArrowRightLeft className="w-3.5 h-3.5" />
                       <span>Reassign a Period</span>
@@ -4464,7 +4464,7 @@ export default function FacultyPortal() {
                                 {r.status === "pending" ? (
                                   <button
                                     onClick={() => handleCancelReassignment(r.id)}
-                                    className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-bold cursor-pointer"
+                                    className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[12px] font-bold cursor-pointer"
                                   >
                                     Cancel
                                   </button>
@@ -4496,7 +4496,7 @@ export default function FacultyPortal() {
                 </div>
                 <button
                   onClick={() => setShowCreateAssignmentModal(true)}
-                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create Assignment</span>
@@ -4538,7 +4538,7 @@ export default function FacultyPortal() {
 
                       <button
                         onClick={() => setSelectedAsgForSubmissions(asg)}
-                        className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                        className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[13px] flex items-center justify-center gap-2 transition-all cursor-pointer"
                       >
                         <FileCheck className="w-4 h-4" />
                         <span>Review Submissions & Marks</span>
@@ -4559,7 +4559,7 @@ export default function FacultyPortal() {
                   </div>
                   <button
                     onClick={() => setShowCreateAssignmentModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                    className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Create Assignment</span>
@@ -4596,7 +4596,7 @@ export default function FacultyPortal() {
                     <button
                       type="button"
                       onClick={() => setSelectedMidExam("Mid-1")}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3.5 py-1.5 rounded-lg text-[13px] font-bold transition-all ${
                         selectedMidExam === "Mid-1" ? "bg-white text-blue-700 shadow-xs" : "text-slate-600"
                       }`}
                     >
@@ -4605,7 +4605,7 @@ export default function FacultyPortal() {
                     <button
                       type="button"
                       onClick={() => setSelectedMidExam("Mid-2")}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3.5 py-1.5 rounded-lg text-[13px] font-bold transition-all ${
                         selectedMidExam === "Mid-2" ? "bg-white text-blue-700 shadow-xs" : "text-slate-600"
                       }`}
                     >
@@ -4615,7 +4615,7 @@ export default function FacultyPortal() {
 
                   <button
                     onClick={() => toast({ title: "Marks Saved!", description: `Internal marks for ${selectedMidCourse} (${selectedMidExam}) saved to database.` })}
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] flex items-center gap-1.5 shadow-sm cursor-pointer"
                   >
                     <CheckCheck className="w-4 h-4" />
                     <span>Lock & Submit Marks</span>
@@ -4862,7 +4862,7 @@ export default function FacultyPortal() {
                                     description: m.mentorNotes || "No remarks noted yet.",
                                   });
                                 }}
-                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] transition-all cursor-pointer"
+                                className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[12px] transition-all cursor-pointer"
                               >
                                 History
                               </button>
@@ -4890,7 +4890,7 @@ export default function FacultyPortal() {
                     <button
                       type="button"
                       onClick={() => setProjectTab("Major")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3.5 py-2 rounded-lg text-[13px] font-bold transition-all ${
                         projectTab === "Major" ? "bg-white text-blue-700 shadow-xs" : "text-slate-600"
                       }`}
                     >
@@ -4899,7 +4899,7 @@ export default function FacultyPortal() {
                     <button
                       type="button"
                       onClick={() => setProjectTab("Mini")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3.5 py-2 rounded-lg text-[13px] font-bold transition-all ${
                         projectTab === "Mini" ? "bg-white text-blue-700 shadow-xs" : "text-slate-600"
                       }`}
                     >
@@ -4909,7 +4909,7 @@ export default function FacultyPortal() {
 
                   <button
                     onClick={() => setShowAddProjectModal(true)}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Register Batch</span>
@@ -4963,7 +4963,7 @@ export default function FacultyPortal() {
 
                         <button
                           onClick={() => toast({ title: "Review Marks Updated", description: `Rubrics saved for ${p.batchId}.` })}
-                          className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <Award className="w-4 h-4" />
                           <span>Update Review Marks</span>
@@ -4984,7 +4984,7 @@ export default function FacultyPortal() {
                   </div>
                   <button
                     onClick={() => setShowAddProjectModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                    className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Register {projectTab} Project Batch</span>
@@ -5004,7 +5004,7 @@ export default function FacultyPortal() {
                 </div>
                 <button
                   onClick={() => setShowAddEventModal(true)}
-                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create Event</span>
@@ -5047,7 +5047,7 @@ export default function FacultyPortal() {
 
                       <button
                         onClick={() => toast({ title: "Coordinator Report", description: `Report generated for ${ev.title}.` })}
-                        className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                        className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[13px] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                       >
                         <Download className="w-4 h-4" />
                         <span>Coordinator Report</span>
@@ -5068,7 +5068,7 @@ export default function FacultyPortal() {
                   </div>
                   <button
                     onClick={() => setShowAddEventModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
+                    className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[13px] inline-flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Create Event</span>
@@ -5102,7 +5102,7 @@ export default function FacultyPortal() {
                     <button
                       onClick={downloadHistoryCSV}
                       disabled={loadingHistory || historyRecords.length === 0}
-                      className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                      className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-[13px] flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Download History (CSV)</span>
@@ -5138,7 +5138,7 @@ export default function FacultyPortal() {
                         setHistoryFromDate(today);
                         setHistoryToDate(today);
                       }}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl text-[13px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
                     >
                       Today
                     </button>
@@ -5150,7 +5150,7 @@ export default function FacultyPortal() {
                         setHistoryFromDate(d.toISOString().split("T")[0]);
                         setHistoryToDate(today);
                       }}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl text-[13px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
                     >
                       Last 7 Days
                     </button>
@@ -5162,7 +5162,7 @@ export default function FacultyPortal() {
                         setHistoryFromDate(d.toISOString().split("T")[0]);
                         setHistoryToDate(today);
                       }}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl text-[13px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
                     >
                       This Month
                     </button>
@@ -5185,7 +5185,7 @@ export default function FacultyPortal() {
                     <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
                       <button
                         onClick={() => setHistoryStatusFilter("all")}
-                        className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                           historyStatusFilter === "all" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600"
                         }`}
                       >
@@ -5193,7 +5193,7 @@ export default function FacultyPortal() {
                       </button>
                       <button
                         onClick={() => setHistoryStatusFilter("marked")}
-                        className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                           historyStatusFilter === "marked" ? "bg-emerald-600 text-white shadow-xs" : "text-emerald-700"
                         }`}
                       >
@@ -5201,7 +5201,7 @@ export default function FacultyPortal() {
                       </button>
                       <button
                         onClick={() => setHistoryStatusFilter("skipped")}
-                        className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                           historyStatusFilter === "skipped" ? "bg-amber-600 text-white shadow-xs" : "text-amber-700"
                         }`}
                       >
@@ -5414,7 +5414,7 @@ export default function FacultyPortal() {
                               <td className="py-3.5 px-4 text-center">
                                 <button
                                   onClick={() => openAttendanceModal(courseObj, rec.date)}
-                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer ${
+                                  className={`px-3.5 py-2 rounded-xl font-bold text-[13px] inline-flex items-center gap-1.5 transition-all cursor-pointer ${
                                     rec.status === "marked"
                                       ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
                                       : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
@@ -5478,7 +5478,7 @@ export default function FacultyPortal() {
                     <button
                       onClick={handlePrintCumulativeAttendance}
                       disabled={loadingBook || !bookData || !bookData.students || bookData.students.length === 0}
-                      className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                      className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-[13px] flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                       title="Print official cumulative attendance register or Save as PDF"
                     >
                       <Printer className="w-4 h-4" />
@@ -5487,7 +5487,7 @@ export default function FacultyPortal() {
                     <button
                       onClick={downloadAttendanceBookCSV}
                       disabled={loadingBook || !bookData || !bookData.students || bookData.students.length === 0}
-                      className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                      className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-[13px] flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Download Register (CSV)</span>
@@ -5542,7 +5542,7 @@ export default function FacultyPortal() {
 
                     <button
                       onClick={fetchStudentAttendanceBook}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
+                      className="px-4 py-2 rounded-xl text-[13px] font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
                     >
                       Apply Range
                     </button>
@@ -5811,7 +5811,7 @@ export default function FacultyPortal() {
                               setSelectedDirectoryYear(yr);
                               setDirectorySectionFilter("all");
                             }}
-                            className={`px-4 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                            className={`px-5 py-3 rounded-xl font-black text-[13px] transition-all flex items-center gap-1.5 cursor-pointer ${
                               isSelected
                                 ? "bg-white text-indigo-950 shadow-lg scale-102"
                                 : "text-white/80 hover:text-white hover:bg-white/10"
@@ -5867,7 +5867,7 @@ export default function FacultyPortal() {
                         <button
                           key={tab.id}
                           onClick={() => setDirectoryActiveTab(tab.id as any)}
-                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                          className={`px-4 py-2.5 rounded-xl text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                             active
                               ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
                               : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
@@ -6061,7 +6061,7 @@ export default function FacultyPortal() {
                                 setDirectorySectionFilter(sec.key);
                                 setDirectoryActiveTab("students");
                               }}
-                              className="w-full py-2 rounded-xl bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                              className="w-full py-2.5 rounded-xl bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[13px] transition-colors flex items-center justify-center gap-1 cursor-pointer"
                             >
                               <span>View Section Roster</span>
                               <ArrowRight className="w-3.5 h-3.5" />
@@ -6254,7 +6254,7 @@ export default function FacultyPortal() {
                   <button
                     type="button"
                     onClick={() => openReassignModal(selectedCourseForAttendance)}
-                    className="px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 border border-sky-300"
+                    className="px-3.5 py-2 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 text-[13px] font-extrabold shadow-sm flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 border border-sky-300"
                     title="Reassign this class period to another faculty"
                   >
                     <ArrowRightLeft className="w-3.5 h-3.5 text-sky-800" />
@@ -6264,7 +6264,7 @@ export default function FacultyPortal() {
 
                 <button
                   onClick={() => setAttendanceModalOpen(false)}
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -6330,7 +6330,7 @@ export default function FacultyPortal() {
                         key={slot.id}
                         type="button"
                         onClick={() => setSelectedPeriod(slot.id)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-2 ${
+                        className={`px-4 py-2.5 rounded-xl text-[13px] font-extrabold transition-all cursor-pointer flex items-center gap-2 ${
                           isSelected
                             ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 ring-2 ring-blue-600/30"
                             : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100"
@@ -6369,14 +6369,14 @@ export default function FacultyPortal() {
                   <button
                     type="button"
                     onClick={() => handleMarkAll(true)}
-                    className="px-3 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold transition-all cursor-pointer shadow-xs"
                   >
                     Mark All Present
                   </button>
                   <button
                     type="button"
                     onClick={() => handleMarkAll(false)}
-                    className="px-3 py-1 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold transition-all cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 text-[13px] font-bold transition-all cursor-pointer"
                   >
                     Mark All Absent
                   </button>
@@ -6398,14 +6398,14 @@ export default function FacultyPortal() {
                 <button
                   type="button"
                   onClick={() => handleMarkAll(true)}
-                  className="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold shadow-xs active:scale-95"
+                  className="px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white text-[13px] font-bold shadow-xs active:scale-95"
                 >
                   All Present
                 </button>
                 <button
                   type="button"
                   onClick={() => handleMarkAll(false)}
-                  className="px-3 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-bold active:scale-95"
+                  className="px-3.5 py-1.5 rounded-lg bg-red-100 text-red-700 text-[13px] font-bold active:scale-95"
                 >
                   All Absent
                 </button>
@@ -6460,7 +6460,7 @@ export default function FacultyPortal() {
                         e.stopPropagation();
                         toggleStudentStatus(s.id);
                       }}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-black transition-all shrink-0 shadow-xs border cursor-pointer active:scale-95 ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] font-black transition-all shrink-0 shadow-xs border cursor-pointer active:scale-95 ${
                         s.status
                           ? "bg-emerald-50 text-emerald-700 border-emerald-300"
                           : "bg-red-50 text-red-700 border-red-300"
@@ -6509,7 +6509,7 @@ export default function FacultyPortal() {
                           <button
                             type="button"
                             onClick={() => toggleStudentStatus(s.id)}
-                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer shadow-xs border ${
+                            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[13px] font-black transition-all cursor-pointer shadow-xs border ${
                               s.status
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
                                 : "bg-red-50 text-red-700 border-red-300 hover:bg-red-100"
@@ -6537,7 +6537,7 @@ export default function FacultyPortal() {
               <button
                 type="button"
                 onClick={() => setAttendanceModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -6557,7 +6557,7 @@ export default function FacultyPortal() {
                     type="button"
                     onClick={handleSubmitAttendance}
                     disabled={submittingAttendance}
-                    className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-blue-600 hover:text-white disabled:bg-slate-300 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-slate-300"
+                    className="px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-blue-600 hover:text-white disabled:bg-slate-300 text-slate-700 text-[13px] font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-slate-300"
                   >
                     {submittingAttendance ? (
                       <>
@@ -6577,7 +6577,7 @@ export default function FacultyPortal() {
                   type="button"
                   onClick={handleSubmitAttendance}
                   disabled={submittingAttendance}
-                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-[13px] font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {submittingAttendance ? (
                     <>
@@ -6630,7 +6630,7 @@ export default function FacultyPortal() {
                 </div>
                 <button
                   onClick={() => setReassignModalOpen(false)}
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -6831,7 +6831,7 @@ export default function FacultyPortal() {
                 <button
                   type="button"
                   onClick={() => setReassignModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl text-[13px] font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -6841,7 +6841,7 @@ export default function FacultyPortal() {
                     type="button"
                     onClick={() => handleCancelReassignment(existingPendingReassignment?.id)}
                     disabled={cancellingReassignment}
-                    className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-black shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+                    className="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-[13px] font-black shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95"
                   >
                     {cancellingReassignment ? (
                       <>
@@ -6860,7 +6860,7 @@ export default function FacultyPortal() {
                     type="button"
                     onClick={handleSendReassignment}
                     disabled={submittingReassignment}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white text-xs font-black shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white text-[13px] font-black shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95"
                   >
                     {submittingReassignment ? (
                       <>
@@ -6947,13 +6947,13 @@ export default function FacultyPortal() {
                 <button
                   type="button"
                   onClick={() => setShowCreateAssignmentModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold"
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold"
                 >
                   Publish Assignment
                 </button>
@@ -7016,13 +7016,13 @@ export default function FacultyPortal() {
                 <button
                   type="button"
                   onClick={() => setShowAddProjectModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold"
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold"
+                  className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold"
                 >
                   Register Project
                 </button>
@@ -7121,13 +7121,13 @@ export default function FacultyPortal() {
                 <button
                   type="button"
                   onClick={() => setShowAddEventModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold"
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                  className="px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold"
                 >
                   Create Event
                 </button>
