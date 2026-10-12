@@ -443,7 +443,7 @@ export default function HourlyAttendance() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[13px] font-medium text-ink-500">
-                {daysFullNames[activeDayOfWeek] || "Day"}, {getFormattedDate(selectedDateFilter)}
+                {getFormattedDate(selectedDateFilter)}
               </p>
               <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">
                 Hourly Attendance

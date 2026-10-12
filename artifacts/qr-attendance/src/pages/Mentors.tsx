@@ -320,7 +320,7 @@ export default function Mentors() {
         <BackButton className="mb-0" />
         
         {/* Header Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <h1 className="text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900 flex items-center gap-2">
               Faculty & Mentors

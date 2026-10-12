@@ -163,7 +163,7 @@ export default function Attendance() {
     <Layout>
       <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-6">
         <BackButton className="mb-0" />
-        <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-end justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">Attendance Records</h1>
             <p className="text-[15px] text-ink-500 mt-1">{records.length} records found</p>
