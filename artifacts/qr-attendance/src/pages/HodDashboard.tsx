@@ -2794,87 +2794,133 @@ export default function HodDashboard() {
 
         {activeTab === "summary" ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: "Students", value: overallTotalStudents, tone: "text-ink-900", caption: "Enrolled" },
-                { label: "Present", value: overallTotalPresent, tone: "text-[#248a3d]", caption: "Checked in today" },
-                { label: "Absent", value: overallTotalAbsent, tone: "text-[#d70015]", caption: "Not checked in" },
-              ].map(({ label, value, tone, caption }) => (
-                <div key={label} className="rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] px-5 py-5">
-                  <p className="text-[13px] font-medium text-ink-500">{label}</p>
-                  <p className={`mt-2 text-[34px] leading-none font-semibold tracking-[-0.02em] tabular-nums ${tone}`}>{value}</p>
-                  <p className="mt-2 text-[12px] text-ink-400">{caption}</p>
-                </div>
-              ))}
-              <div className="rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] px-5 py-5">
-                <p className="text-[13px] font-medium text-ink-500">Department Attendance</p>
-                <p className="mt-2 text-[34px] leading-none font-semibold tracking-[-0.02em] tabular-nums text-ink-900">{overallDeptPercentage}%</p>
-                <div className="mt-3.5 h-1.5 rounded-full bg-ink-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-blue-500 transition-all duration-700" style={{ width: `${Math.min(overallDeptPercentage, 100)}%` }} />
-                </div>
-              </div>
-            </div>
-
             {usersLoading || attendanceLoading ? (
-              <div className="rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] p-20 flex flex-col items-center justify-center gap-4">
+              <div className="rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-24 flex flex-col items-center justify-center gap-4">
                 <div className="w-7 h-7 border-[3px] border-ink-200 border-t-ink-500 rounded-full animate-spin"></div>
                 <p className="text-[13px] text-ink-500">Loading attendance…</p>
               </div>
             ) : (
-              <div className="space-y-8">
+              <div className="space-y-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  <div className="lg:col-span-2 rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] relative overflow-hidden p-9 lg:p-11 flex flex-col justify-between min-h-[300px]">
+                    <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-br from-[#5ac8fa]/25 to-[#0071e3]/10 blur-2xl" />
+                    <div className="relative">
+                      <p className="text-[15px] font-semibold text-blue-600">Today</p>
+                      <h2 className="mt-3 text-[40px] lg:text-[48px] leading-[1.04] font-bold tracking-[-0.035em] text-ink-900">
+                        {overallTotalPresent} students are in.
+                        <span className="block text-ink-400">{overallTotalAbsent} haven't arrived.</span>
+                      </h2>
+                    </div>
+                    <div className="relative mt-10 flex flex-wrap items-center gap-2">
+                      <button onClick={() => setActiveTab("logs")} className="h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium transition-colors cursor-pointer">
+                        Open today's log
+                      </button>
+                      <button onClick={() => setActiveTab("flags")} className="h-11 px-5 rounded-full text-blue-600 hover:bg-blue-50 text-[15px] font-medium flex items-center gap-1 transition-colors cursor-pointer">
+                        Review risk flags <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-9 flex flex-col items-center justify-center text-center">
+                    <div className="relative h-[168px] w-[168px]">
+                      <svg viewBox="0 0 168 168" className="h-full w-full -rotate-90">
+                        <defs>
+                          <linearGradient id="hodRing" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#5ac8fa" />
+                            <stop offset="100%" stopColor="#0071e3" />
+                          </linearGradient>
+                        </defs>
+                        <circle cx="84" cy="84" r="74" fill="none" stroke="#f0f0f3" strokeWidth="14" />
+                        <circle cx="84" cy="84" r="74" fill="none" stroke="url(#hodRing)" strokeWidth="14" strokeLinecap="round"
+                          strokeDasharray={2 * Math.PI * 74} strokeDashoffset={2 * Math.PI * 74 * (1 - Math.min(overallDeptPercentage, 100) / 100)}
+                          style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.22,1,0.36,1)" }} />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-[40px] font-bold tracking-[-0.03em] text-ink-900">{overallDeptPercentage}<span className="text-[22px] text-ink-400">%</span></span>
+                      </div>
+                    </div>
+                    <p className="mt-6 text-[17px] font-semibold text-ink-900">Department attendance</p>
+                    <p className="mt-1 text-[14px] text-ink-500">
+                      {overallDeptPercentage >= 75 ? "Healthy. Above the 75% requirement." : `${75 - overallDeptPercentage}% short of the 75% requirement.`}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+                  {([
+                    { title: "Risk Flags", caption: "Students under 75%", icon: Flag, color: "bg-[#ff3b30]", onClick: () => setActiveTab("flags") },
+                    { title: "Students", caption: "Profiles and reports", icon: Users, color: "bg-[#0a84ff]", onClick: () => setActiveTab("student-analytics") },
+                    { title: "Mentors", caption: "Class incharges", icon: GraduationCap, color: "bg-[#5856d6]", onClick: () => setActiveTab("mentors") },
+                    { title: "Timetable", caption: "Weekly schedules", icon: Calendar, color: "bg-[#34c759]", onClick: () => setActiveTab("schedules") },
+                  ]).map(({ title, caption, icon: TileIcon, color, onClick }) => (
+                    <button key={title} onClick={onClick} className="group rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-6 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_12px_32px_rgba(0,0,0,0.08)] cursor-pointer">
+                      <span className={`h-12 w-12 rounded-[14px] ${color} flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]`}>
+                        <TileIcon className="w-6 h-6 text-white" strokeWidth={2} />
+                      </span>
+                      <p className="mt-5 text-[17px] font-semibold text-ink-900">{title}</p>
+                      <p className="mt-0.5 text-[14px] text-ink-500 flex items-center justify-between">
+                        {caption}
+                        <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-ink-500 group-hover:translate-x-0.5 transition-all" />
+                      </p>
+                    </button>
+                  ))}
+                </div>
+
                 {yearGroups.map(year => {
                   const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
                   if (sectionsInYear.length === 0) return null;
-
-                  let yearPresent = 0;
-                  let yearTotal = 0;
-
-                  sectionsInYear.forEach(s => {
-                    yearPresent += s.presentStudents.length;
-                    yearTotal += s.totalStudents.length;
-                  });
-
-                  const yearPercentage = yearTotal > 0
-                    ? Math.round((yearPresent / yearTotal) * 100)
-                    : 0;
+                  const yearPresent = sectionsInYear.reduce((a, s) => a + s.presentStudents.length, 0);
+                  const yearTotal = sectionsInYear.reduce((a, s) => a + s.totalStudents.length, 0);
+                  const yearPercentage = yearTotal > 0 ? Math.round((yearPresent / yearTotal) * 100) : 0;
 
                   return (
                     <section key={year}>
-                      <div className="flex items-baseline justify-between px-5 mb-2">
-                        <h2 className="text-[13px] font-semibold uppercase tracking-[0.04em] text-ink-500">{year}</h2>
-                        <p className="text-[13px] text-ink-500">
-                          {yearPresent} of {yearTotal} present · <span className="font-semibold text-ink-900">{yearPercentage}%</span>
-                        </p>
+                      <div className="flex items-baseline justify-between mb-5">
+                        <h2 className="text-[28px] font-bold tracking-[-0.025em] text-ink-900">{year}</h2>
+                        <p className="text-[15px] text-ink-500">{yearPercentage}% present</p>
                       </div>
-                      <div className="rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden divide-y divide-black/[0.06]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {sectionsInYear.map(s => {
                           const percent = s.totalStudents.length > 0
-                            ? (s.presentStudents.length / s.totalStudents.length) * 100
+                            ? Math.round((s.presentStudents.length / s.totalStudents.length) * 100)
                             : 0;
-                          const barColor = percent >= 75 ? "bg-[#34c759]" : percent >= 50 ? "bg-[#ff9500]" : "bg-[#ff3b30]";
+                          const status = percent >= 85
+                            ? { label: "Excellent", dot: "bg-[#34c759]", text: "text-[#248a3d]" }
+                            : percent >= 75
+                            ? { label: "On track", dot: "bg-[#34c759]", text: "text-[#248a3d]" }
+                            : percent >= 60
+                            ? { label: "Needs attention", dot: "bg-[#ff9500]", text: "text-[#c93400]" }
+                            : { label: "Critical", dot: "bg-[#ff3b30]", text: "text-[#d70015]" };
                           return (
-                            <div key={s.sectionKey} className="grid grid-cols-[1fr_auto_auto_auto] lg:grid-cols-[1.2fr_96px_96px_96px_1.6fr] items-center gap-2 px-5 py-3 hover:bg-black/[0.015] transition-colors">
-                              <div>
-                                <p className="text-[15px] font-medium text-ink-900">Section {s.displayName}</p>
-                                <p className="text-[12px] text-ink-400">{s.totalStudents.length} students</p>
+                            <div key={s.sectionKey} className="rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-7 flex flex-col transition-all duration-300 hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_12px_32px_rgba(0,0,0,0.08)]">
+                              <div className="flex items-center justify-between">
+                                <span className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${status.text}`}>
+                                  <span className={`h-2 w-2 rounded-full ${status.dot}`} />
+                                  {status.label}
+                                </span>
+                                <button onClick={() => handleCellClick("Total", s)} className="text-[13px] font-medium text-blue-600 hover:underline cursor-pointer">
+                                  View class
+                                </button>
                               </div>
-                              <button onClick={() => handleCellClick("PR", s)} title="Present Students" className="rounded-[10px] px-3 py-1.5 text-left hover:bg-black/[0.04] transition-colors cursor-pointer">
-                                <p className="text-[17px] font-semibold text-[#248a3d] tabular-nums leading-tight">{s.presentStudents.length}</p>
-                                <p className="text-[11px] text-ink-400">Present</p>
+                              <p className="mt-6 text-[56px] leading-none font-bold tracking-[-0.04em] text-ink-900">{s.displayName}</p>
+                              <button onClick={() => handleCellClick("PR", s)} title="Present Students" className="mt-2 self-start text-[15px] text-ink-500 hover:text-ink-900 transition-colors cursor-pointer">
+                                {percent}% present today
                               </button>
-                              <button onClick={() => handleCellClick("AB", s)} className="rounded-[10px] px-3 py-1.5 text-left hover:bg-black/[0.04] transition-colors cursor-pointer">
-                                <p className="text-[17px] font-semibold text-[#d70015] tabular-nums leading-tight">{s.absentStudents.length}</p>
-                                <p className="text-[11px] text-ink-400">Absent</p>
-                              </button>
-                              <button onClick={() => handleCellClick("Total", s)} className="rounded-[10px] px-3 py-1.5 text-left hover:bg-black/[0.04] transition-colors cursor-pointer">
-                                <p className="text-[17px] font-semibold text-ink-900 tabular-nums leading-tight">{s.totalStudents.length}</p>
-                                <p className="text-[11px] text-ink-400">Total</p>
-                              </button>
-                              <div className="col-span-4 lg:col-span-1 flex items-center gap-3">
-                                <div className="flex-1 h-1.5 rounded-full bg-ink-100 overflow-hidden">
-                                  <div className={`h-full rounded-full ${barColor} transition-all duration-500`} style={{ width: `${Math.min(percent, 100)}%` }} />
+                              <div className="mt-7 pt-5 border-t border-black/[0.06] flex items-center justify-between">
+                                <div className="flex -space-x-2">
+                                  {s.absentStudents.slice(0, 4).map((st, i) => (
+                                    <span key={st.id ?? i} className="h-8 w-8 rounded-full ring-2 ring-white bg-gradient-to-b from-[#d1d1d6] to-[#aeaeb2] text-white text-[11px] font-semibold flex items-center justify-center">
+                                      {(st.name || "?").trim().charAt(0).toUpperCase()}
+                                    </span>
+                                  ))}
+                                  {s.absentStudents.length === 0 && (
+                                    <span className="h-8 w-8 rounded-full bg-[#34c759]/15 text-[#248a3d] flex items-center justify-center"><CheckCircle className="w-4 h-4" /></span>
+                                  )}
                                 </div>
-                                <span className="w-11 text-right text-[15px] font-semibold text-ink-900 tabular-nums">{Math.round(percent)}%</span>
+                                <button onClick={() => handleCellClick("AB", s)} className="text-[14px] font-medium text-ink-700 hover:text-blue-600 flex items-center gap-0.5 transition-colors cursor-pointer">
+                                  {s.absentStudents.length === 0 ? "Everyone's here" : `${s.absentStudents.length} absent`}
+                                  <ChevronRight className="w-4 h-4" />
+                                </button>
                               </div>
                             </div>
                           );
