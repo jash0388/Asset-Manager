@@ -84,18 +84,17 @@ function TrainingMenu({ location, sessions }: { location: string; sessions: any[
     <div className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className={`flex items-center gap-2 h-10 px-4 rounded-full text-[13px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
-          isOnTraining ? "bg-blue-600 text-white shadow-md shadow-blue-600/25" : "text-ink-600 hover:text-ink-900 hover:bg-ink-100/70"
+        className={`flex items-center gap-2 h-8 px-3.5 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          isOnTraining ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]" : "text-ink-600 hover:text-ink-900"
         }`}
       >
-        <Briefcase className="w-4 h-4" />
         Training
         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-12 z-50 w-72 rounded-2xl bg-white border border-ink-100 shadow-xl p-2 animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute left-0 top-12 z-50 w-72 rounded-[14px] bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-[0_10px_40px_rgba(0,0,0,0.12)] p-1.5 animate-in fade-in zoom-in-95 duration-150">
             <p className="px-3 pt-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-400">Training sessions</p>
             <Link href="/training-sessions" onClick={() => setOpen(false)}>
               <div className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm cursor-pointer transition-colors ${
@@ -291,14 +290,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const initials = (userDisplayName || "U").replace(/[^A-Za-z ]/g, "").trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join("") || "U";
   const passwordInputCls = "w-full px-4 py-3 rounded-xl bg-ink-50 border-2 border-ink-100 text-ink-900 text-center font-mono text-xl tracking-[0.3em] outline-none focus:border-blue-500 focus:bg-white transition-colors";
   const fieldLabelCls = "block text-[11px] font-bold text-ink-500 uppercase tracking-[0.08em] mb-2";
-  const iconBtnCls = "relative h-10 w-10 rounded-full flex items-center justify-center transition-all cursor-pointer";
+  const iconBtnCls = "relative h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer";
 
   return (
-    <div className="min-h-screen h-screen flex flex-col bg-[#f6f6fb] font-sans">
+    <div className="min-h-screen h-screen flex flex-col bg-[#f5f5f7] font-sans">
 
       {/* ══════════ TOP NAVIGATION ══════════ */}
-      <header className="relative z-30 shrink-0 bg-white/90 backdrop-blur-xl border-b border-ink-100">
-        <div className="mx-auto max-w-[1400px] h-[68px] px-4 lg:px-8 flex items-center gap-4">
+      <header className="relative z-30 shrink-0 bg-white/75 backdrop-blur-2xl backdrop-saturate-150 border-b border-black/[0.08]">
+        <div className="mx-auto max-w-[1400px] h-14 px-4 lg:px-8 flex items-center gap-4">
           <button
             data-testid="mobile-menu-button"
             onClick={() => setMobileNavOpen(o => !o)}
@@ -308,16 +307,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </button>
 
           <div className="flex items-center gap-2.5 shrink-0">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-blue-500/30">
-              <ShieldCheck className="w-5 h-5 text-white" strokeWidth={2.25} />
+            <div className="h-8 w-8 rounded-[9px] bg-ink-900 flex items-center justify-center">
+              <ShieldCheck className="w-[18px] h-[18px] text-white" strokeWidth={2} />
             </div>
             <div className="hidden sm:block leading-tight">
-              <p className="font-display text-[15px] font-extrabold text-ink-900 tracking-tight">SPHN Attendance</p>
+              <p className="text-[14px] font-semibold text-ink-900 tracking-[-0.01em]">SPHN Attendance</p>
               <p className="text-[11px] font-medium text-ink-400">{ROLE_LABEL[role ?? "admin"]}</p>
             </div>
           </div>
 
-          <nav className="hidden lg:flex items-center gap-1 ml-6 rounded-full bg-ink-50 border border-ink-100 p-1">
+          <nav className="hidden lg:flex items-center gap-1 ml-8 rounded-[10px] bg-black/[0.05] p-[3px]">
             {navLinks.map(({ href, label, icon: Icon }) => {
               const isActive = isLinkActive(href);
               return (
@@ -325,11 +324,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <div
                     data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
                     onClick={() => handleNavClick(href)}
-                    className={`flex items-center gap-2 h-10 px-4 rounded-full text-[13px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                      isActive ? "bg-blue-600 text-white shadow-md shadow-blue-600/25" : "text-ink-600 hover:text-ink-900 hover:bg-ink-100/70"
+                    className={`flex items-center gap-2 h-8 px-3.5 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+                      isActive ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]" : "text-ink-600 hover:text-ink-900"
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
                     {shortLabel(label)}
                   </div>
                 </Link>
@@ -356,10 +354,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 top-12 z-50 w-[22rem] sm:w-96 bg-white rounded-2xl shadow-2xl border border-ink-100 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-12 z-50 w-[22rem] sm:w-96 bg-white/95 backdrop-blur-2xl rounded-[14px] shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-black/[0.08] overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-4 py-3.5 border-b border-ink-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="font-display text-sm font-bold text-ink-900">Notifications</span>
+                      <span className="text-sm font-semibold text-ink-900">Notifications</span>
                       {activeNotifications.length > 0 && (
                         <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">{activeNotifications.length}</span>
                       )}
@@ -443,9 +441,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="relative">
               <button
                 onClick={() => { setProfileOpen(p => !p); setNotificationsOpen(false); }}
-                className="flex items-center gap-2.5 rounded-full pl-1 pr-3 h-11 hover:bg-ink-50 transition-colors cursor-pointer"
+                className="flex items-center gap-2.5 rounded-full pl-1 pr-2.5 h-10 hover:bg-black/[0.04] transition-colors cursor-pointer"
               >
-                <span className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-fuchsia-500 text-white text-[12px] font-bold flex items-center justify-center">{initials}</span>
+                <span className="h-8 w-8 rounded-full bg-gradient-to-b from-[#a1a1a6] to-[#8e8e93] text-white text-[12px] font-semibold flex items-center justify-center">{initials}</span>
                 <span className="hidden md:block text-left leading-tight max-w-[160px]">
                   <span className="block text-[13px] font-semibold text-ink-900 truncate">{userDisplayName}</span>
                   <span className="block text-[11px] text-ink-400 truncate">{userEmail}</span>
@@ -455,7 +453,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               {profileOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                  <div className="absolute right-0 top-13 z-50 mt-2 w-60 rounded-2xl bg-white border border-ink-100 shadow-xl p-2 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-13 z-50 mt-2 w-60 rounded-[14px] bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-[0_10px_40px_rgba(0,0,0,0.12)] p-1.5 animate-in fade-in zoom-in-95 duration-150">
                     <div className="px-3 py-2.5 border-b border-ink-100 mb-1">
                       <p className="text-sm font-semibold text-ink-900 truncate">{userDisplayName}</p>
                       <p className="text-xs text-ink-500 truncate">{userEmail}</p>
@@ -518,7 +516,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Settings className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-display text-base font-bold text-ink-900">Settings</p>
+                  <p className="text-[17px] font-semibold text-ink-900">Settings</p>
                   <p className="text-xs text-ink-500">Account & scanner passcode</p>
                 </div>
               </div>
@@ -529,7 +527,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
             <div className="px-6 pb-6">
               <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-ink-50 mb-5">
-                <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-fuchsia-500 text-white flex items-center justify-center text-sm font-bold">{initials}</div>
+                <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-b from-[#a1a1a6] to-[#8e8e93] text-white flex items-center justify-center text-sm font-bold">{initials}</div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-ink-900 truncate">{userDisplayName}</p>
                   <p className="text-xs text-ink-500 truncate">{userEmail}</p>

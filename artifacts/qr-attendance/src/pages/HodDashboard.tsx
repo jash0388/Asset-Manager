@@ -750,36 +750,6 @@ export function getTimetableSubjectDetails(rawSubject: string, section?: string,
   };
 }
 
-function AttendanceRing({ percent, size, stroke, caption }: { percent: number; size: number; stroke: number; caption?: string }) {
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const clamped = Math.max(0, Math.min(percent, 100));
-  const color = clamped >= 75 ? "#10b981" : clamped >= 50 ? "#f59e0b" : "#f43f5e";
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#eceef5" strokeWidth={stroke} />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - clamped / 100)}
-          style={{ transition: "stroke-dashoffset 0.8s ease" }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className={`font-display font-extrabold text-ink-900 tracking-tight ${size >= 120 ? "text-4xl" : "text-[13px]"}`}>{Math.round(clamped)}%</span>
-        {caption && <span className="text-xs font-medium text-ink-500 mt-0.5">{caption}</span>}
-      </div>
-    </div>
-  );
-}
-
 export default function HodDashboard() {
   const search = useSearch();
   const [activeTab, setActiveTab] = useState<"summary" | "logs" | "mentors" | "schedules" | "flags" | "student-analytics">((): any => {
@@ -2763,24 +2733,22 @@ export default function HodDashboard() {
 
   return (
     <Layout>
-      <div className="px-4 lg:px-8 py-7 max-w-[1400px] mx-auto space-y-6 font-sans">
+      <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-8 font-sans">
 
         {activeTab !== "flags" && activeTab !== "student-analytics" && (
-          <div className="space-y-5">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+          <div className="space-y-6">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
               <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 text-blue-700 px-3 py-1 text-xs font-semibold">
-                  <GraduationCap className="w-3.5 h-3.5" />
-                  Department of Data Science
-                </span>
-                <h1 className="font-display mt-3 text-[32px] leading-tight font-extrabold text-ink-900 tracking-tight">
-                  {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, HOD
+                <p className="text-[13px] font-medium text-ink-500">
+                  Department of Data Science · {new Date((activeTab === "summary" ? selectedDate : logDate) + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
+                </p>
+                <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">
+                  {activeTab === "summary" ? "Overview" : activeTab === "logs" ? "Attendance Logs" : activeTab === "mentors" ? "Mentors" : "Timetable"}
                 </h1>
-                <p className="text-ink-500 mt-1">Here's how your department is doing today.</p>
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-2 rounded-full bg-white border border-ink-200 px-4 h-11 hover:border-blue-300 transition-colors cursor-pointer shadow-sm">
+                <label className="flex items-center gap-2 h-9 rounded-[10px] bg-white px-3 text-[13px] font-medium text-ink-900 shadow-[0_0_0_0.5px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)] hover:bg-ink-50 transition-colors cursor-pointer">
                   <Calendar className="w-4 h-4 text-blue-600 pointer-events-none" />
                   <input
                     type="date"
@@ -2791,37 +2759,33 @@ export default function HodDashboard() {
                         setLogDate(e.target.value);
                       }
                     }}
-                    className="bg-transparent text-sm font-semibold text-ink-800 outline-none cursor-pointer [color-scheme:light]"
+                    className="bg-transparent text-[13px] font-medium text-ink-900 outline-none cursor-pointer [color-scheme:light]"
                   />
                 </label>
-                <button
-                  onClick={openPwdModal}
-                  className="flex items-center gap-2 rounded-full bg-white border border-ink-200 text-ink-700 hover:border-blue-300 hover:text-blue-700 px-4 h-11 font-semibold text-sm transition-colors cursor-pointer shadow-sm"
-                  title="Change scanner passcode"
-                >
-                  <Settings className="w-4 h-4" />
-                  <span className="hidden sm:inline">Scanner passcode</span>
+                <button onClick={openPwdModal} className="flex items-center gap-2 h-9 rounded-[10px] bg-white px-3 text-[13px] font-medium text-ink-900 shadow-[0_0_0_0.5px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)] hover:bg-ink-50 transition-colors cursor-pointer" title="Change scanner passcode">
+                  <Settings className="w-4 h-4 text-ink-500" />
+                  <span className="hidden sm:inline">Scanner Passcode</span>
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-7 border-b border-ink-200 overflow-x-auto">
+            <div className="inline-flex rounded-[10px] bg-black/[0.05] p-[3px]">
               {([
-                { key: "summary", label: "Overview", icon: Grid3X3 },
-                { key: "logs", label: "Attendance logs", icon: ClipboardList },
-                { key: "mentors", label: "Mentors", icon: GraduationCap },
-                { key: "schedules", label: "Timetable", icon: Calendar },
-              ] as const).map(({ key, label, icon: TabIcon }) => (
+                { key: "summary", label: "Overview" },
+                { key: "logs", label: "Logs" },
+                { key: "mentors", label: "Mentors" },
+                { key: "schedules", label: "Timetable" },
+              ] as const).map(({ key, label }) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`relative flex items-center gap-2 pb-3.5 pt-1 text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                    activeTab === key ? "text-blue-700" : "text-ink-500 hover:text-ink-900"
+                  className={`h-8 min-w-[96px] px-4 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer ${
+                    activeTab === key
+                      ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]"
+                      : "text-ink-600 hover:text-ink-900"
                   }`}
                 >
-                  <TabIcon className="w-4 h-4" />
                   {label}
-                  {activeTab === key && <span className="absolute -bottom-px left-0 right-0 h-[3px] rounded-t-full bg-blue-600" />}
                 </button>
               ))}
             </div>
@@ -2830,139 +2794,95 @@ export default function HodDashboard() {
 
         {activeTab === "summary" ? (
           <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: "Students", value: overallTotalStudents, tone: "text-ink-900", caption: "Enrolled" },
+                { label: "Present", value: overallTotalPresent, tone: "text-[#248a3d]", caption: "Checked in today" },
+                { label: "Absent", value: overallTotalAbsent, tone: "text-[#d70015]", caption: "Not checked in" },
+              ].map(({ label, value, tone, caption }) => (
+                <div key={label} className="rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] px-5 py-5">
+                  <p className="text-[13px] font-medium text-ink-500">{label}</p>
+                  <p className={`mt-2 text-[34px] leading-none font-semibold tracking-[-0.02em] tabular-nums ${tone}`}>{value}</p>
+                  <p className="mt-2 text-[12px] text-ink-400">{caption}</p>
+                </div>
+              ))}
+              <div className="rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] px-5 py-5">
+                <p className="text-[13px] font-medium text-ink-500">Department Attendance</p>
+                <p className="mt-2 text-[34px] leading-none font-semibold tracking-[-0.02em] tabular-nums text-ink-900">{overallDeptPercentage}%</p>
+                <div className="mt-3.5 h-1.5 rounded-full bg-ink-100 overflow-hidden">
+                  <div className="h-full rounded-full bg-blue-500 transition-all duration-700" style={{ width: `${Math.min(overallDeptPercentage, 100)}%` }} />
+                </div>
+              </div>
+            </div>
+
             {usersLoading || attendanceLoading ? (
-              <div className="bg-white border border-ink-100 rounded-3xl p-20 flex flex-col items-center justify-center gap-4 shadow-sm">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-ink-500">Loading student rosters & attendance records...</p>
+              <div className="rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] p-20 flex flex-col items-center justify-center gap-4">
+                <div className="w-7 h-7 border-[3px] border-ink-200 border-t-ink-500 rounded-full animate-spin"></div>
+                <p className="text-[13px] text-ink-500">Loading attendance…</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-6 items-start">
-                <div className="xl:sticky xl:top-6 rounded-3xl bg-white border border-ink-100 p-6 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <p className="font-display text-base font-bold text-ink-900">Today at a glance</p>
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-                      overallDeptPercentage >= 75 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
-                    }`}>
-                      {overallDeptPercentage >= 75 ? "On track" : "Below 75%"}
-                    </span>
-                  </div>
-                  <div className="flex justify-center py-7">
-                    <AttendanceRing percent={overallDeptPercentage} size={210} stroke={18} caption="students present" />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2.5">
-                    <div className="rounded-2xl bg-emerald-50 px-3 py-3 text-center">
-                      <p className="font-display text-2xl font-extrabold text-emerald-700 tabular-nums">{overallTotalPresent}</p>
-                      <p className="text-[11px] font-semibold text-emerald-700/70 mt-0.5">Present</p>
-                    </div>
-                    <div className="rounded-2xl bg-rose-50 px-3 py-3 text-center">
-                      <p className="font-display text-2xl font-extrabold text-rose-600 tabular-nums">{overallTotalAbsent}</p>
-                      <p className="text-[11px] font-semibold text-rose-600/70 mt-0.5">Absent</p>
-                    </div>
-                    <div className="rounded-2xl bg-ink-50 px-3 py-3 text-center">
-                      <p className="font-display text-2xl font-extrabold text-ink-800 tabular-nums">{overallTotalStudents}</p>
-                      <p className="text-[11px] font-semibold text-ink-500 mt-0.5">Total</p>
-                    </div>
-                  </div>
-                  <div className="mt-5 pt-5 border-t border-ink-100 space-y-3">
-                    {yearGroups.map(year => {
-                      const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
-                      if (sectionsInYear.length === 0) return null;
-                      const yp = sectionsInYear.reduce((a, s) => a + s.presentStudents.length, 0);
-                      const yt = sectionsInYear.reduce((a, s) => a + s.totalStudents.length, 0);
-                      const ypct = yt > 0 ? Math.round((yp / yt) * 100) : 0;
-                      return (
-                        <div key={year}>
-                          <div className="flex items-center justify-between text-[13px]">
-                            <span className="font-semibold text-ink-700">{year}</span>
-                            <span className="font-bold text-ink-900 tabular-nums">{ypct}%</span>
-                          </div>
-                          <div className="mt-1.5 h-2 rounded-full bg-ink-100 overflow-hidden">
-                            <div className={`h-full rounded-full ${ypct >= 75 ? "bg-emerald-500" : ypct >= 50 ? "bg-amber-400" : "bg-rose-500"}`} style={{ width: `${ypct}%` }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+              <div className="space-y-8">
+                {yearGroups.map(year => {
+                  const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
+                  if (sectionsInYear.length === 0) return null;
 
-                <div className="space-y-6">
-                  {yearGroups.map(year => {
-                    const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
-                    if (sectionsInYear.length === 0) return null;
+                  let yearPresent = 0;
+                  let yearTotal = 0;
 
-                    let yearPresent = 0;
-                    let yearAbsent = 0;
-                    let yearTotal = 0;
+                  sectionsInYear.forEach(s => {
+                    yearPresent += s.presentStudents.length;
+                    yearTotal += s.totalStudents.length;
+                  });
 
-                    sectionsInYear.forEach(s => {
-                      yearPresent += s.presentStudents.length;
-                      yearAbsent += s.absentStudents.length;
-                      yearTotal += s.totalStudents.length;
-                    });
+                  const yearPercentage = yearTotal > 0
+                    ? Math.round((yearPresent / yearTotal) * 100)
+                    : 0;
 
-                    const yearPercentage = yearTotal > 0
-                      ? Math.round((yearPresent / yearTotal) * 100)
-                      : 0;
-
-                    return (
-                      <section key={year}>
-                        <div className="flex items-end justify-between mb-3 px-1">
-                          <div>
-                            <h3 className="font-display text-lg font-bold text-ink-900">{year}</h3>
-                            <p className="text-xs text-ink-500">{sectionsInYear.length} sections · {yearTotal} students</p>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs font-semibold">
-                            <span className="text-emerald-600">{yearPresent} present</span>
-                            <span className="text-rose-600">{yearAbsent} absent</span>
-                            <span className="rounded-full bg-white border border-ink-200 px-2.5 py-1 text-ink-800">{yearPercentage}%</span>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {sectionsInYear.map(s => {
-                            const percent = s.totalStudents.length > 0
-                              ? (s.presentStudents.length / s.totalStudents.length) * 100
-                              : 0;
-                            return (
-                              <div key={s.sectionKey} className="rounded-3xl bg-white border border-ink-100 p-5 shadow-sm hover:shadow-lg hover:shadow-blue-600/5 hover:border-blue-200 transition-all">
-                                <div className="flex items-center gap-4">
-                                  <AttendanceRing percent={percent} size={64} stroke={7} />
-                                  <div className="min-w-0">
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-400">Section</p>
-                                    <p className="font-display text-2xl font-extrabold text-ink-900 leading-tight">{s.displayName}</p>
-                                  </div>
-                                </div>
-                                <div className="mt-4 grid grid-cols-3 gap-2">
-                                  <button
-                                    onClick={() => handleCellClick("PR", s)}
-                                    title="Present Students"
-                                    className="rounded-2xl bg-emerald-50/70 hover:bg-emerald-100 py-2.5 text-center transition-colors cursor-pointer active:scale-[0.97]"
-                                  >
-                                    <p className="text-lg font-bold text-emerald-700 tabular-nums">{s.presentStudents.length}</p>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700/70">Present</p>
-                                  </button>
-                                  <button
-                                    onClick={() => handleCellClick("AB", s)}
-                                    className="rounded-2xl bg-rose-50/70 hover:bg-rose-100 py-2.5 text-center transition-colors cursor-pointer active:scale-[0.97]"
-                                  >
-                                    <p className="text-lg font-bold text-rose-600 tabular-nums">{s.absentStudents.length}</p>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wide text-rose-600/70">Absent</p>
-                                  </button>
-                                  <button
-                                    onClick={() => handleCellClick("Total", s)}
-                                    className="rounded-2xl bg-ink-50 hover:bg-ink-100 py-2.5 text-center transition-colors cursor-pointer active:scale-[0.97]"
-                                  >
-                                    <p className="text-lg font-bold text-ink-800 tabular-nums">{s.totalStudents.length}</p>
-                                    <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-500">Total</p>
-                                  </button>
-                                </div>
+                  return (
+                    <section key={year}>
+                      <div className="flex items-baseline justify-between px-5 mb-2">
+                        <h2 className="text-[13px] font-semibold uppercase tracking-[0.04em] text-ink-500">{year}</h2>
+                        <p className="text-[13px] text-ink-500">
+                          {yearPresent} of {yearTotal} present · <span className="font-semibold text-ink-900">{yearPercentage}%</span>
+                        </p>
+                      </div>
+                      <div className="rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden divide-y divide-black/[0.06]">
+                        {sectionsInYear.map(s => {
+                          const percent = s.totalStudents.length > 0
+                            ? (s.presentStudents.length / s.totalStudents.length) * 100
+                            : 0;
+                          const barColor = percent >= 75 ? "bg-[#34c759]" : percent >= 50 ? "bg-[#ff9500]" : "bg-[#ff3b30]";
+                          return (
+                            <div key={s.sectionKey} className="grid grid-cols-[1fr_auto_auto_auto] lg:grid-cols-[1.2fr_96px_96px_96px_1.6fr] items-center gap-2 px-5 py-3 hover:bg-black/[0.015] transition-colors">
+                              <div>
+                                <p className="text-[15px] font-medium text-ink-900">Section {s.displayName}</p>
+                                <p className="text-[12px] text-ink-400">{s.totalStudents.length} students</p>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </section>
-                    );
-                  })}
-                </div>
+                              <button onClick={() => handleCellClick("PR", s)} title="Present Students" className="rounded-[10px] px-3 py-1.5 text-left hover:bg-black/[0.04] transition-colors cursor-pointer">
+                                <p className="text-[17px] font-semibold text-[#248a3d] tabular-nums leading-tight">{s.presentStudents.length}</p>
+                                <p className="text-[11px] text-ink-400">Present</p>
+                              </button>
+                              <button onClick={() => handleCellClick("AB", s)} className="rounded-[10px] px-3 py-1.5 text-left hover:bg-black/[0.04] transition-colors cursor-pointer">
+                                <p className="text-[17px] font-semibold text-[#d70015] tabular-nums leading-tight">{s.absentStudents.length}</p>
+                                <p className="text-[11px] text-ink-400">Absent</p>
+                              </button>
+                              <button onClick={() => handleCellClick("Total", s)} className="rounded-[10px] px-3 py-1.5 text-left hover:bg-black/[0.04] transition-colors cursor-pointer">
+                                <p className="text-[17px] font-semibold text-ink-900 tabular-nums leading-tight">{s.totalStudents.length}</p>
+                                <p className="text-[11px] text-ink-400">Total</p>
+                              </button>
+                              <div className="col-span-4 lg:col-span-1 flex items-center gap-3">
+                                <div className="flex-1 h-1.5 rounded-full bg-ink-100 overflow-hidden">
+                                  <div className={`h-full rounded-full ${barColor} transition-all duration-500`} style={{ width: `${Math.min(percent, 100)}%` }} />
+                                </div>
+                                <span className="w-11 text-right text-[15px] font-semibold text-ink-900 tabular-nums">{Math.round(percent)}%</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })}
               </div>
             )}
           </>

@@ -4,34 +4,34 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Brand palette: "iris". Remaps Tailwind's blue scale so every existing
+/* Brand palette: Apple system blue + neutral greys. Remaps Tailwind's blue scale so every existing
    blue-* utility across the app adopts the brand color. */
 @theme {
-  --color-blue-50: #f4f3ff;
-  --color-blue-100: #ebe9fe;
-  --color-blue-200: #d9d5fe;
-  --color-blue-300: #bcb3fd;
-  --color-blue-400: #9a89fa;
-  --color-blue-500: #7c66f5;
-  --color-blue-600: #6847eb;
-  --color-blue-700: #5836d0;
-  --color-blue-800: #492eab;
-  --color-blue-900: #3d2a89;
-  --color-blue-950: #24185a;
+  --color-blue-50: #f0f7ff;
+  --color-blue-100: #e0efff;
+  --color-blue-200: #b8dcff;
+  --color-blue-300: #7cc0ff;
+  --color-blue-400: #389dff;
+  --color-blue-500: #0a84ff;
+  --color-blue-600: #0071e3;
+  --color-blue-700: #0062c4;
+  --color-blue-800: #00509f;
+  --color-blue-900: #003f7d;
+  --color-blue-950: #002750;
 
-  --color-ink-50: #f5f6fa;
-  --color-ink-100: #eceef5;
-  --color-ink-200: #d9dce8;
-  --color-ink-300: #b4b9cc;
-  --color-ink-400: #8a90a8;
-  --color-ink-500: #646a83;
-  --color-ink-600: #4b5068;
-  --color-ink-700: #363a50;
-  --color-ink-800: #22253a;
-  --color-ink-900: #151829;
-  --color-ink-950: #0b0d1a;
+  --color-ink-50: #f5f5f7;
+  --color-ink-100: #ececf0;
+  --color-ink-200: #d2d2d7;
+  --color-ink-300: #b0b0b6;
+  --color-ink-400: #86868b;
+  --color-ink-500: #6e6e73;
+  --color-ink-600: #515154;
+  --color-ink-700: #3a3a3c;
+  --color-ink-800: #2c2c2e;
+  --color-ink-900: #1d1d1f;
+  --color-ink-950: #111113;
 
-  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
 
   --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   @keyframes fade-up {
@@ -112,8 +112,8 @@
   --elevate-1: rgba(0,0,0, .02);
   --elevate-2: rgba(0,0,0, .04);
 
-  --background: 230 33% 97%;        /* Soft canvas #f5f6fa */
-  --foreground: 232 32% 12%;        /* Ink text #151829 */
+  --background: 240 11% 96%;        /* #f5f5f7 */
+  --foreground: 240 3% 12%;         /* #1d1d1f */
   --border: 228 24% 90%;            /* Soft border */
   --card: 0 0% 100%;                /* Pure white card #ffffff */
   --card-foreground: 222.2 84% 4.9%;
@@ -122,17 +122,17 @@
   --sidebar: 233 40% 7%;
   --sidebar-foreground: 210 40% 98%;
   --sidebar-border: 217.2 32.6% 17.5%;
-  --sidebar-primary: 252 80% 60%;
+  --sidebar-primary: 211 100% 45%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 217.2 32.6% 17.5%;
   --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-ring: 252 80% 60%;
+  --sidebar-ring: 211 100% 45%;
 
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
   --popover-border: 214.3 31.8% 91.4%;
 
-  --primary: 252 80% 60%;           /* Iris #6847eb */
+  --primary: 211 100% 45%;          /* #0071e3 */
   --primary-foreground: 0 0% 100%;
 
   --secondary: 210 40% 96.1%;
@@ -155,7 +155,7 @@
   --chart-4: 43 74% 66%;
   --chart-5: 27 87% 67%;
 
-  --app-font-sans: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --app-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --radius: 0.75rem;
