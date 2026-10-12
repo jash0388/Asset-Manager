@@ -750,6 +750,36 @@ export function getTimetableSubjectDetails(rawSubject: string, section?: string,
   };
 }
 
+function AttendanceRing({ percent, size, stroke, caption }: { percent: number; size: number; stroke: number; caption?: string }) {
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.max(0, Math.min(percent, 100));
+  const color = clamped >= 75 ? "#10b981" : clamped >= 50 ? "#f59e0b" : "#f43f5e";
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#eceef5" strokeWidth={stroke} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference * (1 - clamped / 100)}
+          style={{ transition: "stroke-dashoffset 0.8s ease" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className={`font-display font-extrabold text-ink-900 tracking-tight ${size >= 120 ? "text-4xl" : "text-[13px]"}`}>{Math.round(clamped)}%</span>
+        {caption && <span className="text-xs font-medium text-ink-500 mt-0.5">{caption}</span>}
+      </div>
+    </div>
+  );
+}
+
 export default function HodDashboard() {
   const search = useSearch();
   const [activeTab, setActiveTab] = useState<"summary" | "logs" | "mentors" | "schedules" | "flags" | "student-analytics">((): any => {
@@ -2733,71 +2763,65 @@ export default function HodDashboard() {
 
   return (
     <Layout>
-      <div className="px-4 lg:px-8 py-6 max-w-7xl mx-auto space-y-5 font-sans">
+      <div className="px-4 lg:px-8 py-7 max-w-[1400px] mx-auto space-y-6 font-sans">
 
         {activeTab !== "flags" && activeTab !== "student-analytics" && (
-          <div className="space-y-4">
-            <div className="relative overflow-hidden rounded-3xl bg-ink-950 text-white px-6 py-6 lg:px-8 lg:py-7">
-              <div className="pointer-events-none absolute -top-20 right-10 h-56 w-56 rounded-full bg-blue-600/40 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 right-64 h-56 w-56 rounded-full bg-fuchsia-500/20 blur-3xl" />
-              <div className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:18px_18px]" />
-              <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/10 ring-1 ring-white/15 backdrop-blur flex items-center justify-center">
-                    <GraduationCap className="w-7 h-7 text-blue-200" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-200/80">Head of Department</p>
-                    <h1 className="font-display text-2xl lg:text-[28px] font-extrabold tracking-tight leading-tight">Department of Data Science</h1>
-                    <p className="text-sm text-ink-300 mt-0.5">Live attendance across every section, mentor and timetable.</p>
-                  </div>
-                </div>
+          <div className="space-y-5">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 text-blue-700 px-3 py-1 text-xs font-semibold">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  Department of Data Science
+                </span>
+                <h1 className="font-display mt-3 text-[32px] leading-tight font-extrabold text-ink-900 tracking-tight">
+                  {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, HOD
+                </h1>
+                <p className="text-ink-500 mt-1">Here's how your department is doing today.</p>
+              </div>
 
-                <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-2 rounded-xl bg-white/10 ring-1 ring-white/15 px-3.5 h-11 hover:bg-white/15 transition-colors cursor-pointer">
-                    <Calendar className="w-4 h-4 text-blue-200 pointer-events-none" />
-                    <input
-                      type="date"
-                      value={activeTab === "summary" ? selectedDate : logDate}
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          setSelectedDate(e.target.value);
-                          setLogDate(e.target.value);
-                        }
-                      }}
-                      className="bg-transparent text-sm font-semibold text-white outline-none cursor-pointer [color-scheme:dark]"
-                    />
-                  </label>
-                  <button
-                    onClick={openPwdModal}
-                    className="flex items-center gap-2 rounded-xl bg-white text-ink-900 hover:bg-blue-50 px-4 h-11 font-semibold text-sm transition-colors cursor-pointer"
-                    title="Change scanner passcode"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span className="hidden sm:inline">Scanner passcode</span>
-                  </button>
-                </div>
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 rounded-full bg-white border border-ink-200 px-4 h-11 hover:border-blue-300 transition-colors cursor-pointer shadow-sm">
+                  <Calendar className="w-4 h-4 text-blue-600 pointer-events-none" />
+                  <input
+                    type="date"
+                    value={activeTab === "summary" ? selectedDate : logDate}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setSelectedDate(e.target.value);
+                        setLogDate(e.target.value);
+                      }
+                    }}
+                    className="bg-transparent text-sm font-semibold text-ink-800 outline-none cursor-pointer [color-scheme:light]"
+                  />
+                </label>
+                <button
+                  onClick={openPwdModal}
+                  className="flex items-center gap-2 rounded-full bg-white border border-ink-200 text-ink-700 hover:border-blue-300 hover:text-blue-700 px-4 h-11 font-semibold text-sm transition-colors cursor-pointer shadow-sm"
+                  title="Change scanner passcode"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden sm:inline">Scanner passcode</span>
+                </button>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1 rounded-2xl bg-white border border-ink-100 p-1.5 w-fit shadow-sm">
+            <div className="flex items-center gap-7 border-b border-ink-200 overflow-x-auto">
               {([
-                { key: "summary", label: "Summary", icon: Grid3X3 },
-                { key: "logs", label: "Logs", icon: ClipboardList },
+                { key: "summary", label: "Overview", icon: Grid3X3 },
+                { key: "logs", label: "Attendance logs", icon: ClipboardList },
                 { key: "mentors", label: "Mentors", icon: GraduationCap },
                 { key: "schedules", label: "Timetable", icon: Calendar },
               ] as const).map(({ key, label, icon: TabIcon }) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`flex items-center gap-2 px-4 h-10 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
-                    activeTab === key
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
-                      : "text-ink-500 hover:text-ink-900 hover:bg-ink-50"
+                  className={`relative flex items-center gap-2 pb-3.5 pt-1 text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                    activeTab === key ? "text-blue-700" : "text-ink-500 hover:text-ink-900"
                   }`}
                 >
                   <TabIcon className="w-4 h-4" />
                   {label}
+                  {activeTab === key && <span className="absolute -bottom-px left-0 right-0 h-[3px] rounded-t-full bg-blue-600" />}
                 </button>
               ))}
             </div>
@@ -2806,187 +2830,140 @@ export default function HodDashboard() {
 
         {activeTab === "summary" ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: "Total students", value: overallTotalStudents, icon: Users, tone: "text-ink-900", chip: "bg-ink-100 text-ink-600", hint: "Enrolled in department" },
-                { label: "Present today", value: overallTotalPresent, icon: CheckCircle, tone: "text-emerald-600", chip: "bg-emerald-50 text-emerald-600", hint: "Marked via QR / class" },
-                { label: "Absent today", value: overallTotalAbsent, icon: XCircle, tone: "text-rose-600", chip: "bg-rose-50 text-rose-600", hint: "Not marked yet" },
-              ].map(({ label, value, icon: StatIcon, tone, chip, hint }) => (
-                <div key={label} className="rounded-2xl bg-white border border-ink-100 p-5 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[13px] font-medium text-ink-500">{label}</p>
-                    <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${chip}`}>
-                      <StatIcon className="w-[18px] h-[18px]" />
-                    </span>
-                  </div>
-                  <p className={`font-display mt-3 text-3xl font-extrabold tracking-tight ${tone}`}>{value}</p>
-                  <p className="text-xs text-ink-400 mt-1">{hint}</p>
-                </div>
-              ))}
-              <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-5 shadow-lg shadow-blue-600/20 text-white">
-                <div className="flex items-center justify-between">
-                  <p className="text-[13px] font-medium text-blue-100">Department attendance</p>
-                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${overallDeptPercentage >= 75 ? "bg-emerald-400/20 text-emerald-100" : "bg-amber-400/25 text-amber-100"}`}>
-                    {overallDeptPercentage >= 75 ? "On track" : "Below 75%"}
-                  </span>
-                </div>
-                <p className="font-display mt-3 text-3xl font-extrabold tracking-tight">{overallDeptPercentage}%</p>
-                <div className="mt-3 h-2 rounded-full bg-white/15 overflow-hidden">
-                  <div className="h-full rounded-full bg-white transition-all duration-700" style={{ width: `${Math.min(overallDeptPercentage, 100)}%` }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Main Grid View */}
             {usersLoading || attendanceLoading ? (
-              <div className="bg-white border border-ink-100 rounded-2xl p-20 flex flex-col items-center justify-center gap-4 shadow-sm">
+              <div className="bg-white border border-ink-100 rounded-3xl p-20 flex flex-col items-center justify-center gap-4 shadow-sm">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-sm font-semibold text-ink-500">Loading student rosters & attendance records...</p>
               </div>
             ) : (
-              <Card className="bg-white border border-ink-100 rounded-2xl shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-ink-100">
-                  <div>
-                    <h3 className="font-display text-base font-bold text-ink-900">Section-wise attendance</h3>
-                    <p className="text-xs text-ink-500 mt-0.5">Click any Present / Absent / Total count to see the student list.</p>
+              <div className="grid grid-cols-1 xl:grid-cols-[360px_1fr] gap-6 items-start">
+                <div className="xl:sticky xl:top-6 rounded-3xl bg-white border border-ink-100 p-6 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <p className="font-display text-base font-bold text-ink-900">Today at a glance</p>
+                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                      overallDeptPercentage >= 75 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+                    }`}>
+                      {overallDeptPercentage >= 75 ? "On track" : "Below 75%"}
+                    </span>
                   </div>
-                  <div className="hidden md:flex items-center gap-4 text-[11px] font-medium text-ink-500">
-                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />75%+</span>
-                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400" />50–74%</span>
-                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500" />Below 50%</span>
+                  <div className="flex justify-center py-7">
+                    <AttendanceRing percent={overallDeptPercentage} size={210} stroke={18} caption="students present" />
                   </div>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-ink-100 bg-ink-50/70 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-500">
-                        <th className="py-3 px-6">Section</th>
-                        <th className="py-3 px-4 text-center">Present</th>
-                        <th className="py-3 px-4 text-center">Absent</th>
-                        <th className="py-3 px-4 text-center">Total</th>
-                        <th className="py-3 px-4 text-center">Attendance</th>
-                        <th className="py-3 px-6 w-56">Progress</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {yearGroups.map(year => {
-                        const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
-                        if (sectionsInYear.length === 0) return null;
-
-                        let yearPresent = 0;
-                        let yearAbsent = 0;
-                        let yearTotal = 0;
-
-                        sectionsInYear.forEach(s => {
-                          yearPresent += s.presentStudents.length;
-                          yearAbsent += s.absentStudents.length;
-                          yearTotal += s.totalStudents.length;
-                        });
-
-                        const yearPercentage = yearTotal > 0 
-                          ? Math.round((yearPresent / yearTotal) * 100) 
-                          : 0;
-
-                        return (
-                          <>
-                            {sectionsInYear.map(s => {
-                              const percent = s.totalStudents.length > 0 
-                                ? (s.presentStudents.length / s.totalStudents.length) * 100 
-                                : 0;
-                              const barWidth = Math.min(percent, 100);
-
-                              return (
-                                <tr key={s.sectionKey} className="border-b border-ink-100/70 hover:bg-blue-50/40 transition-colors">
-                                  <td className="py-3.5 px-6">
-                                    <span className="inline-flex items-center gap-2.5 font-semibold text-ink-900 text-sm">
-                                      <span className="h-8 w-8 rounded-lg bg-ink-100 text-ink-700 text-[11px] font-bold flex items-center justify-center">{s.displayName.replace(/[^0-9A-Z]/g, "").slice(-2) || "—"}</span>
-                                      {s.displayName}
-                                    </span>
-                                  </td>
-                                  
-                                  <td 
-                                    onClick={() => handleCellClick("PR", s)}
-                                    className="py-3.5 px-4 text-center text-emerald-600 font-bold cursor-pointer hover:bg-emerald-50 active:scale-[0.97] transition-all text-[15px] tabular-nums"
-                                    title="Present Students"
-                                  >
-                                    {s.presentStudents.length}
-                                  </td>
-
-                                  <td 
-                                    onClick={() => handleCellClick("AB", s)}
-                                    className="py-3.5 px-4 text-center text-rose-600 font-bold cursor-pointer hover:bg-rose-50 active:scale-[0.97] transition-all text-[15px] tabular-nums"
-                                  >
-                                    {s.absentStudents.length}
-                                  </td>
-                                  
-                                  <td 
-                                    onClick={() => handleCellClick("Total", s)}
-                                    className="py-3.5 px-4 text-center text-ink-600 font-semibold cursor-pointer hover:bg-ink-50 active:scale-[0.97] transition-all text-[15px] tabular-nums"
-                                  >
-                                    {s.totalStudents.length}
-                                  </td>
-                                  
-                                  <td className="py-3.5 px-4 text-center">
-                                    <span className={`inline-flex min-w-[52px] justify-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                                      percent >= 75 ? "bg-emerald-50 text-emerald-700" : percent >= 50 ? "bg-amber-50 text-amber-700" : "bg-rose-50 text-rose-700"
-                                    }`}>
-                                      {Math.round(percent)}%
-                                    </span>
-                                  </td>
-
-                                  <td className="py-3.5 px-6">
-                                    <div className="w-full h-2 bg-ink-100 rounded-full overflow-hidden">
-                                      <div 
-                                        className={`h-full rounded-full transition-all duration-500 ${
-                                          percent >= 75 ? 'bg-emerald-500' : percent >= 50 ? 'bg-amber-400' : 'bg-rose-500'
-                                        }`}
-                                        style={{ width: `${barWidth}%` }}
-                                      />
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-
-                            {/* Year subtotal row */}
-                            <tr className="bg-blue-50/60 border-b border-blue-100">
-                              <td className="py-3 px-6 font-bold text-blue-700 text-xs uppercase tracking-[0.1em]">{year} total</td>
-                              <td className="py-3 px-4 text-center text-emerald-700 font-bold text-sm tabular-nums">{yearPresent}</td>
-                              <td className="py-3 px-4 text-center text-rose-700 font-bold text-sm tabular-nums">{yearAbsent}</td>
-                              <td className="py-3 px-4 text-center text-ink-700 font-bold text-sm tabular-nums">{yearTotal}</td>
-                              <td className="py-3 px-4 text-center font-extrabold text-blue-700 text-sm">
-                                {yearPercentage}%
-                              </td>
-                              <td className="py-3 px-6">
-                                <div className="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
-                                  <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${yearPercentage}%` }} />
-                                </div>
-                              </td>
-                            </tr>
-                          </>
-                        );
-                      })}
-                      
-                      {/* Department total footer */}
-                      <tr className="bg-ink-50/70 border-t border-ink-200">
-                        <td colSpan={4} className="py-4 px-6 font-bold text-ink-700 text-xs uppercase tracking-[0.1em] text-right">
-                          Department Overall
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-ink-900 text-white text-sm font-extrabold">
-                            {overallDeptPercentage}%
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${overallDeptPercentage}%` }} />
+                  <div className="grid grid-cols-3 gap-2.5">
+                    <div className="rounded-2xl bg-emerald-50 px-3 py-3 text-center">
+                      <p className="font-display text-2xl font-extrabold text-emerald-700 tabular-nums">{overallTotalPresent}</p>
+                      <p className="text-[11px] font-semibold text-emerald-700/70 mt-0.5">Present</p>
+                    </div>
+                    <div className="rounded-2xl bg-rose-50 px-3 py-3 text-center">
+                      <p className="font-display text-2xl font-extrabold text-rose-600 tabular-nums">{overallTotalAbsent}</p>
+                      <p className="text-[11px] font-semibold text-rose-600/70 mt-0.5">Absent</p>
+                    </div>
+                    <div className="rounded-2xl bg-ink-50 px-3 py-3 text-center">
+                      <p className="font-display text-2xl font-extrabold text-ink-800 tabular-nums">{overallTotalStudents}</p>
+                      <p className="text-[11px] font-semibold text-ink-500 mt-0.5">Total</p>
+                    </div>
+                  </div>
+                  <div className="mt-5 pt-5 border-t border-ink-100 space-y-3">
+                    {yearGroups.map(year => {
+                      const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
+                      if (sectionsInYear.length === 0) return null;
+                      const yp = sectionsInYear.reduce((a, s) => a + s.presentStudents.length, 0);
+                      const yt = sectionsInYear.reduce((a, s) => a + s.totalStudents.length, 0);
+                      const ypct = yt > 0 ? Math.round((yp / yt) * 100) : 0;
+                      return (
+                        <div key={year}>
+                          <div className="flex items-center justify-between text-[13px]">
+                            <span className="font-semibold text-ink-700">{year}</span>
+                            <span className="font-bold text-ink-900 tabular-nums">{ypct}%</span>
                           </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                          <div className="mt-1.5 h-2 rounded-full bg-ink-100 overflow-hidden">
+                            <div className={`h-full rounded-full ${ypct >= 75 ? "bg-emerald-500" : ypct >= 50 ? "bg-amber-400" : "bg-rose-500"}`} style={{ width: `${ypct}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </Card>
+
+                <div className="space-y-6">
+                  {yearGroups.map(year => {
+                    const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
+                    if (sectionsInYear.length === 0) return null;
+
+                    let yearPresent = 0;
+                    let yearAbsent = 0;
+                    let yearTotal = 0;
+
+                    sectionsInYear.forEach(s => {
+                      yearPresent += s.presentStudents.length;
+                      yearAbsent += s.absentStudents.length;
+                      yearTotal += s.totalStudents.length;
+                    });
+
+                    const yearPercentage = yearTotal > 0
+                      ? Math.round((yearPresent / yearTotal) * 100)
+                      : 0;
+
+                    return (
+                      <section key={year}>
+                        <div className="flex items-end justify-between mb-3 px-1">
+                          <div>
+                            <h3 className="font-display text-lg font-bold text-ink-900">{year}</h3>
+                            <p className="text-xs text-ink-500">{sectionsInYear.length} sections · {yearTotal} students</p>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs font-semibold">
+                            <span className="text-emerald-600">{yearPresent} present</span>
+                            <span className="text-rose-600">{yearAbsent} absent</span>
+                            <span className="rounded-full bg-white border border-ink-200 px-2.5 py-1 text-ink-800">{yearPercentage}%</span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {sectionsInYear.map(s => {
+                            const percent = s.totalStudents.length > 0
+                              ? (s.presentStudents.length / s.totalStudents.length) * 100
+                              : 0;
+                            return (
+                              <div key={s.sectionKey} className="rounded-3xl bg-white border border-ink-100 p-5 shadow-sm hover:shadow-lg hover:shadow-blue-600/5 hover:border-blue-200 transition-all">
+                                <div className="flex items-center gap-4">
+                                  <AttendanceRing percent={percent} size={64} stroke={7} />
+                                  <div className="min-w-0">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-400">Section</p>
+                                    <p className="font-display text-2xl font-extrabold text-ink-900 leading-tight">{s.displayName}</p>
+                                  </div>
+                                </div>
+                                <div className="mt-4 grid grid-cols-3 gap-2">
+                                  <button
+                                    onClick={() => handleCellClick("PR", s)}
+                                    title="Present Students"
+                                    className="rounded-2xl bg-emerald-50/70 hover:bg-emerald-100 py-2.5 text-center transition-colors cursor-pointer active:scale-[0.97]"
+                                  >
+                                    <p className="text-lg font-bold text-emerald-700 tabular-nums">{s.presentStudents.length}</p>
+                                    <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700/70">Present</p>
+                                  </button>
+                                  <button
+                                    onClick={() => handleCellClick("AB", s)}
+                                    className="rounded-2xl bg-rose-50/70 hover:bg-rose-100 py-2.5 text-center transition-colors cursor-pointer active:scale-[0.97]"
+                                  >
+                                    <p className="text-lg font-bold text-rose-600 tabular-nums">{s.absentStudents.length}</p>
+                                    <p className="text-[10px] font-semibold uppercase tracking-wide text-rose-600/70">Absent</p>
+                                  </button>
+                                  <button
+                                    onClick={() => handleCellClick("Total", s)}
+                                    className="rounded-2xl bg-ink-50 hover:bg-ink-100 py-2.5 text-center transition-colors cursor-pointer active:scale-[0.97]"
+                                  >
+                                    <p className="text-lg font-bold text-ink-800 tabular-nums">{s.totalStudents.length}</p>
+                                    <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-500">Total</p>
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </>
         ) : activeTab === "logs" ? (
