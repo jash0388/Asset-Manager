@@ -406,7 +406,7 @@ export default function HourlyAttendance() {
 
   return (
     <Layout>
-      <div className="p-2 sm:p-3.5 max-w-7xl mx-auto space-y-2.5 text-slate-800 font-sans">
+      <div className="px-6 lg:px-10 py-10 max-w-[1280px] mx-auto space-y-6 text-ink-900 font-sans">
         
         {/* Navigation Switcher Tabs for Mentors */}
         {role === "mentor" && (
@@ -435,90 +435,61 @@ export default function HourlyAttendance() {
           </div>
         )}
 
-        {/* ── ROW 1: TIGHT EXECUTIVE HEADER (Title + Date + Action in ONE Row) ── */}
-        <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:px-3.5 sm:py-2 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            {role !== "mentor" && (
-              <BackButton to={role === "hod" ? "/hod-dashboard" : "/dashboard"} className="p-1 h-7.5 w-7.5" />
-            )}
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5 leading-tight">
-                  <BookOpen className="w-4 h-4 text-blue-600" />
-                  Hourly Lecture Attendance Control
-                </h1>
-                <span className="px-2 py-0.2 rounded-md text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                  {getFormattedDate(selectedDateFilter)} ({daysFullNames[activeDayOfWeek] || "Day"})
-                </span>
-              </div>
+        {/* Page header */}
+        <div className="pt-2">
+          {role !== "mentor" && (
+            <BackButton to={role === "hod" ? "/hod-dashboard" : "/dashboard"} className="mb-3" />
+          )}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[13px] font-medium text-ink-500">
+                {daysFullNames[activeDayOfWeek] || "Day"}, {getFormattedDate(selectedDateFilter)}
+              </p>
+              <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">
+                Hourly Attendance
+              </h1>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-end md:self-auto flex-wrap">
-            {/* Inline Date Switcher */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg text-xs font-semibold">
-              <Calendar className="w-3.5 h-3.5 text-slate-500" />
-              <input
-                type="date"
-                value={selectedDateFilter}
-                onChange={(e) => setSelectedDateFilter(e.target.value)}
-                className="bg-transparent text-slate-800 text-xs font-bold focus:outline-none cursor-pointer [color-scheme:light]"
-              />
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="h-9 flex items-center gap-2 px-3 rounded-[10px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] text-[13px] text-ink-900">
+                <Calendar className="w-4 h-4 text-ink-500" />
+                <input
+                  type="date"
+                  value={selectedDateFilter}
+                  onChange={(e) => setSelectedDateFilter(e.target.value)}
+                  className="bg-transparent text-[13px] focus:outline-none cursor-pointer [color-scheme:light]"
+                />
+              </label>
+              {(role === "hod" || role === "admin") && (
+                <button
+                  onClick={() => setNewClassModalOpen(true)}
+                  className="h-9 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Assign Class
+                </button>
+              )}
             </div>
-
-            {(role === "hod" || role === "admin") && (
-              <button
-                onClick={() => setNewClassModalOpen(true)}
-                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Assign Class
-              </button>
-            )}
           </div>
         </div>
 
-        {/* ── ROW 2: ULTRA-COMPACT OPERATIONAL KPI METRIC STRIP (~40px) ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider block">Total Scheduled</span>
-              <span className="text-sm font-black text-slate-900">{operationalStats.total} Lectures</span>
+        {/* KPI tiles */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          {[
+            { label: "Scheduled", value: operationalStats.total, sub: "Lectures today", dot: "bg-ink-300", pulse: false },
+            { label: "Completed", value: operationalStats.submittedCount, sub: "Verified", dot: "bg-[#34c759]", pulse: false },
+            { label: "Live", value: operationalStats.startedCount, sub: "In progress", dot: "bg-[#ff9500]", pulse: operationalStats.startedCount > 0 },
+            { label: "Missing", value: operationalStats.missingCount, sub: "Overdue", dot: "bg-[#ff3b30]", pulse: operationalStats.missingCount > 0 },
+            { label: "Upcoming", value: operationalStats.lockedCount, sub: "Locked", dot: "bg-ink-300", pulse: false },
+          ].map((kpi, i) => (
+            <div key={kpi.label} className={`rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] px-5 py-4 ${i === 4 ? "col-span-2 sm:col-span-1" : ""}`}>
+              <p className="flex items-center gap-1.5 text-[13px] font-medium text-ink-500">
+                <span className={`h-2 w-2 rounded-full ${kpi.dot} ${kpi.pulse ? "animate-pulse" : ""}`} />
+                {kpi.label}
+              </p>
+              <p className="mt-2 text-[28px] leading-none font-bold tracking-[-0.02em] text-ink-900">{kpi.value}</p>
+              <p className="mt-1 text-[12px] text-ink-400">{kpi.sub}</p>
             </div>
-            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-emerald-700 uppercase tracking-wider block">Completed</span>
-              <span className="text-sm font-black text-emerald-900">{operationalStats.submittedCount} Verified</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-amber-700 uppercase tracking-wider block">Live / Scanning</span>
-              <span className="text-sm font-black text-amber-900">{operationalStats.startedCount} In Progress</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-rose-700 uppercase tracking-wider block">Missing Attendance</span>
-              <span className="text-sm font-black text-rose-900">{operationalStats.missingCount} Overdue</span>
-            </div>
-            <span className={`w-2 h-2 rounded-full ${operationalStats.missingCount > 0 ? "bg-rose-500 animate-ping" : "bg-rose-400"}`}></span>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between col-span-2 sm:col-span-1">
-            <div>
-              <span className="text-[9.5px] font-bold text-slate-600 uppercase tracking-wider block">Upcoming / Locked</span>
-              <span className="text-sm font-black text-slate-800">{operationalStats.lockedCount} Scheduled</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-          </div>
+          ))}
         </div>
 
         {/* ── ROW 3: COMPACT SINGLE-LINE TOOLBAR (Filters + Search + View Switcher) ── */}

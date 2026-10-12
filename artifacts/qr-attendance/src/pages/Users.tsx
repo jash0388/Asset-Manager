@@ -177,12 +177,12 @@ export default function Users() {
       {qrUserId !== null && (
         <QrModal userId={qrUserId} name={qrUserName} onClose={() => setQrUserId(null)} />
       )}
-      <div className="p-3 sm:p-4 max-w-6xl mx-auto space-y-3">
-        <BackButton />
+      <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-6">
+        <BackButton className="mb-0" />
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Users</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Manage students and staff roster</p>
+            <h1 className="text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">Users</h1>
+            <p className="text-[15px] text-ink-500 mt-1">Manage students and staff roster</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -310,7 +310,7 @@ export default function Users() {
                   data-testid="create-user-submit"
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="flex-1 py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white text-xs font-bold transition-colors"
+                  className="flex-1 py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-[#0071e3] text-white text-xs font-bold transition-colors"
                 >
                   {createMutation.isPending ? "Creating..." : "Create"}
                 </button>

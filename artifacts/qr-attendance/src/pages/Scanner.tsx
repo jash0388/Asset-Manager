@@ -393,7 +393,7 @@ export default function Scanner() {
             )}
             {result.role && (
               <span className={`mb-3 px-3 py-0.5 rounded-full text-xs font-semibold uppercase ${
-                result.role === "student" ? "bg-blue-800 text-blue-200" : "bg-purple-800 text-purple-200"
+                result.role === "student" ? "bg-[#0071e3] text-blue-200" : "bg-[#0071e3] text-purple-200"
               }`}>
                 {result.role}
               </span>

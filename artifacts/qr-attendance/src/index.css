@@ -555,3 +555,10 @@
     background-size: 32px 32px;
   }
 }
+/* Apple typography: no shouty uppercase labels, no monospace data, calm letter-spacing. */
+.uppercase { text-transform: none; }
+.tracking-wider, .tracking-widest, .tracking-wide { letter-spacing: -0.005em; }
+.font-mono {
+  font-family: var(--app-font-sans);
+  font-variant-numeric: tabular-nums;
+}

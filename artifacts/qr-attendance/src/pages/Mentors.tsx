@@ -316,17 +316,16 @@ export default function Mentors() {
 
   return (
     <Layout>
-      <div className="p-3 sm:p-4 max-w-7xl mx-auto space-y-3.5 text-gray-700">
-        <BackButton />
+      <div className="px-6 lg:px-10 py-10 max-w-[1280px] mx-auto space-y-6 text-ink-700">
+        <BackButton className="mb-0" />
         
         {/* Header Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-              <GraduationCap className="w-6 h-6 text-purple-600" />
-              Faculty & Mentors Registry
+            <h1 className="text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900 flex items-center gap-2">
+              Faculty & Mentors
             </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-[15px] text-ink-500 mt-1">
               Manage department mentors, student allotments, timetable schedules, and live scanning logs
             </p>
           </div>
@@ -477,7 +476,7 @@ export default function Mentors() {
                     data-testid="create-mentor-submit"
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 text-white text-xs font-bold cursor-pointer"
+                    className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-[#0071e3] text-white text-xs font-bold cursor-pointer"
                   >
                     {submitting ? "Creating…" : "Save Mentor"}
                   </button>
@@ -905,7 +904,7 @@ export default function Mentors() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 text-white text-xs font-bold cursor-pointer"
+                    className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-[#0071e3] text-white text-xs font-bold cursor-pointer"
                   >
                     {submitting ? "Saving…" : "Save Class Schedule"}
                   </button>

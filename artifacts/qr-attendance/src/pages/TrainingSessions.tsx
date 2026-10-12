@@ -38,6 +38,7 @@ import {
   ShieldCheck,
   RefreshCw,
 } from "lucide-react";
+import { ChevronLeft as TChevronLeft } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface TrainingSubSession {
@@ -861,84 +862,69 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
 
   return (
     <Layout>
-      <div className="p-2 sm:p-3.5 max-w-7xl mx-auto space-y-2.5 text-slate-800 font-sans">
-        
-        {/* ── TOP HEADER ── */}
-        <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:px-3.5 sm:py-2.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            {activeSession && (
-              <Link
-                href="/training-sessions"
-                className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors inline-flex items-center gap-1 text-xs font-bold cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Programs</span>
-              </Link>
-            )}
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2 py-0.2 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200">
-                  {activeSession ? `🏢 ${activeSession.company || "NEXT GEN"}` : "PLACEMENT & TECHNICAL TRAINING"}
-                </span>
-                <h1 className="text-sm sm:text-base font-black text-slate-900 leading-tight">
-                  {activeSession ? activeSession.name : "Training Programs & Bootcamps"}
-                </h1>
-              </div>
+      <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-6 text-ink-900 font-sans">
+
+        {/* Page header */}
+        <div>
+          {activeSession && (
+            <Link
+              href="/training-sessions"
+              className="inline-flex items-center gap-0.5 h-8 -ml-1.5 pl-0.5 pr-2.5 mb-3 rounded-full text-[15px] font-medium text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+            >
+              <TChevronLeft className="w-5 h-5" strokeWidth={2.2} />
+              Programs
+            </Link>
+          )}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[13px] font-medium text-ink-500">
+                {activeSession ? (activeSession.company || "NEXT GEN") : "Placement & technical training"}
+              </p>
+              <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">
+                {activeSession ? activeSession.name : "Training Programs"}
+              </h1>
               {activeSession?.description && (
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5">{activeSession.description}</p>
+                <p className="mt-1 text-[15px] text-ink-500">{activeSession.description}</p>
               )}
             </div>
+
+            {!activeSession ? (
+              <button
+                onClick={() => setShowCreate(true)}
+                className="h-9 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer self-start md:self-auto"
+              >
+                <Plus className="w-4 h-4" />
+                Create Program
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 flex-wrap">
+                <button onClick={() => setManageStudentsOpen(true)} className="h-9 px-3.5 rounded-full bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer">
+                  <Users className="w-4 h-4 text-ink-500" />
+                  Manage Students
+                </button>
+                <button onClick={() => setManageSubSessionsFor(activeSession)} className="h-9 px-3.5 rounded-full bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer">
+                  <BookOpen className="w-4 h-4 text-ink-500" />
+                  Batches
+                </button>
+                <button onClick={() => setAddKeyFor(activeSession)} className="h-9 px-3.5 rounded-full bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer">
+                  <KeyRound className="w-4 h-4 text-ink-500" />
+                  Trainer Key
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm(`Unlock and reset attendance for ${activeSession.name} today so trainer can mark fresh attendance?`)) {
+                      unlockMutation.mutate(activeSession.id);
+                    }
+                  }}
+                  disabled={unlockMutation.isPending}
+                  className="h-9 px-3.5 rounded-full bg-[#ff9500]/10 hover:bg-[#ff9500]/15 text-[#b85c00] text-[13px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Unlock className="w-4 h-4" />
+                  {unlockMutation.isPending ? "Unlocking..." : "Unlock"}
+                </button>
+              </div>
+            )}
           </div>
-
-          {!activeSession ? (
-            <button
-              onClick={() => setShowCreate(true)}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer self-start md:self-auto"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create Program</span>
-            </button>
-          ) : (
-            /* Harmonized Action Toolbar */
-            <div className="flex items-center gap-1.5 flex-wrap self-end md:self-auto">
-              <button
-                onClick={() => setManageStudentsOpen(true)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <Users className="w-3.5 h-3.5 text-slate-600" />
-                <span>Manage Students</span>
-              </button>
-
-              <button
-                onClick={() => setManageSubSessionsFor(activeSession)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-slate-600" />
-                <span>Batches</span>
-              </button>
-
-              <button
-                onClick={() => setAddKeyFor(activeSession)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <KeyRound className="w-3.5 h-3.5 text-slate-600" />
-                <span>Trainer Key</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (confirm(`Unlock and reset attendance for ${activeSession.name} today so trainer can mark fresh attendance?`)) {
-                    unlockMutation.mutate(activeSession.id);
-                  }
-                }}
-                disabled={unlockMutation.isPending}
-                className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <Unlock className="w-3.5 h-3.5 text-amber-700" />
-                <span>{unlockMutation.isPending ? "Unlocking..." : "Unlock"}</span>
-              </button>
-            </div>
-          )}
         </div>
 
         {/* ── SCREEN 1: LANDING PAGE OVERVIEW (No active session selected) ── */}

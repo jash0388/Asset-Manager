@@ -3101,55 +3101,42 @@ export default function FacultyPortal() {
           {/* ════════════════ TAB 1: FACULTY DASHBOARD (HOME) ════════════════ */}
           {activeTab === "home" && (
             <div className="space-y-6">
-              {/* Profile Hero Banner */}
-              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white p-6 lg:p-8 shadow-xl shadow-blue-900/10 border border-blue-800/40">
-                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                  <div className="flex items-center gap-5">
-                    <div className="relative">
-                      <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-200 border-4 border-white/20 shadow-2xl flex items-center justify-center text-3xl font-black text-blue-950">
+              {/* Profile Hero */}
+              <div className="relative overflow-hidden rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-8 lg:p-10">
+                <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-br from-[#5ac8fa]/25 to-[#0071e3]/10 blur-2xl" />
+                <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                  <div className="flex items-center gap-6">
+                    <div className="relative shrink-0">
+                      <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-b from-[#d1d1d6] to-[#8e8e93] flex items-center justify-center text-[34px] font-semibold text-white">
                         {facultyName.charAt(0)}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center border-2 border-white shadow-md">
+                      <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center ring-[3px] ring-white">
                         <Camera className="w-3.5 h-3.5" />
                       </div>
                     </div>
-
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] font-extrabold uppercase tracking-widest text-blue-200 bg-white/10 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
-                        {(() => { const h = liveClock.getHours(); return h < 12 ? "GOOD MORNING" : h < 17 ? "GOOD AFTERNOON" : "GOOD EVENING"; })()}
-                      </span>
-                      <h2 className="text-2xl lg:text-3xl font-black tracking-tight">{facultyName}</h2>
-                      <div className="flex flex-wrap items-center gap-2 pt-1">
-                        <span className="px-3 py-1 rounded-lg bg-white/10 text-white text-xs font-bold backdrop-blur-xs border border-white/10">
-                          {facultyProfile.designation}
-                        </span>
-                        <span className="px-3 py-1 rounded-lg bg-white/10 text-white text-xs font-bold backdrop-blur-xs border border-white/10">
-                          {facultyDept}
-                        </span>
-                        <span className="px-3 py-1 rounded-lg bg-amber-400/20 text-amber-200 text-xs font-mono font-bold border border-amber-400/30">
-                          {facultyProfile.erp}
-                        </span>
-                      </div>
+                    <div>
+                      <p className="text-[15px] font-semibold text-blue-600">
+                        {(() => { const h = liveClock.getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; })()}
+                      </p>
+                      <h2 className="mt-1 text-[34px] lg:text-[40px] leading-[1.05] font-bold tracking-[-0.03em] text-ink-900">{facultyName}</h2>
+                      <p className="mt-2 text-[15px] text-ink-500">
+                        {facultyProfile.designation} · {facultyDept} · {facultyProfile.erp}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-xs">
-                    <div className="text-center px-3">
-                      <p className="text-[10px] uppercase font-bold text-blue-200">Theory</p>
-                      <p className="text-xl font-black text-white mt-0.5">{courses.filter(c => c.type === "Theory").length}</p>
-                    </div>
-                    <div className="text-center px-3 border-l border-white/10">
-                      <p className="text-[10px] uppercase font-bold text-blue-200">Practical</p>
-                      <p className="text-xl font-black text-white mt-0.5">{courses.filter(c => c.type === "Practical").length}</p>
-                    </div>
-                    <div className="text-center px-3 border-l border-white/10">
-                      <p className="text-[10px] uppercase font-bold text-blue-200">Mentees</p>
-                      <p className="text-xl font-black text-white mt-0.5">{mentees.length}</p>
-                    </div>
-                    <div className="text-center px-3 border-l border-white/10">
-                      <p className="text-[10px] uppercase font-bold text-blue-200">Workload</p>
-                      <p className="text-xl font-black text-white mt-0.5">{workload.reduce((acc, curr) => acc + curr.periods.length, 0)} Hrs</p>
-                    </div>
+                  <div className="grid grid-cols-4 rounded-[18px] bg-[#f5f5f7] p-1.5 shrink-0">
+                    {[
+                      { label: "Theory", value: courses.filter(c => c.type === "Theory").length },
+                      { label: "Practical", value: courses.filter(c => c.type === "Practical").length },
+                      { label: "Mentees", value: mentees.length },
+                      { label: "Hours", value: workload.reduce((acc, curr) => acc + curr.periods.length, 0) },
+                    ].map((stat) => (
+                      <div key={stat.label} className="px-5 py-3 text-center">
+                        <p className="text-[24px] font-bold tracking-[-0.02em] text-ink-900">{stat.value}</p>
+                        <p className="text-[12px] text-ink-500">{stat.label}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -3462,7 +3449,7 @@ export default function FacultyPortal() {
               {/* Mentor Overview & Quick Links */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Mentor Overview Card */}
-                <div className="bg-gradient-to-br from-indigo-900 to-blue-950 text-white p-6 rounded-3xl shadow-md space-y-4 flex flex-col justify-between">
+                <div className="bg-gradient-to-br from-[#2997ff] to-[#0071e3] text-white p-6 rounded-3xl shadow-md space-y-4 flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-indigo-200">
                       <Users className="w-5 h-5" />
@@ -4760,7 +4747,7 @@ export default function FacultyPortal() {
               {/* Mentor Information Header Banner */}
               <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-700 to-indigo-800 text-white font-black text-2xl flex items-center justify-center shadow-md">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-700 to-[#0071e3] text-white font-black text-2xl flex items-center justify-center shadow-md">
                     {facultyName.charAt(0)}
                   </div>
                   <div>
@@ -5790,7 +5777,7 @@ export default function FacultyPortal() {
             return (
               <div className="space-y-6">
                 {/* ── Directory Header Banner with Year Switcher ── */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-blue-900 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-indigo-800/40">
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#2997ff] via-[#0a84ff] to-[#0071e3] text-white p-6 sm:p-8 shadow-xl border border-indigo-800/40">
                   <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
                   <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -6250,7 +6237,7 @@ export default function FacultyPortal() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 lg:p-6 animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
             {/* Modal Header */}
-            <div className="p-5 bg-gradient-to-r from-blue-700 to-indigo-800 text-white flex items-center justify-between">
+            <div className="p-5 bg-gradient-to-r from-blue-700 to-[#0071e3] text-white flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold text-blue-200 uppercase tracking-wider block">
                   Hourly Attendance Portal
@@ -6982,7 +6969,7 @@ export default function FacultyPortal() {
       {showAddProjectModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="p-5 bg-teal-900 text-white flex items-center justify-between">
+            <div className="p-5 bg-[#0071e3] text-white flex items-center justify-between">
               <h3 className="font-extrabold text-sm">Register New {projectTab} Project Batch</h3>
               <button onClick={() => setShowAddProjectModal(false)} className="text-teal-200 hover:text-white">
                 <X className="w-5 h-5" />

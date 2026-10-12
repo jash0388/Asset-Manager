@@ -130,7 +130,7 @@ function HistoryPanel({ userId }: { userId: number }) {
           </div>
           <div>
             <h2 className="text-base font-bold text-gray-900">{user.name}</h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-[15px] text-ink-500 mt-1">
               {user.role === "student" ? "Student" : "Staff"} · ID: <span className="font-mono font-semibold text-gray-700">{user.uniqueId}</span>
             </p>
           </div>
@@ -261,11 +261,11 @@ export default function History() {
 
   return (
     <Layout>
-      <div className="p-3 sm:p-4 max-w-5xl mx-auto space-y-3">
-        <BackButton />
+      <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-6">
+        <BackButton className="mb-0" />
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Student History</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Search and view complete attendance history</p>
+          <h1 className="text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">Student History</h1>
+          <p className="text-[15px] text-ink-500 mt-1">Search and view complete attendance history</p>
         </div>
 
         {/* Search */}
