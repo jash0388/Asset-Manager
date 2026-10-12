@@ -2733,143 +2733,139 @@ export default function HodDashboard() {
 
   return (
     <Layout>
-      <div className="px-4 py-3 max-w-6xl mx-auto space-y-3 font-sans">
-        
-        {/* Header section & Top Module Navigation Bar (only show on main HOD Dashboard views) */}
+      <div className="px-4 lg:px-8 py-6 max-w-7xl mx-auto space-y-5 font-sans">
+
         {activeTab !== "flags" && activeTab !== "student-analytics" && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                  <GraduationCap className="w-5 h-5 text-white" />
+          <div className="space-y-4">
+            <div className="relative overflow-hidden rounded-3xl bg-ink-950 text-white px-6 py-6 lg:px-8 lg:py-7">
+              <div className="pointer-events-none absolute -top-20 right-10 h-56 w-56 rounded-full bg-blue-600/40 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 right-64 h-56 w-56 rounded-full bg-fuchsia-500/20 blur-3xl" />
+              <div className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:18px_18px]" />
+              <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/10 ring-1 ring-white/15 backdrop-blur flex items-center justify-center">
+                    <GraduationCap className="w-7 h-7 text-blue-200" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-200/80">Head of Department</p>
+                    <h1 className="font-display text-2xl lg:text-[28px] font-extrabold tracking-tight leading-tight">Department of Data Science</h1>
+                    <p className="text-sm text-ink-300 mt-0.5">Live attendance across every section, mentor and timetable.</p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-xl font-extrabold text-gray-800 tracking-tight leading-tight">HOD Dashboard</h1>
-                  <p className="text-[11px] text-gray-400 font-medium -mt-0.5">Department of Data Science (DS)</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={openPwdModal}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:border-blue-400 hover:shadow-md text-gray-500 hover:text-blue-600 font-semibold text-xs transition-all cursor-pointer"
-                  title="Change scanner passcode"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Settings</span>
-                </button>
-                <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-2.5 py-2 shadow-sm hover:border-blue-400 transition-colors">
-                  <Calendar className="w-3.5 h-3.5 text-blue-600 pointer-events-none" />
-                  <input
-                    type="date"
-                    value={activeTab === "summary" ? selectedDate : logDate}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setSelectedDate(e.target.value);
-                        setLogDate(e.target.value);
-                      }
-                    }}
-                    className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer [color-scheme:light]"
-                  />
+
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 rounded-xl bg-white/10 ring-1 ring-white/15 px-3.5 h-11 hover:bg-white/15 transition-colors cursor-pointer">
+                    <Calendar className="w-4 h-4 text-blue-200 pointer-events-none" />
+                    <input
+                      type="date"
+                      value={activeTab === "summary" ? selectedDate : logDate}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setSelectedDate(e.target.value);
+                          setLogDate(e.target.value);
+                        }
+                      }}
+                      className="bg-transparent text-sm font-semibold text-white outline-none cursor-pointer [color-scheme:dark]"
+                    />
+                  </label>
+                  <button
+                    onClick={openPwdModal}
+                    className="flex items-center gap-2 rounded-xl bg-white text-ink-900 hover:bg-blue-50 px-4 h-11 font-semibold text-sm transition-colors cursor-pointer"
+                    title="Change scanner passcode"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span className="hidden sm:inline">Scanner passcode</span>
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Top Module Navigation Bar */}
-            <div className="flex flex-wrap items-center bg-slate-100/90 border border-slate-200 p-1 rounded-xl w-fit shadow-2xs gap-1">
-              <button
-                onClick={() => setActiveTab("summary")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "summary"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <Grid3X3 className="w-3.5 h-3.5" />
-                Summary
-              </button>
-              <button
-                onClick={() => setActiveTab("logs")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "logs"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <ClipboardList className="w-3.5 h-3.5" />
-                Logs
-              </button>
-              <button
-                onClick={() => setActiveTab("mentors")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "mentors"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <GraduationCap className="w-3.5 h-3.5" />
-                Mentors
-              </button>
-              <button
-                onClick={() => setActiveTab("schedules")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "schedules"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <Calendar className="w-3.5 h-3.5" />
-                Timetable
-              </button>
+            <div className="flex flex-wrap items-center gap-1 rounded-2xl bg-white border border-ink-100 p-1.5 w-fit shadow-sm">
+              {([
+                { key: "summary", label: "Summary", icon: Grid3X3 },
+                { key: "logs", label: "Logs", icon: ClipboardList },
+                { key: "mentors", label: "Mentors", icon: GraduationCap },
+                { key: "schedules", label: "Timetable", icon: Calendar },
+              ] as const).map(({ key, label, icon: TabIcon }) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`flex items-center gap-2 px-4 h-10 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    activeTab === key
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
+                      : "text-ink-500 hover:text-ink-900 hover:bg-ink-50"
+                  }`}
+                >
+                  <TabIcon className="w-4 h-4" />
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         )}
 
         {activeTab === "summary" ? (
           <>
-            {/* Compact inline stats bar */}
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm">
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <Users className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs text-gray-400 font-medium">Total</span>
-                <span className="text-lg font-extrabold text-gray-800">{overallTotalStudents}</span>
-              </div>
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="text-xs text-gray-400 font-medium">Present</span>
-                <span className="text-lg font-extrabold text-emerald-600">{overallTotalPresent}</span>
-              </div>
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <XCircle className="w-3.5 h-3.5 text-red-400" />
-                <span className="text-xs text-gray-400 font-medium">Absent</span>
-                <span className="text-lg font-extrabold text-red-500">{overallTotalAbsent}</span>
-              </div>
-              <div className="flex items-center gap-1.5 ml-auto">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                  <span className="text-[11px] font-black text-white">{overallDeptPercentage}%</span>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: "Total students", value: overallTotalStudents, icon: Users, tone: "text-ink-900", chip: "bg-ink-100 text-ink-600", hint: "Enrolled in department" },
+                { label: "Present today", value: overallTotalPresent, icon: CheckCircle, tone: "text-emerald-600", chip: "bg-emerald-50 text-emerald-600", hint: "Marked via QR / class" },
+                { label: "Absent today", value: overallTotalAbsent, icon: XCircle, tone: "text-rose-600", chip: "bg-rose-50 text-rose-600", hint: "Not marked yet" },
+              ].map(({ label, value, icon: StatIcon, tone, chip, hint }) => (
+                <div key={label} className="rounded-2xl bg-white border border-ink-100 p-5 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[13px] font-medium text-ink-500">{label}</p>
+                    <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${chip}`}>
+                      <StatIcon className="w-[18px] h-[18px]" />
+                    </span>
+                  </div>
+                  <p className={`font-display mt-3 text-3xl font-extrabold tracking-tight ${tone}`}>{value}</p>
+                  <p className="text-xs text-ink-400 mt-1">{hint}</p>
                 </div>
-                <span className="text-xs text-gray-400 font-medium">Dept.</span>
+              ))}
+              <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-5 shadow-lg shadow-blue-600/20 text-white">
+                <div className="flex items-center justify-between">
+                  <p className="text-[13px] font-medium text-blue-100">Department attendance</p>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${overallDeptPercentage >= 75 ? "bg-emerald-400/20 text-emerald-100" : "bg-amber-400/25 text-amber-100"}`}>
+                    {overallDeptPercentage >= 75 ? "On track" : "Below 75%"}
+                  </span>
+                </div>
+                <p className="font-display mt-3 text-3xl font-extrabold tracking-tight">{overallDeptPercentage}%</p>
+                <div className="mt-3 h-2 rounded-full bg-white/15 overflow-hidden">
+                  <div className="h-full rounded-full bg-white transition-all duration-700" style={{ width: `${Math.min(overallDeptPercentage, 100)}%` }} />
+                </div>
               </div>
             </div>
 
             {/* Main Grid View */}
             {usersLoading || attendanceLoading ? (
-              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4">
+              <div className="bg-white border border-ink-100 rounded-2xl p-20 flex flex-col items-center justify-center gap-4 shadow-sm">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-gray-500">Loading student rosters & attendance records...</p>
+                <p className="text-sm font-semibold text-ink-500">Loading student rosters & attendance records...</p>
               </div>
             ) : (
-              <Card className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <Card className="bg-white border border-ink-100 rounded-2xl shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-ink-100">
+                  <div>
+                    <h3 className="font-display text-base font-bold text-ink-900">Section-wise attendance</h3>
+                    <p className="text-xs text-ink-500 mt-0.5">Click any Present / Absent / Total count to see the student list.</p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4 text-[11px] font-medium text-ink-500">
+                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />75%+</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400" />50–74%</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500" />Below 50%</span>
+                  </div>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/80 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-                        <th className="py-2.5 px-4">Section</th>
-                        <th className="py-2.5 px-4 text-center">Present</th>
-                        <th className="py-2.5 px-4 text-center">Absent</th>
-                        <th className="py-2.5 px-4 text-center">Total</th>
-                        <th className="py-2.5 px-4 text-center">%</th>
-                        <th className="py-2.5 px-4 w-32"></th>
+                      <tr className="border-b border-ink-100 bg-ink-50/70 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-500">
+                        <th className="py-3 px-6">Section</th>
+                        <th className="py-3 px-4 text-center">Present</th>
+                        <th className="py-3 px-4 text-center">Absent</th>
+                        <th className="py-3 px-4 text-center">Total</th>
+                        <th className="py-3 px-4 text-center">Attendance</th>
+                        <th className="py-3 px-6 w-56">Progress</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2900,12 +2896,17 @@ export default function HodDashboard() {
                               const barWidth = Math.min(percent, 100);
 
                               return (
-                                <tr key={s.sectionKey} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                                  <td className="py-2 px-4 font-bold text-gray-700 text-sm">{s.displayName}</td>
+                                <tr key={s.sectionKey} className="border-b border-ink-100/70 hover:bg-blue-50/40 transition-colors">
+                                  <td className="py-3.5 px-6">
+                                    <span className="inline-flex items-center gap-2.5 font-semibold text-ink-900 text-sm">
+                                      <span className="h-8 w-8 rounded-lg bg-ink-100 text-ink-700 text-[11px] font-bold flex items-center justify-center">{s.displayName.replace(/[^0-9A-Z]/g, "").slice(-2) || "—"}</span>
+                                      {s.displayName}
+                                    </span>
+                                  </td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("PR", s)}
-                                    className="py-2 px-4 text-center text-emerald-600 font-bold cursor-pointer hover:bg-emerald-50 active:scale-[0.97] transition-all text-sm"
+                                    className="py-3.5 px-4 text-center text-emerald-600 font-bold cursor-pointer hover:bg-emerald-50 active:scale-[0.97] transition-all text-[15px] tabular-nums"
                                     title="Present Students"
                                   >
                                     {s.presentStudents.length}
@@ -2913,29 +2914,31 @@ export default function HodDashboard() {
 
                                   <td 
                                     onClick={() => handleCellClick("AB", s)}
-                                    className="py-2 px-4 text-center text-red-500 font-semibold cursor-pointer hover:bg-red-50 active:scale-[0.97] transition-all text-sm"
+                                    className="py-3.5 px-4 text-center text-rose-600 font-bold cursor-pointer hover:bg-rose-50 active:scale-[0.97] transition-all text-[15px] tabular-nums"
                                   >
                                     {s.absentStudents.length}
                                   </td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("Total", s)}
-                                    className="py-2 px-4 text-center text-gray-500 font-medium cursor-pointer hover:bg-gray-100/50 active:scale-[0.97] transition-all text-sm"
+                                    className="py-3.5 px-4 text-center text-ink-600 font-semibold cursor-pointer hover:bg-ink-50 active:scale-[0.97] transition-all text-[15px] tabular-nums"
                                   >
                                     {s.totalStudents.length}
                                   </td>
                                   
-                                  <td className="py-2 px-4 text-center">
-                                    <span className={`text-sm font-bold ${getPercentageColor(percent)}`}>
+                                  <td className="py-3.5 px-4 text-center">
+                                    <span className={`inline-flex min-w-[52px] justify-center rounded-full px-2.5 py-1 text-xs font-bold ${
+                                      percent >= 75 ? "bg-emerald-50 text-emerald-700" : percent >= 50 ? "bg-amber-50 text-amber-700" : "bg-rose-50 text-rose-700"
+                                    }`}>
                                       {Math.round(percent)}%
                                     </span>
                                   </td>
 
-                                  <td className="py-2 px-4">
-                                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                  <td className="py-3.5 px-6">
+                                    <div className="w-full h-2 bg-ink-100 rounded-full overflow-hidden">
                                       <div 
                                         className={`h-full rounded-full transition-all duration-500 ${
-                                          percent >= 75 ? 'bg-emerald-400' : percent >= 50 ? 'bg-amber-400' : 'bg-red-400'
+                                          percent >= 75 ? 'bg-emerald-500' : percent >= 50 ? 'bg-amber-400' : 'bg-rose-500'
                                         }`}
                                         style={{ width: `${barWidth}%` }}
                                       />
@@ -2946,16 +2949,16 @@ export default function HodDashboard() {
                             })}
 
                             {/* Year subtotal row */}
-                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50/50 border-b border-blue-100">
-                              <td className="py-2 px-4 font-black text-blue-600 text-xs uppercase tracking-wide">⬥ {year}</td>
-                              <td className="py-2 px-4 text-center text-emerald-600 font-bold text-sm">{yearPresent}</td>
-                              <td className="py-2 px-4 text-center text-red-500 font-bold text-sm">{yearAbsent}</td>
-                              <td className="py-2 px-4 text-center text-gray-600 font-bold text-sm">{yearTotal}</td>
-                              <td className="py-2 px-4 text-center font-black text-blue-600 text-sm">
+                            <tr className="bg-blue-50/60 border-b border-blue-100">
+                              <td className="py-3 px-6 font-bold text-blue-700 text-xs uppercase tracking-[0.1em]">{year} total</td>
+                              <td className="py-3 px-4 text-center text-emerald-700 font-bold text-sm tabular-nums">{yearPresent}</td>
+                              <td className="py-3 px-4 text-center text-rose-700 font-bold text-sm tabular-nums">{yearAbsent}</td>
+                              <td className="py-3 px-4 text-center text-ink-700 font-bold text-sm tabular-nums">{yearTotal}</td>
+                              <td className="py-3 px-4 text-center font-extrabold text-blue-700 text-sm">
                                 {yearPercentage}%
                               </td>
-                              <td className="py-2 px-4">
-                                <div className="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden">
+                              <td className="py-3 px-6">
+                                <div className="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
                                   <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${yearPercentage}%` }} />
                                 </div>
                               </td>
@@ -2965,12 +2968,12 @@ export default function HodDashboard() {
                       })}
                       
                       {/* Department total footer */}
-                      <tr className="bg-white border-t-2 border-gray-200">
-                        <td colSpan={4} className="py-3 px-4 font-extrabold text-gray-700 text-xs uppercase tracking-wider text-right">
+                      <tr className="bg-ink-50/70 border-t border-ink-200">
+                        <td colSpan={4} className="py-4 px-6 font-bold text-ink-700 text-xs uppercase tracking-[0.1em] text-right">
                           Department Overall
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-black shadow-md shadow-blue-500/20">
+                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-ink-900 text-white text-sm font-extrabold">
                             {overallDeptPercentage}%
                           </span>
                         </td>

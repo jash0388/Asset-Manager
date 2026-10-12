@@ -19,13 +19,13 @@ import {
   ChevronRight,
   Bell,
   Check,
-  ArrowRightLeft,
   Trash2,
+  Layers,
+  Building2,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
-
 
 const adminNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -42,6 +42,22 @@ const PASSCODE_KEY = "secapp.passcode.v1";
 const getStoredPasscode = () => {
   try { return localStorage.getItem(PASSCODE_KEY) || MASTER_PASSCODE; } catch { return MASTER_PASSCODE; }
 };
+
+const ROLE_LABEL: Record<string, string> = {
+  admin: "Administrator",
+  hod: "Head of Department",
+  principal: "Principal",
+  mentor: "Class Incharge",
+};
+
+const navItemBase =
+  "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150 cursor-pointer select-none";
+const navItemIdle = "text-ink-300 hover:text-white hover:bg-white/[0.06]";
+const navItemActive = "text-white bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]";
+
+function ActiveBar() {
+  return <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-blue-300 to-blue-500" />;
+}
 
 // ─── Training Sessions Tree Component ────────────────────────────────────────
 function TrainingNavTree({ location, onNavigate }: { location: string; onNavigate: () => void }) {
@@ -75,98 +91,55 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
   const isOnTraining = location.startsWith("/training-sessions");
 
   return (
-    <div style={{ marginTop: "4px" }}>
-      {/* Parent: Training Sessions header */}
+    <div className="mt-1">
       <div
         onClick={() => setExpanded(e => !e)}
-        style={{
-          display: "flex", alignItems: "center", gap: "10px",
-          padding: "9px 12px", borderRadius: "10px", marginBottom: "2px",
-          cursor: "pointer", transition: "all 0.15s ease",
-          background: isOnTraining ? "rgba(255,255,255,0.2)" : "transparent",
-          color: isOnTraining ? "#ffffff" : "rgba(255,255,255,0.80)",
-          fontWeight: isOnTraining ? "700" : "500",
-        }}
-        onMouseEnter={e => { if (!isOnTraining) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.1)"; }}
-        onMouseLeave={e => { if (!isOnTraining) (e.currentTarget as HTMLDivElement).style.background = isOnTraining ? "rgba(255,255,255,0.2)" : "transparent"; }}
+        className={`${navItemBase} ${isOnTraining ? navItemActive : navItemIdle}`}
       >
-        <Briefcase style={{ width: "16px", height: "16px", flexShrink: 0 }} />
-        <span style={{ fontSize: "13px", flex: 1 }}>Training Sessions</span>
+        {isOnTraining && <ActiveBar />}
+        <Briefcase className={`w-[18px] h-[18px] shrink-0 ${isOnTraining ? "text-blue-300" : "text-ink-400 group-hover:text-ink-200"}`} />
+        <span className="flex-1">Training Sessions</span>
         {expanded
-          ? <ChevronDown style={{ width: "12px", height: "12px", opacity: 0.7 }} />
-          : <ChevronRight style={{ width: "12px", height: "12px", opacity: 0.7 }} />
+          ? <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+          : <ChevronRight className="w-3.5 h-3.5 opacity-60" />
         }
       </div>
 
-      {/* Sub-tree items with branch lines */}
       {expanded && (
-        <div style={{ marginLeft: "22px", position: "relative" }}>
-          {/* Vertical branch line */}
-          <div style={{
-            position: "absolute", left: "8px", top: 0, bottom: "14px",
-            width: "1.5px", background: "rgba(255,255,255,0.25)", borderRadius: "2px"
-          }} />
+        <div className="ml-[22px] mt-1 border-l border-white/10 pl-3 space-y-0.5">
+          <Link href="/training-sessions" onClick={onNavigate}>
+            <div className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${
+              location === "/training-sessions" ? "bg-white/[0.08] text-white font-semibold" : "text-ink-400 hover:text-white hover:bg-white/[0.05]"
+            }`}>
+              <Layers className="w-3.5 h-3.5 shrink-0" />
+              All Sessions
+            </div>
+          </Link>
 
-          {/* All Sessions overview link */}
-          <div style={{ position: "relative", paddingLeft: "20px", marginBottom: "2px" }}>
-            <div style={{ position: "absolute", left: "8px", top: "50%", width: "12px", height: "1.5px", background: "rgba(255,255,255,0.25)" }} />
-            <Link href="/training-sessions" onClick={onNavigate}>
-              <div style={{
-                display: "flex", alignItems: "center", gap: "8px",
-                padding: "7px 10px", borderRadius: "8px", cursor: "pointer",
-                transition: "all 0.15s", fontSize: "12px",
-                background: location === "/training-sessions" ? "rgba(255,255,255,0.18)" : "transparent",
-                color: location === "/training-sessions" ? "#fff" : "rgba(255,255,255,0.7)",
-                fontWeight: location === "/training-sessions" ? "700" : "400",
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.12)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = location === "/training-sessions" ? "rgba(255,255,255,0.18)" : "transparent"; }}
-              >
-                <span>📋</span> All Sessions
-              </div>
-            </Link>
-          </div>
-
-          {/* Per-session links */}
-          {(sessions || []).map((s: any, idx: number) => {
+          {(sessions || []).map((s: any) => {
             const href = `/training-sessions/${s.id}`;
             const isActive = location === href;
-            const isLast = idx === sessions.length - 1;
             return (
-              <div key={s.id} style={{ position: "relative", paddingLeft: "20px", marginBottom: "2px" }}>
-                {/* Horizontal branch connector */}
-                <div style={{ position: "absolute", left: "8px", top: "50%", width: "12px", height: "1.5px", background: "rgba(255,255,255,0.25)" }} />
-                <Link href={href} onClick={onNavigate}>
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: "8px",
-                    padding: "7px 10px", borderRadius: "8px", cursor: "pointer",
-                    transition: "all 0.15s", fontSize: "12px",
-                    background: isActive ? "rgba(255,255,255,0.18)" : "transparent",
-                    color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
-                    fontWeight: isActive ? "700" : "400",
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.12)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = isActive ? "rgba(255,255,255,0.18)" : "transparent"; }}
-                  >
-                    <span>🏢</span>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
-                  </div>
-                </Link>
-              </div>
+              <Link key={s.id} href={href} onClick={onNavigate}>
+                <div className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs cursor-pointer transition-colors ${
+                  isActive ? "bg-white/[0.08] text-white font-semibold" : "text-ink-400 hover:text-white hover:bg-white/[0.05]"
+                }`}>
+                  <Building2 className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{s.name}</span>
+                </div>
+              </Link>
             );
           })}
 
           {sessions.length === 0 && (
-            <div style={{ paddingLeft: "20px", fontSize: "11px", color: "rgba(255,255,255,0.4)", padding: "6px 10px 6px 28px" }}>
-              No sessions yet
-            </div>
+            <div className="px-2.5 py-1.5 text-[11px] text-ink-500">No sessions yet</div>
           )}
         </div>
       )}
     </div>
   );
 }
-// ─────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { admin, hod, principal, role, logout } = useAuth();
@@ -215,7 +188,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (settingsNewPwd !== settingsConfirmPwd) { setSettingsError("Passcodes don't match."); return; }
     try {
       localStorage.setItem(PASSCODE_KEY, settingsNewPwd);
-      setSettingsSuccess("✅ Passcode updated!"); setSettingsError("");
+      setSettingsSuccess("Passcode updated!"); setSettingsError("");
       setTimeout(() => setShowSettings(false), 1500);
     } catch { setSettingsError("Storage unavailable."); }
   };
@@ -246,6 +219,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const userDisplayName = role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name ?? "Admin";
   const userEmail = role === "principal" ? principal?.email : role === "hod" ? hod?.email : admin?.email ?? "";
   const queryClient = useQueryClient();
+
+  const currentFull = typeof window !== "undefined" ? window.location.pathname + window.location.search : location;
+  const isLinkActive = (href: string) =>
+    href.includes("tab=flags")
+      ? currentFull.includes("tab=flags")
+      : href.includes("tab=student-analytics")
+      ? currentFull.includes("tab=student-analytics")
+      : currentFull === href ||
+        (href === "/hod-dashboard" && !currentFull.includes("tab=") && location.startsWith("/hod-dashboard")) ||
+        (href === "/principal-dashboard" && !currentFull.includes("tab=") && location.startsWith("/principal-dashboard")) ||
+        (href === "/history" && location.startsWith("/history"));
+
+  const activeLink = navLinks.find(l => isLinkActive(l.href));
+  const pageTitle = activeLink?.label ?? (location.startsWith("/training-sessions") ? "Training Sessions" : "Overview");
+  const todayLabel = new Date().toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 
   // ── Notification Popover & Approvals State ──
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -316,182 +304,169 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const initials = (userDisplayName || "U").replace(/[^A-Za-z ]/g, "").trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join("") || "U";
+  const passwordInputCls = "w-full px-4 py-3 rounded-xl bg-ink-50 border-2 border-ink-100 text-ink-900 text-center font-mono text-xl tracking-[0.3em] outline-none focus:border-blue-500 focus:bg-white transition-colors";
+  const fieldLabelCls = "block text-[11px] font-bold text-ink-500 uppercase tracking-[0.08em] mb-2";
+
   return (
-    <div style={{ display: "flex", height: "100vh", background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="flex h-screen bg-ink-50 font-sans">
 
       {/* ══════════ SIDEBAR ══════════ */}
-      <aside style={{
-        position: isDesktop && sidebarOpen ? "relative" as const : "fixed" as const,
-        ...(!(isDesktop && sidebarOpen) && { inset: "0 auto 0 0" }),
-        zIndex: 50,
-        width: "240px",
-        background: "linear-gradient(160deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%)",
-        display: "flex", flexDirection: "column" as const,
-        transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
-        transition: "transform 0.2s ease",
-        boxShadow: "4px 0 24px rgba(37,99,235,0.25)",
-        flexShrink: 0,
-      }}
+      <aside
+        className={`${isDesktop && sidebarOpen ? "relative" : "fixed inset-y-0 left-0"} z-50 w-[264px] shrink-0 flex flex-col bg-ink-950 text-white transition-transform duration-200 ease-out overflow-hidden ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "20px 16px 18px", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
-          <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <ShieldCheck style={{ width: "20px", height: "20px", color: "#ffffff" }} />
+        <div className="pointer-events-none absolute -top-24 -left-20 h-64 w-64 rounded-full bg-blue-600/25 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-48 w-48 rounded-full bg-fuchsia-500/10 blur-3xl" />
+
+        {/* Brand */}
+        <div className="relative flex items-center gap-3 px-5 pt-6 pb-5">
+          <div className="relative h-10 w-10 shrink-0 rounded-2xl bg-gradient-to-br from-blue-400 via-blue-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-blue-900/40">
+            <ShieldCheck className="w-5 h-5 text-white" strokeWidth={2.25} />
           </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>QR Attendance</p>
-            <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Campus Control System</p>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-[15px] font-extrabold tracking-tight leading-tight truncate">SPHN Attendance</p>
+            <p className="text-[11px] text-ink-400 truncate">Sphoorthy Engineering College</p>
           </div>
-          <button onClick={() => setSidebarOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", display: "flex" }}>
-            <X style={{ width: "20px", height: "20px" }} />
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-ink-400 hover:text-white p-1 rounded-lg hover:bg-white/5 cursor-pointer">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
+        {/* Role chip */}
+        <div className="relative mx-4 mb-4 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-500">Signed in as</p>
+          <p className="mt-0.5 text-[13px] font-bold text-white truncate">{ROLE_LABEL[role ?? "admin"] ?? "User"}</p>
+          {role === "hod" && <p className="text-[11px] text-blue-300 truncate">Dept. of Data Science</p>}
+        </div>
+
         {/* Nav */}
-        <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
-          <p style={{ fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", padding: "0 8px", marginBottom: "8px" }}>Navigation</p>
-          {navLinks.map(({ href, label, icon: Icon }) => {
-            const currentFull = window.location.pathname + window.location.search;
-            const isActive = href.includes("tab=flags")
-              ? currentFull.includes("tab=flags")
-              : href.includes("tab=student-analytics")
-              ? currentFull.includes("tab=student-analytics")
-              : currentFull === href ||
-                (href === "/hod-dashboard" && !currentFull.includes("tab=") && location.startsWith("/hod-dashboard")) ||
-                (href === "/principal-dashboard" && !currentFull.includes("tab=") && location.startsWith("/principal-dashboard"));
+        <nav className="relative flex-1 overflow-y-auto px-3 pb-4">
+          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-500">Workspace</p>
+          <div className="space-y-0.5">
+            {navLinks.map(({ href, label, icon: Icon }) => {
+              const isActive = isLinkActive(href);
+              return (
+                <Link key={href} href={href}>
+                  <div
+                    data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
+                    onClick={() => {
+                      if (!isDesktop) setSidebarOpen(false);
+                      if (href.includes("tab=") || href === "/hod-dashboard" || href === "/principal-dashboard") {
+                        window.history.pushState({}, "", href);
+                        window.dispatchEvent(new Event("popstate"));
+                      }
+                    }}
+                    className={`${navItemBase} ${isActive ? navItemActive : navItemIdle}`}
+                  >
+                    {isActive && <ActiveBar />}
+                    <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? "text-blue-300" : "text-ink-400 group-hover:text-ink-200"}`} />
+                    <span className="truncate">{label}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
 
-            return (
-              <Link key={href} href={href}>
-                <div
-                  data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
-                  onClick={() => {
-                    if (!isDesktop) setSidebarOpen(false);
-                    if (href.includes("tab=") || href === "/hod-dashboard" || href === "/principal-dashboard") {
-                      window.history.pushState({}, "", href);
-                      window.dispatchEvent(new Event("popstate"));
-                    }
-                  }}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "10px",
-                    padding: "9px 12px", borderRadius: "10px", marginBottom: "2px",
-                    cursor: "pointer", transition: "all 0.15s ease",
-                    background: isActive ? "rgba(255,255,255,0.2)" : "transparent",
-                    boxShadow: isActive ? "inset 0 0 0 1px rgba(255,255,255,0.25)" : "none",
-                    color: isActive ? "#ffffff" : "rgba(255,255,255,0.75)",
-                    fontWeight: isActive ? "700" : "500",
-                  }}
-                  onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.1)"; }}
-                  onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
-                >
-                  <Icon style={{ width: "16px", height: "16px", flexShrink: 0 }} />
-                  <span style={{ fontSize: "13px" }}>{label}</span>
-                </div>
-              </Link>
-            );
-          })}
-
-          {/* Training Sessions Tree Nav — HOD & Admin only */}
           {(role === "hod" || role === "admin") && (
-            <TrainingNavTree location={location} onNavigate={() => { if (!isDesktop) setSidebarOpen(false); }} />
+            <>
+              <p className="px-3 pt-5 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-500">Programs</p>
+              <TrainingNavTree location={location} onNavigate={() => { if (!isDesktop) setSidebarOpen(false); }} />
+            </>
           )}
         </nav>
 
-        {/* Bottom: user + settings + logout */}
-        <div style={{ padding: "10px", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
-          {/* User info */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 10px 8px" }}>
-            <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "rgba(255,255,255,0.25)", border: "2px solid rgba(255,255,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "800", color: "#ffffff", flexShrink: 0 }}>
-              {userDisplayName?.charAt(0).toUpperCase() ?? "U"}
+        {/* Account */}
+        <div className="relative border-t border-white/[0.06] p-3">
+          <div className="flex items-center gap-3 rounded-xl px-2 py-2">
+            <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-fuchsia-500 p-[2px]">
+              <div className="h-full w-full rounded-full bg-ink-900 flex items-center justify-center text-[12px] font-bold">{initials}</div>
             </div>
-            <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: "12px", fontWeight: "700", color: "#ffffff", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userDisplayName}</p>
-              <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-white truncate">{userDisplayName}</p>
+              <p className="text-[11px] text-ink-400 truncate">{userEmail}</p>
             </div>
           </div>
-
-          {/* Settings */}
-          {(role === "hod" || role === "principal" || role === "admin") && (
+          <div className="mt-1 grid grid-cols-2 gap-1.5">
+            {(role === "hod" || role === "principal" || role === "admin") ? (
+              <button
+                data-testid="sidebar-settings"
+                onClick={openSettings}
+                className="flex items-center justify-center gap-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] px-3 py-2 text-xs font-semibold text-ink-200 transition-colors cursor-pointer"
+              >
+                <Settings className="w-3.5 h-3.5" /> Settings
+              </button>
+            ) : <span />}
             <button
-              data-testid="sidebar-settings"
-              onClick={openSettings}
-              style={{ width: "100%", display: "flex", alignItems: "center", gap: "10px", padding: "9px 12px", borderRadius: "10px", background: "transparent", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.75)", transition: "background 0.15s", marginBottom: "2px" }}
-              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)"}
-              onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
+              data-testid="logout-button"
+              onClick={logout}
+              className="flex items-center justify-center gap-2 rounded-xl bg-white/[0.04] hover:bg-rose-500/20 hover:text-rose-200 px-3 py-2 text-xs font-semibold text-ink-200 transition-colors cursor-pointer"
             >
-              <Settings style={{ width: "16px", height: "16px" }} />
-              <span style={{ fontSize: "13px", fontWeight: "500" }}>Settings</span>
+              <LogOut className="w-3.5 h-3.5" /> Logout
             </button>
-          )}
-
-          {/* Logout */}
-          <button
-            data-testid="logout-button"
-            onClick={logout}
-            style={{ width: "100%", display: "flex", alignItems: "center", gap: "10px", padding: "9px 12px", borderRadius: "10px", background: "transparent", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.75)", transition: "background 0.15s" }}
-            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,100,100,0.2)"}
-            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
-          >
-            <LogOut style={{ width: "16px", height: "16px" }} />
-            <span style={{ fontSize: "13px", fontWeight: "500" }}>Logout</span>
-          </button>
+          </div>
         </div>
       </aside>
 
       {/* Mobile overlay */}
       {sidebarOpen && !isDesktop && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(0,0,0,0.4)" }} onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-40 bg-ink-950/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* ══════════ MAIN CONTENT ══════════ */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-        {/* Header bar (desktop & mobile) */}
-        <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-200 bg-white shadow-xs z-30 relative">
-          <div className="flex items-center gap-3">
+      <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
+        <header className="relative z-30 flex items-center justify-between gap-3 border-b border-ink-100 bg-white/80 backdrop-blur-xl px-4 lg:px-8 h-16 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
             {!sidebarOpen && (
-              <button data-testid="mobile-menu-button" onClick={() => setSidebarOpen(true)} className="p-1 text-slate-500 hover:text-slate-900 cursor-pointer">
+              <button data-testid="mobile-menu-button" onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 rounded-xl text-ink-600 hover:bg-ink-50 cursor-pointer">
                 <Menu className="w-5 h-5" />
               </button>
             )}
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-extrabold text-slate-900">QR Attendance</span>
+            <div className="min-w-0">
+              <p className="hidden sm:block text-[11px] font-medium text-ink-400 leading-none mb-1">
+                {ROLE_LABEL[role ?? "admin"]} <span className="mx-1 text-ink-300">/</span> {pageTitle}
+              </p>
+              <h2 className="font-display text-base sm:text-lg font-bold text-ink-900 leading-tight truncate">{pageTitle}</h2>
             </div>
           </div>
 
           <div className="flex items-center gap-2 relative">
-            {/* Notification Bell with Badge and Popover Dropdown */}
+            <span className="hidden md:inline-flex items-center gap-2 rounded-full border border-ink-100 bg-ink-50 px-3 py-1.5 text-xs font-semibold text-ink-600">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              {todayLabel}
+            </span>
+
+            {/* Notifications */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setNotificationsOpen((prev) => !prev)}
-                className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+                className={`relative h-10 w-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
                   notificationsOpen
-                    ? "bg-blue-50 border-blue-300 text-blue-700 shadow-xs"
-                    : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                    ? "bg-blue-50 border-blue-200 text-blue-700"
+                    : "bg-white border-ink-100 text-ink-600 hover:bg-ink-50 hover:text-ink-900"
                 }`}
                 title="Notifications"
               >
-                <Bell className="w-4.5 h-4.5" />
+                <Bell className="w-[18px] h-[18px]" />
                 {pendingCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-black text-white shadow-xs animate-pulse">
+                  <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-white">
                     {pendingCount}
                   </span>
                 )}
               </button>
 
-              {/* Notification Popover Dropdown */}
               {notificationsOpen && (
-                <div
-                  className="absolute right-0 top-11 z-50 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150"
-                  style={{ minWidth: "320px" }}
-                >
-                  {/* Popover Header */}
-                  <div className="p-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white flex items-center justify-between">
+                <div className="absolute right-0 top-12 z-50 w-[22rem] sm:w-96 bg-white rounded-2xl shadow-2xl border border-ink-100 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-4 py-3.5 border-b border-ink-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-amber-400" />
-                      <span className="text-xs font-black">Notifications & Approvals</span>
+                      <span className="font-display text-sm font-bold text-ink-900">Notifications</span>
                       {activeNotifications.length > 0 && (
-                        <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full font-extrabold">
+                        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">
                           {activeNotifications.length}
                         </span>
                       )}
@@ -499,86 +474,66 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     {activeNotifications.length > 0 && (
                       <button
                         onClick={handleClearAllNotifications}
-                        className="text-[11px] font-extrabold text-amber-300 hover:text-amber-200 flex items-center gap-1 transition-colors cursor-pointer"
+                        className="text-[11px] font-semibold text-ink-500 hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3 h-3" />
-                        <span>Clear All</span>
+                        Clear all
                       </button>
                     )}
                   </div>
 
-                  {/* Popover Body */}
-                  <div className="p-3 space-y-2.5 overflow-y-auto max-h-[420px] bg-slate-50/50">
+                  <div className="p-3 space-y-2 overflow-y-auto max-h-[420px] bg-ink-50/60">
                     {activeNotifications.length === 0 ? (
-                      <div className="p-6 text-center space-y-2 bg-white rounded-xl border border-slate-200/80">
-                        <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                      <div className="py-10 text-center">
+                        <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
                           <Check className="w-5 h-5" />
                         </div>
-                        <p className="text-xs font-bold text-slate-800">No New Notifications</p>
-                        <p className="text-[11px] text-slate-500">All substitution requests have been cleared or handled.</p>
+                        <p className="text-sm font-semibold text-ink-800">You're all caught up</p>
+                        <p className="text-xs text-ink-500 mt-0.5">No pending substitution requests.</p>
                       </div>
                     ) : (
                       activeNotifications.map((r: any) => {
                         const isPending = r.status === "pending";
                         const isAccepted = r.status === "accepted";
-                        const isDeclined = r.status === "declined";
-
                         return (
-                          <div
-                            key={r.id}
-                            className={`p-3 rounded-xl border bg-white shadow-xs space-y-2 relative transition-all ${
-                              isPending
-                                ? "border-amber-300 ring-1 ring-amber-200"
-                                : isAccepted
-                                ? "border-emerald-200"
-                                : "border-rose-200"
-                            }`}
-                          >
+                          <div key={r.id} className="p-3.5 rounded-xl border border-ink-100 bg-white space-y-2.5">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                              <span className="text-[10px] font-mono font-semibold text-ink-500">
                                 {r.date} &bull; {r.slot}
                               </span>
-
-                              {/* Status Badge with Tick or X mark */}
                               {isPending ? (
-                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 flex items-center gap-1">
-                                  <Clock className="w-3 h-3 text-amber-600" />
-                                  <span>Pending HOD</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> Pending
                                 </span>
                               ) : isAccepted ? (
-                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                                  <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
-                                  <span>Accepted</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 flex items-center gap-1">
+                                  <Check className="w-3 h-3" /> Accepted
                                 </span>
                               ) : (
-                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-800 flex items-center gap-1">
-                                  <X className="w-3 h-3 text-rose-600 stroke-[3]" />
-                                  <span>Declined</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 ring-1 ring-rose-200 flex items-center gap-1">
+                                  <X className="w-3 h-3" /> Declined
                                 </span>
                               )}
                             </div>
 
                             <div>
-                              <p className="text-xs font-black text-slate-900">{r.subject} ({r.section})</p>
-                              <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 pt-0.5">
-                                <span className="text-slate-600">{r.fromFacultyName}</span>
-                                <span className="text-indigo-600 font-bold">➔</span>
-                                <span className="text-indigo-900 font-extrabold">{r.toFacultyName}</span>
-                              </div>
+                              <p className="text-[13px] font-bold text-ink-900">{r.subject} <span className="text-ink-400 font-medium">· {r.section}</span></p>
+                              <p className="text-xs text-ink-500 mt-0.5">
+                                {r.fromFacultyName} <span className="text-blue-500">→</span> <span className="font-semibold text-ink-800">{r.toFacultyName}</span>
+                              </p>
                             </div>
 
                             {r.reason && (
-                              <p className="text-[10.5px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                                <strong className="text-slate-700">Reason:</strong> {r.reason}
+                              <p className="text-[11px] text-ink-600 bg-ink-50 px-2.5 py-1.5 rounded-lg">
+                                <span className="font-semibold">Reason:</span> {r.reason}
                               </p>
                             )}
 
-                            {/* Action Buttons for Pending or Status for Accepted/Declined */}
-                            <div className="flex items-center justify-between pt-1 border-t border-slate-100 gap-2">
+                            <div className="flex items-center justify-between pt-2 border-t border-ink-100 gap-2">
                               <button
                                 type="button"
                                 onClick={() => handleClearSingleNotification(r.id)}
-                                className="text-[10.5px] font-bold text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                                className="text-[11px] font-semibold text-ink-400 hover:text-ink-700 transition-colors cursor-pointer"
                               >
                                 Dismiss
                               </button>
@@ -589,31 +544,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                     type="button"
                                     onClick={() => handleNotificationAction(r.id, "decline")}
                                     disabled={processingNotificationId === r.id}
-                                    className="px-2.5 py-1 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                                    className="px-3 py-1.5 rounded-lg border border-ink-200 text-ink-700 hover:bg-ink-50 text-[11px] font-semibold transition-all cursor-pointer"
                                   >
-                                    <X className="w-3 h-3" />
-                                    <span>Decline</span>
+                                    Decline
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => handleNotificationAction(r.id, "accept")}
                                     disabled={processingNotificationId === r.id}
-                                    className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                                    className="px-3 py-1.5 rounded-lg bg-ink-900 hover:bg-ink-800 text-white text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-95"
                                   >
-                                    <Check className="w-3 h-3 stroke-[3]" />
-                                    <span>Accept</span>
+                                    <Check className="w-3 h-3" /> Accept
                                   </button>
                                 </div>
                               ) : isAccepted ? (
-                                <span className="text-[10.5px] font-bold text-emerald-700 flex items-center gap-1">
-                                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                                  <span>Assigned to {r.toFacultyName}</span>
-                                </span>
+                                <span className="text-[11px] font-semibold text-emerald-700">Assigned to {r.toFacultyName}</span>
                               ) : (
-                                <span className="text-[10.5px] font-bold text-rose-700 flex items-center gap-1">
-                                  <X className="w-3.5 h-3.5 text-rose-600 stroke-[3]" />
-                                  <span>Reassignment Declined</span>
-                                </span>
+                                <span className="text-[11px] font-semibold text-rose-700">Reassignment declined</span>
                               )}
                             </div>
                           </div>
@@ -625,96 +572,97 @@ export function Layout({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            {/* Settings Gear Button */}
             <button
               onClick={openSettings}
-              className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition-all cursor-pointer flex items-center justify-center"
+              className="h-10 w-10 rounded-xl border border-ink-100 bg-white text-ink-600 hover:bg-ink-50 hover:text-ink-900 transition-all cursor-pointer flex items-center justify-center"
               title="Settings"
             >
-              <Settings className="w-4.5 h-4.5 text-slate-700" />
+              <Settings className="w-[18px] h-[18px]" />
             </button>
 
-            {/* Logout Button */}
             <button
               onClick={logout}
-              className="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 font-bold text-xs cursor-pointer flex items-center gap-1.5 transition-all"
+              className="hidden sm:flex h-10 items-center gap-2 rounded-xl bg-ink-900 hover:bg-ink-800 px-4 text-xs font-semibold text-white transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+              Logout
             </button>
           </div>
         </header>
 
-        <main style={{ flex: 1, overflowY: "auto" }}>{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          <div className="animate-fade-up">{children}</div>
+        </main>
       </div>
 
       {/* ══════════ SETTINGS MODAL ══════════ */}
       {showSettings && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-          <div style={{ width: "100%", maxWidth: "360px", background: "#ffffff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
-            <div style={{ padding: "18px 20px", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Settings style={{ width: "18px", height: "18px", color: "#2563EB" }} />
+        <div className="fixed inset-0 z-[100] bg-ink-950/50 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setShowSettings(false)}>
+          <div className="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150" onClick={e => e.stopPropagation()}>
+            <div className="px-6 pt-6 pb-4 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-11 w-11 rounded-2xl bg-blue-50 flex items-center justify-center">
+                  <Settings className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p style={{ fontSize: "14px", fontWeight: "800", color: "#111827", margin: 0 }}>System Settings</p>
-                  <p style={{ fontSize: "11px", color: "#6B7280", margin: 0 }}>Account Options & Passcode</p>
+                  <p className="font-display text-base font-bold text-ink-900">Settings</p>
+                  <p className="text-xs text-ink-500">Account & scanner passcode</p>
                 </div>
               </div>
-              <button onClick={() => setShowSettings(false)} style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#F3F4F6", border: "none", cursor: "pointer", fontSize: "16px", color: "#6B7280", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
+              <button onClick={() => setShowSettings(false)} className="h-8 w-8 rounded-lg bg-ink-50 hover:bg-ink-100 text-ink-500 flex items-center justify-center cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <div style={{ padding: "20px", spaceY: "16px" }}>
-              <div style={{ padding: "14px", borderRadius: "12px", background: "#F8FAFC", border: "1px solid #E2E8F0", marginBottom: "16px" }}>
-                <p style={{ fontSize: "11px", color: "#64748B", margin: 0 }}>Logged in Account</p>
-                <p style={{ fontSize: "14px", fontWeight: "800", color: "#0F172A", margin: "2px 0 0" }}>{userDisplayName}</p>
-                <p style={{ fontSize: "11px", fontWeight: "600", color: "#2563EB", margin: "2px 0 0" }}>{userEmail}</p>
+            <div className="px-6 pb-6">
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-ink-50 mb-5">
+                <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-fuchsia-500 text-white flex items-center justify-center text-sm font-bold">{initials}</div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-ink-900 truncate">{userDisplayName}</p>
+                  <p className="text-xs text-ink-500 truncate">{userEmail}</p>
+                </div>
               </div>
 
               {settingsStep === "verify" && (
                 <form onSubmit={handleVerifyForSettings}>
-                  <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Current Passcode</label>
+                  <label className={fieldLabelCls}>Current passcode</label>
                   <input type="password" placeholder="••••••" value={settingsCurrentPwd}
                     onChange={e => { setSettingsCurrentPwd(e.target.value); setSettingsError(""); }}
-                    style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
-                    onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
-                  {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
-                  <button type="submit" style={{ width: "100%", marginTop: "14px", padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Change Passcode →</button>
+                    className={passwordInputCls} autoFocus />
+                  {settingsError && <p className="text-rose-600 text-xs font-semibold text-center mt-2">{settingsError}</p>}
+                  <button type="submit" className="w-full mt-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors cursor-pointer">Change passcode</button>
                 </form>
               )}
 
               {settingsStep === "change" && (
-                <form onSubmit={handleChangePasscode}>
-                  <div style={{ marginBottom: "14px" }}>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>New Passcode</label>
-                    <input type="password" placeholder="Min 4 characters" value={settingsNewPwd}
+                <form onSubmit={handleChangePasscode} className="space-y-4">
+                  <div>
+                    <label className={fieldLabelCls}>New passcode</label>
+                    <input type="password" placeholder="Min 4 chars" value={settingsNewPwd}
                       onChange={e => { setSettingsNewPwd(e.target.value); setSettingsError(""); }}
-                      style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
-                      onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
+                      className={passwordInputCls} autoFocus />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Confirm Passcode</label>
-                    <input type="password" placeholder="Repeat passcode" value={settingsConfirmPwd}
+                    <label className={fieldLabelCls}>Confirm passcode</label>
+                    <input type="password" placeholder="Repeat" value={settingsConfirmPwd}
                       onChange={e => { setSettingsConfirmPwd(e.target.value); setSettingsError(""); }}
-                      style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
-                      onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
+                      className={passwordInputCls} />
                   </div>
-                  {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
-                  {settingsSuccess && <p style={{ color: "#059669", fontSize: "13px", fontWeight: "700", textAlign: "center", marginTop: "8px" }}>{settingsSuccess}</p>}
-                  <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
-                    <button type="button" onClick={() => setSettingsStep("verify")} style={{ flex: 1, padding: "12px", borderRadius: "12px", background: "#F3F4F6", border: "1px solid #E5E7EB", color: "#374151", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>← Back</button>
-                    <button type="submit" style={{ flex: 2, padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Save Passcode</button>
+                  {settingsError && <p className="text-rose-600 text-xs font-semibold text-center">{settingsError}</p>}
+                  {settingsSuccess && <p className="text-emerald-600 text-sm font-semibold text-center">{settingsSuccess}</p>}
+                  <div className="flex gap-2.5">
+                    <button type="button" onClick={() => setSettingsStep("verify")} className="flex-1 py-3 rounded-xl bg-ink-50 hover:bg-ink-100 text-ink-700 font-semibold text-sm cursor-pointer">Back</button>
+                    <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm cursor-pointer">Save passcode</button>
                   </div>
                 </form>
               )}
 
               <button
                 onClick={() => { setShowSettings(false); logout(); }}
-                style={{ width: "100%", marginTop: "16px", padding: "14px", borderRadius: "12px", background: "#DC2626", color: "#ffffff", fontWeight: "800", fontSize: "14px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+                className="w-full mt-4 py-3 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
-                <LogOut style={{ width: "18px", height: "18px" }} />
-                LOGOUT FROM ACCOUNT
+                <LogOut className="w-4 h-4" />
+                Log out of account
               </button>
             </div>
           </div>
