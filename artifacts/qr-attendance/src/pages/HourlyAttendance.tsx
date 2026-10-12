@@ -406,28 +406,28 @@ export default function HourlyAttendance() {
 
   return (
     <Layout>
-      <div className="p-2 sm:p-3.5 max-w-7xl mx-auto space-y-2.5 text-slate-800 font-sans">
+      <div className="px-6 lg:px-10 py-10 max-w-[1280px] mx-auto space-y-6 text-ink-900 font-sans">
         
         {/* Navigation Switcher Tabs for Mentors */}
         {role === "mentor" && (
           <div className="bg-white border border-slate-200 p-1 rounded-xl flex flex-wrap gap-1 shadow-2xs mb-1">
             <button
               onClick={() => navigate("/incharge-dashboard")}
-              className="px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all text-slate-700 hover:bg-slate-100 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg font-bold text-[13px] flex items-center gap-1.5 transition-all text-slate-700 hover:bg-slate-100 cursor-pointer"
             >
               <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
               Class Incharge Portal
             </button>
             <button
               onClick={() => navigate("/mentor")}
-              className="px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all text-slate-700 hover:bg-slate-100 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg font-bold text-[13px] flex items-center gap-1.5 transition-all text-slate-700 hover:bg-slate-100 cursor-pointer"
             >
               <Clock className="w-3.5 h-3.5 text-slate-500" />
               Take Class Attendance
             </button>
             <button
               onClick={() => navigate("/hourly-attendance")}
-              className="px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all bg-slate-900 text-white shadow-xs cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg font-bold text-[13px] flex items-center gap-1.5 transition-all bg-slate-900 text-white shadow-xs cursor-pointer"
             >
               <BookOpen className="w-3.5 h-3.5 text-white" />
               Hourly Attendance
@@ -435,90 +435,61 @@ export default function HourlyAttendance() {
           </div>
         )}
 
-        {/* ── ROW 1: TIGHT EXECUTIVE HEADER (Title + Date + Action in ONE Row) ── */}
-        <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:px-3.5 sm:py-2 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            {role !== "mentor" && (
-              <BackButton to={role === "hod" ? "/hod-dashboard" : "/dashboard"} className="p-1 h-7.5 w-7.5" />
-            )}
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5 leading-tight">
-                  <BookOpen className="w-4 h-4 text-blue-600" />
-                  Hourly Lecture Attendance Control
-                </h1>
-                <span className="px-2 py-0.2 rounded-md text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                  {getFormattedDate(selectedDateFilter)} ({daysFullNames[activeDayOfWeek] || "Day"})
-                </span>
-              </div>
+        {/* Page header */}
+        <div className="pt-2">
+          {role !== "mentor" && (
+            <BackButton to={role === "hod" ? "/hod-dashboard" : "/dashboard"} className="mb-3" />
+          )}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[13px] font-medium text-ink-500">
+                {getFormattedDate(selectedDateFilter)}
+              </p>
+              <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">
+                Hourly Attendance
+              </h1>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-end md:self-auto flex-wrap">
-            {/* Inline Date Switcher */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg text-xs font-semibold">
-              <Calendar className="w-3.5 h-3.5 text-slate-500" />
-              <input
-                type="date"
-                value={selectedDateFilter}
-                onChange={(e) => setSelectedDateFilter(e.target.value)}
-                className="bg-transparent text-slate-800 text-xs font-bold focus:outline-none cursor-pointer [color-scheme:light]"
-              />
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="h-9 flex items-center gap-2 px-3 rounded-[10px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] text-[13px] text-ink-900">
+                <Calendar className="w-4 h-4 text-ink-500" />
+                <input
+                  type="date"
+                  value={selectedDateFilter}
+                  onChange={(e) => setSelectedDateFilter(e.target.value)}
+                  className="bg-transparent text-[13px] focus:outline-none cursor-pointer [color-scheme:light]"
+                />
+              </label>
+              {(role === "hod" || role === "admin") && (
+                <button
+                  onClick={() => setNewClassModalOpen(true)}
+                  className="h-10 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Assign Class
+                </button>
+              )}
             </div>
-
-            {(role === "hod" || role === "admin") && (
-              <button
-                onClick={() => setNewClassModalOpen(true)}
-                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Assign Class
-              </button>
-            )}
           </div>
         </div>
 
-        {/* ── ROW 2: ULTRA-COMPACT OPERATIONAL KPI METRIC STRIP (~40px) ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider block">Total Scheduled</span>
-              <span className="text-sm font-black text-slate-900">{operationalStats.total} Lectures</span>
+        {/* KPI tiles */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          {[
+            { label: "Scheduled", value: operationalStats.total, sub: "Lectures today", dot: "bg-ink-300", pulse: false },
+            { label: "Completed", value: operationalStats.submittedCount, sub: "Verified", dot: "bg-[#34c759]", pulse: false },
+            { label: "Live", value: operationalStats.startedCount, sub: "In progress", dot: "bg-[#ff9500]", pulse: operationalStats.startedCount > 0 },
+            { label: "Missing", value: operationalStats.missingCount, sub: "Overdue", dot: "bg-[#ff3b30]", pulse: operationalStats.missingCount > 0 },
+            { label: "Upcoming", value: operationalStats.lockedCount, sub: "Locked", dot: "bg-ink-300", pulse: false },
+          ].map((kpi, i) => (
+            <div key={kpi.label} className={`rounded-[18px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] px-5 py-4 ${i === 4 ? "col-span-2 sm:col-span-1" : ""}`}>
+              <p className="flex items-center gap-1.5 text-[13px] font-medium text-ink-500">
+                <span className={`h-2 w-2 rounded-full ${kpi.dot} ${kpi.pulse ? "animate-pulse" : ""}`} />
+                {kpi.label}
+              </p>
+              <p className="mt-2 text-[28px] leading-none font-bold tracking-[-0.02em] text-ink-900">{kpi.value}</p>
+              <p className="mt-1 text-[12px] text-ink-400">{kpi.sub}</p>
             </div>
-            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-emerald-700 uppercase tracking-wider block">Completed</span>
-              <span className="text-sm font-black text-emerald-900">{operationalStats.submittedCount} Verified</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-amber-700 uppercase tracking-wider block">Live / Scanning</span>
-              <span className="text-sm font-black text-amber-900">{operationalStats.startedCount} In Progress</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-rose-700 uppercase tracking-wider block">Missing Attendance</span>
-              <span className="text-sm font-black text-rose-900">{operationalStats.missingCount} Overdue</span>
-            </div>
-            <span className={`w-2 h-2 rounded-full ${operationalStats.missingCount > 0 ? "bg-rose-500 animate-ping" : "bg-rose-400"}`}></span>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between col-span-2 sm:col-span-1">
-            <div>
-              <span className="text-[9.5px] font-bold text-slate-600 uppercase tracking-wider block">Upcoming / Locked</span>
-              <span className="text-sm font-black text-slate-800">{operationalStats.lockedCount} Scheduled</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-          </div>
+          ))}
         </div>
 
         {/* ── ROW 3: COMPACT SINGLE-LINE TOOLBAR (Filters + Search + View Switcher) ── */}
@@ -584,7 +555,7 @@ export default function HourlyAttendance() {
             <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
               <button
                 onClick={() => setViewMode("table")}
-                className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                className={`p-1.5 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                   viewMode === "table"
                     ? "bg-white text-blue-700 shadow-2xs"
                     : "text-slate-500 hover:text-slate-800"
@@ -595,7 +566,7 @@ export default function HourlyAttendance() {
               </button>
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                className={`p-1.5 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                   viewMode === "grid"
                     ? "bg-white text-blue-700 shadow-2xs"
                     : "text-slate-500 hover:text-slate-800"
@@ -722,7 +693,7 @@ export default function HourlyAttendance() {
                               {(role === "hod" || role === "admin") && (
                                 <button
                                   onClick={(e) => handleOpenAssignModal(e, s)}
-                                  className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                                  className="p-1.5 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer"
                                   title="Reassign Faculty"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -767,7 +738,7 @@ export default function HourlyAttendance() {
                               e.stopPropagation();
                               handleToggleScheduleOverride(s.id, isUnlocked, extendedMins);
                             }}
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                            className={`px-2.5 py-1 rounded text-[11px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer border ${
                               isUnlocked
                                 ? "bg-emerald-600 text-white border-emerald-700"
                                 : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200"
@@ -784,7 +755,7 @@ export default function HourlyAttendance() {
                               e.stopPropagation();
                               handleSlotClick(s);
                             }}
-                            className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                            className="px-2.5 py-1 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[11.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                           >
                             <span>Details</span>
                             <ChevronRight className="w-3 h-3" />
@@ -861,7 +832,7 @@ export default function HourlyAttendance() {
                       {(role === "hod" || role === "admin") && !s.isReassigned && (
                         <button
                           onClick={(e) => handleOpenAssignModal(e, s)}
-                          className="text-[10.5px] text-blue-700 hover:underline font-bold"
+                          className="text-[11.5px] text-blue-700 hover:underline font-bold"
                           title="Change Faculty"
                         >
                           Reassign
@@ -895,7 +866,7 @@ export default function HourlyAttendance() {
                         e.stopPropagation();
                         handleToggleScheduleOverride(s.id, isUnlocked, extendedMins);
                       }}
-                      className={`px-2 py-0.5 rounded text-[9.5px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                      className={`px-2.5 py-1 rounded text-[9.5px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer border ${
                         isUnlocked
                           ? "bg-emerald-600 text-white border-emerald-700"
                           : "bg-slate-100 text-slate-700 border-slate-300"
@@ -935,7 +906,7 @@ export default function HourlyAttendance() {
                       {(role === "hod" || role === "admin") && (
                         <button
                           onClick={(e) => handleOpenAssignModal(e, selectedSchedule)}
-                          className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
                           Reassign Faculty
@@ -966,7 +937,7 @@ export default function HourlyAttendance() {
                         </div>
                         <button
                           onClick={() => handleToggleScheduleOverride(selectedSchedule.id, isUnlocked, extendedMins)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer border ${
+                          className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all flex items-center gap-1 cursor-pointer border ${
                             isUnlocked
                               ? "bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700"
                               : "bg-slate-900 text-white border-slate-950 hover:bg-slate-800"
@@ -983,7 +954,7 @@ export default function HourlyAttendance() {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 15)}
-                            className={`px-2 py-0.5 rounded text-xs font-bold border cursor-pointer ${
+                            className={`px-2.5 py-1 rounded text-[13px] font-bold border cursor-pointer ${
                               extendedMins === 15 ? "bg-slate-900 text-white border-slate-950" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                             }`}
                           >
@@ -991,7 +962,7 @@ export default function HourlyAttendance() {
                           </button>
                           <button
                             onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 30)}
-                            className={`px-2 py-0.5 rounded text-xs font-bold border cursor-pointer ${
+                            className={`px-2.5 py-1 rounded text-[13px] font-bold border cursor-pointer ${
                               extendedMins === 30 ? "bg-slate-900 text-white border-slate-950" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                             }`}
                           >
@@ -999,7 +970,7 @@ export default function HourlyAttendance() {
                           </button>
                           <button
                             onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 60)}
-                            className={`px-2 py-0.5 rounded text-xs font-bold border cursor-pointer ${
+                            className={`px-2.5 py-1 rounded text-[13px] font-bold border cursor-pointer ${
                               extendedMins === 60 ? "bg-slate-900 text-white border-slate-950" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                             }`}
                           >
@@ -1008,7 +979,7 @@ export default function HourlyAttendance() {
                           {extendedMins > 0 && (
                             <button
                               onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 0)}
-                              className="px-2 py-0.5 rounded text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer"
+                              className="px-2.5 py-1 rounded text-[13px] font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer"
                               title="Reset extra buffer time"
                             >
                               Reset
@@ -1106,7 +1077,7 @@ export default function HourlyAttendance() {
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 p-1.5 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1149,14 +1120,14 @@ export default function HourlyAttendance() {
                   <button
                     type="button"
                     onClick={() => setAssignModalOpen(false)}
-                    className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={assigning || !selectedMentorId}
-                    className="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-bold flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
                   >
                     {assigning ? (
                       <>
@@ -1187,7 +1158,7 @@ export default function HourlyAttendance() {
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 p-1.5 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1290,14 +1261,14 @@ export default function HourlyAttendance() {
                   <button
                     type="button"
                     onClick={() => setNewClassModalOpen(false)}
-                    className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creatingClass}
-                    className="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-bold flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
                   >
                     {creatingClass ? (
                       <>

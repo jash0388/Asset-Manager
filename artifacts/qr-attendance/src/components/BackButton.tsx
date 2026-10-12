@@ -1,14 +1,22 @@
 import { Link } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
-export function BackButton({ to = "/dashboard", label = "Back" }: { to?: string; label?: string }) {
+export function BackButton({
+  to = "/dashboard",
+  label = "Back",
+  className = "mb-4",
+}: {
+  to?: string;
+  label?: string;
+  className?: string;
+}) {
   return (
     <Link href={to}>
       <button
         data-testid="back-button"
-        className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 text-sm font-medium transition-colors border border-gray-200"
+        className={`inline-flex items-center gap-0.5 h-9 -ml-1.5 pl-0.5 pr-2.5 rounded-full text-[16px] font-medium text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer ${className}`}
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ChevronLeft className="w-5 h-5" strokeWidth={2.2} />
         {label}
       </button>
     </Link>

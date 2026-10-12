@@ -130,7 +130,7 @@ function HistoryPanel({ userId }: { userId: number }) {
           </div>
           <div>
             <h2 className="text-base font-bold text-gray-900">{user.name}</h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-[15px] text-ink-500 mt-1">
               {user.role === "student" ? "Student" : "Staff"} · ID: <span className="font-mono font-semibold text-gray-700">{user.uniqueId}</span>
             </p>
           </div>
@@ -179,14 +179,14 @@ function HistoryPanel({ userId }: { userId: number }) {
           <div className="flex items-end gap-2">
             <button
               onClick={() => setApplied({ ...(from ? { from } : {}), ...(to ? { to } : {}) })}
-              className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-xs"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-bold transition-colors shadow-xs"
             >
               Apply
             </button>
             <button
               onClick={exportCsv}
               disabled={!records.length}
-              className="px-3 py-1.5 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 text-gray-700 text-xs font-bold border border-gray-200 shadow-xs flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 text-gray-700 text-[13px] font-bold border border-gray-200 shadow-xs flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" /> Export
             </button>
@@ -261,11 +261,11 @@ export default function History() {
 
   return (
     <Layout>
-      <div className="p-3 sm:p-4 max-w-5xl mx-auto space-y-3">
-        <BackButton />
+      <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-6">
+        <BackButton className="mb-0" />
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Student History</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Search and view complete attendance history</p>
+          <h1 className="text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">Student History</h1>
+          <p className="text-[15px] text-ink-500 mt-1">Search and view complete attendance history</p>
         </div>
 
         {/* Search */}
@@ -294,7 +294,7 @@ export default function History() {
                     data-testid={`search-result-${user.id}`}
                     key={user.id}
                     onClick={() => { setSelectedUserId(user.id); setQuery(""); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 text-left transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-gray-50 text-left transition-colors"
                   >
                     <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
                       {user.name.charAt(0).toUpperCase()}

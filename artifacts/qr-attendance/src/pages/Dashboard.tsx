@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useGetDashboardStats, useGetCurrentlyInside, customFetch } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
-import { Users, UserCheck, Clock, TrendingUp, ArrowRight, Circle, BookOpen } from "lucide-react";
+import { Users, UserCheck, Clock, TrendingUp, ArrowRight, BookOpen } from "lucide-react";
 import { Link } from "wouter";
 
 function StatCard({
@@ -19,44 +19,29 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-3.5 shadow-xs">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
-          <p data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
-            {value}
-          </p>
-          {sub && <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>}
-        </div>
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${color} shadow-xs`}>
-          <Icon className="w-4 h-4" />
-        </div>
-      </div>
+    <div className="rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-6">
+      <span className={`h-10 w-10 rounded-[12px] flex items-center justify-center text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] ${color}`}>
+        <Icon className="w-5 h-5" />
+      </span>
+      <p data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`} className="mt-5 text-[34px] leading-none font-bold tracking-[-0.03em] text-ink-900">
+        {value}
+      </p>
+      <p className="mt-2 text-[15px] font-semibold text-ink-900">{label}</p>
+      {sub && <p className="mt-0.5 text-[13px] text-ink-500">{sub}</p>}
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === "inside") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300">
-        <Circle className="w-2 h-2 fill-current text-emerald-600" />
-        In Campus
-      </span>
-    );
-  }
-  if (status === "left") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs font-bold border border-gray-300">
-        <Circle className="w-2 h-2 fill-current text-gray-500" />
-        Left Campus
-      </span>
-    );
-  }
+  const map: Record<string, { label: string; dot: string; text: string }> = {
+    inside: { label: "On campus", dot: "bg-[#34c759]", text: "text-[#248a3d]" },
+    left: { label: "Left", dot: "bg-ink-300", text: "text-ink-500" },
+  };
+  const s = map[status] ?? { label: "Present", dot: "bg-[#0a84ff]", text: "text-blue-600" };
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-bold border border-blue-300">
-      <Circle className="w-2 h-2 fill-current text-blue-600" />
-      Present
+    <span className={`inline-flex items-center gap-1.5 text-[12px] font-semibold ${s.text}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+      {s.label}
     </span>
   );
 }
@@ -128,197 +113,176 @@ export default function Dashboard() {
     return list;
   }, [todayClassPresence, gateScannedUserIds, allUsers]);
 
+  const insideCount = data?.currentlyInsideCount ?? insideList.length;
+
   return (
     <Layout>
-      <div className="p-3 sm:p-4 max-w-7xl mx-auto space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Dashboard Overview</h1>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-            </p>
+      <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-10 font-sans">
+        <div>
+          <p className="text-[13px] font-medium text-ink-500">
+            {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </p>
+          <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">Overview</h1>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="lg:col-span-2 rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] rounded-[28px] relative overflow-hidden p-9 lg:p-11 flex flex-col justify-between min-h-[280px]">
+            <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-br from-[#34c759]/20 to-[#5ac8fa]/10 blur-2xl" />
+            <div className="relative">
+              <p className="text-[15px] font-semibold text-[#248a3d] flex items-center gap-2">
+                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-[#34c759] opacity-60 animate-ping" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[#34c759]" /></span>
+                Live
+              </p>
+              <h2 className="mt-3 text-[40px] lg:text-[48px] leading-[1.04] font-bold tracking-[-0.035em] text-ink-900">
+                {stats.isLoading ? "Loading campus…" : `${insideCount} people on campus.`}
+                <span className="block text-ink-400">{data?.todayAttendanceCount ?? 0} checked in today.</span>
+              </h2>
+            </div>
+            <div className="relative mt-10 flex flex-wrap items-center gap-2">
+              <Link href="/scanner">
+                <span className="inline-flex h-11 px-6 items-center rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium transition-colors cursor-pointer">Open scanner</span>
+              </Link>
+              <Link href="/attendance">
+                <span className="inline-flex h-11 px-5 items-center gap-1 rounded-full text-blue-600 hover:bg-blue-50 text-[15px] font-medium transition-colors cursor-pointer">
+                  View attendance <ArrowRight className="w-4 h-4" />
+                </span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] rounded-[28px] p-9 flex flex-col justify-between">
+            <span className="h-12 w-12 rounded-[14px] bg-[#5856d6] flex items-center justify-center text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
+              <BookOpen className="w-6 h-6" />
+            </span>
+            <div className="mt-8">
+              <p className="text-[56px] leading-none font-bold tracking-[-0.04em] text-ink-900">{inClassUnscannedStudents.length}</p>
+              <p className="mt-3 text-[17px] font-semibold text-ink-900">In class, gate missed</p>
+              <p className="mt-1 text-[14px] text-ink-500">Marked present by faculty but never scanned at the gate.</p>
+            </div>
           </div>
         </div>
 
-        {/* Top Metric Cards */}
         {stats.isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 animate-pulse">
-                <div className="h-3 bg-gray-200 rounded w-2/3 mb-2" />
-                <div className="h-6 bg-gray-200 rounded w-1/2" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-6 animate-pulse">
+                <div className="h-10 w-10 rounded-[12px] bg-ink-100" />
+                <div className="mt-5 h-8 bg-ink-100 rounded-full w-1/2" />
+                <div className="mt-3 h-3 bg-ink-50 rounded-full w-2/3" />
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
-            <StatCard
-              label="Total Users"
-              value={data?.totalUsers ?? 0}
-              icon={Users}
-              color="bg-blue-100 text-blue-700"
-              sub={`${data?.totalStudents ?? 0} students, ${data?.totalStaff ?? 0} staff`}
-            />
-            <StatCard
-              label="Gate Check-ins"
-              value={data?.todayAttendanceCount ?? 0}
-              icon={UserCheck}
-              color="bg-emerald-100 text-emerald-700"
-              sub="Scanned at campus gate"
-            />
-            <StatCard
-              label="Still on Campus"
-              value={data?.currentlyInsideCount ?? 0}
-              icon={Clock}
-              color="bg-orange-100 text-orange-700"
-              sub="Inside college now"
-            />
-            <StatCard
-              label="In Class (Gate Missed)"
-              value={inClassUnscannedStudents.length}
-              icon={BookOpen}
-              color="bg-indigo-100 text-indigo-700"
-              sub="In lecture, gate missed"
-            />
-            <StatCard
-              label="Total Students"
-              value={data?.totalStudents ?? 0}
-              icon={TrendingUp}
-              color="bg-purple-100 text-purple-700"
-              sub={`${data?.totalStaff ?? 0} staff members`}
-            />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            <StatCard label="Total Users" value={data?.totalUsers ?? 0} icon={Users} color="bg-[#0a84ff]" sub={`${data?.totalStudents ?? 0} students, ${data?.totalStaff ?? 0} staff`} />
+            <StatCard label="Gate Check-ins" value={data?.todayAttendanceCount ?? 0} icon={UserCheck} color="bg-[#34c759]" sub="Scanned at campus gate" />
+            <StatCard label="Still on Campus" value={data?.currentlyInsideCount ?? 0} icon={Clock} color="bg-[#ff9500]" sub="Inside college now" />
+            <StatCard label="Total Students" value={data?.totalStudents ?? 0} icon={TrendingUp} color="bg-[#ff2d55]" sub={`${data?.totalStaff ?? 0} staff members`} />
           </div>
         )}
 
-        {/* 3 Main Activity Columns */}
-        <div className="grid lg:grid-cols-3 gap-3">
-          {/* Recent Gate Activity */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
-            <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-gray-100 bg-gray-50/80">
-              <h2 className="text-xs font-bold text-gray-900">Recent Gate Activity</h2>
+        <div className="grid lg:grid-cols-3 gap-6">
+          <section className="flex flex-col">
+            <div className="flex items-end justify-between px-1 mb-3">
+              <div>
+                <h2 className="text-[20px] font-bold tracking-[-0.02em] text-ink-900">Recent activity</h2>
+                <p className="text-[13px] text-ink-500">Latest gate scans</p>
+              </div>
               <Link href="/attendance">
-                <span className="text-[11px] text-blue-700 font-bold hover:text-blue-800 flex items-center gap-1 cursor-pointer">
-                  View all <ArrowRight className="w-3 h-3" />
-                </span>
+                <span className="text-[14px] font-medium text-blue-600 hover:underline flex items-center gap-0.5 cursor-pointer">See all <ArrowRight className="w-3.5 h-3.5" /></span>
               </Link>
             </div>
-            <div data-testid="recent-activity-table" className="divide-y divide-gray-200 max-h-96 overflow-y-auto flex-1">
+            <div data-testid="recent-activity-table" className="rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] overflow-hidden divide-y divide-black/[0.05] max-h-[460px] overflow-y-auto flex-1">
               {stats.isLoading ? (
-                [...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-5 py-3 animate-pulse">
-                    <div className="w-8 h-8 rounded-full bg-gray-200" />
+                [...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 px-5 py-3.5 animate-pulse">
+                    <div className="w-9 h-9 rounded-full bg-ink-100" />
                     <div className="flex-1">
-                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
-                      <div className="h-2 bg-gray-100 rounded w-1/3" />
+                      <div className="h-3 bg-ink-100 rounded-full w-1/2 mb-2" />
+                      <div className="h-2.5 bg-ink-50 rounded-full w-1/3" />
                     </div>
                   </div>
                 ))
               ) : !data?.recentActivity?.length ? (
-                <div className="px-5 py-12 text-center text-sm text-gray-400 font-medium">No activity today yet</div>
+                <div className="px-6 py-16 text-center text-[14px] text-ink-400">No activity today yet</div>
               ) : (
                 data.recentActivity.map((rec) => (
-                  <div key={rec.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-800 flex-shrink-0">
-                      {rec.user?.name?.charAt(0).toUpperCase()}
-                    </div>
+                  <div key={rec.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-black/[0.02] transition-colors">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-b from-[#d1d1d6] to-[#aeaeb2] flex items-center justify-center text-[13px] font-semibold text-white flex-shrink-0">{rec.user?.name?.charAt(0).toUpperCase()}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{rec.user?.name}</p>
-                      <p className="text-xs text-gray-500 font-mono">
-                        {rec.user?.role === "student" ? "Student" : "Staff"} · {rec.user?.uniqueId}
-                      </p>
+                      <p className="text-[14px] font-medium text-ink-900 truncate">{rec.user?.name}</p>
+                      <p className="text-[12px] text-ink-500">{rec.user?.role === "student" ? "Student" : "Staff"} · {rec.user?.uniqueId}</p>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="flex flex-col items-end gap-0.5">
                       <StatusBadge status={rec.status} />
-                      <span className="text-xs text-gray-400 font-mono">{formatTime(rec.entryTime)}</span>
+                      <span className="text-[12px] text-ink-400 tabular-nums">{formatTime(rec.entryTime)}</span>
                     </div>
                   </div>
                 ))
               )}
             </div>
-          </div>
-
-          {/* Currently On Campus */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50/50">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <h2 className="text-sm font-bold text-gray-900">Currently On Campus</h2>
+          </section>
+          <section className="flex flex-col">
+            <div className="flex items-end justify-between px-1 mb-3">
+              <div>
+                <h2 className="text-[20px] font-bold tracking-[-0.02em] text-ink-900">On campus</h2>
+                <p className="text-[13px] text-ink-500">Inside college right now</p>
               </div>
-              <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-300">
-                {insideList.length} inside
-              </span>
+              <span className="text-[13px] font-semibold text-[#248a3d] bg-[#34c759]/10 px-2.5 py-1 rounded-full">{insideList.length} inside</span>
             </div>
-            <div data-testid="currently-inside-list" className="divide-y divide-gray-200 max-h-96 overflow-y-auto flex-1">
+            <div data-testid="currently-inside-list" className="rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] overflow-hidden divide-y divide-black/[0.05] max-h-[460px] overflow-y-auto flex-1">
               {inside.isLoading ? (
-                [...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-5 py-3 animate-pulse">
-                    <div className="w-8 h-8 rounded-full bg-gray-200" />
+                [...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 px-5 py-3.5 animate-pulse">
+                    <div className="w-9 h-9 rounded-full bg-ink-100" />
                     <div className="flex-1">
-                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
-                      <div className="h-2 bg-gray-100 rounded w-1/3" />
+                      <div className="h-3 bg-ink-100 rounded-full w-1/2 mb-2" />
+                      <div className="h-2.5 bg-ink-50 rounded-full w-1/3" />
                     </div>
                   </div>
                 ))
               ) : !insideList.length ? (
-                <div className="px-5 py-12 text-center text-sm text-gray-400 font-medium">No one currently on campus</div>
+                <div className="px-6 py-16 text-center text-[14px] text-ink-400">No one currently on campus</div>
               ) : (
                 insideList.map((rec) => (
-                  <div key={rec.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-xs font-bold text-emerald-800 flex-shrink-0">
-                      {rec.user?.name?.charAt(0).toUpperCase()}
+                  <Link key={rec.id} href={`/history/${rec.userId}`}>
+                    <div className="flex items-center gap-3 px-5 py-3.5 hover:bg-black/[0.02] transition-colors cursor-pointer group">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-b from-[#d1d1d6] to-[#aeaeb2] flex items-center justify-center text-[13px] font-semibold text-white flex-shrink-0">{rec.user?.name?.charAt(0).toUpperCase()}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[14px] font-medium text-ink-900 truncate">{rec.user?.name}</p>
+                        <p className="text-[12px] text-ink-500 capitalize">{rec.user?.role} · In {formatTime(rec.entryTime)}</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-ink-300 group-hover:text-ink-500 transition-colors" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{rec.user?.name}</p>
-                      <p className="text-xs text-gray-500 font-mono">{rec.user?.role} · In: {formatTime(rec.entryTime)}</p>
-                    </div>
-                    <Link href={`/history/${rec.userId}`}>
-                      <span className="text-xs text-gray-400 hover:text-blue-700 cursor-pointer">
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </Link>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
-          </div>
-
-          {/* In Class (Gate Scan Missed) */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-blue-50/50">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-blue-600" />
-                <h2 className="text-sm font-bold text-gray-900">In Class (Gate Scan Missed)</h2>
+          </section>
+          <section className="flex flex-col">
+            <div className="flex items-end justify-between px-1 mb-3">
+              <div>
+                <h2 className="text-[20px] font-bold tracking-[-0.02em] text-ink-900">Gate missed</h2>
+                <p className="text-[13px] text-ink-500">In lecture without a gate scan</p>
               </div>
-              <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full border border-blue-300">
-                {inClassUnscannedStudents.length} Students
-              </span>
+              <span className="text-[13px] font-semibold text-[#5856d6] bg-[#5856d6]/10 px-2.5 py-1 rounded-full">{inClassUnscannedStudents.length} students</span>
             </div>
-            <div data-testid="in-class-unscanned-list" className="divide-y divide-gray-200 max-h-96 overflow-y-auto flex-1">
+            <div data-testid="in-class-unscanned-list" className="rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] overflow-hidden divide-y divide-black/[0.05] max-h-[460px] overflow-y-auto flex-1">
               {inClassUnscannedStudents.length === 0 ? (
-                <div className="px-5 py-12 text-center text-sm text-gray-400 font-medium">
-                  No students marked in class without gate scan today
-                </div>
+                <div className="px-6 py-16 text-center text-[14px] text-ink-400">No students marked in class without gate scan today</div>
               ) : (
                 inClassUnscannedStudents.map((st) => (
-                  <div key={st.id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-xs font-bold text-blue-800 flex-shrink-0">
-                        {st.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{st.name}</p>
-                        <p className="text-xs text-gray-500 font-mono mt-0.5">{st.uniqueId} · {st.section}</p>
-                      </div>
+                  <div key={st.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-black/[0.02] transition-colors">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-b from-[#d1d1d6] to-[#aeaeb2] flex items-center justify-center text-[13px] font-semibold text-white flex-shrink-0">{st.name.charAt(0)}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-medium text-ink-900 truncate">{st.name}</p>
+                      <p className="text-[12px] text-ink-500">{st.uniqueId} · {st.section}</p>
                     </div>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300 shrink-0">
-                      <BookOpen className="w-3 h-3 text-blue-600" />
-                      Gate Missed
-                    </span>
                   </div>
                 ))
               )}
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </Layout>

@@ -124,7 +124,7 @@ export function CustomMonthSelector({ value, onChange }: { value: string; onChan
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+        className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 text-[13px] sm:text-[15px] font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
       >
         <Calendar className="w-4 h-4 text-blue-600" />
         <span>{monthNames[(month || 1) - 1]} {year}</span>
@@ -138,7 +138,7 @@ export function CustomMonthSelector({ value, onChange }: { value: string; onChan
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer"
+                className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -146,7 +146,7 @@ export function CustomMonthSelector({ value, onChange }: { value: string; onChan
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer"
+                className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -160,7 +160,7 @@ export function CustomMonthSelector({ value, onChange }: { value: string; onChan
                     key={name}
                     type="button"
                     onClick={() => handleSelectMonth(idx)}
-                    className={`py-2 px-2 text-xs rounded-xl font-bold transition-all cursor-pointer ${
+                    className={`py-2.5 px-2.5 text-[13px] rounded-xl font-bold transition-all cursor-pointer ${
                       isSelected
                         ? "bg-blue-600 text-white shadow-xs font-black"
                         : "text-slate-700 hover:bg-slate-100"
@@ -437,7 +437,7 @@ export default function StudentProfileModal({
                 type="button"
                 onClick={handleCloseWithHistory}
                 aria-label="Close Profile"
-                className="flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-all cursor-pointer font-bold text-xs sm:text-sm shadow-xs active:scale-95"
+                className="flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-all cursor-pointer font-bold text-[13px] sm:text-[15px] shadow-xs active:scale-95"
               >
                 <X className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 group-hover:text-rose-600" />
                 <span>Close</span>
@@ -570,7 +570,7 @@ export default function StudentProfileModal({
             <button
               type="button"
               onClick={handleDownloadCSV}
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all shadow-xs active:scale-[0.98] self-start sm:self-auto"
+              className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] sm:text-[15px] font-bold flex items-center gap-2 cursor-pointer transition-all shadow-xs active:scale-[0.98] self-start sm:self-auto"
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Download Register (.csv)</span>
@@ -621,7 +621,7 @@ export default function StudentProfileModal({
                         key={d.dateStr}
                         type="button"
                         onClick={() => setSelectedDayDetail(isSelected ? null : d)}
-                        className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[64px] sm:min-h-[72px] ${
+                        className={`p-2.5 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[64px] sm:min-h-[72px] ${
                           isSelected
                             ? "ring-2 ring-blue-600 bg-blue-50/70 border-blue-400 shadow-md scale-[1.02] z-10"
                             : "hover:border-slate-400 hover:shadow-2xs"
@@ -695,7 +695,7 @@ export default function StudentProfileModal({
                   <button
                     type="button"
                     onClick={() => setSelectedDayDetail(null)}
-                    className="text-xs font-bold text-slate-500 hover:text-slate-800 px-2 py-1 rounded-lg hover:bg-blue-100/50 cursor-pointer"
+                    className="text-[13px] font-bold text-slate-500 hover:text-slate-800 px-2.5 py-1.5 rounded-lg hover:bg-blue-100/50 cursor-pointer"
                   >
                     Close Log
                   </button>
@@ -791,7 +791,7 @@ export default function StudentProfileModal({
             <button
               type="button"
               onClick={handleCloseWithHistory}
-              className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold transition-all cursor-pointer border border-slate-200 active:scale-95 shadow-xs"
+              className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[13px] sm:text-[15px] font-bold transition-all cursor-pointer border border-slate-200 active:scale-95 shadow-xs"
             >
               Close Profile
             </button>

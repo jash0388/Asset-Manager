@@ -171,7 +171,7 @@ export default function ParentApp() {
               <button
                 onClick={() => fetchReport(data.student.uniqueId)}
                 disabled={loading}
-                className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-slate-700 transition-all"
+                className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-[13px] font-bold flex items-center gap-1.5 border border-slate-700 transition-all"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
                 Refresh
@@ -199,7 +199,7 @@ export default function ParentApp() {
             <button
               type="submit"
               disabled={loading || !rollInput.trim()}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 shrink-0 active:scale-95"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-black text-[13px] uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 shrink-0 active:scale-95"
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Check Attendance"}
             </button>

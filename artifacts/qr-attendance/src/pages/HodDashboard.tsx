@@ -136,7 +136,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+        className="px-5 py-3 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-[15px] font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
       >
         <Calendar className="w-4 h-4 text-blue-600" />
         <span>{monthNames[month - 1]} {year}</span>
@@ -150,7 +150,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &larr;
               </button>
@@ -158,7 +158,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
               >
                 &rarr;
               </button>
@@ -172,7 +172,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     key={mName}
                     type="button"
                     onClick={() => handleSelectMonth(idx)}
-                    className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       isSelected 
                         ? "bg-blue-600 text-white shadow-sm" 
                         : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-slate-700"
@@ -2733,33 +2733,23 @@ export default function HodDashboard() {
 
   return (
     <Layout>
-      <div className="px-4 py-3 max-w-6xl mx-auto space-y-3 font-sans">
-        
-        {/* Header section & Top Module Navigation Bar (only show on main HOD Dashboard views) */}
+      <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-8 font-sans">
+
         {activeTab !== "flags" && activeTab !== "student-analytics" && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                  <GraduationCap className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-extrabold text-gray-800 tracking-tight leading-tight">HOD Dashboard</h1>
-                  <p className="text-[11px] text-gray-400 font-medium -mt-0.5">Department of Data Science (DS)</p>
-                </div>
+          <div className="space-y-6">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+              <div>
+                <p className="text-[13px] font-medium text-ink-500">
+                  Department of Data Science · {new Date((activeTab === "summary" ? selectedDate : logDate) + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
+                </p>
+                <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">
+                  {activeTab === "summary" ? "Overview" : activeTab === "logs" ? "Attendance Logs" : activeTab === "mentors" ? "Mentors" : "Timetable"}
+                </h1>
               </div>
-              
+
               <div className="flex items-center gap-2">
-                <button
-                  onClick={openPwdModal}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:border-blue-400 hover:shadow-md text-gray-500 hover:text-blue-600 font-semibold text-xs transition-all cursor-pointer"
-                  title="Change scanner passcode"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Settings</span>
-                </button>
-                <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-2.5 py-2 shadow-sm hover:border-blue-400 transition-colors">
-                  <Calendar className="w-3.5 h-3.5 text-blue-600 pointer-events-none" />
+                <label className="flex items-center gap-2 h-9 rounded-[10px] bg-white px-3 text-[13px] font-medium text-ink-900 shadow-[0_0_0_0.5px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)] hover:bg-ink-50 transition-colors cursor-pointer">
+                  <Calendar className="w-4 h-4 text-blue-600 pointer-events-none" />
                   <input
                     type="date"
                     value={activeTab === "summary" ? selectedDate : logDate}
@@ -2769,221 +2759,177 @@ export default function HodDashboard() {
                         setLogDate(e.target.value);
                       }
                     }}
-                    className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer [color-scheme:light]"
+                    className="bg-transparent text-[13px] font-medium text-ink-900 outline-none cursor-pointer [color-scheme:light]"
                   />
-                </div>
+                </label>
+                <button onClick={openPwdModal} className="flex items-center gap-2 h-10 rounded-[10px] bg-white px-3.5 text-[14px] font-medium text-ink-900 shadow-[0_0_0_0.5px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)] hover:bg-ink-50 transition-colors cursor-pointer" title="Change scanner passcode">
+                  <Settings className="w-4 h-4 text-ink-500" />
+                  <span className="hidden sm:inline">Scanner Passcode</span>
+                </button>
               </div>
             </div>
 
-            {/* Top Module Navigation Bar */}
-            <div className="flex flex-wrap items-center bg-slate-100/90 border border-slate-200 p-1 rounded-xl w-fit shadow-2xs gap-1">
-              <button
-                onClick={() => setActiveTab("summary")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "summary"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <Grid3X3 className="w-3.5 h-3.5" />
-                Summary
-              </button>
-              <button
-                onClick={() => setActiveTab("logs")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "logs"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <ClipboardList className="w-3.5 h-3.5" />
-                Logs
-              </button>
-              <button
-                onClick={() => setActiveTab("mentors")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "mentors"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <GraduationCap className="w-3.5 h-3.5" />
-                Mentors
-              </button>
-              <button
-                onClick={() => setActiveTab("schedules")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "schedules"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
-                }`}
-              >
-                <Calendar className="w-3.5 h-3.5" />
-                Timetable
-              </button>
+            <div className="inline-flex rounded-[10px] bg-black/[0.05] p-[3px]">
+              {([
+                { key: "summary", label: "Overview" },
+                { key: "logs", label: "Logs" },
+                { key: "mentors", label: "Mentors" },
+                { key: "schedules", label: "Timetable" },
+              ] as const).map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`h-9 min-w-[96px] px-5 rounded-[8px] text-[14px] font-medium transition-all cursor-pointer ${
+                    activeTab === key
+                      ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]"
+                      : "text-ink-600 hover:text-ink-900"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         )}
 
         {activeTab === "summary" ? (
           <>
-            {/* Compact inline stats bar */}
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm">
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <Users className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs text-gray-400 font-medium">Total</span>
-                <span className="text-lg font-extrabold text-gray-800">{overallTotalStudents}</span>
-              </div>
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="text-xs text-gray-400 font-medium">Present</span>
-                <span className="text-lg font-extrabold text-emerald-600">{overallTotalPresent}</span>
-              </div>
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <XCircle className="w-3.5 h-3.5 text-red-400" />
-                <span className="text-xs text-gray-400 font-medium">Absent</span>
-                <span className="text-lg font-extrabold text-red-500">{overallTotalAbsent}</span>
-              </div>
-              <div className="flex items-center gap-1.5 ml-auto">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                  <span className="text-[11px] font-black text-white">{overallDeptPercentage}%</span>
-                </div>
-                <span className="text-xs text-gray-400 font-medium">Dept.</span>
-              </div>
-            </div>
-
-            {/* Main Grid View */}
             {usersLoading || attendanceLoading ? (
-              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-gray-500">Loading student rosters & attendance records...</p>
+              <div className="rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-24 flex flex-col items-center justify-center gap-4">
+                <div className="w-7 h-7 border-[3px] border-ink-200 border-t-ink-500 rounded-full animate-spin"></div>
+                <p className="text-[13px] text-ink-500">Loading attendance…</p>
               </div>
             ) : (
-              <Card className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/80 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-                        <th className="py-2.5 px-4">Section</th>
-                        <th className="py-2.5 px-4 text-center">Present</th>
-                        <th className="py-2.5 px-4 text-center">Absent</th>
-                        <th className="py-2.5 px-4 text-center">Total</th>
-                        <th className="py-2.5 px-4 text-center">%</th>
-                        <th className="py-2.5 px-4 w-32"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {yearGroups.map(year => {
-                        const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
-                        if (sectionsInYear.length === 0) return null;
+              <div className="space-y-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  <div className="lg:col-span-2 rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] relative overflow-hidden p-9 lg:p-11 flex flex-col justify-between min-h-[300px]">
+                    <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-br from-[#5ac8fa]/25 to-[#0071e3]/10 blur-2xl" />
+                    <div className="relative">
+                      <p className="text-[15px] font-semibold text-blue-600">Today</p>
+                      <h2 className="mt-3 text-[40px] lg:text-[48px] leading-[1.04] font-bold tracking-[-0.035em] text-ink-900">
+                        {overallTotalPresent} students are in.
+                        <span className="block text-ink-400">{overallTotalAbsent} haven't arrived.</span>
+                      </h2>
+                    </div>
+                    <div className="relative mt-10 flex flex-wrap items-center gap-2">
+                      <button onClick={() => setActiveTab("logs")} className="h-12 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[16px] font-medium transition-colors cursor-pointer">
+                        Open today's log
+                      </button>
+                      <button onClick={() => setActiveTab("flags")} className="h-12 px-6 rounded-full text-blue-600 hover:bg-blue-50 text-[16px] font-medium flex items-center gap-1 transition-colors cursor-pointer">
+                        Review risk flags <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
 
-                        let yearPresent = 0;
-                        let yearAbsent = 0;
-                        let yearTotal = 0;
-
-                        sectionsInYear.forEach(s => {
-                          yearPresent += s.presentStudents.length;
-                          yearAbsent += s.absentStudents.length;
-                          yearTotal += s.totalStudents.length;
-                        });
-
-                        const yearPercentage = yearTotal > 0 
-                          ? Math.round((yearPresent / yearTotal) * 100) 
-                          : 0;
-
-                        return (
-                          <>
-                            {sectionsInYear.map(s => {
-                              const percent = s.totalStudents.length > 0 
-                                ? (s.presentStudents.length / s.totalStudents.length) * 100 
-                                : 0;
-                              const barWidth = Math.min(percent, 100);
-
-                              return (
-                                <tr key={s.sectionKey} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                                  <td className="py-2 px-4 font-bold text-gray-700 text-sm">{s.displayName}</td>
-                                  
-                                  <td 
-                                    onClick={() => handleCellClick("PR", s)}
-                                    className="py-2 px-4 text-center text-emerald-600 font-bold cursor-pointer hover:bg-emerald-50 active:scale-[0.97] transition-all text-sm"
-                                    title="Present Students"
-                                  >
-                                    {s.presentStudents.length}
-                                  </td>
-
-                                  <td 
-                                    onClick={() => handleCellClick("AB", s)}
-                                    className="py-2 px-4 text-center text-red-500 font-semibold cursor-pointer hover:bg-red-50 active:scale-[0.97] transition-all text-sm"
-                                  >
-                                    {s.absentStudents.length}
-                                  </td>
-                                  
-                                  <td 
-                                    onClick={() => handleCellClick("Total", s)}
-                                    className="py-2 px-4 text-center text-gray-500 font-medium cursor-pointer hover:bg-gray-100/50 active:scale-[0.97] transition-all text-sm"
-                                  >
-                                    {s.totalStudents.length}
-                                  </td>
-                                  
-                                  <td className="py-2 px-4 text-center">
-                                    <span className={`text-sm font-bold ${getPercentageColor(percent)}`}>
-                                      {Math.round(percent)}%
-                                    </span>
-                                  </td>
-
-                                  <td className="py-2 px-4">
-                                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                      <div 
-                                        className={`h-full rounded-full transition-all duration-500 ${
-                                          percent >= 75 ? 'bg-emerald-400' : percent >= 50 ? 'bg-amber-400' : 'bg-red-400'
-                                        }`}
-                                        style={{ width: `${barWidth}%` }}
-                                      />
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-
-                            {/* Year subtotal row */}
-                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50/50 border-b border-blue-100">
-                              <td className="py-2 px-4 font-black text-blue-600 text-xs uppercase tracking-wide">⬥ {year}</td>
-                              <td className="py-2 px-4 text-center text-emerald-600 font-bold text-sm">{yearPresent}</td>
-                              <td className="py-2 px-4 text-center text-red-500 font-bold text-sm">{yearAbsent}</td>
-                              <td className="py-2 px-4 text-center text-gray-600 font-bold text-sm">{yearTotal}</td>
-                              <td className="py-2 px-4 text-center font-black text-blue-600 text-sm">
-                                {yearPercentage}%
-                              </td>
-                              <td className="py-2 px-4">
-                                <div className="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden">
-                                  <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${yearPercentage}%` }} />
-                                </div>
-                              </td>
-                            </tr>
-                          </>
-                        );
-                      })}
-                      
-                      {/* Department total footer */}
-                      <tr className="bg-white border-t-2 border-gray-200">
-                        <td colSpan={4} className="py-3 px-4 font-extrabold text-gray-700 text-xs uppercase tracking-wider text-right">
-                          Department Overall
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-black shadow-md shadow-blue-500/20">
-                            {overallDeptPercentage}%
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${overallDeptPercentage}%` }} />
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div className="rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-9 flex flex-col items-center justify-center text-center">
+                    <div className="relative h-[168px] w-[168px]">
+                      <svg viewBox="0 0 168 168" className="h-full w-full -rotate-90">
+                        <defs>
+                          <linearGradient id="hodRing" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#5ac8fa" />
+                            <stop offset="100%" stopColor="#0071e3" />
+                          </linearGradient>
+                        </defs>
+                        <circle cx="84" cy="84" r="74" fill="none" stroke="#f0f0f3" strokeWidth="14" />
+                        <circle cx="84" cy="84" r="74" fill="none" stroke="url(#hodRing)" strokeWidth="14" strokeLinecap="round"
+                          strokeDasharray={2 * Math.PI * 74} strokeDashoffset={2 * Math.PI * 74 * (1 - Math.min(overallDeptPercentage, 100) / 100)}
+                          style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.22,1,0.36,1)" }} />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-[40px] font-bold tracking-[-0.03em] text-ink-900">{overallDeptPercentage}<span className="text-[22px] text-ink-400">%</span></span>
+                      </div>
+                    </div>
+                    <p className="mt-6 text-[17px] font-semibold text-ink-900">Department attendance</p>
+                    <p className="mt-1 text-[14px] text-ink-500">
+                      {overallDeptPercentage >= 75 ? "Healthy. Above the 75% requirement." : `${75 - overallDeptPercentage}% short of the 75% requirement.`}
+                    </p>
+                  </div>
                 </div>
-              </Card>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+                  {([
+                    { title: "Risk Flags", caption: "Students under 75%", icon: Flag, color: "bg-[#ff3b30]", onClick: () => setActiveTab("flags") },
+                    { title: "Students", caption: "Profiles and reports", icon: Users, color: "bg-[#0a84ff]", onClick: () => setActiveTab("student-analytics") },
+                    { title: "Mentors", caption: "Class incharges", icon: GraduationCap, color: "bg-[#5856d6]", onClick: () => setActiveTab("mentors") },
+                    { title: "Timetable", caption: "Weekly schedules", icon: Calendar, color: "bg-[#34c759]", onClick: () => setActiveTab("schedules") },
+                  ]).map(({ title, caption, icon: TileIcon, color, onClick }) => (
+                    <button key={title} onClick={onClick} className="group rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-6 text-left transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_12px_32px_rgba(0,0,0,0.08)] cursor-pointer">
+                      <span className={`h-12 w-12 rounded-[14px] ${color} flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]`}>
+                        <TileIcon className="w-6 h-6 text-white" strokeWidth={2} />
+                      </span>
+                      <p className="mt-5 text-[17px] font-semibold text-ink-900">{title}</p>
+                      <p className="mt-0.5 text-[14px] text-ink-500 flex items-center justify-between">
+                        {caption}
+                        <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-ink-500 group-hover:translate-x-0.5 transition-all" />
+                      </p>
+                    </button>
+                  ))}
+                </div>
+
+                {yearGroups.map(year => {
+                  const sectionsInYear = allSectionsList.filter(s => s.yearLabel === year);
+                  if (sectionsInYear.length === 0) return null;
+                  const yearPresent = sectionsInYear.reduce((a, s) => a + s.presentStudents.length, 0);
+                  const yearTotal = sectionsInYear.reduce((a, s) => a + s.totalStudents.length, 0);
+                  const yearPercentage = yearTotal > 0 ? Math.round((yearPresent / yearTotal) * 100) : 0;
+
+                  return (
+                    <section key={year}>
+                      <div className="flex items-baseline justify-between mb-5">
+                        <h2 className="text-[28px] font-bold tracking-[-0.025em] text-ink-900">{year}</h2>
+                        <p className="text-[15px] text-ink-500">{yearPercentage}% present</p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {sectionsInYear.map(s => {
+                          const percent = s.totalStudents.length > 0
+                            ? Math.round((s.presentStudents.length / s.totalStudents.length) * 100)
+                            : 0;
+                          const status = percent >= 85
+                            ? { label: "Excellent", dot: "bg-[#34c759]", text: "text-[#248a3d]" }
+                            : percent >= 75
+                            ? { label: "On track", dot: "bg-[#34c759]", text: "text-[#248a3d]" }
+                            : percent >= 60
+                            ? { label: "Needs attention", dot: "bg-[#ff9500]", text: "text-[#c93400]" }
+                            : { label: "Critical", dot: "bg-[#ff3b30]", text: "text-[#d70015]" };
+                          return (
+                            <div key={s.sectionKey} className="rounded-[28px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-7 flex flex-col transition-all duration-300 hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_12px_32px_rgba(0,0,0,0.08)]">
+                              <div className="flex items-center justify-between">
+                                <span className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${status.text}`}>
+                                  <span className={`h-2 w-2 rounded-full ${status.dot}`} />
+                                  {status.label}
+                                </span>
+                                <button onClick={() => handleCellClick("Total", s)} className="text-[14px] font-medium text-blue-600 hover:underline cursor-pointer">
+                                  View class
+                                </button>
+                              </div>
+                              <p className="mt-6 text-[56px] leading-none font-bold tracking-[-0.04em] text-ink-900">{s.displayName}</p>
+                              <button onClick={() => handleCellClick("PR", s)} title="Present Students" className="mt-2 self-start text-[16px] text-ink-500 hover:text-ink-900 transition-colors cursor-pointer">
+                                {percent}% present today
+                              </button>
+                              <div className="mt-7 pt-5 border-t border-black/[0.06] flex items-center justify-between">
+                                <div className="flex -space-x-2">
+                                  {s.absentStudents.slice(0, 4).map((st, i) => (
+                                    <span key={st.id ?? i} className="h-8 w-8 rounded-full ring-2 ring-white bg-gradient-to-b from-[#d1d1d6] to-[#aeaeb2] text-white text-[11px] font-semibold flex items-center justify-center">
+                                      {(st.name || "?").trim().charAt(0).toUpperCase()}
+                                    </span>
+                                  ))}
+                                  {s.absentStudents.length === 0 && (
+                                    <span className="h-8 w-8 rounded-full bg-[#34c759]/15 text-[#248a3d] flex items-center justify-center"><CheckCircle className="w-4 h-4" /></span>
+                                  )}
+                                </div>
+                                <button onClick={() => handleCellClick("AB", s)} className="text-[15px] font-medium text-ink-700 hover:text-blue-600 flex items-center gap-0.5 transition-colors cursor-pointer">
+                                  {s.absentStudents.length === 0 ? "Everyone's here" : `${s.absentStudents.length} absent`}
+                                  <ChevronRight className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
             )}
           </>
         ) : activeTab === "logs" ? (
@@ -3021,7 +2967,7 @@ export default function HodDashboard() {
                     setBulkMessageType("late");
                     setBulkMessageModalOpen(true);
                   }}
-                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                  className="h-10 flex items-center gap-1.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-[13px] transition-colors shadow-2xs cursor-pointer"
                   title="Send bulk notice to parents"
                 >
                   <Send className="w-3.5 h-3.5 text-rose-600" />
@@ -3035,7 +2981,7 @@ export default function HodDashboard() {
 
                 <button
                   onClick={handleExportProblemCsv}
-                  className="h-9 flex items-center gap-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+                  className="h-10 flex items-center gap-1.5 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-[13px] transition-colors shadow-2xs cursor-pointer"
                   title="Export Attendance Logs as CSV"
                 >
                   <Download className="w-3.5 h-3.5 text-slate-500" />
@@ -3044,7 +2990,7 @@ export default function HodDashboard() {
 
                 <button
                   onClick={() => setExportModalOpen(true)}
-                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                  className="h-10 flex items-center gap-1.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[13px] transition-colors shadow-xs cursor-pointer"
                   title="Open Monthly Attendance Register"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-slate-300" />
@@ -3053,7 +2999,7 @@ export default function HodDashboard() {
 
                 <button
                   onClick={() => setHolidayModalOpen(true)}
-                  className="h-9 flex items-center gap-1.5 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-xs transition-colors cursor-pointer"
+                  className="h-10 flex items-center gap-1.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-[13px] transition-colors cursor-pointer"
                   title="Configure Holidays"
                 >
                   <Calendar className="w-3.5 h-3.5 text-slate-500" />
@@ -3105,7 +3051,7 @@ export default function HodDashboard() {
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
                     onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       logViewMode === "all"
                         ? "bg-slate-900 text-white shadow-xs"
                         : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/70"
@@ -3115,7 +3061,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("problems"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                       logViewMode === "problems"
                         ? "bg-rose-700 text-white shadow-xs"
                         : "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
@@ -3126,7 +3072,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("late"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       logViewMode === "late"
                         ? "bg-amber-600 text-white shadow-xs"
                         : "bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200"
@@ -3136,7 +3082,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("unscanned"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
                       logViewMode === "unscanned"
                         ? "bg-rose-600 text-white shadow-xs"
                         : "bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200"
@@ -3150,7 +3096,7 @@ export default function HodDashboard() {
                 <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200">
                   <button
                     onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                       logViewMode !== "comparison" && logViewMode !== "trend"
                         ? "bg-white text-slate-900 shadow-2xs"
                         : "text-slate-600 hover:text-slate-900"
@@ -3162,7 +3108,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("comparison"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                       logViewMode === "comparison"
                         ? "bg-white text-slate-900 shadow-2xs"
                         : "text-slate-600 hover:text-slate-900"
@@ -3174,7 +3120,7 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("trend"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
                       logViewMode === "trend"
                         ? "bg-white text-slate-900 shadow-2xs"
                         : "text-slate-600 hover:text-slate-900"
@@ -3364,7 +3310,7 @@ export default function HodDashboard() {
                                 setLogViewMode("problems");
                                 setLogCurrentPage(1);
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-[11px] transition-colors cursor-pointer"
+                              className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-[12px] transition-colors cursor-pointer"
                             >
                               Filter →
                             </button>
@@ -3450,7 +3396,7 @@ export default function HodDashboard() {
                         const lateIds = sortedProblemItems.filter(i => i.isLate).map(i => i.student.id);
                         setSelectedStudentIds(lateIds);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-semibold transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[13px] font-semibold transition-colors cursor-pointer"
                     >
                       Select Late ({sortedProblemItems.filter(i => i.isLate).length})
                     </button>
@@ -3460,7 +3406,7 @@ export default function HodDashboard() {
                         const unscannedIds = sortedProblemItems.filter(i => i.isUnscanned).map(i => i.student.id);
                         setSelectedStudentIds(unscannedIds);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-xs font-semibold transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-[13px] font-semibold transition-colors cursor-pointer"
                     >
                       Select Unscanned ({sortedProblemItems.filter(i => i.isUnscanned).length})
                     </button>
@@ -3474,14 +3420,14 @@ export default function HodDashboard() {
                           setBulkMessageType("custom");
                           setBulkMessageModalOpen(true);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-[13px] transition-colors shadow-2xs cursor-pointer"
                       >
                         <Send className="w-3 h-3" />
                         <span>Broadcast to {selectedStudentIds.length} Parents</span>
                       </button>
                       <button
                         onClick={() => setSelectedStudentIds([])}
-                        className="text-slate-400 hover:text-slate-600 text-xs font-medium cursor-pointer"
+                        className="text-slate-400 hover:text-slate-600 text-[13px] font-medium cursor-pointer"
                       >
                         Clear
                       </button>
@@ -3673,7 +3619,7 @@ export default function HodDashboard() {
                                       setRemarkPreset(item.remark?.preset || "College Bus Delayed");
                                       setRemarkIsExcused(item.remark?.isExcused ?? true);
                                     }}
-                                    className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-900 text-[11px] font-semibold transition-all max-w-[150px] truncate text-left cursor-pointer"
+                                    className="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-900 text-[12px] font-semibold transition-all max-w-[150px] truncate text-left cursor-pointer"
                                     title="Click to edit remark"
                                   >
                                     {item.remark.preset}
@@ -3687,7 +3633,7 @@ export default function HodDashboard() {
                                       setRemarkPreset("College Bus Delayed");
                                       setRemarkIsExcused(true);
                                     }}
-                                    className="px-2.5 py-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-dashed border-slate-300 text-[11px] font-medium transition-colors cursor-pointer"
+                                    className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-dashed border-slate-300 text-[12px] font-medium transition-colors cursor-pointer"
                                   >
                                     + Add Note
                                   </button>
@@ -3703,7 +3649,7 @@ export default function HodDashboard() {
                                       setBulkMessageType(item.isLate ? "late" : "unscanned");
                                       setBulkMessageModalOpen(true);
                                     }}
-                                    className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                    className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
                                     title={`Send parent notice to ${user.name}`}
                                   >
                                     <Send className="w-3.5 h-3.5" />
@@ -3711,7 +3657,7 @@ export default function HodDashboard() {
 
                                   <button
                                     onClick={() => setSelectedStudentForDetails(user)}
-                                    className="p-1.5 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                                    className="p-2 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
                                     title="Open student profile"
                                   >
                                     <Eye className="w-3.5 h-3.5" />
@@ -3758,7 +3704,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(1)}
                         disabled={safeCurrentPage === 1}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="First Page"
                       >
                         <ChevronsLeft className="w-3.5 h-3.5" />
@@ -3767,7 +3713,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={safeCurrentPage === 1}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Previous Page"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
@@ -3780,7 +3726,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={safeCurrentPage === totalPages}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Next Page"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -3789,7 +3735,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(totalPages)}
                         disabled={safeCurrentPage === totalPages}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Last Page"
                       >
                         <ChevronsRight className="w-3.5 h-3.5" />
@@ -3848,7 +3794,7 @@ export default function HodDashboard() {
             {/* ── FILTER & TOOLBAR (COMPACT ERP BAR) ── */}
             <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div className="relative flex-1 max-w-md">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search faculty name, email, roll range..."
@@ -3880,7 +3826,7 @@ export default function HodDashboard() {
                     setMentorsYearFilter(e.target.value);
                     setMentorsPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                 >
                   <option value="All">All Academic Years</option>
                   <option value="2nd Year">2nd Year (II Year)</option>
@@ -3895,7 +3841,7 @@ export default function HodDashboard() {
                     setMentorsSectionFilter(e.target.value);
                     setMentorsPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                 >
                   <option value="All">All Sections</option>
                   <option value="2A">Section 2A</option>
@@ -3915,7 +3861,7 @@ export default function HodDashboard() {
                     setMentorsRoleFilter(e.target.value);
                     setMentorsPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                 >
                   <option value="All">All Roles</option>
                   <option value="incharge">Class In-charge & Mentor</option>
@@ -3932,7 +3878,7 @@ export default function HodDashboard() {
                       setMentorsSearchQuery("");
                       setMentorsPage(1);
                     }}
-                    className="px-2 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 transition-colors cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-[13px] font-bold border border-red-200 transition-colors cursor-pointer"
                     title="Reset all filters"
                   >
                     Reset
@@ -3946,7 +3892,7 @@ export default function HodDashboard() {
                     setMentorsPageSize(Number(e.target.value));
                     setMentorsPage(1);
                   }}
-                  className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                   title="Rows per page"
                 >
                   <option value={20}>20 rows</option>
@@ -3955,12 +3901,12 @@ export default function HodDashboard() {
                 </select>
 
                 {/* View Switcher: Table vs Cards */}
-                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                <div className="flex items-center rounded-[10px] bg-black/[0.05] p-[3px]">
                   <button
                     onClick={() => setMentorsViewMode("table")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                       mentorsViewMode === "table"
-                        ? "bg-white text-blue-700 shadow-2xs"
+                        ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                     title="Table View (Low-scrolling ERP scan)"
@@ -3969,9 +3915,9 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => setMentorsViewMode("card")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                       mentorsViewMode === "card"
-                        ? "bg-white text-blue-700 shadow-2xs"
+                        ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                     title="Card View"
@@ -3995,10 +3941,10 @@ export default function HodDashboard() {
                 <p className="text-[11px] text-slate-400 mt-0.5">Try resetting the year, section, or search query</p>
               </div>
             ) : mentorsViewMode === "table" ? (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+              <div className="bg-white rounded-[18px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-270px)] min-h-[300px] overflow-y-auto scrollbar-thin">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                    <thead className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-black/[0.06] text-ink-500 font-medium text-[12px]">
                       <tr>
                         <th className="py-2 px-2.5 text-center w-10">#</th>
                         <th className="py-2 px-3">Faculty Name & Email</th>
@@ -4010,7 +3956,7 @@ export default function HodDashboard() {
                         <th className="py-2 px-2.5 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                    <tbody className="divide-y divide-black/[0.05] text-[13px]">
                       {paginatedMentorsList.map((m, idx) => {
                         const dbMentor = mentorsTracking.find((mt: any) =>
                           mt.email?.toLowerCase() === m.email?.toLowerCase() ||
@@ -4090,14 +4036,14 @@ export default function HodDashboard() {
                                   </span>
                                   <button
                                     onClick={() => toggleRevealKey(m.id)}
-                                    className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                                     title={isKeyRevealed ? "Hide Passkey" : "Show Passkey"}
                                   >
                                     {isKeyRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                                   </button>
                                   <button
                                     onClick={() => handleCopyKey(key, m.id)}
-                                    className={`p-1 rounded transition-colors cursor-pointer ${
+                                    className={`p-1.5 rounded transition-colors cursor-pointer ${
                                       isCopied ? "bg-emerald-100 text-emerald-800" : "hover:bg-slate-100 text-slate-500 hover:text-slate-800"
                                     }`}
                                     title="Copy Passkey"
@@ -4113,7 +4059,7 @@ export default function HodDashboard() {
                               <div className="flex items-center justify-end gap-1">
                                 <button
                                   onClick={() => setSelectedMentorForModal({ ...m, key })}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-2.5 py-1 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[11.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                   title="View Mentor Details"
                                 >
                                   <span>View</span>
@@ -4131,7 +4077,7 @@ export default function HodDashboard() {
                                     setEditKeyInput(key || "");
                                     setEditMentorModalOpen(true);
                                   }}
-                                  className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
+                                  className="p-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
                                   title="Edit Passkey / Assignment"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -4146,7 +4092,7 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Compact Pagination Footer */}
-                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <div className="bg-white border-t border-black/[0.06] px-5 py-3 flex items-center justify-between text-[13px] text-ink-500">
                   <div>
                     Showing <strong className="text-slate-900">{filteredMentorsList.length === 0 ? 0 : (mentorsPage - 1) * (mentorsPageSize === -1 ? filteredMentorsList.length : mentorsPageSize) + 1}</strong> to <strong className="text-slate-900">{mentorsPageSize === -1 ? filteredMentorsList.length : Math.min(mentorsPage * mentorsPageSize, filteredMentorsList.length)}</strong> of <strong className="text-slate-900">{filteredMentorsList.length}</strong> mentors
                   </div>
@@ -4156,7 +4102,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setMentorsPage((p) => Math.max(1, p - 1))}
                         disabled={mentorsPage === 1}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Prev
                       </button>
@@ -4166,7 +4112,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setMentorsPage((p) => Math.min(totalMentorsPages, p + 1))}
                         disabled={mentorsPage >= totalMentorsPages}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Next
                       </button>
@@ -4230,7 +4176,7 @@ export default function HodDashboard() {
                           {key && (
                             <button
                               onClick={() => toggleRevealKey(m.id)}
-                              className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
+                              className="p-1.5 text-slate-500 hover:text-slate-800 cursor-pointer"
                               title={isKeyRevealed ? "Hide" : "Show"}
                             >
                               {isKeyRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
@@ -4241,7 +4187,7 @@ export default function HodDashboard() {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => setSelectedMentorForModal({ ...m, key })}
-                            className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 text-slate-700 text-[10.5px] font-bold border border-slate-200 cursor-pointer"
+                            className="px-2.5 py-1 rounded bg-slate-100 hover:bg-blue-50 text-slate-700 text-[11.5px] font-bold border border-slate-200 cursor-pointer"
                           >
                             Details
                           </button>
@@ -4258,7 +4204,7 @@ export default function HodDashboard() {
                               setEditKeyInput(key || "");
                               setEditMentorModalOpen(true);
                             }}
-                            className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer"
+                            className="p-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer"
                             title="Edit"
                           >
                             <Edit3 className="w-3 h-3" />
@@ -4311,7 +4257,7 @@ export default function HodDashboard() {
                       {/* Print / Export Timetable */}
                       <button
                         onClick={() => setTimetablePrintModalOpen(true)}
-                        className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                        className="px-3.5 py-2 rounded-lg bg-slate-50 border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-[13px] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                       >
                         <Printer className="w-3.5 h-3.5 text-blue-600" />
                         <span>Print / Export</span>
@@ -4324,7 +4270,7 @@ export default function HodDashboard() {
                           setNewHolidayReason("");
                           setHolidayModalOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-purple-50 border border-purple-300 hover:bg-purple-100 text-purple-900 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                        className="px-3.5 py-2 rounded-lg bg-purple-50 border border-purple-300 hover:bg-purple-100 text-purple-900 font-bold text-[13px] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                         title="Declare Holidays & Examination Dates"
                       >
                         <Calendar className="w-3.5 h-3.5 text-purple-700" />
@@ -4334,7 +4280,7 @@ export default function HodDashboard() {
                       {/* Assign New Class */}
                       <button
                         onClick={() => setNewClassModalOpen(true)}
-                        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95"
+                        className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[13px] flex items-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Assign Class</span>
@@ -4345,7 +4291,7 @@ export default function HodDashboard() {
                         <button
                           onClick={() => setTimetableViewMode("grid")}
                           title="Weekly Matrix Grid View"
-                          className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                          className={`p-1.5 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                             timetableViewMode === "grid" ? "bg-white text-blue-600 shadow-2xs" : "text-slate-500 hover:text-slate-900"
                           }`}
                         >
@@ -4354,7 +4300,7 @@ export default function HodDashboard() {
                         <button
                           onClick={() => setTimetableViewMode("list")}
                           title="Management List View"
-                          className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                          className={`p-1.5 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                             timetableViewMode === "list" ? "bg-white text-blue-600 shadow-2xs" : "text-slate-500 hover:text-slate-900"
                           }`}
                         >
@@ -4371,7 +4317,7 @@ export default function HodDashboard() {
                     </span>
                     <button
                       onClick={() => setSelectedTimetableSection("All")}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex-shrink-0 ${
                         selectedTimetableSection === "All"
                           ? "bg-blue-600 text-white shadow-2xs"
                           : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
@@ -4383,7 +4329,7 @@ export default function HodDashboard() {
                       <button
                         key={sec}
                         onClick={() => setSelectedTimetableSection(sec)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                        className={`px-3 py-1.5 rounded-lg text-[13px] font-bold transition-all cursor-pointer flex-shrink-0 ${
                           selectedTimetableSection === sec
                             ? "bg-blue-600 text-white shadow-2xs"
                             : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
@@ -4682,7 +4628,7 @@ export default function HodDashboard() {
                                       currentFaculty: faculty,
                                       room: isLab ? activeSecMeta.labRoom : activeSecMeta.lectureHall,
                                     })}
-                                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                    className="px-2.5 py-1 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[11px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
                                   >
                                     <Edit3 className="w-2.5 h-2.5" />
                                     <span>Reassign</span>
@@ -4739,7 +4685,7 @@ export default function HodDashboard() {
                             <td className="py-2 px-3 text-center">
                               <button
                                 onClick={() => handleToggleScheduleOverride(s.id, isUnlocked, extendedMins)}
-                                className={`px-2 py-0.5 rounded-lg font-bold text-[10px] inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] inline-flex items-center gap-1 transition-all cursor-pointer border ${
                                   isUnlocked
                                     ? "bg-emerald-600 text-white border-emerald-700"
                                     : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200"
@@ -4752,7 +4698,7 @@ export default function HodDashboard() {
                             <td className="py-2 px-2 text-center">
                               <button
                                 onClick={() => handleOpenAssignModal(s)}
-                                className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-600 hover:bg-blue-500 text-white inline-flex items-center gap-0.5 cursor-pointer"
+                                className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-blue-600 hover:bg-blue-500 text-white inline-flex items-center gap-0.5 cursor-pointer"
                               >
                                 <UserPlus className="w-3 h-3" />
                                 Assign
@@ -4768,12 +4714,17 @@ export default function HodDashboard() {
             )}
           </div>
         ) : activeTab === "student-analytics" ? (
-          <div className="space-y-2.5">
+          <div className="space-y-6">
+            <div>
+              <p className="text-[13px] font-medium text-ink-500">Department of Data Science</p>
+              <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">Students</h1>
+              <p className="mt-1 text-[15px] text-ink-500">Every student's attendance, compliance and report in one place.</p>
+            </div>
             {/* Student Analytics Search & Filter Header (Compact ERP Bar) */}
-            <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs space-y-2.5">
+            <div className="bg-white rounded-[18px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] p-4 space-y-2.5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
+                  <h3 className="text-[17px] font-semibold text-ink-900 flex items-center gap-2">
                     <Users className="w-4 h-4 text-blue-600" />
                     Student Profiles & Academic Attendance Register
                     <span className="ml-1.5 px-2 py-0.2 rounded-full text-[10.5px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
@@ -4786,7 +4737,7 @@ export default function HodDashboard() {
               {/* Toolbar: Search + Quick Filters */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 pt-1">
                 <div className="relative flex-1 max-w-md">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     placeholder="Search by full name or roll number (e.g. 23N81A6701, Naveen)..."
@@ -4795,7 +4746,7 @@ export default function HodDashboard() {
                       setAnalyticsSearchQuery(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                    className="w-full h-9 pl-9 pr-3 rounded-[10px] bg-black/[0.05] text-ink-900 placeholder-ink-400 text-[13px] focus:outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/20"
                   />
                 </div>
 
@@ -4807,7 +4758,7 @@ export default function HodDashboard() {
                       setAnalyticsStatusFilter(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                   >
                     <option value="ALL">Status: All</option>
                     <option value="RED">Critical Shortage (&lt;65%)</option>
@@ -4822,7 +4773,7 @@ export default function HodDashboard() {
                       setAnalyticsYearFilter(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                   >
                     <option value="ALL">All Academic Years</option>
                     <option value="2">2nd Year (II)</option>
@@ -4837,7 +4788,7 @@ export default function HodDashboard() {
                       setAnalyticsSectionFilter(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                   >
                     <option value="ALL">All Sections</option>
                     <option value="A">Section A</option>
@@ -4852,7 +4803,7 @@ export default function HodDashboard() {
                       setAnalyticsSortOrder(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                   >
                     <option value="name">Sort: Full Name (A–Z)</option>
                     <option value="roll">Sort: Roll Number</option>
@@ -4867,7 +4818,7 @@ export default function HodDashboard() {
                       setAnalyticsPageSize(Number(e.target.value));
                       setAnalyticsPage(1);
                     }}
-                    className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                     title="Rows per page"
                   >
                     <option value={20}>20 rows</option>
@@ -4877,12 +4828,12 @@ export default function HodDashboard() {
                   </select>
 
                   {/* View Mode Toggle */}
-                  <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                  <div className="flex items-center rounded-[10px] bg-black/[0.05] p-[3px]">
                     <button
                       onClick={() => setAnalyticsViewMode("table")}
-                      className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                         analyticsViewMode === "table"
-                          ? "bg-white text-blue-700 shadow-2xs"
+                          ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                       title="Table View (Fast Scanning)"
@@ -4891,9 +4842,9 @@ export default function HodDashboard() {
                     </button>
                     <button
                       onClick={() => setAnalyticsViewMode("card")}
-                      className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                         analyticsViewMode === "card"
-                          ? "bg-white text-blue-700 shadow-2xs"
+                          ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                       title="Card View"
@@ -4907,10 +4858,10 @@ export default function HodDashboard() {
 
             {/* High-Density Administrative Display */}
             {analyticsViewMode === "table" ? (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+              <div className="bg-white rounded-[18px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-290px)] min-h-[320px] overflow-y-auto scrollbar-thin">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                    <thead className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-black/[0.06] text-ink-500 font-medium text-[12px]">
                       <tr>
                         <th className="py-2 px-2.5 text-center w-10">#</th>
                         <th className="py-2 px-3">Student Full Name</th>
@@ -4922,7 +4873,7 @@ export default function HodDashboard() {
                         <th className="py-2 px-2.5 text-right">Report</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                    <tbody className="divide-y divide-black/[0.05] text-[13px]">
                       {filteredAnalyticsList.length === 0 ? (
                         <tr>
                           <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
@@ -4940,7 +4891,7 @@ export default function HodDashboard() {
                             <tr
                               key={s.id}
                               onClick={() => setSelectedStudentForDetails(s)}
-                              className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                              className="hover:bg-black/[0.02] transition-colors cursor-pointer group"
                             >
                               <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
                                 {rowNum}
@@ -4950,11 +4901,11 @@ export default function HodDashboard() {
                                   {studentFullName}
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3 font-mono font-bold text-slate-700 text-[11px] whitespace-nowrap">
+                              <td className="py-1.5 px-3 text-ink-500 text-[13px] tabular-nums whitespace-nowrap">
                                 {s.uniqueId || "N/A"}
                               </td>
                               <td className="py-1.5 px-2 text-center whitespace-nowrap">
-                                <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[9.5px] font-bold font-mono">
+                                <span className="inline-block px-2 py-0.5 rounded-md bg-black/[0.05] text-ink-700 text-[12px] font-medium">
                                   {item.secInfo.name}
                                 </span>
                               </td>
@@ -4994,7 +4945,7 @@ export default function HodDashboard() {
                                     <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
                                       Critical (&lt;65%)
                                     </span>
-                                    <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
+                                    <span className="text-[12px] text-ink-500">
                                       +{item.classesNeededFor75} classes to 75%
                                     </span>
                                   </div>
@@ -5003,7 +4954,7 @@ export default function HodDashboard() {
                                     <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
                                       Warning
                                     </span>
-                                    <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
+                                    <span className="text-[12px] text-ink-500">
                                       +{item.classesNeededFor75} classes to 75%
                                     </span>
                                   </div>
@@ -5019,7 +4970,7 @@ export default function HodDashboard() {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(s);
                                   }}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-3.5 py-1.5 rounded-full bg-black/[0.05] hover:bg-blue-500 hover:text-white text-blue-600 text-[13px] font-medium transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                 >
                                   <span>Report</span>
                                   <ChevronRight className="w-3 h-3" />
@@ -5034,7 +4985,7 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Compact Pagination Footer */}
-                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <div className="bg-white border-t border-black/[0.06] px-5 py-3 flex items-center justify-between text-[13px] text-ink-500">
                   <div>
                     Showing <strong className="text-slate-900">{filteredAnalyticsList.length === 0 ? 0 : (analyticsPage - 1) * (analyticsPageSize === -1 ? filteredAnalyticsList.length : analyticsPageSize) + 1}</strong> to <strong className="text-slate-900">{analyticsPageSize === -1 ? filteredAnalyticsList.length : Math.min(analyticsPage * analyticsPageSize, filteredAnalyticsList.length)}</strong> of <strong className="text-slate-900">{filteredAnalyticsList.length}</strong> students
                   </div>
@@ -5044,7 +4995,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setAnalyticsPage((p) => Math.max(1, p - 1))}
                         disabled={analyticsPage === 1}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Prev
                       </button>
@@ -5054,7 +5005,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setAnalyticsPage((p) => Math.min(totalAnalyticsPages, p + 1))}
                         disabled={analyticsPage >= totalAnalyticsPages}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Next
                       </button>
@@ -5135,8 +5086,12 @@ export default function HodDashboard() {
             )}
           </div>
         ) : activeTab === "flags" ? (
-          /* DEDICATED HOD STUDENT RISK FLAG ANALYTICS VIEW (INSTITUTIONAL ERP DISPLAY) */
-          <div className="space-y-2.5">
+          <div className="space-y-6">
+            <div>
+              <p className="text-[13px] font-medium text-ink-500">Department of Data Science</p>
+              <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">Risk Flags</h1>
+              <p className="mt-1 text-[15px] text-ink-500">Students below the 75% attendance requirement, with what they need to recover.</p>
+            </div>
             {/* Ultra-Compact Risk Summary Metric Strip */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {/* Card 1: Critical Shortage (<65%) */}
@@ -5145,16 +5100,16 @@ export default function HodDashboard() {
                   setRiskFlagFilter(riskFlagFilter === "RED" ? "ALL" : "RED");
                   setRiskPage(1);
                 }}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                className={`p-5 rounded-[18px] text-left transition-all cursor-pointer bg-white rounded-[18px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] ${
                   riskFlagFilter === "RED"
-                    ? "border-rose-400 bg-rose-50/40 ring-2 ring-rose-400/30 shadow-xs"
-                    : "border-slate-200 hover:border-rose-300 shadow-2xs"
+                    ? "ring-2 ring-[#ff3b30]"
+                    : "hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_6px_20px_rgba(0,0,0,0.08)]"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
-                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    <span className="text-[13px] font-medium text-ink-500">
                       Critical Shortage (&lt;65%)
                     </span>
                   </div>
@@ -5163,7 +5118,7 @@ export default function HodDashboard() {
                   </span>
                 </div>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                  <p className="mt-2 text-[28px] leading-none font-semibold tracking-[-0.02em] text-ink-900">
                     {hodRedCount === 1 ? "1 Student" : `${hodRedCount} Students`}
                   </p>
                   <span className="text-[10px] font-semibold text-slate-500">
@@ -5178,16 +5133,16 @@ export default function HodDashboard() {
                   setRiskFlagFilter(riskFlagFilter === "YELLOW" ? "ALL" : "YELLOW");
                   setRiskPage(1);
                 }}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                className={`p-5 rounded-[18px] text-left transition-all cursor-pointer bg-white rounded-[18px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] ${
                   riskFlagFilter === "YELLOW"
-                    ? "border-amber-400 bg-amber-50/40 ring-2 ring-amber-400/30 shadow-xs"
-                    : "border-slate-200 hover:border-amber-300 shadow-2xs"
+                    ? "ring-2 ring-[#ff9500]"
+                    : "hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_6px_20px_rgba(0,0,0,0.08)]"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    <span className="text-[13px] font-medium text-ink-500">
                       Borderline Warning (65%–74%)
                     </span>
                   </div>
@@ -5196,7 +5151,7 @@ export default function HodDashboard() {
                   </span>
                 </div>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                  <p className="mt-2 text-[28px] leading-none font-semibold tracking-[-0.02em] text-ink-900">
                     {hodYellowCount === 1 ? "1 Student" : `${hodYellowCount} Students`}
                   </p>
                   <span className="text-[10px] font-semibold text-slate-500">
@@ -5211,16 +5166,16 @@ export default function HodDashboard() {
                   setRiskFlagFilter(riskFlagFilter === "GREEN" ? "ALL" : "GREEN");
                   setRiskPage(1);
                 }}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                className={`p-5 rounded-[18px] text-left transition-all cursor-pointer bg-white rounded-[18px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] ${
                   riskFlagFilter === "GREEN"
-                    ? "border-emerald-400 bg-emerald-50/40 ring-2 ring-emerald-400/30 shadow-xs"
-                    : "border-slate-200 hover:border-emerald-300 shadow-2xs"
+                    ? "ring-2 ring-[#34c759]"
+                    : "hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_6px_20px_rgba(0,0,0,0.08)]"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    <span className="text-[13px] font-medium text-ink-500">
                       Compliant (≥75%)
                     </span>
                   </div>
@@ -5229,7 +5184,7 @@ export default function HodDashboard() {
                   </span>
                 </div>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                  <p className="mt-2 text-[28px] leading-none font-semibold tracking-[-0.02em] text-ink-900">
                     {hodGreenCount === 1 ? "1 Student" : `${hodGreenCount} Students`}
                   </p>
                   <span className="text-[10px] font-semibold text-slate-500">
@@ -5240,9 +5195,9 @@ export default function HodDashboard() {
             </div>
 
             {/* Categorization & Filter Toolbar (Compact ERP Bar) */}
-            <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div className="bg-white rounded-[18px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] p-3 flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div className="relative flex-1 max-w-md">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search student name or roll number..."
@@ -5251,7 +5206,7 @@ export default function HodDashboard() {
                     setRiskSearchQuery(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                  className="w-full h-9 pl-9 pr-3 rounded-[10px] bg-black/[0.05] text-ink-900 placeholder-ink-400 text-[13px] focus:outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/20"
                 />
               </div>
 
@@ -5263,7 +5218,7 @@ export default function HodDashboard() {
                     setRiskFlagFilter(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                 >
                   <option value="ALL">Risk Status: All</option>
                   <option value="RED">Critical Shortage (&lt;65%)</option>
@@ -5278,7 +5233,7 @@ export default function HodDashboard() {
                     setRiskYearFilter(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                 >
                   <option value="ALL">All Academic Years</option>
                   <option value="2">2nd Year (II)</option>
@@ -5293,7 +5248,7 @@ export default function HodDashboard() {
                     setRiskSectionFilter(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                 >
                   <option value="ALL">All Sections</option>
                   <option value="2A">Section 2A</option>
@@ -5313,7 +5268,7 @@ export default function HodDashboard() {
                     setRiskSortOrder(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                 >
                   <option value="lowest">Sort: Lowest Attendance %</option>
                   <option value="highest">Sort: Highest Attendance %</option>
@@ -5328,7 +5283,7 @@ export default function HodDashboard() {
                     setRiskPageSize(Number(e.target.value));
                     setRiskPage(1);
                   }}
-                  className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="h-9 px-3 rounded-[10px] bg-white text-ink-900 text-[13px] font-medium shadow-[0_0_0_0.5px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 cursor-pointer"
                   title="Rows per page"
                 >
                   <option value={20}>20 rows</option>
@@ -5338,12 +5293,12 @@ export default function HodDashboard() {
                 </select>
 
                 {/* View Switcher: Table vs Cards */}
-                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                <div className="flex items-center rounded-[10px] bg-black/[0.05] p-[3px]">
                   <button
                     onClick={() => setRiskViewMode("table")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                       riskViewMode === "table"
-                        ? "bg-white text-blue-700 shadow-2xs"
+                        ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                     title="Table View (Fast Scanning)"
@@ -5352,9 +5307,9 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => setRiskViewMode("card")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-2 rounded-md text-[13px] font-bold transition-all cursor-pointer ${
                       riskViewMode === "card"
-                        ? "bg-white text-blue-700 shadow-2xs"
+                        ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
                         : "text-slate-500 hover:text-slate-800"
                     }`}
                     title="Card View"
@@ -5367,10 +5322,10 @@ export default function HodDashboard() {
 
             {/* High-Density Display (Table View / Card View) */}
             {riskViewMode === "table" ? (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+              <div className="bg-white rounded-[18px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.06),0_2px_10px_rgba(0,0,0,0.04)] overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-310px)] min-h-[300px] overflow-y-auto scrollbar-thin">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                    <thead className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-black/[0.06] text-ink-500 font-medium text-[12px]">
                       <tr>
                         <th className="py-2 px-2.5 text-center w-10">#</th>
                         <th className="py-2 px-3">Student Name</th>
@@ -5382,7 +5337,7 @@ export default function HodDashboard() {
                         <th className="py-2 px-2.5 text-right">Details</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                    <tbody className="divide-y divide-black/[0.05] text-[13px]">
                       {filteredHodAnalyticsList.length === 0 ? (
                         <tr>
                           <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
@@ -5396,21 +5351,21 @@ export default function HodDashboard() {
                             <tr
                               key={item.student.id}
                               onClick={() => setSelectedStudentForDetails(item.student)}
-                              className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                              className="hover:bg-black/[0.02] transition-colors cursor-pointer group"
                             >
                               <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
                                 {rowNum}
                               </td>
                               <td className="py-1.5 px-3">
-                                <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors block truncate max-w-[220px]">
+                                <span className="font-medium text-ink-900 group-hover:text-blue-600 transition-colors block truncate max-w-[240px]">
                                   {item.student.name || (item.student as any).full_name || item.student.uniqueId || "Student"}
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3 font-mono font-bold text-slate-700 text-[11px]">
+                              <td className="py-1.5 px-3 text-ink-500 text-[13px] tabular-nums">
                                 {item.student.uniqueId || "N/A"}
                               </td>
                               <td className="py-1.5 px-2 text-center">
-                                <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[9.5px] font-bold font-mono">
+                                <span className="inline-block px-2 py-0.5 rounded-md bg-black/[0.05] text-ink-700 text-[12px] font-medium">
                                   {item.secInfo.name}
                                 </span>
                               </td>
@@ -5446,7 +5401,7 @@ export default function HodDashboard() {
                                     <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
                                       Critical (&lt;65%)
                                     </span>
-                                    <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
+                                    <span className="text-[12px] text-ink-500">
                                       +{item.classesNeededFor75} classes to 75% (+{item.classesNeededFor65} to 65%)
                                     </span>
                                   </div>
@@ -5455,7 +5410,7 @@ export default function HodDashboard() {
                                     <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
                                       Warning
                                     </span>
-                                    <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
+                                    <span className="text-[12px] text-ink-500">
                                       +{item.classesNeededFor75} consecutive classes to 75%
                                     </span>
                                   </div>
@@ -5471,7 +5426,7 @@ export default function HodDashboard() {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(item.student);
                                   }}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-3.5 py-1.5 rounded-full bg-black/[0.05] hover:bg-blue-500 hover:text-white text-blue-600 text-[13px] font-medium transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                 >
                                   <span>View</span>
                                   <ChevronRight className="w-3 h-3" />
@@ -5486,7 +5441,7 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Compact Table Pagination Footer */}
-                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <div className="bg-white border-t border-black/[0.06] px-5 py-3 flex items-center justify-between text-[13px] text-ink-500">
                   <div>
                     Showing <strong className="text-slate-900">{filteredHodAnalyticsList.length === 0 ? 0 : (riskPage - 1) * (riskPageSize === -1 ? filteredHodAnalyticsList.length : riskPageSize) + 1}</strong> to <strong className="text-slate-900">{riskPageSize === -1 ? filteredHodAnalyticsList.length : Math.min(riskPage * riskPageSize, filteredHodAnalyticsList.length)}</strong> of <strong className="text-slate-900">{filteredHodAnalyticsList.length}</strong> students
                   </div>
@@ -5496,7 +5451,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setRiskPage((p) => Math.max(1, p - 1))}
                         disabled={riskPage === 1}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Prev
                       </button>
@@ -5506,7 +5461,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setRiskPage((p) => Math.min(totalRiskPages, p + 1))}
                         disabled={riskPage >= totalRiskPages}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="h-9 px-3.5 rounded-[8px] bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 disabled:opacity-40 disabled:cursor-not-allowed text-[14px] font-medium"
                       >
                         Next
                       </button>
@@ -5740,7 +5695,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setReassignSlotModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg transition-colors cursor-pointer"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -5780,7 +5735,7 @@ export default function HodDashboard() {
                     <button
                       type="button"
                       onClick={() => setEditedSubjectInput("Free")}
-                      className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-colors cursor-pointer"
+                      className="px-3.5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold border border-slate-200 transition-colors cursor-pointer"
                     >
                       Set Free
                     </button>
@@ -5870,14 +5825,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setReassignSlotModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                    className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingReassignment || (!selectedFacultyName && !customFacultyTextInput.trim())}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200 cursor-pointer"
+                    className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200 cursor-pointer"
                   >
                     {savingReassignment ? (
                       <>
@@ -5908,7 +5863,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1.5"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -5951,14 +5906,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setAssignModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                    className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-[13px] font-bold transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={assigning || !selectedMentorId}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
+                    className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
                   >
                     {assigning ? (
                       <>
@@ -5989,7 +5944,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1.5"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -6098,14 +6053,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setNewClassModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                    className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-[13px] font-bold transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creatingClass || !newMentorId || !newSubject}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
+                    className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
                   >
                     {creatingClass ? (
                       <>
@@ -6144,14 +6099,14 @@ export default function HodDashboard() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => window.print()}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-[13px] flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                   >
                     <Printer className="w-4 h-4" />
                     <span>Print Document</span>
                   </button>
                   <button
                     onClick={() => setTimetablePrintModalOpen(false)}
-                    className="p-2 text-slate-400 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
+                    className="p-2.5 text-slate-400 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -6387,7 +6342,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setExportModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-gray-500 hover:text-gray-900 p-1.5"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -6403,7 +6358,7 @@ export default function HodDashboard() {
                     <button
                       type="button"
                       onClick={() => setExportDateMode("month")}
-                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      className={`py-2.5 rounded-lg text-[13px] font-bold transition-all ${
                         exportDateMode === "month"
                           ? "bg-emerald-600 text-white shadow-md"
                           : "text-gray-500 hover:text-gray-800"
@@ -6414,7 +6369,7 @@ export default function HodDashboard() {
                     <button
                       type="button"
                       onClick={() => setExportDateMode("range")}
-                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      className={`py-2.5 rounded-lg text-[13px] font-bold transition-all ${
                         exportDateMode === "range"
                           ? "bg-emerald-600 text-white shadow-md"
                           : "text-gray-500 hover:text-gray-800"
@@ -6629,7 +6584,7 @@ export default function HodDashboard() {
                 <button
                   type="button"
                   onClick={() => setExportModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-[13px] font-bold transition-colors"
                 >
                   Cancel
                 </button>
@@ -6637,7 +6592,7 @@ export default function HodDashboard() {
                   type="button"
                   onClick={handleGenerateCsv}
                   disabled={isExporting || (exportType === "student" && !exportStudentId)}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[13px] font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isExporting ? (
                     <>
@@ -6661,7 +6616,7 @@ export default function HodDashboard() {
           <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
             <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
               {/* Modal Header */}
-              <div className="p-4 px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex-shrink-0">
+              <div className="p-4 px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-[#2997ff] via-[#0a84ff] to-[#0071e3] text-white flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center">
                     <Calendar className="w-5 h-5 text-purple-300" />
@@ -6673,7 +6628,7 @@ export default function HodDashboard() {
                 </div>
                 <button
                   onClick={() => setHolidayModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
                   title="Close"
                 >
                   <X className="w-4 h-4" />
@@ -6697,7 +6652,7 @@ export default function HodDashboard() {
                             d.setMonth(d.getMonth() - 1);
                             setCalendarViewDate(d);
                           }}
-                          className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
+                          className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
                           title="Previous Month"
                         >
                           <ChevronLeft className="w-4 h-4" />
@@ -6712,7 +6667,7 @@ export default function HodDashboard() {
                             d.setMonth(d.getMonth() + 1);
                             setCalendarViewDate(d);
                           }}
-                          className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
+                          className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
                           title="Next Month"
                         >
                           <ChevronRight className="w-4 h-4" />
@@ -6726,7 +6681,7 @@ export default function HodDashboard() {
                             setCalendarViewDate(new Date());
                             setSelectedCalendarDate(new Date().toISOString().split("T")[0]);
                           }}
-                          className="px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-all cursor-pointer shadow-2xs"
+                          className="px-3 py-1.5 rounded-md bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-all cursor-pointer shadow-2xs"
                         >
                           Today
                         </button>
@@ -6783,7 +6738,7 @@ export default function HodDashboard() {
                                 setNewHolidayReason("");
                               }
                             }}
-                            className={`min-h-[46px] p-1 rounded-lg border text-left flex flex-col justify-between transition-all cursor-pointer relative group ${
+                            className={`min-h-[46px] p-1.5 rounded-lg border text-left flex flex-col justify-between transition-all cursor-pointer relative group ${
                               isSelected
                                 ? "ring-2 ring-blue-600 border-blue-500 bg-blue-50/60 font-bold"
                                 : isDeclared
@@ -6855,7 +6810,7 @@ export default function HodDashboard() {
                         <button
                           type="button"
                           onClick={() => handleRemoveHoliday(selectedCalendarDate)}
-                          className="p-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 transition-colors cursor-pointer"
                           title="Delete Holiday"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -6878,7 +6833,7 @@ export default function HodDashboard() {
                           <button
                             type="button"
                             onClick={() => setNewHolidayType("holiday")}
-                            className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2.5 rounded-xl text-[13px] font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                               newHolidayType === "holiday"
                                 ? "bg-purple-600 text-white border-purple-600 shadow-2xs"
                                 : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
@@ -6889,7 +6844,7 @@ export default function HodDashboard() {
                           <button
                             type="button"
                             onClick={() => setNewHolidayType("exam")}
-                            className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-3 py-2.5 rounded-xl text-[13px] font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                               newHolidayType === "exam"
                                 ? "bg-violet-700 text-white border-violet-700 shadow-2xs"
                                 : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
@@ -6936,7 +6891,7 @@ export default function HodDashboard() {
                       <button
                         type="submit"
                         disabled={!selectedCalendarDate}
-                        className={`w-full py-2.5 rounded-xl font-bold text-xs text-white transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer ${
+                        className={`w-full py-3 rounded-xl font-bold text-[13px] text-white transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer ${
                           newHolidayType === "exam" ? "bg-violet-700 hover:bg-violet-600" : "bg-purple-600 hover:bg-purple-500"
                         }`}
                       >
@@ -6960,7 +6915,7 @@ export default function HodDashboard() {
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("ALL")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
+                        className={`px-3 py-1.5 rounded font-bold cursor-pointer transition-colors ${
                           holidayFilterTab === "ALL" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
@@ -6969,7 +6924,7 @@ export default function HodDashboard() {
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("holiday")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
+                        className={`px-3 py-1.5 rounded font-bold cursor-pointer transition-colors ${
                           holidayFilterTab === "holiday" ? "bg-purple-600 text-white" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
@@ -6978,7 +6933,7 @@ export default function HodDashboard() {
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("exam")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
+                        className={`px-3 py-1.5 rounded font-bold cursor-pointer transition-colors ${
                           holidayFilterTab === "exam" ? "bg-violet-700 text-white" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
@@ -7025,7 +6980,7 @@ export default function HodDashboard() {
                                 e.stopPropagation();
                                 handleRemoveHoliday(dStr);
                               }}
-                              className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -7075,7 +7030,7 @@ export default function HodDashboard() {
                   <p className="text-xs text-gray-500">{pwdStep === "verify" ? "Verify your identity first" : "Enter your new passcode"}</p>
                 </div>
               </div>
-              <button onClick={() => setShowPwdModal(false)} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors text-lg font-light">×</button>
+              <button onClick={() => setShowPwdModal(false)} className="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors text-lg font-light">×</button>
             </div>
 
             {/* Step 1: Verify */}
@@ -7093,7 +7048,7 @@ export default function HodDashboard() {
                   />
                   {pwdError && <p className="text-red-500 text-xs font-semibold text-center mt-2">{pwdError}</p>}
                 </div>
-                <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-600/20">
+                <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-[15px] transition-all shadow-md shadow-blue-600/20">
                   Verify & Continue →
                 </button>
                 <p className="text-center text-xs text-gray-400">Forgot? Use master code to access.</p>
@@ -7131,8 +7086,8 @@ export default function HodDashboard() {
                 {pwdError && <p className="text-red-500 text-xs font-semibold text-center">{pwdError}</p>}
                 {pwdSuccess && <p className="text-emerald-600 text-sm font-bold text-center">{pwdSuccess}</p>}
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setPwdStep("verify")} className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm transition-colors">← Back</button>
-                  <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-600/20">Save Passcode</button>
+                  <button type="button" onClick={() => setPwdStep("verify")} className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-[15px] transition-colors">← Back</button>
+                  <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-[15px] transition-all shadow-md shadow-blue-600/20">Save Passcode</button>
                 </div>
                 <p className="text-center text-xs text-gray-400">Master override always works as a backup.</p>
               </form>
@@ -7161,7 +7116,7 @@ export default function HodDashboard() {
               </div>
               <button
                 onClick={() => setSelectedMentorForModal(null)}
-                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-9 h-9 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
               >
                 ×
               </button>
@@ -7214,7 +7169,7 @@ export default function HodDashboard() {
                 {selectedMentorForModal.key && (
                   <button
                     onClick={() => handleCopyKey(selectedMentorForModal.key, selectedMentorForModal.id)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs transition-colors cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-[13px] transition-colors cursor-pointer"
                   >
                     {copiedKeyId === String(selectedMentorForModal.id) ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedKeyId === String(selectedMentorForModal.id) ? "Copied!" : "Copy Key"}</span>
@@ -7227,7 +7182,7 @@ export default function HodDashboard() {
             <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
               <button
                 onClick={() => setSelectedMentorForModal(null)}
-                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold text-xs text-gray-800 transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold text-[13px] text-gray-800 transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -7256,7 +7211,7 @@ export default function HodDashboard() {
               </div>
               <button
                 onClick={() => setEditMentorModalOpen(false)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
               >
                 ×
               </button>
@@ -7312,7 +7267,7 @@ export default function HodDashboard() {
               <button
                 type="button"
                 onClick={() => setEditMentorModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-[13px] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -7336,7 +7291,7 @@ export default function HodDashboard() {
                   }
                 }}
                 disabled={isSavingKey}
-                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-[13px] transition-colors shadow-xs cursor-pointer"
               >
                 {isSavingKey ? "Saving..." : "Save Changes"}
               </button>
@@ -7365,7 +7320,7 @@ export default function HodDashboard() {
               </div>
               <button
                 onClick={() => setBulkMessageModalOpen(false)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
               >
                 ×
               </button>
@@ -7429,7 +7384,7 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setBulkBroadcastChannel("whatsapp")}
-                    className={`flex-1 py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`flex-1 py-2.5 px-3.5 rounded-lg border font-bold text-[13px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       bulkBroadcastChannel === "whatsapp"
                         ? "bg-emerald-50 border-emerald-400 text-emerald-800 ring-1 ring-emerald-300"
                         : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
@@ -7441,7 +7396,7 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setBulkBroadcastChannel("sms")}
-                    className={`flex-1 py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`flex-1 py-2.5 px-3.5 rounded-lg border font-bold text-[13px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       bulkBroadcastChannel === "sms"
                         ? "bg-blue-50 border-blue-400 text-blue-800 ring-1 ring-blue-300"
                         : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
@@ -7500,7 +7455,7 @@ export default function HodDashboard() {
               <button
                 type="button"
                 onClick={() => setBulkMessageModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-[13px] transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -7519,7 +7474,7 @@ export default function HodDashboard() {
                   }, 800);
                 }}
                 disabled={bulkBroadcastSending || (bulkMessageType === "custom" && selectedStudentIds.length === 0)}
-                className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-xs transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-[13px] transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
                 {bulkBroadcastSending ? (
                   <>
@@ -7558,7 +7513,7 @@ export default function HodDashboard() {
               </div>
               <button
                 onClick={() => setRemarkModalData(null)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
               >
                 ×
               </button>
@@ -7587,7 +7542,7 @@ export default function HodDashboard() {
                         setRemarkPreset(preset);
                         if (!remarkInput || remarkInput === remarkPreset) setRemarkInput(preset);
                       }}
-                      className={`p-2 rounded-lg border text-left font-bold text-[11px] transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-lg border text-left font-bold text-[12px] transition-all cursor-pointer ${
                         remarkPreset === preset
                           ? "bg-blue-50 border-blue-400 text-blue-900 ring-1 ring-blue-200"
                           : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
@@ -7641,7 +7596,7 @@ export default function HodDashboard() {
                     localStorage.setItem("hod_student_remarks_v1", JSON.stringify(updated));
                     setRemarkModalData(null);
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs transition-colors cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-[13px] transition-colors cursor-pointer"
                 >
                   Delete Remark
                 </button>
@@ -7651,7 +7606,7 @@ export default function HodDashboard() {
                 <button
                   type="button"
                   onClick={() => setRemarkModalData(null)}
-                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-[13px] transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -7672,7 +7627,7 @@ export default function HodDashboard() {
                     localStorage.setItem("hod_student_remarks_v1", JSON.stringify(updated));
                     setRemarkModalData(null);
                   }}
-                  className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                  className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[13px] transition-colors shadow-xs cursor-pointer"
                 >
                   Save Remark
                 </button>

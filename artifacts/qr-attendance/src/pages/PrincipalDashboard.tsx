@@ -16,6 +16,7 @@ import {
   Clock,
   ChevronRight,
 } from "lucide-react";
+import { Clock as PClock, CheckCircle2 as PCheck, ScanLine as PScan, AlertTriangle as PAlert } from "lucide-react";
 import { customFetch } from "@workspace/api-client-react";
 import StudentProfileModal from "@/components/StudentProfileModal";
 
@@ -164,7 +165,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+        className="px-3.5 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 text-[13px] font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
       >
         <Calendar className="w-3.5 h-3.5 text-blue-600" />
         <span>{monthNames[month - 1]} {year}</span>
@@ -178,7 +179,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-xs"
+                className="p-1.5 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-[13px]"
               >
                 &larr;
               </button>
@@ -186,7 +187,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-xs"
+                className="p-1.5 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-[13px]"
               >
                 &rarr;
               </button>
@@ -200,7 +201,7 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     key={mName}
                     type="button"
                     onClick={() => handleSelectMonth(idx)}
-                    className={`py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
+                    className={`py-2 rounded-lg text-[13px] font-semibold cursor-pointer ${
                       isSelected 
                         ? "bg-blue-600 text-white shadow-xs" 
                         : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-gray-700"
@@ -562,128 +563,7 @@ export default function PrincipalDashboard() {
     });
   }, [students, detailedLogs, dsPresentSet, classPresentUserIds, sectionFilter, logStatusFilter, searchQuery]);
 
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased pb-12">
-      {/* 1. COMPACT PRINCIPAL HEADER */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Header Title */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-xs font-black">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-extrabold text-slate-900 tracking-tight">Sphoorthy Engineering College</h1>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200 uppercase tracking-wider">
-                  PRINCIPAL
-                </span>
-              </div>
-              <p className="text-xs font-medium text-slate-500">
-                Institutional Campus Portal
-              </p>
-            </div>
-          </div>
-
-          {/* Controls: Date, Export, Logout */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700">
-              <Calendar className="w-3.5 h-3.5 text-slate-500" />
-              <input
-                type="date"
-                value={logDate}
-                onChange={(e) => setLogDate(e.target.value)}
-                className="bg-transparent text-slate-800 focus:outline-none cursor-pointer [color-scheme:light] font-mono text-xs"
-              />
-            </div>
-
-            <button
-              onClick={() => setExportModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              Export
-            </button>
-
-            <button
-              onClick={() => logout()}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-4">
-        {/* 2. TOP SUMMARY (SIMPLE EXECUTIVE STATS) */}
-        <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-blue-700" />
-              <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                College Attendance Today — {logDate}
-              </h2>
-            </div>
-            <span className="text-[11px] font-semibold text-slate-500">
-              All Departments
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-            {/* Card 1: Total Students */}
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Total Students</p>
-              <p className="text-xl font-black text-slate-900 mt-0.5">{campusTotalStudents}</p>
-              <p className="text-[10px] text-slate-400">Enrolled</p>
-            </div>
-
-            {/* Card 2: Present Today */}
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-              <p className="text-[10px] font-bold text-emerald-800 uppercase">Present Today</p>
-              <p className="text-xl font-black text-emerald-700 mt-0.5">{campusPresentCount}</p>
-              <p className="text-[10px] text-emerald-600 font-semibold">{campusAttendancePercent}%</p>
-            </div>
-
-            {/* Card 3: Absent Today */}
-            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200">
-              <p className="text-[10px] font-bold text-rose-800 uppercase">Absent Today</p>
-              <p className="text-xl font-black text-rose-700 mt-0.5">{campusAbsentCount}</p>
-              <p className="text-[10px] text-rose-600 font-semibold">{100 - campusAttendancePercent}%</p>
-            </div>
-
-            {/* Card 4: Attendance % */}
-            <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-              <p className="text-[10px] font-bold text-blue-800 uppercase">Attendance %</p>
-              <p className="text-xl font-black text-blue-700 mt-0.5">{campusAttendancePercent}%</p>
-              <p className="text-[10px] text-blue-600">College Average</p>
-            </div>
-
-            {/* Card 5: Classes */}
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Classes</p>
-              <p className="text-xl font-black text-slate-800 mt-0.5">{hourlySummary.totalClasses}</p>
-              <p className="text-[10px] text-slate-400">Scheduled</p>
-            </div>
-
-            {/* Card 6: Completed */}
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-              <p className="text-[10px] font-bold text-emerald-800 uppercase">Completed</p>
-              <p className="text-xl font-black text-emerald-700 mt-0.5">{hourlySessions.length}</p>
-              <p className="text-[10px] text-emerald-600">Submitted</p>
-            </div>
-
-            {/* Card 7: Pending */}
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Pending</p>
-              <p className="text-xl font-black text-slate-700 mt-0.5">0</p>
-              <p className="text-[10px] text-emerald-600 font-semibold">None</p>
-            </div>
-
-            {/* Card 8: Critical */}
-            <div
-              onClick={() => {
+  const openCriticalStudents = () => {
                 setActiveTab("flags");
                 setRiskFilter("RED");
                 const criticalStudents = studentAnalyticsList
@@ -707,33 +587,129 @@ export default function PrincipalDashboard() {
                   subtitle: `Data Science • Attendance Below 65% Target Limit`,
                   students: criticalStudents,
                 });
-              }}
-              className="p-3 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer transition-all"
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f5f5f7] text-ink-900 font-sans antialiased pb-16">
+      <header className="sticky top-0 z-30 bg-white/75 backdrop-blur-2xl backdrop-saturate-150 border-b border-black/[0.08]">
+        <div className="max-w-[1180px] mx-auto px-6 lg:px-10 h-14 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="h-8 w-8 rounded-[9px] bg-ink-900 text-white flex items-center justify-center">
+              <ShieldCheck className="w-[18px] h-[18px]" />
+            </span>
+            <div className="leading-tight">
+              <h1 className="text-[14px] font-semibold text-ink-900">Sphoorthy Engineering College</h1>
+              <p className="text-[12px] text-ink-500">Principal</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="h-9 flex items-center gap-2 px-3 rounded-[10px] bg-black/[0.05] text-[13px] text-ink-900">
+              <Calendar className="w-4 h-4 text-ink-500" />
+              <input
+                type="date"
+                value={logDate}
+                onChange={(e) => setLogDate(e.target.value)}
+                className="bg-transparent focus:outline-none cursor-pointer [color-scheme:light] text-[13px]"
+              />
+            </label>
+            <button
+              onClick={() => setExportModalOpen(true)}
+              className="h-10 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold text-rose-800 uppercase">Critical</p>
-                <ChevronRight className="w-3 h-3 text-rose-500" />
-              </div>
-              <p className="text-xl font-black text-rose-700 mt-0.5">{redFlagCount}</p>
-              <p className="text-[10px] text-rose-600 font-semibold underline">Below 65%</p>
+              <FileSpreadsheet className="w-4 h-4" />
+              Export
+            </button>
+            <button
+              onClick={() => logout()}
+              className="h-10 px-3.5 rounded-full text-ink-600 hover:bg-black/[0.05] text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              Log out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-[1180px] mx-auto px-6 lg:px-10 pt-10 space-y-8">
+        <div>
+          <p className="text-[13px] font-medium text-ink-500">
+            {new Date(logDate + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · All departments
+          </p>
+          <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">College Overview</h1>
+        </div>
+
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="lg:col-span-2 rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] rounded-[28px] relative overflow-hidden p-9 lg:p-11 flex flex-col justify-between min-h-[300px]">
+            <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-br from-[#5ac8fa]/25 to-[#0071e3]/10 blur-2xl" />
+            <div className="relative">
+              <p className="text-[15px] font-semibold text-blue-600">Today</p>
+              <h2 className="mt-3 text-[40px] lg:text-[48px] leading-[1.04] font-bold tracking-[-0.035em] text-ink-900">
+                {campusPresentCount} students are in.
+                <span className="block text-ink-400">{campusAbsentCount} are absent.</span>
+              </h2>
+            </div>
+            <div className="relative mt-10 flex flex-wrap items-center gap-2">
+              <button onClick={() => setExportModalOpen(true)} className="h-12 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[16px] font-medium transition-colors cursor-pointer">
+                Export report
+              </button>
+              <button onClick={openCriticalStudents} className="h-12 px-6 rounded-full text-blue-600 hover:bg-blue-50 text-[16px] font-medium flex items-center gap-1 transition-colors cursor-pointer">
+                Critical students <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Simple Modality Strip */}
-          <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="font-semibold text-slate-600">Class Attendance</span>
-              <span className="font-bold text-emerald-700 font-mono">{classPresentUserIds.size} Present</span>
+          <div className="rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] rounded-[28px] p-9 flex flex-col items-center justify-center text-center">
+            <div className="relative h-[168px] w-[168px]">
+              <svg viewBox="0 0 168 168" className="h-full w-full -rotate-90">
+                <defs>
+                  <linearGradient id="principalRing" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#5ac8fa" />
+                    <stop offset="100%" stopColor="#0071e3" />
+                  </linearGradient>
+                </defs>
+                <circle cx="84" cy="84" r="74" fill="none" stroke="#f0f0f3" strokeWidth="14" />
+                <circle cx="84" cy="84" r="74" fill="none" stroke="url(#principalRing)" strokeWidth="14" strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 74} strokeDashoffset={2 * Math.PI * 74 * (1 - Math.min(campusAttendancePercent, 100) / 100)}
+                  style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.22,1,0.36,1)" }} />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[40px] font-bold tracking-[-0.03em] text-ink-900">{campusAttendancePercent}<span className="text-[22px] text-ink-400">%</span></span>
+              </div>
             </div>
-            <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="font-semibold text-slate-600">Gate Scans</span>
-              <span className="font-bold text-blue-700 font-mono">{dsPresentSet.size} Scanned</span>
-            </div>
+            <p className="mt-6 text-[17px] font-semibold text-ink-900">College attendance</p>
+            <p className="mt-1 text-[14px] text-ink-500">{campusTotalStudents} students enrolled</p>
           </div>
         </section>
 
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          {([
+            { label: "Classes scheduled", value: hourlySummary.totalClasses, sub: "Across all sections", icon: PClock, color: "bg-[#0a84ff]" },
+            { label: "Classes completed", value: hourlySessions.length, sub: "Attendance submitted", icon: PCheck, color: "bg-[#34c759]" },
+            { label: "Gate scans", value: dsPresentSet.size, sub: `${classPresentUserIds.size} marked in class`, icon: PScan, color: "bg-[#5856d6]" },
+            { label: "Critical students", value: redFlagCount, sub: "Below 65% attendance", icon: PAlert, color: "bg-[#ff3b30]", onClick: openCriticalStudents },
+          ] as { label: string; value: number; sub: string; icon: React.ElementType; color: string; onClick?: () => void }[]).map(({ label, value, sub, icon: Icon, color, onClick }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={onClick}
+              disabled={!onClick}
+              className={`group rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-6 text-left transition-all duration-300 ${onClick ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_12px_32px_rgba(0,0,0,0.08)]" : "cursor-default"}`}
+            >
+              <span className={`h-10 w-10 rounded-[12px] ${color} flex items-center justify-center text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]`}>
+                <Icon className="w-5 h-5" />
+              </span>
+              <p className="mt-5 text-[34px] leading-none font-bold tracking-[-0.03em] text-ink-900">{value}</p>
+              <p className="mt-2 text-[15px] font-semibold text-ink-900 flex items-center justify-between">
+                {label}
+                {onClick && <ChevronRight className="w-4 h-4 text-ink-300 group-hover:text-ink-500 transition-colors" />}
+              </p>
+              <p className="mt-0.5 text-[13px] text-ink-500">{sub}</p>
+            </button>
+          ))}
+        </section>
+
         {/* 3. ACADEMIC DEPARTMENTS AT A GLANCE */}
-        <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+        <section className="rounded-[24px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.05),0_4px_24px_rgba(0,0,0,0.04)] p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900">Academic Departments at a Glance</h3>
@@ -828,7 +804,7 @@ export default function PrincipalDashboard() {
                             e.stopPropagation();
                             setSelectedBranch(dept.code);
                           }}
-                          className={`px-3 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                          className={`px-3.5 py-1.5 rounded text-[12px] font-bold cursor-pointer transition-colors ${
                             isSelected
                               ? "bg-blue-700 text-white"
                               : "bg-slate-100 hover:bg-slate-200 text-slate-700"
@@ -893,7 +869,7 @@ export default function PrincipalDashboard() {
                         })
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-3 py-1.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[12px] cursor-pointer whitespace-nowrap"
                   >
                     View 4A
                   </button>
@@ -931,7 +907,7 @@ export default function PrincipalDashboard() {
                         })
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-3 py-1.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[12px] cursor-pointer whitespace-nowrap"
                   >
                     View 3C
                   </button>
@@ -972,7 +948,7 @@ export default function PrincipalDashboard() {
                         students: criticalStudents,
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-3 py-1.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[12px] cursor-pointer whitespace-nowrap"
                   >
                     View Students
                   </button>
@@ -983,7 +959,7 @@ export default function PrincipalDashboard() {
             <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-thin">
               <button
                 onClick={() => setActiveTab("sections")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "sections"
                     ? "bg-blue-700 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -995,7 +971,7 @@ export default function PrincipalDashboard() {
 
               <button
                 onClick={() => setActiveTab("hourly")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "hourly"
                     ? "bg-blue-700 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -1007,7 +983,7 @@ export default function PrincipalDashboard() {
 
               <button
                 onClick={() => setActiveTab("flags")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "flags"
                     ? "bg-blue-700 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -1019,7 +995,7 @@ export default function PrincipalDashboard() {
 
               <button
                 onClick={() => setActiveTab("logs")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "logs"
                     ? "bg-blue-700 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -1132,7 +1108,7 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 cursor-pointer"
+                                className="px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 cursor-pointer"
                               >
                                 {st.present}
                               </button>
@@ -1157,7 +1133,7 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 cursor-pointer"
+                                className="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 cursor-pointer"
                               >
                                 {st.absent}
                               </button>
@@ -1215,7 +1191,7 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] cursor-pointer"
+                                className="px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[12px] cursor-pointer"
                               >
                                 View Students
                               </button>
@@ -1259,7 +1235,7 @@ export default function PrincipalDashboard() {
                         <button
                           key={sec}
                           onClick={() => setHourlySectionFilter(sec)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
+                          className={`px-3 py-1.5 rounded-lg text-[13px] font-bold cursor-pointer transition-colors ${
                             hourlySectionFilter === sec
                               ? "bg-blue-700 text-white"
                               : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -1346,7 +1322,7 @@ export default function PrincipalDashboard() {
 
                                 <button
                                   onClick={() => setExpandedHourlyScheduleId(isExpanded ? null : session.scheduleId)}
-                                  className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer"
+                                  className="px-3.5 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[13px] font-bold cursor-pointer"
                                 >
                                   {isExpanded ? "Hide" : `Students (${studentList.length})`}
                                 </button>
@@ -1452,7 +1428,7 @@ export default function PrincipalDashboard() {
                           setRiskFilter("ALL");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                        className={`px-3.5 py-2 rounded-lg text-[13px] font-bold cursor-pointer transition-all ${
                           riskFilter === "ALL" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                         }`}
                       >
@@ -1463,7 +1439,7 @@ export default function PrincipalDashboard() {
                           setRiskFilter("RED");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                        className={`px-3.5 py-2 rounded-lg text-[13px] font-bold cursor-pointer transition-all ${
                           riskFilter === "RED" ? "bg-rose-700 text-white" : "bg-rose-100 text-rose-800 hover:bg-rose-200"
                         }`}
                       >
@@ -1474,7 +1450,7 @@ export default function PrincipalDashboard() {
                           setRiskFilter("YELLOW");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                        className={`px-3.5 py-2 rounded-lg text-[13px] font-bold cursor-pointer transition-all ${
                           riskFilter === "YELLOW" ? "bg-amber-600 text-white" : "bg-amber-100 text-amber-800 hover:bg-amber-200"
                         }`}
                       >
@@ -1485,7 +1461,7 @@ export default function PrincipalDashboard() {
                           setRiskFilter("GREEN");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+                        className={`px-3.5 py-2 rounded-lg text-[13px] font-bold cursor-pointer transition-all ${
                           riskFilter === "GREEN" ? "bg-emerald-700 text-white" : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
                         }`}
                       >
@@ -1559,7 +1535,7 @@ export default function PrincipalDashboard() {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(item.student);
                                   }}
-                                  className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] cursor-pointer"
+                                  className="px-3 py-1.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[12px] cursor-pointer"
                                 >
                                   View
                                 </button>
@@ -1582,7 +1558,7 @@ export default function PrincipalDashboard() {
                         <button
                           disabled={flagsPage <= 1}
                           onClick={() => setFlagsPage((p) => Math.max(1, p - 1))}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                          className="px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
                         >
                           Previous
                         </button>
@@ -1592,7 +1568,7 @@ export default function PrincipalDashboard() {
                         <button
                           disabled={flagsPage >= totalFlagsPages}
                           onClick={() => setFlagsPage((p) => Math.min(totalFlagsPages, p + 1))}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                          className="px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
                         >
                           Next
                         </button>
@@ -1742,7 +1718,7 @@ export default function PrincipalDashboard() {
             </p>
             <button
               onClick={() => setSelectedBranch("DS")}
-              className="px-3.5 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-blue-700 text-white text-[13px] font-bold cursor-pointer"
             >
               Open Data Science (DS)
             </button>
@@ -1770,7 +1746,7 @@ export default function PrincipalDashboard() {
                       setSectionModalData(null);
                       setSectionModalPage(1);
                     }}
-                    className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                    className="text-slate-400 hover:text-slate-700 p-1.5 cursor-pointer"
                   >
                     <XCircle className="w-5 h-5" />
                   </button>
@@ -1854,7 +1830,7 @@ export default function PrincipalDashboard() {
                     <button
                       disabled={sectionModalPage <= 1}
                       onClick={() => setSectionModalPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                      className="px-3 py-1.5 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
                     >
                       Previous
                     </button>
@@ -1864,7 +1840,7 @@ export default function PrincipalDashboard() {
                     <button
                       disabled={sectionModalPage >= totalSectionModalPages}
                       onClick={() => setSectionModalPage((p) => Math.min(totalSectionModalPages, p + 1))}
-                      className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                      className="px-3 py-1.5 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
                     >
                       Next
                     </button>
@@ -1873,7 +1849,7 @@ export default function PrincipalDashboard() {
                         setSectionModalData(null);
                         setSectionModalPage(1);
                       }}
-                      className="ml-2 px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold cursor-pointer"
+                      className="ml-2 px-3.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold cursor-pointer"
                     >
                       Close
                     </button>
@@ -1950,7 +1926,7 @@ export default function PrincipalDashboard() {
               <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
                   onClick={() => setExportModalOpen(false)}
-                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
+                  className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-bold"
                 >
                   Cancel
                 </button>

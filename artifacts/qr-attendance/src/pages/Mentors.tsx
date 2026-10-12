@@ -316,17 +316,16 @@ export default function Mentors() {
 
   return (
     <Layout>
-      <div className="p-3 sm:p-4 max-w-7xl mx-auto space-y-3.5 text-gray-700">
-        <BackButton />
+      <div className="px-6 lg:px-10 py-10 max-w-[1280px] mx-auto space-y-6 text-ink-700">
+        <BackButton className="mb-0" />
         
         {/* Header Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-              <GraduationCap className="w-6 h-6 text-purple-600" />
-              Faculty & Mentors Registry
+            <h1 className="text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900 flex items-center gap-2">
+              Faculty & Mentors
             </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-[15px] text-ink-500 mt-1">
               Manage department mentors, student allotments, timetable schedules, and live scanning logs
             </p>
           </div>
@@ -348,7 +347,7 @@ export default function Mentors() {
         <div className="flex flex-wrap bg-gray-100 border border-gray-200 p-1 rounded-xl w-fit gap-1 shadow-2xs">
           <button
             onClick={() => setActiveTab("mentors")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all cursor-pointer ${
               activeTab === "mentors"
                 ? "bg-white text-purple-700 shadow-xs border border-gray-200"
                 : "text-gray-600 hover:text-gray-900"
@@ -362,7 +361,7 @@ export default function Mentors() {
           </button>
           <button
             onClick={() => setActiveTab("schedules")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all cursor-pointer ${
               activeTab === "schedules"
                 ? "bg-white text-purple-700 shadow-xs border border-gray-200"
                 : "text-gray-600 hover:text-gray-900"
@@ -376,7 +375,7 @@ export default function Mentors() {
           </button>
           <button
             onClick={() => setActiveTab("tracking")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-[13px] transition-all cursor-pointer ${
               activeTab === "tracking"
                 ? "bg-white text-purple-700 shadow-xs border border-gray-200"
                 : "text-gray-600 hover:text-gray-900"
@@ -418,7 +417,7 @@ export default function Mentors() {
               <button
                 data-testid="add-mentor-button"
                 onClick={() => setShowForm((v) => !v)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-xs cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[13px] font-bold shadow-xs cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Faculty Mentor
               </button>
@@ -469,7 +468,7 @@ export default function Mentors() {
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
-                    className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-semibold border border-gray-200 hover:bg-gray-200 cursor-pointer"
+                    className="px-3.5 py-2 rounded-lg bg-gray-100 text-gray-600 text-[13px] font-semibold border border-gray-200 hover:bg-gray-200 cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -477,7 +476,7 @@ export default function Mentors() {
                     data-testid="create-mentor-submit"
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 text-white text-xs font-bold cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-[#0071e3] text-white text-[13px] font-bold cursor-pointer"
                   >
                     {submitting ? "Creating…" : "Save Mentor"}
                   </button>
@@ -627,7 +626,7 @@ export default function Mentors() {
                             setStudentStatusFilter("all");
                             setStudentMentorFilter("all");
                           }}
-                          className="px-2 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 cursor-pointer"
+                          className="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-[13px] font-bold border border-red-200 cursor-pointer"
                           title="Reset student filters"
                         >
                           Reset
@@ -781,7 +780,7 @@ export default function Mentors() {
                       setScheduleSectionFilter("all");
                       setScheduleMentorFilter("all");
                     }}
-                    className="px-2 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-[13px] font-bold border border-red-200 cursor-pointer"
                     title="Reset schedule filters"
                   >
                     Reset
@@ -790,7 +789,7 @@ export default function Mentors() {
 
                 <button
                   onClick={() => setShowScheduleForm((v) => !v)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-xs cursor-pointer shrink-0"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[13px] font-bold shadow-xs cursor-pointer shrink-0"
                 >
                   <Plus className="w-3.5 h-3.5" /> Add Class Slot
                 </button>
@@ -898,14 +897,14 @@ export default function Mentors() {
                   <button
                     type="button"
                     onClick={() => setShowScheduleForm(false)}
-                    className="px-3.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-semibold border border-gray-200 hover:bg-gray-200 cursor-pointer"
+                    className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 text-[13px] font-semibold border border-gray-200 hover:bg-gray-200 cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 text-white text-xs font-bold cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:bg-[#0071e3] text-white text-[13px] font-bold cursor-pointer"
                   >
                     {submitting ? "Saving…" : "Save Class Schedule"}
                   </button>
@@ -979,7 +978,7 @@ export default function Mentors() {
                             <td className="px-4 py-2.5 text-center">
                               <button
                                 onClick={() => deleteSchedule(s.id)}
-                                className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 border border-gray-200 transition-colors cursor-pointer"
+                                className="p-2 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 border border-gray-200 transition-colors cursor-pointer"
                                 title="Delete Schedule Slot"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />

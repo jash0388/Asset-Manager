@@ -24,8 +24,8 @@ export default defineConfig({
         name: "QR Attendance System",
         short_name: "QR Attendance",
         description: "QR attendance management for security guards, mentors, and admins",
-        theme_color: "#16a34a",
-        background_color: "#020617",
+        theme_color: "#0071e3",
+        background_color: "#f5f5f7",
         display: "standalone",
         orientation: "portrait",
         start_url: "/security",
@@ -114,7 +114,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: process.env.API_PROXY_TARGET ?? "http://localhost:8080",
         changeOrigin: true,
       },
     },

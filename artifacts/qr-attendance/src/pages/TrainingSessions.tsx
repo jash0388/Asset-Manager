@@ -38,6 +38,7 @@ import {
   ShieldCheck,
   RefreshCw,
 } from "lucide-react";
+import { ChevronLeft as TChevronLeft } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface TrainingSubSession {
@@ -134,7 +135,7 @@ class TrainingErrorBoundary extends Component<{ children: ReactNode }, { hasErro
                 localStorage.removeItem("qr_cached_students");
                 window.location.reload();
               }}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Reload Page & Reset Cache</span>
@@ -204,7 +205,7 @@ function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
             <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">TRAINING SESSIONS & BATCHES</span>
             <h2 className="text-sm font-black text-white">Manage Batches for {session?.name}</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
         </div>
 
         <div className="p-4 space-y-3">
@@ -238,13 +239,13 @@ function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={() => setSubForStudents(sub)}
-                    className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded bg-slate-900 hover:bg-slate-800 text-white text-[13px] font-bold transition-colors cursor-pointer"
                   >
                     Select Students ({sub.studentIds?.length || 0})
                   </button>
                   <button
                     onClick={() => handleRemove(sub.id)}
-                    className="p-1 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 cursor-pointer"
+                    className="p-1.5 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 cursor-pointer"
                     title="Remove Batch"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -264,17 +265,17 @@ function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
             />
             <button
               onClick={handleAdd}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-bold transition-colors cursor-pointer"
             >
               + Add Batch
             </button>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+            <button onClick={onClose} className="px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
               Cancel
             </button>
-            <button onClick={handleSaveAll} disabled={saving} className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
+            <button onClick={handleSaveAll} disabled={saving} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
               {saving ? "Saving..." : "Save Batches"}
             </button>
           </div>
@@ -411,7 +412,7 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
             <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">ROSTER ALLOCATION (ROLL NUMBER ORDER)</span>
             <h2 className="text-sm font-black text-white">{session?.name} — Select Session Students</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
         </div>
 
         <div className="p-4 space-y-3 overflow-y-auto flex-1">
@@ -425,7 +426,7 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
                 <button
                   key={sub.id}
                   onClick={() => setActiveTabSubId(sub.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-lg text-[13px] font-bold transition-all cursor-pointer ${
                     isSelected ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
                   }`}
                 >
@@ -435,7 +436,7 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
             })}
             <button
               onClick={() => setActiveTabSubId(null)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3.5 py-2 rounded-lg text-[13px] font-bold transition-all cursor-pointer ${
                 activeTabSubId === null ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
               }`}
             >
@@ -448,10 +449,10 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
               {currentSelectedIds.length} students allocated to {currentSub ? currentSub.name : "All Enrolled"}
             </span>
             <div className="flex gap-1.5">
-              <button onClick={selectAll} className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold cursor-pointer">
+              <button onClick={selectAll} className="px-2.5 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[13px] font-bold cursor-pointer">
                 Select All
               </button>
-              <button onClick={clearAll} className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold cursor-pointer">
+              <button onClick={clearAll} className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[13px] font-bold cursor-pointer">
                 Clear All
               </button>
             </div>
@@ -491,10 +492,10 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+            <button onClick={onClose} className="px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
               Cancel
             </button>
-            <button onClick={handleSave} disabled={saving} className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
+            <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
               {saving ? "Saving..." : "Save Roster"}
             </button>
           </div>
@@ -545,7 +546,7 @@ function CreateSessionModal({ onClose, onCreated, allStudents }: { onClose: () =
             <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">NEW PROGRAM</span>
             <h2 className="text-sm font-black text-white">Create Training Program</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
         </div>
 
         <div className="p-4 space-y-3">
@@ -582,10 +583,10 @@ function CreateSessionModal({ onClose, onCreated, allStudents }: { onClose: () =
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+            <button onClick={onClose} className="px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
               Cancel
             </button>
-            <button onClick={handleCreate} disabled={saving} className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
+            <button onClick={handleCreate} disabled={saving} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
               {saving ? "Creating..." : "Create Program"}
             </button>
           </div>
@@ -627,7 +628,7 @@ function AddTrainerKeyModal({ session, onClose, onAdded }: { session: TrainingSe
             <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">TRAINER CREDENTIALS</span>
             <h2 className="text-sm font-black text-white">Add Key for {session?.name}</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
         </div>
 
         <div className="p-4 space-y-3">
@@ -667,10 +668,10 @@ function AddTrainerKeyModal({ session, onClose, onAdded }: { session: TrainingSe
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+            <button onClick={onClose} className="px-3.5 py-2 rounded-lg border border-slate-200 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
               Cancel
             </button>
-            <button onClick={handleAdd} disabled={saving} className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
+            <button onClick={handleAdd} disabled={saving} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
               {saving ? "Adding..." : "Add Trainer Key"}
             </button>
           </div>
@@ -861,84 +862,69 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
 
   return (
     <Layout>
-      <div className="p-2 sm:p-3.5 max-w-7xl mx-auto space-y-2.5 text-slate-800 font-sans">
-        
-        {/* ── TOP HEADER ── */}
-        <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:px-3.5 sm:py-2.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            {activeSession && (
-              <Link
-                href="/training-sessions"
-                className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors inline-flex items-center gap-1 text-xs font-bold cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Programs</span>
-              </Link>
-            )}
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2 py-0.2 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200">
-                  {activeSession ? `🏢 ${activeSession.company || "NEXT GEN"}` : "PLACEMENT & TECHNICAL TRAINING"}
-                </span>
-                <h1 className="text-sm sm:text-base font-black text-slate-900 leading-tight">
-                  {activeSession ? activeSession.name : "Training Programs & Bootcamps"}
-                </h1>
-              </div>
+      <div className="px-6 lg:px-10 py-10 max-w-[1180px] mx-auto space-y-6 text-ink-900 font-sans">
+
+        {/* Page header */}
+        <div>
+          {activeSession && (
+            <Link
+              href="/training-sessions"
+              className="inline-flex items-center gap-0.5 h-8 -ml-1.5 pl-0.5 pr-2.5 mb-3 rounded-full text-[15px] font-medium text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+            >
+              <TChevronLeft className="w-5 h-5" strokeWidth={2.2} />
+              Programs
+            </Link>
+          )}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[13px] font-medium text-ink-500">
+                {activeSession ? (activeSession.company || "NEXT GEN") : "Placement & technical training"}
+              </p>
+              <h1 className="mt-1 text-[34px] leading-[1.1] font-bold tracking-[-0.025em] text-ink-900">
+                {activeSession ? activeSession.name : "Training Programs"}
+              </h1>
               {activeSession?.description && (
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5">{activeSession.description}</p>
+                <p className="mt-1 text-[15px] text-ink-500">{activeSession.description}</p>
               )}
             </div>
+
+            {!activeSession ? (
+              <button
+                onClick={() => setShowCreate(true)}
+                className="h-10 px-5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer self-start md:self-auto"
+              >
+                <Plus className="w-4 h-4" />
+                Create Program
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 flex-wrap">
+                <button onClick={() => setManageStudentsOpen(true)} className="h-10 px-4 rounded-full bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer">
+                  <Users className="w-4 h-4 text-ink-500" />
+                  Manage Students
+                </button>
+                <button onClick={() => setManageSubSessionsFor(activeSession)} className="h-10 px-4 rounded-full bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer">
+                  <BookOpen className="w-4 h-4 text-ink-500" />
+                  Batches
+                </button>
+                <button onClick={() => setAddKeyFor(activeSession)} className="h-10 px-4 rounded-full bg-black/[0.05] hover:bg-black/[0.08] text-ink-900 text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer">
+                  <KeyRound className="w-4 h-4 text-ink-500" />
+                  Trainer Key
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm(`Unlock and reset attendance for ${activeSession.name} today so trainer can mark fresh attendance?`)) {
+                      unlockMutation.mutate(activeSession.id);
+                    }
+                  }}
+                  disabled={unlockMutation.isPending}
+                  className="h-10 px-4 rounded-full bg-[#ff9500]/10 hover:bg-[#ff9500]/15 text-[#b85c00] text-[14px] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Unlock className="w-4 h-4" />
+                  {unlockMutation.isPending ? "Unlocking..." : "Unlock"}
+                </button>
+              </div>
+            )}
           </div>
-
-          {!activeSession ? (
-            <button
-              onClick={() => setShowCreate(true)}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer self-start md:self-auto"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create Program</span>
-            </button>
-          ) : (
-            /* Harmonized Action Toolbar */
-            <div className="flex items-center gap-1.5 flex-wrap self-end md:self-auto">
-              <button
-                onClick={() => setManageStudentsOpen(true)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <Users className="w-3.5 h-3.5 text-slate-600" />
-                <span>Manage Students</span>
-              </button>
-
-              <button
-                onClick={() => setManageSubSessionsFor(activeSession)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-slate-600" />
-                <span>Batches</span>
-              </button>
-
-              <button
-                onClick={() => setAddKeyFor(activeSession)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <KeyRound className="w-3.5 h-3.5 text-slate-600" />
-                <span>Trainer Key</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (confirm(`Unlock and reset attendance for ${activeSession.name} today so trainer can mark fresh attendance?`)) {
-                    unlockMutation.mutate(activeSession.id);
-                  }
-                }}
-                disabled={unlockMutation.isPending}
-                className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <Unlock className="w-3.5 h-3.5 text-amber-700" />
-                <span>{unlockMutation.isPending ? "Unlocking..." : "Unlock"}</span>
-              </button>
-            </div>
-          )}
         </div>
 
         {/* ── SCREEN 1: LANDING PAGE OVERVIEW (No active session selected) ── */}
@@ -994,7 +980,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                 </p>
                 <button
                   onClick={() => setShowCreate(true)}
-                  className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs inline-flex items-center gap-1"
+                  className="px-4 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-500 cursor-pointer shadow-xs inline-flex items-center gap-1"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Create First Training Session</span>
@@ -1049,7 +1035,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                       </Link>
                       <button
                         onClick={() => { if (confirm(`Delete training program "${s.name}"?`)) deleteSessionMutation.mutate(s.id); }}
-                        className="p-1.5 rounded-lg border border-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-400 transition-colors cursor-pointer"
+                        className="p-2 rounded-lg border border-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-400 transition-colors cursor-pointer"
                         title="Delete Program"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1132,7 +1118,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
             <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
               <button
                 onClick={() => setActiveSubSessionId(null)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3.5 py-2 rounded-lg text-[13px] font-bold transition-all cursor-pointer whitespace-nowrap ${
                   activeSubSessionId === null
                     ? "bg-slate-900 text-white shadow-xs"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200"
@@ -1148,7 +1134,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                   <button
                     key={sub.id}
                     onClick={() => setActiveSubSessionId(sub.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    className={`px-3.5 py-2 rounded-lg text-[13px] font-bold transition-all cursor-pointer whitespace-nowrap ${
                       isSelected
                         ? "bg-slate-900 text-white shadow-xs"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200"
@@ -1161,7 +1147,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
 
               <button
                 onClick={() => setManageSubSessionsFor(activeSession)}
-                className="px-2.5 py-1.5 rounded-lg border border-dashed border-slate-300 text-blue-700 hover:bg-blue-50 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap"
+                className="px-3 py-2 rounded-lg border border-dashed border-slate-300 text-blue-700 hover:bg-blue-50 text-[13px] font-bold transition-colors cursor-pointer whitespace-nowrap"
               >
                 + Add Batch
               </button>
@@ -1309,7 +1295,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                 </p>
                 <button
                   onClick={() => setManageStudentsOpen(true)}
-                  className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs inline-flex items-center gap-1"
+                  className="px-3.5 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-500 cursor-pointer shadow-xs inline-flex items-center gap-1"
                 >
                   <Users className="w-3.5 h-3.5" />
                   <span>Allocate Students</span>
@@ -1405,7 +1391,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                                     e.stopPropagation();
                                     setSelectedStudent(s);
                                   }}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-2.5 py-1 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[11.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                 >
                                   <span>Profile</span>
                                   <ChevronRight className="w-3 h-3" />

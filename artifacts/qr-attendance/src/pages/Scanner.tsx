@@ -335,7 +335,7 @@ export default function Scanner() {
           <Link href="/dashboard">
             <button
               data-testid="back-button"
-              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors border border-gray-300"
+              className="p-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors border border-gray-300"
               title="Back to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -393,7 +393,7 @@ export default function Scanner() {
             )}
             {result.role && (
               <span className={`mb-3 px-3 py-0.5 rounded-full text-xs font-semibold uppercase ${
-                result.role === "student" ? "bg-blue-800 text-blue-200" : "bg-purple-800 text-purple-200"
+                result.role === "student" ? "bg-[#0071e3] text-blue-200" : "bg-[#0071e3] text-purple-200"
               }`}>
                 {result.role}
               </span>
@@ -408,7 +408,7 @@ export default function Scanner() {
             )}
             <button
               onClick={clearResult}
-              className="mt-8 px-6 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors"
+              className="mt-8 px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[15px] font-semibold transition-colors"
             >
               Continue Scanning
             </button>
@@ -454,7 +454,7 @@ export default function Scanner() {
           </div>
           <button
             onClick={() => setIsLateEntryMode(prev => !prev)}
-            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 cursor-pointer flex items-center ${
+            className={`w-12 h-6.5 rounded-full p-1.5 transition-colors duration-200 cursor-pointer flex items-center ${
               isLateEntryMode ? "bg-amber-500" : "bg-gray-50 border border-gray-200"
             }`}
           >
@@ -517,7 +517,7 @@ export default function Scanner() {
             </div>
             <button
               onClick={testSound}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold transition-colors border border-gray-300"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 text-[13px] font-semibold transition-colors border border-gray-300"
               title="Play test beep"
               data-testid="test-sound"
             >

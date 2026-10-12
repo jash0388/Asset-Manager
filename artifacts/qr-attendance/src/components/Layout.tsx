@@ -16,16 +16,15 @@ import {
   Settings,
   Briefcase,
   ChevronDown,
-  ChevronRight,
   Bell,
   Check,
-  ArrowRightLeft,
   Trash2,
+  Layers,
+  Building2,
 } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
-
 
 const adminNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -43,10 +42,14 @@ const getStoredPasscode = () => {
   try { return localStorage.getItem(PASSCODE_KEY) || MASTER_PASSCODE; } catch { return MASTER_PASSCODE; }
 };
 
-// ─── Training Sessions Tree Component ────────────────────────────────────────
-function TrainingNavTree({ location, onNavigate }: { location: string; onNavigate: () => void }) {
-  const [expanded, setExpanded] = useState(true);
+const ROLE_LABEL: Record<string, string> = {
+  admin: "Administrator",
+  hod: "Head of Department",
+  principal: "Principal",
+  mentor: "Class Incharge",
+};
 
+function useTrainingSessions() {
   const { data: rawData } = useQuery<any>({
     queryKey: ["training-sessions-nav"],
     queryFn: async () => {
@@ -65,125 +68,70 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
     staleTime: 10000,
   });
 
-  const sessions: any[] = useMemo(() => {
+  return useMemo<any[]>(() => {
     if (!rawData) return [];
     if (Array.isArray(rawData)) return rawData;
     if (Array.isArray(rawData?.sessions)) return rawData.sessions;
     return [];
   }, [rawData]);
+}
 
+function TrainingMenu({ location, sessions }: { location: string; sessions: any[] }) {
+  const [open, setOpen] = useState(false);
   const isOnTraining = location.startsWith("/training-sessions");
 
   return (
-    <div style={{ marginTop: "4px" }}>
-      {/* Parent: Training Sessions header */}
-      <div
-        onClick={() => setExpanded(e => !e)}
-        style={{
-          display: "flex", alignItems: "center", gap: "10px",
-          padding: "9px 12px", borderRadius: "10px", marginBottom: "2px",
-          cursor: "pointer", transition: "all 0.15s ease",
-          background: isOnTraining ? "rgba(255,255,255,0.2)" : "transparent",
-          color: isOnTraining ? "#ffffff" : "rgba(255,255,255,0.80)",
-          fontWeight: isOnTraining ? "700" : "500",
-        }}
-        onMouseEnter={e => { if (!isOnTraining) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.1)"; }}
-        onMouseLeave={e => { if (!isOnTraining) (e.currentTarget as HTMLDivElement).style.background = isOnTraining ? "rgba(255,255,255,0.2)" : "transparent"; }}
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={`flex items-center gap-2 h-9 px-4 rounded-[8px] text-[14px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          isOnTraining ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]" : "text-ink-600 hover:text-ink-900"
+        }`}
       >
-        <Briefcase style={{ width: "16px", height: "16px", flexShrink: 0 }} />
-        <span style={{ fontSize: "13px", flex: 1 }}>Training Sessions</span>
-        {expanded
-          ? <ChevronDown style={{ width: "12px", height: "12px", opacity: 0.7 }} />
-          : <ChevronRight style={{ width: "12px", height: "12px", opacity: 0.7 }} />
-        }
-      </div>
-
-      {/* Sub-tree items with branch lines */}
-      {expanded && (
-        <div style={{ marginLeft: "22px", position: "relative" }}>
-          {/* Vertical branch line */}
-          <div style={{
-            position: "absolute", left: "8px", top: 0, bottom: "14px",
-            width: "1.5px", background: "rgba(255,255,255,0.25)", borderRadius: "2px"
-          }} />
-
-          {/* All Sessions overview link */}
-          <div style={{ position: "relative", paddingLeft: "20px", marginBottom: "2px" }}>
-            <div style={{ position: "absolute", left: "8px", top: "50%", width: "12px", height: "1.5px", background: "rgba(255,255,255,0.25)" }} />
-            <Link href="/training-sessions" onClick={onNavigate}>
-              <div style={{
-                display: "flex", alignItems: "center", gap: "8px",
-                padding: "7px 10px", borderRadius: "8px", cursor: "pointer",
-                transition: "all 0.15s", fontSize: "12px",
-                background: location === "/training-sessions" ? "rgba(255,255,255,0.18)" : "transparent",
-                color: location === "/training-sessions" ? "#fff" : "rgba(255,255,255,0.7)",
-                fontWeight: location === "/training-sessions" ? "700" : "400",
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.12)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = location === "/training-sessions" ? "rgba(255,255,255,0.18)" : "transparent"; }}
-              >
-                <span>📋</span> All Sessions
+        Training
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-12 z-50 w-72 rounded-[14px] bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-[0_10px_40px_rgba(0,0,0,0.12)] p-1.5 animate-in fade-in zoom-in-95 duration-150">
+            <p className="px-3 pt-2 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-400">Training sessions</p>
+            <Link href="/training-sessions" onClick={() => setOpen(false)}>
+              <div className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm cursor-pointer transition-colors ${
+                location === "/training-sessions" ? "bg-blue-50 text-blue-700 font-semibold" : "text-ink-700 hover:bg-ink-50"
+              }`}>
+                <span className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Layers className="w-4 h-4" /></span>
+                All sessions
               </div>
             </Link>
-          </div>
-
-          {/* Per-session links */}
-          {(sessions || []).map((s: any, idx: number) => {
-            const href = `/training-sessions/${s.id}`;
-            const isActive = location === href;
-            const isLast = idx === sessions.length - 1;
-            return (
-              <div key={s.id} style={{ position: "relative", paddingLeft: "20px", marginBottom: "2px" }}>
-                {/* Horizontal branch connector */}
-                <div style={{ position: "absolute", left: "8px", top: "50%", width: "12px", height: "1.5px", background: "rgba(255,255,255,0.25)" }} />
-                <Link href={href} onClick={onNavigate}>
-                  <div style={{
-                    display: "flex", alignItems: "center", gap: "8px",
-                    padding: "7px 10px", borderRadius: "8px", cursor: "pointer",
-                    transition: "all 0.15s", fontSize: "12px",
-                    background: isActive ? "rgba(255,255,255,0.18)" : "transparent",
-                    color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
-                    fontWeight: isActive ? "700" : "400",
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.12)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = isActive ? "rgba(255,255,255,0.18)" : "transparent"; }}
-                  >
-                    <span>🏢</span>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+            {sessions.map((s: any) => {
+              const href = `/training-sessions/${s.id}`;
+              return (
+                <Link key={s.id} href={href} onClick={() => setOpen(false)}>
+                  <div className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm cursor-pointer transition-colors ${
+                    location === href ? "bg-blue-50 text-blue-700 font-semibold" : "text-ink-700 hover:bg-ink-50"
+                  }`}>
+                    <span className="h-8 w-8 shrink-0 rounded-lg bg-ink-50 text-ink-500 flex items-center justify-center"><Building2 className="w-4 h-4" /></span>
+                    <span className="truncate">{s.name}</span>
                   </div>
                 </Link>
-              </div>
-            );
-          })}
-
-          {sessions.length === 0 && (
-            <div style={{ paddingLeft: "20px", fontSize: "11px", color: "rgba(255,255,255,0.4)", padding: "6px 10px 6px 28px" }}>
-              No sessions yet
-            </div>
-          )}
-        </div>
+              );
+            })}
+            {sessions.length === 0 && <p className="px-3 py-2 text-xs text-ink-400">No sessions yet</p>}
+          </div>
+        </>
       )}
     </div>
   );
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { admin, hod, principal, role, logout } = useAuth();
   const [location] = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
-  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const handler = (e: MediaQueryListEvent) => {
-      setIsDesktop(e.matches);
-      if (e.matches) setSidebarOpen(true);
-      else setSidebarOpen(false);
-    };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const trainingSessions = useTrainingSessions();
+  const showTraining = role === "hod" || role === "admin";
 
   // ---- Settings modal ----
   const [showSettings, setShowSettings] = useState(false);
@@ -195,6 +143,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [settingsSuccess, setSettingsSuccess] = useState("");
 
   const openSettings = () => {
+    setProfileOpen(false);
     setSettingsStep("verify");
     setSettingsCurrentPwd(""); setSettingsNewPwd(""); setSettingsConfirmPwd("");
     setSettingsError(""); setSettingsSuccess("");
@@ -215,7 +164,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (settingsNewPwd !== settingsConfirmPwd) { setSettingsError("Passcodes don't match."); return; }
     try {
       localStorage.setItem(PASSCODE_KEY, settingsNewPwd);
-      setSettingsSuccess("✅ Passcode updated!"); setSettingsError("");
+      setSettingsSuccess("Passcode updated!"); setSettingsError("");
       setTimeout(() => setShowSettings(false), 1500);
     } catch { setSettingsError("Storage unavailable."); }
   };
@@ -243,9 +192,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
       ]
     : adminNavLinks;
 
+  const shortLabel = (label: string) =>
+    label.replace("Risk Flag Analytics", "Risk Flags").replace("Student Analytics", "Students").replace("Hourly Attendance", "Hourly").replace("HOD Dashboard", "Dashboard");
+
   const userDisplayName = role === "principal" ? principal?.name : role === "hod" ? hod?.name : admin?.name ?? "Admin";
   const userEmail = role === "principal" ? principal?.email : role === "hod" ? hod?.email : admin?.email ?? "";
   const queryClient = useQueryClient();
+
+  const currentFull = typeof window !== "undefined" ? window.location.pathname + window.location.search : location;
+  const isLinkActive = (href: string) =>
+    href.includes("tab=flags")
+      ? currentFull.includes("tab=flags")
+      : href.includes("tab=student-analytics")
+      ? currentFull.includes("tab=student-analytics")
+      : currentFull === href ||
+        (href === "/hod-dashboard" && !currentFull.includes("tab=") && location.startsWith("/hod-dashboard")) ||
+        (href === "/principal-dashboard" && !currentFull.includes("tab=") && location.startsWith("/principal-dashboard")) ||
+        (href === "/history" && location.startsWith("/history"));
+
+  const handleNavClick = (href: string) => {
+    setMobileNavOpen(false);
+    if (href.includes("tab=") || href === "/hod-dashboard" || href === "/principal-dashboard") {
+      window.history.pushState({}, "", href);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
 
   // ── Notification Popover & Approvals State ──
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -316,304 +287,137 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const initials = (userDisplayName || "U").replace(/[^A-Za-z ]/g, "").trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join("") || "U";
+  const passwordInputCls = "w-full px-4 py-3 rounded-xl bg-ink-50 border-2 border-ink-100 text-ink-900 text-center font-mono text-xl tracking-[0.3em] outline-none focus:border-blue-500 focus:bg-white transition-colors";
+  const fieldLabelCls = "block text-[11px] font-bold text-ink-500 uppercase tracking-[0.08em] mb-2";
+  const iconBtnCls = "relative h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer";
+
   return (
-    <div style={{ display: "flex", height: "100vh", background: "#F8FAFC", fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="min-h-screen h-screen flex flex-col bg-[#f5f5f7] font-sans">
 
-      {/* ══════════ SIDEBAR ══════════ */}
-      <aside style={{
-        position: isDesktop && sidebarOpen ? "relative" as const : "fixed" as const,
-        ...(!(isDesktop && sidebarOpen) && { inset: "0 auto 0 0" }),
-        zIndex: 50,
-        width: "240px",
-        background: "linear-gradient(160deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%)",
-        display: "flex", flexDirection: "column" as const,
-        transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)",
-        transition: "transform 0.2s ease",
-        boxShadow: "4px 0 24px rgba(37,99,235,0.25)",
-        flexShrink: 0,
-      }}
-      >
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "20px 16px 18px", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
-          <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <ShieldCheck style={{ width: "20px", height: "20px", color: "#ffffff" }} />
-          </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>QR Attendance</p>
-            <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Campus Control System</p>
-          </div>
-          <button onClick={() => setSidebarOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", display: "flex" }}>
-            <X style={{ width: "20px", height: "20px" }} />
-          </button>
-        </div>
-
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
-          <p style={{ fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", padding: "0 8px", marginBottom: "8px" }}>Navigation</p>
-          {navLinks.map(({ href, label, icon: Icon }) => {
-            const currentFull = window.location.pathname + window.location.search;
-            const isActive = href.includes("tab=flags")
-              ? currentFull.includes("tab=flags")
-              : href.includes("tab=student-analytics")
-              ? currentFull.includes("tab=student-analytics")
-              : currentFull === href ||
-                (href === "/hod-dashboard" && !currentFull.includes("tab=") && location.startsWith("/hod-dashboard")) ||
-                (href === "/principal-dashboard" && !currentFull.includes("tab=") && location.startsWith("/principal-dashboard"));
-
-            return (
-              <Link key={href} href={href}>
-                <div
-                  data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
-                  onClick={() => {
-                    if (!isDesktop) setSidebarOpen(false);
-                    if (href.includes("tab=") || href === "/hod-dashboard" || href === "/principal-dashboard") {
-                      window.history.pushState({}, "", href);
-                      window.dispatchEvent(new Event("popstate"));
-                    }
-                  }}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "10px",
-                    padding: "9px 12px", borderRadius: "10px", marginBottom: "2px",
-                    cursor: "pointer", transition: "all 0.15s ease",
-                    background: isActive ? "rgba(255,255,255,0.2)" : "transparent",
-                    boxShadow: isActive ? "inset 0 0 0 1px rgba(255,255,255,0.25)" : "none",
-                    color: isActive ? "#ffffff" : "rgba(255,255,255,0.75)",
-                    fontWeight: isActive ? "700" : "500",
-                  }}
-                  onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.1)"; }}
-                  onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
-                >
-                  <Icon style={{ width: "16px", height: "16px", flexShrink: 0 }} />
-                  <span style={{ fontSize: "13px" }}>{label}</span>
-                </div>
-              </Link>
-            );
-          })}
-
-          {/* Training Sessions Tree Nav — HOD & Admin only */}
-          {(role === "hod" || role === "admin") && (
-            <TrainingNavTree location={location} onNavigate={() => { if (!isDesktop) setSidebarOpen(false); }} />
-          )}
-        </nav>
-
-        {/* Bottom: user + settings + logout */}
-        <div style={{ padding: "10px", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
-          {/* User info */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 10px 8px" }}>
-            <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "rgba(255,255,255,0.25)", border: "2px solid rgba(255,255,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "800", color: "#ffffff", flexShrink: 0 }}>
-              {userDisplayName?.charAt(0).toUpperCase() ?? "U"}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: "12px", fontWeight: "700", color: "#ffffff", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userDisplayName}</p>
-              <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</p>
-            </div>
-          </div>
-
-          {/* Settings */}
-          {(role === "hod" || role === "principal" || role === "admin") && (
-            <button
-              data-testid="sidebar-settings"
-              onClick={openSettings}
-              style={{ width: "100%", display: "flex", alignItems: "center", gap: "10px", padding: "9px 12px", borderRadius: "10px", background: "transparent", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.75)", transition: "background 0.15s", marginBottom: "2px" }}
-              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)"}
-              onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
-            >
-              <Settings style={{ width: "16px", height: "16px" }} />
-              <span style={{ fontSize: "13px", fontWeight: "500" }}>Settings</span>
-            </button>
-          )}
-
-          {/* Logout */}
+      {/* ══════════ TOP NAVIGATION ══════════ */}
+      <header className="relative z-30 shrink-0 bg-white/75 backdrop-blur-2xl backdrop-saturate-150 border-b border-black/[0.08]">
+        <div className="mx-auto max-w-[1400px] h-14 px-4 lg:px-8 flex items-center gap-4">
           <button
-            data-testid="logout-button"
-            onClick={logout}
-            style={{ width: "100%", display: "flex", alignItems: "center", gap: "10px", padding: "9px 12px", borderRadius: "10px", background: "transparent", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.75)", transition: "background 0.15s" }}
-            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,100,100,0.2)"}
-            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
+            data-testid="mobile-menu-button"
+            onClick={() => setMobileNavOpen(o => !o)}
+            className="lg:hidden -ml-1 h-11 w-11 rounded-full flex items-center justify-center text-ink-600 hover:bg-ink-100 cursor-pointer"
           >
-            <LogOut style={{ width: "16px", height: "16px" }} />
-            <span style={{ fontSize: "13px", fontWeight: "500" }}>Logout</span>
+            {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-        </div>
-      </aside>
 
-      {/* Mobile overlay */}
-      {sidebarOpen && !isDesktop && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(0,0,0,0.4)" }} onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* ══════════ MAIN CONTENT ══════════ */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-        {/* Header bar (desktop & mobile) */}
-        <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-200 bg-white shadow-xs z-30 relative">
-          <div className="flex items-center gap-3">
-            {!sidebarOpen && (
-              <button data-testid="mobile-menu-button" onClick={() => setSidebarOpen(true)} className="p-1 text-slate-500 hover:text-slate-900 cursor-pointer">
-                <Menu className="w-5 h-5" />
-              </button>
-            )}
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-extrabold text-slate-900">QR Attendance</span>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="h-8 w-8 rounded-[9px] bg-ink-900 flex items-center justify-center">
+              <ShieldCheck className="w-[18px] h-[18px] text-white" strokeWidth={2} />
+            </div>
+            <div className="hidden sm:block leading-tight">
+              <p className="text-[14px] font-semibold text-ink-900 tracking-[-0.01em]">SPHN Attendance</p>
+              <p className="text-[11px] font-medium text-ink-400">{ROLE_LABEL[role ?? "admin"]}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 relative">
-            {/* Notification Bell with Badge and Popover Dropdown */}
+          <nav className="hidden lg:flex items-center gap-1 ml-8 rounded-[10px] bg-black/[0.05] p-[3px]">
+            {navLinks.map(({ href, label, icon: Icon }) => {
+              const isActive = isLinkActive(href);
+              return (
+                <Link key={href} href={href}>
+                  <div
+                    data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
+                    onClick={() => handleNavClick(href)}
+                    className={`flex items-center gap-2 h-8 px-3.5 rounded-[8px] text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+                      isActive ? "bg-white text-ink-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]" : "text-ink-600 hover:text-ink-900"
+                    }`}
+                  >
+                    {shortLabel(label)}
+                  </div>
+                </Link>
+              );
+            })}
+            {showTraining && <TrainingMenu location={location} sessions={trainingSessions} />}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-1.5 relative">
+            {/* Notifications */}
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setNotificationsOpen((prev) => !prev)}
-                className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
-                  notificationsOpen
-                    ? "bg-blue-50 border-blue-300 text-blue-700 shadow-xs"
-                    : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                }`}
+                onClick={() => { setNotificationsOpen(p => !p); setProfileOpen(false); }}
+                className={`${iconBtnCls} ${notificationsOpen ? "bg-blue-50 text-blue-700" : "text-ink-500 hover:bg-ink-100 hover:text-ink-900"}`}
                 title="Notifications"
               >
-                <Bell className="w-4.5 h-4.5" />
+                <Bell className="w-[19px] h-[19px]" />
                 {pendingCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-black text-white shadow-xs animate-pulse">
+                  <span className="absolute top-0.5 right-0.5 flex h-[18px] min-w-[18px] px-1 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-white">
                     {pendingCount}
                   </span>
                 )}
               </button>
 
-              {/* Notification Popover Dropdown */}
               {notificationsOpen && (
-                <div
-                  className="absolute right-0 top-11 z-50 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150"
-                  style={{ minWidth: "320px" }}
-                >
-                  {/* Popover Header */}
-                  <div className="p-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white flex items-center justify-between">
+                <div className="absolute right-0 top-12 z-50 w-[22rem] sm:w-96 bg-white/95 backdrop-blur-2xl rounded-[14px] shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-black/[0.08] overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-4 py-3.5 border-b border-ink-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-amber-400" />
-                      <span className="text-xs font-black">Notifications & Approvals</span>
+                      <span className="text-sm font-semibold text-ink-900">Notifications</span>
                       {activeNotifications.length > 0 && (
-                        <span className="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full font-extrabold">
-                          {activeNotifications.length}
-                        </span>
+                        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">{activeNotifications.length}</span>
                       )}
                     </div>
                     {activeNotifications.length > 0 && (
-                      <button
-                        onClick={handleClearAllNotifications}
-                        className="text-[11px] font-extrabold text-amber-300 hover:text-amber-200 flex items-center gap-1 transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        <span>Clear All</span>
+                      <button onClick={handleClearAllNotifications} className="text-[12px] font-semibold text-ink-500 hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer">
+                        <Trash2 className="w-3 h-3" /> Clear all
                       </button>
                     )}
                   </div>
 
-                  {/* Popover Body */}
-                  <div className="p-3 space-y-2.5 overflow-y-auto max-h-[420px] bg-slate-50/50">
+                  <div className="p-3 space-y-2 overflow-y-auto max-h-[420px] bg-ink-50/60">
                     {activeNotifications.length === 0 ? (
-                      <div className="p-6 text-center space-y-2 bg-white rounded-xl border border-slate-200/80">
-                        <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                      <div className="py-10 text-center">
+                        <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
                           <Check className="w-5 h-5" />
                         </div>
-                        <p className="text-xs font-bold text-slate-800">No New Notifications</p>
-                        <p className="text-[11px] text-slate-500">All substitution requests have been cleared or handled.</p>
+                        <p className="text-sm font-semibold text-ink-800">You're all caught up</p>
+                        <p className="text-xs text-ink-500 mt-0.5">No pending substitution requests.</p>
                       </div>
                     ) : (
                       activeNotifications.map((r: any) => {
                         const isPending = r.status === "pending";
                         const isAccepted = r.status === "accepted";
-                        const isDeclined = r.status === "declined";
-
                         return (
-                          <div
-                            key={r.id}
-                            className={`p-3 rounded-xl border bg-white shadow-xs space-y-2 relative transition-all ${
-                              isPending
-                                ? "border-amber-300 ring-1 ring-amber-200"
-                                : isAccepted
-                                ? "border-emerald-200"
-                                : "border-rose-200"
-                            }`}
-                          >
+                          <div key={r.id} className="p-3.5 rounded-xl border border-ink-100 bg-white space-y-2.5">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                                {r.date} &bull; {r.slot}
-                              </span>
-
-                              {/* Status Badge with Tick or X mark */}
+                              <span className="text-[10px] font-mono font-semibold text-ink-500">{r.date} &bull; {r.slot}</span>
                               {isPending ? (
-                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 flex items-center gap-1">
-                                  <Clock className="w-3 h-3 text-amber-600" />
-                                  <span>Pending HOD</span>
-                                </span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                               ) : isAccepted ? (
-                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                                  <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
-                                  <span>Accepted</span>
-                                </span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 flex items-center gap-1"><Check className="w-3 h-3" /> Accepted</span>
                               ) : (
-                                <span className="text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-800 flex items-center gap-1">
-                                  <X className="w-3 h-3 text-rose-600 stroke-[3]" />
-                                  <span>Declined</span>
-                                </span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 ring-1 ring-rose-200 flex items-center gap-1"><X className="w-3 h-3" /> Declined</span>
                               )}
                             </div>
-
                             <div>
-                              <p className="text-xs font-black text-slate-900">{r.subject} ({r.section})</p>
-                              <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 pt-0.5">
-                                <span className="text-slate-600">{r.fromFacultyName}</span>
-                                <span className="text-indigo-600 font-bold">➔</span>
-                                <span className="text-indigo-900 font-extrabold">{r.toFacultyName}</span>
-                              </div>
-                            </div>
-
-                            {r.reason && (
-                              <p className="text-[10.5px] text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                                <strong className="text-slate-700">Reason:</strong> {r.reason}
+                              <p className="text-[13px] font-bold text-ink-900">{r.subject} <span className="text-ink-400 font-medium">· {r.section}</span></p>
+                              <p className="text-xs text-ink-500 mt-0.5">
+                                {r.fromFacultyName} <span className="text-blue-500">→</span> <span className="font-semibold text-ink-800">{r.toFacultyName}</span>
                               </p>
+                            </div>
+                            {r.reason && (
+                              <p className="text-[11px] text-ink-600 bg-ink-50 px-2.5 py-1.5 rounded-lg"><span className="font-semibold">Reason:</span> {r.reason}</p>
                             )}
-
-                            {/* Action Buttons for Pending or Status for Accepted/Declined */}
-                            <div className="flex items-center justify-between pt-1 border-t border-slate-100 gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleClearSingleNotification(r.id)}
-                                className="text-[10.5px] font-bold text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-                              >
-                                Dismiss
-                              </button>
-
+                            <div className="flex items-center justify-between pt-2 border-t border-ink-100 gap-2">
+                              <button type="button" onClick={() => handleClearSingleNotification(r.id)} className="text-[12px] font-semibold text-ink-400 hover:text-ink-700 transition-colors cursor-pointer">Dismiss</button>
                               {isPending ? (
                                 <div className="flex items-center gap-1.5">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleNotificationAction(r.id, "decline")}
-                                    disabled={processingNotificationId === r.id}
-                                    className="px-2.5 py-1 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
-                                  >
-                                    <X className="w-3 h-3" />
-                                    <span>Decline</span>
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleNotificationAction(r.id, "accept")}
-                                    disabled={processingNotificationId === r.id}
-                                    className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                                  >
-                                    <Check className="w-3 h-3 stroke-[3]" />
-                                    <span>Accept</span>
+                                  <button type="button" onClick={() => handleNotificationAction(r.id, "decline")} disabled={processingNotificationId === r.id}
+                                    className="px-3.5 py-2 rounded-lg border border-ink-200 text-ink-700 hover:bg-ink-50 text-[12px] font-semibold transition-all cursor-pointer">Decline</button>
+                                  <button type="button" onClick={() => handleNotificationAction(r.id, "accept")} disabled={processingNotificationId === r.id}
+                                    className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-95">
+                                    <Check className="w-3 h-3" /> Accept
                                   </button>
                                 </div>
                               ) : isAccepted ? (
-                                <span className="text-[10.5px] font-bold text-emerald-700 flex items-center gap-1">
-                                  <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                                  <span>Assigned to {r.toFacultyName}</span>
-                                </span>
+                                <span className="text-[11px] font-semibold text-emerald-700">Assigned to {r.toFacultyName}</span>
                               ) : (
-                                <span className="text-[10.5px] font-bold text-rose-700 flex items-center gap-1">
-                                  <X className="w-3.5 h-3.5 text-rose-600 stroke-[3]" />
-                                  <span>Reassignment Declined</span>
-                                </span>
+                                <span className="text-[11px] font-semibold text-rose-700">Reassignment declined</span>
                               )}
                             </div>
                           </div>
@@ -625,96 +429,151 @@ export function Layout({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            {/* Settings Gear Button */}
-            <button
-              onClick={openSettings}
-              className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition-all cursor-pointer flex items-center justify-center"
-              title="Settings"
-            >
-              <Settings className="w-4.5 h-4.5 text-slate-700" />
-            </button>
+            {(role === "hod" || role === "principal" || role === "admin") && (
+              <button data-testid="sidebar-settings" onClick={openSettings} className={`${iconBtnCls} text-ink-500 hover:bg-ink-100 hover:text-ink-900`} title="Settings">
+                <Settings className="w-[19px] h-[19px]" />
+              </button>
+            )}
 
-            {/* Logout Button */}
-            <button
-              onClick={logout}
-              className="px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 font-bold text-xs cursor-pointer flex items-center gap-1.5 transition-all"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+            <div className="mx-1 h-7 w-px bg-ink-100" />
+
+            {/* Profile */}
+            <div className="relative">
+              <button
+                onClick={() => { setProfileOpen(p => !p); setNotificationsOpen(false); }}
+                className="flex items-center gap-2.5 rounded-full pl-1 pr-2.5 h-11 hover:bg-black/[0.04] transition-colors cursor-pointer"
+              >
+                <span className="h-8 w-8 rounded-full bg-gradient-to-b from-[#a1a1a6] to-[#8e8e93] text-white text-[12px] font-semibold flex items-center justify-center">{initials}</span>
+                <span className="hidden md:block text-left leading-tight max-w-[160px]">
+                  <span className="block text-[13px] font-semibold text-ink-900 truncate">{userDisplayName}</span>
+                  <span className="block text-[11px] text-ink-400 truncate">{userEmail}</span>
+                </span>
+                <ChevronDown className="hidden md:block w-4 h-4 text-ink-400" />
+              </button>
+              {profileOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
+                  <div className="absolute right-0 top-13 z-50 mt-2 w-60 rounded-[14px] bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-[0_10px_40px_rgba(0,0,0,0.12)] p-1.5 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-2.5 border-b border-ink-100 mb-1">
+                      <p className="text-sm font-semibold text-ink-900 truncate">{userDisplayName}</p>
+                      <p className="text-xs text-ink-500 truncate">{userEmail}</p>
+                    </div>
+                    {(role === "hod" || role === "principal" || role === "admin") && (
+                      <button onClick={openSettings} className="w-full flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] text-ink-700 hover:bg-ink-50 cursor-pointer">
+                        <Settings className="w-4 h-4 text-ink-400" /> Settings
+                      </button>
+                    )}
+                    <button data-testid="logout-button" onClick={logout} className="w-full flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] text-rose-600 hover:bg-rose-50 cursor-pointer">
+                      <LogOut className="w-4 h-4" /> Log out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile nav sheet */}
+        {mobileNavOpen && (
+          <div className="lg:hidden border-t border-ink-100 bg-white px-4 py-3 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+            {navLinks.map(({ href, label, icon: Icon }) => {
+              const isActive = isLinkActive(href);
+              return (
+                <Link key={href} href={href}>
+                  <div onClick={() => handleNavClick(href)}
+                    className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold cursor-pointer ${isActive ? "bg-blue-50 text-blue-700" : "text-ink-700 hover:bg-ink-50"}`}>
+                    <Icon className="w-[18px] h-[18px]" /> {label}
+                  </div>
+                </Link>
+              );
+            })}
+            {showTraining && (
+              <Link href="/training-sessions">
+                <div onClick={() => setMobileNavOpen(false)}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold cursor-pointer ${location.startsWith("/training-sessions") ? "bg-blue-50 text-blue-700" : "text-ink-700 hover:bg-ink-50"}`}>
+                  <Briefcase className="w-[18px] h-[18px]" /> Training Sessions
+                </div>
+              </Link>
+            )}
+            <button onClick={logout} className="w-full flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer">
+              <LogOut className="w-[18px] h-[18px]" /> Log out
             </button>
           </div>
-        </header>
+        )}
+      </header>
 
-        <main style={{ flex: 1, overflowY: "auto" }}>{children}</main>
-      </div>
+      <main className="flex-1 overflow-y-auto">
+        <div className="animate-fade-up">{children}</div>
+      </main>
 
       {/* ══════════ SETTINGS MODAL ══════════ */}
       {showSettings && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-          <div style={{ width: "100%", maxWidth: "360px", background: "#ffffff", borderRadius: "20px", overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
-            <div style={{ padding: "18px 20px", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Settings style={{ width: "18px", height: "18px", color: "#2563EB" }} />
+        <div className="fixed inset-0 z-[100] bg-ink-900/30 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setShowSettings(false)}>
+          <div className="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150" onClick={e => e.stopPropagation()}>
+            <div className="px-6 pt-6 pb-4 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-11 w-11 rounded-2xl bg-blue-50 flex items-center justify-center">
+                  <Settings className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p style={{ fontSize: "14px", fontWeight: "800", color: "#111827", margin: 0 }}>System Settings</p>
-                  <p style={{ fontSize: "11px", color: "#6B7280", margin: 0 }}>Account Options & Passcode</p>
+                  <p className="text-[17px] font-semibold text-ink-900">Settings</p>
+                  <p className="text-xs text-ink-500">Account & scanner passcode</p>
                 </div>
               </div>
-              <button onClick={() => setShowSettings(false)} style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#F3F4F6", border: "none", cursor: "pointer", fontSize: "16px", color: "#6B7280", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
+              <button onClick={() => setShowSettings(false)} className="h-9 w-9 rounded-lg bg-ink-50 hover:bg-ink-100 text-ink-500 flex items-center justify-center cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <div style={{ padding: "20px", spaceY: "16px" }}>
-              <div style={{ padding: "14px", borderRadius: "12px", background: "#F8FAFC", border: "1px solid #E2E8F0", marginBottom: "16px" }}>
-                <p style={{ fontSize: "11px", color: "#64748B", margin: 0 }}>Logged in Account</p>
-                <p style={{ fontSize: "14px", fontWeight: "800", color: "#0F172A", margin: "2px 0 0" }}>{userDisplayName}</p>
-                <p style={{ fontSize: "11px", fontWeight: "600", color: "#2563EB", margin: "2px 0 0" }}>{userEmail}</p>
+            <div className="px-6 pb-6">
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-ink-50 mb-5">
+                <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-b from-[#a1a1a6] to-[#8e8e93] text-white flex items-center justify-center text-sm font-bold">{initials}</div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-ink-900 truncate">{userDisplayName}</p>
+                  <p className="text-xs text-ink-500 truncate">{userEmail}</p>
+                </div>
               </div>
 
               {settingsStep === "verify" && (
                 <form onSubmit={handleVerifyForSettings}>
-                  <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Current Passcode</label>
+                  <label className={fieldLabelCls}>Current passcode</label>
                   <input type="password" placeholder="••••••" value={settingsCurrentPwd}
                     onChange={e => { setSettingsCurrentPwd(e.target.value); setSettingsError(""); }}
-                    style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
-                    onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
-                  {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
-                  <button type="submit" style={{ width: "100%", marginTop: "14px", padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Change Passcode →</button>
+                    className={passwordInputCls} autoFocus />
+                  {settingsError && <p className="text-rose-600 text-xs font-semibold text-center mt-2">{settingsError}</p>}
+                  <button type="submit" className="w-full mt-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[15px] transition-colors cursor-pointer">Change passcode</button>
                 </form>
               )}
 
               {settingsStep === "change" && (
-                <form onSubmit={handleChangePasscode}>
-                  <div style={{ marginBottom: "14px" }}>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>New Passcode</label>
-                    <input type="password" placeholder="Min 4 characters" value={settingsNewPwd}
+                <form onSubmit={handleChangePasscode} className="space-y-4">
+                  <div>
+                    <label className={fieldLabelCls}>New passcode</label>
+                    <input type="password" placeholder="Min 4 chars" value={settingsNewPwd}
                       onChange={e => { setSettingsNewPwd(e.target.value); setSettingsError(""); }}
-                      style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
-                      onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} autoFocus />
+                      className={passwordInputCls} autoFocus />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Confirm Passcode</label>
-                    <input type="password" placeholder="Repeat passcode" value={settingsConfirmPwd}
+                    <label className={fieldLabelCls}>Confirm passcode</label>
+                    <input type="password" placeholder="Repeat" value={settingsConfirmPwd}
                       onChange={e => { setSettingsConfirmPwd(e.target.value); setSettingsError(""); }}
-                      style={{ width: "100%", padding: "12px 16px", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box" }}
-                      onFocus={e => e.target.style.borderColor = "#2563EB"} onBlur={e => e.target.style.borderColor = "#E5E7EB"} />
+                      className={passwordInputCls} />
                   </div>
-                  {settingsError && <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", textAlign: "center", marginTop: "8px" }}>{settingsError}</p>}
-                  {settingsSuccess && <p style={{ color: "#059669", fontSize: "13px", fontWeight: "700", textAlign: "center", marginTop: "8px" }}>{settingsSuccess}</p>}
-                  <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
-                    <button type="button" onClick={() => setSettingsStep("verify")} style={{ flex: 1, padding: "12px", borderRadius: "12px", background: "#F3F4F6", border: "1px solid #E5E7EB", color: "#374151", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>← Back</button>
-                    <button type="submit" style={{ flex: 2, padding: "12px", borderRadius: "12px", background: "#2563EB", color: "#fff", fontWeight: "700", fontSize: "14px", border: "none", cursor: "pointer" }}>Save Passcode</button>
+                  {settingsError && <p className="text-rose-600 text-xs font-semibold text-center">{settingsError}</p>}
+                  {settingsSuccess && <p className="text-emerald-600 text-sm font-semibold text-center">{settingsSuccess}</p>}
+                  <div className="flex gap-2.5">
+                    <button type="button" onClick={() => setSettingsStep("verify")} className="flex-1 py-3 rounded-xl bg-ink-50 hover:bg-ink-100 text-ink-700 font-semibold text-[15px] cursor-pointer">Back</button>
+                    <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[15px] cursor-pointer">Save passcode</button>
                   </div>
                 </form>
               )}
 
               <button
                 onClick={() => { setShowSettings(false); logout(); }}
-                style={{ width: "100%", marginTop: "16px", padding: "14px", borderRadius: "12px", background: "#DC2626", color: "#ffffff", fontWeight: "800", fontSize: "14px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+                className="w-full mt-4 py-3 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold text-[15px] flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
-                <LogOut style={{ width: "18px", height: "18px" }} />
-                LOGOUT FROM ACCOUNT
+                <LogOut className="w-4 h-4" />
+                Log out of account
               </button>
             </div>
           </div>
