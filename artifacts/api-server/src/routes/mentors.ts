@@ -11,22 +11,22 @@ const router = Router();
 router.use(authMiddleware, adminOnly);
 
 // List all mentors (login keys included — admin-only view).
-router.get("/", async (_req: AuthRequest, res: Response) => {
+router.get("/mentors", async (req: any, res: Response) => {
   try {
     const { data, error } = await supabase
       .from("qr_mentors")
-      .select("id, name, email, key, section")
-      .order("key", { ascending: true });
+      .select("id, name, email, key");
     if (error) throw error;
-    res.json(data || []);
+    res.json((data || []).sort((a: any, b: any) => String(a.key).localeCompare(String(b.key))));
   } catch (err: any) {
+    req.log?.error?.({ err }, "List mentors error");
     res.status(500).json({ error: "Failed to load mentors" });
   }
 });
 
 // Create a mentor. The form sends { name, email, password } — "password" is the
 // 3-4 digit login key the faculty will type into the Mentor App.
-router.post("/", async (req: Request, res: Response) => {
+router.post("/mentors", async (req: Request, res: Response) => {
   const name = String(req.body?.name || "").trim();
   const email = String(req.body?.email || "").trim().toLowerCase();
   const key = String(req.body?.password ?? req.body?.key ?? "").trim();
@@ -51,8 +51,8 @@ router.post("/", async (req: Request, res: Response) => {
     }
     const { data, error } = await supabase
       .from("qr_mentors")
-      .insert({ name, email, key, section: "UNASSIGNED" })
-      .select("id, name, email, key, section")
+      .insert({ name, email, key })
+      .select("id, name, email, key")
       .single();
     if (error) throw error;
     res.status(201).json(data);
@@ -66,7 +66,7 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 // Update a mentor (currently: login key / passkey from the HOD editor).
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/mentors/:id", async (req: Request, res: Response) => {
   const id = parseInt(String(req.params.id), 10);
   if (!Number.isFinite(id)) {
     res.status(400).json({ error: "Invalid mentor id" });
@@ -96,7 +96,7 @@ router.put("/:id", async (req: Request, res: Response) => {
       .from("qr_mentors")
       .update({ key })
       .eq("id", id)
-      .select("id, name, email, key, section")
+      .select("id, name, email, key")
       .single();
     if (error) throw error;
     if (!data) {
