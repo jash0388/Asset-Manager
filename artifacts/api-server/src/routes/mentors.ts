@@ -5,12 +5,13 @@ import { authMiddleware, adminOnly, AuthRequest } from "../middlewares/auth.js";
 // Mentor CRUD for the Mentors management page. The frontend (Mentors.tsx,
 // HodDashboard passkey editor) calls /api/mentors and /api/mentors/:id, which
 // previously did not exist on the server — those buttons silently failed.
+// This router is mounted under /mentors by routes/index.ts.
 const router = Router();
 
-router.use("/mentors", authMiddleware, adminOnly);
+router.use(authMiddleware, adminOnly);
 
 // List all mentors (login keys included — admin-only view).
-router.get("/mentors", async (_req: AuthRequest, res: Response) => {
+router.get("/", async (_req: AuthRequest, res: Response) => {
   try {
     const { data, error } = await supabase
       .from("qr_mentors")
@@ -25,7 +26,7 @@ router.get("/mentors", async (_req: AuthRequest, res: Response) => {
 
 // Create a mentor. The form sends { name, email, password } — "password" is the
 // 3-4 digit login key the faculty will type into the Mentor App.
-router.post("/mentors", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   const name = String(req.body?.name || "").trim();
   const email = String(req.body?.email || "").trim().toLowerCase();
   const key = String(req.body?.password ?? req.body?.key ?? "").trim();
@@ -65,7 +66,7 @@ router.post("/mentors", async (req: Request, res: Response) => {
 });
 
 // Update a mentor (currently: login key / passkey from the HOD editor).
-router.put("/mentors/:id", async (req: Request, res: Response) => {
+router.put("/:id", async (req: Request, res: Response) => {
   const id = parseInt(String(req.params.id), 10);
   if (!Number.isFinite(id)) {
     res.status(400).json({ error: "Invalid mentor id" });
