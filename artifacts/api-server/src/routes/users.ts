@@ -95,6 +95,51 @@ router.get("/users/:id", authMiddleware, async (req: any, res: any) => {
   }
 });
 
+// Assign / clear a student's mentor. Mentors.tsx calls PATCH /users/:id with
+// { mentorId } — previously unimplemented, so the assign button failed.
+router.patch("/users/:id", authMiddleware, adminOnly, async (req: any, res: any) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
+  }
+  const mentorId = req.body?.mentorId;
+  if (mentorId !== null && !Number.isFinite(Number(mentorId))) {
+    res.status(400).json({ error: "mentorId must be a number or null" });
+    return;
+  }
+  try {
+    if (mentorId !== null) {
+      const { data: mentor } = await supabase
+        .from("qr_mentors")
+        .select("id")
+        .eq("id", Number(mentorId))
+        .limit(1);
+      if (!mentor || mentor.length === 0) {
+        res.status(404).json({ error: "Mentor not found" });
+        return;
+      }
+    }
+    const { data: user, error } = await supabase
+      .from("qr_users")
+      .update({ mentor_id: mentorId === null ? null : Number(mentorId) })
+      .eq("id", id)
+      .select("*")
+      .single();
+    if (error) {
+      if (error.code === "PGRST116") {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      throw error;
+    }
+    res.json(formatUser(user));
+  } catch (err: any) {
+    req.log.error({ err }, "Update user error");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.delete("/users/:id", authMiddleware, adminOnly, async (req: any, res: any) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {

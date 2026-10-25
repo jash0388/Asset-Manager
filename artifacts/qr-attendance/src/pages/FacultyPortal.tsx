@@ -1268,16 +1268,43 @@ const DEPARTMENT_MASTER_SCHEDULE: Record<
   },
 };
 
-export const OFFICIAL_FACULTY_LIST = Object.entries(FACULTY_DIRECTORY).map(([key, data], idx) => ({
-  id: idx + 1,
-  name: data.name,
-  email: data.email,
-  role: data.role,
-  yearLabel: data.section,
-  section: data.section,
-  rollRange: `Key: ${key} | ${data.department}`,
-  count: data.mentees.length || 27
-}));
+// Derive the concrete years/sections a faculty member serves from their actual
+// course assignments ("DS-2A" etc). The directory's `section` field is a display
+// string with Roman numerals ("DS III (A/B/C) & IV-A") that filters can't match.
+function parseFacultyAssignment(section: string, courses: Course[]): { years: string[]; sections: string[] } {
+  const romanToYear: Record<string, string> = { I: "1st Year", II: "2nd Year", III: "3rd Year", IV: "4th Year" };
+  const years = new Set<string>();
+  const sections = new Set<string>();
+  for (const c of courses || []) {
+    const m = (c.section || "").match(/^DS-?([1-4])([A-D])$/i);
+    if (m) {
+      sections.add(`${m[1]}${m[2].toUpperCase()}`);
+      years.add(romanToYear[m[1]]);
+    }
+  }
+  if (years.size === 0) {
+    // No concrete courses — fall back to the Roman numerals in the display string.
+    const romans = (section || "").match(/IV|III|II|I/g) || [];
+    romans.forEach(r => years.add(romanToYear[r]));
+  }
+  return { years: [...years], sections: [...sections] };
+}
+
+export const OFFICIAL_FACULTY_LIST = Object.entries(FACULTY_DIRECTORY).map(([key, data], idx) => {
+  const { years, sections } = parseFacultyAssignment(data.section, data.courses);
+  return {
+    id: idx + 1,
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    yearLabel: years.length === 1 ? years[0] : years.length === 0 ? "All Years" : "Multiple Years",
+    years,
+    sections,
+    section: data.section,
+    rollRange: `Key: ${key} | ${data.department}`,
+    count: data.mentees.length || 27
+  };
+});
 
 // IST (Asia/Kolkata) date string, YYYY-MM-DD. The server files attendance by IST
 // day, so a UTC "today" misfiles submissions made between 00:00 and 05:30 IST.

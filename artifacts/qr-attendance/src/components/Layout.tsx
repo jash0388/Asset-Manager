@@ -16,7 +16,6 @@ import {
   Settings,
   Briefcase,
   ChevronDown,
-  ChevronRight,
   Bell,
   Check,
   List,
@@ -24,7 +23,7 @@ import {
   ArrowRightLeft,
   Trash2,
 } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 
@@ -45,9 +44,10 @@ const getStoredPasscode = () => {
   try { return localStorage.getItem(PASSCODE_KEY) || MASTER_PASSCODE; } catch { return MASTER_PASSCODE; }
 };
 
-// ─── Training Sessions Tree Component ────────────────────────────────────────
-function TrainingNavTree({ location, onNavigate }: { location: string; onNavigate: () => void }) {
-  const [expanded, setExpanded] = useState(true);
+// ─── Training Programs Dropdown (desktop) ────────────────────────────────────
+function TrainingProgramsMenu({ location, onNavigate }: { location: string; onNavigate: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   const { data: rawData } = useQuery<any>({
     queryKey: ["training-sessions-nav"],
@@ -76,68 +76,60 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
 
   const isOnTraining = location.startsWith("/training-sessions");
 
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <div className="mt-1">
+    <div className="relative" ref={ref}>
       <button
-        onClick={() => setExpanded(e => !e)}
-        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors cursor-pointer ${
+        onClick={() => setOpen(o => !o)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${
           isOnTraining
-            ? "bg-emerald-600 text-white font-semibold shadow-sm"
-            : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
+            ? "bg-emerald-600 text-white shadow-sm"
+            : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
         }`}
       >
-        <Briefcase className="w-4 h-4 shrink-0" />
-        <span className="flex-1 text-left">Training Sessions</span>
-        {expanded
-          ? <ChevronDown className="w-3 h-3 opacity-70" />
-          : <ChevronRight className="w-3 h-3 opacity-70" />}
+        <Briefcase className="w-4 h-4" />
+        <span>Training</span>
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
-      {expanded && (
-        <div className="ml-[22px] relative">
-          <div className="absolute left-0 top-0 bottom-3 w-px bg-slate-300" aria-hidden />
-
-          <div className="relative pl-4">
-            <div className="absolute left-0 top-1/2 w-3 h-px bg-slate-300" aria-hidden />
-            <Link href="/training-sessions" onClick={onNavigate}>
-              <div
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs cursor-pointer transition-colors ${
-                  location === "/training-sessions"
-                    ? "bg-emerald-600 text-white font-semibold"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                <List className="w-3 h-3 shrink-0" />
+      {open && (
+        <div className="absolute left-0 top-full mt-1.5 w-72 bg-white rounded-lg border border-slate-300 shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+          <p className="eyebrow text-slate-500 px-4 pt-3 pb-2 border-b border-slate-200">Training Programs</p>
+          <div className="max-h-72 overflow-y-auto p-1.5">
+            <Link href="/training-sessions" onClick={() => { setOpen(false); onNavigate(); }}>
+              <div className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] cursor-pointer transition-colors ${
+                location === "/training-sessions" ? "bg-emerald-50 text-emerald-800 font-semibold" : "text-slate-700 hover:bg-slate-100"
+              }`}>
+                <List className="w-4 h-4 shrink-0 text-slate-500" />
                 <span>All Sessions</span>
               </div>
             </Link>
-          </div>
-
-          {(sessions || []).map((s: any) => {
-            const href = `/training-sessions/${s.id}`;
-            const isActive = location === href;
-            return (
-              <div key={s.id} className="relative pl-4 mt-0.5">
-                <div className="absolute left-0 top-1/2 w-3 h-px bg-slate-300" aria-hidden />
-                <Link href={href} onClick={onNavigate}>
-                  <div
-                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs cursor-pointer transition-colors ${
-                      isActive
-                        ? "bg-emerald-600 text-white font-semibold"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                    }`}
-                  >
-                    <Building2 className="w-3 h-3 shrink-0" />
+            {(sessions || []).map((s: any) => {
+              const href = `/training-sessions/${s.id}`;
+              const isActive = location === href;
+              return (
+                <Link key={s.id} href={href} onClick={() => { setOpen(false); onNavigate(); }}>
+                  <div className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] cursor-pointer transition-colors ${
+                    isActive ? "bg-emerald-50 text-emerald-800 font-semibold" : "text-slate-700 hover:bg-slate-100"
+                  }`}>
+                    <Building2 className="w-4 h-4 shrink-0 text-slate-500" />
                     <span className="truncate">{s.name}</span>
                   </div>
                 </Link>
-              </div>
-            );
-          })}
-
-          {sessions.length === 0 && (
-            <div className="pl-6 py-1.5 text-[11px] text-slate-500">No sessions yet</div>
-          )}
+              );
+            })}
+            {sessions.length === 0 && (
+              <p className="px-3 py-2.5 text-xs text-slate-500">No sessions yet</p>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -148,19 +140,9 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
 export function Layout({ children }: { children: React.ReactNode }) {
   const { admin, hod, principal, role, logout } = useAuth();
   const [location] = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
-  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const handler = (e: MediaQueryListEvent) => {
-      setIsDesktop(e.matches);
-      if (e.matches) setSidebarOpen(true);
-      else setSidebarOpen(false);
-    };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
+  useEffect(() => { setMobileOpen(false); }, [location]);
 
   // ---- Settings modal ----
   const [showSettings, setShowSettings] = useState(false);
@@ -305,146 +287,75 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const initials = userDisplayName?.charAt(0).toUpperCase() ?? "U";
 
-  return (
-    <div className="flex h-screen bg-slate-100">
+  const isNavLinkActive = (href: string) => {
+    const currentFull = window.location.pathname + window.location.search;
+    return href.includes("tab=flags")
+      ? currentFull.includes("tab=flags")
+      : href.includes("tab=student-analytics")
+      ? currentFull.includes("tab=student-analytics")
+      : currentFull === href ||
+        (href === "/hod-dashboard" && !currentFull.includes("tab=") && location.startsWith("/hod-dashboard")) ||
+        (href === "/principal-dashboard" && !currentFull.includes("tab=") && location.startsWith("/principal-dashboard"));
+  };
 
-      {/* ══════════ SIDEBAR ══════════ */}
-      <aside
-        className={`${isDesktop && sidebarOpen ? "relative" : "fixed inset-y-0 left-0"} z-50 w-[250px] shrink-0 flex flex-col bg-white border-r border-slate-300 shadow-sm transition-transform duration-200 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-4 pt-5 pb-4 border-b border-slate-200">
-          <div className="w-9 h-9 rounded-md bg-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
-            <ShieldCheck className="w-5 h-5 text-white" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-bold text-slate-900 truncate" style={{ fontFamily: "var(--app-font-display)" }}>
-              SPHN Attendance
-            </p>
-            <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-slate-500 truncate">
-              Control Console
-            </p>
-          </div>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="text-slate-400 hover:text-slate-900 transition-colors cursor-pointer"
-            aria-label="Close menu"
-          >
-            <X className="w-5 h-5" />
-          </button>
+  const pushNavHref = (href: string) => {
+    if (href.includes("tab=") || href === "/hod-dashboard" || href === "/principal-dashboard") {
+      window.history.pushState({}, "", href);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
+  const navLinkEl = ({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }, extraClass = "") => {
+    const isActive = isNavLinkActive(href);
+    return (
+      <Link key={href} href={href}>
+        <div
+          data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
+          onClick={() => pushNavHref(href)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] whitespace-nowrap transition-colors cursor-pointer ${extraClass} ${
+            isActive
+              ? "bg-emerald-600 text-white font-semibold shadow-sm"
+              : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
+          }`}
+        >
+          <Icon className="w-4 h-4 shrink-0" />
+          <span>{label}</span>
         </div>
+      </Link>
+    );
+  };
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto">
-          <p className="eyebrow text-slate-500 px-2 mb-2">Registry</p>
-          {navLinks.map(({ href, label, icon: Icon }) => {
-            const currentFull = window.location.pathname + window.location.search;
-            const isActive = href.includes("tab=flags")
-              ? currentFull.includes("tab=flags")
-              : href.includes("tab=student-analytics")
-              ? currentFull.includes("tab=student-analytics")
-              : currentFull === href ||
-                (href === "/hod-dashboard" && !currentFull.includes("tab=") && location.startsWith("/hod-dashboard")) ||
-                (href === "/principal-dashboard" && !currentFull.includes("tab=") && location.startsWith("/principal-dashboard"));
+  return (
+    <div className="flex flex-col h-screen bg-slate-100">
 
-            return (
-              <Link key={href} href={href}>
-                <div
-                  data-testid={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
-                  onClick={() => {
-                    if (!isDesktop) setSidebarOpen(false);
-                    if (href.includes("tab=") || href === "/hod-dashboard" || href === "/principal-dashboard") {
-                      window.history.pushState({}, "", href);
-                      window.dispatchEvent(new Event("popstate"));
-                    }
-                  }}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-md mb-0.5 cursor-pointer transition-colors ${
-                    isActive
-                      ? "bg-emerald-600 text-white font-semibold shadow-sm"
-                      : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
-                  }`}
-                >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span className="text-[13px]">{label}</span>
-                </div>
-              </Link>
-            );
-          })}
-
-          {/* Training Sessions Tree Nav — HOD & Admin only */}
-          {(role === "hod" || role === "admin") && (
-            <div className="mt-3 pt-3 border-t border-slate-200">
-              <p className="eyebrow text-slate-500 px-2 mb-1.5">Programs</p>
-              <TrainingNavTree location={location} onNavigate={() => { if (!isDesktop) setSidebarOpen(false); }} />
-            </div>
-          )}
-        </nav>
-
-        {/* Bottom: user + settings + logout */}
-        <div className="px-3 py-3 border-t border-slate-200">
-          <div className="flex items-center gap-2.5 px-1.5 pb-2.5">
-            <div className="w-8 h-8 rounded-md bg-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0 font-mono">
-              {initials}
+      {/* ══════════ TOP NAV — BRAND ROW ══════════ */}
+      <header className="shrink-0 bg-white border-b border-slate-300 shadow-xs z-40 relative">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5">
+          {/* Brand */}
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              data-testid="mobile-menu-button"
+              onClick={() => setMobileOpen(o => !o)}
+              className="lg:hidden p-1.5 rounded-md border border-slate-300 bg-white text-slate-700 hover:text-slate-950 hover:border-slate-400 transition-colors cursor-pointer"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+            <div className="w-9 h-9 rounded-md bg-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
+              <ShieldCheck className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-900 truncate">{userDisplayName}</p>
-              <p className="text-[10px] font-mono text-slate-500 truncate">{userEmail}</p>
-            </div>
-          </div>
-
-          {(role === "hod" || role === "principal" || role === "admin") && (
-            <button
-              data-testid="sidebar-settings"
-              onClick={openSettings}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-[13px] font-medium transition-colors cursor-pointer"
-            >
-              <Settings className="w-4 h-4" />
-              <span>Settings</span>
-            </button>
-          )}
-
-          <button
-            data-testid="logout-button"
-            onClick={logout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:bg-red-50 hover:text-red-700 text-[13px] font-medium transition-colors cursor-pointer"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Mobile overlay */}
-      {sidebarOpen && !isDesktop && (
-        <div className="fixed inset-0 z-40 bg-slate-900/40" onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* ══════════ MAIN CONTENT ══════════ */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-        {/* Header bar (desktop & mobile) */}
-        <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-300 bg-white shadow-xs z-30 relative">
-          <div className="flex items-center gap-3">
-            {!sidebarOpen && (
-              <button
-                data-testid="mobile-menu-button"
-                onClick={() => setSidebarOpen(true)}
-                className="p-1.5 -ml-1 rounded-md border border-slate-300 bg-white text-slate-700 hover:text-slate-950 hover:border-slate-400 transition-colors cursor-pointer"
-                aria-label="Open menu"
-              >
-                <Menu className="w-4 h-4" />
-              </button>
-            )}
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span className="text-[13px] font-bold text-slate-900 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
+              <p className="text-[15px] font-bold text-slate-900 leading-tight truncate" style={{ fontFamily: "var(--app-font-display)" }}>
                 SPHN Attendance
-              </span>
-              <span className="hidden sm:inline stamp border-emerald-300 text-emerald-800 bg-emerald-50">{role ?? "staff"}</span>
+              </p>
+              <p className="hidden sm:block text-[9px] font-mono uppercase tracking-[0.14em] text-slate-500 leading-tight">
+                Campus Control Console
+              </p>
             </div>
+            <span className="hidden md:inline stamp border-emerald-300 text-emerald-800 bg-emerald-50 ml-1">{role ?? "staff"}</span>
           </div>
 
+          {/* Right controls */}
           <div className="flex items-center gap-2 relative">
             {/* Notification Bell with Badge and Popover Dropdown */}
             <div className="relative">
@@ -554,7 +465,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                               </p>
                             )}
 
-                            {/* Action Buttons for Pending or Status for Accepted/Declined */}
                             <div className="flex items-center justify-between pt-1.5 border-t border-slate-200 gap-2">
                               <button
                                 type="button"
@@ -615,19 +525,69 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Settings className="w-4 h-4" />
             </button>
 
+            {/* User chip */}
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200">
+              <div className="w-8 h-8 rounded-md bg-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0 font-mono">
+                {initials}
+              </div>
+              <div className="hidden md:block min-w-0 max-w-[160px]">
+                <p className="text-xs font-semibold text-slate-900 truncate leading-tight">{userDisplayName}</p>
+                <p className="text-[10px] font-mono text-slate-500 truncate leading-tight">{userEmail}</p>
+              </div>
+            </div>
+
             {/* Logout Button */}
             <button
               onClick={logout}
               className="px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-700 hover:bg-red-50 hover:border-red-300 hover:text-red-700 font-semibold text-xs cursor-pointer flex items-center gap-1.5 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Logout</span>
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
-        </header>
+        </div>
 
-        <main className="flex-1 overflow-y-auto">{children}</main>
-      </div>
+        {/* ══════════ TOP NAV — LINK ROW (desktop) ══════════ */}
+        <nav className="hidden lg:flex items-center gap-1 px-4 sm:px-5 py-1.5 border-t border-slate-200 bg-white overflow-x-auto">
+          {navLinks.map((l) => navLinkEl(l))}
+          {(role === "hod" || role === "admin") && (
+            <TrainingProgramsMenu location={location} onNavigate={() => {}} />
+          )}
+        </nav>
+
+        {/* Mobile slide-down nav */}
+        {mobileOpen && (
+          <nav className="lg:hidden border-t border-slate-200 bg-white px-3 py-3 space-y-1 max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
+            {navLinks.map((l) => navLinkEl(l, "w-full"))}
+            {(role === "hod" || role === "admin") && (
+              <div className="pt-2 mt-2 border-t border-slate-200">
+                <p className="eyebrow text-slate-500 px-3 mb-1.5">Training Programs</p>
+                <Link href="/training-sessions" onClick={() => setMobileOpen(false)}>
+                  <div className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] cursor-pointer transition-colors ${
+                    location === "/training-sessions" ? "bg-emerald-600 text-white font-semibold" : "text-slate-700 hover:bg-slate-100"
+                  }`}>
+                    <List className="w-4 h-4 shrink-0" />
+                    <span>All Sessions</span>
+                  </div>
+                </Link>
+              </div>
+            )}
+            {(role === "hod" || role === "principal" || role === "admin") && (
+              <button
+                data-testid="sidebar-settings"
+                onClick={() => { setMobileOpen(false); openSettings(); }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 text-[13px] font-medium transition-colors cursor-pointer"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Settings</span>
+              </button>
+            )}
+          </nav>
+        )}
+      </header>
+
+      {/* ══════════ MAIN CONTENT ══════════ */}
+      <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
 
       {/* ══════════ SETTINGS MODAL ══════════ */}
       {showSettings && (

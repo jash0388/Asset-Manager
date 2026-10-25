@@ -2332,7 +2332,7 @@ export default function HodDashboard() {
     return sections.map(secName => {
       const secStudents = deptStudents.filter(u => getSectionDisplayName(u.section).name === secName);
       const total = secStudents.length;
-      const mentor = OFFICIAL_FACULTY_LIST.find(m => m.section === secName) || null;
+      const mentor = OFFICIAL_FACULTY_LIST.find(m => (m.sections || []).includes(secName) || m.section === secName) || null;
 
       let scanned = 0;
       let late = 0;
@@ -2470,20 +2470,23 @@ export default function HodDashboard() {
   };
 
   const filteredMentorsList = useMemo(() => {
-    return OFFICIAL_FACULTY_LIST.filter((m) => {
-      // Year Filter
+    return OFFICIAL_FACULTY_LIST.filter((m: any) => {
+      // Year Filter — match against the parsed years ("2nd Year" etc).
       if (mentorsYearFilter !== "All") {
-        const yFilterNormalized = mentorsYearFilter.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const mYearNormalized = (m.yearLabel || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-        if (mentorsYearFilter === "2nd Year" && !mYearNormalized.includes("2nd") && !mYearNormalized.includes("2")) return false;
-        if (mentorsYearFilter === "3rd Year" && !mYearNormalized.includes("3rd") && !mYearNormalized.includes("3")) return false;
-        if (mentorsYearFilter === "4th Year" && !mYearNormalized.includes("4th") && !mYearNormalized.includes("4")) return false;
+        const years: string[] = m.years || [];
+        if (!years.includes(mentorsYearFilter)) {
+          // Legacy fallback for entries without parsed years.
+          const mYearNormalized = (m.yearLabel || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+          const digit = mentorsYearFilter.charAt(0);
+          if (!mYearNormalized.includes(digit) && !mYearNormalized.includes(mentorsYearFilter.toLowerCase().replace(/[^a-z0-9]/g, ""))) return false;
+        }
       }
-      // Section Filter
+      // Section Filter — match against parsed concrete sections ("2A" etc).
       if (mentorsSectionFilter !== "All") {
         const secFilterClean = mentorsSectionFilter.toUpperCase().trim();
-        const secClean = (m.section || "").toUpperCase();
-        if (!secClean.includes(secFilterClean)) return false;
+        const parsedMatch = (m.sections || []).some((s: string) => s.toUpperCase() === secFilterClean);
+        const displayMatch = (m.section || "").toUpperCase().includes(secFilterClean);
+        if (!parsedMatch && !displayMatch) return false;
       }
       // Role Filter
       if (mentorsRoleFilter !== "All") {
