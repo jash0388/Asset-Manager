@@ -55,3 +55,4 @@ Thumbs.db
 .vercel
 .env*.local
 .env*
+android/local.properties

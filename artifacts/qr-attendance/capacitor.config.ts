@@ -2,10 +2,10 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.sphn.attendance',
-  appName: 'SPHN Student Attendance',
+  appName: 'SPHN Attendance',
   webDir: 'dist/public',
   server: {
-    url: 'https://sphn.online',
+    url: 'https://qr-attendance-app-eight.vercel.app',
     cleartext: false,
     androidScheme: 'https',
   },
