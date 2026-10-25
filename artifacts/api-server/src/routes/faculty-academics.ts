@@ -253,12 +253,45 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
 
     const studentList = users || [];
 
-    // 2. Fetch mentor sessions in date range
+    // 2. Resolve the schedules that belong to the selected class.
+    // "DS-4A" -> year "IV" + section letter "A" (qr_schedules stores them split).
+    const digitMatch = rawSection.match(/([234])\s*[-_ ]?\s*([ABC])/i);
+    const romanMatch = rawSection.match(/(IV|III|II)\s*[-_ ]?\s*([ABC])/i);
+    const yearToken = digitMatch
+      ? ({ "2": "II", "3": "III", "4": "IV" } as Record<string, string>)[digitMatch[1]]
+      : romanMatch
+      ? romanMatch[1].toUpperCase()
+      : null;
+    const letterToken = (digitMatch?.[2] || romanMatch?.[2] || "").toUpperCase();
+
+    let schedQuery = supabase.from("qr_schedules").select("id, subject, section, year");
+    if (yearToken) schedQuery = schedQuery.eq("year", yearToken);
+    if (letterToken) schedQuery = schedQuery.eq("section", letterToken);
+    const courseUpper = (courseCode || "").trim().toUpperCase();
+    if (courseUpper && courseUpper !== "ALL") schedQuery = schedQuery.eq("subject", courseUpper);
+    const { data: classSchedules, error: schedErr } = await schedQuery;
+    if (schedErr) throw schedErr;
+    const scheduleIds = (classSchedules || []).map((s: any) => s.id);
+
+    if (scheduleIds.length === 0) {
+      // No timetable rows for this class+course — return an honest empty
+      // register instead of dates from the mentor's unrelated classes.
+      res.json({
+        section: canonicalSection || rawSection || "All Sections",
+        students: [],
+        dates: [],
+        matrix: {},
+        message: "No timetable schedule found for this class and course.",
+      });
+      return;
+    }
+
+    // 3. Sessions for THIS class's schedules in range (includes substitute-taken
+    // sessions — the register follows the class, not the teacher).
     let sessQuery = supabase
       .from("qr_mentor_sessions")
       .select("id, date, schedule_id")
-      .eq("mentor_id", mentorId)
-      .order("date", { ascending: true });
+      .in("schedule_id", scheduleIds);
 
     if (from) sessQuery = sessQuery.gte("date", from);
     if (to) sessQuery = sessQuery.lte("date", to);
@@ -269,17 +302,15 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
     const sessionList = sessions || [];
     const distinctDates = Array.from(new Set(sessionList.map((s) => s.date))).sort();
 
-    // If no sessions yet, include default recent dates
-    const effectiveDates = distinctDates.length > 0 ? distinctDates : ["2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29"];
-
-    // 3. Fetch hourly attendance records
-    const sessionIds = sessionList.map((s) => s.id);
+    // 4. Hourly attendance for THIS class's schedules on those dates only —
+    // marks from other subjects/sections can no longer leak into the register.
     let attendanceLogs: any[] = [];
-    if (sessionIds.length > 0) {
+    if (distinctDates.length > 0) {
       const { data: logs } = await supabase
         .from("qr_hourly_attendance")
         .select("user_id, date, marked_present")
-        .in("date", effectiveDates);
+        .in("schedule_id", scheduleIds)
+        .in("date", distinctDates);
       attendanceLogs = logs || [];
     }
 
@@ -287,25 +318,24 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
     const studentRows = studentList.map((s: any, idx: number) => {
       const attendanceByDate: Record<string, string> = {};
       let presentCount = 0;
-      let totalClasses = effectiveDates.length;
+      let recordedCount = 0;
 
-      effectiveDates.forEach((d) => {
+      distinctDates.forEach((d) => {
         const found = attendanceLogs.find((l) => l.user_id === s.id && l.date === d);
         if (found) {
-          if (found.marked_present) {
-            attendanceByDate[d] = "P";
-            presentCount++;
-          } else {
-            attendanceByDate[d] = "A";
-          }
+          attendanceByDate[d] = found.marked_present ? "P" : "A";
+          recordedCount++;
+          if (found.marked_present) presentCount++;
         } else {
-          // No record found — mark as absent (no fake data)
+          // No record for this class on this date
           attendanceByDate[d] = "-";
         }
       });
 
-      const absentCount = totalClasses - presentCount;
-      const percentage = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 100;
+      // Percentage counts only the classes where the student was actually
+      // recorded — unheld dates no longer drag it down.
+      const totalClasses = distinctDates.length;
+      const percentage = recordedCount > 0 ? Math.round((presentCount / recordedCount) * 100) : 0;
 
       return {
         sNo: idx + 1,
@@ -316,7 +346,7 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
         attendanceByDate,
         totalClasses,
         presentCount,
-        absentCount,
+        absentCount: recordedCount - presentCount,
         percentage,
       };
     });
@@ -324,9 +354,9 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
     res.json({
       section: canonicalSection || rawSection || "All Sections",
       courseCode: courseCode || "ALL",
-      fromDate: from || (effectiveDates[0] || "2026-08-25"),
-      toDate: to || (effectiveDates[effectiveDates.length - 1] || "2026-08-29"),
-      dates: effectiveDates,
+      fromDate: from || (distinctDates[0] || null),
+      toDate: to || (distinctDates[distinctDates.length - 1] || null),
+      dates: distinctDates,
       students: studentRows,
     });
   } catch (err: any) {
@@ -334,9 +364,9 @@ router.get("/faculty/student-attendance-book", authMiddleware, mentorOnly, async
     res.json({
       section: section || "All",
       courseCode: courseCode || "ALL",
-      fromDate: from || "2026-08-25",
-      toDate: to || "2026-08-29",
-      dates: ["2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29"],
+      fromDate: from || null,
+      toDate: to || null,
+      dates: [],
       students: [],
     });
   }
