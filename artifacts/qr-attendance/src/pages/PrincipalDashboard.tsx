@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { DepartmentSetupWizard } from "@/components/DepartmentSetupWizard";
 import {
   Building2,
   Users,
@@ -229,7 +230,34 @@ export default function PrincipalDashboard() {
   const { logout } = useAuth();
   const [selectedBranch, setSelectedBranch] = useState("DS");
   const [activeTab, setActiveTab] = useState<"sections" | "hourly" | "flags" | "logs">("sections");
-  
+
+  // Department registry (live from the database; BRANCHES as offline fallback)
+  const [departments, setDepartments] = useState<any[]>(BRANCHES);
+  const [setupWizard, setSetupWizard] = useState<{ open: boolean; code?: string }>({ open: false });
+
+  const fetchDepartments = async () => {
+    try {
+      const data = await customFetch<any[]>("/api/admin/departments");
+      if (Array.isArray(data) && data.length > 0) {
+        setDepartments(
+          data.map((d: any) => ({
+            id: d.code,
+            name: d.name,
+            shortName: d.name,
+            code: d.code,
+            totalStudents: d.studentCount ?? 0,
+            active: d.status === "live",
+            status: d.status,
+          }))
+        );
+      }
+    } catch {
+      /* keep fallback list */
+    }
+  };
+
+  useEffect(() => { fetchDepartments(); }, []);
+
   const [logDate, setLogDate] = useState(() => {
     const d = new Date();
     const year = d.getFullYear();
@@ -746,7 +774,7 @@ export default function PrincipalDashboard() {
                 Academic Departments at a Glance
               </h3>
             </div>
-            <span className="stamp border-blue-300 bg-blue-50 text-blue-800">6 Departments</span>
+            <span className="stamp border-blue-300 bg-blue-50 text-blue-800">{departments.length} Departments</span>
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-slate-300/70">
@@ -764,10 +792,11 @@ export default function PrincipalDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {BRANCHES.map((dept) => {
+                {departments.map((dept: any) => {
                   const isDS = dept.code === "DS";
                   const isSelected = selectedBranch === dept.code;
-                  const enrolled = isDS ? campusTotalStudents : 0;
+                  const isLive = dept.status ? dept.status === "live" : Boolean(dept.active);
+                  const enrolled = isDS ? campusTotalStudents : (dept.studentCount ?? dept.totalStudents ?? 0);
                   const present = isDS ? campusPresentCount : 0;
                   const absent = isDS ? campusAbsentCount : 0;
                   const pct = isDS ? campusAttendancePercent : null;
@@ -784,7 +813,7 @@ export default function PrincipalDashboard() {
                         {dept.name} <span className="font-mono text-slate-500">({dept.code})</span>
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-800">
-                        {isDS ? enrolled : <span className="text-slate-400 text-[11px]">No Data Today</span>}
+                        {isDS ? enrolled : isLive && enrolled > 0 ? enrolled : <span className="text-slate-400 text-[11px]">No Data Today</span>}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">
                         {isDS ? present : "—"}
@@ -818,27 +847,43 @@ export default function PrincipalDashboard() {
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         <span className={`stamp ${
-                          dept.active
+                          isLive
                             ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                            : dept.status === "setup"
+                            ? "border-amber-300 bg-amber-50 text-amber-800"
                             : "border-slate-300 bg-slate-50 text-slate-500"
                         }`}>
-                          {dept.active ? "Live" : "Not Started"}
+                          {isLive ? "Live" : dept.status === "setup" ? "In Setup" : "Not Started"}
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedBranch(dept.code);
-                          }}
-                          className={`px-3 py-1 rounded-md text-[11px] font-semibold cursor-pointer transition-colors ${
-                            isSelected
-                              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                              : "bg-white border border-slate-300 hover:border-slate-400 text-slate-700"
-                          }`}
-                        >
-                          {isSelected ? "Current" : "View"}
-                        </button>
+                        <div className="flex items-center justify-center gap-1.5">
+                          {!isLive && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSetupWizard({ open: true, code: dept.code });
+                              }}
+                              className="px-3 py-1 rounded-md text-[11px] font-bold cursor-pointer transition-colors bg-emerald-600 hover:bg-emerald-700 text-white"
+                              title="Set up this department"
+                            >
+                              Setup
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBranch(dept.code);
+                            }}
+                            className={`px-3 py-1 rounded-md text-[11px] font-semibold cursor-pointer transition-colors ${
+                              isSelected
+                                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                                : "bg-white border border-slate-300 hover:border-slate-400 text-slate-700"
+                            }`}
+                          >
+                            {isSelected ? "Current" : "View"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -2013,6 +2058,13 @@ export default function PrincipalDashboard() {
           </div>
         )}
       </main>
+
+      <DepartmentSetupWizard
+        open={setupWizard.open}
+        prefillCode={setupWizard.code}
+        onClose={() => setSetupWizard({ open: false })}
+        onDone={fetchDepartments}
+      />
     </div>
   );
 }
