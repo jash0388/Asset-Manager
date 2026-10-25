@@ -19,17 +19,21 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-3.5 shadow-xs">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</p>
-          <p data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`} className="text-xl sm:text-2xl font-black text-gray-900 mt-0.5">
+    <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+      <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${color}`} aria-hidden />
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="eyebrow text-slate-500">{label}</p>
+          <p
+            data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`}
+            className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums"
+          >
             {value}
           </p>
-          {sub && <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>}
+          {sub && <p className="text-[10.5px] text-slate-500 mt-1.5 truncate">{sub}</p>}
         </div>
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${color} shadow-xs`}>
-          <Icon className="w-4 h-4" />
+        <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4 text-slate-700" />
         </div>
       </div>
     </div>
@@ -39,25 +43,45 @@ function StatCard({
 function StatusBadge({ status }: { status: string }) {
   if (status === "inside") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300">
-        <Circle className="w-2 h-2 fill-current text-emerald-600" />
+      <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+        <Circle className="w-1.5 h-1.5 fill-current text-emerald-600" />
         In Campus
       </span>
     );
   }
   if (status === "left") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs font-bold border border-gray-300">
-        <Circle className="w-2 h-2 fill-current text-gray-500" />
+      <span className="stamp border-slate-300 bg-slate-50 text-slate-600">
+        <Circle className="w-1.5 h-1.5 fill-current text-slate-400" />
         Left Campus
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-bold border border-blue-300">
-      <Circle className="w-2 h-2 fill-current text-blue-600" />
+    <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
+      <Circle className="w-1.5 h-1.5 fill-current text-blue-600" />
       Present
     </span>
+  );
+}
+
+function PanelHeader({
+  title,
+  right,
+  accent,
+}: {
+  title: string;
+  right?: React.ReactNode;
+  accent?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-slate-200 bg-slate-50/70">
+      <h2 className="text-[13px] font-bold text-slate-950 flex items-center gap-2" style={{ fontFamily: "var(--app-font-display)" }}>
+        {accent && <Circle className="w-2 h-2 fill-emerald-600 text-emerald-600 animate-pulse" />}
+        {title}
+      </h2>
+      {right}
+    </div>
   );
 }
 
@@ -130,106 +154,112 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="p-3 sm:p-4 max-w-7xl mx-auto space-y-3">
-        <div className="flex items-center justify-between">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5">
+        {/* Page header */}
+        <div className="flex items-end justify-between gap-4 pb-4 border-b border-slate-300/70">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Dashboard Overview</h1>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-            </p>
+            <p className="eyebrow text-slate-500">Daily Register</p>
+            <h1 className="text-xl sm:text-[26px] font-bold text-slate-950 tracking-tight mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+              Dashboard Overview
+            </h1>
           </div>
+          <p className="hidden sm:block text-[11px] font-mono text-slate-500 text-right leading-relaxed">
+            {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </p>
         </div>
 
         {/* Top Metric Cards */}
         {stats.isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 animate-pulse">
-                <div className="h-3 bg-gray-200 rounded w-2/3 mb-2" />
-                <div className="h-6 bg-gray-200 rounded w-1/2" />
+              <div key={i} className="bg-card border border-slate-200 rounded-lg p-4 animate-pulse">
+                <div className="h-2.5 bg-slate-200 rounded w-2/3 mb-3" />
+                <div className="h-6 bg-slate-200 rounded w-1/2" />
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             <StatCard
               label="Total Users"
               value={data?.totalUsers ?? 0}
               icon={Users}
-              color="bg-blue-100 text-blue-700"
-              sub={`${data?.totalStudents ?? 0} students, ${data?.totalStaff ?? 0} staff`}
+              color="bg-blue-600"
+              sub={`${data?.totalStudents ?? 0} students · ${data?.totalStaff ?? 0} staff`}
             />
             <StatCard
               label="Gate Check-ins"
               value={data?.todayAttendanceCount ?? 0}
               icon={UserCheck}
-              color="bg-emerald-100 text-emerald-700"
+              color="bg-emerald-600"
               sub="Scanned at campus gate"
             />
             <StatCard
               label="Still on Campus"
               value={data?.currentlyInsideCount ?? 0}
               icon={Clock}
-              color="bg-orange-100 text-orange-700"
+              color="bg-orange-500"
               sub="Inside college now"
             />
             <StatCard
               label="In Class (Gate Missed)"
               value={inClassUnscannedStudents.length}
               icon={BookOpen}
-              color="bg-indigo-100 text-indigo-700"
+              color="bg-indigo-500"
               sub="In lecture, gate missed"
             />
             <StatCard
               label="Total Students"
               value={data?.totalStudents ?? 0}
               icon={TrendingUp}
-              color="bg-purple-100 text-purple-700"
+              color="bg-purple-500"
               sub={`${data?.totalStaff ?? 0} staff members`}
             />
           </div>
         )}
 
         {/* 3 Main Activity Columns */}
-        <div className="grid lg:grid-cols-3 gap-3">
+        <div className="grid lg:grid-cols-3 gap-4">
           {/* Recent Gate Activity */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
-            <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-gray-100 bg-gray-50/80">
-              <h2 className="text-xs font-bold text-gray-900">Recent Gate Activity</h2>
-              <Link href="/attendance">
-                <span className="text-[11px] text-blue-700 font-bold hover:text-blue-800 flex items-center gap-1 cursor-pointer">
-                  View all <ArrowRight className="w-3 h-3" />
-                </span>
-              </Link>
-            </div>
-            <div data-testid="recent-activity-table" className="divide-y divide-gray-200 max-h-96 overflow-y-auto flex-1">
+          <div className="bg-card border border-slate-300/70 rounded-lg overflow-hidden shadow-xs flex flex-col">
+            <PanelHeader
+              title="Recent Gate Activity"
+              right={
+                <Link href="/attendance">
+                  <span className="text-[11px] text-emerald-800 font-semibold hover:text-emerald-600 flex items-center gap-1 cursor-pointer">
+                    View all <ArrowRight className="w-3 h-3" />
+                  </span>
+                </Link>
+              }
+            />
+            <div data-testid="recent-activity-table" className="divide-y divide-slate-200 max-h-96 overflow-y-auto flex-1">
               {stats.isLoading ? (
                 [...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-5 py-3 animate-pulse">
-                    <div className="w-8 h-8 rounded-full bg-gray-200" />
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 animate-pulse">
+                    <div className="w-8 h-8 rounded-full bg-slate-200" />
                     <div className="flex-1">
-                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
-                      <div className="h-2 bg-gray-100 rounded w-1/3" />
+                      <div className="h-3 bg-slate-200 rounded w-1/2 mb-2" />
+                      <div className="h-2 bg-slate-100 rounded w-1/3" />
                     </div>
                   </div>
                 ))
               ) : !data?.recentActivity?.length ? (
-                <div className="px-5 py-12 text-center text-sm text-gray-400 font-medium">No activity today yet</div>
+                <div className="px-4 py-12 text-center text-[13px] text-slate-500">No activity today yet</div>
               ) : (
                 data.recentActivity.map((rec) => (
-                  <div key={rec.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-800 flex-shrink-0">
+                  <div key={rec.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 shrink-0 font-mono">
                       {rec.user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{rec.user?.name}</p>
-                      <p className="text-xs text-gray-500 font-mono">
+                      <p className="text-[13px] font-semibold text-slate-950 truncate">{rec.user?.name}</p>
+                      <p className="text-[11px] text-slate-500 font-mono">
                         {rec.user?.role === "student" ? "Student" : "Staff"} · {rec.user?.uniqueId}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <StatusBadge status={rec.status} />
-                      <span className="text-xs text-gray-400 font-mono">{formatTime(rec.entryTime)}</span>
+                      <span className="text-[11px] text-slate-500 font-mono">{formatTime(rec.entryTime)}</span>
                     </div>
                   </div>
                 ))
@@ -238,41 +268,41 @@ export default function Dashboard() {
           </div>
 
           {/* Currently On Campus */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-gray-50/50">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <h2 className="text-sm font-bold text-gray-900">Currently On Campus</h2>
-              </div>
-              <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-300">
-                {insideList.length} inside
-              </span>
-            </div>
-            <div data-testid="currently-inside-list" className="divide-y divide-gray-200 max-h-96 overflow-y-auto flex-1">
+          <div className="bg-card border border-slate-300/70 rounded-lg overflow-hidden shadow-xs flex flex-col">
+            <PanelHeader
+              title="Currently On Campus"
+              accent
+              right={
+                <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                  {insideList.length} inside
+                </span>
+              }
+            />
+            <div data-testid="currently-inside-list" className="divide-y divide-slate-200 max-h-96 overflow-y-auto flex-1">
               {inside.isLoading ? (
                 [...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-5 py-3 animate-pulse">
-                    <div className="w-8 h-8 rounded-full bg-gray-200" />
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 animate-pulse">
+                    <div className="w-8 h-8 rounded-full bg-slate-200" />
                     <div className="flex-1">
-                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
-                      <div className="h-2 bg-gray-100 rounded w-1/3" />
+                      <div className="h-3 bg-slate-200 rounded w-1/2 mb-2" />
+                      <div className="h-2 bg-slate-100 rounded w-1/3" />
                     </div>
                   </div>
                 ))
               ) : !insideList.length ? (
-                <div className="px-5 py-12 text-center text-sm text-gray-400 font-medium">No one currently on campus</div>
+                <div className="px-4 py-12 text-center text-[13px] text-slate-500">No one currently on campus</div>
               ) : (
                 insideList.map((rec) => (
-                  <div key={rec.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-xs font-bold text-emerald-800 flex-shrink-0">
+                  <div key={rec.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-xs font-bold text-emerald-800 shrink-0 font-mono">
                       {rec.user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{rec.user?.name}</p>
-                      <p className="text-xs text-gray-500 font-mono">{rec.user?.role} · In: {formatTime(rec.entryTime)}</p>
+                      <p className="text-[13px] font-semibold text-slate-950 truncate">{rec.user?.name}</p>
+                      <p className="text-[11px] text-slate-500 font-mono">{rec.user?.role} · In: {formatTime(rec.entryTime)}</p>
                     </div>
                     <Link href={`/history/${rec.userId}`}>
-                      <span className="text-xs text-gray-400 hover:text-blue-700 cursor-pointer">
+                      <span className="text-slate-400 hover:text-emerald-700 cursor-pointer transition-colors">
                         <ArrowRight className="w-4 h-4" />
                       </span>
                     </Link>
@@ -283,35 +313,34 @@ export default function Dashboard() {
           </div>
 
           {/* In Class (Gate Scan Missed) */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-blue-50/50">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-blue-600" />
-                <h2 className="text-sm font-bold text-gray-900">In Class (Gate Scan Missed)</h2>
-              </div>
-              <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full border border-blue-300">
-                {inClassUnscannedStudents.length} Students
-              </span>
-            </div>
-            <div data-testid="in-class-unscanned-list" className="divide-y divide-gray-200 max-h-96 overflow-y-auto flex-1">
+          <div className="bg-card border border-slate-300/70 rounded-lg overflow-hidden shadow-xs flex flex-col">
+            <PanelHeader
+              title="In Class — Gate Scan Missed"
+              right={
+                <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
+                  {inClassUnscannedStudents.length} students
+                </span>
+              }
+            />
+            <div data-testid="in-class-unscanned-list" className="divide-y divide-slate-200 max-h-96 overflow-y-auto flex-1">
               {inClassUnscannedStudents.length === 0 ? (
-                <div className="px-5 py-12 text-center text-sm text-gray-400 font-medium">
+                <div className="px-4 py-12 text-center text-[13px] text-slate-500">
                   No students marked in class without gate scan today
                 </div>
               ) : (
                 inClassUnscannedStudents.map((st) => (
-                  <div key={st.id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-xs font-bold text-blue-800 flex-shrink-0">
+                  <div key={st.id} className="flex items-center justify-between gap-2 px-4 py-3 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-xs font-bold text-blue-800 shrink-0 font-mono">
                         {st.name.charAt(0)}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{st.name}</p>
-                        <p className="text-xs text-gray-500 font-mono mt-0.5">{st.uniqueId} · {st.section}</p>
+                        <p className="text-[13px] font-semibold text-slate-950 truncate">{st.name}</p>
+                        <p className="text-[11px] text-slate-500 font-mono mt-0.5">{st.uniqueId} · {st.section}</p>
                       </div>
                     </div>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300 shrink-0">
-                      <BookOpen className="w-3 h-3 text-blue-600" />
+                    <span className="stamp border-blue-300 bg-blue-50 text-blue-800 shrink-0">
+                      <BookOpen className="w-3 h-3" />
                       Gate Missed
                     </span>
                   </div>
