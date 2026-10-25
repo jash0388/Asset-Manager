@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Clock,
   ChevronRight,
+  Circle,
 } from "lucide-react";
 import { customFetch } from "@workspace/api-client-react";
 import StudentProfileModal from "@/components/StudentProfileModal";
@@ -88,7 +89,7 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
       percent,
       label: "Safe (≥ 75%)",
       badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
-      dotColor: "🟢",
+      dotColor: "text-emerald-600",
       classesNeededFor75: 0,
       classesNeededFor65: 0,
     };
@@ -98,7 +99,7 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
       percent,
       label: "Warning (65–74%)",
       badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
-      dotColor: "🟡",
+      dotColor: "text-amber-600",
       classesNeededFor75,
       classesNeededFor65: 0,
     };
@@ -107,8 +108,8 @@ function getStudentFlagStatus(totalWorkingDays: number, presentDays: number) {
       flag: "RED" as const,
       percent,
       label: "Critical (< 65%)",
-      badgeColor: "bg-rose-100 text-rose-800 border-rose-300",
-      dotColor: "🔴",
+      badgeColor: "bg-red-100 text-red-800 border-red-300",
+      dotColor: "text-red-600",
       classesNeededFor75,
       classesNeededFor65,
     };
@@ -164,29 +165,29 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+        className="px-3 py-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
       >
-        <Calendar className="w-3.5 h-3.5 text-blue-600" />
+        <Calendar className="w-3.5 h-3.5 text-emerald-600" />
         <span>{monthNames[month - 1]} {year}</span>
       </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 mt-1.5 w-60 rounded-xl bg-white border border-gray-200 p-3 shadow-xl z-30 animate-in fade-in duration-100">
-            <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
+          <div className="absolute left-0 mt-1.5 w-60 rounded-lg bg-white border border-slate-300 p-3 shadow-xl z-30 animate-in fade-in duration-100">
+            <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200">
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-xs"
+                className="p-1 rounded-md bg-white border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-400 cursor-pointer text-xs"
               >
                 &larr;
               </button>
-              <span className="text-xs font-bold text-gray-800 font-mono">{currentYear}</span>
+              <span className="text-xs font-bold text-slate-900 font-mono">{currentYear}</span>
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1 rounded-md bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-100 cursor-pointer text-xs"
+                className="p-1 rounded-md bg-white border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-400 cursor-pointer text-xs"
               >
                 &rarr;
               </button>
@@ -200,10 +201,10 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     key={mName}
                     type="button"
                     onClick={() => handleSelectMonth(idx)}
-                    className={`py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
-                      isSelected 
-                        ? "bg-blue-600 text-white shadow-xs" 
-                        : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-gray-700"
+                    className={`py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "bg-white border border-slate-300 hover:bg-slate-100 text-slate-700"
                     }`}
                   >
                     {mName}
@@ -564,30 +565,28 @@ export default function PrincipalDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased pb-12">
-      {/* 1. COMPACT PRINCIPAL HEADER */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* 1. PRINCIPAL PAGE HEADER */}
+      <header className="bg-white border-b border-slate-300/70 sticky top-0 z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Header Title */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center shadow-xs font-black">
-              <ShieldCheck className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-md bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-extrabold text-slate-900 tracking-tight">Sphoorthy Engineering College</h1>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200 uppercase tracking-wider">
-                  PRINCIPAL
-                </span>
+                <h1 className="text-lg font-bold text-slate-950 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
+                  Sphoorthy Engineering College
+                </h1>
+                <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">Principal</span>
               </div>
-              <p className="text-xs font-medium text-slate-500">
-                Institutional Campus Portal
-              </p>
+              <p className="eyebrow text-slate-500 mt-0.5">Institutional Campus Portal</p>
             </div>
           </div>
 
           {/* Controls: Date, Export, Logout */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 rounded-md border border-slate-300 text-xs font-semibold text-slate-700">
               <Calendar className="w-3.5 h-3.5 text-slate-500" />
               <input
                 type="date"
@@ -599,7 +598,7 @@ export default function PrincipalDashboard() {
 
             <button
               onClick={() => setExportModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
               Export
@@ -607,7 +606,7 @@ export default function PrincipalDashboard() {
 
             <button
               onClick={() => logout()}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-md bg-white hover:bg-red-50 hover:border-red-300 hover:text-red-700 text-slate-800 border border-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               Logout
@@ -617,68 +616,73 @@ export default function PrincipalDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-4">
-        {/* 2. TOP SUMMARY (SIMPLE EXECUTIVE STATS) */}
-        <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-blue-700" />
-              <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                College Attendance Today — {logDate}
+        {/* 2. TOP SUMMARY (EXECUTIVE STATS) */}
+        <section className="bg-white border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+          <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+            <div>
+              <p className="eyebrow text-slate-500">Daily Register</p>
+              <h2 className="text-[15px] font-bold text-slate-950 tracking-tight mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                College Attendance Today — <span className="font-mono">{logDate}</span>
               </h2>
             </div>
-            <span className="text-[11px] font-semibold text-slate-500">
-              All Departments
-            </span>
+            <span className="stamp border-slate-300 bg-slate-50 text-slate-600">All Departments</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
             {/* Card 1: Total Students */}
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Total Students</p>
-              <p className="text-xl font-black text-slate-900 mt-0.5">{campusTotalStudents}</p>
-              <p className="text-[10px] text-slate-400">Enrolled</p>
+            <div className="bg-white border border-slate-300/70 rounded-lg p-3 shadow-xs relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600" aria-hidden />
+              <p className="eyebrow text-slate-500">Total Students</p>
+              <p className="text-xl font-bold text-slate-950 mt-1.5 font-mono tabular-nums">{campusTotalStudents}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Enrolled</p>
             </div>
 
             {/* Card 2: Present Today */}
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-              <p className="text-[10px] font-bold text-emerald-800 uppercase">Present Today</p>
-              <p className="text-xl font-black text-emerald-700 mt-0.5">{campusPresentCount}</p>
-              <p className="text-[10px] text-emerald-600 font-semibold">{campusAttendancePercent}%</p>
+            <div className="bg-white border border-slate-300/70 rounded-lg p-3 shadow-xs relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+              <p className="eyebrow text-slate-500">Present Today</p>
+              <p className="text-xl font-bold text-emerald-700 mt-1.5 font-mono tabular-nums">{campusPresentCount}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5 font-mono">{campusAttendancePercent}%</p>
             </div>
 
             {/* Card 3: Absent Today */}
-            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200">
-              <p className="text-[10px] font-bold text-rose-800 uppercase">Absent Today</p>
-              <p className="text-xl font-black text-rose-700 mt-0.5">{campusAbsentCount}</p>
-              <p className="text-[10px] text-rose-600 font-semibold">{100 - campusAttendancePercent}%</p>
+            <div className="bg-white border border-slate-300/70 rounded-lg p-3 shadow-xs relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-red-500" aria-hidden />
+              <p className="eyebrow text-slate-500">Absent Today</p>
+              <p className="text-xl font-bold text-red-700 mt-1.5 font-mono tabular-nums">{campusAbsentCount}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5 font-mono">{100 - campusAttendancePercent}%</p>
             </div>
 
             {/* Card 4: Attendance % */}
-            <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-              <p className="text-[10px] font-bold text-blue-800 uppercase">Attendance %</p>
-              <p className="text-xl font-black text-blue-700 mt-0.5">{campusAttendancePercent}%</p>
-              <p className="text-[10px] text-blue-600">College Average</p>
+            <div className="bg-white border border-slate-300/70 rounded-lg p-3 shadow-xs relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-purple-500" aria-hidden />
+              <p className="eyebrow text-slate-500">Attendance %</p>
+              <p className="text-xl font-bold text-slate-950 mt-1.5 font-mono tabular-nums">{campusAttendancePercent}%</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">College Average</p>
             </div>
 
             {/* Card 5: Classes */}
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Classes</p>
-              <p className="text-xl font-black text-slate-800 mt-0.5">{hourlySummary.totalClasses}</p>
-              <p className="text-[10px] text-slate-400">Scheduled</p>
+            <div className="bg-white border border-slate-300/70 rounded-lg p-3 shadow-xs relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-500" aria-hidden />
+              <p className="eyebrow text-slate-500">Classes</p>
+              <p className="text-xl font-bold text-slate-950 mt-1.5 font-mono tabular-nums">{hourlySummary.totalClasses}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Scheduled</p>
             </div>
 
             {/* Card 6: Completed */}
-            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-              <p className="text-[10px] font-bold text-emerald-800 uppercase">Completed</p>
-              <p className="text-xl font-black text-emerald-700 mt-0.5">{hourlySessions.length}</p>
-              <p className="text-[10px] text-emerald-600">Submitted</p>
+            <div className="bg-white border border-slate-300/70 rounded-lg p-3 shadow-xs relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-500" aria-hidden />
+              <p className="eyebrow text-slate-500">Completed</p>
+              <p className="text-xl font-bold text-slate-950 mt-1.5 font-mono tabular-nums">{hourlySessions.length}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Submitted</p>
             </div>
 
             {/* Card 7: Pending */}
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Pending</p>
-              <p className="text-xl font-black text-slate-700 mt-0.5">0</p>
-              <p className="text-[10px] text-emerald-600 font-semibold">None</p>
+            <div className="bg-white border border-slate-300/70 rounded-lg p-3 shadow-xs relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-slate-400" aria-hidden />
+              <p className="eyebrow text-slate-500">Pending</p>
+              <p className="text-xl font-bold text-slate-950 mt-1.5 font-mono tabular-nums">0</p>
+              <p className="text-[10px] text-emerald-700 mt-0.5 font-semibold">None</p>
             </div>
 
             {/* Card 8: Critical */}
@@ -708,57 +712,58 @@ export default function PrincipalDashboard() {
                   students: criticalStudents,
                 });
               }}
-              className="p-3 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer transition-all"
+              className="bg-white border border-slate-300/70 rounded-lg p-3 shadow-xs relative overflow-hidden cursor-pointer hover:border-red-300 transition-colors"
             >
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-red-600" aria-hidden />
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold text-rose-800 uppercase">Critical</p>
-                <ChevronRight className="w-3 h-3 text-rose-500" />
+                <p className="eyebrow text-slate-500">Critical</p>
+                <ChevronRight className="w-3 h-3 text-red-500" />
               </div>
-              <p className="text-xl font-black text-rose-700 mt-0.5">{redFlagCount}</p>
-              <p className="text-[10px] text-rose-600 font-semibold underline">Below 65%</p>
+              <p className="text-xl font-bold text-red-700 mt-1.5 font-mono tabular-nums">{redFlagCount}</p>
+              <p className="text-[10px] text-red-700 mt-0.5 font-semibold underline">Below 65%</p>
             </div>
           </div>
 
-          {/* Simple Modality Strip */}
-          <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="font-semibold text-slate-600">Class Attendance</span>
-              <span className="font-bold text-emerald-700 font-mono">{classPresentUserIds.size} Present</span>
+          {/* Modality Strip */}
+          <div className="pt-2 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div className="flex items-center justify-between px-3 py-2 rounded-md bg-slate-50 border border-slate-200">
+              <span className="font-medium text-slate-600">Class Attendance</span>
+              <span className="font-semibold text-emerald-700 font-mono">{classPresentUserIds.size} Present</span>
             </div>
-            <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="font-semibold text-slate-600">Gate Scans</span>
-              <span className="font-bold text-blue-700 font-mono">{dsPresentSet.size} Scanned</span>
+            <div className="flex items-center justify-between px-3 py-2 rounded-md bg-slate-50 border border-slate-200">
+              <span className="font-medium text-slate-600">Gate Scans</span>
+              <span className="font-semibold text-blue-700 font-mono">{dsPresentSet.size} Scanned</span>
             </div>
           </div>
         </section>
 
         {/* 3. ACADEMIC DEPARTMENTS AT A GLANCE */}
-        <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+        <section className="bg-white border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+          <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
             <div>
-              <h3 className="text-sm font-extrabold text-slate-900">Academic Departments at a Glance</h3>
-              <p className="text-xs text-slate-500">Department comparison today</p>
+              <p className="eyebrow text-slate-500">Department Comparison</p>
+              <h3 className="text-[15px] font-bold text-slate-950 tracking-tight mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                Academic Departments at a Glance
+              </h3>
             </div>
-            <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
-              6 Departments
-            </span>
+            <span className="stamp border-blue-300 bg-blue-50 text-blue-800">6 Departments</span>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="overflow-x-auto rounded-lg border border-slate-300/70">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
-                  <th className="py-2.5 px-3">Department</th>
-                  <th className="py-2.5 px-3 text-right">Students</th>
-                  <th className="py-2.5 px-3 text-right">Present</th>
-                  <th className="py-2.5 px-3 text-right">Absent</th>
-                  <th className="py-2.5 px-3 text-center">Attendance %</th>
-                  <th className="py-2.5 px-3 text-center">Classes Pending</th>
-                  <th className="py-2.5 px-3 text-center">Status</th>
-                  <th className="py-2.5 px-3 text-center">Action</th>
+                <tr className="bg-slate-100 border-b border-slate-200">
+                  <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold">Department</th>
+                  <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-right">Students</th>
+                  <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-right">Present</th>
+                  <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-right">Absent</th>
+                  <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Attendance %</th>
+                  <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Classes Pending</th>
+                  <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Status</th>
+                  <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-200">
                 {BRANCHES.map((dept) => {
                   const isDS = dept.code === "DS";
                   const isSelected = selectedBranch === dept.code;
@@ -772,19 +777,19 @@ export default function PrincipalDashboard() {
                       key={dept.code}
                       onClick={() => setSelectedBranch(dept.code)}
                       className={`hover:bg-slate-50 transition-colors cursor-pointer ${
-                        isSelected ? "bg-blue-50/50 font-medium" : ""
+                        isSelected ? "bg-emerald-50/60" : ""
                       }`}
                     >
-                      <td className="py-2.5 px-3 font-bold text-slate-900">
-                        {dept.name} ({dept.code})
+                      <td className="py-2.5 px-3 font-semibold text-slate-900">
+                        {dept.name} <span className="font-mono text-slate-500">({dept.code})</span>
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-800">
-                        {isDS ? enrolled : "No Data Today"}
+                        {isDS ? enrolled : <span className="text-slate-400 text-[11px]">No Data Today</span>}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">
                         {isDS ? present : "—"}
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono font-bold text-rose-700">
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-red-700">
                         {isDS ? absent : "—"}
                       </td>
                       <td className="py-2.5 px-3 text-center">
@@ -794,7 +799,7 @@ export default function PrincipalDashboard() {
                             <div className="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
                               <div
                                 className={`h-full ${
-                                  pct >= 75 ? "bg-emerald-500" : pct >= 65 ? "bg-amber-500" : "bg-rose-500"
+                                  pct >= 75 ? "bg-emerald-500" : pct >= 65 ? "bg-amber-500" : "bg-red-500"
                                 }`}
                                 style={{ width: `${pct}%` }}
                               />
@@ -806,18 +811,16 @@ export default function PrincipalDashboard() {
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         {isDS ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                            0 Pending
-                          </span>
+                          <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">0 Pending</span>
                         ) : (
                           <span className="text-slate-400">—</span>
                         )}
                       </td>
                       <td className="py-2.5 px-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
+                        <span className={`stamp ${
                           dept.active
-                            ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                            : "bg-slate-100 text-slate-600 border-slate-200"
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                            : "border-slate-300 bg-slate-50 text-slate-500"
                         }`}>
                           {dept.active ? "Live" : "Not Started"}
                         </span>
@@ -828,10 +831,10 @@ export default function PrincipalDashboard() {
                             e.stopPropagation();
                             setSelectedBranch(dept.code);
                           }}
-                          className={`px-3 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                          className={`px-3 py-1 rounded-md text-[11px] font-semibold cursor-pointer transition-colors ${
                             isSelected
-                              ? "bg-blue-700 text-white"
-                              : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                              : "bg-white border border-slate-300 hover:border-slate-400 text-slate-700"
                           }`}
                         >
                           {isSelected ? "Current" : "View"}
@@ -849,24 +852,28 @@ export default function PrincipalDashboard() {
         {selectedBranch === "DS" ? (
           <section className="space-y-3">
             {/* DEPARTMENT SPECIFIC NEEDS ATTENTION */}
-            <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5 space-y-2.5">
+            <div className="bg-white border border-slate-300/70 rounded-lg p-3.5 space-y-2.5 shadow-xs relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500" aria-hidden />
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
+                <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  <span>Data Science — Needs Attention</span>
+                  <p className="eyebrow text-slate-500">Data Science</p>
+                  <span className="text-[13px] font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>
+                    Needs Attention
+                  </span>
                 </div>
-                <span className="text-[11px] font-semibold text-amber-700">
+                <span className="stamp border-amber-300 bg-amber-50 text-amber-800">
                   {sectionStats.filter(s => s.status !== "Good").length} Issues
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
                 {/* Issue 1: Section 4A */}
-                <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
+                <div className="p-2.5 rounded-md bg-amber-50/60 border border-amber-200 flex items-start justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-rose-500" />
-                      <p className="font-bold text-slate-900">Section 4A — 54%</p>
+                      <span className="w-2 h-2 rounded-full bg-red-500" />
+                      <p className="font-bold text-slate-900">Section 4A — <span className="font-mono">54%</span></p>
                     </div>
                     <p className="text-slate-500 text-[11px] mt-0.5">29 absent out of 63 students.</p>
                   </div>
@@ -893,18 +900,18 @@ export default function PrincipalDashboard() {
                         })
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-2.5 py-1 rounded-md bg-white border border-amber-300 hover:bg-amber-100 text-amber-800 font-semibold text-[11px] cursor-pointer whitespace-nowrap transition-colors"
                   >
                     View 4A
                   </button>
                 </div>
 
                 {/* Issue 2: Section 3C */}
-                <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
+                <div className="p-2.5 rounded-md bg-amber-50/60 border border-amber-200 flex items-start justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-amber-500" />
-                      <p className="font-bold text-slate-900">Section 3C — 70%</p>
+                      <p className="font-bold text-slate-900">Section 3C — <span className="font-mono">70%</span></p>
                     </div>
                     <p className="text-slate-500 text-[11px] mt-0.5">16 absent out of 54 students.</p>
                   </div>
@@ -931,18 +938,18 @@ export default function PrincipalDashboard() {
                         })
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-2.5 py-1 rounded-md bg-white border border-amber-300 hover:bg-amber-100 text-amber-800 font-semibold text-[11px] cursor-pointer whitespace-nowrap transition-colors"
                   >
                     View 3C
                   </button>
                 </div>
 
                 {/* Issue 3: Critical Attendance */}
-                <div className="p-2.5 rounded-lg bg-white border border-amber-200 flex items-start justify-between gap-2 shadow-xs">
+                <div className="p-2.5 rounded-md bg-amber-50/60 border border-amber-200 flex items-start justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-rose-500" />
-                      <p className="font-bold text-slate-900">{redFlagCount} Students — Below 65%</p>
+                      <span className="w-2 h-2 rounded-full bg-red-500" />
+                      <p className="font-bold text-slate-900"><span className="font-mono">{redFlagCount}</span> Students — Below 65%</p>
                     </div>
                     <p className="text-slate-500 text-[11px] mt-0.5">Attendance below 65% limit.</p>
                   </div>
@@ -972,117 +979,118 @@ export default function PrincipalDashboard() {
                         students: criticalStudents,
                       });
                     }}
-                    className="px-2.5 py-1 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer whitespace-nowrap"
+                    className="px-2.5 py-1 rounded-md bg-white border border-amber-300 hover:bg-amber-100 text-amber-800 font-semibold text-[11px] cursor-pointer whitespace-nowrap transition-colors"
                   >
                     View Students
                   </button>
                 </div>
               </div>
             </div>
-            {/* Simple View Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-thin">
+            {/* View Navigation Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin">
               <button
                 onClick={() => setActiveTab("sections")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-4 py-2 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "sections"
-                    ? "bg-blue-700 text-white shadow-xs"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
-                Section Attendance ({sectionStats.length})
+                Section Attendance <span className="font-mono">({sectionStats.length})</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("hourly")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-4 py-2 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "hourly"
-                    ? "bg-blue-700 text-white shadow-xs"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                 }`}
               >
                 <Clock className="w-3.5 h-3.5" />
-                Class Attendance ({hourlySessions.length})
+                Class Attendance <span className="font-mono">({hourlySessions.length})</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("flags")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-4 py-2 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "flags"
-                    ? "bg-blue-700 text-white shadow-xs"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                 }`}
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
-                Attendance Problems ({redFlagCount})
+                Attendance Problems <span className="font-mono">({redFlagCount})</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("logs")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+                className={`px-4 py-2 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
                   activeTab === "logs"
-                    ? "bg-blue-700 text-white shadow-xs"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                 }`}
               >
                 <Users className="w-3.5 h-3.5" />
-                Daily Records ({filteredLogs.length})
+                Daily Records <span className="font-mono">({filteredLogs.length})</span>
               </button>
             </div>
 
             {/* TAB 1: SECTION ATTENDANCE */}
             {activeTab === "sections" && (
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div className="bg-white border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-900">
-                      Section Attendance — Data Science
+                    <p className="eyebrow text-slate-500">Data Science</p>
+                    <h3 className="text-[15px] font-bold text-slate-950 tracking-tight mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                      Section Attendance
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Attendance across all 8 class sections
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
-                      {campusTotalStudents} Students
-                    </span>
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                    <span className="stamp border-slate-300 bg-slate-50 text-slate-600">{campusTotalStudents} Students</span>
+                    <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                       {campusPresentCount} Present ({campusAttendancePercent}%)
                     </span>
                   </div>
                 </div>
 
-                <div className="overflow-x-auto rounded-lg border border-slate-200">
+                <div className="overflow-x-auto rounded-lg border border-slate-300/70">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
-                        <th className="py-2.5 px-3 w-14 text-center">Year</th>
-                        <th className="py-2.5 px-3">Section</th>
-                        <th className="py-2.5 px-3 text-right">Students</th>
-                        <th className="py-2.5 px-3 text-right">Present</th>
-                        <th className="py-2.5 px-3 text-right">Absent</th>
-                        <th className="py-2.5 px-3 text-center">Attendance %</th>
-                        <th className="py-2.5 px-3 text-center">Classes</th>
-                        <th className="py-2.5 px-3 text-center">Status</th>
-                        <th className="py-2.5 px-3 text-center">Students</th>
+                      <tr className="bg-slate-100 border-b border-slate-200">
+                        <th className="py-2.5 px-3 w-14 text-center eyebrow text-slate-500 font-semibold">Year</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold">Section</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-right">Students</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-right">Present</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-right">Absent</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Attendance %</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Classes</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Status</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Students</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-200">
                       {sectionStats.map((st) => {
                         const secStudents = students.filter((s) => getSectionDisplayName(s.section).name === st.section);
 
                         return (
                           <tr key={st.section} className="hover:bg-slate-50 transition-colors">
-                            <td className="py-2.5 px-3 text-center font-bold text-slate-500 font-mono">
+                            <td className="py-2.5 px-3 text-center font-semibold text-slate-500 font-mono">
                               {st.yearLabel.slice(0, 3)}
                             </td>
-                            <td className="py-2.5 px-3 font-bold text-slate-900 flex items-center gap-2">
-                              <span className="w-6 h-6 rounded bg-blue-100 text-blue-800 font-mono font-black flex items-center justify-center text-xs">
-                                {st.section}
+                            <td className="py-2.5 px-3">
+                              <span className="flex items-center gap-2 font-semibold text-slate-900">
+                                <span className="w-6 h-6 rounded bg-blue-50 border border-blue-300 text-blue-800 font-mono font-bold flex items-center justify-center text-xs">
+                                  {st.section}
+                                </span>
+                                <span>Section {st.section}</span>
                               </span>
-                              <span>Section {st.section}</span>
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">
+                            <td className="py-2.5 px-3 text-right font-mono font-semibold text-slate-800">
                               <button
                                 onClick={() => {
                                   setSectionModalData({
@@ -1109,7 +1117,7 @@ export default function PrincipalDashboard() {
                                 {st.total}
                               </button>
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">
+                            <td className="py-2.5 px-3 text-right">
                               <button
                                 onClick={() => {
                                   const presentOnly = secStudents.filter(s => overallPresentSet.has(s.id));
@@ -1132,12 +1140,12 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 cursor-pointer"
+                                className="px-2 py-0.5 rounded stamp border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 cursor-pointer"
                               >
                                 {st.present}
                               </button>
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-rose-700">
+                            <td className="py-2.5 px-3 text-right">
                               <button
                                 onClick={() => {
                                   const absentOnly = secStudents.filter(s => !overallPresentSet.has(s.id));
@@ -1157,38 +1165,38 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 cursor-pointer"
+                                className="px-2 py-0.5 rounded stamp border-red-300 bg-red-50 text-red-800 hover:bg-red-100 cursor-pointer"
                               >
                                 {st.absent}
                               </button>
                             </td>
                             <td className="py-2.5 px-3 text-center">
                               <div className="flex items-center justify-center gap-2">
-                                <span className={`font-mono font-black ${
-                                  st.percent >= 75 ? "text-emerald-700" : st.percent >= 65 ? "text-amber-700" : "text-rose-700"
+                                <span className={`font-mono font-bold ${
+                                  st.percent >= 75 ? "text-emerald-700" : st.percent >= 65 ? "text-amber-700" : "text-red-700"
                                 }`}>
                                   {st.percent}%
                                 </span>
                                 <div className="w-14 h-2 bg-slate-200 rounded-full overflow-hidden">
                                   <div
                                     className={`h-full ${
-                                      st.percent >= 75 ? "bg-emerald-500" : st.percent >= 65 ? "bg-amber-500" : "bg-rose-500"
+                                      st.percent >= 75 ? "bg-emerald-500" : st.percent >= 65 ? "bg-amber-500" : "bg-red-500"
                                     }`}
                                     style={{ width: `${st.percent}%` }}
                                   />
                                 </div>
                               </div>
                             </td>
-                            <td className="py-2.5 px-3 text-center text-slate-600 font-semibold">
+                            <td className="py-2.5 px-3 text-center text-slate-600 font-mono font-semibold">
                               {st.periodsCount > 0 ? `${st.periodsCount} Completed` : "0"}
                             </td>
                             <td className="py-2.5 px-3 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
+                              <span className={`stamp ${
                                 st.status === "Good"
-                                  ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                  ? "border-emerald-300 bg-emerald-50 text-emerald-800"
                                   : st.status === "Warning"
-                                  ? "bg-amber-100 text-amber-800 border-amber-300"
-                                  : "bg-rose-100 text-rose-800 border-rose-300"
+                                  ? "border-amber-300 bg-amber-50 text-amber-800"
+                                  : "border-red-300 bg-red-50 text-red-800"
                               }`}>
                                 {st.status}
                               </span>
@@ -1215,7 +1223,7 @@ export default function PrincipalDashboard() {
                                     }),
                                   });
                                 }}
-                                className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] cursor-pointer"
+                                className="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 font-semibold text-[11px] cursor-pointer transition-colors"
                               >
                                 View Students
                               </button>
@@ -1231,13 +1239,14 @@ export default function PrincipalDashboard() {
 
             {/* TAB 2: CLASS ATTENDANCE */}
             {activeTab === "hourly" && (
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
+              <div className="bg-white border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-900">
-                      Class Attendance Today — {logDate}
+                    <p className="eyebrow text-slate-500">Faculty Submissions</p>
+                    <h3 className="text-[15px] font-bold text-slate-950 tracking-tight mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                      Class Attendance Today — <span className="font-mono">{logDate}</span>
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Attendance submissions by faculty
                     </p>
                   </div>
@@ -1250,7 +1259,7 @@ export default function PrincipalDashboard() {
                         placeholder="Search subject, faculty..."
                         value={hourlySearchQuery}
                         onChange={(e) => setHourlySearchQuery(e.target.value)}
-                        className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-blue-500"
+                        className="pl-8 pr-3 py-1.5 text-xs rounded-md bg-white border border-slate-300 text-slate-800 focus:outline-none focus:border-emerald-600"
                       />
                     </div>
 
@@ -1259,10 +1268,10 @@ export default function PrincipalDashboard() {
                         <button
                           key={sec}
                           onClick={() => setHourlySectionFilter(sec)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
+                          className={`px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer transition-colors ${
                             hourlySectionFilter === sec
-                              ? "bg-blue-700 text-white"
-                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                           }`}
                         >
                           {sec === "ALL" ? "All" : sec}
@@ -1273,14 +1282,23 @@ export default function PrincipalDashboard() {
                 </div>
 
                 {hourlyLoading ? (
-                  <div className="p-8 text-center text-slate-500 text-xs font-semibold animate-pulse">
-                    Loading Class Attendance...
+                  <div className="space-y-2" aria-busy="true">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="border border-slate-200 rounded-lg p-3 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-md bg-slate-200 animate-pulse" />
+                        <div className="flex-1 space-y-1.5">
+                          <div className="h-3 bg-slate-200 rounded w-1/3 animate-pulse" />
+                          <div className="h-2.5 bg-slate-200 rounded w-1/4 animate-pulse" />
+                        </div>
+                        <div className="h-6 w-24 bg-slate-200 rounded animate-pulse" />
+                      </div>
+                    ))}
                   </div>
                 ) : hourlySessions.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500 text-xs space-y-1">
+                  <div className="p-10 text-center text-slate-500 text-xs space-y-1.5">
                     <Clock className="w-8 h-8 text-slate-400 mx-auto" />
-                    <p className="font-bold text-slate-700">No Classes Recorded on {logDate}</p>
-                    <p className="text-slate-400">Classes will appear here as faculty submit attendance.</p>
+                    <p className="font-bold text-slate-900 text-sm" style={{ fontFamily: "var(--app-font-display)" }}>No Classes Recorded on {logDate}</p>
+                    <p className="text-slate-500">Classes will appear here as faculty submit attendance.</p>
                   </div>
                 ) : (
                   <div className="space-y-2.5">
@@ -1308,25 +1326,25 @@ export default function PrincipalDashboard() {
                         return (
                           <div
                             key={`${session.scheduleId}_${session.date || logDate}`}
-                            className="border border-slate-200 rounded-xl overflow-hidden shadow-xs hover:border-slate-300 transition-all bg-white"
+                            className="border border-slate-300/70 rounded-lg overflow-hidden shadow-xs hover:border-slate-400 transition-all bg-white"
                           >
-                            <div className="p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
+                            <div className="p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/70 border-b border-slate-200">
                               <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-800 flex flex-col items-center justify-center flex-shrink-0 font-mono">
-                                  <span className="text-[9px] font-bold uppercase">{session.year}</span>
-                                  <span className="text-xs font-black">{session.section}</span>
+                                <div className="w-9 h-9 rounded-md bg-blue-50 border border-blue-300 text-blue-800 flex flex-col items-center justify-center flex-shrink-0 font-mono">
+                                  <span className="text-[9px] font-semibold uppercase">{session.year}</span>
+                                  <span className="text-xs font-bold">{session.section}</span>
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    <h4 className="text-sm font-bold text-slate-900">{session.subject}</h4>
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                    <h4 className="text-sm font-bold text-slate-950">{session.subject}</h4>
+                                    <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                                       Complete
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                                    <span>{session.startTime?.slice(0, 5)} – {session.endTime?.slice(0, 5)}</span>
+                                    <span className="font-mono">{session.startTime?.slice(0, 5)} – {session.endTime?.slice(0, 5)}</span>
                                     <span>•</span>
-                                    <span className="font-semibold text-slate-700">Faculty: {session.facultyName}</span>
+                                    <span className="font-medium text-slate-700">Faculty: {session.facultyName}</span>
                                   </div>
                                 </div>
                               </div>
@@ -1334,19 +1352,19 @@ export default function PrincipalDashboard() {
                               <div className="flex items-center gap-3 justify-end">
                                 <div className="text-right">
                                   <div className="flex items-center gap-2 justify-end">
-                                    <span className="text-sm font-black text-slate-900">{pct}%</span>
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                      pct >= 75 ? "bg-emerald-100 text-emerald-800" : pct >= 65 ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"
+                                    <span className="text-sm font-bold text-slate-950 font-mono">{pct}%</span>
+                                    <span className={`stamp ${
+                                      pct >= 75 ? "border-emerald-300 bg-emerald-50 text-emerald-800" : pct >= 65 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-red-300 bg-red-50 text-red-800"
                                     }`}>
                                       {session.presentCount}/{session.totalStudents} Present
                                     </span>
                                   </div>
-                                  <p className="text-[10px] text-slate-400">{session.absentCount} Absent</p>
+                                  <p className="text-[10px] text-slate-500 font-mono">{session.absentCount} Absent</p>
                                 </div>
 
                                 <button
                                   onClick={() => setExpandedHourlyScheduleId(isExpanded ? null : session.scheduleId)}
-                                  className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer"
+                                  className="px-3 py-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs font-semibold cursor-pointer transition-colors"
                                 >
                                   {isExpanded ? "Hide" : `Students (${studentList.length})`}
                                 </button>
@@ -1354,34 +1372,34 @@ export default function PrincipalDashboard() {
                             </div>
 
                             {isExpanded && (
-                              <div className="p-3 bg-white border-t border-slate-200 space-y-2">
+                              <div className="p-3 bg-white space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs font-bold text-slate-700">
-                                    Students ({session.presentCount} Present, {session.absentCount} Absent)
+                                  <span className="text-xs font-semibold text-slate-700">
+                                    Students (<span className="font-mono">{session.presentCount}</span> Present, <span className="font-mono">{session.absentCount}</span> Absent)
                                   </span>
                                   <a
                                     href={`/api/mentor/history/export?date=${logDate}&scheduleId=${session.scheduleId}`}
                                     download={`Attendance_${session.subject}_Sec${session.section}_${logDate}.csv`}
-                                    className="px-2.5 py-1 rounded bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-bold flex items-center gap-1"
+                                    className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold flex items-center gap-1 transition-colors"
                                   >
                                     <FileSpreadsheet className="w-3.5 h-3.5" />
                                     Export CSV
                                   </a>
                                 </div>
 
-                                <div className="overflow-x-auto rounded-lg border border-slate-200">
+                                <div className="overflow-x-auto rounded-lg border border-slate-300/70">
                                   <table className="w-full text-left text-xs">
                                     <thead>
-                                      <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase">
-                                        <th className="py-2 px-3 w-10 text-center">#</th>
-                                        <th className="py-2 px-3">Roll Number</th>
-                                        <th className="py-2 px-3">Student Name</th>
-                                        <th className="py-2 px-3 text-center">Class Status</th>
-                                        <th className="py-2 px-3 text-center">Marking Method</th>
-                                        <th className="py-2 px-3 text-center">Gate Scan</th>
+                                      <tr className="bg-slate-100 border-b border-slate-200">
+                                        <th className="py-2 px-3 w-10 text-center eyebrow text-slate-500 font-semibold">#</th>
+                                        <th className="py-2 px-3 eyebrow text-slate-500 font-semibold">Roll Number</th>
+                                        <th className="py-2 px-3 eyebrow text-slate-500 font-semibold">Student Name</th>
+                                        <th className="py-2 px-3 eyebrow text-slate-500 font-semibold text-center">Class Status</th>
+                                        <th className="py-2 px-3 eyebrow text-slate-500 font-semibold text-center">Marking Method</th>
+                                        <th className="py-2 px-3 eyebrow text-slate-500 font-semibold text-center">Gate Scan</th>
                                       </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100">
+                                    <tbody className="divide-y divide-slate-200">
                                       {studentList.map((st: any, idx: number) => (
                                         <tr
                                           key={st.id}
@@ -1389,16 +1407,16 @@ export default function PrincipalDashboard() {
                                             const fullUser = students.find((s) => s.id === st.id) || st;
                                             setSelectedStudentForDetails(fullUser);
                                           }}
-                                          className="hover:bg-blue-50/50 transition-colors cursor-pointer"
+                                          className="hover:bg-slate-50 transition-colors cursor-pointer"
                                         >
                                           <td className="py-1.5 px-3 text-center text-slate-400 font-mono">{idx + 1}</td>
-                                          <td className="py-1.5 px-3 font-mono font-bold text-slate-900">{st.uniqueId || "N/A"}</td>
+                                          <td className="py-1.5 px-3 font-mono font-semibold text-slate-900">{st.uniqueId || "N/A"}</td>
                                           <td className="py-1.5 px-3 font-semibold text-slate-800">{st.name}</td>
                                           <td className="py-1.5 px-3 text-center">
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
+                                            <span className={`stamp ${
                                               st.markedPresent
-                                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                                                : "bg-rose-100 text-rose-800 border-rose-300"
+                                                ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                                                : "border-red-300 bg-red-50 text-red-800"
                                             }`}>
                                               {st.markedPresent ? "Present" : "Absent"}
                                             </span>
@@ -1407,7 +1425,7 @@ export default function PrincipalDashboard() {
                                             {st.scannedQr ? "QR Scan" : st.markedByTeacher ? "Faculty Marked" : "—"}
                                           </td>
                                           <td className="py-1.5 px-3 text-center text-[11px]">
-                                            <span className={st.scannedGate ? "text-emerald-700 font-bold" : "text-slate-400"}>
+                                            <span className={st.scannedGate ? "text-emerald-700 font-semibold font-mono" : "text-slate-400 font-mono"}>
                                               {st.scannedGate ? (st.gateEntryTime ? formatTime(st.gateEntryTime) : "Scanned") : "No Gate Scan"}
                                             </span>
                                           </td>
@@ -1435,13 +1453,14 @@ export default function PrincipalDashboard() {
               const paginatedFlagsList = filteredFlagsList.slice((flagsPage - 1) * PAGE_SIZE, flagsPage * PAGE_SIZE);
 
               return (
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
+                <div className="bg-white border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
                     <div>
-                      <h3 className="text-sm font-extrabold text-slate-900">
-                        Attendance Problems ({monthForFlags})
+                      <p className="eyebrow text-slate-500">Risk Flag Analytics</p>
+                      <h3 className="text-[15px] font-bold text-slate-950 tracking-tight mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                        Attendance Problems (<span className="font-mono">{monthForFlags}</span>)
                       </h3>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 mt-0.5">
                         Students below 75% target threshold
                       </p>
                     </div>
@@ -1452,66 +1471,66 @@ export default function PrincipalDashboard() {
                           setRiskFilter("ALL");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                          riskFilter === "ALL" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                          riskFilter === "ALL" ? "bg-slate-800 text-white" : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                         }`}
                       >
-                        All ({studentAnalyticsList.length})
+                        All <span className="font-mono">({studentAnalyticsList.length})</span>
                       </button>
                       <button
                         onClick={() => {
                           setRiskFilter("RED");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                          riskFilter === "RED" ? "bg-rose-700 text-white" : "bg-rose-100 text-rose-800 hover:bg-rose-200"
+                        className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                          riskFilter === "RED" ? "bg-red-600 text-white" : "bg-white border border-red-300 text-red-700 hover:bg-red-50"
                         }`}
                       >
-                        Critical ({redFlagCount})
+                        Critical <span className="font-mono">({redFlagCount})</span>
                       </button>
                       <button
                         onClick={() => {
                           setRiskFilter("YELLOW");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                          riskFilter === "YELLOW" ? "bg-amber-600 text-white" : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                        className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                          riskFilter === "YELLOW" ? "bg-amber-600 text-white" : "bg-white border border-amber-300 text-amber-800 hover:bg-amber-50"
                         }`}
                       >
-                        Warning ({yellowFlagCount})
+                        Warning <span className="font-mono">({yellowFlagCount})</span>
                       </button>
                       <button
                         onClick={() => {
                           setRiskFilter("GREEN");
                           setFlagsPage(1);
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${
-                          riskFilter === "GREEN" ? "bg-emerald-700 text-white" : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                        className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                          riskFilter === "GREEN" ? "bg-emerald-600 text-white" : "bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50"
                         }`}
                       >
-                        Safe ({greenFlagCount})
+                        Safe <span className="font-mono">({greenFlagCount})</span>
                       </button>
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto rounded-lg border border-slate-200">
+                  <div className="overflow-x-auto rounded-lg border border-slate-300/70">
                     <table className="w-full text-left text-xs">
                       <thead>
-                        <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
-                          <th className="py-2.5 px-3">Student Name</th>
-                          <th className="py-2.5 px-3">Roll Number</th>
-                          <th className="py-2.5 px-3 text-center">Section</th>
-                          <th className="py-2.5 px-3 text-right">Days Present</th>
-                          <th className="py-2.5 px-3 text-center">Attendance %</th>
-                          <th className="py-2.5 px-3 text-center">Status</th>
-                          <th className="py-2.5 px-3">Needed for 75%</th>
-                          <th className="py-2.5 px-3 text-center">Action</th>
+                        <tr className="bg-slate-100 border-b border-slate-200">
+                          <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold">Student Name</th>
+                          <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold">Roll Number</th>
+                          <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Section</th>
+                          <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-right">Days Present</th>
+                          <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Attendance %</th>
+                          <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Status</th>
+                          <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold">Needed for 75%</th>
+                          <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-slate-200">
                         {paginatedFlagsList.length === 0 ? (
                           <tr>
-                            <td colSpan={8} className="py-8 text-center text-slate-400 italic">
+                            <td colSpan={8} className="py-10 text-center text-slate-500">
                               No students found in this category.
                             </td>
                           </tr>
@@ -1522,31 +1541,32 @@ export default function PrincipalDashboard() {
                               onClick={() => setSelectedStudentForDetails(item.student)}
                               className="hover:bg-slate-50 transition-colors cursor-pointer"
                             >
-                              <td className="py-2 px-3 font-bold text-slate-900">{item.student.name}</td>
-                              <td className="py-2 px-3 font-mono font-bold text-slate-700">{item.student.uniqueId || "N/A"}</td>
-                              <td className="py-2 px-3 text-center font-mono font-bold text-blue-700">
+                              <td className="py-2 px-3 font-semibold text-slate-900">{item.student.name}</td>
+                              <td className="py-2 px-3 font-mono font-semibold text-slate-700">{item.student.uniqueId || "N/A"}</td>
+                              <td className="py-2 px-3 text-center font-mono font-semibold text-blue-700">
                                 Sec {getSectionDisplayName(item.student.section).name}
                               </td>
-                              <td className="py-2 px-3 text-right font-mono font-bold text-slate-800">
+                              <td className="py-2 px-3 text-right font-mono font-semibold text-slate-800">
                                 {item.presentDays} / {item.totalWorkingDays}
                               </td>
-                              <td className="py-2 px-3 text-center font-mono font-black">
-                                <span className={item.percent >= 75 ? "text-emerald-700" : item.percent >= 65 ? "text-amber-700" : "text-rose-700"}>
+                              <td className="py-2 px-3 text-center font-mono font-bold">
+                                <span className={item.percent >= 75 ? "text-emerald-700" : item.percent >= 65 ? "text-amber-700" : "text-red-700"}>
                                   {item.percent}%
                                 </span>
                               </td>
                               <td className="py-2 px-3 text-center">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${item.badgeColor}`}>
-                                  {item.dotColor} {item.label}
+                                <span className={`stamp ${item.badgeColor}`}>
+                                  <Circle className={`w-1.5 h-1.5 fill-current ${item.dotColor}`} />
+                                  {item.label}
                                 </span>
                               </td>
                               <td className="py-2 px-3 text-slate-600 text-[11px]">
                                 {item.flag === "RED" ? (
-                                  <span className="text-rose-700 font-semibold">
+                                  <span className="text-red-700 font-semibold font-mono">
                                     Needs {item.classesNeededFor75} days for 75%
                                   </span>
                                 ) : item.flag === "YELLOW" ? (
-                                  <span className="text-amber-700 font-semibold">
+                                  <span className="text-amber-700 font-semibold font-mono">
                                     Needs {item.classesNeededFor75} days for 75%
                                   </span>
                                 ) : (
@@ -1559,7 +1579,7 @@ export default function PrincipalDashboard() {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(item.student);
                                   }}
-                                  className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] cursor-pointer"
+                                  className="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 font-semibold text-[11px] cursor-pointer transition-colors"
                                 >
                                   View
                                 </button>
@@ -1573,7 +1593,7 @@ export default function PrincipalDashboard() {
 
                   {/* 20 Per Page Pagination Bar */}
                   {filteredFlagsList.length > 0 && (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-200 text-xs text-slate-600">
                       <div>
                         Showing <span className="font-bold font-mono text-slate-900">{(flagsPage - 1) * PAGE_SIZE + 1}–{Math.min(flagsPage * PAGE_SIZE, filteredFlagsList.length)}</span> of <span className="font-bold font-mono text-slate-900">{filteredFlagsList.length}</span> students
                       </div>
@@ -1582,17 +1602,17 @@ export default function PrincipalDashboard() {
                         <button
                           disabled={flagsPage <= 1}
                           onClick={() => setFlagsPage((p) => Math.max(1, p - 1))}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                          className="px-3 py-1.5 rounded-md border border-slate-300 bg-white hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-slate-700 cursor-pointer transition-colors"
                         >
                           Previous
                         </button>
-                        <span className="px-2.5 py-1 rounded bg-slate-100 font-mono font-bold text-slate-800 text-xs">
+                        <span className="px-2.5 py-1 rounded-md bg-slate-100 font-mono font-semibold text-slate-800 text-xs">
                           Page {flagsPage} of {totalFlagsPages}
                         </span>
                         <button
                           disabled={flagsPage >= totalFlagsPages}
                           onClick={() => setFlagsPage((p) => Math.min(totalFlagsPages, p + 1))}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                          className="px-3 py-1.5 rounded-md border border-slate-300 bg-white hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-slate-700 cursor-pointer transition-colors"
                         >
                           Next
                         </button>
@@ -1605,13 +1625,14 @@ export default function PrincipalDashboard() {
 
             {/* TAB 4: DAILY RECORDS */}
             {activeTab === "logs" && (
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
+              <div className="bg-white border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-900">
-                      Daily Records — {logDate}
+                    <p className="eyebrow text-slate-500">Unified Register</p>
+                    <h3 className="text-[15px] font-bold text-slate-950 tracking-tight mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                      Daily Records — <span className="font-mono">{logDate}</span>
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Student attendance across classes and gate
                     </p>
                   </div>
@@ -1625,14 +1646,14 @@ export default function PrincipalDashboard() {
                         placeholder="Search student, roll..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-blue-500"
+                        className="pl-8 pr-3 py-1.5 text-xs rounded-md bg-white border border-slate-300 text-slate-800 focus:outline-none focus:border-emerald-600"
                       />
                     </div>
 
                     <select
                       value={sectionFilter}
                       onChange={(e) => setSectionFilter(e.target.value)}
-                      className="px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-semibold"
+                      className="px-2.5 py-1.5 text-xs rounded-md bg-white border border-slate-300 text-slate-800 font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     >
                       <option value="ALL">All Sections</option>
                       {sections.map(s => <option key={s} value={s}>Sec {s}</option>)}
@@ -1641,7 +1662,7 @@ export default function PrincipalDashboard() {
                     <select
                       value={logStatusFilter}
                       onChange={(e) => setLogStatusFilter(e.target.value as any)}
-                      className="px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-semibold"
+                      className="px-2.5 py-1.5 text-xs rounded-md bg-white border border-slate-300 text-slate-800 font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     >
                       <option value="ALL">All Statuses</option>
                       <option value="PRESENT">Present</option>
@@ -1653,21 +1674,21 @@ export default function PrincipalDashboard() {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto rounded-lg border border-slate-200">
+                <div className="overflow-x-auto rounded-lg border border-slate-300/70">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-slate-100/80 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase">
-                        <th className="py-2.5 px-3 w-10 text-center">#</th>
-                        <th className="py-2.5 px-3">Roll Number</th>
-                        <th className="py-2.5 px-3">Student Name</th>
-                        <th className="py-2.5 px-3 text-center">Section</th>
-                        <th className="py-2.5 px-3 text-center">Entry</th>
-                        <th className="py-2.5 px-3 text-center">Exit</th>
-                        <th className="py-2.5 px-3 text-center">Class Attendance</th>
-                        <th className="py-2.5 px-3 text-center">Status</th>
+                      <tr className="bg-slate-100 border-b border-slate-200">
+                        <th className="py-2.5 px-3 w-10 text-center eyebrow text-slate-500 font-semibold">#</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold">Roll Number</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold">Student Name</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Section</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Entry</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Exit</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Class Attendance</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-500 font-semibold text-center">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-200">
                       {filteredLogs.slice(0, 150).map((item, idx) => (
                         <tr
                           key={item.student.id}
@@ -1675,17 +1696,17 @@ export default function PrincipalDashboard() {
                           className="hover:bg-slate-50 transition-colors cursor-pointer"
                         >
                           <td className="py-2 px-3 text-center text-slate-400 font-mono">{idx + 1}</td>
-                          <td className="py-2 px-3 font-mono font-bold text-slate-900">{item.student.uniqueId || "N/A"}</td>
+                          <td className="py-2 px-3 font-mono font-semibold text-slate-900">{item.student.uniqueId || "N/A"}</td>
                           <td className="py-2 px-3 font-semibold text-slate-800">{item.student.name}</td>
-                          <td className="py-2 px-3 text-center font-mono font-bold text-blue-700">
+                          <td className="py-2 px-3 text-center font-mono font-semibold text-blue-700">
                             Sec {item.sectionDisplayName}
                           </td>
                           <td className="py-2 px-3 text-center font-mono text-[11px]">
                             {item.log?.entryTime ? (
-                              <span className="font-bold text-slate-800">
+                              <span className="font-semibold text-slate-800">
                                 {formatTime(item.log.entryTime)}
                                 {item.isLate && (
-                                  <span className="ml-1 px-1 py-0.2 rounded bg-amber-100 text-amber-800 text-[9px] font-black">LATE</span>
+                                  <span className="stamp ml-1 border-amber-300 bg-amber-50 text-amber-800">LATE</span>
                                 )}
                               </span>
                             ) : (
@@ -1697,7 +1718,7 @@ export default function PrincipalDashboard() {
                           </td>
                           <td className="py-2 px-3 text-center">
                             {item.isClass ? (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                              <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
                                 Present
                               </span>
                             ) : (
@@ -1705,14 +1726,14 @@ export default function PrincipalDashboard() {
                             )}
                           </td>
                           <td className="py-2 px-3 text-center">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
+                            <span className={`stamp ${
                               item.unifiedStatus === "PRESENT"
-                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                ? "border-emerald-300 bg-emerald-50 text-emerald-800"
                                 : item.unifiedStatus === "CLASS_ONLY"
-                                ? "bg-blue-100 text-blue-800 border-blue-300"
+                                ? "border-blue-300 bg-blue-50 text-blue-800"
                                 : item.unifiedStatus === "GATE_ONLY"
-                                ? "bg-amber-100 text-amber-800 border-amber-300"
-                                : "bg-rose-100 text-rose-800 border-rose-300"
+                                ? "border-amber-300 bg-amber-50 text-amber-800"
+                                : "border-red-300 bg-red-50 text-red-800"
                             }`}>
                               {item.unifiedStatus === "PRESENT"
                                 ? "Present"
@@ -1732,9 +1753,11 @@ export default function PrincipalDashboard() {
             )}
           </section>
         ) : (
-          <section className="bg-white border border-slate-200 rounded-xl p-8 text-center space-y-3 shadow-xs">
-            <Building2 className="w-10 h-10 text-slate-400 mx-auto" />
-            <h3 className="text-base font-bold text-slate-900">
+          <section className="bg-white border border-slate-300/70 rounded-lg p-10 text-center space-y-3 shadow-xs">
+            <div className="w-12 h-12 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto">
+              <Building2 className="w-6 h-6 text-slate-500" />
+            </div>
+            <h3 className="text-base font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>
               Department of {BRANCHES.find(b => b.code === selectedBranch)?.name} ({selectedBranch})
             </h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
@@ -1742,7 +1765,7 @@ export default function PrincipalDashboard() {
             </p>
             <button
               onClick={() => setSelectedBranch("DS")}
-              className="px-3.5 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold cursor-pointer"
+              className="px-3.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer transition-colors"
             >
               Open Data Science (DS)
             </button>
@@ -1759,26 +1782,28 @@ export default function PrincipalDashboard() {
 
           return (
             <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl p-5 space-y-3 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
-                <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="bg-white border border-slate-300/70 rounded-lg w-full max-w-2xl p-5 space-y-3 shadow-xl overflow-hidden max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-start justify-between border-b border-slate-200 pb-3">
                   <div>
-                    <h3 className="text-base font-extrabold text-slate-900">{sectionModalData.title}</h3>
-                    <p className="text-xs text-slate-500 font-medium">{sectionModalData.subtitle}</p>
+                    <h3 className="text-base font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>{sectionModalData.title}</h3>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">{sectionModalData.subtitle}</p>
                   </div>
                   <button
                     onClick={() => {
                       setSectionModalData(null);
                       setSectionModalPage(1);
                     }}
-                    className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                    className="w-7 h-7 rounded-md bg-white border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-400 p-1 cursor-pointer transition-colors flex items-center justify-center"
                   >
-                    <XCircle className="w-5 h-5" />
+                    <XCircle className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="overflow-y-auto space-y-1.5 pr-1 flex-1 border border-slate-200 rounded-xl bg-slate-50/50 p-2">
+                <div className="overflow-y-auto space-y-1.5 pr-1 flex-1 border border-slate-300/70 rounded-lg bg-slate-50/70 p-2">
                   {sectionModalData.students.length === 0 ? (
-                    <div className="p-8 text-center text-slate-400 text-xs italic">No students match this view.</div>
+                    <div className="p-10 text-center text-slate-500 text-xs">
+                      No students match this view.
+                    </div>
                   ) : (
                     paginatedSectionStudents.map((item, idx) => (
                       <div
@@ -1788,14 +1813,14 @@ export default function PrincipalDashboard() {
                           setSectionModalData(null);
                           setSectionModalPage(1);
                         }}
-                        className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-blue-400 flex items-center justify-between transition-all cursor-pointer group shadow-xs"
+                        className="p-2.5 rounded-md bg-white border border-slate-300/70 hover:border-emerald-400 flex items-center justify-between transition-colors cursor-pointer group"
                       >
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded bg-blue-100 text-blue-800 font-bold text-xs flex items-center justify-center font-mono">
+                          <div className="w-7 h-7 rounded bg-slate-100 border border-slate-300 text-slate-700 font-semibold text-xs flex items-center justify-center font-mono">
                             {(sectionModalPage - 1) * PAGE_SIZE + idx + 1}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+                            <p className="text-xs font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
                               {item.student.name}
                             </p>
                             <p className="text-[11px] font-mono text-slate-500">
@@ -1806,17 +1831,17 @@ export default function PrincipalDashboard() {
 
                         <div className="flex flex-wrap items-center gap-1.5">
                           {item.hourlyTotal && item.hourlyTotal > 0 ? (
-                            <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${
+                            <span className={`stamp ${
                               item.hourlyCount && item.hourlyCount > 0
-                                ? "bg-blue-50 text-blue-800 border-blue-200"
-                                : "bg-slate-100 text-slate-500 border-slate-200"
+                                ? "border-blue-300 bg-blue-50 text-blue-800"
+                                : "border-slate-300 bg-slate-50 text-slate-500"
                             }`}>
                               {item.hourlyCount}/{item.hourlyTotal} Classes
                             </span>
                           ) : null}
 
                           {item.entryTime ? (
-                            <span className="text-[11px] font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            <span className="stamp border-slate-300 bg-slate-50 text-slate-700">
                               Gate: {formatTime(item.entryTime)}
                             </span>
                           ) : (
@@ -1825,12 +1850,12 @@ export default function PrincipalDashboard() {
                             </span>
                           )}
 
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
+                          <span className={`stamp ${
                             item.hourlyCount && item.hourlyCount > 0
-                              ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                              ? "border-emerald-300 bg-emerald-50 text-emerald-800"
                               : item.entryTime
-                              ? "bg-amber-100 text-amber-800 border-amber-300"
-                              : "bg-rose-100 text-rose-800 border-rose-300"
+                              ? "border-amber-300 bg-amber-50 text-amber-800"
+                              : "border-red-300 bg-red-50 text-red-800"
                           }`}>
                             {item.hourlyCount && item.hourlyCount > 0
                               ? "Present in Class"
@@ -1845,7 +1870,7 @@ export default function PrincipalDashboard() {
                 </div>
 
                 {/* 20 Per Page Pagination Bar */}
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
                   <span>
                     Showing <span className="font-bold font-mono text-slate-900">{sectionModalData.students.length === 0 ? 0 : (sectionModalPage - 1) * PAGE_SIZE + 1}–{Math.min(sectionModalPage * PAGE_SIZE, sectionModalData.students.length)}</span> of <span className="font-bold font-mono text-slate-900">{sectionModalData.students.length}</span> students
                   </span>
@@ -1854,17 +1879,17 @@ export default function PrincipalDashboard() {
                     <button
                       disabled={sectionModalPage <= 1}
                       onClick={() => setSectionModalPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                      className="px-2.5 py-1 rounded-md border border-slate-300 bg-white hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-slate-700 cursor-pointer transition-colors"
                     >
                       Previous
                     </button>
-                    <span className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-800 text-[11px]">
+                    <span className="px-2 py-0.5 rounded-md bg-slate-100 font-mono font-semibold text-slate-800 text-[11px]">
                       {sectionModalPage} / {totalSectionModalPages}
                     </span>
                     <button
                       disabled={sectionModalPage >= totalSectionModalPages}
                       onClick={() => setSectionModalPage((p) => Math.min(totalSectionModalPages, p + 1))}
-                      className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-slate-700 cursor-pointer"
+                      className="px-2.5 py-1 rounded-md border border-slate-300 bg-white hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-slate-700 cursor-pointer transition-colors"
                     >
                       Next
                     </button>
@@ -1873,7 +1898,7 @@ export default function PrincipalDashboard() {
                         setSectionModalData(null);
                         setSectionModalPage(1);
                       }}
-                      className="ml-2 px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold cursor-pointer"
+                      className="ml-2 px-3 py-1 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold cursor-pointer transition-colors"
                     >
                       Close
                     </button>
@@ -1899,37 +1924,37 @@ export default function PrincipalDashboard() {
         {/* CSV EXPORT MODAL */}
         {exportModalOpen && (
           <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+            <div className="bg-white border border-slate-300/70 rounded-lg w-full max-w-md p-5 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div className="flex items-center gap-2 font-bold text-slate-950 text-sm" style={{ fontFamily: "var(--app-font-display)" }}>
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
                   <span>Export Attendance (.csv)</span>
                 </div>
-                <button onClick={() => setExportModalOpen(false)} className="text-slate-400 hover:text-slate-700">
-                  <XCircle className="w-5 h-5" />
+                <button onClick={() => setExportModalOpen(false)} className="w-7 h-7 rounded-md bg-white border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-400 transition-colors cursor-pointer flex items-center justify-center">
+                  <XCircle className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="font-bold text-slate-700">Scope</label>
+                  <label className="eyebrow block text-slate-600">Scope</label>
                   <select
                     value={exportType}
                     onChange={(e) => setExportType(e.target.value as any)}
-                    className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-semibold"
+                    className="w-full mt-1 px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-800 font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
-                    <option value="all">All Departments & Sections</option>
+                    <option value="all">All Departments &amp; Sections</option>
                     <option value="section">Specific Section</option>
                   </select>
                 </div>
 
                 {exportType === "section" && (
                   <div>
-                    <label className="font-bold text-slate-700">Section</label>
+                    <label className="eyebrow block text-slate-600">Section</label>
                     <select
                       value={exportSection}
                       onChange={(e) => setExportSection(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-semibold"
+                      className="w-full mt-1 px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-800 font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     >
                       {sections.map(s => <option key={s} value={s}>Section {s}</option>)}
                     </select>
@@ -1937,31 +1962,52 @@ export default function PrincipalDashboard() {
                 )}
 
                 <div>
-                  <label className="font-bold text-slate-700">Month</label>
+                  <label className="eyebrow block text-slate-600">Month</label>
                   <input
                     type="month"
                     value={exportMonth}
                     onChange={(e) => setExportMonth(e.target.value)}
-                    className="w-full mt-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 font-semibold"
+                    className="w-full mt-1 px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-800 font-mono font-semibold focus:outline-none focus:border-emerald-600"
                   />
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
+              <div className="pt-2 border-t border-slate-200 flex items-center justify-end gap-2">
                 <button
                   onClick={() => setExportModalOpen(false)}
-                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold"
+                  className="px-3 py-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
-                <a
-                  href={`/api/attendance/export?month=${exportMonth}${exportType === "section" ? `&section=${exportSection}` : ""}`}
-                  download={`Attendance_${exportMonth}.csv`}
-                  onClick={() => setExportModalOpen(false)}
-                  className="px-4 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold shadow-xs"
+                <button
+                  onClick={async () => {
+                    // The anchor version could not send the Authorization
+                    // header and hit a nonexistent route; fetch the CSV with
+                    // the bearer token and download it as a blob instead.
+                    const qs = exportType === "section" ? `&section=${encodeURIComponent(exportSection)}` : "";
+                    try {
+                      const res = await fetch(`/api/attendance/export?month=${exportMonth}${qs}`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem("qr_token") || ""}` },
+                      });
+                      if (!res.ok) throw new Error(`Export failed (${res.status})`);
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `Attendance_${exportMonth}${exportType === "section" ? `_${exportSection}` : ""}.csv`;
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                      setExportModalOpen(false);
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }}
+                  className="px-4 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Download CSV
-                </a>
+                </button>
               </div>
             </div>
           </div>

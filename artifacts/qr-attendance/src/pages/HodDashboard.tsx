@@ -136,35 +136,36 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-slate-800 text-sm font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98] shadow-xs"
+        className="px-3.5 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-sm font-semibold flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
       >
-        <Calendar className="w-4 h-4 text-blue-600" />
-        <span>{monthNames[month - 1]} {year}</span>
+        <Calendar className="w-4 h-4 text-emerald-600" />
+        <span className="font-mono">{monthNames[month - 1]} {year}</span>
       </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 mt-2 w-64 rounded-2xl bg-white border border-gray-200 p-4 shadow-2xl z-30 animate-in fade-in duration-100">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
+          <div className="absolute left-0 mt-2 w-64 rounded-lg bg-white border border-slate-300 p-4 shadow-xl z-30 animate-in fade-in duration-100">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200">
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-1.5 rounded-md bg-white border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-400 transition-colors cursor-pointer"
               >
                 &larr;
               </button>
-              <span className="text-sm font-bold text-slate-800 font-mono">{currentYear}</span>
+              <span className="eyebrow text-slate-500">Academic Month</span>
+              <span className="text-sm font-bold text-slate-900 font-mono">{currentYear}</span>
               <button
                 type="button"
                 onClick={() => setCurrentYear(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 hover:text-slate-800 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-1.5 rounded-md bg-white border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-400 transition-colors cursor-pointer"
               >
                 &rarr;
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
               {monthNames.map((mName, idx) => {
                 const isSelected = currentYear === year && (idx + 1) === month;
                 return (
@@ -172,10 +173,10 @@ function CustomMonthSelector({ value, onChange }: { value: string; onChange: (va
                     key={mName}
                     type="button"
                     onClick={() => handleSelectMonth(idx)}
-                    className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      isSelected 
-                        ? "bg-blue-600 text-white shadow-sm" 
-                        : "bg-gray-50 border border-gray-100 hover:bg-gray-100 text-slate-700"
+                    className={`py-2 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
+                      isSelected
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-700"
                     }`}
                   >
                     {mName}
@@ -821,7 +822,7 @@ export default function HodDashboard() {
     studentsList: Array<{
       student: StudentUser;
       record?: AttendanceRecord;
-      status: "present" | "absent";
+      status: "present" | "in_class" | "absent";
     }>;
   }>({
     title: "",
@@ -1359,7 +1360,7 @@ export default function HodDashboard() {
       queryClient.invalidateQueries({ queryKey: ["admin-schedules-list-status"] });
       queryClient.invalidateQueries({ queryKey: ["admin-schedules-with-status"] });
 
-      setReassignSuccessMsg(`✅ Database Updated! ${newSubject} assigned to ${newFaculty}`);
+      setReassignSuccessMsg(`Database Updated! ${newSubject} assigned to ${newFaculty}`);
       setTimeout(() => {
         setReassignSlotModalOpen(false);
         setReassignSuccessMsg("");
@@ -2691,9 +2692,9 @@ export default function HodDashboard() {
   };
 
   const getPercentageColor = (percent: number) => {
-    if (percent < 40) return "text-red-500 font-bold";
+    if (percent < 40) return "text-red-600 font-bold";
     if (percent < 60) return "text-orange-700 font-semibold";
-    return "text-green-700 font-semibold";
+    return "text-emerald-700 font-semibold";
   };
 
   // ---- Passcode Settings ----
@@ -2726,40 +2727,38 @@ export default function HodDashboard() {
     if (pwdNew !== pwdConfirm) { setPwdError("Passcodes don't match."); return; }
     try {
       localStorage.setItem(PASSCODE_KEY, pwdNew);
-      setPwdSuccess("✅ Scanner passcode updated!");
+      setPwdSuccess("Scanner passcode updated!");
       setTimeout(() => setShowPwdModal(false), 1800);
     } catch { setPwdError("Storage unavailable."); }
   };
 
   return (
     <Layout>
-      <div className="px-4 py-3 max-w-6xl mx-auto space-y-3 font-sans">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5">
         
         {/* Header section & Top Module Navigation Bar (only show on main HOD Dashboard views) */}
         {activeTab !== "flags" && activeTab !== "student-analytics" && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                  <GraduationCap className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-extrabold text-gray-800 tracking-tight leading-tight">HOD Dashboard</h1>
-                  <p className="text-[11px] text-gray-400 font-medium -mt-0.5">Department of Data Science (DS)</p>
-                </div>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-end justify-between gap-3 pb-4 border-b border-slate-300/70">
+              <div>
+                <p className="eyebrow text-slate-500">Department Control</p>
+                <h1 className="text-xl sm:text-[26px] font-bold text-slate-950 tracking-tight mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                  HOD Dashboard
+                </h1>
+                <p className="text-[11px] text-slate-500 mt-0.5">Department of Data Science (DS)</p>
               </div>
               
               <div className="flex items-center gap-2">
                 <button
                   onClick={openPwdModal}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:border-blue-400 hover:shadow-md text-gray-500 hover:text-blue-600 font-semibold text-xs transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-950 font-semibold text-xs transition-colors cursor-pointer shadow-xs"
                   title="Change scanner passcode"
                 >
                   <Settings className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Settings</span>
                 </button>
-                <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-2.5 py-2 shadow-sm hover:border-blue-400 transition-colors">
-                  <Calendar className="w-3.5 h-3.5 text-blue-600 pointer-events-none" />
+                <div className="flex items-center gap-1.5 bg-white border border-slate-300 rounded-md px-2.5 py-2 shadow-xs">
+                  <Calendar className="w-3.5 h-3.5 text-emerald-600 pointer-events-none" />
                   <input
                     type="date"
                     value={activeTab === "summary" ? selectedDate : logDate}
@@ -2769,20 +2768,20 @@ export default function HodDashboard() {
                         setLogDate(e.target.value);
                       }
                     }}
-                    className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer [color-scheme:light]"
+                    className="bg-transparent text-xs font-mono font-semibold text-slate-800 outline-none cursor-pointer [color-scheme:light]"
                   />
                 </div>
               </div>
             </div>
 
             {/* Top Module Navigation Bar */}
-            <div className="flex flex-wrap items-center bg-slate-100/90 border border-slate-200 p-1 rounded-xl w-fit shadow-2xs gap-1">
+            <div className="flex flex-wrap items-center gap-1.5">
               <button
                 onClick={() => setActiveTab("summary")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer border ${
                   activeTab === "summary"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                    : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                 }`}
               >
                 <Grid3X3 className="w-3.5 h-3.5" />
@@ -2790,10 +2789,10 @@ export default function HodDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("logs")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer border ${
                   activeTab === "logs"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                    : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                 }`}
               >
                 <ClipboardList className="w-3.5 h-3.5" />
@@ -2801,10 +2800,10 @@ export default function HodDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("mentors")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer border ${
                   activeTab === "mentors"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                    : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                 }`}
               >
                 <GraduationCap className="w-3.5 h-3.5" />
@@ -2812,10 +2811,10 @@ export default function HodDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("schedules")}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer border ${
                   activeTab === "schedules"
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                    : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                 }`}
               >
                 <Calendar className="w-3.5 h-3.5" />
@@ -2828,47 +2827,80 @@ export default function HodDashboard() {
         {activeTab === "summary" ? (
           <>
             {/* Compact inline stats bar */}
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm">
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <Users className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs text-gray-400 font-medium">Total</span>
-                <span className="text-lg font-extrabold text-gray-800">{overallTotalStudents}</span>
-              </div>
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="text-xs text-gray-400 font-medium">Present</span>
-                <span className="text-lg font-extrabold text-emerald-600">{overallTotalPresent}</span>
-              </div>
-              <div className="flex items-center gap-1.5 pr-4 border-r border-gray-200">
-                <XCircle className="w-3.5 h-3.5 text-red-400" />
-                <span className="text-xs text-gray-400 font-medium">Absent</span>
-                <span className="text-lg font-extrabold text-red-500">{overallTotalAbsent}</span>
-              </div>
-              <div className="flex items-center gap-1.5 ml-auto">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                  <span className="text-[11px] font-black text-white">{overallDeptPercentage}%</span>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="eyebrow text-slate-500">Total Students</p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{overallTotalStudents}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className="text-xs text-gray-400 font-medium">Dept.</span>
+              </div>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="eyebrow text-slate-500">Present</p>
+                    <p className="text-[26px] leading-none font-bold text-emerald-700 mt-2 font-mono tabular-nums">{overallTotalPresent}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-emerald-200 bg-emerald-50 flex items-center justify-center shrink-0">
+                    <CheckCircle className="w-4 h-4 text-emerald-700" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-red-600" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="eyebrow text-slate-500">Absent</p>
+                    <p className="text-[26px] leading-none font-bold text-red-700 mt-2 font-mono tabular-nums">{overallTotalAbsent}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-red-200 bg-red-50 flex items-center justify-center shrink-0">
+                    <XCircle className="w-4 h-4 text-red-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="eyebrow text-slate-500">Dept. Attendance</p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{overallDeptPercentage}%</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-emerald-200 bg-emerald-50 flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-4 h-4 text-emerald-700" />
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Main Grid View */}
             {usersLoading || attendanceLoading ? (
-              <div className="bg-white border border-gray-200 p-20 flex flex-col items-center justify-center gap-4">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-semibold text-gray-500">Loading student rosters & attendance records...</p>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-2">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-9 bg-slate-200 rounded animate-pulse" />
+                ))}
               </div>
             ) : (
-              <Card className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <Card className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-200 bg-slate-50/70">
+                  <h2 className="text-[13px] font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>
+                    Section-wise Attendance — {selectedDate}
+                  </h2>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/80 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-                        <th className="py-2.5 px-4">Section</th>
-                        <th className="py-2.5 px-4 text-center">Present</th>
-                        <th className="py-2.5 px-4 text-center">Absent</th>
-                        <th className="py-2.5 px-4 text-center">Total</th>
-                        <th className="py-2.5 px-4 text-center">%</th>
+                      <tr className="border-b border-slate-200 bg-slate-100">
+                        <th className="py-2.5 px-4 eyebrow text-slate-600">Section</th>
+                        <th className="py-2.5 px-4 eyebrow text-slate-600 text-center">Present</th>
+                        <th className="py-2.5 px-4 eyebrow text-slate-600 text-center">Absent</th>
+                        <th className="py-2.5 px-4 eyebrow text-slate-600 text-center">Total</th>
+                        <th className="py-2.5 px-4 eyebrow text-slate-600 text-center">%</th>
                         <th className="py-2.5 px-4 w-32"></th>
                       </tr>
                     </thead>
@@ -2900,12 +2932,12 @@ export default function HodDashboard() {
                               const barWidth = Math.min(percent, 100);
 
                               return (
-                                <tr key={s.sectionKey} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                                  <td className="py-2 px-4 font-bold text-gray-700 text-sm">{s.displayName}</td>
+                                <tr key={s.sectionKey} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                  <td className="py-2.5 px-4 font-bold text-slate-900 text-sm font-mono">{s.displayName}</td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("PR", s)}
-                                    className="py-2 px-4 text-center text-emerald-600 font-bold cursor-pointer hover:bg-emerald-50 active:scale-[0.97] transition-all text-sm"
+                                    className="py-2.5 px-4 text-center text-emerald-700 font-bold cursor-pointer hover:bg-emerald-50 transition-colors text-sm font-mono tabular-nums"
                                     title="Present Students"
                                   >
                                     {s.presentStudents.length}
@@ -2913,29 +2945,29 @@ export default function HodDashboard() {
 
                                   <td 
                                     onClick={() => handleCellClick("AB", s)}
-                                    className="py-2 px-4 text-center text-red-500 font-semibold cursor-pointer hover:bg-red-50 active:scale-[0.97] transition-all text-sm"
+                                    className="py-2.5 px-4 text-center text-red-600 font-semibold cursor-pointer hover:bg-red-50 transition-colors text-sm font-mono tabular-nums"
                                   >
                                     {s.absentStudents.length}
                                   </td>
                                   
                                   <td 
                                     onClick={() => handleCellClick("Total", s)}
-                                    className="py-2 px-4 text-center text-gray-500 font-medium cursor-pointer hover:bg-gray-100/50 active:scale-[0.97] transition-all text-sm"
+                                    className="py-2.5 px-4 text-center text-slate-600 font-medium cursor-pointer hover:bg-slate-100 transition-colors text-sm font-mono tabular-nums"
                                   >
                                     {s.totalStudents.length}
                                   </td>
                                   
-                                  <td className="py-2 px-4 text-center">
-                                    <span className={`text-sm font-bold ${getPercentageColor(percent)}`}>
+                                  <td className="py-2.5 px-4 text-center">
+                                    <span className={`text-sm font-bold font-mono tabular-nums ${getPercentageColor(percent)}`}>
                                       {Math.round(percent)}%
                                     </span>
                                   </td>
 
-                                  <td className="py-2 px-4">
-                                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                  <td className="py-2.5 px-4">
+                                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                       <div 
                                         className={`h-full rounded-full transition-all duration-500 ${
-                                          percent >= 75 ? 'bg-emerald-400' : percent >= 50 ? 'bg-amber-400' : 'bg-red-400'
+                                          percent >= 75 ? 'bg-emerald-600' : percent >= 50 ? 'bg-amber-500' : 'bg-red-500'
                                         }`}
                                         style={{ width: `${barWidth}%` }}
                                       />
@@ -2946,17 +2978,19 @@ export default function HodDashboard() {
                             })}
 
                             {/* Year subtotal row */}
-                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50/50 border-b border-blue-100">
-                              <td className="py-2 px-4 font-black text-blue-600 text-xs uppercase tracking-wide">⬥ {year}</td>
-                              <td className="py-2 px-4 text-center text-emerald-600 font-bold text-sm">{yearPresent}</td>
-                              <td className="py-2 px-4 text-center text-red-500 font-bold text-sm">{yearAbsent}</td>
-                              <td className="py-2 px-4 text-center text-gray-600 font-bold text-sm">{yearTotal}</td>
-                              <td className="py-2 px-4 text-center font-black text-blue-600 text-sm">
+                            <tr className="bg-slate-100 border-b border-slate-200">
+                              <td className="py-2 px-4 font-bold text-slate-800 text-xs uppercase tracking-wide">
+                                <span className="eyebrow text-slate-700">{year}</span>
+                              </td>
+                              <td className="py-2 px-4 text-center text-emerald-700 font-bold text-sm font-mono tabular-nums">{yearPresent}</td>
+                              <td className="py-2 px-4 text-center text-red-600 font-bold text-sm font-mono tabular-nums">{yearAbsent}</td>
+                              <td className="py-2 px-4 text-center text-slate-700 font-bold text-sm font-mono tabular-nums">{yearTotal}</td>
+                              <td className="py-2 px-4 text-center font-bold text-slate-900 text-sm font-mono tabular-nums">
                                 {yearPercentage}%
                               </td>
                               <td className="py-2 px-4">
-                                <div className="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden">
-                                  <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${yearPercentage}%` }} />
+                                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                  <div className="h-full bg-emerald-600 rounded-full transition-all duration-500" style={{ width: `${yearPercentage}%` }} />
                                 </div>
                               </td>
                             </tr>
@@ -2965,18 +2999,18 @@ export default function HodDashboard() {
                       })}
                       
                       {/* Department total footer */}
-                      <tr className="bg-white border-t-2 border-gray-200">
-                        <td colSpan={4} className="py-3 px-4 font-extrabold text-gray-700 text-xs uppercase tracking-wider text-right">
+                      <tr className="bg-white border-t-2 border-slate-300">
+                        <td colSpan={4} className="py-3 px-4 font-bold text-slate-900 text-xs uppercase tracking-wider text-right">
                           Department Overall
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-black shadow-md shadow-blue-500/20">
+                          <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                             {overallDeptPercentage}%
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${overallDeptPercentage}%` }} />
+                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-emerald-600 rounded-full transition-all duration-500" style={{ width: `${overallDeptPercentage}%` }} />
                           </div>
                         </td>
                       </tr>
@@ -2987,29 +3021,29 @@ export default function HodDashboard() {
             )}
           </>
         ) : activeTab === "logs" ? (
-          <div className="space-y-3.5">
+          <div className="space-y-4">
             {/* ── 1. CLEAN TOP HEADER STRIP ── */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+            <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3.5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-md bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center flex-shrink-0">
                   <ClipboardList className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-base font-extrabold text-slate-900 tracking-tight">
+                    <h2 className="text-base font-bold text-slate-950 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
                       Daily Student Attendance Logs
                     </h2>
-                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold">
+                    <span className="stamp border-slate-300 bg-slate-100 text-slate-700">
                       {problemStats.totalEnrolled} Students
                     </span>
                     {problemStats.lateCount + problemStats.unscannedCount > 0 && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                      <span className="stamp border-red-300 bg-red-50 text-red-800">
                         {problemStats.lateCount + problemStats.unscannedCount} Attention Needed
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    College Start: <span className="font-semibold text-slate-700">09:00 AM</span> • Late Cutoff: <span className="font-semibold text-slate-700">09:30 AM</span> • Attendance Date: <span className="font-semibold text-slate-700 font-mono">{logDate}</span>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    College Start: <span className="font-semibold text-slate-900 font-mono">09:00 AM</span> • Late Cutoff: <span className="font-semibold text-slate-900 font-mono">09:30 AM</span> • Attendance Date: <span className="font-semibold text-slate-900 font-mono">{logDate}</span>
                   </p>
                 </div>
               </div>
@@ -3021,13 +3055,13 @@ export default function HodDashboard() {
                     setBulkMessageType("late");
                     setBulkMessageModalOpen(true);
                   }}
-                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-md bg-red-50 hover:bg-red-100 border border-red-300 text-red-800 font-semibold text-xs transition-colors shadow-xs cursor-pointer"
                   title="Send bulk notice to parents"
                 >
-                  <Send className="w-3.5 h-3.5 text-rose-600" />
+                  <Send className="w-3.5 h-3.5 text-red-600" />
                   <span>Notify Parents</span>
                   {selectedStudentIds.length > 0 && (
-                    <span className="px-1.5 py-0.5 bg-rose-600 text-white rounded-full text-[10px] font-black">
+                    <span className="px-1.5 py-0.5 bg-red-600 text-white rounded-md text-[10px] font-bold font-mono">
                       {selectedStudentIds.length}
                     </span>
                   )}
@@ -3035,7 +3069,7 @@ export default function HodDashboard() {
 
                 <button
                   onClick={handleExportProblemCsv}
-                  className="h-9 flex items-center gap-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs transition-colors shadow-2xs cursor-pointer"
+                  className="h-9 flex items-center gap-1.5 px-3 rounded-md bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-xs transition-colors shadow-xs cursor-pointer"
                   title="Export Attendance Logs as CSV"
                 >
                   <Download className="w-3.5 h-3.5 text-slate-500" />
@@ -3044,16 +3078,16 @@ export default function HodDashboard() {
 
                 <button
                   onClick={() => setExportModalOpen(true)}
-                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                  className="h-9 flex items-center gap-1.5 px-3.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer"
                   title="Open Monthly Attendance Register"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-slate-300" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-100" />
                   <span>Monthly Register</span>
                 </button>
 
                 <button
                   onClick={() => setHolidayModalOpen(true)}
-                  className="h-9 flex items-center gap-1.5 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-semibold text-xs transition-colors cursor-pointer"
+                  className="h-9 flex items-center gap-1.5 px-2.5 rounded-md bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 hover:text-slate-950 font-semibold text-xs transition-colors cursor-pointer"
                   title="Configure Holidays"
                 >
                   <Calendar className="w-3.5 h-3.5 text-slate-500" />
@@ -3064,82 +3098,86 @@ export default function HodDashboard() {
 
             {/* ── 2. LOW-PROFILE 4-CARD KPI STRIP ── */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Scanned</span>
-                <div className="text-2xl font-black text-slate-900 mt-1">{problemStats.scannedCount}</div>
-                <div className="text-xs text-slate-500 font-medium mt-0.5">{problemStats.attendanceRate}% of strength</div>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600" aria-hidden />
+                <span className="eyebrow text-slate-500 block">Total Scanned</span>
+                <div className="text-2xl font-bold text-slate-950 mt-1.5 font-mono tabular-nums">{problemStats.scannedCount}</div>
+                <div className="text-xs text-slate-500 mt-0.5 font-mono tabular-nums">{problemStats.attendanceRate}% of strength</div>
               </div>
 
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">On-Time Arrivals</span>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">&lt;9:30 AM</span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="eyebrow text-emerald-700 block">On-Time Arrivals</span>
+                  <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">&lt;9:30 AM</span>
                 </div>
-                <div className="text-2xl font-black text-emerald-700 mt-1">{Math.max(0, problemStats.scannedCount - problemStats.lateCount)}</div>
-                <div className="text-xs text-emerald-600 font-medium mt-0.5">{problemStats.punctualityRate}% punctuality score</div>
+                <div className="text-2xl font-bold text-emerald-700 mt-1.5 font-mono tabular-nums">{Math.max(0, problemStats.scannedCount - problemStats.lateCount)}</div>
+                <div className="text-xs text-emerald-700 mt-0.5 font-mono tabular-nums">{problemStats.punctualityRate}% punctuality score</div>
               </div>
 
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Late Arrivals</span>
-                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">&gt;9:30 AM</span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500" aria-hidden />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="eyebrow text-amber-700 block">Late Arrivals</span>
+                  <span className="stamp border-amber-300 bg-amber-50 text-amber-800">&gt;9:30 AM</span>
                 </div>
-                <div className="text-2xl font-black text-amber-700 mt-1">{problemStats.lateCount}</div>
-                <div className="text-xs text-amber-600 font-medium mt-0.5">{problemStats.chronicLateCount} repeat late</div>
+                <div className="text-2xl font-bold text-amber-700 mt-1.5 font-mono tabular-nums">{problemStats.lateCount}</div>
+                <div className="text-xs text-amber-700 mt-0.5 font-mono tabular-nums">{problemStats.chronicLateCount} repeat late</div>
               </div>
 
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-rose-600 uppercase tracking-wider block">Not Scanned</span>
-                  <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">Absent</span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-red-600" aria-hidden />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="eyebrow text-red-700 block">Not Scanned</span>
+                  <span className="stamp border-red-300 bg-red-50 text-red-800">Absent</span>
                 </div>
-                <div className="text-2xl font-black text-rose-700 mt-1">{problemStats.unscannedCount}</div>
-                <div className="text-xs text-rose-600 font-medium mt-0.5">0 gate scans today</div>
+                <div className="text-2xl font-bold text-red-700 mt-1.5 font-mono tabular-nums">{problemStats.unscannedCount}</div>
+                <div className="text-xs text-red-700 mt-0.5 font-mono tabular-nums">0 gate scans today</div>
               </div>
             </div>
 
             {/* ── 3. UNIFIED CONTROL & FILTER BAR ── */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs space-y-3">
+            <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs space-y-3">
               {/* Top Row: Status Tabs + Subview switcher */}
-              <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
+              <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-slate-200">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
                     onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer border ${
                       logViewMode === "all"
-                        ? "bg-slate-900 text-white shadow-xs"
-                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/70"
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                        : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                     }`}
                   >
                     All Students ({problemStats.totalEnrolled})
                   </button>
                   <button
                     onClick={() => { setLogViewMode("problems"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer border flex items-center gap-1.5 ${
                       logViewMode === "problems"
-                        ? "bg-rose-700 text-white shadow-xs"
-                        : "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                        : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                     }`}
                   >
-                    <Flame className="w-3 h-3 text-rose-500" />
+                    <Flame className={`w-3 h-3 ${logViewMode === "problems" ? "text-emerald-100" : "text-red-500"}`} />
                     <span>Attention Needed ({problemStats.lateCount + problemStats.unscannedCount})</span>
                   </button>
                   <button
                     onClick={() => { setLogViewMode("late"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer border ${
                       logViewMode === "late"
-                        ? "bg-amber-600 text-white shadow-xs"
-                        : "bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200"
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                        : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                     }`}
                   >
                     Late Arrivals ({problemStats.lateCount})
                   </button>
                   <button
                     onClick={() => { setLogViewMode("unscanned"); setLogCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer border ${
                       logViewMode === "unscanned"
-                        ? "bg-rose-600 text-white shadow-xs"
-                        : "bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200"
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                        : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                     }`}
                   >
                     Not Scanned ({problemStats.unscannedCount})
@@ -3147,13 +3185,13 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Sub-view switcher */}
-                <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-1 bg-white border border-slate-300 p-0.5 rounded-md">
                   <button
                     onClick={() => { setLogViewMode("all"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-2.5 py-1 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
                       logViewMode !== "comparison" && logViewMode !== "trend"
-                        ? "bg-white text-slate-900 shadow-2xs"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-950"
                     }`}
                     title="Student Logs Table"
                   >
@@ -3162,10 +3200,10 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("comparison"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-2.5 py-1 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
                       logViewMode === "comparison"
-                        ? "bg-white text-slate-900 shadow-2xs"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-950"
                     }`}
                     title="Section Punctuality Comparison"
                   >
@@ -3174,10 +3212,10 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => { setLogViewMode("trend"); setLogCurrentPage(1); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-2.5 py-1 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
                       logViewMode === "trend"
-                        ? "bg-white text-slate-900 shadow-2xs"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-950"
                     }`}
                     title="Weekly Attendance & Late Trend"
                   >
@@ -3197,7 +3235,7 @@ export default function HodDashboard() {
                       setSelectedSectionFilter(e.target.value);
                       setLogCurrentPage(1);
                     }}
-                    className="h-8.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="h-9 px-3 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="All">All Sections ({deptStudents.length})</option>
                     <option value="2A">2A CSE Data Science</option>
@@ -3218,7 +3256,7 @@ export default function HodDashboard() {
                       setSelectedMentorFilter(e.target.value);
                       setLogCurrentPage(1);
                     }}
-                    className="h-8.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="h-9 px-3 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="All">All Faculty Mentors</option>
                     {OFFICIAL_FACULTY_LIST.map((m) => (
@@ -3235,7 +3273,7 @@ export default function HodDashboard() {
                       setLogSortField(e.target.value as any);
                       setLogCurrentPage(1);
                     }}
-                    className="h-8.5 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="h-9 px-3 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="entryTime">Sort: Entry Time</option>
                     <option value="severity">Sort: Problem Severity</option>
@@ -3256,7 +3294,7 @@ export default function HodDashboard() {
                       setLogSearchQuery(e.target.value);
                       setLogCurrentPage(1);
                     }}
-                    className="w-full h-8.5 pl-8.5 pr-7 py-1 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+                    className="w-full h-9 pl-9 pr-7 rounded-md bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-xs font-medium focus:outline-none focus:border-emerald-600 transition-colors"
                   />
                   {logSearchQuery && (
                     <button
@@ -3264,7 +3302,7 @@ export default function HodDashboard() {
                         setLogSearchQuery("");
                         setLogCurrentPage(1);
                       }}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -3275,67 +3313,74 @@ export default function HodDashboard() {
 
             {/* ── SECTION COMPARISON VIEW ── */}
             {logViewMode === "comparison" && (
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
                   <div>
-                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <BarChart2 className="w-4 h-4 text-indigo-600" />
-                      Section-Wise Punctuality & Accountability Matrix
+                    <p className="eyebrow text-slate-500 flex items-center gap-1.5">
+                      <BarChart2 className="w-3.5 h-3.5 text-blue-700" />
+                      Section Accountability
+                    </p>
+                    <h3 className="text-sm font-bold text-slate-950 mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                      Section-Wise Punctuality &amp; Accountability Matrix
                     </h3>
-                    <p className="text-[11px] text-slate-500">Hold class in-charges and mentors accountable for late comers and unscanned students.</p>
+                    <p className="text-[11px] text-slate-600">Hold class in-charges and mentors accountable for late comers and unscanned students.</p>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                        <th className="py-2.5 px-3">Section</th>
-                        <th className="py-2.5 px-3">Class In-charge / Mentor</th>
-                        <th className="py-2.5 px-3 text-center">Strength</th>
-                        <th className="py-2.5 px-3 text-center">Scanned</th>
-                        <th className="py-2.5 px-3 text-center">Late Comers</th>
-                        <th className="py-2.5 px-3 text-center">Unscanned</th>
-                        <th className="py-2.5 px-3 text-center">Punctuality %</th>
-                        <th className="py-2.5 px-3 text-center">Status</th>
-                        <th className="py-2.5 px-3 text-center">Action</th>
+                      <tr className="bg-slate-100 border-b border-slate-200">
+                        <th className="py-2.5 px-3 eyebrow text-slate-600">Section</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600">Class In-charge / Mentor</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600 text-center">Strength</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600 text-center">Scanned</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600 text-center">Late Comers</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600 text-center">Unscanned</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600 text-center">Punctuality %</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600 text-center">Status</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium">
+                    <tbody className="divide-y divide-slate-200 font-medium">
                       {sectionComparisonStats.map((row) => (
-                        <tr key={row.secName} className="hover:bg-indigo-50/20 transition-colors">
-                          <td className="py-2.5 px-3 font-extrabold text-slate-900">
-                            <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-xs">
+                        <tr key={row.secName} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-2.5 px-3">
+                            <span className="font-mono font-bold text-slate-900">
                               {row.secName}
                             </span>
                           </td>
                           <td className="py-2.5 px-3">
-                            <span className="font-bold text-slate-800">{row.mentor?.name || "Not Assigned"}</span>
-                            <p className="text-[10px] text-slate-400 font-mono">{row.mentor?.email || "—"}</p>
+                            <span className="font-bold text-slate-900">{row.mentor?.name || "Not Assigned"}</span>
+                            <p className="text-[10px] text-slate-500 font-mono">{row.mentor?.email || "—"}</p>
                           </td>
-                          <td className="py-2.5 px-3 text-center font-bold text-slate-700">{row.total}</td>
-                          <td className="py-2.5 px-3 text-center font-bold text-blue-700">{row.scanned}</td>
+                          <td className="py-2.5 px-3 text-center font-bold text-slate-800 font-mono tabular-nums">{row.total}</td>
+                          <td className="py-2.5 px-3 text-center font-bold text-blue-700 font-mono tabular-nums">{row.scanned}</td>
                           <td className="py-2.5 px-3 text-center">
-                            <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
-                              row.late > 4 ? "bg-amber-100 text-amber-900 border border-amber-300" : row.late > 0 ? "bg-amber-50 text-amber-800" : "text-slate-400"
-                            }`}>
-                              {row.late}
-                            </span>
+                            {row.late > 0 ? (
+                              <span className={`stamp ${row.late > 4 ? "border-amber-400 bg-amber-100 text-amber-800" : "border-amber-300 bg-amber-50 text-amber-800"}`}>
+                                {row.late}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 font-mono">0</span>
+                            )}
                           </td>
                           <td className="py-2.5 px-3 text-center">
-                            <span className={`px-2 py-0.5 rounded-full font-bold text-xs ${
-                              row.unscanned > 5 ? "bg-rose-100 text-rose-800 border border-rose-300" : row.unscanned > 0 ? "bg-rose-50 text-rose-700" : "text-slate-400"
-                            }`}>
-                              {row.unscanned}
-                            </span>
+                            {row.unscanned > 0 ? (
+                              <span className={`stamp ${row.unscanned > 5 ? "border-red-400 bg-red-100 text-red-800" : "border-red-300 bg-red-50 text-red-800"}`}>
+                                {row.unscanned}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 font-mono">0</span>
+                            )}
                           </td>
                           <td className="py-2.5 px-3 text-center">
                             <div className="flex items-center justify-center gap-1.5">
-                              <span className="font-bold text-slate-900">{row.punctualityRate}%</span>
+                              <span className="font-bold text-slate-900 font-mono tabular-nums">{row.punctualityRate}%</span>
                               <div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                 <div
                                   className={`h-full rounded-full ${
-                                    row.punctualityRate >= 85 ? "bg-emerald-500" : row.punctualityRate >= 70 ? "bg-amber-500" : "bg-rose-500"
+                                    row.punctualityRate >= 85 ? "bg-emerald-600" : row.punctualityRate >= 70 ? "bg-amber-500" : "bg-red-500"
                                   }`}
                                   style={{ width: `${row.punctualityRate}%` }}
                                 />
@@ -3344,15 +3389,15 @@ export default function HodDashboard() {
                           </td>
                           <td className="py-2.5 px-3 text-center">
                             {row.status === "critical" ? (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                              <span className="stamp border-red-300 bg-red-50 text-red-800">
                                 Critical
                               </span>
                             ) : row.status === "warning" ? (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                              <span className="stamp border-amber-300 bg-amber-50 text-amber-800">
                                 Warning
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                                 Good
                               </span>
                             )}
@@ -3364,7 +3409,7 @@ export default function HodDashboard() {
                                 setLogViewMode("problems");
                                 setLogCurrentPage(1);
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-[11px] transition-colors cursor-pointer"
+                              className="px-2.5 py-1 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-[11px] transition-colors cursor-pointer"
                             >
                               Filter →
                             </button>
@@ -3379,35 +3424,38 @@ export default function HodDashboard() {
 
             {/* ── WEEKLY TREND VIEW ── */}
             {logViewMode === "trend" && (
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
                   <div>
-                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-purple-600" />
-                      6-Day Department Punctuality & Late Arrival Trend
+                    <p className="eyebrow text-slate-500 flex items-center gap-1.5">
+                      <TrendingUp className="w-3.5 h-3.5 text-purple-700" />
+                      6-Day Trend
+                    </p>
+                    <h3 className="text-sm font-bold text-slate-950 mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                      Department Punctuality &amp; Late Arrival Trend
                     </h3>
-                    <p className="text-[11px] text-slate-500">Track day-by-day late entries to evaluate whether corrective actions are working.</p>
+                    <p className="text-[11px] text-slate-600">Track day-by-day late entries to evaluate whether corrective actions are working.</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
                   {weeklyTrendData.map((d) => (
-                    <div key={d.dateStr} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-1">
-                      <span className="text-[11px] font-black text-slate-800 block">{d.dayName}</span>
-                      <span className="text-[10px] text-slate-400 font-mono block">{d.dateStr}</span>
+                    <div key={d.dateStr} className="p-3 bg-white rounded-lg border border-slate-300/70 text-center space-y-1 shadow-xs">
+                      <span className="text-[11px] font-bold text-slate-900 block">{d.dayName}</span>
+                      <span className="text-[10px] text-slate-500 font-mono block">{d.dateStr}</span>
                       
                       <div className="pt-1.5 border-t border-slate-200 space-y-1 text-xs">
                         <div className="flex justify-between items-center text-[11px]">
                           <span className="text-amber-800 font-medium">Late:</span>
-                          <span className="font-bold text-amber-950 px-1.5 py-0.2 bg-amber-100 rounded">{d.lateCount}</span>
+                          <span className="font-bold text-amber-800 font-mono tabular-nums px-1.5 bg-amber-50 border border-amber-200 rounded">{d.lateCount}</span>
                         </div>
                         <div className="flex justify-between items-center text-[11px]">
-                          <span className="text-rose-700 font-medium">Unscanned:</span>
-                          <span className="font-bold text-rose-800 px-1.5 py-0.2 bg-rose-100 rounded">{d.unscannedCount}</span>
+                          <span className="text-red-800 font-medium">Unscanned:</span>
+                          <span className="font-bold text-red-800 font-mono tabular-nums px-1.5 bg-red-50 border border-red-200 rounded">{d.unscannedCount}</span>
                         </div>
                         <div className="flex justify-between items-center text-[11px]">
                           <span className="text-purple-700 font-medium">On-Time %:</span>
-                          <span className="font-bold text-purple-900">{d.punctuality}%</span>
+                          <span className="font-bold text-purple-800 font-mono tabular-nums">{d.punctuality}%</span>
                         </div>
                       </div>
                     </div>
@@ -3418,14 +3466,15 @@ export default function HodDashboard() {
 
             {/* ── 4. STREAMLINED TABLE ── */}
             {logsLoading ? (
-              <div className="bg-white border border-slate-200 p-12 flex flex-col items-center justify-center gap-3 rounded-2xl shadow-xs">
-                <Loader2 className="w-7 h-7 text-blue-600 animate-spin" />
-                <p className="text-xs font-semibold text-slate-500">Loading daily student attendance records...</p>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-2">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="h-10 bg-slate-200 rounded animate-pulse" />
+                ))}
               </div>
             ) : (
-              <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
+              <div className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
                 {/* Bulk Select Bar */}
-                <div className="p-2.5 px-4 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-600">
+                <div className="p-2.5 px-4 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-700">
                   <div className="flex items-center gap-2.5 flex-wrap">
                     <button
                       onClick={() => {
@@ -3435,10 +3484,10 @@ export default function HodDashboard() {
                           setSelectedStudentIds(sortedProblemItems.map(i => i.student.id));
                         }
                       }}
-                      className="flex items-center gap-1.5 font-bold text-slate-700 hover:text-slate-900 cursor-pointer"
+                      className="flex items-center gap-1.5 font-semibold text-slate-800 hover:text-slate-950 cursor-pointer"
                     >
                       {selectedStudentIds.length > 0 && selectedStudentIds.length === sortedProblemItems.length ? (
-                        <CheckSquare className="w-4 h-4 text-blue-600" />
+                        <CheckSquare className="w-4 h-4 text-emerald-600" />
                       ) : (
                         <Square className="w-4 h-4 text-slate-400" />
                       )}
@@ -3450,7 +3499,7 @@ export default function HodDashboard() {
                         const lateIds = sortedProblemItems.filter(i => i.isLate).map(i => i.student.id);
                         setSelectedStudentIds(lateIds);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-semibold transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-md bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 text-xs font-semibold transition-colors cursor-pointer"
                     >
                       Select Late ({sortedProblemItems.filter(i => i.isLate).length})
                     </button>
@@ -3460,7 +3509,7 @@ export default function HodDashboard() {
                         const unscannedIds = sortedProblemItems.filter(i => i.isUnscanned).map(i => i.student.id);
                         setSelectedStudentIds(unscannedIds);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-xs font-semibold transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-md bg-red-50 hover:bg-red-100 border border-red-300 text-red-800 text-xs font-semibold transition-colors cursor-pointer"
                     >
                       Select Unscanned ({sortedProblemItems.filter(i => i.isUnscanned).length})
                     </button>
@@ -3468,20 +3517,20 @@ export default function HodDashboard() {
 
                   {selectedStudentIds.length > 0 && (
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-blue-700">{selectedStudentIds.length} Selected</span>
+                      <span className="font-bold text-blue-700 font-mono">{selectedStudentIds.length} Selected</span>
                       <button
                         onClick={() => {
                           setBulkMessageType("custom");
                           setBulkMessageModalOpen(true);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer"
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer"
                       >
                         <Send className="w-3 h-3" />
                         <span>Broadcast to {selectedStudentIds.length} Parents</span>
                       </button>
                       <button
                         onClick={() => setSelectedStudentIds([])}
-                        className="text-slate-400 hover:text-slate-600 text-xs font-medium cursor-pointer"
+                        className="text-slate-500 hover:text-slate-800 text-xs font-medium cursor-pointer"
                       >
                         Clear
                       </button>
@@ -3491,17 +3540,17 @@ export default function HodDashboard() {
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
-                    <thead className="bg-slate-50/90 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                    <thead className="bg-slate-100 border-b border-slate-200">
                       <tr>
-                        <th className="py-3 px-3 text-center w-10">Select</th>
+                        <th className="py-3 px-3 text-center w-10 eyebrow text-slate-600">Sel</th>
                         <th
-                          className="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          className="py-3 px-4 cursor-pointer hover:bg-slate-200/60 transition-colors select-none"
                           onClick={() => handleSort("name")}
                         >
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 eyebrow text-slate-600">
                             <span>Student Details</span>
                             {logSortField === "name" ? (
-                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
+                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-emerald-700" /> : <ArrowDown className="w-3.5 h-3.5 text-emerald-700" />
                             ) : (
                               <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                             )}
@@ -3509,13 +3558,13 @@ export default function HodDashboard() {
                         </th>
 
                         <th
-                          className="py-3 px-3 cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          className="py-3 px-3 cursor-pointer hover:bg-slate-200/60 transition-colors select-none"
                           onClick={() => handleSort("section")}
                         >
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 eyebrow text-slate-600">
                             <span>Class & Mentor</span>
                             {logSortField === "section" ? (
-                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
+                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-emerald-700" /> : <ArrowDown className="w-3.5 h-3.5 text-emerald-700" />
                             ) : (
                               <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                             )}
@@ -3523,31 +3572,32 @@ export default function HodDashboard() {
                         </th>
 
                         <th
-                          className="py-3 px-3 cursor-pointer hover:bg-slate-100 transition-colors select-none"
+                          className="py-3 px-3 cursor-pointer hover:bg-slate-200/60 transition-colors select-none"
                           onClick={() => handleSort("entryTime")}
                         >
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 eyebrow text-slate-600">
                             <span>Gate Timing</span>
                             {logSortField === "entryTime" ? (
-                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-600" />
+                              logSortOrder === "asc" ? <ArrowUp className="w-3.5 h-3.5 text-emerald-700" /> : <ArrowDown className="w-3.5 h-3.5 text-emerald-700" />
                             ) : (
                               <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                             )}
                           </div>
                         </th>
 
-                        <th className="py-3 px-3 text-center">Status</th>
+                        <th className="py-3 px-3 text-center eyebrow text-slate-600">Status</th>
 
-                        <th className="py-3 px-3 text-center">HOD Remark</th>
+                        <th className="py-3 px-3 text-center eyebrow text-slate-600">HOD Remark</th>
 
-                        <th className="py-3 px-3 text-center">Actions</th>
+                        <th className="py-3 px-3 text-center eyebrow text-slate-600">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-xs">
+                    <tbody className="divide-y divide-slate-200 text-xs">
                       {paginatedProblemItems.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="py-12 text-center text-slate-400 text-xs font-medium">
-                            No students match the current filters.
+                          <td colSpan={7} className="py-14 text-center">
+                            <ClipboardList className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                            <p className="text-slate-600 text-xs font-medium">No students match the current filters.</p>
                           </td>
                         </tr>
                       ) : (
@@ -3564,10 +3614,10 @@ export default function HodDashboard() {
                                 isSelected
                                   ? "bg-blue-50/70"
                                   : item.isUnscanned
-                                  ? "hover:bg-rose-50/30"
+                                  ? "hover:bg-red-50/40"
                                   : item.isLate
-                                  ? "hover:bg-amber-50/30"
-                                  : "hover:bg-slate-50/60"
+                                  ? "hover:bg-amber-50/40"
+                                  : "hover:bg-slate-50"
                               }`}
                             >
                               {/* Checkbox */}
@@ -3579,10 +3629,10 @@ export default function HodDashboard() {
                                       prev.includes(user.id) ? prev.filter(id => id !== user.id) : [...prev, user.id]
                                     );
                                   }}
-                                  className="text-slate-400 hover:text-blue-600 cursor-pointer"
+                                  className="text-slate-400 hover:text-emerald-600 cursor-pointer"
                                 >
                                   {isSelected ? (
-                                    <CheckSquare className="w-4 h-4 text-blue-600" />
+                                    <CheckSquare className="w-4 h-4 text-emerald-600" />
                                   ) : (
                                     <Square className="w-4 h-4 text-slate-300" />
                                   )}
@@ -3596,11 +3646,11 @@ export default function HodDashboard() {
                                   className="flex items-center gap-3 cursor-pointer group"
                                   title="Click to view student profile"
                                 >
-                                  <div className="w-8.5 h-8.5 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase flex-shrink-0 group-hover:border-blue-400 group-hover:bg-blue-50 transition-colors">
+                                  <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase flex-shrink-0 group-hover:border-emerald-400 group-hover:bg-emerald-50 transition-colors font-mono">
                                     {user.name.charAt(0)}
                                   </div>
                                   <div>
-                                    <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
+                                    <p className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight">
                                       {user.name}
                                     </p>
                                     <p className="text-[11px] text-slate-500 font-mono mt-0.5">
@@ -3612,10 +3662,10 @@ export default function HodDashboard() {
 
                               {/* Class & Assigned Mentor */}
                               <td className="py-3 px-3">
-                                <span className="inline-block px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[11px] font-bold font-mono">
+                                <span className="stamp border-slate-300 bg-slate-100 text-slate-700 font-mono">
                                   {sDisplayName}
                                 </span>
-                                <p className="text-[11px] text-slate-600 mt-0.5 truncate max-w-[140px]" title={item.mentor?.name || "Not Assigned"}>
+                                <p className="text-[11px] text-slate-600 mt-1 truncate max-w-[140px]" title={item.mentor?.name || "Not Assigned"}>
                                   {item.mentor?.name || "—"}
                                 </p>
                               </td>
@@ -3623,8 +3673,8 @@ export default function HodDashboard() {
                               {/* Gate Scan Timing */}
                               <td className="py-3 px-3">
                                 {item.isUnscanned ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-50 border border-rose-200 text-rose-700">
-                                    <XCircle className="w-3 h-3 text-rose-500" /> Not Scanned
+                                  <span className="stamp border-red-300 bg-red-50 text-red-800">
+                                    <XCircle className="w-3 h-3 text-red-500" /> Not Scanned
                                   </span>
                                 ) : (
                                   <div>
@@ -3632,13 +3682,13 @@ export default function HodDashboard() {
                                       <Clock className="w-3 h-3 text-slate-400" />
                                       <span>{formatTime(item.record?.entryTime)}</span>
                                       {item.isLate && (
-                                        <span className="px-1.5 py-0.2 rounded bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-bold">
+                                        <span className="stamp border-amber-300 bg-amber-100 text-amber-800">
                                           +{item.minutesLate}m
                                         </span>
                                       )}
                                     </div>
                                     {isInside && (
-                                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-semibold mt-0.5">
+                                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-800 font-semibold mt-0.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Inside Campus
                                       </span>
                                     )}
@@ -3649,15 +3699,15 @@ export default function HodDashboard() {
                               {/* Status */}
                               <td className="py-3 px-3 text-center">
                                 {item.isUnscanned ? (
-                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 border border-rose-200 text-rose-800">
+                                  <span className="stamp border-red-300 bg-red-50 text-red-800">
                                     Absent
                                   </span>
                                 ) : item.isLate ? (
-                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 border border-amber-200 text-amber-800">
+                                  <span className="stamp border-amber-300 bg-amber-50 text-amber-800">
                                     Late
                                   </span>
                                 ) : (
-                                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 border border-emerald-200 text-emerald-800">
+                                  <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                                     Punctual
                                   </span>
                                 )}
@@ -3673,7 +3723,7 @@ export default function HodDashboard() {
                                       setRemarkPreset(item.remark?.preset || "College Bus Delayed");
                                       setRemarkIsExcused(item.remark?.isExcused ?? true);
                                     }}
-                                    className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-900 text-[11px] font-semibold transition-all max-w-[150px] truncate text-left cursor-pointer"
+                                    className="px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-900 text-[11px] font-semibold transition-colors max-w-[150px] truncate text-left cursor-pointer"
                                     title="Click to edit remark"
                                   >
                                     {item.remark.preset}
@@ -3687,7 +3737,7 @@ export default function HodDashboard() {
                                       setRemarkPreset("College Bus Delayed");
                                       setRemarkIsExcused(true);
                                     }}
-                                    className="px-2.5 py-1 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-dashed border-slate-300 text-[11px] font-medium transition-colors cursor-pointer"
+                                    className="px-2.5 py-1 rounded-md hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-dashed border-slate-300 text-[11px] font-medium transition-colors cursor-pointer"
                                   >
                                     + Add Note
                                   </button>
@@ -3703,7 +3753,7 @@ export default function HodDashboard() {
                                       setBulkMessageType(item.isLate ? "late" : "unscanned");
                                       setBulkMessageModalOpen(true);
                                     }}
-                                    className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
                                     title={`Send parent notice to ${user.name}`}
                                   >
                                     <Send className="w-3.5 h-3.5" />
@@ -3711,7 +3761,7 @@ export default function HodDashboard() {
 
                                   <button
                                     onClick={() => setSelectedStudentForDetails(user)}
-                                    className="p-1.5 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded-md hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
                                     title="Open student profile"
                                   >
                                     <Eye className="w-3.5 h-3.5" />
@@ -3727,8 +3777,8 @@ export default function HodDashboard() {
                 </div>
 
                 {/* ── PAGINATION CONTROLS ── */}
-                <div className="p-3 px-4 bg-slate-50/90 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-600">
-                  <div className="font-medium">
+                <div className="p-3 px-4 bg-slate-50/80 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-700">
+                  <div className="font-medium font-mono tabular-nums">
                     Showing <span className="font-bold text-slate-900">{sortedProblemItems.length === 0 ? 0 : (safeCurrentPage - 1) * logPageSize + 1}</span> to{" "}
                     <span className="font-bold text-slate-900">{Math.min(safeCurrentPage * logPageSize, sortedProblemItems.length)}</span> of{" "}
                     <span className="font-bold text-slate-900">{sortedProblemItems.length}</span> students
@@ -3744,7 +3794,7 @@ export default function HodDashboard() {
                           setLogPageSize(Number(e.target.value));
                           setLogCurrentPage(1);
                         }}
-                        className="h-7 px-1.5 rounded-lg bg-white border border-slate-300 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                        className="h-7 px-1.5 rounded-md bg-white border border-slate-300 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer font-mono"
                       >
                         <option value={15}>15</option>
                         <option value={25}>25</option>
@@ -3758,7 +3808,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(1)}
                         disabled={safeCurrentPage === 1}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-md bg-white border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:border-slate-400 hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
                         title="First Page"
                       >
                         <ChevronsLeft className="w-3.5 h-3.5" />
@@ -3767,20 +3817,20 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={safeCurrentPage === 1}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-md bg-white border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:border-slate-400 hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
                         title="Previous Page"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
                       </button>
 
-                      <span className="px-2 font-bold text-slate-800 text-xs">
+                      <span className="px-2 font-semibold text-slate-900 text-xs font-mono tabular-nums">
                         Page {safeCurrentPage} of {totalPages}
                       </span>
 
                       <button
                         onClick={() => setLogCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={safeCurrentPage === totalPages}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-md bg-white border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:border-slate-400 hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
                         title="Next Page"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -3789,7 +3839,7 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setLogCurrentPage(totalPages)}
                         disabled={safeCurrentPage === totalPages}
-                        className="p-1 rounded-lg bg-white border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
+                        className="p-1 rounded-md bg-white border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:border-slate-400 hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
                         title="Last Page"
                       >
                         <ChevronsRight className="w-3.5 h-3.5" />
@@ -3801,52 +3851,42 @@ export default function HodDashboard() {
             )}
           </div>
         ) : activeTab === "mentors" ? (
-          <div className="space-y-2.5">
-            {/* ── ULTRA-COMPACT MENTORS KPI METRIC STRIP ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Total Mentors</span>
-                  <span className="text-base font-black text-slate-900 leading-none">{mentorsStats.total} Faculty</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+          <div className="space-y-4">
+            {/* ── MENTORS KPI METRIC STRIP ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-slate-700" aria-hidden />
+                <p className="eyebrow text-slate-500">Total Mentors</p>
+                <p className="text-lg font-bold text-slate-950 leading-none mt-2 font-mono tabular-nums">{mentorsStats.total} <span className="text-xs font-semibold text-slate-500">Faculty</span></p>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">Class In-charges</span>
-                  <span className="text-base font-black text-indigo-900 leading-none">{mentorsStats.inchargeCount} Primary</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-600" aria-hidden />
+                <p className="eyebrow text-indigo-700">Class In-charges</p>
+                <p className="text-lg font-bold text-indigo-900 leading-none mt-2 font-mono tabular-nums">{mentorsStats.inchargeCount} <span className="text-xs font-semibold text-slate-500">Primary</span></p>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">Faculty Mentors</span>
-                  <span className="text-base font-black text-blue-900 leading-none">{mentorsStats.facultyCount} Mentors</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600" aria-hidden />
+                <p className="eyebrow text-blue-700">Faculty Mentors</p>
+                <p className="text-lg font-bold text-blue-900 leading-none mt-2 font-mono tabular-nums">{mentorsStats.facultyCount} <span className="text-xs font-semibold text-slate-500">Mentors</span></p>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider block">Subject Faculty</span>
-                  <span className="text-base font-black text-purple-900 leading-none">{mentorsStats.subjectCount} Instructors</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-purple-600" aria-hidden />
+                <p className="eyebrow text-purple-700">Subject Faculty</p>
+                <p className="text-lg font-bold text-purple-900 leading-none mt-2 font-mono tabular-nums">{mentorsStats.subjectCount} <span className="text-xs font-semibold text-slate-500">Instructors</span></p>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2 shadow-2xs flex items-center justify-between col-span-2 sm:col-span-1">
-                <div>
-                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Total Enrolled</span>
-                  <span className="text-base font-black text-emerald-900 leading-none">{mentorsStats.totalEnrolledStudents} Students</span>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden col-span-2 sm:col-span-1">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+                <p className="eyebrow text-emerald-700">Total Enrolled</p>
+                <p className="text-lg font-bold text-emerald-900 leading-none mt-2 font-mono tabular-nums">{mentorsStats.totalEnrolledStudents} <span className="text-xs font-semibold text-slate-500">Students</span></p>
               </div>
             </div>
 
             {/* ── FILTER & TOOLBAR (COMPACT ERP BAR) ── */}
-            <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div className="bg-card border border-slate-300/70 rounded-lg p-3 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
               <div className="relative flex-1 max-w-md">
                 <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -3857,7 +3897,7 @@ export default function HodDashboard() {
                     setMentorsSearchQuery(e.target.value);
                     setMentorsPage(1);
                   }}
-                  className="w-full pl-8 pr-7 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                  className="w-full pl-9 pr-7 py-2 rounded-md bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-emerald-600 transition-colors"
                 />
                 {mentorsSearchQuery && (
                   <button
@@ -3865,7 +3905,7 @@ export default function HodDashboard() {
                       setMentorsSearchQuery("");
                       setMentorsPage(1);
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 cursor-pointer"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -3880,7 +3920,7 @@ export default function HodDashboard() {
                     setMentorsYearFilter(e.target.value);
                     setMentorsPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="All">All Academic Years</option>
                   <option value="2nd Year">2nd Year (II Year)</option>
@@ -3895,7 +3935,7 @@ export default function HodDashboard() {
                     setMentorsSectionFilter(e.target.value);
                     setMentorsPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="All">All Sections</option>
                   <option value="2A">Section 2A</option>
@@ -3915,7 +3955,7 @@ export default function HodDashboard() {
                     setMentorsRoleFilter(e.target.value);
                     setMentorsPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="All">All Roles</option>
                   <option value="incharge">Class In-charge & Mentor</option>
@@ -3932,7 +3972,7 @@ export default function HodDashboard() {
                       setMentorsSearchQuery("");
                       setMentorsPage(1);
                     }}
-                    className="px-2 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 transition-colors cursor-pointer"
+                    className="px-2.5 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold border border-red-600 transition-colors cursor-pointer"
                     title="Reset all filters"
                   >
                     Reset
@@ -3946,7 +3986,7 @@ export default function HodDashboard() {
                     setMentorsPageSize(Number(e.target.value));
                     setMentorsPage(1);
                   }}
-                  className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer font-mono"
                   title="Rows per page"
                 >
                   <option value={20}>20 rows</option>
@@ -3955,13 +3995,13 @@ export default function HodDashboard() {
                 </select>
 
                 {/* View Switcher: Table vs Cards */}
-                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                <div className="flex items-center rounded-md border border-slate-300 bg-white p-0.5">
                   <button
                     onClick={() => setMentorsViewMode("table")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-1.5 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer ${
                       mentorsViewMode === "table"
-                        ? "bg-white text-blue-700 shadow-2xs"
-                        : "text-slate-500 hover:text-slate-800"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                     title="Table View (Low-scrolling ERP scan)"
                   >
@@ -3969,10 +4009,10 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => setMentorsViewMode("card")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-1.5 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer ${
                       mentorsViewMode === "card"
-                        ? "bg-white text-blue-700 shadow-2xs"
-                        : "text-slate-500 hover:text-slate-800"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                     title="Card View"
                   >
@@ -3984,33 +4024,34 @@ export default function HodDashboard() {
 
             {/* ── HIGH-DENSITY MENTOR DISPLAY (TABLE / CARD VIEW) ── */}
             {mentorsLoading ? (
-              <div className="bg-white border border-slate-200 p-12 flex flex-col items-center justify-center gap-2 rounded-xl shadow-2xs">
-                <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-                <p className="text-xs font-semibold text-slate-500">Loading faculty registry...</p>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-2">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="h-9 bg-slate-200 rounded animate-pulse" />
+                ))}
               </div>
             ) : filteredMentorsList.length === 0 ? (
-              <div className="bg-white border border-slate-200 p-12 text-center rounded-xl shadow-2xs">
-                <Users className="w-8 h-8 text-slate-300 mx-auto mb-1.5" />
-                <p className="text-xs font-bold text-slate-700">No mentors match the selected filters</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Try resetting the year, section, or search query</p>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-14 text-center shadow-xs">
+                <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-900">No mentors match the selected filters</p>
+                <p className="text-xs text-slate-600 mt-1">Try resetting the year, section, or search query</p>
               </div>
             ) : mentorsViewMode === "table" ? (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+              <div className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-270px)] min-h-[300px] overflow-y-auto scrollbar-thin">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                    <thead className="sticky top-0 z-10 bg-slate-100 border-b border-slate-200">
                       <tr>
-                        <th className="py-2 px-2.5 text-center w-10">#</th>
-                        <th className="py-2 px-3">Faculty Name & Email</th>
-                        <th className="py-2 px-2.5">Year</th>
-                        <th className="py-2 px-2 text-center">Section</th>
-                        <th className="py-2 px-3">Designated Role</th>
-                        <th className="py-2 px-3">Allocated Roll Range</th>
-                        <th className="py-2 px-3">Passkey</th>
-                        <th className="py-2 px-2.5 text-right">Actions</th>
+                        <th className="py-2 px-2.5 text-center w-10 eyebrow text-slate-600">#</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Faculty Name & Email</th>
+                        <th className="py-2 px-2.5 eyebrow text-slate-600">Year</th>
+                        <th className="py-2 px-2 text-center eyebrow text-slate-600">Section</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Designated Role</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Allocated Roll Range</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Passkey</th>
+                        <th className="py-2 px-2.5 text-right eyebrow text-slate-600">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                    <tbody className="divide-y divide-slate-200 font-medium text-xs">
                       {paginatedMentorsList.map((m, idx) => {
                         const dbMentor = mentorsTracking.find((mt: any) =>
                           mt.email?.toLowerCase() === m.email?.toLowerCase() ||
@@ -4024,11 +4065,11 @@ export default function HodDashboard() {
                         const rowNum = mentorsPageSize === -1 ? idx + 1 : (mentorsPage - 1) * mentorsPageSize + idx + 1;
 
                         return (
-                          <tr key={m.id} className="hover:bg-slate-50/80 transition-colors group">
-                            <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
+                          <tr key={m.id} className="hover:bg-slate-50 transition-colors group">
+                            <td className="py-2 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px] tabular-nums">
                               {rowNum}
                             </td>
-                            <td className="py-1.5 px-3">
+                            <td className="py-2 px-3">
                               <span className="font-bold text-slate-900 block leading-tight">
                                 {m.name}
                               </span>
@@ -4036,41 +4077,41 @@ export default function HodDashboard() {
                                 {m.email}
                               </span>
                             </td>
-                            <td className="py-1.5 px-2.5 whitespace-nowrap">
+                            <td className="py-2 px-2.5 whitespace-nowrap">
                               <span
-                                className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                className={`stamp ${
                                   m.yearLabel?.includes("4")
-                                    ? "bg-amber-50 border-amber-300 text-amber-900"
+                                    ? "border-amber-300 bg-amber-50 text-amber-800"
                                     : m.yearLabel?.includes("3")
-                                    ? "bg-blue-50 border-blue-300 text-blue-900"
-                                    : "bg-emerald-50 border-emerald-300 text-emerald-900"
+                                    ? "border-blue-300 bg-blue-50 text-blue-800"
+                                    : "border-emerald-300 bg-emerald-50 text-emerald-800"
                                 }`}
                               >
                                 {m.yearLabel}
                               </span>
                             </td>
-                            <td className="py-1.5 px-2 text-center whitespace-nowrap">
-                              <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[10px] font-bold font-mono">
+                            <td className="py-2 px-2 text-center whitespace-nowrap">
+                              <span className="stamp border-slate-300 bg-slate-100 text-slate-700 font-mono">
                                 Sec {m.section}
                               </span>
                             </td>
-                            <td className="py-1.5 px-3">
+                            <td className="py-2 px-3">
                               <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                className={`stamp ${
                                   isClassIncharge
-                                    ? "bg-indigo-50 border-indigo-300 text-indigo-900"
+                                    ? "border-indigo-300 bg-indigo-50 text-indigo-800"
                                     : isFacultyMentor
-                                    ? "bg-blue-50 border-blue-300 text-blue-900"
-                                    : "bg-purple-50 border-purple-300 text-purple-900"
+                                    ? "border-blue-300 bg-blue-50 text-blue-800"
+                                    : "border-purple-300 bg-purple-50 text-purple-800"
                                 }`}
                               >
-                                {isClassIncharge && <ShieldCheck className="w-3 h-3 text-indigo-700 shrink-0" />}
+                                {isClassIncharge && <ShieldCheck className="w-3 h-3 shrink-0" />}
                                 <span>{m.role}</span>
                               </span>
                             </td>
-                            <td className="py-1.5 px-3">
+                            <td className="py-2 px-3">
                               <div className="flex items-center gap-1.5 font-mono text-[10.5px]">
-                                <span className="font-bold text-slate-800 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                                <span className="font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                                   {m.rollRange}
                                 </span>
                                 <span className="text-[9.5px] font-semibold text-slate-500">
@@ -4078,19 +4119,19 @@ export default function HodDashboard() {
                                 </span>
                               </div>
                             </td>
-                            <td className="py-1.5 px-3">
+                            <td className="py-2 px-3">
                               {key ? (
                                 <div className="flex items-center gap-1">
                                   <span className={`font-mono font-bold rounded px-1.5 py-0.5 border text-[10.5px] ${
                                     isKeyRevealed
-                                      ? "bg-blue-50 text-blue-950 border-blue-300"
+                                      ? "bg-blue-50 text-blue-900 border-blue-300"
                                       : "bg-slate-50 text-slate-700 border-slate-200"
                                   }`}>
                                     {isKeyRevealed ? key : "••••••••"}
                                   </span>
                                   <button
                                     onClick={() => toggleRevealKey(m.id)}
-                                    className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                                    className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
                                     title={isKeyRevealed ? "Hide Passkey" : "Show Passkey"}
                                   >
                                     {isKeyRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
@@ -4098,7 +4139,7 @@ export default function HodDashboard() {
                                   <button
                                     onClick={() => handleCopyKey(key, m.id)}
                                     className={`p-1 rounded transition-colors cursor-pointer ${
-                                      isCopied ? "bg-emerald-100 text-emerald-800" : "hover:bg-slate-100 text-slate-500 hover:text-slate-800"
+                                      isCopied ? "bg-emerald-100 text-emerald-800" : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
                                     }`}
                                     title="Copy Passkey"
                                   >
@@ -4109,11 +4150,11 @@ export default function HodDashboard() {
                                 <span className="text-[10px] font-mono text-slate-400 italic">Not set</span>
                               )}
                             </td>
-                            <td className="py-1.5 px-2.5 text-right">
+                            <td className="py-2 px-2.5 text-right">
                               <div className="flex items-center justify-end gap-1">
                                 <button
                                   onClick={() => setSelectedMentorForModal({ ...m, key })}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-2 py-1 rounded-md bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-800 text-[10.5px] font-semibold border border-slate-300 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                   title="View Mentor Details"
                                 >
                                   <span>View</span>
@@ -4131,7 +4172,7 @@ export default function HodDashboard() {
                                     setEditKeyInput(key || "");
                                     setEditMentorModalOpen(true);
                                   }}
-                                  className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
+                                  className="p-1 rounded-md bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-700 border border-slate-300 transition-colors cursor-pointer"
                                   title="Edit Passkey / Assignment"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -4146,7 +4187,7 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Compact Pagination Footer */}
-                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <div className="bg-slate-50/80 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-700 font-medium font-mono tabular-nums">
                   <div>
                     Showing <strong className="text-slate-900">{filteredMentorsList.length === 0 ? 0 : (mentorsPage - 1) * (mentorsPageSize === -1 ? filteredMentorsList.length : mentorsPageSize) + 1}</strong> to <strong className="text-slate-900">{mentorsPageSize === -1 ? filteredMentorsList.length : Math.min(mentorsPage * mentorsPageSize, filteredMentorsList.length)}</strong> of <strong className="text-slate-900">{filteredMentorsList.length}</strong> mentors
                   </div>
@@ -4156,17 +4197,17 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setMentorsPage((p) => Math.max(1, p - 1))}
                         disabled={mentorsPage === 1}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="px-2 py-1 rounded-md border border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold"
                       >
                         Prev
                       </button>
-                      <span className="px-2 font-mono text-[11px] font-bold text-slate-800">
+                      <span className="px-2 font-mono text-[11px] font-semibold text-slate-900">
                         {mentorsPage} / {totalMentorsPages}
                       </span>
                       <button
                         onClick={() => setMentorsPage((p) => Math.min(totalMentorsPages, p + 1))}
                         disabled={mentorsPage >= totalMentorsPages}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="px-2 py-1 rounded-md border border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold"
                       >
                         Next
                       </button>
@@ -4176,7 +4217,7 @@ export default function HodDashboard() {
               </div>
             ) : (
               /* Compact Streamlined Card View (~100px height) */
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5 max-h-[calc(100vh-270px)] min-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 max-h-[calc(100vh-270px)] min-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
                 {paginatedMentorsList.map((m) => {
                   const dbMentor = mentorsTracking.find((mt: any) =>
                     mt.email?.toLowerCase() === m.email?.toLowerCase() ||
@@ -4190,23 +4231,23 @@ export default function HodDashboard() {
                   return (
                     <div
                       key={m.id}
-                      className="bg-white border border-slate-200 hover:border-blue-400 rounded-xl p-3 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between space-y-2"
+                      className="bg-card border border-slate-300/70 hover:border-slate-400 rounded-lg p-3 shadow-xs transition-colors flex flex-col justify-between space-y-2"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-bold text-slate-900 text-xs leading-tight truncate" title={m.name}>
+                          <h4 className="font-bold text-slate-950 text-xs leading-tight truncate" title={m.name}>
                             {m.name}
                           </h4>
                           <p className="text-[10.5px] text-slate-500 font-mono mt-0.5 truncate">
                             {m.email}
                           </p>
                         </div>
-                        <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-slate-100 border border-slate-200 text-slate-800 font-mono shrink-0">
+                        <span className="stamp border-slate-300 bg-slate-100 text-slate-700 font-mono shrink-0">
                           Sec {m.section}
                         </span>
                       </div>
 
-                      <div className="bg-slate-50 rounded-lg p-2 border border-slate-200 text-[10.5px] space-y-1">
+                      <div className="bg-slate-50 rounded-md p-2 border border-slate-200 text-[10.5px] space-y-1">
                         <div className="flex items-center justify-between text-slate-600 font-semibold">
                           <span>Role / Year:</span>
                           <span className="font-bold text-slate-900">
@@ -4215,25 +4256,36 @@ export default function HodDashboard() {
                         </div>
                         <div className="flex items-center justify-between text-slate-600 font-semibold">
                           <span>Roll Range:</span>
-                          <span className="font-mono font-bold text-blue-800">
+                          <span className="font-mono font-bold text-blue-700">
                             {m.rollRange} ({m.count} std)
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+                      <div className="flex items-center justify-between pt-1.5 border-t border-slate-200 text-xs">
                         <div className="flex items-center gap-1">
-                          <span className="text-[10.5px] font-bold text-slate-500">Key:</span>
-                          <span className="font-mono font-bold text-[10.5px] text-slate-800 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
+                          <span className="text-[10.5px] font-semibold text-slate-500">Key:</span>
+                          <span className="font-mono font-bold text-[10.5px] text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                             {isKeyRevealed ? key || "None" : "••••••••"}
                           </span>
                           {key && (
                             <button
                               onClick={() => toggleRevealKey(m.id)}
-                              className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
+                              className="p-1 text-slate-500 hover:text-slate-900 cursor-pointer"
                               title={isKeyRevealed ? "Hide" : "Show"}
                             >
                               {isKeyRevealed ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                            </button>
+                          )}
+                          {key && (
+                            <button
+                              onClick={() => handleCopyKey(key, m.id)}
+                              className={`p-1 rounded cursor-pointer transition-colors ${
+                                isCopied ? "bg-emerald-100 text-emerald-800" : "text-slate-500 hover:text-slate-900"
+                              }`}
+                              title="Copy Passkey"
+                            >
+                              {isCopied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                             </button>
                           )}
                         </div>
@@ -4241,7 +4293,7 @@ export default function HodDashboard() {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => setSelectedMentorForModal({ ...m, key })}
-                            className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 text-slate-700 text-[10.5px] font-bold border border-slate-200 cursor-pointer"
+                            className="px-2 py-1 rounded-md bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-800 text-[10.5px] font-semibold border border-slate-300 cursor-pointer"
                           >
                             Details
                           </button>
@@ -4258,7 +4310,7 @@ export default function HodDashboard() {
                               setEditKeyInput(key || "");
                               setEditMentorModalOpen(true);
                             }}
-                            className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer"
+                            className="p-1 rounded-md bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-700 border border-slate-300 cursor-pointer"
                             title="Edit"
                           >
                             <Edit3 className="w-3 h-3" />
@@ -4272,48 +4324,48 @@ export default function HodDashboard() {
             )}
           </div>
         ) : activeTab === "schedules" ? (
-          <div className="space-y-3">
-            {/* ── ULTRA-COMPACT HEADER & SECTION SELECTOR BAR ── */}
+          <div className="space-y-4">
+            {/* ── HEADER & SECTION SELECTOR BAR ── */}
             {(() => {
               const activeSecKey = selectedTimetableSection === "All" ? "2A" : selectedTimetableSection;
               const activeSecMeta = SECTION_METADATA_REGISTRY[activeSecKey] || SECTION_METADATA_REGISTRY["2A"];
 
               return (
-                <div className="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs space-y-2.5">
+                <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
                   {/* Top Row: Title, Metadata Chips & Primary Actions */}
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                      <div className="w-9 h-9 rounded-md bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
                         <GraduationCap className="w-4 h-4" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h2 className="text-base font-bold text-slate-900 leading-none">
+                          <h2 className="text-base font-bold text-slate-950 leading-none" style={{ fontFamily: "var(--app-font-display)" }}>
                             Department Master Timetable
                           </h2>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-100 text-blue-950 border border-blue-300">
+                          <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
                             {selectedTimetableSection === "All" ? "All Sections (Showing 2A)" : `Section ${activeSecMeta.sectionKey} • ${activeSecMeta.yearLabel}`}
                           </span>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-indigo-50 text-indigo-950 border border-indigo-200">
-                            👤 {activeSecMeta.classIncharge.name} (In-charge)
+                          <span className="stamp border-indigo-300 bg-indigo-50 text-indigo-800">
+                            <User className="w-3 h-3" /> {activeSecMeta.classIncharge.name} (In-charge)
                           </span>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-950 border border-emerald-200">
-                            📍 {activeSecMeta.lectureHall}
+                          <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                            <MapPin className="w-3 h-3" /> {activeSecMeta.lectureHall}
                           </span>
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700">
+                          <span className="stamp border-slate-300 bg-slate-100 text-slate-700">
                             {activeSecMeta.totalStudents} Students
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
                       {/* Print / Export Timetable */}
                       <button
                         onClick={() => setTimetablePrintModalOpen(true)}
-                        className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                        className="px-3 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-800 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                       >
-                        <Printer className="w-3.5 h-3.5 text-blue-600" />
+                        <Printer className="w-3.5 h-3.5 text-slate-500" />
                         <span>Print / Export</span>
                       </button>
 
@@ -4324,29 +4376,29 @@ export default function HodDashboard() {
                           setNewHolidayReason("");
                           setHolidayModalOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-purple-50 border border-purple-300 hover:bg-purple-100 text-purple-900 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                        className="px-3 py-2 rounded-md bg-purple-50 border border-purple-300 hover:bg-purple-100 text-purple-800 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                         title="Declare Holidays & Examination Dates"
                       >
                         <Calendar className="w-3.5 h-3.5 text-purple-700" />
-                        <span>Holidays & Exams</span>
+                        <span>Holidays &amp; Exams</span>
                       </button>
 
                       {/* Assign New Class */}
                       <button
                         onClick={() => setNewClassModalOpen(true)}
-                        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95"
+                        className="px-3 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Assign Class</span>
                       </button>
 
                       {/* View Switcher Toggle */}
-                      <div className="flex items-center bg-slate-100 border border-slate-200 p-0.5 rounded-lg">
+                      <div className="flex items-center bg-white border border-slate-300 p-0.5 rounded-md">
                         <button
                           onClick={() => setTimetableViewMode("grid")}
                           title="Weekly Matrix Grid View"
-                          className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                            timetableViewMode === "grid" ? "bg-white text-blue-600 shadow-2xs" : "text-slate-500 hover:text-slate-900"
+                          className={`p-1 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer ${
+                            timetableViewMode === "grid" ? "bg-emerald-600 text-white shadow-xs" : "text-slate-500 hover:text-slate-900"
                           }`}
                         >
                           <LayoutGrid className="w-3.5 h-3.5" />
@@ -4354,8 +4406,8 @@ export default function HodDashboard() {
                         <button
                           onClick={() => setTimetableViewMode("list")}
                           title="Management List View"
-                          className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                            timetableViewMode === "list" ? "bg-white text-blue-600 shadow-2xs" : "text-slate-500 hover:text-slate-900"
+                          className={`p-1 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer ${
+                            timetableViewMode === "list" ? "bg-emerald-600 text-white shadow-xs" : "text-slate-500 hover:text-slate-900"
                           }`}
                         >
                           <List className="w-3.5 h-3.5" />
@@ -4365,16 +4417,16 @@ export default function HodDashboard() {
                   </div>
 
                   {/* Section Selector Pills Row */}
-                  <div className="flex items-center gap-1 pt-2 border-t border-slate-100 overflow-x-auto text-xs scrollbar-none">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 mr-1 flex items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-1 pt-3 border-t border-slate-200 overflow-x-auto text-xs scrollbar-none">
+                    <span className="eyebrow text-slate-500 mr-1.5 flex items-center gap-1 flex-shrink-0">
                       <SlidersHorizontal className="w-3 h-3" /> Section:
                     </span>
                     <button
                       onClick={() => setSelectedTimetableSection("All")}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                      className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer flex-shrink-0 border ${
                         selectedTimetableSection === "All"
-                          ? "bg-blue-600 text-white shadow-2xs"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
+                          ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                          : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                       }`}
                     >
                       All Sections
@@ -4383,13 +4435,13 @@ export default function HodDashboard() {
                       <button
                         key={sec}
                         onClick={() => setSelectedTimetableSection(sec)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer flex-shrink-0 border font-mono ${
                           selectedTimetableSection === sec
-                            ? "bg-blue-600 text-white shadow-2xs"
-                            : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
+                            ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:text-slate-950"
                         }`}
                       >
-                        Section {sec}
+                        {sec}
                       </button>
                     ))}
                   </div>
@@ -4397,27 +4449,28 @@ export default function HodDashboard() {
               );
             })()}
 
-            {/* ── ULTRA-COMPACT SEARCH BAR ── */}
-            <div className="bg-white border border-slate-200 px-3 py-2 rounded-xl flex items-center gap-2 shadow-2xs">
+            {/* ── SEARCH BAR ── */}
+            <div className="bg-card border border-slate-300/70 rounded-lg px-3.5 py-2.5 flex items-center gap-2 shadow-xs">
               <Search className="w-3.5 h-3.5 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search subject, faculty, room or day..."
                 value={schedulesSearchQuery}
                 onChange={(e) => setSchedulesSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none"
+                className="w-full bg-transparent text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none"
               />
             </div>
 
             {schedulesLoading ? (
-              <div className="bg-white border border-slate-200 p-12 flex flex-col items-center justify-center gap-2 rounded-2xl">
-                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-xs font-semibold text-slate-500">Loading department academic schedule...</p>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-2">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-9 bg-slate-200 rounded animate-pulse" />
+                ))}
               </div>
             ) : timetableViewMode === "grid" ? (
-              /* ── ULTRA-COMPACT WEEKLY TIMETABLE MATRIX (GRID VIEW) ── */
-              <div className="space-y-3">
-                <Card className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden p-2 sm:p-3">
+              /* ── WEEKLY TIMETABLE MATRIX (GRID VIEW) ── */
+              <div className="space-y-4">
+                <Card className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden p-3 sm:p-4">
                   {(() => {
                     const daysOfWeek = [
                       { key: "MON", label: "MON" },
@@ -4447,27 +4500,27 @@ export default function HodDashboard() {
                       <div className="overflow-x-auto scrollbar-thin">
                         <table className="w-full border-collapse text-xs">
                           <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
-                              <th className="py-2 px-2 text-center w-28 border-r border-slate-200">
+                            <tr className="border-b border-slate-300 bg-slate-100">
+                              <th className="py-2.5 px-2 text-center w-28 border-r border-slate-300 eyebrow text-slate-600">
                                 TIME / SLOT
                               </th>
                               {daysOfWeek.map((day) => (
                                 <th
                                   key={day.key}
-                                  className="py-2 px-2 text-center min-w-[125px]"
+                                  className="py-2.5 px-2 text-center min-w-[125px] eyebrow text-slate-600"
                                 >
                                   {day.label}
                                 </th>
                               ))}
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 text-xs">
+                          <tbody className="divide-y divide-slate-200 text-xs">
                             {defaultSlots.map((slot, sIdx) => {
                               if (slot.isBreak) {
                                 return (
-                                  <tr key={sIdx} className="bg-amber-50/70 border-y border-amber-200/80">
+                                  <tr key={sIdx} className="bg-amber-50 border-y border-amber-200">
                                     <td colSpan={daysOfWeek.length + 1} className="py-1 px-3 text-center">
-                                      <div className="inline-flex items-center gap-1.5 text-[10px] font-black text-amber-950 uppercase tracking-wider">
+                                      <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-800 uppercase tracking-wider">
                                         <Coffee className="w-3 h-3 text-amber-700" />
                                         {slot.breakName}
                                       </div>
@@ -4479,11 +4532,11 @@ export default function HodDashboard() {
                               const pIdx = slot.slotIdx!;
 
                               return (
-                                <tr key={sIdx} className="hover:bg-slate-50/40 transition-colors">
+                                <tr key={sIdx} className="hover:bg-slate-50/50 transition-colors">
                                   {/* Period Column */}
-                                  <td className="py-1.5 px-2 align-middle border-r border-slate-200 text-center bg-slate-50/30">
-                                    <span className="block text-[9.5px] font-bold text-slate-400 uppercase">{slot.periodName}</span>
-                                    <span className="block font-mono text-[10px] font-bold text-slate-800 mt-0.5">{slot.label}</span>
+                                  <td className="py-1.5 px-2 align-middle border-r border-slate-200 text-center bg-slate-50/60">
+                                    <span className="block text-[9.5px] font-semibold text-slate-500 uppercase">{slot.periodName}</span>
+                                    <span className="block font-mono text-[10px] font-bold text-slate-900 mt-0.5">{slot.label}</span>
                                   </td>
 
                                   {/* Day Columns */}
@@ -4517,17 +4570,17 @@ export default function HodDashboard() {
                                               dayLabel: day.label,
                                               slotIdx: pIdx,
                                               periodName: slot.periodName || "",
-                                              timeLabel: slot.label,
+                                              timeLabel: slot.label ?? "",
                                               subject: "Free",
                                               currentFaculty: "Unassigned",
-                                              room: secMeta.lectureHall,
+                                              room: secMeta.lectureHall ?? "",
                                             })}
                                             title="Click to assign subject and faculty for this free period"
-                                            className="border border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 hover:text-blue-700 rounded-lg flex items-center justify-center p-1.5 min-h-[48px] text-[11px] font-bold text-slate-400 bg-slate-50/40 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] group"
+                                            className="border border-dashed border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/60 hover:text-emerald-800 rounded-md flex items-center justify-center p-1.5 min-h-[48px] text-[11px] font-semibold text-slate-500 bg-slate-50/50 cursor-pointer transition-colors group"
                                           >
                                             <div className="flex items-center gap-1">
                                               <span>Free</span>
-                                              <Plus className="w-3 h-3 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                              <Plus className="w-3 h-3 text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                                             </div>
                                           </div>
                                         </td>
@@ -4548,29 +4601,29 @@ export default function HodDashboard() {
                                             dayLabel: day.label,
                                             slotIdx: pIdx,
                                             periodName: slot.periodName || "",
-                                            timeLabel: slot.label,
+                                            timeLabel: slot.label ?? "",
                                             subject: rawSubj,
                                             currentFaculty: faculty,
-                                            room: isLab ? secMeta.labRoom : secMeta.lectureHall,
+                                            room: (isLab ? secMeta.labRoom : secMeta.lectureHall) ?? "",
                                           })}
                                           title={`Click to reassign faculty for ${rawSubj}`}
-                                          className={`rounded-lg p-1.5 border transition-all flex flex-col justify-between min-h-[48px] cursor-pointer group hover:scale-[1.02] active:scale-[0.98] ${
+                                          className={`rounded-md p-1.5 border transition-colors flex flex-col justify-between min-h-[48px] cursor-pointer group hover:shadow-xs ${
                                             isLab
-                                              ? "bg-emerald-50/90 border-emerald-300 hover:border-emerald-500 hover:ring-2 hover:ring-emerald-400/40 shadow-2xs"
+                                              ? "bg-emerald-50 border-emerald-300 hover:border-emerald-500"
                                               : isActivity
-                                              ? "bg-amber-50/80 border-amber-200 hover:border-amber-400 hover:ring-2 hover:ring-amber-400/40 shadow-2xs"
-                                              : "bg-blue-50/90 border-blue-200 hover:border-blue-400 hover:ring-2 hover:ring-blue-400/40 shadow-2xs"
+                                              ? "bg-amber-50 border-amber-300 hover:border-amber-500"
+                                              : "bg-blue-50 border-blue-300 hover:border-blue-500"
                                           }`}
                                         >
                                           <div>
                                             {/* Tag & Code Row */}
                                             <div className="flex items-center justify-between gap-1 mb-0.5">
-                                              <span className={`px-1.5 py-0.2 rounded text-[8.5px] font-black uppercase tracking-wider ${
+                                              <span className={`stamp ${
                                                 isLab
-                                                  ? "bg-emerald-200 text-emerald-950 border border-emerald-300"
+                                                  ? "border-emerald-300 bg-emerald-100 text-emerald-800"
                                                   : isActivity
-                                                  ? "bg-amber-200 text-amber-950 border border-amber-300"
-                                                  : "bg-blue-200 text-blue-950 border border-blue-300"
+                                                  ? "border-amber-300 bg-amber-100 text-amber-800"
+                                                  : "border-blue-300 bg-blue-100 text-blue-800"
                                               }`}>
                                                 {isLab ? "LAB" : isActivity ? "ACT" : "THEORY"}
                                               </span>
@@ -4578,22 +4631,22 @@ export default function HodDashboard() {
                                                 <span className="font-mono text-[9px] font-bold text-slate-600 truncate">
                                                   {subjDetails.code}
                                                 </span>
-                                                <Edit3 className="w-2.5 h-2.5 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                                                <Edit3 className="w-2.5 h-2.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                                               </div>
                                             </div>
 
                                             {/* Subject Title */}
-                                            <h4 className="font-bold text-slate-900 text-[11px] leading-tight truncate" title={subjDetails.fullName || rawSubj}>
+                                            <h4 className="font-bold text-slate-950 text-[11px] leading-tight truncate" title={subjDetails.fullName || rawSubj}>
                                               {rawSubj}
                                             </h4>
 
                                             {/* Faculty & Venue */}
-                                            <div className="mt-1 flex items-center justify-between text-[9.5px] text-slate-600 font-semibold gap-1">
+                                            <div className="mt-1 flex items-center justify-between text-[9.5px] text-slate-700 font-semibold gap-1">
                                               <span className="truncate flex items-center gap-0.5" title={faculty}>
                                                 <User className="w-2.5 h-2.5 text-slate-500 flex-shrink-0" />
                                                 <span className="truncate">{faculty}</span>
                                               </span>
-                                              <span className="font-mono text-slate-500 flex-shrink-0">
+                                              <span className="font-mono text-slate-600 flex-shrink-0">
                                                 {isLab ? "Lab" : secMeta.lectureHall.replace("Hall ", "H")}
                                               </span>
                                             </div>
@@ -4612,13 +4665,16 @@ export default function HodDashboard() {
                   })()}
                 </Card>
 
-                {/* ── ULTRA-COMPACT COURSE REFERENCE CATALOG ── */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xs space-y-2">
-                  <div className="flex items-center justify-between">
+                {/* ── COURSE REFERENCE CATALOG ── */}
+                <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
                     <div>
-                      <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                        <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-                        Academic Course & Faculty Allocation (Section {selectedTimetableSection === "All" ? "2A" : selectedTimetableSection})
+                      <p className="eyebrow text-slate-500 flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5 text-blue-700" />
+                        Course Reference
+                      </p>
+                      <h3 className="text-sm font-bold text-slate-950 mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>
+                        Academic Course &amp; Faculty Allocation (Section {selectedTimetableSection === "All" ? "2A" : selectedTimetableSection})
                       </h3>
                     </div>
                   </div>
@@ -4626,17 +4682,17 @@ export default function HodDashboard() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
-                        <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
-                          <th className="py-1.5 px-2 text-center w-10">S.No</th>
-                          <th className="py-1.5 px-2">Code</th>
-                          <th className="py-1.5 px-3">Subject / Lab Title</th>
-                          <th className="py-1.5 px-2 text-center">Type</th>
-                          <th className="py-1.5 px-3">Assigned Faculty</th>
-                          <th className="py-1.5 px-2">Room</th>
-                          <th className="py-1.5 px-2 text-center">Edit</th>
+                        <tr className="border-b border-slate-200 bg-slate-100">
+                          <th className="py-2 px-2 text-center w-10 eyebrow text-slate-600">S.No</th>
+                          <th className="py-2 px-2 eyebrow text-slate-600">Code</th>
+                          <th className="py-2 px-3 eyebrow text-slate-600">Subject / Lab Title</th>
+                          <th className="py-2 px-2 text-center eyebrow text-slate-600">Type</th>
+                          <th className="py-2 px-3 eyebrow text-slate-600">Assigned Faculty</th>
+                          <th className="py-2 px-2 eyebrow text-slate-600">Room</th>
+                          <th className="py-2 px-2 text-center eyebrow text-slate-600">Edit</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 font-medium text-[11px]">
+                      <tbody className="divide-y divide-slate-200 font-medium text-[11px]">
                         {(() => {
                           const activeSecKey = selectedTimetableSection === "All" ? "2A" : selectedTimetableSection;
                           const activeSecMeta = SECTION_METADATA_REGISTRY[activeSecKey] || SECTION_METADATA_REGISTRY["2A"];
@@ -4652,24 +4708,20 @@ export default function HodDashboard() {
                             const isLab = details.type === "practical" || rawSubj.includes("LAB") || rawSubj.includes("/");
 
                             return (
-                              <tr key={rawSubj} className="hover:bg-slate-50/70 transition-colors">
-                                <td className="py-1.5 px-2 text-center font-mono font-bold text-slate-500">{idx + 1}</td>
-                                <td className="py-1.5 px-2 font-mono font-bold text-blue-700">{details.code}</td>
-                                <td className="py-1.5 px-3 font-bold text-slate-900">{details.fullName || rawSubj}</td>
-                                <td className="py-1.5 px-2 text-center">
-                                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                                    isLab
-                                      ? "bg-emerald-100 text-emerald-950 border border-emerald-300"
-                                      : "bg-blue-100 text-blue-950 border border-blue-300"
-                                  }`}>
+                              <tr key={rawSubj} className="hover:bg-slate-50 transition-colors">
+                                <td className="py-2 px-2 text-center font-mono font-semibold text-slate-500 tabular-nums">{idx + 1}</td>
+                                <td className="py-2 px-2 font-mono font-bold text-blue-700">{details.code}</td>
+                                <td className="py-2 px-3 font-bold text-slate-900">{details.fullName || rawSubj}</td>
+                                <td className="py-2 px-2 text-center">
+                                  <span className={`stamp ${isLab ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-blue-300 bg-blue-50 text-blue-800"}`}>
                                     {isLab ? "LAB" : "THEORY"}
                                   </span>
                                 </td>
-                                <td className="py-1.5 px-3 font-bold text-slate-800">{faculty}</td>
-                                <td className="py-1.5 px-2 font-mono text-[10px] text-slate-600">
+                                <td className="py-2 px-3 font-semibold text-slate-800">{faculty}</td>
+                                <td className="py-2 px-2 font-mono text-[10px] text-slate-600">
                                   {isLab ? activeSecMeta.labRoom : activeSecMeta.lectureHall}
                                 </td>
-                                <td className="py-1.5 px-2 text-center">
+                                <td className="py-2 px-2 text-center">
                                   <button
                                     onClick={() => handleOpenSlotReassign({
                                       sectionKey: activeSecKey,
@@ -4682,7 +4734,7 @@ export default function HodDashboard() {
                                       currentFaculty: faculty,
                                       room: isLab ? activeSecMeta.labRoom : activeSecMeta.lectureHall,
                                     })}
-                                    className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                    className="px-2 py-1 rounded-md bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-800 text-[10px] font-semibold border border-slate-300 transition-colors inline-flex items-center gap-1 cursor-pointer"
                                   >
                                     <Edit3 className="w-2.5 h-2.5" />
                                     <span>Reassign</span>
@@ -4698,22 +4750,22 @@ export default function HodDashboard() {
                 </div>
               </div>
             ) : (
-              /* ── COMPACT LIST VIEW ── */
-              <Card className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
+              /* ── LIST VIEW ── */
+              <Card className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
                 <div className="overflow-x-auto max-h-[500px] overflow-y-auto scroll-smooth scrollbar-thin">
                   <table className="w-full text-left border-collapse relative text-xs">
-                    <thead className="sticky top-0 z-20 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                    <thead className="sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                       <tr>
-                        <th className="py-2.5 px-3">Faculty / Mentor</th>
-                        <th className="py-2.5 px-2">Day</th>
-                        <th className="py-2.5 px-2">Time Slot</th>
-                        <th className="py-2.5 px-2">Section</th>
-                        <th className="py-2.5 px-3">Subject Title</th>
-                        <th className="py-2.5 px-3 text-center">HOD Override</th>
-                        <th className="py-2.5 px-2 text-center">Assign</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600">Faculty / Mentor</th>
+                        <th className="py-2.5 px-2 eyebrow text-slate-600">Day</th>
+                        <th className="py-2.5 px-2 eyebrow text-slate-600">Time Slot</th>
+                        <th className="py-2.5 px-2 eyebrow text-slate-600">Section</th>
+                        <th className="py-2.5 px-3 eyebrow text-slate-600">Subject Title</th>
+                        <th className="py-2.5 px-3 text-center eyebrow text-slate-600">HOD Override</th>
+                        <th className="py-2.5 px-2 text-center eyebrow text-slate-600">Assign</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-xs font-medium">
+                    <tbody className="divide-y divide-slate-200 text-xs font-medium">
                       {schedules.map((s: any) => {
                         const overrideObj = (scheduleOverrides || []).find((o: any) => o.scheduleId === s.id);
                         const isUnlocked = overrideObj ? overrideObj.isUnlocked : false;
@@ -4721,38 +4773,38 @@ export default function HodDashboard() {
                         const subjInfo = getTimetableSubjectDetails(s.subject, s.section, s.year);
 
                         return (
-                          <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
-                            <td className="py-2 px-3 font-bold text-slate-900">{s.qr_mentors?.name || "Unassigned"}</td>
-                            <td className="py-2 px-2 text-slate-700 font-bold">{s.day_of_week}</td>
-                            <td className="py-2 px-2 text-slate-700 font-mono text-[11px]">
+                          <tr key={s.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="py-2.5 px-3 font-bold text-slate-900">{s.qr_mentors?.name || "Unassigned"}</td>
+                            <td className="py-2.5 px-2 text-slate-800 font-semibold">{s.day_of_week}</td>
+                            <td className="py-2.5 px-2 text-slate-700 font-mono text-[11px]">
                               {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}
                             </td>
-                            <td className="py-2 px-2">
-                              <span className="inline-block px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-bold text-[10px] font-mono">
+                            <td className="py-2.5 px-2">
+                              <span className="stamp border-slate-300 bg-slate-100 text-slate-700 font-mono">
                                 {s.year} - {s.section}
                               </span>
                             </td>
-                            <td className="py-2 px-3">
+                            <td className="py-2.5 px-3">
                               <span className="font-bold text-slate-900">{subjInfo.fullName}</span>
                               <span className="block text-[9.5px] font-mono text-slate-500">{subjInfo.code}</span>
                             </td>
-                            <td className="py-2 px-3 text-center">
+                            <td className="py-2.5 px-3 text-center">
                               <button
                                 onClick={() => handleToggleScheduleOverride(s.id, isUnlocked, extendedMins)}
-                                className={`px-2 py-0.5 rounded-lg font-bold text-[10px] inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                                className={`px-2 py-1 rounded-md font-semibold text-[10px] inline-flex items-center gap-1 transition-colors cursor-pointer border ${
                                   isUnlocked
                                     ? "bg-emerald-600 text-white border-emerald-700"
-                                    : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200"
+                                    : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
                                 }`}
                               >
-                                {isUnlocked ? <Unlock className="w-3 h-3 text-white" /> : <Lock className="w-3 h-3 text-slate-500" />}
+                                {isUnlocked ? <Unlock className="w-3 h-3" /> : <Lock className="w-3 h-3 text-slate-500" />}
                                 {isUnlocked ? "UNLOCKED" : "LOCKED"}
                               </button>
                             </td>
-                            <td className="py-2 px-2 text-center">
+                            <td className="py-2.5 px-2 text-center">
                               <button
                                 onClick={() => handleOpenAssignModal(s)}
-                                className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-600 hover:bg-blue-500 text-white inline-flex items-center gap-0.5 cursor-pointer"
+                                className="px-2 py-1 rounded-md text-[10px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white inline-flex items-center gap-0.5 cursor-pointer"
                               >
                                 <UserPlus className="w-3 h-3" />
                                 Assign
@@ -4768,15 +4820,18 @@ export default function HodDashboard() {
             )}
           </div>
         ) : activeTab === "student-analytics" ? (
-          <div className="space-y-2.5">
-            {/* Student Analytics Search & Filter Header (Compact ERP Bar) */}
-            <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs space-y-2.5">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+          <div className="space-y-4">
+            {/* Student Analytics Search & Filter Header */}
+            <div className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-3">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-3 border-b border-slate-200">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
-                    <Users className="w-4 h-4 text-blue-600" />
-                    Student Profiles & Academic Attendance Register
-                    <span className="ml-1.5 px-2 py-0.2 rounded-full text-[10.5px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                  <p className="eyebrow text-slate-500 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-blue-700" />
+                    Student Register
+                  </p>
+                  <h3 className="text-sm font-bold text-slate-950 mt-0.5 flex items-center gap-2" style={{ fontFamily: "var(--app-font-display)" }}>
+                    Student Profiles &amp; Academic Attendance Register
+                    <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
                       {filteredAnalyticsList.length} Students
                     </span>
                   </h3>
@@ -4784,7 +4839,7 @@ export default function HodDashboard() {
               </div>
 
               {/* Toolbar: Search + Quick Filters */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 pt-1">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
                 <div className="relative flex-1 max-w-md">
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
@@ -4795,7 +4850,7 @@ export default function HodDashboard() {
                       setAnalyticsSearchQuery(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                    className="w-full pl-9 pr-3 py-2 rounded-md bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-emerald-600 transition-colors"
                   />
                 </div>
 
@@ -4807,7 +4862,7 @@ export default function HodDashboard() {
                       setAnalyticsStatusFilter(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="ALL">Status: All</option>
                     <option value="RED">Critical Shortage (&lt;65%)</option>
@@ -4822,7 +4877,7 @@ export default function HodDashboard() {
                       setAnalyticsYearFilter(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="ALL">All Academic Years</option>
                     <option value="2">2nd Year (II)</option>
@@ -4837,7 +4892,7 @@ export default function HodDashboard() {
                       setAnalyticsSectionFilter(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="ALL">All Sections</option>
                     <option value="A">Section A</option>
@@ -4852,7 +4907,7 @@ export default function HodDashboard() {
                       setAnalyticsSortOrder(e.target.value);
                       setAnalyticsPage(1);
                     }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                   >
                     <option value="name">Sort: Full Name (A–Z)</option>
                     <option value="roll">Sort: Roll Number</option>
@@ -4867,7 +4922,7 @@ export default function HodDashboard() {
                       setAnalyticsPageSize(Number(e.target.value));
                       setAnalyticsPage(1);
                     }}
-                    className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="px-2 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer font-mono"
                     title="Rows per page"
                   >
                     <option value={20}>20 rows</option>
@@ -4877,13 +4932,13 @@ export default function HodDashboard() {
                   </select>
 
                   {/* View Mode Toggle */}
-                  <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                  <div className="flex items-center rounded-md border border-slate-300 bg-white p-0.5">
                     <button
                       onClick={() => setAnalyticsViewMode("table")}
-                      className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      className={`p-1.5 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer ${
                         analyticsViewMode === "table"
-                          ? "bg-white text-blue-700 shadow-2xs"
-                          : "text-slate-500 hover:text-slate-800"
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "text-slate-500 hover:text-slate-900"
                       }`}
                       title="Table View (Fast Scanning)"
                     >
@@ -4891,10 +4946,10 @@ export default function HodDashboard() {
                     </button>
                     <button
                       onClick={() => setAnalyticsViewMode("card")}
-                      className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                      className={`p-1.5 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer ${
                         analyticsViewMode === "card"
-                          ? "bg-white text-blue-700 shadow-2xs"
-                          : "text-slate-500 hover:text-slate-800"
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "text-slate-500 hover:text-slate-900"
                       }`}
                       title="Card View"
                     >
@@ -4907,26 +4962,27 @@ export default function HodDashboard() {
 
             {/* High-Density Administrative Display */}
             {analyticsViewMode === "table" ? (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+              <div className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-290px)] min-h-[320px] overflow-y-auto scrollbar-thin">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                    <thead className="sticky top-0 z-10 bg-slate-100 border-b border-slate-200">
                       <tr>
-                        <th className="py-2 px-2.5 text-center w-10">#</th>
-                        <th className="py-2 px-3">Student Full Name</th>
-                        <th className="py-2 px-3">Roll Number</th>
-                        <th className="py-2 px-2 text-center">Class</th>
-                        <th className="py-2 px-3 text-center">Attendance %</th>
-                        <th className="py-2 px-3">Present / Absent / Total</th>
-                        <th className="py-2 px-3">Compliance & 75% Requirement</th>
-                        <th className="py-2 px-2.5 text-right">Report</th>
+                        <th className="py-2 px-2.5 text-center w-10 eyebrow text-slate-600">#</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Student Full Name</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Roll Number</th>
+                        <th className="py-2 px-2 text-center eyebrow text-slate-600">Class</th>
+                        <th className="py-2 px-3 text-center eyebrow text-slate-600">Attendance %</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Present / Absent / Total</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Compliance & 75% Requirement</th>
+                        <th className="py-2 px-2.5 text-right eyebrow text-slate-600">Report</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                    <tbody className="divide-y divide-slate-200 font-medium text-xs">
                       {filteredAnalyticsList.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
-                            No student profiles match your query or filters.
+                          <td colSpan={8} className="py-14 text-center">
+                            <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                            <p className="text-slate-600 font-semibold text-xs">No student profiles match your query or filters.</p>
                           </td>
                         </tr>
                       ) : (
@@ -4940,58 +4996,58 @@ export default function HodDashboard() {
                             <tr
                               key={s.id}
                               onClick={() => setSelectedStudentForDetails(s)}
-                              className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                              className="hover:bg-slate-50 transition-colors cursor-pointer group"
                             >
-                              <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
+                              <td className="py-2 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px] tabular-nums">
                                 {rowNum}
                               </td>
-                              <td className="py-1.5 px-3">
-                                <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors block break-words">
+                              <td className="py-2 px-3">
+                                <span className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors block break-words">
                                   {studentFullName}
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3 font-mono font-bold text-slate-700 text-[11px] whitespace-nowrap">
+                              <td className="py-2 px-3 font-mono font-semibold text-slate-700 text-[11px] whitespace-nowrap">
                                 {s.uniqueId || "N/A"}
                               </td>
-                              <td className="py-1.5 px-2 text-center whitespace-nowrap">
-                                <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[9.5px] font-bold font-mono">
+                              <td className="py-2 px-2 text-center whitespace-nowrap">
+                                <span className="stamp border-slate-300 bg-slate-100 text-slate-700 font-mono">
                                   {item.secInfo.name}
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3 text-center">
-                                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-black border ${
+                              <td className="py-2 px-3 text-center">
+                                <span className={`inline-block px-2.5 py-0.5 rounded font-bold border text-[11px] font-mono tabular-nums ${
                                   item.flag === "RED"
-                                    ? "bg-rose-50 text-rose-700 border-rose-200"
+                                    ? "bg-red-50 text-red-800 border-red-300"
                                     : item.flag === "YELLOW"
-                                    ? "bg-amber-50 text-amber-800 border-amber-200"
-                                    : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    ? "bg-amber-50 text-amber-800 border-amber-300"
+                                    : "bg-emerald-50 text-emerald-800 border-emerald-300"
                                 }`}>
                                   {item.percent}%
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3">
+                              <td className="py-2 px-3">
                                 <div className="space-y-0.5">
-                                  <div className="flex items-center gap-2 text-[11px] font-bold">
+                                  <div className="flex items-center gap-2 text-[11px] font-bold font-mono tabular-nums">
                                     <span className="text-emerald-700">{item.presentDays}P</span>
                                     <span className="text-slate-300">•</span>
-                                    <span className="text-rose-600">{absentDays}A</span>
+                                    <span className="text-red-600">{absentDays}A</span>
                                     <span className="text-slate-300">•</span>
                                     <span className="text-slate-600">{item.totalWorkingDays} Days</span>
                                   </div>
                                   <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                     <div
                                       className={`h-full rounded-full ${
-                                        item.flag === "RED" ? "bg-rose-500" : item.flag === "YELLOW" ? "bg-amber-500" : "bg-emerald-500"
+                                        item.flag === "RED" ? "bg-red-500" : item.flag === "YELLOW" ? "bg-amber-500" : "bg-emerald-600"
                                       }`}
                                       style={{ width: `${item.percent}%` }}
                                     />
                                   </div>
                                 </div>
                               </td>
-                              <td className="py-1.5 px-3">
+                              <td className="py-2 px-3">
                                 {item.flag === "RED" ? (
                                   <div className="flex items-center gap-1.5">
-                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+                                    <span className="stamp border-red-300 bg-red-50 text-red-800 shrink-0">
                                       Critical (&lt;65%)
                                     </span>
                                     <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
@@ -5000,7 +5056,7 @@ export default function HodDashboard() {
                                   </div>
                                 ) : item.flag === "YELLOW" ? (
                                   <div className="flex items-center gap-1.5">
-                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                    <span className="stamp border-amber-300 bg-amber-50 text-amber-800 shrink-0">
                                       Warning
                                     </span>
                                     <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
@@ -5008,18 +5064,18 @@ export default function HodDashboard() {
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    ✓ Compliant • ≥75%
+                                  <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                                    <Check className="w-3 h-3" /> Compliant • ≥75%
                                   </span>
                                 )}
                               </td>
-                              <td className="py-1.5 px-2.5 text-right">
+                              <td className="py-2 px-2.5 text-right">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(s);
                                   }}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-2 py-1 rounded-md bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-800 text-[10.5px] font-semibold border border-slate-300 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                 >
                                   <span>Report</span>
                                   <ChevronRight className="w-3 h-3" />
@@ -5034,7 +5090,7 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Compact Pagination Footer */}
-                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <div className="bg-slate-50/80 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-700 font-medium font-mono tabular-nums">
                   <div>
                     Showing <strong className="text-slate-900">{filteredAnalyticsList.length === 0 ? 0 : (analyticsPage - 1) * (analyticsPageSize === -1 ? filteredAnalyticsList.length : analyticsPageSize) + 1}</strong> to <strong className="text-slate-900">{analyticsPageSize === -1 ? filteredAnalyticsList.length : Math.min(analyticsPage * analyticsPageSize, filteredAnalyticsList.length)}</strong> of <strong className="text-slate-900">{filteredAnalyticsList.length}</strong> students
                   </div>
@@ -5044,17 +5100,17 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setAnalyticsPage((p) => Math.max(1, p - 1))}
                         disabled={analyticsPage === 1}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="px-2 py-1 rounded-md border border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold"
                       >
                         Prev
                       </button>
-                      <span className="px-2 font-mono text-[11px] font-bold text-slate-800">
+                      <span className="px-2 font-mono text-[11px] font-semibold text-slate-900">
                         {analyticsPage} / {totalAnalyticsPages}
                       </span>
                       <button
                         onClick={() => setAnalyticsPage((p) => Math.min(totalAnalyticsPages, p + 1))}
                         disabled={analyticsPage >= totalAnalyticsPages}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="px-2 py-1 rounded-md border border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold"
                       >
                         Next
                       </button>
@@ -5063,11 +5119,12 @@ export default function HodDashboard() {
                 </div>
               </div>
             ) : (
-              /* Administrative Cards View (No giant button bloat, full student names) */
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[calc(100vh-290px)] min-h-[320px] overflow-y-auto pr-1 scrollbar-thin">
+              /* Administrative Cards View */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[calc(100vh-290px)] min-h-[320px] overflow-y-auto pr-1 scrollbar-thin">
                 {filteredAnalyticsList.length === 0 ? (
-                  <div className="col-span-full bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 font-semibold text-xs">
-                    No student profiles match your query or filters.
+                  <div className="col-span-full bg-card border border-slate-300/70 rounded-lg p-14 text-center shadow-xs">
+                    <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-slate-600 font-semibold text-xs">No student profiles match your query or filters.</p>
                   </div>
                 ) : (
                   paginatedAnalyticsList.map((item) => {
@@ -5079,12 +5136,12 @@ export default function HodDashboard() {
                       <div
                         key={s.id}
                         onClick={() => setSelectedStudentForDetails(s)}
-                        className="bg-white border border-slate-200 hover:border-blue-400 rounded-xl p-3 shadow-2xs hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2.5"
+                        className="bg-card border border-slate-300/70 hover:border-slate-400 rounded-lg p-3 shadow-xs transition-colors cursor-pointer group flex flex-col justify-between space-y-2.5"
                       >
                         <div className="space-y-2">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 flex-1">
-                              <h4 className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug break-words">
+                              <h4 className="text-xs font-bold text-slate-950 group-hover:text-emerald-700 transition-colors leading-snug break-words">
                                 {studentFullName}
                               </h4>
                               <div className="flex items-center gap-1.5 text-[10.5px] font-mono text-slate-500 mt-0.5">
@@ -5095,35 +5152,35 @@ export default function HodDashboard() {
                             </div>
 
                             <span
-                              className={`px-2 py-0.5 rounded-full text-[11px] font-black border shrink-0 ${
+                              className={`inline-block px-2 py-0.5 rounded font-bold border text-[11px] font-mono tabular-nums shrink-0 ${
                                 item.flag === "RED"
-                                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                                  ? "bg-red-50 text-red-800 border-red-300"
                                   : item.flag === "YELLOW"
-                                  ? "bg-amber-50 text-amber-800 border-amber-200"
-                                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  ? "bg-amber-50 text-amber-800 border-amber-300"
+                                  : "bg-emerald-50 text-emerald-800 border-emerald-300"
                               }`}
                             >
                               {item.percent}%
                             </span>
                           </div>
 
-                          <div className="bg-slate-50 rounded-lg p-2 border border-slate-200/80 text-[11px] space-y-1">
+                          <div className="bg-slate-50 rounded-md p-2 border border-slate-200 text-[11px] space-y-1">
                             <div className="flex items-center justify-between text-slate-600 font-semibold">
                               <span>Days Attended:</span>
-                              <span className="font-bold text-slate-900">
-                                {item.presentDays} Present / {absentDays} Absent ({item.totalWorkingDays} Total)
+                              <span className="font-bold text-slate-900 font-mono tabular-nums">
+                                {item.presentDays}P / {absentDays}A ({item.totalWorkingDays} Total)
                               </span>
                             </div>
                             <div className="flex items-center justify-between text-slate-600 font-semibold">
                               <span>Action Target:</span>
                               <span className="font-bold text-slate-900">
-                                {item.classesNeededFor75 > 0 ? `+${item.classesNeededFor75} Classes to 75%` : "✓ Compliant"}
+                                {item.classesNeededFor75 > 0 ? `+${item.classesNeededFor75} Classes to 75%` : "Compliant ≥75%"}
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="pt-1 border-t border-slate-100 flex items-center justify-between text-[10.5px] font-bold text-blue-700 group-hover:text-blue-800">
+                        <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10.5px] font-bold text-emerald-700 group-hover:text-emerald-800">
                           <span>View Attendance Profile</span>
                           <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                         </div>
@@ -5135,35 +5192,36 @@ export default function HodDashboard() {
             )}
           </div>
         ) : activeTab === "flags" ? (
-          /* DEDICATED HOD STUDENT RISK FLAG ANALYTICS VIEW (INSTITUTIONAL ERP DISPLAY) */
-          <div className="space-y-2.5">
-            {/* Ultra-Compact Risk Summary Metric Strip */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          /* DEDICATED HOD STUDENT RISK FLAG ANALYTICS VIEW */
+          <div className="space-y-4">
+            {/* Risk Summary Metric Strip */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Card 1: Critical Shortage (<65%) */}
               <button
                 onClick={() => {
                   setRiskFlagFilter(riskFlagFilter === "RED" ? "ALL" : "RED");
                   setRiskPage(1);
                 }}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                className={`p-3.5 rounded-lg border text-left transition-colors cursor-pointer bg-card relative overflow-hidden shadow-xs ${
                   riskFlagFilter === "RED"
-                    ? "border-rose-400 bg-rose-50/40 ring-2 ring-rose-400/30 shadow-xs"
-                    : "border-slate-200 hover:border-rose-300 shadow-2xs"
+                    ? "border-red-400 ring-2 ring-red-500/20"
+                    : "border-slate-300/70 hover:border-red-300"
                 }`}
               >
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-red-600" aria-hidden />
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
-                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+                    <span className="eyebrow text-red-700">
                       Critical Shortage (&lt;65%)
                     </span>
                   </div>
-                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                  <span className="stamp border-red-300 bg-red-50 text-red-800">
                     Condonation Req.
                   </span>
                 </div>
-                <div className="mt-1 flex items-baseline justify-between">
-                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                <div className="mt-1.5 flex items-baseline justify-between">
+                  <p className="text-xl sm:text-2xl font-bold text-slate-950 font-mono tabular-nums">
                     {hodRedCount === 1 ? "1 Student" : `${hodRedCount} Students`}
                   </p>
                   <span className="text-[10px] font-semibold text-slate-500">
@@ -5178,25 +5236,26 @@ export default function HodDashboard() {
                   setRiskFlagFilter(riskFlagFilter === "YELLOW" ? "ALL" : "YELLOW");
                   setRiskPage(1);
                 }}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                className={`p-3.5 rounded-lg border text-left transition-colors cursor-pointer bg-card relative overflow-hidden shadow-xs ${
                   riskFlagFilter === "YELLOW"
-                    ? "border-amber-400 bg-amber-50/40 ring-2 ring-amber-400/30 shadow-xs"
-                    : "border-slate-200 hover:border-amber-300 shadow-2xs"
+                    ? "border-amber-400 ring-2 ring-amber-500/20"
+                    : "border-slate-300/70 hover:border-amber-300"
                 }`}
               >
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500" aria-hidden />
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
-                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    <span className="eyebrow text-amber-700">
                       Borderline Warning (65%–74%)
                     </span>
                   </div>
-                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  <span className="stamp border-amber-300 bg-amber-50 text-amber-800">
                     Recoverable
                   </span>
                 </div>
-                <div className="mt-1 flex items-baseline justify-between">
-                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                <div className="mt-1.5 flex items-baseline justify-between">
+                  <p className="text-xl sm:text-2xl font-bold text-slate-950 font-mono tabular-nums">
                     {hodYellowCount === 1 ? "1 Student" : `${hodYellowCount} Students`}
                   </p>
                   <span className="text-[10px] font-semibold text-slate-500">
@@ -5211,25 +5270,26 @@ export default function HodDashboard() {
                   setRiskFlagFilter(riskFlagFilter === "GREEN" ? "ALL" : "GREEN");
                   setRiskPage(1);
                 }}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer bg-white ${
+                className={`p-3.5 rounded-lg border text-left transition-colors cursor-pointer bg-card relative overflow-hidden shadow-xs ${
                   riskFlagFilter === "GREEN"
-                    ? "border-emerald-400 bg-emerald-50/40 ring-2 ring-emerald-400/30 shadow-xs"
-                    : "border-slate-200 hover:border-emerald-300 shadow-2xs"
+                    ? "border-emerald-400 ring-2 ring-emerald-500/20"
+                    : "border-slate-300/70 hover:border-emerald-300"
                 }`}
               >
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    <span className="eyebrow text-emerald-700">
                       Compliant (≥75%)
                     </span>
                   </div>
-                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                     Safe Standing
                   </span>
                 </div>
-                <div className="mt-1 flex items-baseline justify-between">
-                  <p className="text-xl sm:text-2xl font-black text-slate-900">
+                <div className="mt-1.5 flex items-baseline justify-between">
+                  <p className="text-xl sm:text-2xl font-bold text-slate-950 font-mono tabular-nums">
                     {hodGreenCount === 1 ? "1 Student" : `${hodGreenCount} Students`}
                   </p>
                   <span className="text-[10px] font-semibold text-slate-500">
@@ -5239,8 +5299,8 @@ export default function HodDashboard() {
               </button>
             </div>
 
-            {/* Categorization & Filter Toolbar (Compact ERP Bar) */}
-            <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
+            {/* Categorization & Filter Toolbar */}
+            <div className="bg-card border border-slate-300/70 rounded-lg p-3 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
               <div className="relative flex-1 max-w-md">
                 <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -5251,7 +5311,7 @@ export default function HodDashboard() {
                     setRiskSearchQuery(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                  className="w-full pl-9 pr-3 py-2 rounded-md bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-emerald-600 transition-colors"
                 />
               </div>
 
@@ -5263,7 +5323,7 @@ export default function HodDashboard() {
                     setRiskFlagFilter(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="ALL">Risk Status: All</option>
                   <option value="RED">Critical Shortage (&lt;65%)</option>
@@ -5278,7 +5338,7 @@ export default function HodDashboard() {
                     setRiskYearFilter(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="ALL">All Academic Years</option>
                   <option value="2">2nd Year (II)</option>
@@ -5293,7 +5353,7 @@ export default function HodDashboard() {
                     setRiskSectionFilter(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="ALL">All Sections</option>
                   <option value="2A">Section 2A</option>
@@ -5313,7 +5373,7 @@ export default function HodDashboard() {
                     setRiskSortOrder(e.target.value);
                     setRiskPage(1);
                   }}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2.5 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="lowest">Sort: Lowest Attendance %</option>
                   <option value="highest">Sort: Highest Attendance %</option>
@@ -5328,7 +5388,7 @@ export default function HodDashboard() {
                     setRiskPageSize(Number(e.target.value));
                     setRiskPage(1);
                   }}
-                  className="px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer font-mono"
                   title="Rows per page"
                 >
                   <option value={20}>20 rows</option>
@@ -5338,13 +5398,13 @@ export default function HodDashboard() {
                 </select>
 
                 {/* View Switcher: Table vs Cards */}
-                <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+                <div className="flex items-center rounded-md border border-slate-300 bg-white p-0.5">
                   <button
                     onClick={() => setRiskViewMode("table")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-1.5 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer ${
                       riskViewMode === "table"
-                        ? "bg-white text-blue-700 shadow-2xs"
-                        : "text-slate-500 hover:text-slate-800"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                     title="Table View (Fast Scanning)"
                   >
@@ -5352,10 +5412,10 @@ export default function HodDashboard() {
                   </button>
                   <button
                     onClick={() => setRiskViewMode("card")}
-                    className={`p-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    className={`p-1.5 rounded-[4px] text-xs font-semibold transition-colors cursor-pointer ${
                       riskViewMode === "card"
-                        ? "bg-white text-blue-700 shadow-2xs"
-                        : "text-slate-500 hover:text-slate-800"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                     title="Card View"
                   >
@@ -5367,26 +5427,27 @@ export default function HodDashboard() {
 
             {/* High-Density Display (Table View / Card View) */}
             {riskViewMode === "table" ? (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+              <div className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-310px)] min-h-[300px] overflow-y-auto scrollbar-thin">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                    <thead className="sticky top-0 z-10 bg-slate-100 border-b border-slate-200">
                       <tr>
-                        <th className="py-2 px-2.5 text-center w-10">#</th>
-                        <th className="py-2 px-3">Student Name</th>
-                        <th className="py-2 px-3">Roll Number</th>
-                        <th className="py-2 px-2 text-center">Class</th>
-                        <th className="py-2 px-3 text-center">Attendance %</th>
-                        <th className="py-2 px-3">Attended Days</th>
-                        <th className="py-2 px-3">Compliance & Recovery Target</th>
-                        <th className="py-2 px-2.5 text-right">Details</th>
+                        <th className="py-2 px-2.5 text-center w-10 eyebrow text-slate-600">#</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Student Name</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Roll Number</th>
+                        <th className="py-2 px-2 text-center eyebrow text-slate-600">Class</th>
+                        <th className="py-2 px-3 text-center eyebrow text-slate-600">Attendance %</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Attended Days</th>
+                        <th className="py-2 px-3 eyebrow text-slate-600">Compliance & Recovery Target</th>
+                        <th className="py-2 px-2.5 text-right eyebrow text-slate-600">Details</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                    <tbody className="divide-y divide-slate-200 font-medium text-xs">
                       {filteredHodAnalyticsList.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
-                            No students found matching your selected filters.
+                          <td colSpan={8} className="py-14 text-center">
+                            <Flag className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                            <p className="text-slate-600 font-semibold text-xs">No students found matching your selected filters.</p>
                           </td>
                         </tr>
                       ) : (
@@ -5396,54 +5457,54 @@ export default function HodDashboard() {
                             <tr
                               key={item.student.id}
                               onClick={() => setSelectedStudentForDetails(item.student)}
-                              className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                              className="hover:bg-slate-50 transition-colors cursor-pointer group"
                             >
-                              <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
+                              <td className="py-2 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px] tabular-nums">
                                 {rowNum}
                               </td>
-                              <td className="py-1.5 px-3">
-                                <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors block truncate max-w-[220px]">
+                              <td className="py-2 px-3">
+                                <span className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors block truncate max-w-[220px]">
                                   {item.student.name || (item.student as any).full_name || item.student.uniqueId || "Student"}
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3 font-mono font-bold text-slate-700 text-[11px]">
+                              <td className="py-2 px-3 font-mono font-semibold text-slate-700 text-[11px]">
                                 {item.student.uniqueId || "N/A"}
                               </td>
-                              <td className="py-1.5 px-2 text-center">
-                                <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[9.5px] font-bold font-mono">
+                              <td className="py-2 px-2 text-center">
+                                <span className="stamp border-slate-300 bg-slate-100 text-slate-700 font-mono">
                                   {item.secInfo.name}
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3 text-center">
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-black border ${
+                              <td className="py-2 px-3 text-center">
+                                <span className={`inline-block px-2 py-0.5 rounded font-bold border text-[11px] font-mono tabular-nums ${
                                   item.flag === "RED"
-                                    ? "bg-rose-50 text-rose-700 border-rose-200"
+                                    ? "bg-red-50 text-red-800 border-red-300"
                                     : item.flag === "YELLOW"
-                                    ? "bg-amber-50 text-amber-800 border-amber-200"
-                                    : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    ? "bg-amber-50 text-amber-800 border-amber-300"
+                                    : "bg-emerald-50 text-emerald-800 border-emerald-300"
                                 }`}>
                                   {item.percent}%
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3">
+                              <td className="py-2 px-3">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-bold text-slate-800 text-[11px] whitespace-nowrap">
+                                  <span className="font-bold text-slate-800 text-[11px] whitespace-nowrap font-mono tabular-nums">
                                     {item.presentDays} / {item.totalWorkingDays} Days
                                   </span>
                                   <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
                                     <div
                                       className={`h-full rounded-full ${
-                                        item.flag === "RED" ? "bg-rose-500" : item.flag === "YELLOW" ? "bg-amber-500" : "bg-emerald-500"
+                                        item.flag === "RED" ? "bg-red-500" : item.flag === "YELLOW" ? "bg-amber-500" : "bg-emerald-600"
                                       }`}
                                       style={{ width: `${item.percent}%` }}
                                     />
                                   </div>
                                 </div>
                               </td>
-                              <td className="py-1.5 px-3">
+                              <td className="py-2 px-3">
                                 {item.flag === "RED" ? (
                                   <div className="flex items-center gap-1.5">
-                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+                                    <span className="stamp border-red-300 bg-red-50 text-red-800 shrink-0">
                                       Critical (&lt;65%)
                                     </span>
                                     <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
@@ -5452,7 +5513,7 @@ export default function HodDashboard() {
                                   </div>
                                 ) : item.flag === "YELLOW" ? (
                                   <div className="flex items-center gap-1.5">
-                                    <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                    <span className="stamp border-amber-300 bg-amber-50 text-amber-800 shrink-0">
                                       Warning
                                     </span>
                                     <span className="text-[10.5px] font-semibold text-slate-600 font-mono">
@@ -5460,18 +5521,18 @@ export default function HodDashboard() {
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    ✓ Compliant • ≥75%
+                                  <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                                    <Check className="w-3 h-3" /> Compliant • ≥75%
                                   </span>
                                 )}
                               </td>
-                              <td className="py-1.5 px-2.5 text-right">
+                              <td className="py-2 px-2.5 text-right">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedStudentForDetails(item.student);
                                   }}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-2 py-1 rounded-md bg-white hover:bg-slate-50 hover:border-slate-400 text-slate-800 text-[10.5px] font-semibold border border-slate-300 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                 >
                                   <span>View</span>
                                   <ChevronRight className="w-3 h-3" />
@@ -5486,7 +5547,7 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Compact Table Pagination Footer */}
-                <div className="bg-slate-50 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <div className="bg-slate-50/80 border-t border-slate-200 px-3 py-2 flex items-center justify-between text-xs text-slate-700 font-medium font-mono tabular-nums">
                   <div>
                     Showing <strong className="text-slate-900">{filteredHodAnalyticsList.length === 0 ? 0 : (riskPage - 1) * (riskPageSize === -1 ? filteredHodAnalyticsList.length : riskPageSize) + 1}</strong> to <strong className="text-slate-900">{riskPageSize === -1 ? filteredHodAnalyticsList.length : Math.min(riskPage * riskPageSize, filteredHodAnalyticsList.length)}</strong> of <strong className="text-slate-900">{filteredHodAnalyticsList.length}</strong> students
                   </div>
@@ -5496,17 +5557,17 @@ export default function HodDashboard() {
                       <button
                         onClick={() => setRiskPage((p) => Math.max(1, p - 1))}
                         disabled={riskPage === 1}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="px-2 py-1 rounded-md border border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold"
                       >
                         Prev
                       </button>
-                      <span className="px-2 font-mono text-[11px] font-bold text-slate-800">
+                      <span className="px-2 font-mono text-[11px] font-semibold text-slate-900">
                         {riskPage} / {totalRiskPages}
                       </span>
                       <button
                         onClick={() => setRiskPage((p) => Math.min(totalRiskPages, p + 1))}
                         disabled={riskPage >= totalRiskPages}
-                        className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold"
+                        className="px-2 py-1 rounded-md border border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold"
                       >
                         Next
                       </button>
@@ -5515,31 +5576,32 @@ export default function HodDashboard() {
                 </div>
               </div>
             ) : (
-              /* Streamlined Compact Card View (No repeated giant paragraph boxes) */
-              <div className="space-y-1.5 max-h-[calc(100vh-310px)] min-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+              /* Streamlined Compact Card View */
+              <div className="space-y-2 max-h-[calc(100vh-310px)] min-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
                 {filteredHodAnalyticsList.length === 0 ? (
-                  <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400 font-semibold text-xs">
-                    No students found matching your selected filters.
+                  <div className="bg-card border border-slate-300/70 rounded-lg p-14 text-center shadow-xs">
+                    <Flag className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-slate-600 font-semibold text-xs">No students found matching your selected filters.</p>
                   </div>
                 ) : (
                   paginatedRiskList.map((item) => (
                     <div
                       key={item.student.id}
                       onClick={() => setSelectedStudentForDetails(item.student)}
-                      className="bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-2.5 transition-all hover:shadow-2xs cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                      className="bg-card border border-slate-300/70 hover:border-slate-400 rounded-lg p-3 transition-colors shadow-xs cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] shrink-0 border ${
+                        <div className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0 border font-mono tabular-nums ${
                           item.flag === "RED"
-                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            ? "bg-red-50 text-red-800 border-red-300"
                             : item.flag === "YELLOW"
-                            ? "bg-amber-50 text-amber-800 border-amber-200"
-                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "bg-amber-50 text-amber-800 border-amber-300"
+                            : "bg-emerald-50 text-emerald-800 border-emerald-300"
                         }`}>
                           {item.percent}%
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                          <h4 className="text-xs font-bold text-slate-950 group-hover:text-emerald-700 transition-colors">
                             {item.student.name || (item.student as any).full_name || item.student.uniqueId || "Student"}
                           </h4>
                           <div className="flex items-center gap-2 text-[10.5px] text-slate-500 font-mono">
@@ -5554,7 +5616,7 @@ export default function HodDashboard() {
 
                       <div className="flex items-center gap-3 justify-between sm:justify-end">
                         <div className="text-left sm:text-right">
-                          <span className="text-xs font-bold text-slate-800 block">
+                          <span className="text-xs font-bold text-slate-900 block font-mono tabular-nums">
                             {item.presentDays} / {item.totalWorkingDays} Days Attended
                           </span>
                           <span className="text-[10px] font-semibold text-slate-500 block">
@@ -5562,12 +5624,12 @@ export default function HodDashboard() {
                           </span>
                         </div>
 
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0 ${
+                        <span className={`stamp shrink-0 ${
                           item.flag === "RED"
-                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            ? "border-red-300 bg-red-50 text-red-800"
                             : item.flag === "YELLOW"
-                            ? "bg-amber-50 text-amber-800 border-amber-200"
-                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "border-amber-300 bg-amber-50 text-amber-800"
+                            : "border-emerald-300 bg-emerald-50 text-emerald-800"
                         }`}>
                           {item.flag === "RED" ? "Critical (<65%)" : item.flag === "YELLOW" ? "Warning (65-74%)" : "Compliant (≥75%)"}
                         </span>
@@ -5582,20 +5644,20 @@ export default function HodDashboard() {
 
         {/* Detailed student listing slide-over sheet */}
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <SheetContent className="w-full sm:max-w-xl bg-white border-l border-gray-200 p-0 flex flex-col h-full text-gray-900">
-            <SheetHeader className="p-6 border-b border-gray-200">
-              <SheetTitle className="text-2xl font-bold text-gray-800 tracking-tight">
+          <SheetContent className="w-full sm:max-w-xl bg-white border-l border-slate-300 p-0 flex flex-col h-full text-slate-900">
+            <SheetHeader className="p-6 border-b border-slate-200">
+              <SheetTitle className="text-xl font-bold text-slate-950 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
                 {drawerConfig.title}
               </SheetTitle>
-              <SheetDescription className="text-gray-500 text-sm mt-1">
+              <SheetDescription className="text-slate-600 text-sm mt-1">
                 {drawerConfig.description}
               </SheetDescription>
             </SheetHeader>
 
             {/* Search filter */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-white">
+            <div className="px-6 py-4 border-b border-slate-200 bg-white">
               <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                   <Search className="w-4 h-4" />
                 </div>
                 <input
@@ -5603,16 +5665,17 @@ export default function HodDashboard() {
                   placeholder="Search student name or roll number..."
                   value={studentSearchQuery}
                   onChange={(e) => setStudentSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 transition-colors text-sm"
                 />
               </div>
             </div>
 
             {/* Students list */}
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-855 p-2">
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-200 p-2">
               {filteredDrawerStudents.length === 0 ? (
-                <div className="py-20 text-center text-gray-400 text-sm">
-                  No students match your query.
+                <div className="py-20 text-center">
+                  <User className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-slate-600 text-sm">No students match your query.</p>
                 </div>
               ) : (
                 filteredDrawerStudents.map((item, idx) => {
@@ -5623,14 +5686,14 @@ export default function HodDashboard() {
                   const hasGateRecord = Boolean(record?.entryTime);
                   
                   return (
-                    <div key={s.id} className="p-3 hover:bg-gray-50 rounded-xl transition-all space-y-2">
+                    <div key={s.id} className="p-3 hover:bg-slate-50 rounded-md transition-colors space-y-2">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-xs font-bold text-gray-800 uppercase">
+                          <div className="w-9 h-9 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase font-mono">
                             {s.name.charAt(0)}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-gray-800">{s.name}</p>
+                            <p className="text-sm font-semibold text-slate-900">{s.name}</p>
                             <p className="text-xs text-slate-500 font-mono mt-0.5">{s.uniqueId}</p>
                           </div>
                         </div>
@@ -5640,13 +5703,13 @@ export default function HodDashboard() {
                             <>
                               <div className="flex flex-wrap items-center justify-end gap-1.5">
                                 {hasGateRecord && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    <QrCode className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                                  <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
+                                    <QrCode className="w-3 h-3 shrink-0" />
                                     QR Scanned
                                   </span>
                                 )}
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
-                                  <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                                  <CheckCircle className="w-3 h-3" />
                                   {record?.exitTime
                                     ? "Left Campus"
                                     : isExitTimeOver(record?.date, record?.exitTime)
@@ -5654,23 +5717,23 @@ export default function HodDashboard() {
                                       : "Still on Campus"}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-3 text-gray-500 text-[10px]">
+                              <div className="flex items-center gap-3 text-slate-500 text-[10px] font-mono">
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3.5 h-3.5 text-blue-500" /> 
                                   In: {formatTime(record?.entryTime)}
                                   {isLateTime(record?.entryTime) && (
-                                    <span className="ml-1.5 px-1 py-0.2 rounded bg-amber-500/20 text-amber-600 text-[8px] font-black uppercase tracking-wider">LATE</span>
+                                    <span className="stamp border-amber-300 bg-amber-100 text-amber-800">LATE</span>
                                   )}
                                 </span>
                                 {record?.exitTime ? (
                                   <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-500" /> Out: {formatTime(record?.exitTime)}</span>
                                 ) : (
-                                  <span className="flex items-center gap-1 text-gray-400 font-medium">Out: —</span>
+                                  <span className="flex items-center gap-1 text-slate-500 font-medium">Out: —</span>
                                 )}
                               </div>
                               {hourlyInfo && hourlyInfo.attended.length > 0 && (
-                                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                  📚 {hourlyInfo.attended.length} class{hourlyInfo.attended.length > 1 ? "es" : ""} attended
+                                <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
+                                  <BookOpen className="w-3 h-3" /> {hourlyInfo.attended.length} class{hourlyInfo.attended.length > 1 ? "es" : ""} attended
                                 </span>
                               )}
                             </>
@@ -5678,25 +5741,25 @@ export default function HodDashboard() {
                             <>
                               <div className="flex flex-wrap items-center justify-end gap-1.5">
                                 {hasGateRecord && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    <QrCode className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                                  <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
+                                    <QrCode className="w-3 h-3 shrink-0" />
                                     QR Scanned • In: {formatTime(record?.entryTime)}
                                   </span>
                                 )}
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">
-                                  <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                                  <CheckCircle className="w-3 h-3" />
                                   In Class
                                 </span>
                               </div>
                               {hourlyInfo && hourlyInfo.attended.length > 0 && (
-                                <span className="text-[9px] text-emerald-600 font-semibold">
-                                  📚 {hourlyInfo.attended.length} class{hourlyInfo.attended.length > 1 ? "es" : ""} attended
+                                <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                                  <BookOpen className="w-3 h-3" /> {hourlyInfo.attended.length} class{hourlyInfo.attended.length > 1 ? "es" : ""} attended
                                 </span>
                               )}
                             </>
                           ) : (
-                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">
-                              <XCircle className="w-3 h-3 text-red-500" />
+                            <span className="stamp border-red-300 bg-red-50 text-red-800">
+                              <XCircle className="w-3 h-3" />
                               Absent
                             </span>
                           )}
@@ -5705,10 +5768,10 @@ export default function HodDashboard() {
 
                       {/* Missed classes row — ONLY shown when attendance was submitted/taken for a class and student was absent */}
                       {missedClasses.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-1.5 pl-12 pt-1 border-t border-gray-100">
+                        <div className="flex flex-wrap items-center gap-1.5 pl-12 pt-1.5 border-t border-slate-200">
                           {missedClasses.map((mc: any, mcIdx: number) => (
-                            <span key={mcIdx} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
-                              <XCircle className="w-3 h-3 text-rose-500 flex-shrink-0" />
+                            <span key={mcIdx} className="stamp border-red-300 bg-red-50 text-red-800">
+                              <XCircle className="w-3 h-3 shrink-0" />
                               Missed {mc.subject || "Class"} {formatScheduleTime(mc.startTime) ? `(${formatScheduleTime(mc.startTime)})` : ""}
                             </span>
                           ))}
@@ -5724,33 +5787,33 @@ export default function HodDashboard() {
 
         {/* Reassign Faculty for Timetable Slot Modal */}
         {reassignSlotModalOpen && slotToReassign && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150">
+          <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-300 rounded-lg w-full max-w-lg p-6 space-y-4 shadow-xl animate-in fade-in zoom-in duration-150">
               <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold">
                     <UserPlus className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">Reassign Faculty / Teacher</h3>
-                    <p className="text-[11px] font-semibold text-slate-500">
+                    <h3 className="text-base font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Reassign Faculty / Teacher</h3>
+                    <p className="text-[11px] font-semibold text-slate-500 font-mono">
                       Section {slotToReassign.sectionKey} • {slotToReassign.dayLabel} • {slotToReassign.periodName} ({slotToReassign.timeLabel})
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setReassignSlotModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-slate-900 p-1 rounded-md transition-colors cursor-pointer"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Slot details card */}
-              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl space-y-2 text-xs">
+              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-md space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-sm">{slotToReassign.subject}</span>
-                  <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-900 font-bold text-[10px]">
+                  <span className="font-bold text-slate-950 text-sm">{slotToReassign.subject}</span>
+                  <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
                     {slotToReassign.room}
                   </span>
                 </div>
@@ -5765,7 +5828,7 @@ export default function HodDashboard() {
               <form onSubmit={handleSaveSlotReassign} className="space-y-4">
                 {/* Edit Subject Field */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="eyebrow block text-slate-600 mb-1.5">
                     Subject / Lab / Activity Title
                   </label>
                   <div className="flex items-center gap-2">
@@ -5774,13 +5837,13 @@ export default function HodDashboard() {
                       value={editedSubjectInput}
                       onChange={(e) => setEditedSubjectInput(e.target.value)}
                       placeholder="e.g. CN, JAVA LAB, Free"
-                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold focus:outline-none focus:border-blue-500 font-mono"
+                      className="flex-1 px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-bold focus:outline-none focus:border-emerald-600 font-mono transition-colors"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setEditedSubjectInput("Free")}
-                      className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-colors cursor-pointer"
+                      className="px-3 py-2.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                     >
                       Set Free
                     </button>
@@ -5789,7 +5852,7 @@ export default function HodDashboard() {
 
                 {/* Select from list */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="eyebrow block text-slate-600 mb-1.5">
                     Select Department Faculty
                   </label>
                   <select
@@ -5798,7 +5861,7 @@ export default function HodDashboard() {
                       setSelectedFacultyName(e.target.value);
                       setCustomFacultyTextInput("");
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                   >
                     <option value="" disabled>-- Select Faculty --</option>
                     {DEPARTMENT_FACULTY_LIST.map((name) => (
@@ -5811,7 +5874,7 @@ export default function HodDashboard() {
 
                 {/* Or Custom / Multi Faculty */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="eyebrow block text-slate-600 mb-1.5">
                     Or Enter Custom Name / Multi-Faculty Co-Teachers
                   </label>
                   <input
@@ -5821,7 +5884,7 @@ export default function HodDashboard() {
                     onChange={(e) => {
                       setCustomFacultyTextInput(e.target.value);
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:border-blue-500 placeholder-slate-400"
+                    className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 placeholder-slate-400 transition-colors"
                   />
                   <span className="text-[10px] text-slate-500 mt-1 block">
                     If entered, this custom text will take precedence over the dropdown selection.
@@ -5829,8 +5892,8 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Scope of change */}
-                <div className="bg-blue-50/70 border border-blue-200 p-3 rounded-xl space-y-2">
-                  <span className="block text-[11px] font-bold text-blue-950 uppercase tracking-wide">
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-md space-y-2">
+                  <span className="eyebrow block text-blue-800">
                     Reassignment Scope:
                   </span>
                   <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
@@ -5839,7 +5902,7 @@ export default function HodDashboard() {
                       name="reassignScope"
                       checked={applyToAllSlotsOfSubject}
                       onChange={() => setApplyToAllSlotsOfSubject(true)}
-                      className="text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      className="text-emerald-600 focus:ring-emerald-600 cursor-pointer"
                     />
                     <span>
                       Update faculty for <strong>all "{slotToReassign.subject}"</strong> classes in Section {slotToReassign.sectionKey}
@@ -5851,7 +5914,7 @@ export default function HodDashboard() {
                       name="reassignScope"
                       checked={!applyToAllSlotsOfSubject}
                       onChange={() => setApplyToAllSlotsOfSubject(false)}
-                      className="text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      className="text-emerald-600 focus:ring-emerald-600 cursor-pointer"
                     />
                     <span>
                       Update only this specific time slot (<strong>{slotToReassign.dayLabel} {slotToReassign.timeLabel}</strong>)
@@ -5860,8 +5923,8 @@ export default function HodDashboard() {
                 </div>
 
                 {reassignSuccessMsg && (
-                  <div className="p-3 rounded-xl bg-green-100 border border-green-300 text-green-800 text-xs font-bold text-center flex items-center justify-center gap-2 animate-in fade-in">
-                    <CheckCircle className="w-4 h-4 text-green-700" />
+                  <div className="p-3 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold text-center flex items-center justify-center gap-2 animate-in fade-in">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
                     {reassignSuccessMsg}
                   </div>
                 )}
@@ -5870,14 +5933,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setReassignSlotModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                    className="flex-1 py-2.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingReassignment || (!selectedFacultyName && !customFacultyTextInput.trim())}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200 cursor-pointer"
+                    className="flex-1 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     {savingReassignment ? (
                       <>
@@ -5899,36 +5962,36 @@ export default function HodDashboard() {
 
         {/* Assign Faculty to Class Modal */}
         {assignModalOpen && scheduleToAssign && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+          <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-300 rounded-lg w-full max-w-md p-6 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
                   <UserPlus className="w-5 h-5 text-purple-700" />
-                  <h3 className="text-lg font-bold text-gray-900">Assign Class to Faculty</h3>
+                  <h3 className="text-lg font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Assign Class to Faculty</h3>
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-slate-400 hover:text-slate-900 p-1 cursor-pointer transition-colors"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-1 text-xs">
-                <p className="text-gray-700 font-bold">{scheduleToAssign.subject}</p>
-                <p className="text-gray-500">Class: {scheduleToAssign.year} Yr - {scheduleToAssign.section} | Day: {scheduleToAssign.day_of_week}</p>
-                <p className="text-gray-400 font-mono">{scheduleToAssign.start_time?.slice(0,5)} - {scheduleToAssign.end_time?.slice(0,5)}</p>
+              <div className="bg-slate-50 border border-slate-200 p-3 rounded-md space-y-1 text-xs">
+                <p className="text-slate-900 font-bold">{scheduleToAssign.subject}</p>
+                <p className="text-slate-600">Class: {scheduleToAssign.year} Yr - {scheduleToAssign.section} | Day: {scheduleToAssign.day_of_week}</p>
+                <p className="text-slate-500 font-mono">{scheduleToAssign.start_time?.slice(0,5)} - {scheduleToAssign.end_time?.slice(0,5)}</p>
               </div>
 
               <form onSubmit={handleConfirmAssign} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="eyebrow block text-slate-600 mb-1.5">
                     Select Faculty / Teacher
                   </label>
                   <select
                     value={selectedMentorId}
                     onChange={(e) => setSelectedMentorId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -5941,7 +6004,7 @@ export default function HodDashboard() {
                 </div>
 
                 {assignSuccessMsg && (
-                  <div className="p-3 rounded-xl bg-green-100 border border-green-300 text-green-800 text-xs font-bold text-center flex items-center justify-center gap-2">
+                  <div className="p-3 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold text-center flex items-center justify-center gap-2">
                     <UserCheck className="w-4 h-4" />
                     {assignSuccessMsg}
                   </div>
@@ -5951,14 +6014,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setAssignModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                    className="flex-1 py-2.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={assigning || !selectedMentorId}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
+                    className="flex-1 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     {assigning ? (
                       <>
@@ -5980,16 +6043,16 @@ export default function HodDashboard() {
 
         {/* Create New Class Schedule Modal */}
         {newClassModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+          <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-300 rounded-lg w-full max-w-md p-6 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
                   <Plus className="w-5 h-5 text-purple-700" />
-                  <h3 className="text-lg font-bold text-gray-900">Assign New Class Schedule</h3>
+                  <h3 className="text-lg font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Assign New Class Schedule</h3>
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-slate-400 hover:text-slate-900 p-1 cursor-pointer transition-colors"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -5997,7 +6060,7 @@ export default function HodDashboard() {
 
               <form onSubmit={handleCreateClass} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="eyebrow block text-slate-600 mb-1">
                     Subject Name
                   </label>
                   <input
@@ -6005,18 +6068,18 @@ export default function HodDashboard() {
                     placeholder="e.g. DBMS, Computer Networks, AI"
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-semibold focus:outline-none focus:border-emerald-600 transition-colors"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Year</label>
+                    <label className="eyebrow block text-slate-600 mb-1">Year</label>
                     <select
                       value={newYear}
                       onChange={(e) => setNewYear(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
+                      className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                     >
                       <option value="II">II Year</option>
                       <option value="III">III Year</option>
@@ -6024,11 +6087,11 @@ export default function HodDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Section</label>
+                    <label className="eyebrow block text-slate-600 mb-1">Section</label>
                     <select
                       value={newSection}
                       onChange={(e) => setNewSection(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
+                      className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                     >
                       <option value="A">Section A</option>
                       <option value="B">Section B</option>
@@ -6039,11 +6102,11 @@ export default function HodDashboard() {
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Day</label>
+                    <label className="eyebrow block text-slate-600 mb-1">Day</label>
                     <select
                       value={newDay}
                       onChange={(e) => setNewDay(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold"
+                      className="w-full px-2 py-2 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                     >
                       <option value="MON">Mon</option>
                       <option value="TUE">Tue</option>
@@ -6054,35 +6117,35 @@ export default function HodDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Start Time</label>
+                    <label className="eyebrow block text-slate-600 mb-1">Start Time</label>
                     <input
                       type="text"
                       placeholder="09:00:00"
                       value={newStartTime}
                       onChange={(e) => setNewStartTime(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-mono"
+                      className="w-full px-2 py-2 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-mono focus:outline-none focus:border-emerald-600 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">End Time</label>
+                    <label className="eyebrow block text-slate-600 mb-1">End Time</label>
                     <input
                       type="text"
                       placeholder="10:00:00"
                       value={newEndTime}
                       onChange={(e) => setNewEndTime(e.target.value)}
-                      className="w-full px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-mono"
+                      className="w-full px-2 py-2 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-mono focus:outline-none focus:border-emerald-600 transition-colors"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="eyebrow block text-slate-600 mb-1">
                     Assign Faculty / Teacher
                   </label>
                   <select
                     value={newMentorId}
                     onChange={(e) => setNewMentorId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold focus:outline-none focus:border-purple-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -6098,14 +6161,14 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setNewClassModalOpen(false)}
-                    className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                    className="flex-1 py-2.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creatingClass || !newMentorId || !newSubject}
-                    className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-blue-200"
+                    className="flex-1 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     {creatingClass ? (
                       <>
@@ -6127,31 +6190,31 @@ export default function HodDashboard() {
 
         {/* Official Printable Timetable Document Modal */}
         {timetablePrintModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-            <div className="bg-white border border-slate-300 rounded-3xl w-full max-w-5xl my-6 p-6 sm:p-8 space-y-6 shadow-2xl relative text-slate-900">
+          <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+            <div className="bg-white border border-slate-300 rounded-lg w-full max-w-5xl my-6 p-6 sm:p-8 space-y-6 shadow-xl relative text-slate-900">
               {/* Modal Control Bar */}
               <div className="flex items-center justify-between border-b border-slate-200 pb-4 print:hidden">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200">
+                  <div className="p-2 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
                     <Printer className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">Official Department Timetable Document</h3>
-                    <p className="text-xs text-slate-500">Autonomous university standard format ready for printing & archiving</p>
+                    <h3 className="text-base font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Official Department Timetable Document</h3>
+                    <p className="text-xs text-slate-600">Autonomous university standard format ready for printing &amp; archiving</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => window.print()}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                    className="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
                   >
                     <Printer className="w-4 h-4" />
                     <span>Print Document</span>
                   </button>
                   <button
                     onClick={() => setTimetablePrintModalOpen(false)}
-                    className="p-2 text-slate-400 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
+                    className="p-2 text-slate-400 hover:text-slate-900 rounded-md hover:bg-slate-100 transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -6373,21 +6436,21 @@ export default function HodDashboard() {
 
         {/* Export Monthly Attendance Register Modal */}
         {exportModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-            <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+          <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-300 rounded-lg w-full max-w-lg p-6 space-y-5 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <div className="p-2 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <FileSpreadsheet className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">Download Monthly Register</h3>
-                    <p className="text-xs text-gray-500">Export attendance spreadsheet (P / A register format)</p>
+                    <h3 className="text-lg font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Download Monthly Register</h3>
+                    <p className="text-xs text-slate-600">Export attendance spreadsheet (P / A register format)</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setExportModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-900 p-1"
+                  className="text-slate-400 hover:text-slate-900 p-1 cursor-pointer transition-colors"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -6396,31 +6459,31 @@ export default function HodDashboard() {
               <div className="space-y-4">
                 {/* Date Selection Mode Selector */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="eyebrow block text-slate-600 mb-1.5">
                     Date Range Type
                   </label>
-                  <div className="grid grid-cols-2 gap-2 bg-gray-50 p-1 rounded-xl border border-gray-200">
+                  <div className="grid grid-cols-2 gap-2 bg-white p-1 rounded-md border border-slate-300">
                     <button
                       type="button"
                       onClick={() => setExportDateMode("month")}
-                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      className={`py-2 rounded-[4px] text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                         exportDateMode === "month"
-                          ? "bg-emerald-600 text-white shadow-md"
-                          : "text-gray-500 hover:text-gray-800"
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
                       }`}
                     >
-                      🗓️ By Month
+                      <Calendar className="w-3.5 h-3.5" /> By Month
                     </button>
                     <button
                       type="button"
                       onClick={() => setExportDateMode("range")}
-                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                      className={`py-2 rounded-[4px] text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                         exportDateMode === "range"
-                          ? "bg-emerald-600 text-white shadow-md"
-                          : "text-gray-500 hover:text-gray-800"
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
                       }`}
                     >
-                      📅 Calendar Range (From - To)
+                      <Calendar className="w-3.5 h-3.5" /> Calendar Range (From - To)
                     </button>
                   </div>
                 </div>
@@ -6428,14 +6491,14 @@ export default function HodDashboard() {
                 {/* Month Picker */}
                 {exportDateMode === "month" ? (
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="eyebrow block text-slate-600 mb-1.5">
                       Select Month
                     </label>
                     <input
                       type="month"
                       value={exportMonth}
                       onChange={(e) => setExportMonth(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:light]"
+                      className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 [color-scheme:light] transition-colors"
                       required
                     />
                   </div>
@@ -6443,26 +6506,26 @@ export default function HodDashboard() {
                   /* Custom From - To Calendar Date Pickers */
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="eyebrow block text-slate-600 mb-1.5">
                         From Date
                       </label>
                       <input
                         type="date"
                         value={exportFromDate}
                         onChange={(e) => setExportFromDate(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:light]"
+                        className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 [color-scheme:light] transition-colors"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="eyebrow block text-slate-600 mb-1.5">
                         To Date
                       </label>
                       <input
                         type="date"
                         value={exportToDate}
                         onChange={(e) => setExportToDate(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 [color-scheme:light]"
+                        className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 [color-scheme:light] transition-colors"
                         required
                       />
                     </div>
@@ -6471,13 +6534,13 @@ export default function HodDashboard() {
 
                 {/* Scope Selector */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="eyebrow block text-slate-600 mb-1.5">
                     Target Scope
                   </label>
                   <select
                     value={exportType}
                     onChange={(e) => setExportType(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                   >
                     <option value="department">Full Department (All Students)</option>
                     <option value="year">By Year (2nd, 3rd, or 4th Year)</option>
@@ -6489,13 +6552,13 @@ export default function HodDashboard() {
                 {/* Year Selector */}
                 {exportType === "year" && (
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="eyebrow block text-slate-600 mb-1.5">
                       Select Year
                     </label>
                     <select
                       value={exportYear}
                       onChange={(e) => setExportYear(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                     >
                       <option value="2nd Year">2nd Year (DS II)</option>
                       <option value="3rd Year">3rd Year (DS III)</option>
@@ -6507,13 +6570,13 @@ export default function HodDashboard() {
                 {/* Section Selector */}
                 {exportType === "section" && (
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="eyebrow block text-slate-600 mb-1.5">
                       Select Section
                     </label>
                     <select
                       value={exportSection}
                       onChange={(e) => setExportSection(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                     >
                       <option value="2A">2A CSE Data Science</option>
                       <option value="2B">2B CSE Data Science</option>
@@ -6531,14 +6594,14 @@ export default function HodDashboard() {
                 {/* Student Selector by Roll Number or Name */}
                 {exportType === "student" && (
                   <div className="space-y-2.5">
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    <label className="eyebrow block text-slate-600">
                       Enter Roll Number or Search Student
                     </label>
 
                     {/* Roll Number Search Input */}
                     <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                        <Search className="w-4 h-4 text-emerald-700" />
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Search className="w-4 h-4" />
                       </div>
                       <input
                         type="text"
@@ -6556,7 +6619,7 @@ export default function HodDashboard() {
                             setExportStudentId("");
                           }
                         }}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 placeholder-gray-400 font-mono"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 placeholder-slate-400 font-mono transition-colors"
                       />
                     </div>
 
@@ -6571,7 +6634,7 @@ export default function HodDashboard() {
                           setExportRollQuery(s.uniqueId || "");
                         }
                       }}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer"
+                      className="w-full px-3.5 py-2.5 rounded-md bg-white border border-slate-300 text-slate-900 text-sm font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                     >
                       <option value="">-- Select from Roll Number List --</option>
                       {[...studentsOnly]
@@ -6598,17 +6661,17 @@ export default function HodDashboard() {
                         if (!s) return null;
                         const { name: secName, yearLabel } = getSectionDisplayName(s.section);
                         return (
-                          <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between text-xs">
+                          <div className="p-3 rounded-md bg-emerald-50 border border-emerald-300 flex items-center justify-between text-xs">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-emerald-900/60 border border-emerald-700/50 flex items-center justify-center font-bold text-emerald-700">
+                              <div className="w-8 h-8 rounded-md bg-white border border-emerald-300 flex items-center justify-center font-bold text-emerald-800 font-mono">
                                 {s.name.charAt(0)}
                               </div>
                               <div>
-                                <p className="font-bold text-emerald-200 text-sm">{s.name}</p>
-                                <p className="text-emerald-700/80 font-mono">Roll No: {s.uniqueId || "N/A"} | Sec {secName} ({yearLabel})</p>
+                                <p className="font-bold text-emerald-900 text-sm">{s.name}</p>
+                                <p className="text-emerald-800 font-mono">Roll No: {s.uniqueId || "N/A"} | Sec {secName} ({yearLabel})</p>
                               </div>
                             </div>
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-500/30">
+                            <span className="stamp border-emerald-300 bg-white text-emerald-800">
                               Selected
                             </span>
                           </div>
@@ -6618,8 +6681,10 @@ export default function HodDashboard() {
                   </div>
                 )}
 
-                <div className="bg-gray-50/80 border border-gray-200 p-3.5 rounded-xl text-xs text-gray-500 space-y-1">
-                  <p className="font-semibold text-gray-700">📊 Register Format Preview:</p>
+                <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-md text-xs text-slate-600 space-y-1">
+                  <p className="font-semibold text-slate-900 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-emerald-600" /> Register Format Preview:
+                  </p>
                   <p>• Columns: S.No | Roll No | Student Name | Year | Section | Day 1..31 | Total P | Total A | Attendance %</p>
                   <p>• Daily Status: <span className="text-emerald-700 font-bold">P</span> = Present, <span className="text-red-700 font-bold">A</span> = Absent</p>
                 </div>
@@ -6629,7 +6694,7 @@ export default function HodDashboard() {
                 <button
                   type="button"
                   onClick={() => setExportModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors"
+                  className="flex-1 py-2.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -6637,7 +6702,7 @@ export default function HodDashboard() {
                   type="button"
                   onClick={handleGenerateCsv}
                   disabled={isExporting || (exportType === "student" && !exportStudentId)}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isExporting ? (
                     <>
@@ -6658,22 +6723,22 @@ export default function HodDashboard() {
 
         {/* Manage Holidays & Academic Calendar Modal */}
         {holidayModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+            <div className="bg-white border border-slate-300 rounded-lg w-full max-w-4xl max-h-[92vh] flex flex-col shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
               {/* Modal Header */}
-              <div className="p-4 px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex-shrink-0">
+              <div className="p-4 px-6 border-b border-slate-200 flex items-center justify-between bg-white flex-shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-purple-300" />
+                  <div className="w-9 h-9 rounded-md bg-purple-50 border border-purple-200 flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-purple-700" />
                   </div>
                   <div>
-                    <h3 className="text-base font-extrabold tracking-tight">Academic Calendar & Holiday Management</h3>
-                    <p className="text-xs text-purple-200/80 font-medium">Declare holidays & examinations • Days are excluded from absent penalty & show reasons on sphn.online</p>
+                    <h3 className="text-base font-bold text-slate-950 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>Academic Calendar &amp; Holiday Management</h3>
+                    <p className="text-xs text-slate-600 font-medium">Declare holidays &amp; examinations • Days are excluded from absent penalty &amp; show reasons on sphn.online</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setHolidayModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
+                  className="w-8 h-8 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-colors cursor-pointer"
                   title="Close"
                 >
                   <X className="w-4 h-4" />
@@ -6686,7 +6751,7 @@ export default function HodDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                   
                   {/* Left Column: Interactive Month Calendar (7 cols) */}
-                  <div className="lg:col-span-7 bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3.5">
+                  <div className="lg:col-span-7 bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3.5">
                     {/* Month Navigator */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -6697,12 +6762,12 @@ export default function HodDashboard() {
                             d.setMonth(d.getMonth() - 1);
                             setCalendarViewDate(d);
                           }}
-                          className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
+                          className="p-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 transition-colors cursor-pointer shadow-xs"
                           title="Previous Month"
                         >
                           <ChevronLeft className="w-4 h-4" />
                         </button>
-                        <h4 className="font-extrabold text-sm text-slate-900">
+                        <h4 className="font-bold text-sm text-slate-950">
                           {calendarViewDate.toLocaleString("en-US", { month: "long", year: "numeric" })}
                         </h4>
                         <button
@@ -6712,7 +6777,7 @@ export default function HodDashboard() {
                             d.setMonth(d.getMonth() + 1);
                             setCalendarViewDate(d);
                           }}
-                          className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer shadow-2xs"
+                          className="p-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 transition-colors cursor-pointer shadow-xs"
                           title="Next Month"
                         >
                           <ChevronRight className="w-4 h-4" />
@@ -6726,7 +6791,7 @@ export default function HodDashboard() {
                             setCalendarViewDate(new Date());
                             setSelectedCalendarDate(new Date().toISOString().split("T")[0]);
                           }}
-                          className="px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold transition-all cursor-pointer shadow-2xs"
+                          className="px-2.5 py-1 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold transition-colors cursor-pointer shadow-xs"
                         >
                           Today
                         </button>
@@ -6734,8 +6799,8 @@ export default function HodDashboard() {
                     </div>
 
                     {/* Day Names Header */}
-                    <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      <span className="text-red-400">Sun</span>
+                    <div className="grid grid-cols-7 gap-1 text-center eyebrow text-slate-500">
+                      <span className="text-red-600">Sun</span>
                       <span>Mon</span>
                       <span>Tue</span>
                       <span>Wed</span>
@@ -6755,7 +6820,7 @@ export default function HodDashboard() {
                       // Blank leading days
                       for (let i = 0; i < firstDayIndex; i++) {
                         cells.push(
-                          <div key={`blank-${i}`} className="min-h-[46px] rounded-lg bg-slate-100/40 border border-transparent opacity-30" />
+                          <div key={`blank-${i}`} className="min-h-[46px] rounded-md bg-slate-100/40 border border-transparent opacity-30" />
                         );
                       }
 
@@ -6783,33 +6848,35 @@ export default function HodDashboard() {
                                 setNewHolidayReason("");
                               }
                             }}
-                            className={`min-h-[46px] p-1 rounded-lg border text-left flex flex-col justify-between transition-all cursor-pointer relative group ${
+                            className={`min-h-[46px] p-1 rounded-md border text-left flex flex-col justify-between transition-colors cursor-pointer relative group ${
                               isSelected
-                                ? "ring-2 ring-blue-600 border-blue-500 bg-blue-50/60 font-bold"
+                                ? "ring-2 ring-emerald-600 border-emerald-500 bg-emerald-50/60 font-bold"
                                 : isDeclared
                                 ? isExam
-                                  ? "bg-violet-50 hover:bg-violet-100/80 border-violet-300 text-violet-950"
-                                  : "bg-purple-50 hover:bg-purple-100/80 border-purple-300 text-purple-950"
+                                  ? "bg-indigo-50 hover:bg-indigo-100/80 border-indigo-300 text-indigo-900"
+                                  : "bg-purple-50 hover:bg-purple-100/80 border-purple-300 text-purple-900"
                                 : isSunday
-                                ? "bg-slate-100/80 hover:bg-slate-200/70 border-slate-200 text-slate-500"
-                                : "bg-white hover:bg-slate-100/60 border-slate-200 text-slate-800"
+                                ? "bg-slate-100/80 hover:bg-slate-200/70 border-slate-200 text-slate-600"
+                                : "bg-white hover:bg-slate-50 border-slate-300/70 text-slate-800"
                             }`}
                           >
                             <div className="flex items-center justify-between w-full">
-                              <span className={`text-[11px] font-bold ${isSelected ? "text-blue-700" : isSunday ? "text-red-500" : "text-slate-700"}`}>
+                              <span className={`text-[11px] font-bold ${isSelected ? "text-emerald-700" : isSunday ? "text-red-600" : "text-slate-800"}`}>
                                 {day}
                               </span>
                               {isDeclared && (
-                                <span className="text-[10px]">{isExam ? "📝" : "🌴"}</span>
+                                isExam
+                                  ? <FileText className="w-3 h-3 text-indigo-700 shrink-0" />
+                                  : <Calendar className="w-3 h-3 text-purple-700 shrink-0" />
                               )}
                             </div>
 
                             {isDeclared ? (
-                              <div className={`text-[9px] font-extrabold truncate px-1 py-0.5 rounded leading-tight ${isExam ? "bg-violet-200/80 text-violet-900" : "bg-purple-200/80 text-purple-900"}`}>
+                              <div className={`text-[9px] font-bold truncate px-1 py-0.5 rounded leading-tight ${isExam ? "bg-indigo-200/80 text-indigo-900" : "bg-purple-200/80 text-purple-900"}`}>
                                 {holidayItem.reason}
                               </div>
                             ) : isSunday ? (
-                              <span className="text-[9px] text-slate-400 font-semibold">Sunday</span>
+                              <span className="text-[9px] text-slate-500 font-semibold">Sunday</span>
                             ) : null}
                           </button>
                         );
@@ -6820,12 +6887,12 @@ export default function HodDashboard() {
                   </div>
 
                   {/* Right Column: Event Form / Action Panel (5 cols) */}
-                  <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-4.5 space-y-4 shadow-2xs">
+                  <div className="lg:col-span-5 bg-white border border-slate-300/70 rounded-lg p-4.5 space-y-4 shadow-xs">
                     <div>
-                      <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                      <span className="eyebrow text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 inline-block">
                         Day Details
                       </span>
-                      <h4 className="text-sm font-extrabold text-slate-900 mt-1">
+                      <h4 className="text-sm font-bold text-slate-950 mt-1.5">
                         {new Date(selectedCalendarDate + "T00:00:00").toLocaleDateString("en-US", {
                           weekday: "long",
                           year: "numeric",
@@ -6838,14 +6905,15 @@ export default function HodDashboard() {
 
                     {/* Current Status on Selected Date */}
                     {holidays[selectedCalendarDate] ? (
-                      <div className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+                      <div className={`p-3 rounded-md border text-xs flex items-center justify-between gap-2 ${
                         holidays[selectedCalendarDate].type === "exam"
-                          ? "bg-violet-50 border-violet-200 text-violet-900"
+                          ? "bg-indigo-50 border-indigo-200 text-indigo-900"
                           : "bg-purple-50 border-purple-200 text-purple-900"
                       }`}>
                         <div>
-                          <div className="font-extrabold flex items-center gap-1.5">
-                            <span>{holidays[selectedCalendarDate].type === "exam" ? "📝 Examination" : "🌴 Declared Holiday"}</span>
+                          <div className="font-bold flex items-center gap-1.5">
+                            {holidays[selectedCalendarDate].type === "exam" ? <FileText className="w-3.5 h-3.5 shrink-0" /> : <Calendar className="w-3.5 h-3.5 shrink-0" />}
+                            <span>{holidays[selectedCalendarDate].type === "exam" ? "Examination" : "Declared Holiday"}</span>
                             <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/70 border border-current font-bold">
                               {holidays[selectedCalendarDate].year_applies || "ALL"}
                             </span>
@@ -6855,14 +6923,14 @@ export default function HodDashboard() {
                         <button
                           type="button"
                           onClick={() => handleRemoveHoliday(selectedCalendarDate)}
-                          className="p-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-md bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 transition-colors cursor-pointer shrink-0"
                           title="Delete Holiday"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     ) : (
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium">
+                      <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium">
                         Working instructional day. Select an option below to declare as a holiday or examination day.
                       </div>
                     )}
@@ -6871,38 +6939,38 @@ export default function HodDashboard() {
                     <form onSubmit={handleAddHoliday} className="space-y-3 pt-1">
                       {/* Event Type Selector */}
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                        <label className="eyebrow block text-slate-600 mb-1">
                           Category / Event Type
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             type="button"
                             onClick={() => setNewHolidayType("holiday")}
-                            className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-2.5 py-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
                               newHolidayType === "holiday"
-                                ? "bg-purple-600 text-white border-purple-600 shadow-2xs"
-                                : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                                ? "bg-purple-600 text-white border-purple-600 shadow-xs"
+                                : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
                             }`}
                           >
-                            <span>🌴 Holiday</span>
+                            <Calendar className="w-3.5 h-3.5" /> Holiday
                           </button>
                           <button
                             type="button"
                             onClick={() => setNewHolidayType("exam")}
-                            className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                            className={`px-2.5 py-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
                               newHolidayType === "exam"
-                                ? "bg-violet-700 text-white border-violet-700 shadow-2xs"
-                                : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                                ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                                : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
                             }`}
                           >
-                            <span>📝 Examination</span>
+                            <FileText className="w-3.5 h-3.5" /> Examination
                           </button>
                         </div>
                       </div>
 
                       {/* Event Name / Reason */}
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                        <label className="eyebrow block text-slate-600 mb-1">
                           Title / Reason (Shown on sphn.online)
                         </label>
                         <input
@@ -6910,20 +6978,20 @@ export default function HodDashboard() {
                           placeholder={newHolidayType === "exam" ? "e.g. Mid-1 Exam: DBMS & OS" : "e.g. Dussehra Vacation"}
                           value={newHolidayReason}
                           onChange={(e) => setNewHolidayReason(e.target.value)}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 focus:bg-white"
+                          className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-semibold focus:outline-none focus:border-emerald-600 transition-colors"
                           required
                         />
                       </div>
 
                       {/* Scope: Applicable Year */}
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                        <label className="eyebrow block text-slate-600 mb-1">
                           Applicable Batches
                         </label>
                         <select
                           value={newHolidayYear}
                           onChange={(e) => setNewHolidayYear(e.target.value)}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                          className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer transition-colors"
                         >
                           <option value="ALL">All Years (2nd, 3rd & 4th Year)</option>
                           <option value="II">2nd Year Only (25N8)</option>
@@ -6936,8 +7004,8 @@ export default function HodDashboard() {
                       <button
                         type="submit"
                         disabled={!selectedCalendarDate}
-                        className={`w-full py-2.5 rounded-xl font-bold text-xs text-white transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer ${
-                          newHolidayType === "exam" ? "bg-violet-700 hover:bg-violet-600" : "bg-purple-600 hover:bg-purple-500"
+                        className={`w-full py-2.5 rounded-md font-semibold text-xs text-white transition-colors shadow-xs flex items-center justify-center gap-1.5 cursor-pointer ${
+                          newHolidayType === "exam" ? "bg-indigo-600 hover:bg-indigo-700" : "bg-purple-600 hover:bg-purple-700"
                         }`}
                       >
                         <Plus className="w-4 h-4" />
@@ -6948,20 +7016,20 @@ export default function HodDashboard() {
                 </div>
 
                 {/* Bottom Section: Searchable List of Configured Holidays & Exams */}
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
+                      <span className="eyebrow text-slate-700">
                         All Declared Calendar Entries ({Object.keys(holidays).length})
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-white border border-slate-200 p-0.5 rounded-lg text-xs">
+                    <div className="flex items-center gap-1 bg-white border border-slate-300 p-0.5 rounded-md text-xs">
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("ALL")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
-                          holidayFilterTab === "ALL" ? "bg-slate-900 text-white" : "text-slate-600 hover:text-slate-900"
+                        className={`px-2.5 py-1 rounded-[4px] font-semibold cursor-pointer transition-colors ${
+                          holidayFilterTab === "ALL" ? "bg-emerald-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
                         All
@@ -6969,8 +7037,8 @@ export default function HodDashboard() {
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("holiday")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
-                          holidayFilterTab === "holiday" ? "bg-purple-600 text-white" : "text-slate-600 hover:text-slate-900"
+                        className={`px-2.5 py-1 rounded-[4px] font-semibold cursor-pointer transition-colors ${
+                          holidayFilterTab === "holiday" ? "bg-purple-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
                         Holidays
@@ -6978,8 +7046,8 @@ export default function HodDashboard() {
                       <button
                         type="button"
                         onClick={() => setHolidayFilterTab("exam")}
-                        className={`px-2.5 py-1 rounded font-bold cursor-pointer transition-colors ${
-                          holidayFilterTab === "exam" ? "bg-violet-700 text-white" : "text-slate-600 hover:text-slate-900"
+                        className={`px-2.5 py-1 rounded-[4px] font-semibold cursor-pointer transition-colors ${
+                          holidayFilterTab === "exam" ? "bg-indigo-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
                         Exams
@@ -7004,20 +7072,20 @@ export default function HodDashboard() {
                               const [y, m] = dStr.split("-");
                               setCalendarViewDate(new Date(parseInt(y), parseInt(m) - 1, 1));
                             }}
-                            className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition-all cursor-pointer hover:shadow-2xs ${
+                            className={`p-2.5 rounded-md border flex items-center justify-between text-xs transition-colors cursor-pointer ${
                               isExam
-                                ? "bg-violet-50/80 border-violet-200 hover:border-violet-300"
+                                ? "bg-indigo-50/80 border-indigo-200 hover:border-indigo-300"
                                 : "bg-purple-50/80 border-purple-200 hover:border-purple-300"
                             }`}
                           >
                             <div className="truncate pr-2">
                               <div className="flex items-center gap-1.5">
-                                <span className="font-mono font-extrabold text-slate-800">{dStr}</span>
-                                <span className={`text-[9px] font-bold px-1 rounded uppercase ${isExam ? "bg-violet-200 text-violet-900" : "bg-purple-200 text-purple-900"}`}>
+                                <span className="font-mono font-bold text-slate-900">{dStr}</span>
+                                <span className={`text-[9px] font-bold px-1 rounded uppercase ${isExam ? "bg-indigo-200 text-indigo-900" : "bg-purple-200 text-purple-900"}`}>
                                   {isExam ? "Exam" : "Holiday"}
                                 </span>
                               </div>
-                              <div className="text-slate-600 font-bold truncate mt-0.5">{item.reason}</div>
+                              <div className="text-slate-700 font-semibold truncate mt-0.5">{item.reason}</div>
                             </div>
                             <button
                               type="button"
@@ -7025,7 +7093,7 @@ export default function HodDashboard() {
                                 e.stopPropagation();
                                 handleRemoveHoliday(dStr);
                               }}
-                              className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
                               title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -7036,13 +7104,13 @@ export default function HodDashboard() {
                   </div>
 
                   {/* Summary & Rule Note */}
-                  <div className="p-3 rounded-xl bg-purple-50 border border-purple-200 text-[11px] text-purple-950 space-y-1">
+                  <div className="p-3 rounded-md bg-purple-50 border border-purple-200 text-[11px] text-purple-900 space-y-1">
                     <p className="font-bold flex items-center gap-1.5">
-                      <span>ℹ️ Automatic Academic Rules:</span>
+                      <AlertCircle className="w-3.5 h-3.5" /> Automatic Academic Rules:
                     </p>
                     <p>• All <strong>Sundays</strong> are automatically marked with <strong>*</strong> in registers and not counted as absent.</p>
                     <p>• Declared <strong>Holidays</strong> and <strong>Examinations</strong> are marked with <strong>*</strong> and completely excluded from absent penalties.</p>
-                    <p>• When students check on <strong>sphn.online</strong>, these dates appear in purple/violet and display the official reason entered above.</p>
+                    <p>• When students check on <strong>sphn.online</strong>, these dates appear in purple/indigo and display the official reason entered above.</p>
                   </div>
                 </div>
               </div>
@@ -7062,79 +7130,79 @@ export default function HodDashboard() {
       </div>
       {/* ════════ SCANNER SETTINGS MODAL ════════ */}
       {showPwdModal && (
-        <div className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowPwdModal(false); }}>
-          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-[200] bg-slate-900/40 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowPwdModal(false); }}>
+          <div className="w-full max-w-sm bg-white rounded-lg shadow-xl border border-slate-300 overflow-hidden">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+            <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <Settings className="w-5 h-5 text-blue-600" />
+                <div className="w-10 h-10 rounded-md bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                  <Settings className="w-5 h-5 text-emerald-700" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-gray-900">Scanner Settings</h2>
-                  <p className="text-xs text-gray-500">{pwdStep === "verify" ? "Verify your identity first" : "Enter your new passcode"}</p>
+                  <h2 className="text-base font-bold text-slate-950">Scanner Settings</h2>
+                  <p className="text-xs text-slate-600">{pwdStep === "verify" ? "Verify your identity first" : "Enter your new passcode"}</p>
                 </div>
               </div>
-              <button onClick={() => setShowPwdModal(false)} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors text-lg font-light">×</button>
+              <button onClick={() => setShowPwdModal(false)} className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200 hover:border-slate-400 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors cursor-pointer" aria-label="Close settings"><X className="w-3.5 h-3.5" /></button>
             </div>
 
             {/* Step 1: Verify */}
             {pwdStep === "verify" && (
               <form onSubmit={handlePwdVerify} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Current Passcode</label>
+                  <label className="eyebrow block text-slate-600 mb-2">Current Passcode</label>
                   <input
                     type="password"
                     placeholder="Enter current passcode"
                     value={pwdCurrent}
                     onChange={e => { setPwdCurrent(e.target.value); setPwdError(""); }}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none text-center font-mono text-2xl tracking-[0.4em] text-gray-900 bg-gray-50 transition-colors placeholder:text-gray-300 placeholder:text-base placeholder:tracking-normal"
+                    className="w-full px-4 py-3 rounded-md border-2 border-slate-300 focus:border-emerald-600 outline-none text-center font-mono text-2xl tracking-[0.4em] text-slate-900 bg-white transition-colors placeholder:text-slate-300 placeholder:text-base placeholder:tracking-normal"
                     autoFocus
                   />
-                  {pwdError && <p className="text-red-500 text-xs font-semibold text-center mt-2">{pwdError}</p>}
+                  {pwdError && <p className="text-red-700 text-xs font-semibold text-center mt-2">{pwdError}</p>}
                 </div>
-                <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-600/20">
+                <button type="submit" className="w-full py-3 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-colors cursor-pointer">
                   Verify & Continue →
                 </button>
-                <p className="text-center text-xs text-gray-400">Forgot? Use master code to access.</p>
+                <p className="text-center text-xs text-slate-500">Forgot? Use master code to access.</p>
               </form>
             )}
 
             {/* Step 2: Change */}
             {pwdStep === "change" && (
               <form onSubmit={handlePwdChange} className="p-6 space-y-4">
-                <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                  <span className="text-xs font-semibold text-blue-700">Identity verified — set your new passcode below</span>
+                <div className="p-3 rounded-md bg-emerald-50 border border-emerald-200 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span className="text-xs font-semibold text-emerald-800">Identity verified — set your new passcode below</span>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">New Passcode</label>
+                  <label className="eyebrow block text-slate-600 mb-2">New Passcode</label>
                   <input
                     type="password"
                     placeholder="Min 4 characters"
                     value={pwdNew}
                     onChange={e => { setPwdNew(e.target.value); setPwdError(""); }}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none text-center font-mono text-2xl tracking-[0.4em] text-gray-900 bg-gray-50 transition-colors placeholder:text-gray-300 placeholder:text-base placeholder:tracking-normal"
+                    className="w-full px-4 py-3 rounded-md border-2 border-slate-300 focus:border-emerald-600 outline-none text-center font-mono text-2xl tracking-[0.4em] text-slate-900 bg-white transition-colors placeholder:text-slate-300 placeholder:text-base placeholder:tracking-normal"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Confirm Passcode</label>
+                  <label className="eyebrow block text-slate-600 mb-2">Confirm Passcode</label>
                   <input
                     type="password"
                     placeholder="Repeat new passcode"
                     value={pwdConfirm}
                     onChange={e => { setPwdConfirm(e.target.value); setPwdError(""); }}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none text-center font-mono text-2xl tracking-[0.4em] text-gray-900 bg-gray-50 transition-colors placeholder:text-gray-300 placeholder:text-base placeholder:tracking-normal"
+                    className="w-full px-4 py-3 rounded-md border-2 border-slate-300 focus:border-emerald-600 outline-none text-center font-mono text-2xl tracking-[0.4em] text-slate-900 bg-white transition-colors placeholder:text-slate-300 placeholder:text-base placeholder:tracking-normal"
                   />
                 </div>
-                {pwdError && <p className="text-red-500 text-xs font-semibold text-center">{pwdError}</p>}
-                {pwdSuccess && <p className="text-emerald-600 text-sm font-bold text-center">{pwdSuccess}</p>}
+                {pwdError && <p className="text-red-700 text-xs font-semibold text-center">{pwdError}</p>}
+                {pwdSuccess && <p className="text-emerald-700 text-sm font-bold text-center">{pwdSuccess}</p>}
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setPwdStep("verify")} className="flex-1 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm transition-colors">← Back</button>
-                  <button type="submit" className="flex-[2] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm transition-all shadow-md shadow-blue-600/20">Save Passcode</button>
+                  <button type="button" onClick={() => setPwdStep("verify")} className="flex-1 py-3 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-sm transition-colors cursor-pointer">← Back</button>
+                  <button type="submit" className="flex-[2] py-3 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition-colors cursor-pointer">Save Passcode</button>
                 </div>
-                <p className="text-center text-xs text-gray-400">Master override always works as a backup.</p>
+                <p className="text-center text-xs text-slate-500">Master override always works as a backup.</p>
               </form>
             )}
           </div>
@@ -7144,26 +7212,27 @@ export default function HodDashboard() {
       {/* ════════ MENTOR DETAILS MODAL ════════ */}
       {selectedMentorForModal && (
         <div
-          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[200] bg-slate-900/40 flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setSelectedMentorForModal(null); }}
         >
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="w-full max-w-lg bg-white rounded-lg shadow-xl border border-slate-300 overflow-hidden">
             {/* Header */}
-            <div className="p-5 border-b border-gray-100 flex items-start justify-between gap-3 bg-slate-50">
+            <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/70 flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-base font-black uppercase shadow-xs">
+                <div className="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center text-white text-sm font-bold uppercase font-mono shadow-xs">
                   {selectedMentorForModal.name.split(" ").slice(-1)[0]?.charAt(0) || selectedMentorForModal.name.charAt(0)}
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-gray-900">{selectedMentorForModal.name}</h2>
-                  <p className="text-xs text-gray-500 font-mono">{selectedMentorForModal.email}</p>
+                  <h2 className="text-base font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>{selectedMentorForModal.name}</h2>
+                  <p className="text-[11px] text-slate-500 font-mono">{selectedMentorForModal.email}</p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedMentorForModal(null)}
-                className="w-8 h-8 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                aria-label="Close mentor details"
               >
-                ×
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -7171,50 +7240,50 @@ export default function HodDashboard() {
             <div className="p-5 space-y-4 text-xs">
               {/* Role & Section Badges */}
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-1 rounded-lg font-bold bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" />
+                <span className="stamp border-indigo-300 bg-indigo-50 text-indigo-800">
+                  <ShieldCheck className="w-3 h-3" />
                   {selectedMentorForModal.role}
                 </span>
-                <span className="px-2.5 py-1 rounded-lg font-bold bg-blue-50 border border-blue-200 text-blue-700 text-xs">
+                <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
                   {selectedMentorForModal.yearLabel}
                 </span>
-                <span className="px-2.5 py-1 rounded-lg font-bold bg-gray-100 border border-gray-200 text-gray-800 text-xs font-mono">
+                <span className="stamp border-slate-300 bg-slate-100 text-slate-700 font-mono">
                   Section {selectedMentorForModal.section}
                 </span>
               </div>
 
               {/* Allocation details */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Students Assigned</span>
-                  <span className="text-base font-black text-gray-900 font-mono">{selectedMentorForModal.count} Students</span>
+                <div className="p-3 bg-slate-50 rounded-md border border-slate-200">
+                  <span className="eyebrow text-slate-500 block mb-1">Students Assigned</span>
+                  <span className="text-base font-bold text-slate-950 font-mono tabular-nums">{selectedMentorForModal.count} Students</span>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Department</span>
-                  <span className="text-sm font-bold text-gray-800">CSE Data Science</span>
+                <div className="p-3 bg-slate-50 rounded-md border border-slate-200">
+                  <span className="eyebrow text-slate-500 block mb-1">Department</span>
+                  <span className="text-sm font-bold text-slate-900">CSE Data Science</span>
                 </div>
               </div>
 
               {/* Roll Numbers Allocated */}
-              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5">Assigned Roll Range</span>
-                <p className="font-mono text-xs font-bold text-gray-800 bg-white p-2 rounded-lg border border-gray-200 break-words leading-relaxed">
+              <div className="p-3 bg-slate-50 rounded-md border border-slate-200">
+                <span className="eyebrow text-slate-500 block mb-1.5">Assigned Roll Range</span>
+                <p className="font-mono text-xs font-bold text-slate-800 bg-white p-2 rounded-md border border-slate-200 break-words leading-relaxed">
                   {selectedMentorForModal.rollRange}
                 </p>
               </div>
 
               {/* Login Key */}
-              <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100 flex items-center justify-between">
+              <div className="p-3 bg-blue-50 rounded-md border border-blue-200 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Security Passkey</span>
-                  <span className="font-mono text-xs font-black text-blue-900 tracking-widest mt-0.5 block">
+                  <span className="eyebrow text-blue-800 block">Security Passkey</span>
+                  <span className="font-mono text-xs font-bold text-blue-900 tracking-widest mt-0.5 block">
                     {selectedMentorForModal.key || "Not configured"}
                   </span>
                 </div>
                 {selectedMentorForModal.key && (
                   <button
                     onClick={() => handleCopyKey(selectedMentorForModal.key, selectedMentorForModal.id)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs transition-colors cursor-pointer"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white hover:bg-blue-50 border border-blue-300 text-blue-800 font-semibold text-xs transition-colors cursor-pointer"
                   >
                     {copiedKeyId === String(selectedMentorForModal.id) ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedKeyId === String(selectedMentorForModal.id) ? "Copied!" : "Copy Key"}</span>
@@ -7224,10 +7293,10 @@ export default function HodDashboard() {
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+            <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-200 flex justify-end">
               <button
                 onClick={() => setSelectedMentorForModal(null)}
-                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold text-xs text-gray-800 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -7239,80 +7308,81 @@ export default function HodDashboard() {
       {/* ════════ EDIT MENTOR MODAL ════════ */}
       {editMentorModalOpen && mentorEditData && (
         <div
-          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[200] bg-slate-900/40 flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setEditMentorModalOpen(false); }}
         >
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-xl border border-slate-300 overflow-hidden">
             {/* Header */}
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+            <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-md bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center">
                   <Edit3 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-gray-900">Edit Faculty Assignment</h2>
-                  <p className="text-[11px] text-gray-500">{mentorEditData.name}</p>
+                  <h2 className="text-sm font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Edit Faculty Assignment</h2>
+                  <p className="text-[11px] text-slate-500 font-mono">{mentorEditData.name}</p>
                 </div>
               </div>
               <button
                 onClick={() => setEditMentorModalOpen(false)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                aria-label="Close editor"
               >
-                ×
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
             {/* Form */}
             <div className="p-5 space-y-3.5 text-xs">
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Faculty Name</label>
+                <label className="eyebrow block text-slate-600 mb-1">Faculty Name</label>
                 <input
                   type="text"
                   value={mentorEditData.name}
                   disabled
-                  className="w-full h-8 px-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs cursor-not-allowed"
+                  className="w-full h-8 px-3 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Official Email</label>
+                <label className="eyebrow block text-slate-600 mb-1">Official Email</label>
                 <input
                   type="text"
                   value={mentorEditData.email}
                   disabled
-                  className="w-full h-8 px-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 font-mono text-xs cursor-not-allowed"
+                  className="w-full h-8 px-3 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-mono text-xs cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Assigned Section</label>
+                <label className="eyebrow block text-slate-600 mb-1">Assigned Section</label>
                 <input
                   type="text"
                   value={mentorEditData.section}
                   disabled
-                  className="w-full h-8 px-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs cursor-not-allowed"
+                  className="w-full h-8 px-3 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-wider mb-1">Login Key / Passkey</label>
+                <label className="eyebrow block text-slate-600 mb-1">Login Key / Passkey</label>
                 <input
                   type="text"
                   value={editKeyInput}
                   onChange={(e) => setEditKeyInput(e.target.value)}
                   placeholder="Enter login passkey"
-                  className="w-full h-9 px-3 rounded-lg bg-gray-50 border-2 border-blue-200 focus:border-blue-500 text-gray-900 font-mono text-xs font-bold outline-none"
+                  className="w-full h-9 px-3 rounded-md bg-white border border-blue-300 focus:border-blue-600 text-slate-900 font-mono text-xs font-bold outline-none transition-colors"
                 />
-                <p className="text-[10px] text-gray-400 mt-1">This key is used by faculty to log into the Mentor App.</p>
+                <p className="text-[10px] text-slate-500 mt-1">This key is used by faculty to log into the Mentor App.</p>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
+            <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-200 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setEditMentorModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -7336,7 +7406,7 @@ export default function HodDashboard() {
                   }
                 }}
                 disabled={isSavingKey}
-                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                className="px-4 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer"
               >
                 {isSavingKey ? "Saving..." : "Save Changes"}
               </button>
@@ -7348,26 +7418,27 @@ export default function HodDashboard() {
       {/* ════════ BULK PARENT NOTIFICATION MODAL ════════ */}
       {bulkMessageModalOpen && (
         <div
-          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[200] bg-slate-900/40 flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setBulkMessageModalOpen(false); }}
         >
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-lg bg-white rounded-lg shadow-xl border border-slate-300 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Header */}
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+            <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-md bg-red-50 border border-red-200 text-red-700 flex items-center justify-center">
                   <Send className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-gray-900">Broadcast Notice to Parents</h2>
-                  <p className="text-xs text-gray-500">Official HOD Punctuality & Absence Notification</p>
+                  <h2 className="text-base font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Broadcast Notice to Parents</h2>
+                  <p className="text-xs text-slate-600">Official HOD Punctuality &amp; Absence Notification</p>
                 </div>
               </div>
               <button
                 onClick={() => setBulkMessageModalOpen(false)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                aria-label="Close broadcast"
               >
-                ×
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -7375,46 +7446,46 @@ export default function HodDashboard() {
             <div className="p-5 space-y-4 text-xs">
               {/* Target Audience Selector */}
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                <label className="eyebrow block text-slate-600 mb-1.5">
                   Target Recipient Group
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setBulkMessageType("late")}
-                    className={`p-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-md border text-center font-bold transition-colors cursor-pointer ${
                       bulkMessageType === "late"
-                        ? "bg-amber-50 border-amber-400 text-amber-950 ring-2 ring-amber-200"
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                        ? "bg-amber-50 border-amber-400 text-amber-900 ring-2 ring-amber-200"
+                        : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="block text-sm font-black text-amber-900">{problemStats.lateCount}</span>
+                    <span className="block text-sm font-bold text-amber-800 font-mono tabular-nums">{problemStats.lateCount}</span>
                     <span className="text-[10px] text-amber-800">All Late Comers</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setBulkMessageType("unscanned")}
-                    className={`p-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-md border text-center font-bold transition-colors cursor-pointer ${
                       bulkMessageType === "unscanned"
-                        ? "bg-red-50 border-red-400 text-red-950 ring-2 ring-red-200"
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                        ? "bg-red-50 border-red-400 text-red-900 ring-2 ring-red-200"
+                        : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="block text-sm font-black text-red-900">{problemStats.unscannedCount}</span>
+                    <span className="block text-sm font-bold text-red-800 font-mono tabular-nums">{problemStats.unscannedCount}</span>
                     <span className="text-[10px] text-red-800">All Unscanned</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setBulkMessageType("custom")}
-                    className={`p-2.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-md border text-center font-bold transition-colors cursor-pointer ${
                       bulkMessageType === "custom"
-                        ? "bg-blue-50 border-blue-400 text-blue-950 ring-2 ring-blue-200"
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                        ? "bg-blue-50 border-blue-400 text-blue-900 ring-2 ring-blue-200"
+                        : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="block text-sm font-black text-blue-900">{selectedStudentIds.length}</span>
+                    <span className="block text-sm font-bold text-blue-800 font-mono tabular-nums">{selectedStudentIds.length}</span>
                     <span className="text-[10px] text-blue-800">Selected Only</span>
                   </button>
                 </div>
@@ -7422,17 +7493,17 @@ export default function HodDashboard() {
 
               {/* Delivery Channel */}
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                <label className="eyebrow block text-slate-600 mb-1.5">
                   Notification Channel
                 </label>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setBulkBroadcastChannel("whatsapp")}
-                    className={`flex-1 py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`flex-1 py-2 px-3 rounded-md border font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       bulkBroadcastChannel === "whatsapp"
                         ? "bg-emerald-50 border-emerald-400 text-emerald-800 ring-1 ring-emerald-300"
-                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+                        : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                     }`}
                   >
                     <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
@@ -7441,10 +7512,10 @@ export default function HodDashboard() {
                   <button
                     type="button"
                     onClick={() => setBulkBroadcastChannel("sms")}
-                    className={`flex-1 py-2 px-3 rounded-lg border font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`flex-1 py-2 px-3 rounded-md border font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       bulkBroadcastChannel === "sms"
                         ? "bg-blue-50 border-blue-400 text-blue-800 ring-1 ring-blue-300"
-                        : "bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100"
+                        : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                     }`}
                   >
                     <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
@@ -7455,27 +7526,27 @@ export default function HodDashboard() {
 
               {/* Message Template Preview */}
               <div>
-                <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                <label className="eyebrow block text-slate-600 mb-1">
                   Message Content Preview
                 </label>
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 font-sans text-xs text-gray-800 leading-relaxed space-y-1">
+                <div className="p-3 bg-slate-50 rounded-md border border-slate-200 text-xs text-slate-800 leading-relaxed space-y-1">
                   {bulkMessageType === "late" ? (
                     <>
-                      <p className="font-bold text-gray-900">🔔 Late Arrival Advisory:</p>
+                      <p className="font-bold text-slate-900">🔔 Late Arrival Advisory:</p>
                       <p>
                         "Dear Parent, your ward was marked <strong>LATE</strong> today ({logDate}) at Sphoorthy Engineering College. College timing commences at <strong>09:00 AM</strong>. Repeated late entries affect academic attendance records. Please advise punctuality. — <em>HOD, CSE Data Science</em>"
                       </p>
                     </>
                   ) : bulkMessageType === "unscanned" ? (
                     <>
-                      <p className="font-bold text-gray-900">⚠️ Absence & Safety Alert:</p>
+                      <p className="font-bold text-slate-900">⚠️ Absence &amp; Safety Alert:</p>
                       <p>
                         "Dear Parent, your ward has <strong>NOT SCANNED</strong> into the college campus today ({logDate}). If they have not arrived, please confirm their status with the faculty mentor or department office. — <em>HOD, CSE Data Science</em>"
                       </p>
                     </>
                   ) : (
                     <>
-                      <p className="font-bold text-gray-900">📢 Department Circular:</p>
+                      <p className="font-bold text-slate-900">📢 Department Circular:</p>
                       <p>
                         "Dear Parent, this is an official attendance notice regarding your ward's attendance status today ({logDate}) at Sphoorthy Engineering College CSE-DS Dept. — <em>HOD</em>"
                       </p>
@@ -7486,9 +7557,9 @@ export default function HodDashboard() {
 
               {/* Broadcast Alert */}
               {bulkBroadcastSuccess && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 flex items-center gap-2">
+                <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-md text-emerald-800 flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="font-bold">
+                  <span className="font-semibold">
                     Broadcast queued successfully! {bulkMessageType === "late" ? problemStats.lateCount : bulkMessageType === "unscanned" ? problemStats.unscannedCount : selectedStudentIds.length} parent alerts sent via {bulkBroadcastChannel.toUpperCase()}.
                   </span>
                 </div>
@@ -7496,11 +7567,11 @@ export default function HodDashboard() {
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
+            <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-200 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setBulkMessageModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -7519,7 +7590,7 @@ export default function HodDashboard() {
                   }, 800);
                 }}
                 disabled={bulkBroadcastSending || (bulkMessageType === "custom" && selectedStudentIds.length === 0)}
-                className="px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-xs transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-1.5 rounded-md bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold text-xs transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
                 {bulkBroadcastSending ? (
                   <>
@@ -7541,26 +7612,27 @@ export default function HodDashboard() {
       {/* ════════ ADD / EDIT STUDENT REMARK & EXCUSE MODAL ════════ */}
       {remarkModalData && (
         <div
-          className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[200] bg-slate-900/40 flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setRemarkModalData(null); }}
         >
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-xl border border-slate-300 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Header */}
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-slate-50">
+            <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-md bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center">
                   <FileEdit className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-gray-900">Document Reason & Excuse</h2>
-                  <p className="text-[11px] text-gray-500">{remarkModalData.student.name} ({remarkModalData.student.uniqueId})</p>
+                  <h2 className="text-sm font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Document Reason &amp; Excuse</h2>
+                  <p className="text-[11px] text-slate-500 font-mono">{remarkModalData.student.name} ({remarkModalData.student.uniqueId})</p>
                 </div>
               </div>
               <button
                 onClick={() => setRemarkModalData(null)}
-                className="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors text-lg cursor-pointer"
+                className="w-7 h-7 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                aria-label="Close remark"
               >
-                ×
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
@@ -7568,7 +7640,7 @@ export default function HodDashboard() {
             <div className="p-5 space-y-3.5 text-xs">
               {/* Quick Preset Buttons */}
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                <label className="eyebrow block text-slate-600 mb-1.5">
                   Select Valid Reason Preset
                 </label>
                 <div className="grid grid-cols-2 gap-1.5">
@@ -7587,10 +7659,10 @@ export default function HodDashboard() {
                         setRemarkPreset(preset);
                         if (!remarkInput || remarkInput === remarkPreset) setRemarkInput(preset);
                       }}
-                      className={`p-2 rounded-lg border text-left font-bold text-[11px] transition-all cursor-pointer ${
+                      className={`p-2 rounded-md border text-left font-semibold text-[11px] transition-colors cursor-pointer ${
                         remarkPreset === preset
                           ? "bg-blue-50 border-blue-400 text-blue-900 ring-1 ring-blue-200"
-                          : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                          : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
                       }`}
                     >
                       {preset}
@@ -7601,7 +7673,7 @@ export default function HodDashboard() {
 
               {/* Custom Remark Input */}
               <div>
-                <label className="block text-[10px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                <label className="eyebrow block text-slate-600 mb-1">
                   Custom Remark / Description
                 </label>
                 <input
@@ -7609,15 +7681,15 @@ export default function HodDashboard() {
                   value={remarkInput}
                   onChange={(e) => setRemarkInput(e.target.value)}
                   placeholder="e.g. Route 12 college bus punctured at LB Nagar"
-                  className="w-full h-9 px-3 rounded-lg bg-gray-50 border border-gray-300 focus:border-blue-500 text-gray-900 font-medium text-xs outline-none"
+                  className="w-full h-9 px-3 rounded-md bg-white border border-slate-300 focus:border-blue-600 text-slate-900 font-medium text-xs outline-none transition-colors"
                 />
               </div>
 
               {/* Excused Toggle */}
-              <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200 flex items-center justify-between">
+              <div className="p-3 bg-emerald-50 rounded-md border border-emerald-200 flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-emerald-900 block">Mark as Valid / Excused</span>
-                  <span className="text-[10px] text-emerald-700">Will mark this late entry or absence as approved by HOD.</span>
+                  <span className="text-[10px] text-emerald-800">Will mark this late entry or absence as approved by HOD.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -7629,7 +7701,7 @@ export default function HodDashboard() {
             </div>
 
             {/* Actions */}
-            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+            <div className="px-5 py-3 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between">
               {remarksMap[`${remarkModalData.student.id}_${logDate}`] ? (
                 <button
                   type="button"
@@ -7641,7 +7713,7 @@ export default function HodDashboard() {
                     localStorage.setItem("hod_student_remarks_v1", JSON.stringify(updated));
                     setRemarkModalData(null);
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-md bg-red-50 hover:bg-red-100 border border-red-300 text-red-800 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Delete Remark
                 </button>
@@ -7651,7 +7723,7 @@ export default function HodDashboard() {
                 <button
                   type="button"
                   onClick={() => setRemarkModalData(null)}
-                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -7672,7 +7744,7 @@ export default function HodDashboard() {
                     localStorage.setItem("hod_student_remarks_v1", JSON.stringify(updated));
                     setRemarkModalData(null);
                   }}
-                  className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
+                  className="px-4 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer"
                 >
                   Save Remark
                 </button>

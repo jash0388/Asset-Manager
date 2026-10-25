@@ -25,7 +25,8 @@ import {
   UserCheck,
   Clock,
   ClipboardCheck,
-  BookOpen
+  BookOpen,
+  X
 } from "lucide-react";
 
 type StudentUser = {
@@ -661,142 +662,135 @@ export default function InchargeDashboard() {
   const greenCount = analyticsList.filter((s) => s.flag === "GREEN").length;
 
   return (
-    <div style={{ backgroundColor: "#f8fafc", color: "#0f172a" }} className="min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans bg-slate-100 text-slate-900">
       {/* Header Bar */}
-      <header style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border-b px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xs">
-        <div className="flex items-center gap-3.5">
-          <div style={{ backgroundColor: "#2563eb" }} className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold shadow-md">
-            <Award className="w-6 h-6 text-white" />
+      <header className="bg-white border-b border-slate-300/70 px-4 sm:px-6 py-4 flex items-center justify-between gap-3 sticky top-0 z-40 shadow-xs">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-10 h-10 rounded-md bg-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+            <Award className="w-5 h-5 text-white" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 style={{ color: "#0f172a" }} className="text-base sm:text-lg font-black tracking-tight">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight truncate" style={{ fontFamily: "var(--app-font-display)" }}>
                 {activeAllocation.name}
               </h1>
-              <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black border">
+              <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                 Sec {activeAllocation.section}
               </span>
             </div>
-            <p style={{ color: "#1e40af" }} className="text-xs font-bold mt-0.5">
-              {activeAllocation.role} ({activeAllocation.yearLabel}) • CSE Data Science
+            <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+              {activeAllocation.role} ({activeAllocation.yearLabel}) · CSE Data Science
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => {
               setPermissionModalOpen(true);
               setPermissionErrorMsg("");
               setPermissionSuccessMsg("");
             }}
-            style={{ backgroundColor: "#10b981", color: "#ffffff", borderColor: "#10b981" }}
-            className="px-3.5 sm:px-4 py-2 rounded-xl font-extrabold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 hover:opacity-95"
+            className="px-3.5 sm:px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             title="Mark attendance for students taking permission / On-Duty"
           >
-            <ClipboardCheck className="w-4 h-4 text-white" />
+            <ClipboardCheck className="w-4 h-4" />
             <span className="hidden sm:inline">Permission / OD Attendance</span>
             <span className="sm:hidden">Permission</span>
           </button>
 
           <button
             onClick={() => navigate("/mentor")}
-            style={{ backgroundColor: "#2563eb", color: "#ffffff", borderColor: "#2563eb" }}
-            className="px-3.5 sm:px-4 py-2 rounded-xl font-bold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+            className="px-3.5 sm:px-4 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Clock className="w-3.5 h-3.5 text-white" />
+            <Clock className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Take Class Attendance</span>
             <span className="sm:hidden">Take Class</span>
           </button>
 
           <button
             onClick={logout}
-            style={{ backgroundColor: "#f1f5f9", color: "#334155", borderColor: "#cbd5e1" }}
-            className="px-3 py-2 rounded-xl font-bold text-xs border flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+            className="px-3 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <LogOut className="w-4 h-4 text-slate-600" />
+            <LogOut className="w-4 h-4" />
             <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 p-3 sm:p-4 max-w-6xl mx-auto w-full space-y-3">
+      <div className="flex-1 p-3 sm:p-4 max-w-6xl mx-auto w-full space-y-4">
         {/* Navigation Switcher Tabs */}
-        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border p-1.5 rounded-xl flex flex-wrap gap-1.5 shadow-xs mb-1">
+        <div className="flex flex-wrap gap-1.5">
           <button
             onClick={() => navigate("/incharge-dashboard")}
-            style={{ backgroundColor: "#2563eb", color: "#ffffff" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+            className="px-4 py-2 rounded-md bg-emerald-600 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Award className="w-3.5 h-3.5" />
             Class Incharge Portal
           </button>
           <button
             onClick={() => navigate("/mentor")}
-            style={{ backgroundColor: "#f1f5f9", color: "#334155" }}
-            className="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer hover:bg-gray-200"
+            className="px-4 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Clock className="w-3.5 h-3.5 text-slate-550" />
+            <Clock className="w-3.5 h-3.5" />
             Take Class Attendance
           </button>
         </div>
 
         {/* Allocation Info Banner */}
-        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-          <div>
-            <span style={{ backgroundColor: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe" }} className="text-[10px] font-black uppercase tracking-wider border px-2.5 py-0.5 rounded-full">
-              Assigned Mentoring Roster
-            </span>
-            <h2 style={{ color: "#0f172a" }} className="text-lg font-black mt-1">
-              Roll Range: {activeAllocation.rollRange}
+        <div className="bg-card border border-slate-300/70 rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="min-w-0">
+            <p className="eyebrow text-slate-500">Assigned Mentoring Roster</p>
+            <h2 className="text-base sm:text-lg font-bold text-slate-950 mt-1 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
+              Roll Range: <span className="font-mono">{activeAllocation.rollRange}</span>
             </h2>
-            <p style={{ color: "#475569" }} className="text-xs font-bold mt-0.5">
-              Assigned Mentored Capacity: {activeAllocation.count} Students
+            <p className="text-xs text-slate-500 mt-0.5">
+              Assigned Mentored Capacity: <span className="font-mono font-semibold text-slate-800">{activeAllocation.count} Students</span>
             </p>
           </div>
 
           {/* Year & Scope Selectors */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 shrink-0">
             {/* Year Selector Tabs */}
-            <div style={{ backgroundColor: "#f1f5f9", borderColor: "#cbd5e1" }} className="flex p-1 rounded-xl border text-xs font-black">
+            <div className="flex flex-wrap gap-1">
               <button
                 onClick={() => setSelectedYearFilter("ALL")}
-                style={{
-                  backgroundColor: selectedYearFilter === "ALL" ? "#2563eb" : "transparent",
-                  color: selectedYearFilter === "ALL" ? "#ffffff" : "#475569",
-                }}
-                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                className={`px-3 py-1.5 rounded-md transition-colors cursor-pointer text-xs font-semibold ${
+                  selectedYearFilter === "ALL"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
+                }`}
               >
                 All Years
               </button>
               <button
                 onClick={() => setSelectedYearFilter("4")}
-                style={{
-                  backgroundColor: selectedYearFilter === "4" ? "#2563eb" : "transparent",
-                  color: selectedYearFilter === "4" ? "#ffffff" : "#475569",
-                }}
-                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                className={`px-3 py-1.5 rounded-md transition-colors cursor-pointer text-xs font-semibold ${
+                  selectedYearFilter === "4"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
+                }`}
               >
                 4th Yr
               </button>
               <button
                 onClick={() => setSelectedYearFilter("3")}
-                style={{
-                  backgroundColor: selectedYearFilter === "3" ? "#2563eb" : "transparent",
-                  color: selectedYearFilter === "3" ? "#ffffff" : "#475569",
-                }}
-                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                className={`px-3 py-1.5 rounded-md transition-colors cursor-pointer text-xs font-semibold ${
+                  selectedYearFilter === "3"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
+                }`}
               >
                 3rd Yr
               </button>
               <button
                 onClick={() => setSelectedYearFilter("2")}
-                style={{
-                  backgroundColor: selectedYearFilter === "2" ? "#2563eb" : "transparent",
-                  color: selectedYearFilter === "2" ? "#ffffff" : "#475569",
-                }}
-                className="px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                className={`px-3 py-1.5 rounded-md transition-colors cursor-pointer text-xs font-semibold ${
+                  selectedYearFilter === "2"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
+                }`}
               >
                 2nd Yr
               </button>
@@ -804,21 +798,21 @@ export default function InchargeDashboard() {
 
             <button
               onClick={() => setViewScope("MENTORED")}
-              style={{
-                backgroundColor: viewScope === "MENTORED" ? "#2563eb" : "#f1f5f9",
-                color: viewScope === "MENTORED" ? "#ffffff" : "#334155",
-              }}
-              className="px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border border-transparent shadow-xs"
+              className={`px-3.5 py-2 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
+                viewScope === "MENTORED"
+                  ? "bg-emerald-600 text-white"
+                  : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
+              }`}
             >
               My Mentored ({analyticsList.length})
             </button>
             <button
               onClick={() => setViewScope("FULL_SECTION")}
-              style={{
-                backgroundColor: viewScope === "FULL_SECTION" ? "#2563eb" : "#f1f5f9",
-                color: viewScope === "FULL_SECTION" ? "#ffffff" : "#334155",
-              }}
-              className="px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border border-transparent shadow-xs"
+              className={`px-3.5 py-2 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
+                viewScope === "FULL_SECTION"
+                  ? "bg-emerald-600 text-white"
+                  : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
+              }`}
             >
               Full Sec {activeAllocation.section}
             </button>
@@ -829,83 +823,76 @@ export default function InchargeDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             onClick={() => setRiskFlagFilter("RED")}
-            style={{
-              backgroundColor: "#ffffff",
-              borderColor: riskFlagFilter === "RED" ? "#e11d48" : "#e2e8f0",
-              boxShadow: riskFlagFilter === "RED" ? "0 0 0 2px rgba(225,29,72,0.2)" : "none",
-            }}
-            className="p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer shadow-xs"
+            className={`bg-card p-3.5 rounded-lg border text-left transition-all cursor-pointer shadow-xs relative overflow-hidden ${
+              riskFlagFilter === "RED" ? "border-red-500 ring-2 ring-red-500/20" : "border-slate-300/70"
+            }`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span style={{ color: "#be123c" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                <AlertCircle className="w-4 h-4 text-rose-600" />
-                🔴 RED FLAG (&lt; 65%)
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-red-600" aria-hidden />
+            <div className="flex items-center justify-between mb-2.5 gap-2">
+              <span className="eyebrow text-red-700 flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5" />
+                RED FLAG (&lt; 65%)
               </span>
-              <span style={{ backgroundColor: "#e11d48", color: "#ffffff" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black">
+              <span className="stamp border-red-300 bg-red-50 text-red-800">
                 Critical
               </span>
             </div>
-            <p style={{ color: "#0f172a" }} className="text-2xl font-black">{redCount} Students</p>
-            <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Shortage Risk • Requires Condonation / Parent Notice</p>
+            <p className="text-[26px] leading-none font-bold text-slate-950 font-mono tabular-nums">{redCount}</p>
+            <p className="text-[10.5px] text-slate-500 mt-1.5">Students · Shortage risk — condonation / parent notice</p>
           </button>
 
           <button
             onClick={() => setRiskFlagFilter("YELLOW")}
-            style={{
-              backgroundColor: "#ffffff",
-              borderColor: riskFlagFilter === "YELLOW" ? "#f59e0b" : "#e2e8f0",
-              boxShadow: riskFlagFilter === "YELLOW" ? "0 0 0 2px rgba(245,158,11,0.2)" : "none",
-            }}
-            className="p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer shadow-xs"
+            className={`bg-card p-3.5 rounded-lg border text-left transition-all cursor-pointer shadow-xs relative overflow-hidden ${
+              riskFlagFilter === "YELLOW" ? "border-amber-500 ring-2 ring-amber-500/20" : "border-slate-300/70"
+            }`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span style={{ color: "#b45309" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-amber-600" />
-                🟡 YELLOW FLAG (65%–74%)
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500" aria-hidden />
+            <div className="flex items-center justify-between mb-2.5 gap-2">
+              <span className="eyebrow text-amber-700 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                YELLOW FLAG (65%–74%)
               </span>
-              <span style={{ backgroundColor: "#fbbf24", color: "#000000" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black">
+              <span className="stamp border-amber-400 bg-amber-100 text-amber-900">
                 Warning
               </span>
             </div>
-            <p style={{ color: "#0f172a" }} className="text-2xl font-black">{yellowCount} Students</p>
-            <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Recoverable • Needs Consecutive Classes for 75%</p>
+            <p className="text-[26px] leading-none font-bold text-slate-950 font-mono tabular-nums">{yellowCount}</p>
+            <p className="text-[10.5px] text-slate-500 mt-1.5">Students · Recoverable — needs consecutive classes for 75%</p>
           </button>
 
           <button
             onClick={() => setRiskFlagFilter("GREEN")}
-            style={{
-              backgroundColor: "#ffffff",
-              borderColor: riskFlagFilter === "GREEN" ? "#10b981" : "#e2e8f0",
-              boxShadow: riskFlagFilter === "GREEN" ? "0 0 0 2px rgba(16,185,129,0.2)" : "none",
-            }}
-            className="p-3.5 rounded-xl border-2 text-left transition-all cursor-pointer shadow-xs"
+            className={`bg-card p-3.5 rounded-lg border text-left transition-all cursor-pointer shadow-xs relative overflow-hidden ${
+              riskFlagFilter === "GREEN" ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-slate-300/70"
+            }`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span style={{ color: "#047857" }} className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-                <CheckCircle className="w-4 h-4 text-emerald-600" />
-                🟢 GREEN FLAG (≥ 75%)
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+            <div className="flex items-center justify-between mb-2.5 gap-2">
+              <span className="eyebrow text-emerald-700 flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5" />
+                GREEN FLAG (≥ 75%)
               </span>
-              <span style={{ backgroundColor: "#10b981", color: "#ffffff" }} className="px-2.5 py-0.5 rounded-full text-[10px] font-black">
+              <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                 Safe
               </span>
             </div>
-            <p style={{ color: "#0f172a" }} className="text-2xl font-black">{greenCount} Students</p>
-            <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">Good Standing • Attendance Target Met</p>
+            <p className="text-[26px] leading-none font-bold text-slate-950 font-mono tabular-nums">{greenCount}</p>
+            <p className="text-[10.5px] text-slate-500 mt-1.5">Students · Good standing — attendance target met</p>
           </button>
         </div>
 
         {/* Toolbar & Student List */}
-        <div style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }} className="border rounded-xl p-4 space-y-3 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-card border border-slate-300/70 rounded-lg p-4 space-y-3 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search student name or roll number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ backgroundColor: "#f8fafc", borderColor: "#cbd5e1", color: "#0f172a" }}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs font-bold focus:outline-none"
+                className="w-full pl-9 pr-4 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
               />
             </div>
 
@@ -913,57 +900,79 @@ export default function InchargeDashboard() {
               <select
                 value={riskFlagFilter}
                 onChange={(e: any) => setRiskFlagFilter(e.target.value)}
-                style={{ backgroundColor: "#f8fafc", borderColor: "#cbd5e1", color: "#0f172a" }}
-                className="px-3 py-2 rounded-xl border text-xs font-bold focus:outline-none"
+                className="px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-800 focus:outline-none focus:border-emerald-600 cursor-pointer"
               >
-                <option value="ALL">All Risk Flags (🔴 🟡 🟢)</option>
-                <option value="RED">🔴 Red Flag (&lt; 65%)</option>
-                <option value="YELLOW">🟡 Yellow Flag (65%–74%)</option>
-                <option value="GREEN">🟢 Green Flag (≥ 75%)</option>
+                <option value="ALL">All Risk Flags</option>
+                <option value="RED">Red Flag (&lt; 65%)</option>
+                <option value="YELLOW">Yellow Flag (65%–74%)</option>
+                <option value="GREEN">Green Flag (≥ 75%)</option>
               </select>
             </div>
           </div>
 
           {/* Student Cards Inner Scroll */}
-          <div className="space-y-3 pt-2 max-h-[58vh] overflow-y-auto pr-2 custom-scrollbar contain-paint">
+          <div className="space-y-3 pt-1 max-h-[58vh] overflow-y-auto pr-1 custom-scrollbar contain-paint">
             {filteredAnalyticsList.length === 0 ? (
-              <div style={{ color: "#64748b" }} className="p-12 text-center text-xs font-bold">
-                No students found matching your search or risk flag filter.
+              <div className="p-12 text-center space-y-2">
+                <Users className="w-8 h-8 text-slate-400 mx-auto" />
+                <p className="text-[13px] text-slate-600">No students found matching your search or risk flag filter.</p>
               </div>
             ) : (
               filteredAnalyticsList.map((item) => (
                 <div
                   key={item.student.id}
                   onClick={() => setSelectedStudentForDetails(item.student)}
-                  style={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0" }}
-                  className={`border rounded-2xl p-4 transition-all cursor-pointer space-y-3 group shadow-xs hover:border-purple-300 ${item.cardBorder}`}
+                  className={`bg-white border border-slate-300/70 rounded-lg p-4 transition-all cursor-pointer space-y-3 group shadow-xs hover:border-slate-400 border-l-4 ${
+                    item.flag === "RED"
+                      ? "border-l-red-600"
+                      : item.flag === "YELLOW"
+                      ? "border-l-amber-500"
+                      : "border-l-emerald-500"
+                  }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3.5">
-                      <div style={{ backgroundColor: "#f1f5f9", borderColor: "#cbd5e1" }} className="w-10 h-10 rounded-xl border flex items-center justify-center font-black text-base">
-                        {item.dotColor}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-10 h-10 rounded-md border flex items-center justify-center shrink-0 ${
+                        item.flag === "RED"
+                          ? "bg-red-50 border-red-200 text-red-600"
+                          : item.flag === "YELLOW"
+                          ? "bg-amber-50 border-amber-200 text-amber-600"
+                          : "bg-emerald-50 border-emerald-200 text-emerald-600"
+                      }`}>
+                        {item.flag === "RED" ? (
+                          <AlertCircle className="w-5 h-5" />
+                        ) : item.flag === "YELLOW" ? (
+                          <AlertTriangle className="w-5 h-5" />
+                        ) : (
+                          <CheckCircle className="w-5 h-5" />
+                        )}
                       </div>
-                      <div>
-                        {/* EXPLICIT 100% PITCH BLACK BOLD STUDENT NAME */}
-                        <h4 style={{ color: "#0f172a" }} className="text-base font-black tracking-tight group-hover:text-purple-700 transition-colors">
+                      <div className="min-w-0">
+                        <h4 className="text-[15px] font-bold text-slate-950 tracking-tight group-hover:text-emerald-700 transition-colors truncate" style={{ fontFamily: "var(--app-font-display)" }}>
                           {item.student.name}
                         </h4>
-                        <div className="flex items-center gap-2 mt-0.5 text-xs font-mono font-bold">
-                          <span style={{ color: "#334155" }}>Roll: <strong style={{ color: "#047857" }} className="font-extrabold">{item.student.uniqueId || item.student.unique_id || "N/A"}</strong></span>
-                          <span style={{ color: "#cbd5e1" }}>•</span>
-                          <span style={{ color: "#334155" }}>Year: <strong style={{ color: "#0f172a" }} className="font-bold">{item.secInfo.yearLabel}</strong></span>
-                          <span style={{ color: "#cbd5e1" }}>•</span>
-                          <span style={{ color: "#334155" }}>Sec: <strong style={{ color: "#6b21a8" }} className="font-bold">{item.secInfo.name}</strong></span>
+                        <div className="flex items-center gap-2 mt-0.5 text-[11px] font-mono text-slate-500 flex-wrap">
+                          <span>Roll: <span className="font-semibold text-slate-800">{item.student.uniqueId || item.student.unique_id || "N/A"}</span></span>
+                          <span className="text-slate-300">·</span>
+                          <span>Year: <span className="font-semibold text-slate-800">{item.secInfo.yearLabel}</span></span>
+                          <span className="text-slate-300">·</span>
+                          <span>Sec: <span className="font-semibold text-slate-800">{item.secInfo.name}</span></span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 shrink-0">
                       <div className="text-right">
-                        <span style={item.badgeStyle} className="px-3.5 py-1 rounded-full text-xs font-black shadow-xs inline-block">
+                        <span className={`stamp ${
+                          item.flag === "RED"
+                            ? "border-red-300 bg-red-50 text-red-800"
+                            : item.flag === "YELLOW"
+                            ? "border-amber-400 bg-amber-100 text-amber-900"
+                            : "border-emerald-300 bg-emerald-50 text-emerald-800"
+                        }`}>
                           {item.label} ({item.percent}%)
                         </span>
-                        <p style={{ color: "#475569" }} className="text-xs font-bold mt-1">
+                        <p className="text-[11px] text-slate-500 mt-1.5 font-mono">
                           {item.presentDays} / {item.totalWorkingDays} Working Days Attended
                         </p>
                       </div>
@@ -971,19 +980,26 @@ export default function InchargeDashboard() {
                   </div>
 
                   {/* Recovery Math Banner */}
-                  <div style={item.bannerStyle} className="p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className={`p-3 rounded-md border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                    item.flag === "RED"
+                      ? "bg-red-50 border-red-200 text-red-900"
+                      : item.flag === "YELLOW"
+                      ? "bg-amber-50 border-amber-200 text-amber-900"
+                      : "bg-emerald-50 border-emerald-200 text-emerald-900"
+                  }`}>
+                    <div className="flex items-center gap-2 min-w-0">
                       <TrendingUp className="w-4 h-4 shrink-0" />
-                      <span className="font-bold">{item.tip}</span>
+                      <span className="font-semibold">{item.tip}</span>
                     </div>
 
                     {item.classesNeededFor75 > 0 ? (
-                      <span style={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", color: "#0f172a" }} className="font-mono font-black text-xs px-3 py-1 rounded-lg border shrink-0 shadow-xs">
+                      <span className="font-mono font-semibold text-xs px-3 py-1 rounded-md bg-white border border-slate-300 text-slate-900 shrink-0 whitespace-nowrap">
                         Target +{item.classesNeededFor75} Classes Needed
                       </span>
                     ) : (
-                      <span style={{ backgroundColor: "#059669", color: "#ffffff" }} className="font-mono font-black text-xs px-3 py-1 rounded-lg shrink-0 shadow-xs">
-                        ✓ Target Met
+                      <span className="font-mono font-semibold text-xs px-3 py-1 rounded-md bg-emerald-600 text-white shrink-0 inline-flex items-center gap-1 whitespace-nowrap">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Target Met
                       </span>
                     )}
                   </div>
@@ -1006,31 +1022,30 @@ export default function InchargeDashboard() {
 
       {/* ─── Mark Student Permission / OD Attendance Modal ─── */}
       {permissionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 animate-in fade-in duration-200">
           <div
-            style={{ backgroundColor: "#ffffff" }}
-            className="rounded-3xl border border-gray-200 shadow-2xl max-w-2xl w-full max-h-[94vh] flex flex-col overflow-hidden text-slate-900"
+            className="bg-white rounded-lg border border-slate-300 shadow-xl max-w-2xl w-full max-h-[94vh] flex flex-col overflow-hidden text-slate-900"
           >
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-emerald-50 via-teal-50 to-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md">
+            <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-md bg-emerald-600 flex items-center justify-center text-white shrink-0">
                   <ClipboardCheck className="w-5 h-5" />
                 </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-900">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>
                     Mark Student Permission / OD Attendance
                   </h3>
-                  <p className="text-xs font-bold text-emerald-800">
-                    Section {activeAllocation.section} ({activeAllocation.yearLabel}) • Grant class attendance for permitted students
+                  <p className="text-[11px] text-slate-500">
+                    Section {activeAllocation.section} ({activeAllocation.yearLabel}) · Grant class attendance for permitted students
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setPermissionModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-all cursor-pointer"
+                className="w-8 h-8 shrink-0 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -1038,34 +1053,34 @@ export default function InchargeDashboard() {
             <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5 text-sm">
               {/* Status alerts */}
               {permissionErrorMsg && (
-                <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-bold flex items-center gap-2">
+                <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-md text-xs font-semibold flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{permissionErrorMsg}</span>
                 </div>
               )}
               {permissionSuccessMsg && (
-                <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2">
+                <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-xs font-semibold flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-600" />
                   <span>{permissionSuccessMsg}</span>
                 </div>
               )}
 
               {/* Step 1: Date Picker */}
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="bg-slate-50 border border-slate-200 rounded-md p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <label className="block text-xs font-black uppercase text-gray-600 tracking-wider mb-1">
-                    1. Select Date & Day
+                  <label className="eyebrow block text-slate-600 mb-1">
+                    1. Select Date &amp; Day
                   </label>
-                  <p className="text-xs text-gray-400">Date on which the student was given permission</p>
+                  <p className="text-xs text-slate-500">Date on which the student was given permission</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="date"
                     value={permissionDate}
                     onChange={(e) => setPermissionDate(e.target.value)}
-                    className="px-3.5 py-2 rounded-xl bg-white border border-gray-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-xs"
+                    className="px-3.5 py-2 rounded-md bg-white border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-emerald-600"
                   />
-                  <span className="px-3 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-200 uppercase">
+                  <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                     {targetDayName}
                   </span>
                 </div>
@@ -1073,12 +1088,12 @@ export default function InchargeDashboard() {
 
               {/* Step 2: Student Multi-Select Box (Just like Training Manage Students) */}
               <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
-                    <label className="block text-xs font-black uppercase text-gray-700 tracking-wider">
+                    <label className="eyebrow block text-slate-600">
                       2. Select Students ({selectedStudentIds.length} Selected)
                     </label>
-                    <p className="text-xs text-gray-400">Choose the students who took permission</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Choose the students who took permission</p>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
@@ -1087,7 +1102,7 @@ export default function InchargeDashboard() {
                         const allIds = modalFilteredStudents.map(s => s.id);
                         setSelectedStudentIds(Array.from(new Set([...selectedStudentIds, ...allIds])));
                       }}
-                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer"
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
                     >
                       Select All Visible ({modalFilteredStudents.length})
                     </button>
@@ -1095,7 +1110,7 @@ export default function InchargeDashboard() {
                       <button
                         type="button"
                         onClick={() => setSelectedStudentIds([])}
-                        className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all cursor-pointer"
+                        className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-white text-slate-700 hover:border-slate-400 border border-slate-300 transition-colors cursor-pointer"
                       >
                         Clear
                       </button>
@@ -1105,20 +1120,20 @@ export default function InchargeDashboard() {
 
                 {/* Search Bar */}
                 <div className="relative">
-                  <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={permissionStudentSearch}
                     onChange={(e) => setPermissionStudentSearch(e.target.value)}
                     placeholder="Search student by name or roll number..."
-                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs font-semibold text-slate-800 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-9 pr-4 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
                   />
                 </div>
 
                 {/* Students Checkbox Container with internal scroll */}
-                <div className="border border-gray-200 rounded-2xl max-h-[190px] overflow-y-auto divide-y divide-gray-100 bg-white">
+                <div className="border border-slate-300 rounded-md max-h-[190px] overflow-y-auto divide-y divide-slate-200 bg-white">
                   {modalFilteredStudents.length === 0 ? (
-                    <div className="p-6 text-center text-xs font-semibold text-gray-400">
+                    <div className="p-6 text-center text-xs font-medium text-slate-500">
                       No students found matching your search.
                     </div>
                   ) : (
@@ -1132,8 +1147,8 @@ export default function InchargeDashboard() {
                               prev.includes(s.id) ? prev.filter(id => id !== s.id) : [...prev, s.id]
                             );
                           }}
-                          className={`px-3.5 py-2.5 flex items-center justify-between cursor-pointer transition-colors ${
-                            isSelected ? "bg-emerald-50/70" : "hover:bg-gray-50"
+                          className={`px-3.5 py-2.5 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                            isSelected ? "bg-emerald-50/70" : "hover:bg-slate-50"
                           }`}
                         >
                           <div className="flex items-center gap-3 min-w-0">
@@ -1141,14 +1156,14 @@ export default function InchargeDashboard() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => {}}
-                              className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 pointer-events-none"
+                              className="w-4 h-4 rounded accent-emerald-600 border-slate-300 pointer-events-none"
                             />
                             <div className="min-w-0">
-                              <p className="font-extrabold text-xs text-slate-900 truncate">{s.name}</p>
-                              <p className="text-[11px] font-mono text-gray-500">{s.uniqueId || s.unique_id || "—"}</p>
+                              <p className="font-semibold text-xs text-slate-950 truncate">{s.name}</p>
+                              <p className="text-[11px] font-mono text-slate-500">{s.uniqueId || s.unique_id || "—"}</p>
                             </div>
                           </div>
-                          <span className="text-[10px] font-bold text-gray-400 uppercase bg-gray-100 px-2 py-0.5 rounded">
+                          <span className="stamp border-slate-300 bg-slate-50 text-slate-700 shrink-0">
                             {s.section || activeAllocation.section}
                           </span>
                         </div>
@@ -1162,10 +1177,10 @@ export default function InchargeDashboard() {
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
-                    <label className="block text-xs font-black uppercase text-gray-700 tracking-wider">
+                    <label className="eyebrow block text-slate-600">
                       3. Select Class Periods to Mark Present ({selectedScheduleIds.length} Selected)
                     </label>
-                    <p className="text-xs text-gray-400">Choose which lectures or lab periods to grant attendance for</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Choose which lectures or lab periods to grant attendance for</p>
                   </div>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <button
@@ -1174,7 +1189,7 @@ export default function InchargeDashboard() {
                         const allSids = daySchedules.map(s => s.id);
                         setSelectedScheduleIds(allSids);
                       }}
-                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-all cursor-pointer"
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors cursor-pointer"
                     >
                       All Periods ({daySchedules.length})
                     </button>
@@ -1184,7 +1199,7 @@ export default function InchargeDashboard() {
                         const morningSids = daySchedules.filter(s => (s.start_time || "") < "13:00:00").map(s => s.id);
                         setSelectedScheduleIds(morningSids);
                       }}
-                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition-all cursor-pointer"
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition-colors cursor-pointer"
                     >
                       Morning (9 AM - 1 PM)
                     </button>
@@ -1194,7 +1209,7 @@ export default function InchargeDashboard() {
                         const afternoonSids = daySchedules.filter(s => (s.start_time || "") >= "13:00:00").map(s => s.id);
                         setSelectedScheduleIds(afternoonSids);
                       }}
-                      className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 transition-all cursor-pointer"
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200 transition-colors cursor-pointer"
                     >
                       Afternoon (1 PM - 4:30 PM)
                     </button>
@@ -1202,7 +1217,7 @@ export default function InchargeDashboard() {
                       <button
                         type="button"
                         onClick={() => setSelectedScheduleIds([])}
-                        className="px-2.5 py-1 text-[11px] font-extrabold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200 transition-all cursor-pointer"
+                        className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-white text-slate-700 hover:border-slate-400 border border-slate-300 transition-colors cursor-pointer"
                       >
                         Clear
                       </button>
@@ -1212,11 +1227,12 @@ export default function InchargeDashboard() {
 
                 {/* Periods List */}
                 {daySchedules.length === 0 ? (
-                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
-                    ⚠️ No regular classes scheduled in timetable for {targetDayName} for Sec {activeAllocation.section}.
+                  <div className="p-4 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>No regular classes scheduled in timetable for {targetDayName} for Sec {activeAllocation.section}.</span>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[170px] overflow-y-auto p-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[170px] overflow-y-auto p-0.5">
                     {daySchedules.map((sched: any, idx: number) => {
                       const isSelected = selectedScheduleIds.includes(sched.id);
                       const startFmt = (sched.start_time || "00:00").slice(0, 5);
@@ -1231,26 +1247,26 @@ export default function InchargeDashboard() {
                               prev.includes(sched.id) ? prev.filter(id => id !== sched.id) : [...prev, sched.id]
                             );
                           }}
-                          className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                          className={`p-3 rounded-md border flex items-center gap-3 cursor-pointer transition-colors ${
                             isSelected
-                              ? "bg-emerald-50 border-emerald-400 shadow-xs"
-                              : "bg-white border-gray-200 hover:border-gray-300"
+                              ? "bg-emerald-50 border-emerald-400"
+                              : "bg-white border-slate-300 hover:border-slate-400"
                           }`}
                         >
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => {}}
-                            className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 pointer-events-none"
+                            className="w-4 h-4 rounded accent-emerald-600 border-slate-300 pointer-events-none"
                           />
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between">
-                              <span className="font-extrabold text-xs text-slate-900 truncate">{sched.subject || `Period ${idx + 1}`}</span>
-                              <span className="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-xs text-slate-950 truncate">{sched.subject || `Period ${idx + 1}`}</span>
+                              <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded shrink-0">
                                 {startFmt} - {endFmt}
                               </span>
                             </div>
-                            <p className="text-[11px] text-gray-500 font-semibold truncate mt-0.5">{facultyName}</p>
+                            <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">{facultyName}</p>
                           </div>
                         </div>
                       );
@@ -1261,7 +1277,7 @@ export default function InchargeDashboard() {
 
               {/* Step 4: Reason / Notes */}
               <div>
-                <label className="block text-xs font-black uppercase text-gray-700 tracking-wider mb-1.5">
+                <label className="eyebrow block text-slate-600 mb-1.5">
                   4. Reason / OD Remarks
                 </label>
                 <div className="flex flex-wrap gap-1.5 mb-2">
@@ -1276,10 +1292,10 @@ export default function InchargeDashboard() {
                       key={preset}
                       type="button"
                       onClick={() => setPermissionReason(preset)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-colors cursor-pointer ${
                         permissionReason === preset
-                          ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                          : "bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200"
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-white hover:bg-slate-100 text-slate-700 border-slate-300"
                       }`}
                     >
                       {preset}
@@ -1291,29 +1307,29 @@ export default function InchargeDashboard() {
                   value={permissionReason}
                   onChange={(e) => setPermissionReason(e.target.value)}
                   placeholder="Enter reason or remarks..."
-                  className="w-full px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs font-semibold text-slate-800 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
                 />
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-3">
-              <div className="text-xs text-gray-500 font-bold">
+            <div className="px-5 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+              <div className="text-xs text-slate-500 font-semibold min-w-0">
                 {selectedStudentIds.length > 0 && selectedScheduleIds.length > 0 ? (
-                  <span className="text-emerald-700">
-                    ⚡ Will mark <strong>{selectedStudentIds.length * selectedScheduleIds.length}</strong> class attendance record(s) as Present
+                  <span className="text-emerald-800">
+                    Will mark <strong className="font-mono">{selectedStudentIds.length * selectedScheduleIds.length}</strong> class attendance record(s) as Present
                   </span>
                 ) : (
                   <span>Select student(s) and class(es) above to continue</span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setPermissionModalOpen(false)}
                   disabled={permissionSubmitting}
-                  className="px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-100 transition-all cursor-pointer"
+                  className="px-4 py-2.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1321,8 +1337,7 @@ export default function InchargeDashboard() {
                   type="button"
                   onClick={handleMarkPermissionAttendance}
                   disabled={permissionSubmitting || selectedStudentIds.length === 0 || selectedScheduleIds.length === 0}
-                  style={{ backgroundColor: "#10b981", borderColor: "#10b981" }}
-                  className="px-5 py-2.5 rounded-xl font-extrabold text-xs text-white border shadow-md flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600"
+                  className="px-5 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {permissionSubmitting ? (
                     <>
@@ -1332,7 +1347,7 @@ export default function InchargeDashboard() {
                   ) : (
                     <>
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>Confirm & Mark Present ({selectedStudentIds.length})</span>
+                      <span>Confirm &amp; Mark Present ({selectedStudentIds.length})</span>
                     </>
                   )}
                 </button>

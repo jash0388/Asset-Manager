@@ -28,6 +28,7 @@ import {
   Activity,
   X,
   Eye,
+  ArrowRight,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
@@ -406,28 +407,28 @@ export default function HourlyAttendance() {
 
   return (
     <Layout>
-      <div className="p-2 sm:p-3.5 max-w-7xl mx-auto space-y-2.5 text-slate-800 font-sans">
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4 text-slate-900 font-sans">
         
         {/* Navigation Switcher Tabs for Mentors */}
         {role === "mentor" && (
-          <div className="bg-white border border-slate-200 p-1 rounded-xl flex flex-wrap gap-1 shadow-2xs mb-1">
+          <div className="bg-white border border-slate-300/70 p-1 rounded-lg flex flex-wrap gap-1 shadow-xs">
             <button
               onClick={() => navigate("/incharge-dashboard")}
-              className="px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all text-slate-700 hover:bg-slate-100 cursor-pointer"
+              className="px-3 py-1 rounded-md font-semibold text-xs flex items-center gap-1.5 transition-all text-slate-700 hover:bg-slate-100 cursor-pointer"
             >
               <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
               Class Incharge Portal
             </button>
             <button
               onClick={() => navigate("/mentor")}
-              className="px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all text-slate-700 hover:bg-slate-100 cursor-pointer"
+              className="px-3 py-1 rounded-md font-semibold text-xs flex items-center gap-1.5 transition-all text-slate-700 hover:bg-slate-100 cursor-pointer"
             >
               <Clock className="w-3.5 h-3.5 text-slate-500" />
               Take Class Attendance
             </button>
             <button
               onClick={() => navigate("/hourly-attendance")}
-              className="px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all bg-slate-900 text-white shadow-xs cursor-pointer"
+              className="px-3 py-1 rounded-md font-semibold text-xs flex items-center gap-1.5 transition-all bg-emerald-600 text-white shadow-xs cursor-pointer"
             >
               <BookOpen className="w-3.5 h-3.5 text-white" />
               Hourly Attendance
@@ -435,41 +436,39 @@ export default function HourlyAttendance() {
           </div>
         )}
 
-        {/* ── ROW 1: TIGHT EXECUTIVE HEADER (Title + Date + Action in ONE Row) ── */}
-        <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:px-3.5 sm:py-2 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
+        {/* ── ROW 1: PAGE HEADER (Eyebrow + Sora Title + Date + Action) ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 pb-4 border-b border-slate-300/70">
+          <div className="flex items-center gap-2.5 min-w-0">
             {role !== "mentor" && (
-              <BackButton to={role === "hod" ? "/hod-dashboard" : "/dashboard"} className="p-1 h-7.5 w-7.5" />
+              <BackButton to={role === "hod" ? "/hod-dashboard" : "/dashboard"} />
             )}
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5 leading-tight">
-                  <BookOpen className="w-4 h-4 text-blue-600" />
-                  Hourly Lecture Attendance Control
-                </h1>
-                <span className="px-2 py-0.2 rounded-md text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                  {getFormattedDate(selectedDateFilter)} ({daysFullNames[activeDayOfWeek] || "Day"})
-                </span>
-              </div>
+              <p className="eyebrow text-slate-500">Lecture Register</p>
+              <h1 className="text-xl sm:text-[24px] font-bold text-slate-950 tracking-tight mt-0.5 leading-tight" style={{ fontFamily: "var(--app-font-display)" }}>
+                Hourly Lecture Attendance
+              </h1>
+              <p className="text-[11px] font-mono text-slate-500 mt-0.5">
+                {getFormattedDate(selectedDateFilter)} ({daysFullNames[activeDayOfWeek] || "Day"})
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 self-end md:self-auto flex-wrap">
             {/* Inline Date Switcher */}
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg text-xs font-semibold">
+            <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2.5 py-1.5 rounded-md text-xs font-semibold">
               <Calendar className="w-3.5 h-3.5 text-slate-500" />
               <input
                 type="date"
                 value={selectedDateFilter}
                 onChange={(e) => setSelectedDateFilter(e.target.value)}
-                className="bg-transparent text-slate-800 text-xs font-bold focus:outline-none cursor-pointer [color-scheme:light]"
+                className="bg-transparent text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer [color-scheme:light] font-mono"
               />
             </div>
 
             {(role === "hod" || role === "admin") && (
               <button
                 onClick={() => setNewClassModalOpen(true)}
-                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer"
+                className="px-2.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Assign Class
@@ -478,51 +477,41 @@ export default function HourlyAttendance() {
           </div>
         </div>
 
-        {/* ── ROW 2: ULTRA-COMPACT OPERATIONAL KPI METRIC STRIP (~40px) ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider block">Total Scheduled</span>
-              <span className="text-sm font-black text-slate-900">{operationalStats.total} Lectures</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+        {/* ── ROW 2: OPERATIONAL KPI METRIC STRIP ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div className="bg-white border border-slate-300/70 rounded-lg px-3 py-2.5 shadow-xs relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-slate-400" aria-hidden />
+            <p className="eyebrow text-slate-500">Total Scheduled</p>
+            <p className="text-lg font-bold text-slate-950 font-mono tabular-nums mt-1">{operationalStats.total} <span className="text-[11px] font-sans font-medium text-slate-500">Lectures</span></p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-emerald-700 uppercase tracking-wider block">Completed</span>
-              <span className="text-sm font-black text-emerald-900">{operationalStats.submittedCount} Verified</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <div className="bg-white border border-slate-300/70 rounded-lg px-3 py-2.5 shadow-xs relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+            <p className="eyebrow text-slate-500">Completed</p>
+            <p className="text-lg font-bold text-emerald-700 font-mono tabular-nums mt-1">{operationalStats.submittedCount} <span className="text-[11px] font-sans font-medium text-slate-500">Verified</span></p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-amber-700 uppercase tracking-wider block">Live / Scanning</span>
-              <span className="text-sm font-black text-amber-900">{operationalStats.startedCount} In Progress</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <div className="bg-white border border-slate-300/70 rounded-lg px-3 py-2.5 shadow-xs relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500" aria-hidden />
+            <p className="eyebrow text-slate-500">Live / Scanning</p>
+            <p className="text-lg font-bold text-amber-700 font-mono tabular-nums mt-1">{operationalStats.startedCount} <span className="text-[11px] font-sans font-medium text-slate-500">In Progress</span></p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="text-[9.5px] font-bold text-rose-700 uppercase tracking-wider block">Missing Attendance</span>
-              <span className="text-sm font-black text-rose-900">{operationalStats.missingCount} Overdue</span>
-            </div>
-            <span className={`w-2 h-2 rounded-full ${operationalStats.missingCount > 0 ? "bg-rose-500 animate-ping" : "bg-rose-400"}`}></span>
+          <div className="bg-white border border-slate-300/70 rounded-lg px-3 py-2.5 shadow-xs relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-red-500" aria-hidden />
+            <p className="eyebrow text-slate-500">Missing Attendance</p>
+            <p className="text-lg font-bold text-red-700 font-mono tabular-nums mt-1">{operationalStats.missingCount} <span className="text-[11px] font-sans font-medium text-slate-500">Overdue</span></p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs flex items-center justify-between col-span-2 sm:col-span-1">
-            <div>
-              <span className="text-[9.5px] font-bold text-slate-600 uppercase tracking-wider block">Upcoming / Locked</span>
-              <span className="text-sm font-black text-slate-800">{operationalStats.lockedCount} Scheduled</span>
-            </div>
-            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+          <div className="bg-white border border-slate-300/70 rounded-lg px-3 py-2.5 shadow-xs relative overflow-hidden col-span-2 sm:col-span-1">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600" aria-hidden />
+            <p className="eyebrow text-slate-500">Upcoming / Locked</p>
+            <p className="text-lg font-bold text-slate-950 font-mono tabular-nums mt-1">{operationalStats.lockedCount} <span className="text-[11px] font-sans font-medium text-slate-500">Scheduled</span></p>
           </div>
         </div>
 
-        {/* ── ROW 3: COMPACT SINGLE-LINE TOOLBAR (Filters + Search + View Switcher) ── */}
-        <div className="bg-white border border-slate-200 p-2 rounded-xl shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-2">
+        {/* ── ROW 3: SINGLE-LINE TOOLBAR (Filters + Search + View Switcher) ── */}
+        <div className="bg-white border border-slate-300/70 p-2 rounded-lg shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
@@ -530,7 +519,7 @@ export default function HourlyAttendance() {
               placeholder="Search subject, faculty, section..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-7 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+              className="w-full pl-8 pr-7 py-1.5 rounded-md bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-xs font-medium focus:outline-none focus:border-emerald-600"
             />
             {searchQuery && (
               <button
@@ -547,7 +536,7 @@ export default function HourlyAttendance() {
             <select
               value={selectedYear}
               onChange={(e: any) => setSelectedYear(e.target.value)}
-              className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+              className="px-2 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
               <option value="All">All Years</option>
               <option value="4th Year">4th Year (IV)</option>
@@ -559,7 +548,7 @@ export default function HourlyAttendance() {
             <select
               value={selectedSection}
               onChange={(e) => setSelectedSection(e.target.value)}
-              className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+              className="px-2 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
               <option value="All">All Sections</option>
               <option value="A">Section A</option>
@@ -571,23 +560,23 @@ export default function HourlyAttendance() {
             <select
               value={selectedStatusFilter}
               onChange={(e: any) => setSelectedStatusFilter(e.target.value)}
-              className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+              className="px-2 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
             >
               <option value="All">Status: All</option>
-              <option value="submitted">✓ Completed (Submitted)</option>
-              <option value="started">● Live Scanning</option>
-              <option value="missing">⚠️ Missing Attendance</option>
-              <option value="locked">🔒 Upcoming / Locked</option>
+              <option value="submitted">Completed (Submitted)</option>
+              <option value="started">Live Scanning</option>
+              <option value="missing">Missing Attendance</option>
+              <option value="locked">Upcoming / Locked</option>
             </select>
 
             {/* View Mode Switcher */}
-            <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+            <div className="flex items-center rounded-md border border-slate-300 bg-slate-100 p-0.5">
               <button
                 onClick={() => setViewMode("table")}
-                className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                className={`p-1 rounded-[4px] text-xs font-semibold transition-all cursor-pointer ${
                   viewMode === "table"
-                    ? "bg-white text-blue-700 shadow-2xs"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
                 title="ERP Table View (Fast Scanning, No Page Scroll)"
               >
@@ -595,10 +584,10 @@ export default function HourlyAttendance() {
               </button>
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                className={`p-1 rounded-[4px] text-xs font-semibold transition-all cursor-pointer ${
                   viewMode === "grid"
-                    ? "bg-white text-blue-700 shadow-2xs"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
                 title="Dense Lecture Cards Grid"
               >
@@ -610,46 +599,59 @@ export default function HourlyAttendance() {
 
         {/* ── MAIN ATTENDANCE DISPLAY (HIGH DENSITY TABLE & DENSE GRID) ── */}
         {schedulesLoading ? (
-          <div className="bg-white border border-slate-200 p-12 flex flex-col items-center justify-center gap-2 rounded-xl shadow-2xs">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-            <p className="text-xs text-slate-600 font-semibold">Loading daily lecture attendance register...</p>
+          <div className="bg-white border border-slate-300/70 rounded-lg p-4 shadow-xs space-y-2" aria-busy="true">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3 py-1.5">
+                <div className="w-8 h-8 rounded-md bg-slate-200 animate-pulse" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3 bg-slate-200 rounded w-1/3 animate-pulse" />
+                  <div className="h-2.5 bg-slate-200 rounded w-1/5 animate-pulse" />
+                </div>
+                <div className="h-5 w-28 bg-slate-200 rounded animate-pulse" />
+                <div className="h-5 w-20 bg-slate-200 rounded animate-pulse" />
+              </div>
+            ))}
           </div>
         ) : schedulesErr ? (
-          <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-center text-xs font-semibold">
+          <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg text-center text-xs font-semibold">
             Failed to load schedules: {schedulesErr instanceof Error ? schedulesErr.message : "Unknown error"}
           </div>
         ) : activeDayOfWeek === "SUN" ? (
-          <div className="bg-white border border-slate-200 p-10 rounded-xl text-center space-y-2">
-            <Calendar className="w-8 h-8 text-slate-400 mx-auto" />
-            <h3 className="text-slate-900 font-bold text-sm">Sunday - No Classes Scheduled</h3>
+          <div className="bg-white border border-slate-300/70 p-12 rounded-lg text-center space-y-2 shadow-xs">
+            <div className="w-12 h-12 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto">
+              <Calendar className="w-6 h-6 text-slate-500" />
+            </div>
+            <h3 className="text-slate-950 font-bold text-sm" style={{ fontFamily: "var(--app-font-display)" }}>Sunday - No Classes Scheduled</h3>
             <p className="text-xs text-slate-500">Please select a weekday above to view scheduled lecture attendance.</p>
           </div>
         ) : daySlots.length === 0 ? (
-          <div className="bg-white border border-slate-200 p-10 rounded-xl text-center space-y-2">
-            <AlertTriangle className="w-8 h-8 text-slate-400 mx-auto" />
-            <h3 className="text-slate-900 font-bold text-sm">No Lectures Found</h3>
+          <div className="bg-white border border-slate-300/70 p-12 rounded-lg text-center space-y-2 shadow-xs">
+            <div className="w-12 h-12 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6 text-slate-500" />
+            </div>
+            <h3 className="text-slate-950 font-bold text-sm" style={{ fontFamily: "var(--app-font-display)" }}>No Lectures Found</h3>
             <p className="text-xs text-slate-500">
               No classes match your current search filters for {daysFullNames[activeDayOfWeek]}.
             </p>
           </div>
         ) : viewMode === "table" ? (
           /* HIGH-DENSITY ERP TABLE VIEW (Zero Outer Scroll, Sticky Header) */
-          <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+          <div className="bg-white border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
             <div className="overflow-x-auto max-h-[calc(100vh-250px)] min-h-[350px] overflow-y-auto scrollbar-thin">
               <table className="w-full text-left border-collapse text-xs">
-                <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                <thead className="sticky top-0 z-10 bg-slate-100 border-b border-slate-200">
                   <tr>
-                    <th className="py-2 px-2.5 text-center w-8">#</th>
-                    <th className="py-2 px-3">Subject & Course Code</th>
-                    <th className="py-2 px-2 text-center">Class</th>
-                    <th className="py-2 px-3">Timing & Duration</th>
-                    <th className="py-2 px-3">Assigned Faculty</th>
-                    <th className="py-2 px-3">Live Attendance Status</th>
-                    <th className="py-2 px-2.5 text-center">HOD Override</th>
-                    <th className="py-2 px-2.5 text-right">Log Sheet</th>
+                    <th className="py-2 px-2.5 text-center w-8 eyebrow text-slate-500 font-semibold">#</th>
+                    <th className="py-2 px-3 eyebrow text-slate-500 font-semibold">Subject &amp; Course Code</th>
+                    <th className="py-2 px-2 text-center eyebrow text-slate-500 font-semibold">Class</th>
+                    <th className="py-2 px-3 eyebrow text-slate-500 font-semibold">Timing &amp; Duration</th>
+                    <th className="py-2 px-3 eyebrow text-slate-500 font-semibold">Assigned Faculty</th>
+                    <th className="py-2 px-3 eyebrow text-slate-500 font-semibold">Live Attendance Status</th>
+                    <th className="py-2 px-2.5 text-center eyebrow text-slate-500 font-semibold">HOD Override</th>
+                    <th className="py-2 px-2.5 text-right eyebrow text-slate-500 font-semibold">Log Sheet</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                <tbody className="divide-y divide-slate-200 font-medium text-xs">
                   {daySlots.map((s, idx) => {
                     const duration = getDurationInfo(s.start_time, s.end_time);
                     const isPast = isClassPastTime(s.end_time, selectedDateFilter);
@@ -666,13 +668,13 @@ export default function HourlyAttendance() {
                       <tr
                         key={s.id}
                         onClick={() => handleSlotClick(s)}
-                        className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                        className="hover:bg-slate-50 transition-colors cursor-pointer group"
                       >
                         <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
                           {idx + 1}
                         </td>
                         <td className="py-1.5 px-3">
-                          <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors block leading-tight">
+                          <span className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors block leading-tight">
                             {s.subject}
                           </span>
                           <span className="text-[10px] font-mono text-slate-500">
@@ -680,19 +682,19 @@ export default function HourlyAttendance() {
                           </span>
                         </td>
                         <td className="py-1.5 px-2 text-center whitespace-nowrap">
-                          <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[10px] font-bold font-mono">
+                          <span className="stamp border-slate-300 bg-slate-50 text-slate-700">
                             {s.year ? `${s.year} - ` : ""}{s.section}
                           </span>
                         </td>
                         <td className="py-1.5 px-3 whitespace-nowrap">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-mono font-bold text-slate-800 text-[11px]">
+                            <span className="font-mono font-semibold text-slate-800 text-[11px]">
                               {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}
                             </span>
-                            <span className={`px-1.5 py-0.2 rounded text-[9.5px] font-bold border ${
+                            <span className={`stamp ${
                               duration.isBlock
-                                ? "bg-indigo-50 text-indigo-900 border-indigo-300 font-bold"
-                                : "bg-slate-50 text-slate-600 border-slate-200"
+                                ? "border-indigo-300 bg-indigo-50 text-indigo-800"
+                                : "border-slate-300 bg-slate-50 text-slate-600"
                             }`}>
                               {duration.label}
                             </span>
@@ -701,28 +703,28 @@ export default function HourlyAttendance() {
                         <td className="py-1.5 px-3">
                           {s.isReassigned && s.reassignedTo ? (
                             <div className="space-y-0.5">
-                              <div className="flex items-center gap-1 text-[11px] font-extrabold text-indigo-700">
+                              <div className="flex items-center gap-1 text-[11px] font-semibold text-indigo-700">
                                 <span className="text-slate-400 line-through truncate max-w-[85px]" title={s.qr_mentors?.name}>
                                   {s.qr_mentors?.name || "Original"}
                                 </span>
-                                <span className="text-indigo-600 font-bold">➔</span>
-                                <span className="text-indigo-900 font-black truncate max-w-[110px]" title={s.reassignedTo}>
+                                <ArrowRight className="w-3 h-3 text-indigo-600 shrink-0" />
+                                <span className="text-indigo-900 font-bold truncate max-w-[110px]" title={s.reassignedTo}>
                                   {s.reassignedTo}
                                 </span>
                               </div>
-                              <span className="inline-block text-[8.5px] px-1 py-0.2 rounded bg-indigo-100 text-indigo-800 font-black uppercase tracking-wider">
+                              <span className="stamp border-indigo-300 bg-indigo-50 text-indigo-800">
                                 Reassigned
                               </span>
                             </div>
                           ) : (
                             <div className="flex items-center justify-between gap-1.5">
-                              <span className="font-bold text-slate-900 truncate max-w-[140px]" title={s.qr_mentors?.name || "Unassigned"}>
+                              <span className="font-semibold text-slate-900 truncate max-w-[140px]" title={s.qr_mentors?.name || "Unassigned"}>
                                 {s.qr_mentors?.name || "Unassigned"}
                               </span>
                               {(role === "hod" || role === "admin") && (
                                 <button
                                   onClick={(e) => handleOpenAssignModal(e, s)}
-                                  className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                                  className="p-1 rounded text-slate-400 hover:text-emerald-700 hover:bg-slate-100 transition-colors cursor-pointer"
                                   title="Reassign Faculty"
                                 >
                                   <Edit3 className="w-3 h-3" />
@@ -734,28 +736,28 @@ export default function HourlyAttendance() {
                         <td className="py-1.5 px-3">
                           {s.status === "submitted" ? (
                             <div className="flex items-center gap-1.5">
-                              <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1 shrink-0">
+                              <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800 shrink-0">
                                 <CheckCircle className="w-3 h-3 text-emerald-600" />
                                 Submitted ({presentCount}/{totalStudents})
                               </span>
-                              <span className="text-[10px] font-semibold text-slate-500 font-mono">
+                              <span className="text-[10px] font-medium text-slate-500 font-mono">
                                 {attendanceRate}% • {absentCount}A
                               </span>
                             </div>
                           ) : s.status === "started" ? (
                             <div className="flex items-center gap-1.5">
-                              <span className="px-2 py-0.5 rounded-full text-[10.5px] font-black bg-amber-50 text-amber-800 border border-amber-300 flex items-center gap-1 animate-pulse shrink-0">
+                              <span className="stamp border-amber-300 bg-amber-50 text-amber-800 shrink-0">
                                 <Activity className="w-3 h-3 text-amber-600" />
                                 Live Scanning ({s.studentCount || 0} Present)
                               </span>
                             </div>
                           ) : isPast ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-rose-50 text-rose-800 border border-rose-300 flex items-center gap-1 shrink-0">
-                              <AlertTriangle className="w-3 h-3 text-rose-600" />
+                            <span className="stamp border-red-300 bg-red-50 text-red-800 shrink-0">
+                              <AlertTriangle className="w-3 h-3 text-red-600" />
                               Attendance Missing / Overdue
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-50 text-slate-700 border border-slate-200 flex items-center gap-1 shrink-0">
+                            <span className="stamp border-slate-300 bg-slate-50 text-slate-600 shrink-0">
                               <Lock className="w-3 h-3 text-slate-500" />
                               Starts at {s.start_time.slice(0, 5)}
                             </span>
@@ -767,10 +769,10 @@ export default function HourlyAttendance() {
                               e.stopPropagation();
                               handleToggleScheduleOverride(s.id, isUnlocked, extendedMins);
                             }}
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                            className={`px-2 py-0.5 rounded stamp inline-flex items-center gap-1 transition-all cursor-pointer ${
                               isUnlocked
-                                ? "bg-emerald-600 text-white border-emerald-700"
-                                : "bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200"
+                                ? "bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700"
+                                : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                             }`}
                             title={isUnlocked ? "Click to lock" : "Click to unlock"}
                           >
@@ -784,7 +786,7 @@ export default function HourlyAttendance() {
                               e.stopPropagation();
                               handleSlotClick(s);
                             }}
-                            className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                            className="px-2 py-0.5 rounded-md bg-white hover:border-slate-400 text-slate-700 text-[10.5px] font-semibold border border-slate-300 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                           >
                             <span>Details</span>
                             <ChevronRight className="w-3 h-3" />
@@ -816,28 +818,28 @@ export default function HourlyAttendance() {
                 <div
                   key={s.id}
                   onClick={() => handleSlotClick(s)}
-                  className="bg-white border border-slate-200 hover:border-blue-400 p-3 rounded-xl shadow-2xs hover:shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2"
+                  className="bg-white border border-slate-300/70 hover:border-slate-400 p-3 rounded-lg shadow-xs transition-all cursor-pointer group flex flex-col justify-between space-y-2"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-start justify-between gap-1.5">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[10px] font-bold font-mono">
+                        <span className="stamp border-slate-300 bg-slate-50 text-slate-700">
                           {s.year ? `${s.year} - ` : ""}{s.section}
                         </span>
-                        <span className={`px-1.5 py-0.2 rounded text-[9.5px] font-bold border ${
+                        <span className={`stamp ${
                           duration.isBlock
-                            ? "bg-indigo-50 text-indigo-900 border-indigo-300"
-                            : "bg-slate-50 text-slate-600 border-slate-200"
+                            ? "border-indigo-300 bg-indigo-50 text-indigo-800"
+                            : "border-slate-300 bg-slate-50 text-slate-600"
                         }`}>
                           {duration.label}
                         </span>
                       </div>
-                      <span className="text-[11px] font-mono font-bold text-slate-800">
+                      <span className="text-[11px] font-mono font-semibold text-slate-800">
                         {s.start_time.slice(0, 5)} - {s.end_time.slice(0, 5)}
                       </span>
                     </div>
 
-                    <h4 className="text-slate-900 font-bold text-xs group-hover:text-blue-600 transition-colors leading-tight">
+                    <h4 className="text-slate-950 font-bold text-xs group-hover:text-emerald-700 transition-colors leading-tight">
                       {s.subject}
                     </h4>
 
@@ -846,10 +848,10 @@ export default function HourlyAttendance() {
                         <div className="space-y-0.5 truncate">
                           <div className="flex items-center gap-1 text-[11px]">
                             <span className="text-slate-400 line-through truncate max-w-[80px]">{s.qr_mentors?.name}</span>
-                            <span className="text-indigo-600 font-bold">➔</span>
-                            <strong className="text-indigo-900 font-black truncate max-w-[100px]">{s.reassignedTo}</strong>
+                            <ArrowRight className="w-3 h-3 text-indigo-600 shrink-0" />
+                            <strong className="text-indigo-900 font-bold truncate max-w-[100px]">{s.reassignedTo}</strong>
                           </div>
-                          <span className="inline-block text-[8px] px-1 py-0.2 rounded bg-indigo-100 text-indigo-800 font-black uppercase">
+                          <span className="stamp border-indigo-300 bg-indigo-50 text-indigo-800">
                             Reassigned
                           </span>
                         </div>
@@ -861,7 +863,7 @@ export default function HourlyAttendance() {
                       {(role === "hod" || role === "admin") && !s.isReassigned && (
                         <button
                           onClick={(e) => handleOpenAssignModal(e, s)}
-                          className="text-[10.5px] text-blue-700 hover:underline font-bold"
+                          className="text-[10.5px] text-emerald-700 hover:underline font-semibold"
                           title="Change Faculty"
                         >
                           Reassign
@@ -870,23 +872,27 @@ export default function HourlyAttendance() {
                     </div>
                   </div>
 
-                  <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between gap-2">
                     {/* Dominant Status Badge */}
                     {s.status === "submitted" ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
-                        ✓ {presentCount}/{totalStudents} ({attendanceRate}%)
+                      <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                        <CheckCircle className="w-3 h-3 text-emerald-600" />
+                        {presentCount}/{totalStudents} ({attendanceRate}%)
                       </span>
                     ) : s.status === "started" ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-800 border border-amber-300 animate-pulse">
-                        ● Live ({s.studentCount || 0} Present)
+                      <span className="stamp border-amber-300 bg-amber-50 text-amber-800">
+                        <Activity className="w-3 h-3 text-amber-600" />
+                        Live ({s.studentCount || 0} Present)
                       </span>
                     ) : isPast ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-300">
-                        ⚠️ Missing Attendance
+                      <span className="stamp border-red-300 bg-red-50 text-red-800">
+                        <AlertTriangle className="w-3 h-3 text-red-600" />
+                        Missing Attendance
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-50 text-slate-700 border border-slate-200">
-                        🔒 Starts at {s.start_time.slice(0, 5)}
+                      <span className="stamp border-slate-300 bg-slate-50 text-slate-600">
+                        <Lock className="w-3 h-3 text-slate-500" />
+                        Starts at {s.start_time.slice(0, 5)}
                       </span>
                     )}
 
@@ -895,10 +901,10 @@ export default function HourlyAttendance() {
                         e.stopPropagation();
                         handleToggleScheduleOverride(s.id, isUnlocked, extendedMins);
                       }}
-                      className={`px-2 py-0.5 rounded text-[9.5px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer border ${
+                      className={`px-2 py-0.5 rounded stamp inline-flex items-center gap-1 transition-all cursor-pointer ${
                         isUnlocked
-                          ? "bg-emerald-600 text-white border-emerald-700"
-                          : "bg-slate-100 text-slate-700 border-slate-300"
+                          ? "bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700"
+                          : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                       }`}
                     >
                       {isUnlocked ? <Unlock className="w-2.5 h-2.5" /> : <Lock className="w-2.5 h-2.5 text-slate-500" />}
@@ -913,7 +919,7 @@ export default function HourlyAttendance() {
 
         {/* ── DETAILED ATTENDANCE LOG SHEET (SLIDE-OUT DRAWER) ── */}
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <SheetContent className="w-full sm:max-w-xl bg-white border-l border-slate-200 p-0 flex flex-col h-full text-slate-900">
+          <SheetContent className="w-full sm:max-w-xl bg-white border-l border-slate-300 p-0 flex flex-col h-full text-slate-900">
             {selectedSchedule && (() => {
               const overrideObj = (scheduleOverrides || []).find((o: any) => o.scheduleId === selectedSchedule.id);
               const isUnlocked = overrideObj ? overrideObj.isUnlocked : false;
@@ -921,13 +927,13 @@ export default function HourlyAttendance() {
 
               return (
                 <>
-                  <SheetHeader className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50">
+                  <SheetHeader className="p-4 sm:p-5 border-b border-slate-300 bg-white space-y-0">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded-md bg-blue-100 border border-blue-300 text-blue-900 text-[10.5px] font-black uppercase">
+                        <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
                           {selectedSchedule.year} Yr - {selectedSchedule.section}
                         </span>
-                        <span className="text-xs text-slate-600 font-mono font-bold">
+                        <span className="text-xs text-slate-600 font-mono font-semibold">
                           {selectedSchedule.start_time.slice(0, 5)} - {selectedSchedule.end_time.slice(0, 5)}
                         </span>
                       </div>
@@ -935,7 +941,7 @@ export default function HourlyAttendance() {
                       {(role === "hod" || role === "admin") && (
                         <button
                           onClick={(e) => handleOpenAssignModal(e, selectedSchedule)}
-                          className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                          className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
                           Reassign Faculty
@@ -943,33 +949,33 @@ export default function HourlyAttendance() {
                       )}
                     </div>
 
-                    <SheetTitle className="text-base sm:text-lg font-black text-slate-900 mt-2 truncate">
+                    <SheetTitle className="text-base sm:text-lg font-bold text-slate-950 mt-2 truncate" style={{ fontFamily: "var(--app-font-display)" }}>
                       {selectedSchedule.subject}
                     </SheetTitle>
-                    <SheetDescription className="text-slate-600 text-xs mt-0.5">
-                      Faculty: <span className="text-slate-900 font-bold">{selectedSchedule.qr_mentors?.name || "Unassigned"}</span>
+                    <SheetDescription className="text-slate-500 text-xs mt-0.5">
+                      Faculty: <span className="text-slate-900 font-semibold">{selectedSchedule.qr_mentors?.name || "Unassigned"}</span>
                     </SheetDescription>
 
                     {/* HOD Attendance Control Switch & Buffer Extension inside Modal */}
-                    <div className="mt-3 p-2.5 bg-slate-100 border border-slate-200 rounded-xl space-y-2">
+                    <div className="mt-3 p-2.5 bg-slate-50 border border-slate-300/70 rounded-lg space-y-2">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5">
                           {isUnlocked ? (
-                            <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-600 text-white flex items-center gap-1">
-                              <Unlock className="w-3 h-3" /> UNLOCKED (Attendance Open)
+                            <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                              <Unlock className="w-3 h-3" /> Unlocked (Attendance Open)
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-white text-slate-800 border border-slate-300 flex items-center gap-1">
+                            <span className="stamp border-slate-300 bg-white text-slate-700">
                               <Lock className="w-3 h-3 text-slate-500" /> Standard Time Lock Active
                             </span>
                           )}
                         </div>
                         <button
                           onClick={() => handleToggleScheduleOverride(selectedSchedule.id, isUnlocked, extendedMins)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer border ${
+                          className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer border ${
                             isUnlocked
                               ? "bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700"
-                              : "bg-slate-900 text-white border-slate-950 hover:bg-slate-800"
+                              : "bg-white text-slate-800 border-slate-300 hover:border-slate-400"
                           }`}
                         >
                           {isUnlocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
@@ -979,28 +985,28 @@ export default function HourlyAttendance() {
 
                       {/* Buffer Time Extension Buttons */}
                       <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-200 text-xs">
-                        <span className="text-[11px] font-bold text-slate-700">Extend Attendance Buffer:</span>
+                        <span className="text-[11px] font-semibold text-slate-700">Extend Attendance Buffer:</span>
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 15)}
-                            className={`px-2 py-0.5 rounded text-xs font-bold border cursor-pointer ${
-                              extendedMins === 15 ? "bg-slate-900 text-white border-slate-950" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                            className={`px-2 py-0.5 rounded-md text-xs font-semibold border cursor-pointer font-mono transition-colors ${
+                              extendedMins === 15 ? "bg-emerald-600 text-white border-emerald-700" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                             }`}
                           >
                             +15m
                           </button>
                           <button
                             onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 30)}
-                            className={`px-2 py-0.5 rounded text-xs font-bold border cursor-pointer ${
-                              extendedMins === 30 ? "bg-slate-900 text-white border-slate-950" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                            className={`px-2 py-0.5 rounded-md text-xs font-semibold border cursor-pointer font-mono transition-colors ${
+                              extendedMins === 30 ? "bg-emerald-600 text-white border-emerald-700" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                             }`}
                           >
                             +30m
                           </button>
                           <button
                             onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 60)}
-                            className={`px-2 py-0.5 rounded text-xs font-bold border cursor-pointer ${
-                              extendedMins === 60 ? "bg-slate-900 text-white border-slate-950" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                            className={`px-2 py-0.5 rounded-md text-xs font-semibold border cursor-pointer font-mono transition-colors ${
+                              extendedMins === 60 ? "bg-emerald-600 text-white border-emerald-700" : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
                             }`}
                           >
                             +1h
@@ -1008,7 +1014,7 @@ export default function HourlyAttendance() {
                           {extendedMins > 0 && (
                             <button
                               onClick={() => handleExtendScheduleTime(selectedSchedule.id, isUnlocked, 0)}
-                              className="px-2 py-0.5 rounded text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer"
+                              className="px-2 py-0.5 rounded-md text-xs font-semibold bg-white text-red-700 border border-red-300 hover:bg-red-50 cursor-pointer transition-colors"
                               title="Reset extra buffer time"
                             >
                               Reset
@@ -1020,27 +1026,27 @@ export default function HourlyAttendance() {
                   </SheetHeader>
 
                   {/* Toolbar inside drawer */}
-                  <div className="px-4 py-2.5 border-b border-slate-200 bg-white flex items-center justify-between gap-2">
+                  <div className="px-4 py-2.5 border-b border-slate-300 bg-white flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <label className="text-xs font-bold text-slate-500">Date:</label>
+                      <label className="eyebrow text-slate-500">Date:</label>
                       {availableDates.length > 0 ? (
                         <select
                           value={selectedDate}
                           onChange={(e) => handleDateChange(e.target.value)}
-                          className="px-2 py-1 rounded bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                          className="px-2 py-1 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                         >
                           {availableDates.map(d => (
                             <option key={d} value={d}>{d}</option>
                           ))}
                         </select>
                       ) : (
-                        <span className="text-xs text-slate-400 font-mono">{selectedDateFilter}</span>
+                        <span className="text-xs text-slate-500 font-mono">{selectedDateFilter}</span>
                       )}
                     </div>
-                    
+
                     {detailRecords.length > 0 && (
-                      <div className="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 px-2 py-1 rounded flex items-center gap-1">
-                        Present: <span className="text-emerald-700 font-black">{detailRecords.filter(r => r.markedPresent).length}</span> / {detailRecords.length}
+                      <div className="text-xs font-semibold text-slate-700 bg-white border border-slate-300 px-2 py-1 rounded-md flex items-center gap-1">
+                        Present: <span className="text-emerald-700 font-bold font-mono">{detailRecords.filter(r => r.markedPresent).length}</span> / <span className="font-mono">{detailRecords.length}</span>
                       </div>
                     )}
                   </div>
@@ -1048,39 +1054,48 @@ export default function HourlyAttendance() {
                   {/* Drawer Content Body */}
                   <div className="flex-1 overflow-y-auto p-4 space-y-2">
                     {detailsLoading ? (
-                      <div className="py-16 flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-                        <p className="text-xs text-slate-500">Loading student attendance checklist...</p>
+                      <div className="space-y-2" aria-busy="true">
+                        {[...Array(6)].map((_, i) => (
+                          <div key={i} className="px-3 py-2 flex items-center justify-between gap-3 border border-slate-200 rounded-md">
+                            <div className="flex-1 space-y-1.5">
+                              <div className="h-3 bg-slate-200 rounded w-1/3 animate-pulse" />
+                              <div className="h-2.5 bg-slate-200 rounded w-1/4 animate-pulse" />
+                            </div>
+                            <div className="h-5 w-16 bg-slate-200 rounded animate-pulse" />
+                          </div>
+                        ))}
                       </div>
                     ) : detailsError ? (
-                      <div className="px-3 py-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+                      <div className="px-3 py-2 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
                         {detailsError}
                       </div>
                     ) : detailRecords.length === 0 ? (
                       <div className="py-16 text-center space-y-2">
-                        <AlertTriangle className="w-8 h-8 text-slate-400 mx-auto" />
-                        <p className="text-slate-700 text-xs font-bold">No attendance submitted for this lecture yet.</p>
-                        <p className="text-[11px] text-slate-400 max-w-xs mx-auto">
+                        <div className="w-12 h-12 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto">
+                          <AlertTriangle className="w-6 h-6 text-slate-500" />
+                        </div>
+                        <p className="text-slate-900 text-xs font-bold">No attendance submitted for this lecture yet.</p>
+                        <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
                           Student checklist will update in real time once the mentor starts scanning.
                         </p>
                       </div>
                     ) : (
-                      <div className="divide-y divide-slate-100 border border-slate-200 bg-white rounded-xl overflow-hidden shadow-2xs">
+                      <div className="divide-y divide-slate-200 border border-slate-300/70 bg-white rounded-lg overflow-hidden shadow-xs">
                         {detailRecords.map(r => (
                           <div key={r.studentId} className="px-3 py-2 flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs font-bold text-slate-900 truncate">{r.name}</p>
+                              <p className="text-xs font-semibold text-slate-900 truncate">{r.name}</p>
                               <p className="text-[10.5px] text-slate-500 font-mono">{r.uniqueId}</p>
                             </div>
 
                             <div className="flex items-center gap-1.5 shrink-0">
                               {r.markedPresent ? (
-                                <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                                   <CheckCircle className="w-3 h-3 text-emerald-600" /> Present
                                 </span>
                               ) : (
-                                <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
-                                  <XCircle className="w-3 h-3 text-rose-600" /> Absent
+                                <span className="stamp border-red-300 bg-red-50 text-red-800">
+                                  <XCircle className="w-3 h-3 text-red-600" /> Absent
                                 </span>
                               )}
                             </div>
@@ -1097,36 +1112,36 @@ export default function HourlyAttendance() {
 
         {/* ── ASSIGN FACULTY TO CLASS MODAL ── */}
         {assignModalOpen && scheduleToAssign && (
-          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-5 space-y-3 shadow-2xl">
+          <div className="fixed inset-0 z-50 bg-slate-950/60 flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-300/70 rounded-lg w-full max-w-md p-5 space-y-3 shadow-xl">
               <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
                 <div className="flex items-center gap-2">
-                  <UserPlus className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-sm font-bold text-slate-900">Assign Faculty to Class</h3>
+                  <UserPlus className="w-4 h-4 text-emerald-600" />
+                  <h3 className="text-sm font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Assign Faculty to Class</h3>
                 </div>
                 <button
                   onClick={() => setAssignModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                  className="w-7 h-7 rounded-md bg-white border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-400 p-1 cursor-pointer transition-colors flex items-center justify-center"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl space-y-0.5 text-xs">
-                <p className="text-slate-900 font-bold">{scheduleToAssign.subject}</p>
+              <div className="bg-slate-50 border border-slate-300/70 p-2.5 rounded-md space-y-0.5 text-xs">
+                <p className="text-slate-950 font-semibold">{scheduleToAssign.subject}</p>
                 <p className="text-slate-600">Class: {scheduleToAssign.year} Yr - {scheduleToAssign.section} | Day: {scheduleToAssign.day_of_week}</p>
                 <p className="text-slate-500 font-mono">{scheduleToAssign.start_time.slice(0,5)} - {scheduleToAssign.end_time.slice(0,5)}</p>
               </div>
 
               <form onSubmit={handleConfirmAssign} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  <label className="eyebrow block text-slate-600 mb-1">
                     Select Faculty / Mentor
                   </label>
                   <select
                     value={selectedMentorId}
                     onChange={(e) => setSelectedMentorId(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -1139,7 +1154,7 @@ export default function HourlyAttendance() {
                 </div>
 
                 {assignSuccessMsg && (
-                  <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center flex items-center justify-center gap-1.5">
+                  <div className="p-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold text-center flex items-center justify-center gap-1.5">
                     <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
                     {assignSuccessMsg}
                   </div>
@@ -1149,14 +1164,14 @@ export default function HourlyAttendance() {
                   <button
                     type="button"
                     onClick={() => setAssignModalOpen(false)}
-                    className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                    className="flex-1 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={assigning || !selectedMentorId}
-                    className="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
+                    className="flex-1 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                   >
                     {assigning ? (
                       <>
@@ -1178,16 +1193,16 @@ export default function HourlyAttendance() {
 
         {/* ── CREATE NEW CLASS SCHEDULE MODAL ── */}
         {newClassModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-5 space-y-3 shadow-2xl">
+          <div className="fixed inset-0 z-50 bg-slate-950/60 flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-300/70 rounded-lg w-full max-w-md p-5 space-y-3 shadow-xl">
               <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
                 <div className="flex items-center gap-2">
-                  <Plus className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-sm font-bold text-slate-900">Add New Timetable Lecture</h3>
+                  <Plus className="w-4 h-4 text-emerald-600" />
+                  <h3 className="text-sm font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Add New Timetable Lecture</h3>
                 </div>
                 <button
                   onClick={() => setNewClassModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                  className="w-7 h-7 rounded-md bg-white border border-slate-300 text-slate-500 hover:text-slate-900 hover:border-slate-400 p-1 cursor-pointer transition-colors flex items-center justify-center"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1195,24 +1210,24 @@ export default function HourlyAttendance() {
 
               <form onSubmit={handleCreateClass} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">Subject Name</label>
+                  <label className="eyebrow block text-slate-600 mb-1">Subject Name</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Web Services, Cloud Computing"
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-1.5 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-medium focus:outline-none focus:border-emerald-600"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1">Year</label>
+                    <label className="eyebrow block text-slate-600 mb-1">Year</label>
                     <select
                       value={newYear}
                       onChange={(e) => setNewYear(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                      className="w-full px-2.5 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     >
                       <option value="II">2nd Year (II)</option>
                       <option value="III">3rd Year (III)</option>
@@ -1220,11 +1235,11 @@ export default function HourlyAttendance() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1">Section</label>
+                    <label className="eyebrow block text-slate-600 mb-1">Section</label>
                     <select
                       value={newSection}
                       onChange={(e) => setNewSection(e.target.value)}
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                      className="w-full px-2.5 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     >
                       <option value="A">Section A</option>
                       <option value="B">Section B</option>
@@ -1235,11 +1250,11 @@ export default function HourlyAttendance() {
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1">Day</label>
+                    <label className="eyebrow block text-slate-600 mb-1">Day</label>
                     <select
                       value={newDay}
                       onChange={(e) => setNewDay(e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                      className="w-full px-2 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     >
                       <option value="MON">Monday</option>
                       <option value="TUE">Tuesday</option>
@@ -1250,31 +1265,31 @@ export default function HourlyAttendance() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1">Start Time</label>
+                    <label className="eyebrow block text-slate-600 mb-1">Start Time</label>
                     <input
                       type="time"
                       value={newStartTime}
                       onChange={(e) => setNewStartTime(e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                      className="w-full px-2 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-mono font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1">End Time</label>
+                    <label className="eyebrow block text-slate-600 mb-1">End Time</label>
                     <input
                       type="time"
                       value={newEndTime}
                       onChange={(e) => setNewEndTime(e.target.value)}
-                      className="w-full px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                      className="w-full px-2 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-mono font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">Assigned Faculty</label>
+                  <label className="eyebrow block text-slate-600 mb-1">Assigned Faculty</label>
                   <select
                     value={newMentorId}
                     onChange={(e) => setNewMentorId(Number(e.target.value))}
-                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                    className="w-full px-3 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-semibold focus:outline-none focus:border-emerald-600 cursor-pointer"
                     required
                   >
                     <option value="" disabled>-- Select Faculty --</option>
@@ -1290,14 +1305,14 @@ export default function HourlyAttendance() {
                   <button
                     type="button"
                     onClick={() => setNewClassModalOpen(false)}
-                    className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                    className="flex-1 py-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creatingClass}
-                    className="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-xs cursor-pointer"
+                    className="flex-1 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                   >
                     {creatingClass ? (
                       <>

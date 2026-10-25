@@ -121,12 +121,12 @@ class TrainingErrorBoundary extends Component<{ children: ReactNode }, { hasErro
     if (this.state.hasError) {
       return (
         <Layout>
-          <div className="p-6 max-w-xl mx-auto my-12 bg-white border border-rose-200 rounded-2xl shadow-xl text-center space-y-4">
-            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+          <div className="p-6 max-w-xl mx-auto my-12 bg-white border border-red-200 rounded-lg shadow-sm text-center space-y-4">
+            <div className="w-12 h-12 rounded-md bg-red-50 text-red-600 border border-red-200 flex items-center justify-center mx-auto">
               <AlertTriangle className="w-6 h-6" />
             </div>
-            <h2 className="text-base font-bold text-slate-900">Training Sessions Module Encountered an Issue</h2>
-            <p className="text-xs text-slate-500 font-mono bg-slate-50 p-2.5 rounded-lg border border-slate-200 break-words">
+            <h2 className="text-base font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>Training Sessions Module Encountered an Issue</h2>
+            <p className="text-xs text-slate-600 font-mono bg-slate-50 p-2.5 rounded-md border border-slate-200 break-words">
               {this.state.error}
             </p>
             <button
@@ -134,7 +134,7 @@ class TrainingErrorBoundary extends Component<{ children: ReactNode }, { hasErro
                 localStorage.removeItem("qr_cached_students");
                 window.location.reload();
               }}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+              className="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Reload Page & Reset Cache</span>
@@ -197,27 +197,27 @@ function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl border border-slate-200 overflow-hidden">
-        <div className="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-xl shadow-xl border border-slate-300 overflow-hidden">
+        <div className="px-4 py-3.5 flex items-center justify-between border-b border-slate-200 bg-white">
           <div>
-            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">TRAINING SESSIONS & BATCHES</span>
-            <h2 className="text-sm font-black text-white">Manage Batches for {session?.name}</h2>
+            <p className="eyebrow text-emerald-700">Training Sessions &amp; Batches</p>
+            <h2 className="text-sm font-bold text-slate-950 mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>Manage Batches for {session?.name}</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center cursor-pointer transition-colors"><X className="w-3.5 h-3.5" /></button>
         </div>
 
         <div className="p-4 space-y-3">
-          {error && <div className="p-2 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">{error}</div>}
+          {error && <div className="p-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">{error}</div>}
           <p className="text-xs text-slate-600">
             Allocate students to <strong>Session 1</strong> or <strong>Session 2</strong> below for separate batch attendance in the Faculty App.
           </p>
 
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {subSessions.map((sub, idx) => (
-              <div key={sub.id} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl gap-2">
+              <div key={sub.id} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-md gap-2">
                 <div className="flex items-center gap-2 flex-1">
-                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                  <span className="w-5 h-5 rounded bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0 font-mono">
                     {idx + 1}
                   </span>
                   <div className="flex-1">
@@ -227,10 +227,10 @@ function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
                         const val = e.target.value;
                         setSubSessions(prev => prev.map(s => s.id === sub.id ? { ...s, name: val } : s));
                       }}
-                      className="text-xs font-bold text-slate-900 bg-white border border-slate-200 rounded px-2 py-1 w-full"
+                      className="text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-md px-2 py-1 w-full focus:outline-none focus:border-emerald-600"
                     />
-                    <span className="text-[10.5px] text-slate-500 font-medium mt-0.5 block">
-                      👥 {sub.studentIds?.length || 0} students assigned
+                    <span className="text-[10.5px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
+                      <Users className="w-3 h-3" /> {sub.studentIds?.length || 0} students assigned
                     </span>
                   </div>
                 </div>
@@ -238,13 +238,13 @@ function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={() => setSubForStudents(sub)}
-                    className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold transition-colors cursor-pointer"
                   >
                     Select Students ({sub.studentIds?.length || 0})
                   </button>
                   <button
                     onClick={() => handleRemove(sub.id)}
-                    className="p-1 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 cursor-pointer"
+                    className="p-1.5 rounded-md bg-white text-red-600 hover:bg-red-50 border border-slate-300 hover:border-red-300 cursor-pointer transition-colors"
                     title="Remove Batch"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -259,22 +259,23 @@ function ManageSubSessionsModal({ session, allStudents, onClose, onUpdated }: {
               value={newSubName}
               onChange={e => setNewSubName(e.target.value)}
               placeholder="e.g. Session 3 (Evening Batch)"
-              className="flex-1 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 placeholder-slate-400"
+              className="flex-1 px-3 py-1.5 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
               onKeyDown={e => { if (e.key === "Enter") handleAdd(); }}
             />
             <button
               onClick={handleAdd}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1"
             >
-              + Add Batch
+              <Plus className="w-3.5 h-3.5" />
+              Add Batch
             </button>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+            <button onClick={onClose} className="px-3 py-1.5 rounded-md bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:border-slate-400 cursor-pointer transition-colors">
               Cancel
             </button>
-            <button onClick={handleSaveAll} disabled={saving} className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
+            <button onClick={handleSaveAll} disabled={saving} className="px-3.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer transition-colors disabled:opacity-60">
               {saving ? "Saving..." : "Save Batches"}
             </button>
           </div>
@@ -404,20 +405,20 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[88vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col">
-        <div className="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[88vh] overflow-hidden shadow-xl border border-slate-300 flex flex-col">
+        <div className="px-4 py-3.5 flex items-center justify-between border-b border-slate-200 bg-white">
           <div>
-            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">ROSTER ALLOCATION (ROLL NUMBER ORDER)</span>
-            <h2 className="text-sm font-black text-white">{session?.name} — Select Session Students</h2>
+            <p className="eyebrow text-emerald-700">Roster Allocation (Roll Number Order)</p>
+            <h2 className="text-sm font-bold text-slate-950 mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>{session?.name} — Select Session Students</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center cursor-pointer transition-colors"><X className="w-3.5 h-3.5" /></button>
         </div>
 
         <div className="p-4 space-y-3 overflow-y-auto flex-1">
-          {error && <div className="p-2 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">{error}</div>}
+          {error && <div className="p-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">{error}</div>}
 
-          <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl">
+          <div className="flex flex-wrap gap-1.5">
             {subSessions.map(sub => {
               const isSelected = activeTabSubId === sub.id;
               const count = (subStudentsMap[sub.id] || []).length;
@@ -425,33 +426,35 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
                 <button
                   key={sub.id}
                   onClick={() => setActiveTabSubId(sub.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    isSelected ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                    isSelected ? "bg-emerald-600 text-white" : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                   }`}
                 >
-                  📑 {sub.name} ({count})
+                  <BookOpen className="w-3.5 h-3.5" />
+                  {sub.name} ({count})
                 </button>
               );
             })}
             <button
               onClick={() => setActiveTabSubId(null)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeTabSubId === null ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                activeTabSubId === null ? "bg-emerald-600 text-white" : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
               }`}
             >
-              📋 All Enrolled ({overallIds.length})
+              <Users className="w-3.5 h-3.5" />
+              All Enrolled ({overallIds.length})
             </button>
           </div>
 
           <div className="flex items-center justify-between gap-2 pt-1">
-            <span className="text-xs font-bold text-slate-800">
+            <span className="text-xs font-semibold text-slate-800">
               {currentSelectedIds.length} students allocated to {currentSub ? currentSub.name : "All Enrolled"}
             </span>
             <div className="flex gap-1.5">
-              <button onClick={selectAll} className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold cursor-pointer">
+              <button onClick={selectAll} className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold cursor-pointer transition-colors">
                 Select All
               </button>
-              <button onClick={clearAll} className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold cursor-pointer">
+              <button onClick={clearAll} className="px-2 py-0.5 rounded-md bg-white text-slate-700 border border-slate-300 hover:border-slate-400 text-xs font-semibold cursor-pointer transition-colors">
                 Clear All
               </button>
             </div>
@@ -461,10 +464,10 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search students by name, roll number, section..."
-            className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 placeholder-slate-400"
+            className="w-full px-3 py-1.5 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
           />
 
-          <div className="border border-slate-200 rounded-xl max-h-64 overflow-y-auto divide-y divide-slate-100">
+          <div className="border border-slate-300 rounded-md max-h-64 overflow-y-auto divide-y divide-slate-200">
             {filtered.map(s => {
               const checked = currentSelectedIds.includes(s.id);
               return (
@@ -472,29 +475,29 @@ function ManageStudentsModal({ session, initialSubSessionId, allStudents, onClos
                   key={s.id}
                   onClick={() => toggle(s.id)}
                   className={`flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors ${
-                    checked ? "bg-blue-50/60" : "hover:bg-slate-50"
+                    checked ? "bg-emerald-50/60" : "hover:bg-slate-50"
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => {}}
-                    className="w-4 h-4 rounded text-blue-600 cursor-pointer"
+                    className="w-4 h-4 rounded accent-emerald-600 cursor-pointer"
                   />
                   <div className="flex-1 min-w-0">
-                    <span className={`text-xs font-bold block ${checked ? "text-blue-950" : "text-slate-900"}`}>{s.name}</span>
-                    <span className="text-[10.5px] font-mono text-slate-500">{s.uniqueId} • {s.section || "N/A"}</span>
+                    <span className={`text-xs font-semibold block ${checked ? "text-emerald-900" : "text-slate-900"}`}>{s.name}</span>
+                    <span className="text-[10.5px] font-mono text-slate-500">{s.uniqueId} · {s.section || "N/A"}</span>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+            <button onClick={onClose} className="px-3 py-1.5 rounded-md bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:border-slate-400 cursor-pointer transition-colors">
               Cancel
             </button>
-            <button onClick={handleSave} disabled={saving} className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
+            <button onClick={handleSave} disabled={saving} className="px-3.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer transition-colors disabled:opacity-60">
               {saving ? "Saving..." : "Save Roster"}
             </button>
           </div>
@@ -538,54 +541,54 @@ function CreateSessionModal({ onClose, onCreated, allStudents }: { onClose: () =
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 overflow-hidden">
-        <div className="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-md shadow-xl border border-slate-300 overflow-hidden">
+        <div className="px-4 py-3.5 flex items-center justify-between border-b border-slate-200 bg-white">
           <div>
-            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">NEW PROGRAM</span>
-            <h2 className="text-sm font-black text-white">Create Training Program</h2>
+            <p className="eyebrow text-emerald-700">New Program</p>
+            <h2 className="text-sm font-bold text-slate-950 mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>Create Training Program</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center cursor-pointer transition-colors"><X className="w-3.5 h-3.5" /></button>
         </div>
 
         <div className="p-4 space-y-3">
-          {error && <div className="p-2 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">{error}</div>}
+          {error && <div className="p-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">{error}</div>}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Training Program Title *</label>
+            <label className="eyebrow block text-slate-600 mb-1.5">Training Program Title *</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Next Gen Employability Training"
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+              className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Corporate Sponsor / Company</label>
+            <label className="eyebrow block text-slate-600 mb-1.5">Corporate Sponsor / Company</label>
             <input
               value={company}
               onChange={e => setCompany(e.target.value)}
               placeholder="e.g. NEXT GEN, Wipro, Infosys"
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+              className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Description / Curriculum Focus</label>
+            <label className="eyebrow block text-slate-600 mb-1.5">Description / Curriculum Focus</label>
             <input
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="e.g. Full Stack Employability & Soft Skills"
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+              className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+            <button onClick={onClose} className="px-3 py-1.5 rounded-md bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:border-slate-400 cursor-pointer transition-colors">
               Cancel
             </button>
-            <button onClick={handleCreate} disabled={saving} className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
+            <button onClick={handleCreate} disabled={saving} className="px-3.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer transition-colors disabled:opacity-60">
               {saving ? "Creating..." : "Create Program"}
             </button>
           </div>
@@ -620,57 +623,57 @@ function AddTrainerKeyModal({ session, onClose, onAdded }: { session: TrainingSe
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 overflow-hidden">
-        <div className="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-md shadow-xl border border-slate-300 overflow-hidden">
+        <div className="px-4 py-3.5 flex items-center justify-between border-b border-slate-200 bg-white">
           <div>
-            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">TRAINER CREDENTIALS</span>
-            <h2 className="text-sm font-black text-white">Add Key for {session?.name}</h2>
+            <p className="eyebrow text-emerald-700">Trainer Credentials</p>
+            <h2 className="text-sm font-bold text-slate-950 mt-0.5" style={{ fontFamily: "var(--app-font-display)" }}>Add Key for {session?.name}</h2>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center cursor-pointer transition-colors"><X className="w-3.5 h-3.5" /></button>
         </div>
 
         <div className="p-4 space-y-3">
-          {error && <div className="p-2 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">{error}</div>}
+          {error && <div className="p-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">{error}</div>}
           <p className="text-xs text-slate-600">
             External trainers use this key in the Faculty Mobile App to mark attendance for <strong>{session?.name}</strong>.
           </p>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Trainer Full Name *</label>
+            <label className="eyebrow block text-slate-600 mb-1.5">Trainer Full Name *</label>
             <input
               value={trainerName}
               onChange={e => setTrainerName(e.target.value)}
               placeholder="e.g. Mr. Ravi Kumar"
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+              className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Trainer Email</label>
+            <label className="eyebrow block text-slate-600 mb-1.5">Trainer Email</label>
             <input
               value={trainerEmail}
               onChange={e => setTrainerEmail(e.target.value)}
               placeholder="e.g. trainer@nextgen.com"
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
+              className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Faculty App Passkey *</label>
+            <label className="eyebrow block text-slate-600 mb-1.5">Faculty App Passkey *</label>
             <input
               value={trainerKey}
               onChange={e => setTrainerKey(e.target.value)}
               placeholder="e.g. 802"
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold font-mono text-slate-900"
+              className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-medium font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button onClick={onClose} className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+            <button onClick={onClose} className="px-3 py-1.5 rounded-md bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:border-slate-400 cursor-pointer transition-colors">
               Cancel
             </button>
-            <button onClick={handleAdd} disabled={saving} className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs">
+            <button onClick={handleAdd} disabled={saving} className="px-3.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer transition-colors disabled:opacity-60">
               {saving ? "Adding..." : "Add Trainer Key"}
             </button>
           </div>
@@ -861,67 +864,65 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
 
   return (
     <Layout>
-      <div className="p-2 sm:p-3.5 max-w-7xl mx-auto space-y-2.5 text-slate-800 font-sans">
-        
-        {/* ── TOP HEADER ── */}
-        <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:px-3.5 sm:py-2.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            {activeSession && (
-              <Link
-                href="/training-sessions"
-                className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors inline-flex items-center gap-1 text-xs font-bold cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Programs</span>
-              </Link>
-            )}
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2 py-0.2 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200">
-                  {activeSession ? `🏢 ${activeSession.company || "NEXT GEN"}` : "PLACEMENT & TECHNICAL TRAINING"}
-                </span>
-                <h1 className="text-sm sm:text-base font-black text-slate-900 leading-tight">
-                  {activeSession ? activeSession.name : "Training Programs & Bootcamps"}
-                </h1>
-              </div>
-              {activeSession?.description && (
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5">{activeSession.description}</p>
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5">
+
+        {/* ── PAGE HEADER ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 pb-4 border-b border-slate-300/70">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {activeSession && (
+                <Link
+                  href="/training-sessions"
+                  className="px-2 py-1 rounded-md bg-white border border-slate-300 text-slate-700 hover:border-slate-400 text-[11px] font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Programs</span>
+                </Link>
               )}
+              <p className="eyebrow text-slate-500 truncate">
+                {activeSession ? `Training Program · ${activeSession.company || "NEXT GEN"}` : "Placement & Technical Training"}
+              </p>
             </div>
+            <h1 className="text-xl sm:text-[26px] font-bold text-slate-950 tracking-tight mt-1.5" style={{ fontFamily: "var(--app-font-display)" }}>
+              {activeSession ? activeSession.name : "Training Programs & Bootcamps"}
+            </h1>
+            {activeSession?.description && (
+              <p className="text-xs text-slate-500 mt-1">{activeSession.description}</p>
+            )}
           </div>
 
           {!activeSession ? (
             <button
               onClick={() => setShowCreate(true)}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-xs cursor-pointer self-start md:self-auto"
+              className="px-3.5 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer self-start md:self-auto shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Create Program</span>
             </button>
           ) : (
             /* Harmonized Action Toolbar */
-            <div className="flex items-center gap-1.5 flex-wrap self-end md:self-auto">
+            <div className="flex items-center gap-1.5 flex-wrap self-start md:self-auto shrink-0">
               <button
                 onClick={() => setManageStudentsOpen(true)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <Users className="w-3.5 h-3.5 text-slate-600" />
+                <Users className="w-3.5 h-3.5 text-slate-500" />
                 <span>Manage Students</span>
               </button>
 
               <button
                 onClick={() => setManageSubSessionsFor(activeSession)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <BookOpen className="w-3.5 h-3.5 text-slate-600" />
+                <BookOpen className="w-3.5 h-3.5 text-slate-500" />
                 <span>Batches</span>
               </button>
 
               <button
                 onClick={() => setAddKeyFor(activeSession)}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-1.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <KeyRound className="w-3.5 h-3.5 text-slate-600" />
+                <KeyRound className="w-3.5 h-3.5 text-slate-500" />
                 <span>Trainer Key</span>
               </button>
 
@@ -932,7 +933,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                   }
                 }}
                 disabled={unlockMutation.isPending}
-                className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-1.5 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Unlock className="w-3.5 h-3.5 text-amber-700" />
                 <span>{unlockMutation.isPending ? "Unlocking..." : "Unlock"}</span>
@@ -945,79 +946,109 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
         {!activeSession && (
           <div className="space-y-2.5">
             {/* Landing KPI Operational Metric Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Training Programs</span>
-                  <span className="text-base font-black text-slate-900">{landingStats.totalPrograms} Active</span>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="eyebrow text-slate-500">Training Programs</p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{landingStats.totalPrograms}</p>
+                    <p className="text-[10.5px] text-slate-500 mt-1.5">Active programs</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <Building2 className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">Total Enrolled</span>
-                  <span className="text-base font-black text-indigo-950">{landingStats.totalEnrolled} Candidates</span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-500" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="eyebrow text-slate-500">Total Enrolled</p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{landingStats.totalEnrolled}</p>
+                    <p className="text-[10.5px] text-slate-500 mt-1.5">Candidates across programs</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider block">Configured Batches</span>
-                  <span className="text-base font-black text-purple-950">{landingStats.totalBatches} Sessions</span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-purple-500" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="eyebrow text-slate-500">Configured Batches</p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{landingStats.totalBatches}</p>
+                    <p className="text-[10.5px] text-slate-500 mt-1.5">Sessions configured</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <BookOpen className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Trainer Credentials</span>
-                  <span className="text-base font-black text-emerald-950">{landingStats.totalKeys} Active Keys</span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="eyebrow text-slate-500">Trainer Credentials</p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{landingStats.totalKeys}</p>
+                    <p className="text-[10.5px] text-slate-500 mt-1.5">Active keys</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <KeyRound className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
               </div>
             </div>
 
             {/* Programs Grid */}
             {loadingSessions ? (
-              <div className="bg-white border border-slate-200 p-12 flex flex-col items-center justify-center gap-2 rounded-xl shadow-2xs">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-                <p className="text-xs text-slate-600 font-semibold">Loading training programs...</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="bg-card border border-slate-300/70 rounded-lg p-4 shadow-xs animate-pulse">
+                    <div className="h-2.5 bg-slate-200 rounded w-1/3 mb-3" />
+                    <div className="h-4 bg-slate-200 rounded w-2/3 mb-4" />
+                    <div className="h-3 bg-slate-200 rounded w-1/2" />
+                  </div>
+                ))}
               </div>
             ) : sessions.length === 0 ? (
-              <div className="bg-white border border-slate-200 p-12 rounded-xl text-center space-y-3 shadow-2xs">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-12 text-center space-y-3 shadow-xs">
                 <Building2 className="w-10 h-10 text-slate-400 mx-auto" />
-                <h3 className="text-slate-900 font-bold text-sm">No Training Programs Configured Yet</h3>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                <h3 className="text-slate-950 font-bold text-sm" style={{ fontFamily: "var(--app-font-display)" }}>No Training Programs Configured Yet</h3>
+                <p className="text-xs text-slate-600 max-w-xs mx-auto">
                   Create employability training programs, allocate batches, and assign external trainer app credentials.
                 </p>
                 <button
                   onClick={() => setShowCreate(true)}
-                  className="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs inline-flex items-center gap-1"
+                  className="px-3.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Create First Training Session</span>
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {sessions.map(s => (
                   <div
                     key={s.id}
-                    className="bg-white border border-slate-200 hover:border-blue-400 rounded-xl p-3.5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between space-y-3 group"
+                    className="bg-card border border-slate-300/70 hover:border-emerald-400 rounded-lg p-3.5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between space-y-3 group"
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-900 border border-blue-200 font-mono">
-                          🏢 {s.company?.toUpperCase() || "NEXT GEN"}
+                        <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
+                          <Building2 className="w-3 h-3" />
+                          {s.company?.toUpperCase() || "NEXT GEN"}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-medium">
+                        <span className="text-[10px] font-mono text-slate-500">
                           ID: #{s.id}
                         </span>
                       </div>
 
-                      <h3 className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
+                      <h3 className="text-sm font-bold text-slate-950 group-hover:text-emerald-700 transition-colors leading-tight">
                         {s.name}
                       </h3>
 
@@ -1028,28 +1059,28 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                       )}
 
                       <div className="grid grid-cols-2 gap-1.5 pt-1">
-                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center">
-                          <span className="text-sm font-black text-slate-900 block">{s.studentIds?.length || 0}</span>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase">Enrolled</span>
+                        <div className="bg-slate-50 border border-slate-200 rounded-md p-2 text-center">
+                          <span className="text-sm font-bold text-slate-950 block font-mono tabular-nums">{s.studentIds?.length || 0}</span>
+                          <span className="eyebrow text-slate-500">Enrolled</span>
                         </div>
-                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-2 text-center">
-                          <span className="text-sm font-black text-slate-900 block">{s.subSessions?.length || 2}</span>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase">Batches</span>
+                        <div className="bg-slate-50 border border-slate-200 rounded-md p-2 text-center">
+                          <span className="text-sm font-bold text-slate-950 block font-mono tabular-nums">{s.subSessions?.length || 2}</span>
+                          <span className="eyebrow text-slate-500">Batches</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <div className="pt-2 border-t border-slate-200 flex items-center justify-between gap-2">
                       <Link
                         href={`/training-sessions/${s.id}`}
-                        className="flex-1 py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1 transition-colors shadow-2xs cursor-pointer"
+                        className="flex-1 py-1.5 px-3 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                       >
                         <span>Open Dashboard</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                       <button
                         onClick={() => { if (confirm(`Delete training program "${s.name}"?`)) deleteSessionMutation.mutate(s.id); }}
-                        className="p-1.5 rounded-lg border border-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-400 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-md border border-slate-300 bg-white hover:bg-red-50 hover:text-red-700 hover:border-red-300 text-slate-400 transition-colors cursor-pointer"
                         title="Delete Program"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1062,26 +1093,26 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
 
             {/* Quick Reference Table for All Batches across programs */}
             {sessions.length > 0 && (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
-                <div className="px-3.5 py-2 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-                    All Configured Training Batches & Rosters
+              <div className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                  <h3 className="text-[13px] font-bold text-slate-950 flex items-center gap-2" style={{ fontFamily: "var(--app-font-display)" }}>
+                    <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
+                    All Configured Training Batches &amp; Rosters
                   </h3>
-                  <span className="text-[11px] text-slate-500 font-medium">Quick Batch Overview</span>
+                  <span className="eyebrow text-slate-500">Quick Batch Overview</span>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px]">
+                    <thead className="bg-slate-100 border-b border-slate-200">
                       <tr>
-                        <th className="py-2 px-3">Program Name</th>
-                        <th className="py-2 px-3">Batch Name</th>
-                        <th className="py-2 px-3 text-center">Enrolled Strength</th>
-                        <th className="py-2 px-3">Trainer App Credential</th>
-                        <th className="py-2 px-3 text-right">Action</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3">Program Name</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3">Batch Name</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3 text-center">Enrolled Strength</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3">Trainer App Credential</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3 text-right">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                    <tbody className="divide-y divide-slate-200 text-xs">
                       {sessions.flatMap(s => {
                         const subs = s?.subSessions && s.subSessions.length > 0 ? s.subSessions : [
                           { id: 1, name: "Session 1 (Final years)", studentIds: [] },
@@ -1090,25 +1121,28 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                         const trainerKeyInfo = (s?.trainerKeys && s.trainerKeys.length > 0) ? s.trainerKeys.map(k => `${k.name} (Key: ${k.key})`).join(", ") : "Key: 802";
 
                         return subs.map((sub, sIdx) => (
-                          <tr key={`${s.id}-${sub.id}`} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="py-2 px-3 font-bold text-slate-900">
+                          <tr key={`${s.id}-${sub.id}`} className="hover:bg-slate-50 transition-colors">
+                            <td className="py-2.5 px-3 font-semibold text-slate-950">
                               {s.name}
                             </td>
-                            <td className="py-2 px-3 font-semibold text-slate-700">
-                              📑 {sub.name}
+                            <td className="py-2.5 px-3 font-medium text-slate-700">
+                              <span className="inline-flex items-center gap-1.5">
+                                <BookOpen className="w-3 h-3 text-slate-400" />
+                                {sub.name}
+                              </span>
                             </td>
-                            <td className="py-2 px-3 text-center">
-                              <span className="inline-block px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                            <td className="py-2.5 px-3 text-center">
+                              <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
                                 {sub.studentIds?.length || 0} Students
                               </span>
                             </td>
-                            <td className="py-2 px-3 text-slate-600 text-[11px] font-mono">
+                            <td className="py-2.5 px-3 text-slate-600 text-[11px] font-mono">
                               {trainerKeyInfo}
                             </td>
-                            <td className="py-2 px-3 text-right">
+                            <td className="py-2.5 px-3 text-right">
                               <Link
                                 href={`/training-sessions/${s.id}`}
-                                className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10.5px] font-bold inline-flex items-center gap-1 cursor-pointer"
+                                className="px-2 py-1 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-[10.5px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
                               >
                                 <span>Open Roster</span>
                                 <ChevronRight className="w-3 h-3" />
@@ -1127,18 +1161,19 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
 
         {/* ── SCREEN 2: ACTIVE PROGRAM DETAIL VIEW ── */}
         {activeSession && (
-          <div className="space-y-2.5">
+          <div className="space-y-4">
             {/* SUB-SESSIONS / BATCH TABS */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
               <button
                 onClick={() => setActiveSubSessionId(null)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap inline-flex items-center gap-1.5 ${
                   activeSubSessionId === null
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                 }`}
               >
-                📋 All Enrolled ({activeSession.studentIds?.length || 0})
+                <Users className="w-3.5 h-3.5" />
+                All Enrolled ({activeSession.studentIds?.length || 0})
               </button>
 
               {subSessions.map(sub => {
@@ -1148,70 +1183,95 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                   <button
                     key={sub.id}
                     onClick={() => setActiveSubSessionId(sub.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap inline-flex items-center gap-1.5 ${
                       isSelected
-                        ? "bg-slate-900 text-white shadow-xs"
-                        : "bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200"
+                        ? "bg-emerald-600 text-white"
+                        : "bg-white border border-slate-300 text-slate-700 hover:border-slate-400"
                     }`}
                   >
-                    📑 {sub.name} ({count})
+                    <BookOpen className="w-3.5 h-3.5" />
+                    {sub.name} ({count})
                   </button>
                 );
               })}
 
               <button
                 onClick={() => setManageSubSessionsFor(activeSession)}
-                className="px-2.5 py-1.5 rounded-lg border border-dashed border-slate-300 text-blue-700 hover:bg-blue-50 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap"
+                className="px-2.5 py-1.5 rounded-md border border-dashed border-slate-300 text-emerald-700 hover:bg-emerald-50 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
               >
-                + Add Batch
+                <Plus className="w-3.5 h-3.5" />
+                Add Batch
               </button>
             </div>
 
             {/* Program Operational Stats Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                    {currentSubSession ? `${currentSubSession.name} Enrolled` : "Total Candidates"}
-                  </span>
-                  <span className="text-base font-black text-slate-900">{enrolledStudents.length} Students</span>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="eyebrow text-slate-500">
+                      {currentSubSession ? `${currentSubSession.name} Enrolled` : "Total Candidates"}
+                    </p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{enrolledStudents.length}</p>
+                    <p className="text-[10.5px] text-slate-500 mt-1.5">Students enrolled</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Present Today</span>
-                  <span className="text-base font-black text-emerald-900">{presentCount} Marked</span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="eyebrow text-slate-500">Present Today</p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{presentCount}</p>
+                    <p className="text-[10.5px] text-slate-500 mt-1.5">Marked present</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <UserCheck className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">Attendance State</span>
-                  <span className={`text-xs font-black ${isAttendanceStarted ? "text-rose-900" : "text-slate-700"}`}>
-                    {isAttendanceStarted ? `${absentCount} Absent` : "Attendance Not Started"}
-                  </span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${isAttendanceStarted ? "bg-red-500" : "bg-slate-400"}`} aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="eyebrow text-slate-500">Attendance State</p>
+                    <p className={`text-lg leading-none font-bold mt-2.5 ${isAttendanceStarted ? "text-red-700" : "text-slate-500"}`}>
+                      {isAttendanceStarted ? `${absentCount} Absent` : "Not Started"}
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <Activity className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className={`w-2.5 h-2.5 rounded-full ${isAttendanceStarted ? "bg-rose-500" : "bg-slate-400"}`}></span>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">Trainer Keys</span>
-                  <span className="text-base font-black text-indigo-900">{activeSession.trainerKeys?.length || 0} Configured</span>
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3.5 shadow-xs relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-500" aria-hidden />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="eyebrow text-slate-500">Trainer Keys</p>
+                    <p className="text-[26px] leading-none font-bold text-slate-950 mt-2 font-mono tabular-nums">{activeSession.trainerKeys?.length || 0}</p>
+                    <p className="text-[10.5px] text-slate-500 mt-1.5">Configured</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                    <KeyRound className="w-4 h-4 text-slate-700" />
+                  </div>
                 </div>
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
               </div>
             </div>
 
             {/* Executive Masked Trainer Key Strip */}
             {(activeSession.trainerKeys || []).length > 0 && (
-              <div className="bg-white border border-slate-200 rounded-xl p-2.5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-3 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                    <KeyRound className="w-3.5 h-3.5 text-blue-600" />
+                  <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Trainer App Passkey:</span>
                   </span>
                   {(activeSession.trainerKeys || []).map(tk => {
@@ -1219,9 +1279,9 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                     const isCopied = copiedKeyId === String(tk.id);
 
                     return (
-                      <div key={tk.id} className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
-                        <span className="text-xs font-bold text-slate-800">{tk.name}:</span>
-                        <span className="font-mono text-xs font-bold text-blue-900 tracking-wider">
+                      <div key={tk.id} className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-md px-2 py-1">
+                        <span className="text-xs font-semibold text-slate-700">{tk.name}:</span>
+                        <span className="font-mono text-xs font-bold text-blue-700 tracking-wider">
                           {isRevealed ? tk.key : "••••••••"}
                         </span>
                         <button
@@ -1242,21 +1302,21 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                     );
                   })}
                 </div>
-                <span className="text-[10.5px] text-slate-500 font-medium">
+                <span className="text-[10.5px] text-slate-500">
                   Trainer selects batch from dropdown in Faculty App
                 </span>
               </div>
             )}
 
             {/* Student Roster Toolbar */}
-            <div className="bg-white border border-slate-200 p-2 rounded-xl shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div className="bg-card border border-slate-300/70 rounded-lg p-3 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
               <div className="relative flex-1 max-w-sm">
                 <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                 <input
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder={`Search ${currentSubSession ? currentSubSession.name : "enrolled"} candidates...`}
-                  className="w-full pl-8 pr-7 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs font-semibold focus:outline-none focus:border-blue-500"
+                  className="w-full pl-8 pr-7 py-1.5 rounded-md bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-xs font-medium focus:outline-none focus:border-emerald-600"
                 />
                 {searchQuery && (
                   <button
@@ -1272,7 +1332,7 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                 <select
                   value={selectedSectionFilter}
                   onChange={e => setSelectedSectionFilter(e.target.value)}
-                  className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-medium focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="ALL">All Sections</option>
                   <option value="A">Section A</option>
@@ -1283,58 +1343,58 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                 <select
                   value={selectedStatusFilter}
                   onChange={(e: any) => setSelectedStatusFilter(e.target.value)}
-                  className="px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
+                  className="px-2 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 text-xs font-medium focus:outline-none focus:border-emerald-600 cursor-pointer"
                 >
                   <option value="ALL">Status: All</option>
-                  <option value="PRESENT">✓ Present</option>
-                  <option value="ABSENT">✗ Absent</option>
-                  <option value="PENDING">⏳ Pending / Not Marked</option>
+                  <option value="PRESENT">Present</option>
+                  <option value="ABSENT">Absent</option>
+                  <option value="PENDING">Pending / Not Marked</option>
                 </select>
 
-                <div className="text-xs font-bold text-slate-600 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg">
-                  Showing <strong className="text-slate-900">{filteredEnrolled.length}</strong> of {enrolledStudents.length} (Roll Number Order)
+                <div className="text-[11px] text-slate-600 bg-white border border-slate-300 px-2.5 py-1.5 rounded-md font-mono whitespace-nowrap">
+                  Showing <strong className="text-slate-950">{filteredEnrolled.length}</strong> of {enrolledStudents.length} · Roll No. Order
                 </div>
               </div>
             </div>
 
             {/* High-Density Student Roster Table - STRICT ROLL NUMBER ORDER */}
             {enrolledStudents.length === 0 ? (
-              <div className="bg-white border border-slate-200 rounded-xl p-10 text-center space-y-2 shadow-2xs">
+              <div className="bg-card border border-slate-300/70 rounded-lg p-10 text-center space-y-2 shadow-xs">
                 <Users className="w-8 h-8 text-slate-400 mx-auto" />
-                <h3 className="text-slate-900 font-bold text-sm">
+                <h3 className="text-slate-950 font-bold text-sm" style={{ fontFamily: "var(--app-font-display)" }}>
                   No Students in {currentSubSession ? currentSubSession.name : "this Training Program"}
                 </h3>
-                <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                <p className="text-xs text-slate-600 max-w-xs mx-auto">
                   Click below to allocate students to {currentSubSession ? currentSubSession.name : activeSession.name}.
                 </p>
                 <button
                   onClick={() => setManageStudentsOpen(true)}
-                  className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 cursor-pointer shadow-xs inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5 transition-colors"
                 >
                   <Users className="w-3.5 h-3.5" />
                   <span>Allocate Students</span>
                 </button>
               </div>
             ) : (
-              <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
-                <div className="overflow-x-auto max-h-[calc(100vh-290px)] min-h-[320px] overflow-y-auto scrollbar-thin">
+              <div className="bg-card border border-slate-300/70 rounded-lg shadow-xs overflow-hidden">
+                <div className="overflow-x-auto max-h-[calc(100vh-330px)] min-h-[320px] overflow-y-auto scrollbar-thin">
                   <table className="w-full text-left border-collapse text-xs">
-                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+                    <thead className="sticky top-0 z-10 bg-slate-100 border-b border-slate-200">
                       <tr>
-                        <th className="py-2 px-2.5 text-center w-10">#</th>
-                        <th className="py-2 px-3">Roll Number (HTNO)</th>
-                        <th className="py-2 px-3">Candidate Full Name</th>
-                        <th className="py-2 px-2 text-center">Section</th>
-                        <th className="py-2 px-3">Batch Allocation</th>
-                        <th className="py-2 px-3">Gate Scan</th>
-                        <th className="py-2 px-3 text-center">Training Attendance</th>
-                        <th className="py-2 px-2.5 text-right">Profile</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-2.5 text-center w-10">#</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3">Roll Number (HTNO)</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3">Candidate Full Name</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-2 text-center">Section</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3">Batch Allocation</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3">Gate Scan</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-3 text-center">Training Attendance</th>
+                        <th className="eyebrow text-slate-500 py-2.5 px-2.5 text-right">Profile</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                    <tbody className="divide-y divide-slate-200 text-xs">
                       {filteredEnrolled.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
+                          <td colSpan={8} className="py-12 text-center text-slate-500 font-medium">
                             No student matches the search or filter query.
                           </td>
                         </tr>
@@ -1349,63 +1409,63 @@ function TrainingSessionsInner({ trainingId }: { trainingId?: number }) {
                             <tr
                               key={s.id}
                               onClick={() => setSelectedStudent(s)}
-                              className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                              className="hover:bg-slate-50 transition-colors cursor-pointer group"
                             >
-                              <td className="py-1.5 px-2.5 text-center font-mono text-slate-400 font-semibold text-[11px]">
+                              <td className="py-2 px-2.5 text-center font-mono text-slate-400 text-[11px]">
                                 {idx + 1}
                               </td>
-                              <td className="py-1.5 px-3 font-mono font-black text-blue-950 text-[11px] whitespace-nowrap">
+                              <td className="py-2 px-3 font-mono font-semibold text-slate-900 text-[11px] whitespace-nowrap">
                                 {s.uniqueId || "N/A"}
                               </td>
-                              <td className="py-1.5 px-3">
-                                <span className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors block leading-tight">
+                              <td className="py-2 px-3">
+                                <span className="font-semibold text-slate-950 group-hover:text-emerald-700 transition-colors block leading-tight">
                                   {s.name}
                                 </span>
                               </td>
-                              <td className="py-1.5 px-2 text-center whitespace-nowrap">
-                                <span className="inline-block px-1.5 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-800 text-[10px] font-bold font-mono">
+                              <td className="py-2 px-2 text-center whitespace-nowrap">
+                                <span className="stamp border-slate-300 bg-slate-50 text-slate-700">
                                   {s.section || "N/A"}
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3 whitespace-nowrap text-slate-600">
+                              <td className="py-2 px-3 whitespace-nowrap">
                                 {studentSub ? (
-                                  <span className="px-1.5 py-0.2 rounded bg-blue-50 text-blue-900 border border-blue-200 text-[10px] font-semibold">
+                                  <span className="stamp border-blue-300 bg-blue-50 text-blue-800">
                                     {studentSub.name}
                                   </span>
                                 ) : (
                                   <span className="text-[10px] text-slate-400 italic">Unassigned Batch</span>
                                 )}
                               </td>
-                              <td className="py-1.5 px-3 whitespace-nowrap">
-                                <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-slate-600">
+                              <td className="py-2 px-3 whitespace-nowrap">
+                                <span className="inline-flex items-center gap-1.5 text-[10.5px] font-medium text-slate-600">
                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                   <span>Campus Scanned</span>
                                 </span>
                               </td>
-                              <td className="py-1.5 px-3 text-center whitespace-nowrap">
+                              <td className="py-2 px-3 text-center whitespace-nowrap">
                                 {isMarked ? (
                                   isPresent ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
                                       <CheckCircle className="w-3 h-3 text-emerald-600" /> Present
                                     </span>
                                   ) : (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
-                                      <XCircle className="w-3 h-3 text-rose-600" /> Absent
+                                    <span className="stamp border-red-300 bg-red-50 text-red-800">
+                                      <XCircle className="w-3 h-3 text-red-600" /> Absent
                                     </span>
                                   )
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                                    ⏳ Pending / Not Marked
+                                  <span className="stamp border-slate-300 bg-slate-50 text-slate-600">
+                                    <Clock className="w-3 h-3" /> Pending
                                   </span>
                                 )}
                               </td>
-                              <td className="py-1.5 px-2.5 text-right">
+                              <td className="py-2 px-2.5 text-right">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedStudent(s);
                                   }}
-                                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[10.5px] font-bold border border-slate-200 transition-colors inline-flex items-center gap-0.5 cursor-pointer"
+                                  className="px-2 py-1 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-[10.5px] font-semibold transition-colors inline-flex items-center gap-0.5 cursor-pointer"
                                 >
                                   <span>Profile</span>
                                   <ChevronRight className="w-3 h-3" />

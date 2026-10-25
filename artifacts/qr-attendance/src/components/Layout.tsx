@@ -82,29 +82,29 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
         onClick={() => setExpanded(e => !e)}
         className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors cursor-pointer ${
           isOnTraining
-            ? "bg-slate-800 text-slate-50 font-semibold"
-            : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 font-medium"
+            ? "bg-emerald-600 text-white font-semibold shadow-sm"
+            : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
         }`}
       >
         <Briefcase className="w-4 h-4 shrink-0" />
         <span className="flex-1 text-left">Training Sessions</span>
         {expanded
-          ? <ChevronDown className="w-3 h-3 opacity-60" />
-          : <ChevronRight className="w-3 h-3 opacity-60" />}
+          ? <ChevronDown className="w-3 h-3 opacity-70" />
+          : <ChevronRight className="w-3 h-3 opacity-70" />}
       </button>
 
       {expanded && (
         <div className="ml-[22px] relative">
-          <div className="absolute left-0 top-0 bottom-3 w-px bg-slate-700/70" aria-hidden />
+          <div className="absolute left-0 top-0 bottom-3 w-px bg-slate-300" aria-hidden />
 
           <div className="relative pl-4">
-            <div className="absolute left-0 top-1/2 w-3 h-px bg-slate-700/70" aria-hidden />
+            <div className="absolute left-0 top-1/2 w-3 h-px bg-slate-300" aria-hidden />
             <Link href="/training-sessions" onClick={onNavigate}>
               <div
                 className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs cursor-pointer transition-colors ${
                   location === "/training-sessions"
-                    ? "bg-slate-800 text-slate-50 font-semibold"
-                    : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                    ? "bg-emerald-600 text-white font-semibold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
                 <List className="w-3 h-3 shrink-0" />
@@ -118,13 +118,13 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
             const isActive = location === href;
             return (
               <div key={s.id} className="relative pl-4 mt-0.5">
-                <div className="absolute left-0 top-1/2 w-3 h-px bg-slate-700/70" aria-hidden />
+                <div className="absolute left-0 top-1/2 w-3 h-px bg-slate-300" aria-hidden />
                 <Link href={href} onClick={onNavigate}>
                   <div
                     className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs cursor-pointer transition-colors ${
                       isActive
-                        ? "bg-slate-800 text-slate-50 font-semibold"
-                        : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
+                        ? "bg-emerald-600 text-white font-semibold"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     }`}
                   >
                     <Building2 className="w-3 h-3 shrink-0" />
@@ -136,7 +136,7 @@ function TrainingNavTree({ location, onNavigate }: { location: string; onNavigat
           })}
 
           {sessions.length === 0 && (
-            <div className="pl-6 py-1.5 text-[11px] text-slate-600">No sessions yet</div>
+            <div className="pl-6 py-1.5 text-[11px] text-slate-500">No sessions yet</div>
           )}
         </div>
       )}
@@ -286,8 +286,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
       queryClient.invalidateQueries({ queryKey: ["layout-reassignments"] });
       queryClient.invalidateQueries({ queryKey: ["admin-schedules-list-status"] });
       queryClient.invalidateQueries({ queryKey: ["hourly-attendance-schedules"] });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Action error:", err);
+      const { toast } = await import("@/hooks/use-toast");
+      let msg = err?.message || err?.error || "Request could not be processed.";
+      if (typeof msg === "string" && (msg.includes("<") || msg.includes("<!DOCTYPE"))) {
+        msg = "Server error — the reassignment was not updated.";
+      }
+      toast({
+        variant: "destructive",
+        title: "Action Failed",
+        description: msg,
+      });
     } finally {
       setProcessingNotificationId(null);
     }
@@ -300,18 +310,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* ══════════ SIDEBAR ══════════ */}
       <aside
-        className={`${isDesktop && sidebarOpen ? "relative" : "fixed inset-y-0 left-0"} z-50 w-[248px] shrink-0 flex flex-col bg-slate-950 border-r border-slate-800 transition-transform duration-200 ${
+        className={`${isDesktop && sidebarOpen ? "relative" : "fixed inset-y-0 left-0"} z-50 w-[250px] shrink-0 flex flex-col bg-white border-r border-slate-300 shadow-sm transition-transform duration-200 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-4 pt-5 pb-4 border-b border-slate-800/80">
-          <div className="w-9 h-9 rounded-md bg-slate-900 border border-slate-700 flex items-center justify-center shrink-0 relative">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            <span className="absolute bottom-0 left-1.5 right-1.5 h-[2px] bg-emerald-500/80" aria-hidden />
+        <div className="flex items-center gap-3 px-4 pt-5 pb-4 border-b border-slate-200">
+          <div className="w-9 h-9 rounded-md bg-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
+            <ShieldCheck className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-bold text-slate-50 truncate" style={{ fontFamily: "var(--app-font-display)" }}>
+            <p className="text-[13px] font-bold text-slate-900 truncate" style={{ fontFamily: "var(--app-font-display)" }}>
               SPHN Attendance
             </p>
             <p className="text-[10px] font-mono uppercase tracking-[0.12em] text-slate-500 truncate">
@@ -320,7 +329,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="text-slate-500 hover:text-slate-200 transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-slate-900 transition-colors cursor-pointer"
             aria-label="Close menu"
           >
             <X className="w-5 h-5" />
@@ -329,7 +338,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
-          <p className="eyebrow text-slate-600 px-2 mb-2">Registry</p>
+          <p className="eyebrow text-slate-500 px-2 mb-2">Registry</p>
           {navLinks.map(({ href, label, icon: Icon }) => {
             const currentFull = window.location.pathname + window.location.search;
             const isActive = href.includes("tab=flags")
@@ -351,15 +360,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                       window.dispatchEvent(new Event("popstate"));
                     }
                   }}
-                  className={`relative flex items-center gap-2.5 pl-3.5 pr-3 py-2 rounded-md mb-0.5 cursor-pointer transition-colors ${
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-md mb-0.5 cursor-pointer transition-colors ${
                     isActive
-                      ? "bg-slate-800 text-slate-50 font-semibold"
-                      : "text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium"
+                      ? "bg-emerald-600 text-white font-semibold shadow-sm"
+                      : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium"
                   }`}
                 >
-                  {isActive && (
-                    <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-emerald-500" aria-hidden />
-                  )}
                   <Icon className="w-4 h-4 shrink-0" />
                   <span className="text-[13px]">{label}</span>
                 </div>
@@ -369,21 +375,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Training Sessions Tree Nav — HOD & Admin only */}
           {(role === "hod" || role === "admin") && (
-            <div className="mt-3 pt-3 border-t border-slate-800/80">
-              <p className="eyebrow text-slate-600 px-2 mb-1.5">Programs</p>
+            <div className="mt-3 pt-3 border-t border-slate-200">
+              <p className="eyebrow text-slate-500 px-2 mb-1.5">Programs</p>
               <TrainingNavTree location={location} onNavigate={() => { if (!isDesktop) setSidebarOpen(false); }} />
             </div>
           )}
         </nav>
 
         {/* Bottom: user + settings + logout */}
-        <div className="px-3 py-3 border-t border-slate-800/80">
+        <div className="px-3 py-3 border-t border-slate-200">
           <div className="flex items-center gap-2.5 px-1.5 pb-2.5">
-            <div className="w-8 h-8 rounded-md bg-emerald-900/60 border border-emerald-700/50 flex items-center justify-center text-xs font-bold text-emerald-300 shrink-0 font-mono">
+            <div className="w-8 h-8 rounded-md bg-emerald-600 flex items-center justify-center text-xs font-bold text-white shrink-0 font-mono">
               {initials}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-200 truncate">{userDisplayName}</p>
+              <p className="text-xs font-semibold text-slate-900 truncate">{userDisplayName}</p>
               <p className="text-[10px] font-mono text-slate-500 truncate">{userEmail}</p>
             </div>
           </div>
@@ -392,7 +398,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <button
               data-testid="sidebar-settings"
               onClick={openSettings}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-900 hover:text-slate-200 text-[13px] font-medium transition-colors cursor-pointer"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-[13px] font-medium transition-colors cursor-pointer"
             >
               <Settings className="w-4 h-4" />
               <span>Settings</span>
@@ -402,7 +408,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <button
             data-testid="logout-button"
             onClick={logout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-400 hover:bg-red-950/50 hover:text-red-300 text-[13px] font-medium transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:bg-red-50 hover:text-red-700 text-[13px] font-medium transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -412,30 +418,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile overlay */}
       {sidebarOpen && !isDesktop && (
-        <div className="fixed inset-0 z-40 bg-slate-950/50" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-40 bg-slate-900/40" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* ══════════ MAIN CONTENT ══════════ */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
         {/* Header bar (desktop & mobile) */}
-        <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-300/70 bg-slate-50 z-30 relative">
+        <header className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-300 bg-white shadow-xs z-30 relative">
           <div className="flex items-center gap-3">
             {!sidebarOpen && (
               <button
                 data-testid="mobile-menu-button"
                 onClick={() => setSidebarOpen(true)}
-                className="p-1.5 -ml-1 rounded-md border border-slate-300 bg-card text-slate-600 hover:text-slate-950 hover:border-slate-400 transition-colors cursor-pointer"
+                className="p-1.5 -ml-1 rounded-md border border-slate-300 bg-white text-slate-700 hover:text-slate-950 hover:border-slate-400 transition-colors cursor-pointer"
                 aria-label="Open menu"
               >
                 <Menu className="w-4 h-4" />
               </button>
             )}
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-700" />
-              <span className="text-[13px] font-bold text-slate-950 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span className="text-[13px] font-bold text-slate-900 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
                 SPHN Attendance
               </span>
-              <span className="hidden sm:inline stamp border-slate-300 text-slate-500 bg-card">{role ?? "staff"}</span>
+              <span className="hidden sm:inline stamp border-emerald-300 text-emerald-800 bg-emerald-50">{role ?? "staff"}</span>
             </div>
           </div>
 
@@ -447,14 +453,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 onClick={() => setNotificationsOpen((prev) => !prev)}
                 className={`relative p-2 rounded-md border transition-colors cursor-pointer flex items-center justify-center ${
                   notificationsOpen
-                    ? "bg-slate-950 border-slate-950 text-slate-50"
-                    : "bg-card border-slate-300 text-slate-600 hover:text-slate-950 hover:border-slate-400"
+                    ? "bg-emerald-700 border-emerald-700 text-white"
+                    : "bg-white border-slate-300 text-slate-700 hover:text-slate-950 hover:border-slate-400"
                 }`}
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
                 {pendingCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold font-mono text-white border-2 border-slate-50">
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold font-mono text-white border-2 border-white">
                     {pendingCount}
                   </span>
                 )}
@@ -463,16 +469,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
               {/* Notification Popover Dropdown */}
               {notificationsOpen && (
                 <div
-                  className="absolute right-0 top-11 z-50 w-80 sm:w-96 bg-card rounded-lg shadow-xl border border-slate-300 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute right-0 top-11 z-50 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-slate-300 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150"
                   style={{ minWidth: "320px" }}
                 >
                   {/* Popover Header */}
-                  <div className="px-4 py-3 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
+                  <div className="px-4 py-3 bg-emerald-700 text-white flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Bell className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="eyebrow text-slate-300">Notifications &amp; Approvals</span>
+                      <Bell className="w-3.5 h-3.5" />
+                      <span className="eyebrow">Notifications &amp; Approvals</span>
                       {activeNotifications.length > 0 && (
-                        <span className="text-[10px] font-mono bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-mono bg-white/20 text-white px-1.5 py-0.5 rounded">
                           {activeNotifications.length}
                         </span>
                       )}
@@ -480,7 +486,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     {activeNotifications.length > 0 && (
                       <button
                         onClick={handleClearAllNotifications}
-                        className="text-[11px] font-semibold text-slate-400 hover:text-slate-100 flex items-center gap-1 transition-colors cursor-pointer"
+                        className="text-[11px] font-semibold text-emerald-100 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3 h-3" />
                         <span>Clear all</span>
@@ -489,14 +495,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </div>
 
                   {/* Popover Body */}
-                  <div className="p-3 space-y-2 overflow-y-auto max-h-[420px] bg-slate-100/60">
+                  <div className="p-3 space-y-2 overflow-y-auto max-h-[420px] bg-slate-100/70">
                     {activeNotifications.length === 0 ? (
-                      <div className="p-6 text-center space-y-2 bg-card rounded-md border border-slate-200">
-                        <div className="w-9 h-9 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-700 flex items-center justify-center mx-auto">
+                      <div className="p-6 text-center space-y-2 bg-white rounded-md border border-slate-200">
+                        <div className="w-9 h-9 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 flex items-center justify-center mx-auto">
                           <Check className="w-4 h-4" />
                         </div>
                         <p className="text-xs font-semibold text-slate-900">No pending notices</p>
-                        <p className="text-[11px] text-slate-500">All substitution requests have been cleared or handled.</p>
+                        <p className="text-[11px] text-slate-600">All substitution requests have been cleared or handled.</p>
                       </div>
                     ) : (
                       activeNotifications.map((r: any) => {
@@ -507,27 +513,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         return (
                           <div
                             key={r.id}
-                            className={`p-3 rounded-md border bg-card space-y-2 relative ${
+                            className={`p-3 rounded-md border bg-white space-y-2 relative ${
                               isPending
-                                ? "border-amber-300 ring-1 ring-amber-200/60"
+                                ? "border-amber-400 ring-1 ring-amber-300/70"
                                 : isAccepted
-                                ? "border-emerald-200"
-                                : "border-red-200"
+                                ? "border-emerald-300"
+                                : "border-red-300"
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="stamp border-slate-300 text-slate-600 bg-slate-50">
+                              <span className="stamp border-slate-300 text-slate-700 bg-slate-100">
                                 {r.date} &middot; {r.slot}
                               </span>
 
                               {isPending ? (
-                                <span className="stamp border-amber-300 bg-amber-50 text-amber-800">Pending HOD</span>
+                                <span className="stamp border-amber-400 bg-amber-100 text-amber-800">Pending HOD</span>
                               ) : isAccepted ? (
-                                <span className="stamp border-emerald-300 bg-emerald-50 text-emerald-800">
+                                <span className="stamp border-emerald-400 bg-emerald-100 text-emerald-800">
                                   <Check className="w-3 h-3" /> Accepted
                                 </span>
                               ) : (
-                                <span className="stamp border-red-300 bg-red-50 text-red-800">
+                                <span className="stamp border-red-400 bg-red-100 text-red-800">
                                   <X className="w-3 h-3" /> Declined
                                 </span>
                               )}
@@ -535,7 +541,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
                             <div>
                               <p className="text-xs font-semibold text-slate-900">{r.subject} ({r.section})</p>
-                              <div className="flex items-center gap-1.5 text-[11px] text-slate-600 pt-0.5">
+                              <div className="flex items-center gap-1.5 text-[11px] text-slate-700 pt-0.5">
                                 <span>{r.fromFacultyName}</span>
                                 <ArrowRightLeft className="w-3 h-3 text-blue-600" />
                                 <span className="font-semibold text-slate-900">{r.toFacultyName}</span>
@@ -543,8 +549,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             </div>
 
                             {r.reason && (
-                              <p className="text-[10.5px] text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200">
-                                <span className="font-semibold text-slate-700">Reason:</span> {r.reason}
+                              <p className="text-[10.5px] text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                                <span className="font-semibold text-slate-900">Reason:</span> {r.reason}
                               </p>
                             )}
 
@@ -553,7 +559,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                               <button
                                 type="button"
                                 onClick={() => handleClearSingleNotification(r.id)}
-                                className="text-[10.5px] font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                                className="text-[10.5px] font-semibold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
                               >
                                 Dismiss
                               </button>
@@ -573,7 +579,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                     type="button"
                                     onClick={() => handleNotificationAction(r.id, "accept")}
                                     disabled={processingNotificationId === r.id}
-                                    className="px-3 py-1 rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                                    className="px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer"
                                   >
                                     <Check className="w-3 h-3" />
                                     <span>Accept</span>
@@ -581,7 +587,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                 </div>
                               ) : isAccepted ? (
                                 <span className="text-[10.5px] font-medium text-emerald-800 flex items-center gap-1">
-                                  <Check className="w-3.5 h-3.5 text-emerald-700" />
+                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
                                   <span>Assigned to {r.toFacultyName}</span>
                                 </span>
                               ) : (
@@ -603,7 +609,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Settings Gear Button */}
             <button
               onClick={openSettings}
-              className="p-2 rounded-md bg-card border border-slate-300 text-slate-600 hover:text-slate-950 hover:border-slate-400 transition-colors cursor-pointer flex items-center justify-center"
+              className="p-2 rounded-md bg-white border border-slate-300 text-slate-700 hover:text-slate-950 hover:border-slate-400 transition-colors cursor-pointer flex items-center justify-center"
               title="Settings"
             >
               <Settings className="w-4 h-4" />
@@ -612,7 +618,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Logout Button */}
             <button
               onClick={logout}
-              className="px-3 py-2 rounded-md bg-card border border-slate-300 text-slate-600 hover:bg-red-50 hover:border-red-300 hover:text-red-800 font-semibold text-xs cursor-pointer flex items-center gap-1.5 transition-colors"
+              className="px-3 py-2 rounded-md bg-white border border-slate-300 text-slate-700 hover:bg-red-50 hover:border-red-300 hover:text-red-700 font-semibold text-xs cursor-pointer flex items-center gap-1.5 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Logout</span>
@@ -625,21 +631,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* ══════════ SETTINGS MODAL ══════════ */}
       {showSettings && (
-        <div className="fixed inset-0 z-100 bg-slate-950/50 flex items-center justify-center p-6">
-          <div className="w-full max-w-[380px] bg-card rounded-lg shadow-xl border border-slate-300 overflow-hidden">
+        <div className="fixed inset-0 z-100 bg-slate-900/40 flex items-center justify-center p-6">
+          <div className="w-full max-w-[380px] bg-white rounded-lg shadow-xl border border-slate-300 overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-md border border-slate-200 bg-slate-50 flex items-center justify-center">
-                  <Settings className="w-4 h-4 text-slate-700" />
+                <div className="w-9 h-9 rounded-md border border-emerald-200 bg-emerald-50 flex items-center justify-center">
+                  <Settings className="w-4 h-4 text-emerald-700" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-950" style={{ fontFamily: "var(--app-font-display)" }}>System Settings</p>
-                  <p className="text-[11px] text-slate-500">Account options &amp; passcode</p>
+                  <p className="text-sm font-bold text-slate-900" style={{ fontFamily: "var(--app-font-display)" }}>System Settings</p>
+                  <p className="text-[11px] text-slate-600">Account options &amp; passcode</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 transition-colors cursor-pointer flex items-center justify-center"
+                className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-400 transition-colors cursor-pointer flex items-center justify-center"
                 aria-label="Close settings"
               >
                 <X className="w-3.5 h-3.5" />
@@ -649,8 +655,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="p-5 space-y-4">
               <div className="px-3.5 py-3 rounded-md bg-slate-50 border border-slate-200">
                 <p className="eyebrow text-slate-500">Signed in</p>
-                <p className="text-sm font-semibold text-slate-950 mt-1">{userDisplayName}</p>
-                <p className="text-[11px] font-mono text-slate-500">{userEmail}</p>
+                <p className="text-sm font-semibold text-slate-900 mt-1">{userDisplayName}</p>
+                <p className="text-[11px] font-mono text-slate-600">{userEmail}</p>
               </div>
 
               {settingsStep === "verify" && (
@@ -659,11 +665,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <label className="eyebrow block text-slate-600">Current Passcode</label>
                     <input type="password" placeholder="••••••" value={settingsCurrentPwd}
                       onChange={e => { setSettingsCurrentPwd(e.target.value); setSettingsError(""); }}
-                      className="w-full px-4 py-3 rounded-md bg-slate-50 border border-slate-300 text-slate-950 text-center font-mono text-xl tracking-[0.3em] outline-none focus:bg-card focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors box-border"
+                      className="w-full px-4 py-3 rounded-md bg-white border border-slate-300 text-slate-900 text-center font-mono text-xl tracking-[0.3em] outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 transition-colors box-border"
                       autoFocus />
                   </div>
                   {settingsError && <p className="text-red-700 text-xs font-semibold text-center">{settingsError}</p>}
-                  <button type="submit" className="w-full py-2.5 rounded-md bg-slate-950 hover:bg-emerald-800 text-slate-50 font-semibold font-mono uppercase tracking-[0.14em] text-xs transition-colors cursor-pointer">
+                  <button type="submit" className="w-full py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold font-mono uppercase tracking-[0.14em] text-xs transition-colors cursor-pointer">
                     Change Passcode →
                   </button>
                 </form>
@@ -675,27 +681,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <label className="eyebrow block text-slate-600">New Passcode</label>
                     <input type="password" placeholder="Min 4 characters" value={settingsNewPwd}
                       onChange={e => { setSettingsNewPwd(e.target.value); setSettingsError(""); }}
-                      className="w-full px-4 py-3 rounded-md bg-slate-50 border border-slate-300 text-slate-950 text-center font-mono text-xl tracking-[0.3em] outline-none focus:bg-card focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors box-border"
+                      className="w-full px-4 py-3 rounded-md bg-white border border-slate-300 text-slate-900 text-center font-mono text-xl tracking-[0.3em] outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 transition-colors box-border"
                       autoFocus />
                   </div>
                   <div className="space-y-1.5">
                     <label className="eyebrow block text-slate-600">Confirm Passcode</label>
                     <input type="password" placeholder="Repeat passcode" value={settingsConfirmPwd}
                       onChange={e => { setSettingsConfirmPwd(e.target.value); setSettingsError(""); }}
-                      className="w-full px-4 py-3 rounded-md bg-slate-50 border border-slate-300 text-slate-950 text-center font-mono text-xl tracking-[0.3em] outline-none focus:bg-card focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors box-border" />
+                      className="w-full px-4 py-3 rounded-md bg-white border border-slate-300 text-slate-900 text-center font-mono text-xl tracking-[0.3em] outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 transition-colors box-border" />
                   </div>
                   {settingsError && <p className="text-red-700 text-xs font-semibold text-center">{settingsError}</p>}
                   {settingsSuccess && <p className="text-emerald-700 text-xs font-semibold text-center">{settingsSuccess}</p>}
                   <div className="flex gap-2.5">
-                    <button type="button" onClick={() => setSettingsStep("verify")} className="flex-1 py-2.5 rounded-md bg-card border border-slate-300 text-slate-700 hover:border-slate-400 font-semibold text-xs transition-colors cursor-pointer">← Back</button>
-                    <button type="submit" className="flex-[2] py-2.5 rounded-md bg-slate-950 hover:bg-emerald-800 text-slate-50 font-semibold font-mono uppercase tracking-[0.14em] text-xs transition-colors cursor-pointer">Save Passcode</button>
+                    <button type="button" onClick={() => setSettingsStep("verify")} className="flex-1 py-2.5 rounded-md bg-white border border-slate-300 text-slate-800 hover:border-slate-400 font-semibold text-xs transition-colors cursor-pointer">← Back</button>
+                    <button type="submit" className="flex-[2] py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold font-mono uppercase tracking-[0.14em] text-xs transition-colors cursor-pointer">Save Passcode</button>
                   </div>
                 </form>
               )}
 
               <button
                 onClick={() => { setShowSettings(false); logout(); }}
-                className="w-full py-3 rounded-md bg-red-700 hover:bg-red-800 text-white font-semibold font-mono uppercase tracking-[0.14em] text-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold font-mono uppercase tracking-[0.14em] text-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
                 Logout from account

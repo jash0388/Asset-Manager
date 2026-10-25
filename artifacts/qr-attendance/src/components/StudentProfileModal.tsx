@@ -287,7 +287,7 @@ export default function StudentProfileModal({
     }
   });
 
-  const monthDaysList = [];
+  const monthDaysList: Array<{ dayNum: number; dateStr: string; dayOfWeek: string; status: string; isSundayOrHoliday: boolean; isFuture: boolean; holidayReason?: string; record?: any }> = [];
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   let presentCount = 0;

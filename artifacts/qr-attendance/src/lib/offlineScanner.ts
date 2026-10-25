@@ -442,11 +442,14 @@ export async function syncQueue(): Promise<SyncResult> {
     for (const r of results) {
       if (!r) continue;
       const cid = String(r.clientScanId || "").trim();
-      if (cid) acceptedClientIds.add(cid);
 
       if (r.status === "ok" || r.status === "duplicate" || r.status === "user_not_found" || r.status === "max_reached" || r.status === "invalid" || r.action) {
+        // Terminal status — the server has definitively handled this scan.
+        if (cid) acceptedClientIds.add(cid);
         synced++;
       } else {
+        // Transient failure (e.g. {status:"error"} from a DB hiccup) — leave it
+        // in the queue so the next sync retries instead of silently dropping it.
         skipped++;
       }
     }

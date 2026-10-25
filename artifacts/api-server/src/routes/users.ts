@@ -50,7 +50,7 @@ router.post("/users", authMiddleware, adminOnly, async (req: any, res: any) => {
   try {
     const { data: inserted, error } = await supabase
       .from("qr_users")
-      .insert({ name, unique_id: uid, role })
+      .insert({ name, unique_id: uid, role, mentor_id: mentorId })
       .select()
       .single();
 
@@ -190,6 +190,7 @@ function formatUser(u: any) {
     createdAt: u.created_at,
     section: u.section,
     batch: u.batch,
+    mentorId: u.mentor_id,
   };
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useScanQr, getGetDashboardStatsQueryKey, getGetTodayAttendanceQueryKey, getGetCurrentlyInsideQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, XCircle, QrCode, Camera, ArrowLeft, Volume2, VolumeX, Play } from "lucide-react";
+import { CheckCircle, XCircle, QrCode, Camera, ArrowLeft, Volume2, VolumeX, Play, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { findUserLocal, enqueueScan, markScannedLocally, syncQueue, getQueue } from "../lib/offlineScanner";
 
@@ -279,7 +279,7 @@ export default function Scanner() {
         Html5QrcodeSupportedFormats.CODABAR,
       ];
 
-      const scanner = new Html5Qrcode("qr-reader", { formatsToSupport });
+      const scanner = new Html5Qrcode("qr-reader", { formatsToSupport, verbose: true });
       scannerInstanceRef.current = scanner;
 
       const cameras = await Html5Qrcode.getCameras();
@@ -328,28 +328,31 @@ export default function Scanner() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-slate-100 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4">
+      <header className="bg-white border-b border-slate-300/70 px-4 py-3.5 shadow-xs">
         <div className="flex items-center gap-3 max-w-md mx-auto">
           <Link href="/dashboard">
             <button
               data-testid="back-button"
-              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors border border-gray-300"
+              className="p-2 rounded-md bg-white border border-slate-300 text-slate-700 hover:text-slate-950 hover:border-slate-400 transition-colors cursor-pointer"
               title="Back to Dashboard"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
           </Link>
-          <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-md bg-emerald-600 flex items-center justify-center shadow-sm shrink-0">
             <QrCode className="w-5 h-5 text-white" />
           </div>
-          <div>
-            <h1 className="text-base font-bold text-gray-900">QR & Barcode Scanner</h1>
-            <p className="text-xs text-gray-500">Scan QR code or barcode on ID card</p>
+          <div className="min-w-0">
+            <p className="eyebrow text-slate-500">Gate Console</p>
+            <h1 className="text-base font-bold text-slate-950 tracking-tight leading-tight" style={{ fontFamily: "var(--app-font-display)" }}>
+              QR &amp; Barcode Scanner
+            </h1>
+            <p className="text-[11px] text-slate-500">Scan QR code or barcode on ID card</p>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Scanner Area */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 max-w-md mx-auto w-full">
@@ -357,20 +360,20 @@ export default function Scanner() {
         {result && (
           <div
             data-testid={result.success ? "scan-success" : "scan-error"}
-            className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-6 transition-all ${
+            className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-6 ${
               result.success
                 ? result.action === "exit"
-                  ? "bg-orange-950/95"
-                  : "bg-green-950/95"
-                : "bg-red-950/95"
+                  ? "bg-orange-500"
+                  : "bg-emerald-600"
+                : "bg-red-600"
             }`}
           >
             {result.success ? (
-              <CheckCircle className={`w-20 h-20 mb-4 ${result.action === "exit" ? "text-orange-700" : "text-green-700"}`} />
+              <CheckCircle className={`w-20 h-20 mb-4 ${result.action === "exit" ? "text-orange-100" : "text-emerald-100"}`} />
             ) : (
-              <XCircle className="w-20 h-20 text-red-700 mb-4" />
+              <XCircle className="w-20 h-20 text-red-100 mb-4" />
             )}
-            <p className={`text-3xl font-extrabold mb-3 uppercase tracking-wide ${result.success ? (result.action === "exit" ? "text-orange-700" : "text-green-700") : "text-amber-700"}`}>
+            <p className="text-3xl font-extrabold mb-3 uppercase tracking-wide text-white" style={{ fontFamily: "var(--app-font-display)" }}>
               {result.success
                 ? result.action === "exit"
                   ? "Left Campus"
@@ -380,35 +383,35 @@ export default function Scanner() {
                 : "Already Scanned"}
             </p>
             {result.userName && (
-              <div className="my-2 px-6 py-3 bg-white/90 border-2 border-amber-400/80 rounded-2xl shadow-2xl text-center">
-                <p className="text-4xl sm:text-5xl font-black text-amber-700 tracking-wide leading-tight drop-shadow-lg uppercase">
+              <div className="my-2 px-8 py-4 bg-white border border-white/70 rounded-lg shadow-xl text-center">
+                <p
+                  className="text-4xl sm:text-5xl font-black text-slate-950 tracking-tight leading-tight uppercase"
+                  style={{ fontFamily: "var(--app-font-display)" }}
+                >
                   {result.userName}
                 </p>
               </div>
             )}
             {result.uniqueId && (
-              <p className="text-lg font-mono text-gray-800 mb-2 tracking-wider">
+              <p className="text-base font-mono text-white mt-3 tracking-widest">
                 ID: {result.uniqueId}
               </p>
             )}
             {result.role && (
-              <span className={`mb-3 px-3 py-0.5 rounded-full text-xs font-semibold uppercase ${
-                result.role === "student" ? "bg-blue-800 text-blue-200" : "bg-purple-800 text-purple-200"
-              }`}>
+              <span className="stamp mt-3 border-white/70 bg-white/15 text-white">
                 {result.role}
               </span>
             )}
-            <p className="text-sm text-gray-700 text-center mt-1 px-4">{result.message}</p>
+            <p className="text-sm text-white/90 text-center mt-2 px-4 font-medium">{result.message}</p>
             {result.action && (
-              <span className={`mt-4 px-4 py-1.5 rounded-full text-sm font-semibold ${
-                result.action === "entry" ? "bg-green-800 text-green-200" : result.action === "exit" ? "bg-orange-800 text-orange-200" : "bg-gray-100 text-gray-800"
-              }`}>
-                {result.action === "entry" ? "✓ Checked In" : result.action === "exit" ? "✓ Checked Out" : "Recorded"}
+              <span className="stamp mt-4 border-white bg-white text-slate-950">
+                <CheckCircle className="w-3 h-3" />
+                {result.action === "entry" ? "Checked In" : result.action === "exit" ? "Checked Out" : "Recorded"}
               </span>
             )}
             <button
               onClick={clearResult}
-              className="mt-8 px-6 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors"
+              className="mt-8 px-6 py-2.5 rounded-md bg-white text-slate-900 hover:bg-slate-100 text-sm font-semibold transition-colors shadow-sm cursor-pointer"
             >
               Continue Scanning
             </button>
@@ -416,24 +419,26 @@ export default function Scanner() {
         )}
 
         {isLateEntryMode && (
-          <div className="w-full mb-3 px-4 py-2.5 rounded-xl bg-amber-50 border border-amber-500/30 text-amber-700 text-xs font-black flex items-center justify-center gap-2 animate-pulse">
-            ⚠️ LATE ENTRY MODE IS ACTIVE
+          <div className="w-full mb-3 px-4 py-2.5 rounded-md bg-amber-100 border border-amber-400 text-amber-900 text-xs font-bold flex items-center justify-center gap-2 animate-pulse">
+            <AlertTriangle className="w-3.5 h-3.5" />
+            LATE ENTRY MODE IS ACTIVE
           </div>
         )}
 
         {/* Scanner viewport */}
-        <div className="w-full bg-white border border-gray-200 rounded-2xl overflow-hidden mb-4">
+        <div className="w-full bg-white border border-slate-300/70 rounded-lg overflow-hidden shadow-xs mb-4">
           <div
             id="qr-reader"
             ref={scannerRef}
             className={`w-full aspect-square ${scanning ? "" : "hidden"}`}
           />
           {!scanning && (
-            <div className="w-full aspect-square flex flex-col items-center justify-center bg-gray-100">
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
-                <Camera className="w-12 h-12 text-gray-500" />
+            <div className="w-full aspect-square flex flex-col items-center justify-center bg-slate-50">
+              <div className="w-20 h-20 rounded-md border border-slate-300 bg-white shadow-xs flex items-center justify-center mb-4">
+                <Camera className="w-9 h-9 text-slate-400" />
               </div>
-              <p className="text-sm text-gray-500 text-center px-6">
+              <p className="eyebrow text-slate-500 mb-1.5">Camera Standby</p>
+              <p className="text-sm text-slate-600 text-center px-6">
                 Camera is off. Press Start to begin scanning.
               </p>
             </div>
@@ -441,26 +446,26 @@ export default function Scanner() {
         </div>
 
         {cameraError && (
-          <div className="w-full mb-4 px-4 py-3 rounded-lg bg-red-900/30 border border-red-800 text-red-700 text-sm text-center">
+          <div className="w-full mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-300 text-red-800 text-sm text-center font-medium">
             {cameraError}
           </div>
         )}
 
         {/* Late Entry Mode Toggle */}
-        <div className="w-full mb-4 bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between shadow-lg">
+        <div className="w-full mb-4 bg-white border border-slate-300/70 rounded-lg px-4 py-3 flex items-center justify-between shadow-xs">
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-gray-900 tracking-wide">Late Entry Mode</span>
-            <span className="text-xs text-slate-550 font-medium">Flag scanned student as late entry</span>
+            <span className="eyebrow text-slate-500">Late Entry Mode</span>
+            <span className="text-xs text-slate-600 font-medium mt-1">Flag scanned student as late entry</span>
           </div>
           <button
             onClick={() => setIsLateEntryMode(prev => !prev)}
-            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 cursor-pointer flex items-center ${
-              isLateEntryMode ? "bg-amber-500" : "bg-gray-50 border border-gray-200"
+            className={`w-12 h-7 rounded-full p-1 transition-colors duration-200 cursor-pointer flex items-center border ${
+              isLateEntryMode ? "bg-amber-400 border-amber-500" : "bg-slate-100 border-slate-300"
             }`}
           >
             <div
-              className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transition-transform duration-200 ${
-                isLateEntryMode ? "translate-x-5.5" : "translate-x-0"
+              className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                isLateEntryMode ? "translate-x-5" : "translate-x-0 border border-slate-300"
               }`}
             />
           </button>
@@ -472,7 +477,7 @@ export default function Scanner() {
             <button
               data-testid="start-scanner"
               onClick={startScanner}
-              className="flex-1 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-base font-bold flex items-center justify-center gap-3 transition-colors shadow-lg shadow-blue-900/30"
+              className="flex-1 py-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold flex items-center justify-center gap-3 transition-colors shadow-sm cursor-pointer"
             >
               <Camera className="w-5 h-5" />
               Start Scanner
@@ -481,7 +486,7 @@ export default function Scanner() {
             <button
               data-testid="stop-scanner"
               onClick={stopScanner}
-              className="flex-1 py-4 rounded-xl bg-gray-200 hover:bg-gray-300 text-white text-base font-bold flex items-center justify-center gap-3 transition-colors"
+              className="flex-1 py-4 rounded-md bg-white border border-slate-300 text-slate-800 hover:border-slate-400 hover:bg-slate-50 text-base font-bold flex items-center justify-center gap-3 transition-colors cursor-pointer"
             >
               Stop Scanner
             </button>
@@ -489,20 +494,20 @@ export default function Scanner() {
         </div>
 
         {/* Volume control */}
-        <div className="mt-6 w-full bg-white border border-gray-200 rounded-xl px-4 py-3">
-          <div className="flex items-center gap-3 mb-2">
+        <div className="mt-6 w-full bg-white border border-slate-300/70 rounded-lg px-4 py-3 shadow-xs">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => handleVolumeChange(volume > 0 ? 0 : 0.7)}
-              className="text-gray-700 hover:text-gray-900 transition-colors"
+              className="text-slate-700 hover:text-slate-950 transition-colors cursor-pointer"
               title={volume > 0 ? "Mute" : "Unmute"}
               data-testid="toggle-mute"
             >
-              {volume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5 text-gray-400" />}
+              {volume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5 text-slate-400" />}
             </button>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-gray-500">Beep volume</span>
-                <span className="text-xs font-mono text-gray-400">{Math.round(volume * 100)}%</span>
+                <span className="eyebrow text-slate-500">Beep volume</span>
+                <span className="text-xs font-mono text-slate-500">{Math.round(volume * 100)}%</span>
               </div>
               <input
                 type="range"
@@ -511,13 +516,13 @@ export default function Scanner() {
                 step={0.05}
                 value={volume}
                 onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                className="w-full accent-blue-500 cursor-pointer"
+                className="w-full accent-emerald-600 cursor-pointer"
                 data-testid="volume-slider"
               />
             </div>
             <button
               onClick={testSound}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold transition-colors border border-gray-300"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-slate-300 text-slate-800 hover:border-slate-400 text-xs font-semibold transition-colors cursor-pointer"
               title="Play test beep"
               data-testid="test-sound"
             >
@@ -534,11 +539,11 @@ export default function Scanner() {
             "Hold steady — works with both QR codes & barcodes",
             "Same student scanned via QR + barcode counts only once",
           ].map((tip, i) => (
-            <div key={i} className="flex items-start gap-3 px-4 py-3 rounded-lg bg-white border border-gray-200">
-              <span className="w-5 h-5 rounded-full bg-blue-900/60 text-blue-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div key={i} className="flex items-start gap-3 px-4 py-3 rounded-md bg-white border border-slate-300/70 shadow-xs">
+              <span className="w-5 h-5 rounded border border-slate-300 bg-slate-100 text-slate-700 text-[10px] font-mono font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </span>
-              <p className="text-sm text-gray-500">{tip}</p>
+              <p className="text-sm text-slate-600">{tip}</p>
             </div>
           ))}
         </div>

@@ -54,7 +54,7 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
           <button
             type="submit"
             disabled={submitting}
-            className="group w-full py-3.5 px-6 rounded-md bg-slate-950 hover:bg-emerald-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-slate-50 text-sm font-semibold font-mono uppercase tracking-[0.18em] transition-colors flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.99]"
+            className="group w-full py-3.5 px-6 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold font-mono uppercase tracking-[0.18em] transition-colors flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.99]"
           >
             {submitting ? (
               <>
@@ -138,14 +138,13 @@ export default function Login() {
     <div className="min-h-[100dvh] bg-slate-100 ledger-ruled flex flex-col items-center px-4 py-10 sm:py-0 sm:justify-center">
       {/* Masthead */}
       <div className="flex flex-col items-center text-center mb-8 sm:mb-10">
-        <div className="w-14 h-14 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center mb-4 shadow-md relative">
-          <ShieldCheck className="w-7 h-7 text-emerald-400" />
-          <span className="absolute -bottom-px left-1.5 right-1.5 h-[2px] bg-emerald-500/70" aria-hidden />
+        <div className="w-14 h-14 rounded-lg bg-emerald-600 flex items-center justify-center mb-4 shadow-md">
+          <ShieldCheck className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-[26px] sm:text-3xl font-bold text-slate-950 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
+        <h1 className="text-[26px] sm:text-3xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
           SPHN Attendance
         </h1>
-        <p className="eyebrow text-slate-500 mt-1.5">Campus Control Console &middot; 2022&ndash;26</p>
+        <p className="eyebrow text-slate-600 mt-1.5">Campus Control Console &middot; 2022&ndash;26</p>
       </div>
 
       <AccessCard

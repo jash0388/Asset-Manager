@@ -5,15 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   CAMPUS LEDGER — design system
+   SPHN DAYLIGHT — design system (bright, high-contrast build)
 
-   Aesthetic world: an institutional register. Paper surfaces, ink typography,
-   hairline rules, stamp-like status marks and mono numerals. One confident
-   emerald for the primary voice; steel blue, plum, rust and ochre kept as a
-   harmonised, low-chroma accent set so categories stay distinct.
+   Built for old / low-quality laptop screens:
+   - White surfaces everywhere. No dark sidebars, no muted gray-on-white text.
+   - Near-black primary text (#161815), minimum ~4.5:1 contrast for secondary.
+   - Vivid, saturated accents (emerald primary; vivid blue, orange, purple,
+     rust, ochre as category voices) so status reads at a glance.
+   - Same identity toolkit as before: Sora display type, mono eyebrows and
+     stamp badges, hairline rules, mono numerals.
 
-   Tailwind's default palettes are REMAPPED below, so the pages that hardcode
-   bg-slate-*, text-blue-600, bg-emerald-100 etc. all inherit this system.
+   Tailwind's default palettes are REMAPPED below, so pages that hardcode
+   bg-slate-*, text-blue-600, bg-emerald-100 etc. inherit this system.
    ───────────────────────────────────────────────────────────────────────────── */
 
 @theme inline {
@@ -80,201 +83,201 @@
 }
 
 @theme {
-  /* Warm ink neutrals — replaces slate & gray ramps */
-  --color-slate-50: #f7f6f2;
-  --color-slate-100: #efede6;
-  --color-slate-200: #e3e0d6;
-  --color-slate-300: #cbc7b9;
-  --color-slate-400: #a8a395;
-  --color-slate-500: #837e70;
-  --color-slate-600: #635f53;
-  --color-slate-700: #4a473e;
-  --color-slate-800: #33312b;
-  --color-slate-900: #22211c;
-  --color-slate-950: #141310;
+  /* Bright cool neutrals — replaces slate & gray ramps */
+  --color-slate-50: #fafaf9;
+  --color-slate-100: #f3f3f1;
+  --color-slate-200: #e6e6e3;
+  --color-slate-300: #cfd1cb;
+  --color-slate-400: #9da098;
+  --color-slate-500: #6c7069;
+  --color-slate-600: #4e524b;
+  --color-slate-700: #383b36;
+  --color-slate-800: #262923;
+  --color-slate-900: #17181a;
+  --color-slate-950: #0c0d0b;
 
-  --color-gray-50: #f7f6f2;
-  --color-gray-100: #efede6;
-  --color-gray-200: #e3e0d6;
-  --color-gray-300: #cbc7b9;
-  --color-gray-400: #a8a395;
-  --color-gray-500: #837e70;
-  --color-gray-600: #635f53;
-  --color-gray-700: #4a473e;
-  --color-gray-800: #33312b;
-  --color-gray-900: #22211c;
-  --color-gray-950: #141310;
+  --color-gray-50: #fafaf9;
+  --color-gray-100: #f3f3f1;
+  --color-gray-200: #e6e6e3;
+  --color-gray-300: #cfd1cb;
+  --color-gray-400: #9da098;
+  --color-gray-500: #6c7069;
+  --color-gray-600: #4e524b;
+  --color-gray-700: #383b36;
+  --color-gray-800: #262923;
+  --color-gray-900: #17181a;
+  --color-gray-950: #0c0d0b;
 
-  /* Emerald — the brand voice (also covers green-*) */
-  --color-emerald-50: #edf5ef;
-  --color-emerald-100: #d9ebdd;
-  --color-emerald-200: #b5d7be;
-  --color-emerald-300: #88bc96;
-  --color-emerald-400: #579c6e;
-  --color-emerald-500: #368052;
-  --color-emerald-600: #23683f;
-  --color-emerald-700: #1c5334;
-  --color-emerald-800: #17422b;
-  --color-emerald-900: #123523;
-  --color-emerald-950: #0a2015;
+  /* Vivid emerald — the brand voice (also covers green-*) */
+  --color-emerald-50: #eaf9f0;
+  --color-emerald-100: #d2f4e0;
+  --color-emerald-200: #a8e8c3;
+  --color-emerald-300: #6fd59e;
+  --color-emerald-400: #34bc74;
+  --color-emerald-500: #0fa258;
+  --color-emerald-600: #0b8a49;
+  --color-emerald-700: #08703b;
+  --color-emerald-800: #075a30;
+  --color-emerald-900: #064525;
+  --color-emerald-950: #032b16;
 
-  --color-green-50: #edf5ef;
-  --color-green-100: #d9ebdd;
-  --color-green-200: #b5d7be;
-  --color-green-300: #88bc96;
-  --color-green-400: #579c6e;
-  --color-green-500: #368052;
-  --color-green-600: #23683f;
-  --color-green-700: #1c5334;
-  --color-green-800: #17422b;
-  --color-green-900: #123523;
-  --color-green-950: #0a2015;
+  --color-green-50: #eaf9f0;
+  --color-green-100: #d2f4e0;
+  --color-green-200: #a8e8c3;
+  --color-green-300: #6fd59e;
+  --color-green-400: #34bc74;
+  --color-green-500: #0fa258;
+  --color-green-600: #0b8a49;
+  --color-green-700: #08703b;
+  --color-green-800: #075a30;
+  --color-green-900: #064525;
+  --color-green-950: #032b16;
 
-  /* Steel blue — secondary category voice */
-  --color-blue-50: #eef3f6;
-  --color-blue-100: #dce7ed;
-  --color-blue-200: #b9cedc;
-  --color-blue-300: #8faec4;
-  --color-blue-400: #5f8aa6;
-  --color-blue-500: #416d8b;
-  --color-blue-600: #2f5670;
-  --color-blue-700: #274659;
-  --color-blue-800: #1f3847;
-  --color-blue-900: #182b37;
-  --color-blue-950: #0f1b23;
+  /* Vivid royal blue — secondary category voice */
+  --color-blue-50: #eaf2fe;
+  --color-blue-100: #d4e3fd;
+  --color-blue-200: #aac5fb;
+  --color-blue-300: #729ef8;
+  --color-blue-400: #3b74f0;
+  --color-blue-500: #1b57e0;
+  --color-blue-600: #0f47c6;
+  --color-blue-700: #0d3ba3;
+  --color-blue-800: #0e3280;
+  --color-blue-900: #0f2a63;
+  --color-blue-950: #0a1b40;
 
-  /* Muted indigo */
-  --color-indigo-50: #f0f0f4;
-  --color-indigo-100: #e0e0e8;
-  --color-indigo-200: #c4c4d3;
-  --color-indigo-300: #a0a1b8;
-  --color-indigo-400: #7a7c9a;
-  --color-indigo-500: #5b5e7e;
-  --color-indigo-600: #474a66;
-  --color-indigo-700: #3a3d53;
-  --color-indigo-800: #2e3042;
-  --color-indigo-900: #242634;
-  --color-indigo-950: #16171f;
+  /* Vivid indigo */
+  --color-indigo-50: #eef0fe;
+  --color-indigo-100: #dfe2fd;
+  --color-indigo-200: #c0c5fa;
+  --color-indigo-300: #939cf5;
+  --color-indigo-400: #626eea;
+  --color-indigo-500: #454edb;
+  --color-indigo-600: #373fc4;
+  --color-indigo-700: #2e34a0;
+  --color-indigo-800: #282d7e;
+  --color-indigo-900: #232864;
+  --color-indigo-950: #161940;
 
-  /* Muted plum */
-  --color-purple-50: #f4f1f4;
-  --color-purple-100: #eae3ea;
-  --color-purple-200: #d5c7d6;
-  --color-purple-300: #b79fb9;
-  --color-purple-400: #967898;
-  --color-purple-500: #775c79;
-  --color-purple-600: #5e475f;
-  --color-purple-700: #4b394c;
-  --color-purple-800: #3b2d3c;
-  --color-purple-900: #2e2430;
-  --color-purple-950: #1d161f;
+  /* Vivid purple */
+  --color-purple-50: #f7eefe;
+  --color-purple-100: #eedffc;
+  --color-purple-200: #dcc0f8;
+  --color-purple-300: #c49af1;
+  --color-purple-400: #a76de6;
+  --color-purple-500: #8e49d6;
+  --color-purple-600: #7736be;
+  --color-purple-700: #622b9b;
+  --color-purple-800: #4f247b;
+  --color-purple-900: #3f1e60;
+  --color-purple-950: #27113d;
 
-  /* Rust — replaces the orange ramp */
-  --color-orange-50: #fbf3ec;
-  --color-orange-100: #f7e3d4;
-  --color-orange-200: #efc6a6;
-  --color-orange-300: #e3a271;
-  --color-orange-400: #d47c3f;
-  --color-orange-500: #c4622d;
-  --color-orange-600: #a54f24;
-  --color-orange-700: #853f1e;
-  --color-orange-800: #6a331a;
-  --color-orange-900: #552a17;
-  --color-orange-950: #33180d;
+  /* Vivid orange */
+  --color-orange-50: #fef2e8;
+  --color-orange-100: #fee3cd;
+  --color-orange-200: #fdc694;
+  --color-orange-300: #fba052;
+  --color-orange-400: #f87e1f;
+  --color-orange-500: #ea6a0a;
+  --color-orange-600: #c95608;
+  --color-orange-700: #a24508;
+  --color-orange-800: #82390a;
+  --color-orange-900: #672e0b;
+  --color-orange-950: #401c06;
 
   /* Ochre — replaces the amber ramp */
-  --color-amber-50: #fbf6e8;
-  --color-amber-100: #f6ebc9;
-  --color-amber-200: #ecd794;
-  --color-amber-300: #dfbd58;
-  --color-amber-400: #cfa52e;
-  --color-amber-500: #b98a1f;
-  --color-amber-600: #9a6f19;
-  --color-amber-700: #7a5715;
-  --color-amber-800: #624514;
-  --color-amber-900: #503913;
-  --color-amber-950: #2f210a;
+  --color-amber-50: #fef7e6;
+  --color-amber-100: #feebc0;
+  --color-amber-200: #fdd680;
+  --color-amber-300: #fbbc3f;
+  --color-amber-400: #f2a10f;
+  --color-amber-500: #d98a06;
+  --color-amber-600: #b46e07;
+  --color-amber-700: #8f5609;
+  --color-amber-800: #71430c;
+  --color-amber-900: #59350c;
+  --color-amber-950: #361f06;
 
-  /* Refined brick — destructive, slightly warm */
-  --color-red-50: #faf0ee;
-  --color-red-100: #f4dedb;
-  --color-red-200: #e8bcb6;
-  --color-red-300: #d98f86;
-  --color-red-400: #c95f53;
-  --color-red-500: #b93a2f;
-  --color-red-600: #a53026;
-  --color-red-700: #87271f;
-  --color-red-800: #6d221c;
-  --color-red-900: #581e19;
-  --color-red-950: #340f0c;
+  /* Vivid red — destructive */
+  --color-red-50: #fef0ef;
+  --color-red-100: #fddcd9;
+  --color-red-200: #fbb5ae;
+  --color-red-300: #f68577;
+  --color-red-400: #ee5240;
+  --color-red-500: #dc2f1b;
+  --color-red-600: #c22412;
+  --color-red-700: #9f2112;
+  --color-red-800: #7e2013;
+  --color-red-900: #651e13;
+  --color-red-950: #3d100a;
 }
 
 /* LIGHT MODE (app always renders light; .dark kept equivalent) */
 :root {
-  --button-outline: rgba(20, 19, 16, .05);
-  --badge-outline: rgba(20, 19, 16, .03);
+  --button-outline: rgba(23, 24, 26, .06);
+  --badge-outline: rgba(23, 24, 26, .04);
 
   --opaque-button-border-intensity: 9;
 
-  --elevate-1: rgba(20, 19, 16, .03);
-  --elevate-2: rgba(20, 19, 16, .05);
+  --elevate-1: rgba(23, 24, 26, .04);
+  --elevate-2: rgba(23, 24, 26, .07);
 
-  --background: 45 22% 96%;         /* warm paper */
-  --foreground: 48 12% 10%;         /* warm ink */
-  --border: 45 15% 87%;             /* hairline */
+  --background: 60 6% 98%;          /* near-white page */
+  --foreground: 240 6% 9%;          /* near-black text */
+  --border: 60 4% 86%;              /* visible hairline */
   --card: 0 0% 100%;
-  --card-foreground: 48 12% 10%;
-  --card-border: 45 15% 87%;
+  --card-foreground: 240 6% 9%;
+  --card-border: 60 4% 86%;
 
-  --sidebar: 48 13% 7%;             /* deep ink */
-  --sidebar-foreground: 45 25% 94%;
-  --sidebar-border: 48 10% 16%;
-  --sidebar-primary: 152 50% 28%;   /* emerald */
+  --sidebar: 0 0% 100%;             /* white sidebar */
+  --sidebar-foreground: 240 6% 9%;
+  --sidebar-border: 60 4% 86%;
+  --sidebar-primary: 152 76% 29%;   /* vivid emerald */
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 48 10% 14%;
-  --sidebar-accent-foreground: 45 25% 94%;
-  --sidebar-ring: 152 50% 28%;
+  --sidebar-accent: 60 6% 95%;
+  --sidebar-accent-foreground: 240 6% 9%;
+  --sidebar-ring: 152 76% 29%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 48 12% 10%;
-  --popover-border: 45 15% 87%;
+  --popover-foreground: 240 6% 9%;
+  --popover-border: 60 4% 86%;
 
-  --primary: 152 50% 27%;           /* deep emerald */
+  --primary: 152 76% 29%;           /* vivid emerald */
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 45 20% 94%;
-  --secondary-foreground: 48 12% 12%;
+  --secondary: 60 6% 95%;
+  --secondary-foreground: 240 6% 9%;
 
-  --muted: 45 20% 94%;
-  --muted-foreground: 45 8% 40%;
+  --muted: 60 6% 95%;
+  --muted-foreground: 150 3% 36%;   /* readable secondary text */
 
-  --accent: 45 20% 94%;
-  --accent-foreground: 48 12% 12%;
+  --accent: 60 6% 95%;
+  --accent-foreground: 240 6% 9%;
 
-  --destructive: 5 62% 45%;
+  --destructive: 8 79% 46%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 45 15% 87%;
-  --ring: 152 50% 27%;
-  --chart-1: 152 50% 27%;
-  --chart-2: 210 40% 31%;
-  --chart-3: 20 63% 47%;
-  --chart-4: 45 74% 42%;
-  --chart-5: 262 14% 38%;
+  --input: 60 4% 86%;
+  --ring: 152 76% 29%;
+  --chart-1: 152 76% 29%;
+  --chart-2: 224 84% 42%;
+  --chart-3: 24 92% 48%;
+  --chart-4: 273 62% 53%;
+  --chart-5: 40 95% 44%;
 
   --app-font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
   --app-font-display: 'Sora', var(--app-font-sans);
   --app-font-serif: Georgia, serif;
   --app-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
   --radius: 0.5rem;
-  --shadow-2xs: 0px 1px 2px 0px rgba(20, 19, 16, 0.04);
-  --shadow-xs: 0px 1px 2px 0px rgba(20, 19, 16, 0.05);
-  --shadow-sm: 0px 1px 3px 0px rgba(20, 19, 16, 0.05), 0px 1px 2px -1px rgba(20, 19, 16, 0.03);
-  --shadow: 0px 2px 6px 0px rgba(20, 19, 16, 0.05), 0px 1px 2px -1px rgba(20, 19, 16, 0.03);
-  --shadow-md: 0px 3px 8px -1px rgba(20, 19, 16, 0.06), 0px 2px 4px -2px rgba(20, 19, 16, 0.03);
-  --shadow-lg: 0px 8px 20px -4px rgba(20, 19, 16, 0.08), 0px 4px 6px -2px rgba(20, 19, 16, 0.03);
-  --shadow-xl: 0px 16px 32px -8px rgba(20, 19, 16, 0.10), 0px 8px 10px -6px rgba(20, 19, 16, 0.04);
-  --shadow-2xl: 0px 24px 48px -12px rgba(20, 19, 16, 0.14);
+  --shadow-2xs: 0px 1px 2px 0px rgba(23, 24, 26, 0.06);
+  --shadow-xs: 0px 1px 3px 0px rgba(23, 24, 26, 0.08);
+  --shadow-sm: 0px 1px 4px 0px rgba(23, 24, 26, 0.08), 0px 1px 2px -1px rgba(23, 24, 26, 0.05);
+  --shadow: 0px 2px 8px 0px rgba(23, 24, 26, 0.09), 0px 1px 2px -1px rgba(23, 24, 26, 0.05);
+  --shadow-md: 0px 4px 10px -1px rgba(23, 24, 26, 0.10), 0px 2px 4px -2px rgba(23, 24, 26, 0.05);
+  --shadow-lg: 0px 10px 24px -4px rgba(23, 24, 26, 0.12), 0px 4px 8px -3px rgba(23, 24, 26, 0.06);
+  --shadow-xl: 0px 18px 36px -8px rgba(23, 24, 26, 0.14), 0px 8px 12px -6px rgba(23, 24, 26, 0.06);
+  --shadow-2xl: 0px 28px 56px -12px rgba(23, 24, 26, 0.18);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -288,46 +291,46 @@
 }
 
 .dark {
-  --button-outline: rgba(20, 19, 16, .05);
-  --badge-outline: rgba(20, 19, 16, .03);
+  --button-outline: rgba(23, 24, 26, .06);
+  --badge-outline: rgba(23, 24, 26, .04);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(20, 19, 16, .03);
-  --elevate-2: rgba(20, 19, 16, .05);
+  --elevate-1: rgba(23, 24, 26, .04);
+  --elevate-2: rgba(23, 24, 26, .07);
 
-  --background: 45 22% 96%;
-  --foreground: 48 12% 10%;
-  --border: 45 15% 87%;
+  --background: 60 6% 98%;
+  --foreground: 240 6% 9%;
+  --border: 60 4% 86%;
   --card: 0 0% 100%;
-  --card-foreground: 48 12% 10%;
-  --card-border: 45 15% 87%;
-  --sidebar: 48 13% 7%;
-  --sidebar-foreground: 45 25% 94%;
-  --sidebar-border: 48 10% 16%;
-  --sidebar-primary: 152 50% 28%;
+  --card-foreground: 240 6% 9%;
+  --card-border: 60 4% 86%;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 240 6% 9%;
+  --sidebar-border: 60 4% 86%;
+  --sidebar-primary: 152 76% 29%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 48 10% 14%;
-  --sidebar-accent-foreground: 45 25% 94%;
-  --sidebar-ring: 152 50% 28%;
+  --sidebar-accent: 60 6% 95%;
+  --sidebar-accent-foreground: 240 6% 9%;
+  --sidebar-ring: 152 76% 29%;
   --popover: 0 0% 100%;
-  --popover-foreground: 48 12% 10%;
-  --popover-border: 45 15% 87%;
-  --primary: 152 50% 27%;
+  --popover-foreground: 240 6% 9%;
+  --popover-border: 60 4% 86%;
+  --primary: 152 76% 29%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 45 20% 94%;
-  --secondary-foreground: 48 12% 12%;
-  --muted: 45 20% 94%;
-  --muted-foreground: 45 8% 40%;
-  --accent: 45 20% 94%;
-  --accent-foreground: 48 12% 12%;
-  --destructive: 5 62% 45%;
+  --secondary: 60 6% 95%;
+  --secondary-foreground: 240 6% 9%;
+  --muted: 60 6% 95%;
+  --muted-foreground: 150 3% 36%;
+  --accent: 60 6% 95%;
+  --accent-foreground: 240 6% 9%;
+  --destructive: 8 79% 46%;
   --destructive-foreground: 0 0% 100%;
-  --input: 45 15% 87%;
-  --ring: 152 50% 27%;
-  --chart-1: 152 50% 27%;
-  --chart-2: 210 40% 31%;
-  --chart-3: 20 63% 47%;
-  --chart-4: 45 74% 42%;
-  --chart-5: 262 14% 38%;
+  --input: 60 4% 86%;
+  --ring: 152 76% 29%;
+  --chart-1: 152 76% 29%;
+  --chart-2: 224 84% 42%;
+  --chart-3: 24 92% 48%;
+  --chart-4: 273 62% 53%;
+  --chart-5: 40 95% 44%;
 }
 
 @layer base {
@@ -356,8 +359,8 @@
   }
 
   ::selection {
-    background: #b5d7be;
-    color: #141310;
+    background: #a8e8c3;
+    color: #17181a;
   }
 }
 
@@ -375,14 +378,7 @@
     pointer-events: none;
   }
 
-  /* ── Ledger motif utilities ─────────────────────────────────────────────── */
-
-  /* Faint ruled-paper backdrop for auth / hero surfaces */
-  .ledger-ruled {
-    background-image:
-      linear-gradient(to bottom, transparent 31px, rgba(20, 19, 16, 0.045) 31px, rgba(20, 19, 16, 0.045) 32px, transparent 32px);
-    background-size: 100% 32px;
-  }
+  /* ── Identity toolkit ────────────────────────────────────────────────────── */
 
   /* Section eyebrow: small caps, wide tracking, mono — the register label */
   .eyebrow {

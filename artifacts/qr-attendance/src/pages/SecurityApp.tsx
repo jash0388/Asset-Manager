@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import {
   CheckCircle, XCircle, Camera, History as HistoryIcon, ArrowLeft,
   ShieldCheck, Wifi, WifiOff, RefreshCw, CloudUpload, Download, Clock,
+  Smartphone, AlertTriangle,
 } from "lucide-react";
 import {
   refreshUserCache, findUserLocal, getCachedUsers, getCacheFetchedAt,
@@ -286,7 +287,7 @@ export default function SecurityApp() {
         Html5QrcodeSupportedFormats.CODABAR,
       ];
 
-      const scanner = new Html5Qrcode("sec-qr-reader", { formatsToSupport });
+      const scanner = new Html5Qrcode("sec-qr-reader", { formatsToSupport, verbose: true });
       scannerInstanceRef.current = scanner;
 
       // Wider scan region to accommodate horizontal 1D barcodes
@@ -342,20 +343,20 @@ export default function SecurityApp() {
   // ===================== LOCK SCREEN =====================
   if (!unlocked) {
     return (
-      <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", fontFamily: "Inter, system-ui, sans-serif" }}>
-        <div style={{ width: "100%", maxWidth: "380px" }}>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-[380px]">
           {/* Logo */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "32px" }}>
-            <div style={{ width: "64px", height: "64px", borderRadius: "16px", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px", boxShadow: "0 4px 20px rgba(37,99,235,0.3)" }}>
-              <ShieldCheck style={{ width: "32px", height: "32px", color: "#ffffff" }} />
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-lg bg-emerald-600 flex items-center justify-center mb-4 shadow-md">
+              <ShieldCheck className="w-8 h-8 text-white" />
             </div>
-            <h1 style={{ fontSize: "22px", fontWeight: "800", color: "#111827", margin: "0 0 6px", textAlign: "center" }}>SPHN Security Scanner</h1>
-            <p style={{ fontSize: "13px", color: "#6B7280", margin: 0, textAlign: "center" }}>Enter passcode to access the scanner</p>
+            <h1 className="text-[22px] font-bold text-slate-950 tracking-tight mb-1.5 text-center">SPHN Security Scanner</h1>
+            <p className="text-[13px] text-slate-500 text-center">Enter passcode to access the scanner</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleUnlock} style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: "16px", padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-            <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#374151", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
+          <form onSubmit={handleUnlock} className="bg-white border border-slate-300/70 rounded-lg p-6 shadow-xs">
+            <label className="eyebrow block text-slate-600 mb-2">
               Passcode
             </label>
             <input
@@ -363,19 +364,15 @@ export default function SecurityApp() {
               placeholder="••••••"
               value={passcode}
               onChange={(e) => setPasscode(e.target.value)}
-              style={{ width: "100%", padding: "14px 16px", background: "#ffffff", border: "2px solid #E5E7EB", borderRadius: "12px", color: "#111827", textAlign: "center", fontFamily: "monospace", fontSize: "20px", letterSpacing: "0.3em", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
-              onFocus={e => e.target.style.borderColor = "#2563EB"}
-              onBlur={e => e.target.style.borderColor = "#E5E7EB"}
+              className="w-full px-4 py-3.5 bg-white border border-slate-300 rounded-md text-slate-950 text-center font-mono text-xl tracking-[0.3em] outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 transition-colors box-border"
               autoFocus
             />
             {passcodeError && (
-              <p style={{ color: "#DC2626", fontSize: "12px", fontWeight: "600", marginTop: "8px", textAlign: "center" }}>{passcodeError}</p>
+              <p className="text-red-700 text-xs font-semibold mt-2 text-center">{passcodeError}</p>
             )}
             <button
               type="submit"
-              style={{ width: "100%", marginTop: "16px", padding: "14px", borderRadius: "12px", background: "#2563EB", color: "#ffffff", fontWeight: "700", fontSize: "15px", border: "none", cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.3)", transition: "background 0.2s" }}
-              onMouseEnter={e => (e.target as HTMLButtonElement).style.background = "#1D4ED8"}
-              onMouseLeave={e => (e.target as HTMLButtonElement).style.background = "#2563EB"}
+              className="w-full mt-4 py-3.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[15px] cursor-pointer transition-colors"
             >
               Unlock Scanner
             </button>
@@ -387,62 +384,61 @@ export default function SecurityApp() {
 
   // ===================== MAIN SCANNER UI =====================
   return (
-    <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column", fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-white flex flex-col">
 
       {/* ---- SCAN RESULT POPUP (full screen overlay) ---- */}
       {popup && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 50,
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-          padding: "24px",
-          background: popup.ok ? "rgba(5,150,105,0.97)" : "rgba(185,28,28,0.97)",
-        }}>
+        <div
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-6 ${
+            popup.ok ? "bg-emerald-600" : "bg-red-600"
+          }`}
+        >
           {popup.ok ? (
-            <CheckCircle style={{ width: "80px", height: "80px", color: "#ffffff", marginBottom: "16px" }} />
+            <CheckCircle className="w-20 h-20 text-white mb-4" />
           ) : (
-            <XCircle style={{ width: "80px", height: "80px", color: "#ffffff", marginBottom: "16px" }} />
+            <XCircle className="w-20 h-20 text-white mb-4" />
           )}
-          <p style={{ fontSize: "32px", fontWeight: "900", color: "#ffffff", margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {popup.ok ? "✓ Access Granted" : "⚠ Already Scanned"}
+          <p className="text-[32px] font-bold text-white mb-2 uppercase tracking-wide font-mono">
+            {popup.ok ? "Access Granted" : "Already Scanned"}
           </p>
           {popup.ok && (
             <>
-              <div style={{ margin: "12px 0", padding: "16px 32px", background: "rgba(255,255,255,0.15)", borderRadius: "16px", border: "2px solid rgba(255,255,255,0.4)", textAlign: "center" }}>
-                <p style={{ fontSize: "36px", fontWeight: "900", color: "#ffffff", margin: 0, letterSpacing: "0.03em" }}>
+              <div className="my-3 px-8 py-4 bg-white/15 rounded-lg border-2 border-white/40 text-center">
+                <p className="text-[36px] font-bold text-white leading-tight" style={{ fontFamily: "var(--app-font-display)" }}>
                   {popup.user.name}
                 </p>
               </div>
-              <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)", margin: "4px 0" }}>{popup.user.uniqueId} · {popup.user.role}</p>
-              <span style={{ marginTop: "8px", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", background: "rgba(0,0,0,0.2)", color: "#ffffff" }}>
+              <p className="text-sm text-white/85 font-mono">{popup.user.uniqueId} · {popup.user.role}</p>
+              <span className="stamp mt-3 bg-black/25 text-white border-white/20">
                 Saved · {popup.queued} pending sync
               </span>
             </>
           )}
           {!popup.ok && (
-            <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.9)", textAlign: "center", marginTop: "8px" }}>{popup.message}</p>
+            <p className="text-[15px] text-white/90 text-center mt-2">{popup.message}</p>
           )}
         </div>
       )}
 
       {/* ---- HEADER ---- */}
-      <div style={{ background: "#ffffff", borderBottom: "2px solid #E5E7EB", padding: "12px 16px", position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ maxWidth: "480px", margin: "0 auto", display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <ShieldCheck style={{ width: "22px", height: "22px", color: "#ffffff" }} />
+      <div className="bg-white border-b border-slate-300 px-4 py-3 sticky top-0 z-10 shadow-xs">
+        <div className="max-w-[480px] mx-auto flex items-center gap-3">
+          <div className="w-10 h-10 rounded-md bg-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+            <ShieldCheck className="w-[22px] h-[22px] text-white" />
           </div>
-          <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: "16px", fontWeight: "800", color: "#111827", margin: 0 }}>Security Scanner</h1>
-            <p style={{ fontSize: "11px", color: "#6B7280", margin: 0 }}>Offline-ready · validates locally · auto-syncs</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base font-bold text-slate-950 tracking-tight">Security Scanner</h1>
+            <p className="text-[11px] text-slate-500">Offline-ready · validates locally · auto-syncs</p>
           </div>
           <button
             data-testid="open-history"
             onClick={() => setShowHistory(true)}
-            style={{ padding: "8px", borderRadius: "10px", background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#2563EB", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}
+            className="relative p-2 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-950 cursor-pointer flex items-center justify-center transition-colors"
             title="View pending queue"
           >
-            <HistoryIcon style={{ width: "20px", height: "20px" }} />
+            <HistoryIcon className="w-5 h-5" />
             {queueLen > 0 && (
-              <span style={{ position: "absolute", top: "-4px", right: "-4px", background: "#EF4444", color: "#fff", borderRadius: "10px", fontSize: "10px", fontWeight: "800", minWidth: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
+              <span className="absolute -top-1.5 -right-1.5 h-[18px] min-w-[18px] px-1 flex items-center justify-center rounded-full bg-red-600 text-white text-[10px] font-bold font-mono border-2 border-white">
                 {queueLen}
               </span>
             )}
@@ -452,18 +448,18 @@ export default function SecurityApp() {
       </div>
 
       {/* ---- STATUS BAR ---- */}
-      <div style={{ background: "#F9FAFB", borderBottom: "1px solid #E5E7EB", padding: "8px 16px" }}>
-        <div style={{ maxWidth: "480px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: online ? "#059669" : "#D97706", fontWeight: "600" }}>
-            {online ? <Wifi style={{ width: "14px", height: "14px" }} /> : <WifiOff style={{ width: "14px", height: "14px" }} />}
+      <div className="bg-slate-50 border-b border-slate-200 px-4 py-2">
+        <div className="max-w-[480px] mx-auto flex items-center justify-between text-xs">
+          <div className={`flex items-center gap-1.5 font-semibold ${online ? "text-emerald-700" : "text-orange-700"}`}>
+            {online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
             <span>{online ? "Online" : "Offline"}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: queueLen > 0 ? "#D97706" : "#059669", fontWeight: "600" }}>
-            <CloudUpload style={{ width: "14px", height: "14px", ...(syncing ? { animation: "pulse 1s infinite" } : {}) }} />
+          <div className={`flex items-center gap-1.5 font-semibold font-mono ${queueLen > 0 ? "text-orange-700" : "text-emerald-700"}`}>
+            <CloudUpload className={`w-3.5 h-3.5 ${syncing ? "animate-pulse" : ""}`} />
             <span>{syncing ? "Syncing..." : queueLen > 0 ? `${queueLen} pending` : "All synced ✓"}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#6B7280", fontWeight: "500" }}>
-            <Download style={{ width: "14px", height: "14px" }} />
+          <div className="flex items-center gap-1.5 text-slate-600 font-medium font-mono">
+            <Download className="w-3.5 h-3.5" />
             <span>{cachedCount} students</span>
           </div>
         </div>
@@ -471,13 +467,16 @@ export default function SecurityApp() {
 
       {/* ---- INSTALL BANNER ---- */}
       {installPromptEvt && (
-        <div style={{ background: "#EFF6FF", borderBottom: "1px solid #BFDBFE", padding: "8px 16px" }}>
-          <div style={{ maxWidth: "480px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-            <p style={{ fontSize: "12px", color: "#1D4ED8", margin: 0, fontWeight: "500" }}>📱 Install this app to your home screen for offline scanning.</p>
+        <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
+          <div className="max-w-[480px] mx-auto flex items-center justify-between gap-3">
+            <p className="text-xs text-blue-800 font-medium flex items-center gap-1.5">
+              <Smartphone className="w-3.5 h-3.5 shrink-0 text-blue-600" />
+              Install this app to your home screen for offline scanning.
+            </p>
             <button
               onClick={installApp}
               data-testid="install-app"
-              style={{ padding: "6px 14px", borderRadius: "8px", background: "#2563EB", color: "#ffffff", fontSize: "12px", fontWeight: "700", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}
+              className="px-3.5 py-1.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold cursor-pointer whitespace-nowrap transition-colors"
             >
               Install
             </button>
@@ -486,26 +485,27 @@ export default function SecurityApp() {
       )}
 
       {/* ---- MAIN CONTENT ---- */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 16px", maxWidth: "480px", margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
+      <div className="flex-1 flex flex-col items-center px-4 py-5 max-w-[480px] mx-auto w-full box-border">
 
         {/* Camera box */}
-        <div style={{ width: "100%", background: "#F9FAFB", border: "2px solid #E5E7EB", borderRadius: "20px", overflow: "hidden", marginBottom: "20px" }}>
+        <div className="w-full bg-white border-2 border-slate-300/70 rounded-lg overflow-hidden mb-5 shadow-xs">
           <div
             id="sec-qr-reader"
             ref={scannerRef}
             style={{ width: "100%", aspectRatio: "1", display: scanning ? "block" : "none" }}
           />
           {!scanning && (
-            <div style={{ width: "100%", aspectRatio: "1", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#F3F4F6" }}>
-              <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-                <Camera style={{ width: "40px", height: "40px", color: "#9CA3AF" }} />
+            <div className="w-full aspect-square flex flex-col items-center justify-center bg-slate-100">
+              <div className="w-20 h-20 rounded-full bg-white border border-slate-300 flex items-center justify-center mb-3">
+                <Camera className="w-10 h-10 text-slate-400" />
               </div>
-              <p style={{ fontSize: "14px", color: "#6B7280", textAlign: "center", padding: "0 24px", margin: 0 }}>
-                Tap <strong style={{ color: "#2563EB" }}>Start Scanner</strong> to open camera
+              <p className="text-sm text-slate-600 text-center px-6">
+                Tap <strong className="text-emerald-700">Start Scanner</strong> to open camera
               </p>
               {cachedCount === 0 && (
-                <p style={{ marginTop: "8px", fontSize: "12px", color: "#D97706", padding: "0 24px", textAlign: "center" }}>
-                  ⚠️ No students cached yet — connect to internet once first
+                <p className="mt-2 text-xs text-orange-700 px-6 text-center flex items-center gap-1.5 justify-center">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  No students cached yet — connect to internet once first
                 </p>
               )}
             </div>
@@ -514,73 +514,60 @@ export default function SecurityApp() {
 
         {/* Late Entry banner */}
         {isLateEntryMode && (
-          <div style={{ width: "100%", marginBottom: "12px", padding: "10px 16px", borderRadius: "12px", background: "#FFFBEB", border: "2px solid #F59E0B", color: "#92400E", fontSize: "13px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-            ⚠️ LATE ENTRY MODE IS ACTIVE
+          <div className="w-full mb-3 px-4 py-2.5 rounded-md bg-amber-100 border-2 border-amber-400 text-amber-800 text-[13px] font-bold flex items-center justify-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            LATE ENTRY MODE IS ACTIVE
           </div>
         )}
 
         {/* Camera error */}
         {cameraError && (
-          <div style={{ width: "100%", marginBottom: "12px", padding: "12px 16px", borderRadius: "12px", background: "#FEF2F2", border: "1px solid #FECACA", color: "#991B1B", fontSize: "13px" }}>
+          <div className="w-full mb-3 px-4 py-3 rounded-md bg-red-50 border border-red-300 text-red-800 text-[13px]">
             {cameraError}
           </div>
         )}
 
         {/* Late Entry Toggle */}
-        <div style={{ width: "100%", marginBottom: "16px", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: "14px", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="w-full mb-4 bg-white border border-slate-300/70 rounded-lg px-4 py-3.5 flex items-center justify-between shadow-xs">
           <div>
-            <p style={{ fontSize: "14px", fontWeight: "700", color: "#111827", margin: "0 0 2px" }}>Late Entry Mode</p>
-            <p style={{ fontSize: "12px", color: "#6B7280", margin: 0 }}>Flag scanned student as late entry</p>
+            <p className="text-sm font-bold text-slate-950 mb-0.5">Late Entry Mode</p>
+            <p className="text-xs text-slate-500">Flag scanned student as late entry</p>
           </div>
           <button
             onClick={() => setIsLateEntryMode(prev => !prev)}
-            style={{
-              width: "52px", height: "28px", borderRadius: "14px", padding: "3px",
-              background: isLateEntryMode ? "#F59E0B" : "#D1D5DB",
-              border: "none", cursor: "pointer", display: "flex", alignItems: "center",
-              transition: "background 0.2s",
-            }}
+            className={`w-[52px] h-7 rounded-full p-[3px] cursor-pointer flex items-center transition-colors ${
+              isLateEntryMode ? "bg-amber-500" : "bg-slate-300"
+            }`}
+            aria-label="Toggle late entry mode"
           >
-            <div style={{
-              width: "22px", height: "22px", borderRadius: "50%", background: "#ffffff",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-              transform: isLateEntryMode ? "translateX(24px)" : "translateX(0)",
-              transition: "transform 0.2s",
-            }} />
+            <div
+              className={`w-[22px] h-[22px] rounded-full bg-white shadow-sm transition-transform ${
+                isLateEntryMode ? "translate-x-6" : "translate-x-0"
+              }`}
+            />
           </button>
         </div>
 
         {/* Start / Stop Scanner button */}
-        <div style={{ width: "100%", display: "flex", gap: "12px", marginBottom: "12px" }}>
+        <div className="w-full flex gap-3 mb-3">
           {!scanning ? (
             <button
               data-testid="security-start-scanner"
               onClick={startScanner}
               disabled={cachedCount === 0}
-              style={{
-                flex: 1, padding: "16px", borderRadius: "14px",
-                background: cachedCount === 0 ? "#D1D5DB" : "#2563EB",
-                color: "#ffffff", fontWeight: "800", fontSize: "16px",
-                border: "none", cursor: cachedCount === 0 ? "not-allowed" : "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                boxShadow: cachedCount === 0 ? "none" : "0 4px 14px rgba(37,99,235,0.35)",
-                transition: "background 0.2s",
-              }}
+              className={`flex-1 py-4 rounded-md font-bold text-base flex items-center justify-center gap-2 transition-colors ${
+                cachedCount === 0
+                  ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm cursor-pointer"
+              }`}
             >
-              <Camera style={{ width: "20px", height: "20px" }} /> Start Scanner
+              <Camera className="w-5 h-5" /> Start Scanner
             </button>
           ) : (
             <button
               data-testid="security-stop-scanner"
               onClick={stopScanner}
-              style={{
-                flex: 1, padding: "16px", borderRadius: "14px",
-                background: "#EF4444", color: "#ffffff",
-                fontWeight: "800", fontSize: "16px",
-                border: "none", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                boxShadow: "0 4px 14px rgba(239,68,68,0.3)",
-              }}
+              className="flex-1 py-4 rounded-md bg-red-600 hover:bg-red-700 text-white font-bold text-base flex items-center justify-center gap-2 cursor-pointer transition-colors"
             >
               Stop Scanner
             </button>
@@ -589,70 +576,54 @@ export default function SecurityApp() {
 
         {/* Sync status message */}
         {syncStatusMsg && (
-          <div style={{
-            width: "100%", marginBottom: "12px", padding: "12px 16px",
-            borderRadius: "12px",
-            background: syncError ? "#FEF2F2" : "#EFF6FF",
-            border: `1px solid ${syncError ? "#FECACA" : "#BFDBFE"}`,
-            color: syncError ? "#991B1B" : "#1D4ED8",
-            fontSize: "13px", fontWeight: "600", textAlign: "center",
-          }}>
+          <div
+            className={`w-full mb-3 px-4 py-3 rounded-md text-[13px] font-semibold text-center ${
+              syncError ? "bg-red-50 border border-red-300 text-red-800" : "bg-blue-50 border border-blue-200 text-blue-800"
+            }`}
+          >
             {syncStatusMsg}
           </div>
         )}
 
         {/* Action buttons grid */}
-        <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "12px" }}>
+        <div className="w-full grid grid-cols-2 gap-2.5 mb-3">
           <button
             onClick={refreshCacheNow}
             disabled={refreshing}
             data-testid="refresh-students"
-            style={{
-              padding: "12px", borderRadius: "12px",
-              background: "#F9FAFB", border: "1px solid #E5E7EB",
-              color: "#374151", fontSize: "12px", fontWeight: "600",
-              cursor: refreshing ? "not-allowed" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
-              opacity: refreshing ? 0.6 : 1, transition: "background 0.2s",
-            }}
+            className={`py-3 rounded-md border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+              refreshing
+                ? "bg-slate-50 border-slate-300 text-slate-500 opacity-60 cursor-not-allowed"
+                : "bg-white border-slate-300 text-slate-800 hover:border-slate-400 cursor-pointer"
+            }`}
           >
-            <RefreshCw style={{ width: "14px", height: "14px", ...(refreshing ? { animation: "spin 1s linear infinite" } : {}) }} />
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
             {refreshing ? "Refreshing..." : "Refresh Students"}
           </button>
           <button
             onClick={() => runSync(true)}
             disabled={syncing || queueLen === 0}
             data-testid="sync-now"
-            style={{
-              padding: "12px", borderRadius: "12px",
-              background: syncing || queueLen === 0 ? "#F9FAFB" : "#2563EB",
-              border: syncing || queueLen === 0 ? "1px solid #E5E7EB" : "none",
-              color: syncing || queueLen === 0 ? "#9CA3AF" : "#ffffff",
-              fontSize: "12px", fontWeight: "700",
-              cursor: syncing || queueLen === 0 ? "not-allowed" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
-              boxShadow: syncing || queueLen === 0 ? "none" : "0 2px 8px rgba(37,99,235,0.3)",
-            }}
+            className={`py-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+              syncing || queueLen === 0
+                ? "bg-slate-50 border border-slate-300 text-slate-500 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-sm"
+            }`}
           >
-            <CloudUpload style={{ width: "14px", height: "14px" }} />
+            <CloudUpload className="w-3.5 h-3.5" />
             {syncing ? "Syncing..." : `Sync Now (${queueLen})`}
           </button>
         </div>
 
         {/* Download & Clear buttons (only when queue has items) */}
         {queueLen > 0 && (
-          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
+          <div className="w-full flex flex-col gap-2 mb-3">
             <button
               onClick={downloadQueueJson}
               data-testid="download-scans-json"
-              style={{
-                width: "100%", padding: "13px", borderRadius: "12px",
-                background: "#FFFBEB", border: "2px solid #F59E0B",
-                color: "#92400E", fontSize: "13px", fontWeight: "700",
-                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-              }}
+              className="w-full py-3 rounded-md bg-amber-100 border-2 border-amber-400 text-amber-800 text-[13px] font-bold cursor-pointer flex items-center justify-center gap-2 hover:bg-amber-200 transition-colors"
             >
-              <Download style={{ width: "16px", height: "16px" }} />
+              <Download className="w-4 h-4" />
               Download Offline Scans ({queueLen} items)
             </button>
             <button
@@ -664,12 +635,7 @@ export default function SecurityApp() {
                   setTimeout(() => setSyncStatusMsg(""), 3000);
                 }
               }}
-              style={{
-                width: "100%", padding: "10px", borderRadius: "12px",
-                background: "#F9FAFB", border: "1px solid #E5E7EB",
-                color: "#6B7280", fontSize: "12px", fontWeight: "600",
-                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
-              }}
+              className="w-full py-2.5 rounded-md bg-white border border-slate-300 hover:border-slate-400 text-slate-600 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors"
             >
               Clear Pending Queue ({queueLen})
             </button>
@@ -677,7 +643,7 @@ export default function SecurityApp() {
         )}
 
         {/* Info footer */}
-        <div style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", background: "#F9FAFB", border: "1px solid #E5E7EB", fontSize: "12px", color: "#6B7280" }}>
+        <div className="w-full px-3.5 py-2.5 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-600 font-mono text-center">
           {cachedAt ? (
             <>Student cache updated {formatAgo(cachedAt)} · 5s cooldown between duplicate scans.</>
           ) : (
@@ -689,49 +655,54 @@ export default function SecurityApp() {
 
       {/* ---- PENDING QUEUE MODAL ---- */}
       {showHistory && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-          <div style={{ width: "100%", maxWidth: "480px", background: "#ffffff", borderRadius: "20px 20px 0 0", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 16px 12px", borderBottom: "1px solid #E5E7EB" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className="fixed inset-0 z-40 bg-slate-900/50 flex items-end justify-center">
+          <div className="w-full max-w-[480px] bg-white rounded-t-xl max-h-[80vh] flex flex-col shadow-xl">
+            <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-slate-200">
+              <div className="flex items-center gap-2.5">
                 <button
                   data-testid="close-history"
                   onClick={() => setShowHistory(false)}
-                  style={{ padding: "8px", borderRadius: "10px", background: "#F3F4F6", border: "none", cursor: "pointer", display: "flex" }}
+                  className="p-2 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer flex transition-colors"
                 >
-                  <ArrowLeft style={{ width: "18px", height: "18px", color: "#374151" }} />
+                  <ArrowLeft className="w-[18px] h-[18px]" />
                 </button>
-                <h2 style={{ fontSize: "15px", fontWeight: "700", color: "#111827", margin: 0 }}>
-                  Pending Sync ({queueLen})
+                <h2 className="text-[15px] font-bold text-slate-950">
+                  Pending Sync <span className="font-mono">({queueLen})</span>
                 </h2>
               </div>
               <button
                 onClick={() => runSync(true)}
                 disabled={syncing || queueLen === 0}
-                style={{ fontSize: "13px", color: syncing || queueLen === 0 ? "#9CA3AF" : "#2563EB", background: "none", border: "none", cursor: syncing || queueLen === 0 ? "not-allowed" : "pointer", fontWeight: "700" }}
+                className={`text-[13px] bg-transparent border-none transition-colors ${
+                  syncing || queueLen === 0
+                    ? "text-slate-400 cursor-not-allowed"
+                    : "text-emerald-700 hover:text-emerald-600 cursor-pointer font-semibold"
+                }`}
               >
                 {syncing ? "Syncing…" : "Sync Now"}
               </button>
             </div>
-            <div data-testid="history-list" style={{ flex: 1, overflowY: "auto" }}>
+            <div data-testid="history-list" className="flex-1 overflow-y-auto">
               {queueLen === 0 ? (
-                <div style={{ padding: "32px", textAlign: "center", color: "#6B7280", fontSize: "14px" }}>
-                  ✅ No pending scans — everything is on the dashboard!
+                <div className="p-8 text-center">
+                  <CheckCircle className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+                  <p className="text-sm text-slate-600">No pending scans — everything is on the dashboard!</p>
                 </div>
               ) : (
                 queue.slice().reverse().map((s) => {
                   const u = findUserLocal(s.uniqueId);
                   return (
-                    <div key={s.clientScanId} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", borderBottom: "1px solid #F3F4F6" }}>
-                      <div style={{ width: "40px", height: "40px", borderRadius: "50%", background: "#EFF6FF", border: "1px solid #BFDBFE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: "700", color: "#2563EB", flexShrink: 0 }}>
+                    <div key={s.clientScanId} className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
+                      <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-sm font-bold text-blue-800 font-mono shrink-0">
                         {(u?.name ?? s.uniqueId).charAt(0).toUpperCase()}
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: "14px", fontWeight: "600", color: "#111827", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u?.name ?? "Unknown"}</p>
-                        <p style={{ fontSize: "12px", color: "#6B7280", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {s.uniqueId} · <Clock style={{ display: "inline", width: "11px", height: "11px", verticalAlign: "middle" }} /> {new Date(s.scannedAt).toLocaleTimeString()}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-slate-950 mb-0.5 truncate">{u?.name ?? "Unknown"}</p>
+                        <p className="text-xs text-slate-500 truncate">
+                          <span className="font-mono">{s.uniqueId}</span> · <Clock className="inline w-[11px] h-[11px] align-middle" /> <span className="font-mono">{new Date(s.scannedAt).toLocaleTimeString()}</span>
                         </p>
                       </div>
-                      <span style={{ padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: "700", background: "#FFFBEB", color: "#92400E", border: "1px solid #FDE68A", whiteSpace: "nowrap" }}>
+                      <span className="stamp border-amber-400 bg-amber-100 text-amber-800 shrink-0">
                         Pending
                       </span>
                     </div>
@@ -740,7 +711,7 @@ export default function SecurityApp() {
               )}
             </div>
             {lastSync && (
-              <div style={{ padding: "10px 16px", borderTop: "1px solid #E5E7EB", fontSize: "12px", color: "#9CA3AF", textAlign: "center" }}>
+              <div className="px-4 py-2.5 border-t border-slate-200 text-xs text-slate-500 text-center font-mono">
                 Last sync {formatAgo(lastSync)} · auto-syncs every 3s when online
               </div>
             )}
@@ -749,7 +720,7 @@ export default function SecurityApp() {
       )}
 
       {/* tick for re-render */}
-      <span style={{ display: "none" }}>{tick}</span>
+      <span className="hidden">{tick}</span>
     </div>
   );
 }

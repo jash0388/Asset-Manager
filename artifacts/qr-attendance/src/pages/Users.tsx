@@ -61,31 +61,39 @@ function QrModal({ userId, name, onClose }: { userId: number; name: string; onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-semibold text-gray-900">QR Code — {name}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-900">
-            <X className="w-5 h-5" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+      <div className="bg-white border border-slate-300/70 rounded-lg p-6 w-full max-w-sm shadow-xl">
+        <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-200">
+          <div>
+            <p className="eyebrow text-slate-500">Credential</p>
+            <h3 className="text-base font-bold text-slate-950 mt-0.5">QR Code — {name}</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-400 flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Close QR dialog"
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
         {isLoading ? (
-          <div className="flex items-center justify-center h-48">
-            <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center h-48 gap-3">
+            <div className="w-32 h-32 bg-slate-200 rounded-lg animate-pulse" />
+            <div className="h-3 w-24 bg-slate-200 rounded animate-pulse" />
           </div>
         ) : data ? (
           <div className="flex flex-col items-center gap-4">
-            <div className="p-3 bg-white rounded-xl">
+            <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
               <img src={data.qrCodeDataUrl} alt="QR Code" className="w-48 h-48" />
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-500">Unique ID</p>
-              <p className="text-lg font-mono font-bold text-gray-900 mt-1">{data.uniqueId}</p>
+              <p className="eyebrow text-slate-500">Unique ID</p>
+              <p className="text-lg font-mono font-bold text-slate-950 mt-1">{data.uniqueId}</p>
             </div>
             <button
               data-testid="download-qr"
               onClick={handleDownload}
-              className="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-2.5 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <Download className="w-4 h-4" />
               Download PNG
@@ -179,12 +187,17 @@ export default function Users() {
       )}
       <div className="p-3 sm:p-4 max-w-6xl mx-auto space-y-3">
         <BackButton />
-        <div className="flex items-center justify-between">
+        <div className="flex items-end justify-between gap-4 pb-4 border-b border-slate-300/70">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Users</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Manage students and staff roster</p>
+            <p className="eyebrow text-slate-500">Directory</p>
+            <h1 className="text-xl sm:text-[26px] font-bold text-slate-950 tracking-tight mt-0.5">Users</h1>
+            <p className="text-xs text-slate-500 mt-1">Manage students and staff roster</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col items-end gap-2">
+            <p className="hidden sm:block text-[11px] font-mono text-slate-500">
+              {filteredUsers.length} / {users.length} shown
+            </p>
+            <div className="flex gap-2">
             <button
               disabled={isPrinting || !users.length}
               onClick={async () => {
@@ -215,7 +228,7 @@ export default function Users() {
                     try {
                       const res = await fetch(`/api/qrcode/${user.id}`, {
                         headers: { 
-                          "Authorization": `Bearer ${localStorage.getItem("token") || "bypass-token"}` 
+                          "Authorization": `Bearer ${localStorage.getItem("qr_token") || "bypass-token"}`
                         }
                       });
                       if (res.ok) {
@@ -244,7 +257,7 @@ export default function Users() {
                   setIsPrinting(false);
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               {isPrinting ? "Generating PDF..." : "Print All"}
@@ -252,54 +265,55 @@ export default function Users() {
             <button
               data-testid="add-user-button"
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-xs cursor-pointer"
             >
               <UserPlus className="w-3.5 h-3.5" />
               Add User
             </button>
+            </div>
           </div>
         </div>
 
         {/* Add user form */}
         {showForm && (
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-xs">
-            <h2 className="text-xs font-bold text-gray-900 mb-3">Add New User</h2>
+          <div className="bg-white border border-slate-300/70 rounded-lg p-4 shadow-xs">
+            <h2 className="text-sm font-bold text-slate-950 mb-3">Add New User</h2>
             {createError && (
-              <div data-testid="create-user-error" className="mb-3 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
+              <div data-testid="create-user-error" className="mb-3 px-3 py-1.5 rounded-md bg-red-50 border border-red-300 text-red-700 text-xs font-semibold">
                 {createError}
               </div>
             )}
             <form onSubmit={handleCreate} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-gray-600 mb-1">Full Name *</label>
+                <label className="eyebrow block text-slate-600 mb-1.5">Full Name *</label>
                 <input
                   data-testid="user-name-input"
                   type="text"
                   required
                   value={newUser.name}
                   onChange={(e) => { setCreateError(null); setNewUser((p) => ({ ...p, name: e.target.value })); }}
-                  className="w-full px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-xs font-medium focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-1.5 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-medium focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors"
                   placeholder="Full name"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-600 mb-1">Unique ID (optional)</label>
+                <label className="eyebrow block text-slate-600 mb-1.5">Unique ID (optional)</label>
                 <input
                   data-testid="user-uid-input"
                   type="text"
                   value={newUser.uniqueId}
                   onChange={(e) => { setCreateError(null); setNewUser((p) => ({ ...p, uniqueId: e.target.value })); }}
-                  className="w-full px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-xs font-medium focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-1.5 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-medium focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors"
                   placeholder="Auto-generated if blank"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-600 mb-1">Role *</label>
+                <label className="eyebrow block text-slate-600 mb-1.5">Role *</label>
                 <select
                   data-testid="user-role-select"
                   value={newUser.role}
                   onChange={(e) => setNewUser((p) => ({ ...p, role: e.target.value as "student" | "staff" }))}
-                  className="w-full px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-xs font-medium focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-1.5 rounded-md bg-white border border-slate-300 text-slate-900 text-xs font-medium focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors"
                 >
                   <option value="student">Student</option>
                   <option value="staff">Staff</option>
@@ -310,14 +324,14 @@ export default function Users() {
                   data-testid="create-user-submit"
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="flex-1 py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white text-xs font-bold transition-colors"
+                  className="flex-1 py-1.5 px-3 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 text-white text-xs font-semibold transition-colors cursor-pointer"
                 >
                   {createMutation.isPending ? "Creating..." : "Create"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="py-1.5 px-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold border border-gray-200"
+                  className="py-1.5 px-2.5 rounded-md bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold border border-slate-300 hover:border-slate-400 transition-colors cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -329,14 +343,14 @@ export default function Users() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input
               data-testid="user-search"
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or ID..."
-              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-900 placeholder-gray-400 text-xs font-medium focus:outline-none focus:border-blue-500 shadow-xs"
+              className="w-full pl-8 pr-3 py-1.5 rounded-md bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-xs font-medium focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors shadow-xs"
             />
           </div>
           <div className="flex gap-1.5">
@@ -345,10 +359,10 @@ export default function Users() {
                 key={r}
                 data-testid={`filter-${r || "all"}`}
                 onClick={() => setRoleFilter(r)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
                   roleFilter === r
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "bg-white text-gray-600 hover:text-gray-900 border border-gray-200"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-white text-slate-700 hover:text-slate-950 border border-slate-300 hover:border-slate-400"
                 }`}
               >
                 {r === "" ? "All" : r === "student" ? "Students" : "Staff"}
@@ -358,61 +372,62 @@ export default function Users() {
         </div>
 
         {/* Table */}
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs">
+        <div className="bg-white border border-slate-300/70 rounded-lg overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table data-testid="users-table" className="w-full">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/80 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                  <th className="text-left px-4 py-2.5">Name</th>
-                  <th className="text-left px-4 py-2.5">Unique ID</th>
-                  <th className="text-left px-4 py-2.5">Role</th>
-                  <th className="text-left px-4 py-2.5">Added</th>
-                  <th className="text-right px-4 py-2.5">Actions</th>
+                <tr className="border-b border-slate-200 bg-slate-100">
+                  <th className="text-left px-4 py-2.5 eyebrow text-slate-600">Name</th>
+                  <th className="text-left px-4 py-2.5 eyebrow text-slate-600">Unique ID</th>
+                  <th className="text-left px-4 py-2.5 eyebrow text-slate-600">Role</th>
+                  <th className="text-left px-4 py-2.5 eyebrow text-slate-600">Added</th>
+                  <th className="text-right px-4 py-2.5 eyebrow text-slate-600">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-200">
                 {isLoading ? (
                   [...Array(5)].map((_, i) => (
                     <tr key={i}>
                       {[...Array(5)].map((_, j) => (
                         <td key={j} className="px-4 py-2.5">
-                          <div className="h-3.5 bg-gray-100 rounded animate-pulse" />
+                          <div className="h-3.5 bg-slate-200 rounded animate-pulse" />
                         </td>
                       ))}
                     </tr>
                   ))
                 ) : !filteredUsers.length ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-xs text-gray-400 font-medium">
-                      No users found
+                    <td colSpan={5} className="px-4 py-12 text-center">
+                      <UserPlus className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                      <p className="text-xs text-slate-600 font-medium">No users found</p>
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-4 py-2">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-xs font-bold text-blue-800 font-mono flex-shrink-0">
                             {user.name.charAt(0).toUpperCase()}
                           </div>
-                          <span className="text-xs font-bold text-gray-900">{user.name}</span>
+                          <span className="text-[13px] font-semibold text-slate-950">{user.name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-2">
-                        <span className="font-mono text-xs text-gray-600 font-semibold">{user.uniqueId}</span>
+                        <span className="font-mono text-xs text-slate-600 font-semibold">{user.uniqueId}</span>
                       </td>
                       <td className="px-4 py-2">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`stamp ${
                             user.role === "student"
-                              ? "bg-blue-100 text-blue-800 border border-blue-200"
-                              : "bg-purple-100 text-purple-800 border border-purple-200"
+                              ? "border-blue-300 bg-blue-50 text-blue-800"
+                              : "border-purple-300 bg-purple-50 text-purple-800"
                           }`}
                         >
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-xs text-gray-500 font-medium">
+                      <td className="px-4 py-2 text-xs text-slate-500 font-mono">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-2">
@@ -420,7 +435,7 @@ export default function Users() {
                           <button
                             data-testid={`view-qr-${user.id}`}
                             onClick={() => { setQrUserId(user.id); setQrUserName(user.name); }}
-                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors border border-gray-200"
+                            className="p-1.5 rounded-md bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 transition-colors border border-slate-300 hover:border-slate-400 cursor-pointer"
                             title="View QR Code"
                           >
                             <QrCode className="w-3.5 h-3.5" />
@@ -428,7 +443,7 @@ export default function Users() {
                           <button
                             data-testid={`delete-user-${user.id}`}
                             onClick={() => handleDelete(user.id, user.name)}
-                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors border border-gray-200"
+                            className="p-1.5 rounded-md bg-white hover:bg-red-50 text-slate-600 hover:text-red-700 transition-colors border border-slate-300 hover:border-slate-400 cursor-pointer"
                             title="Delete user"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
