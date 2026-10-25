@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ShieldCheck, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { ShieldCheck, Loader2, AlertCircle, ArrowRight, Delete } from "lucide-react";
 import { useLocation } from "wouter";
 
 // NO hardcoded codes here. All verification is done on the server.
@@ -32,23 +32,88 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
             <label htmlFor="access-code" className="eyebrow block text-slate-600 text-center">
               Staff Access Code
             </label>
+            {/* Desktop: typed input */}
             <input
               id="access-code"
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              required
               maxLength={6}
-              autoFocus
               value={adminCode}
-              onChange={(e) => setAdminCode(e.target.value)}
-              className="w-full px-4 py-4 rounded-md bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-3xl font-mono font-semibold tracking-[0.35em] text-center focus:outline-none focus:bg-card focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors"
+              onChange={(e) => setAdminCode(e.target.value.replace(/[^0-9]/g, ""))}
+              className="hidden md:block w-full px-4 py-4 rounded-md bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-3xl font-mono font-semibold tracking-[0.35em] text-center focus:outline-none focus:bg-card focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15 transition-colors"
               placeholder="••••••"
               aria-describedby="access-help"
             />
+            {/* Mobile: passcode dots (old-iPhone style, on-screen keypad below) */}
+            <div
+              className="md:hidden flex items-center justify-center gap-4 h-14 rounded-md bg-slate-50 border border-slate-300"
+              role="textbox"
+              aria-label="Staff access code"
+              aria-describedby="access-help"
+            >
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <span
+                  key={i}
+                  className={`rounded-full transition-all ${
+                    i < adminCode.length
+                      ? "w-3 h-3 bg-slate-800"
+                      : "w-2 h-2 bg-slate-300"
+                  }`}
+                />
+              ))}
+            </div>
             <p id="access-help" className="text-center text-[11px] text-slate-500">
               Faculty keys &amp; administration PINs only
             </p>
+          </div>
+
+          {/* Mobile on-screen keypad — classic passcode style */}
+          <div className="md:hidden select-none mx-auto w-[264px]">
+            <div className="grid grid-cols-3 gap-x-5 gap-y-3">
+              {[
+                { d: "1", sub: "" },
+                { d: "2", sub: "ABC" },
+                { d: "3", sub: "DEF" },
+                { d: "4", sub: "GHI" },
+                { d: "5", sub: "JKL" },
+                { d: "6", sub: "MNO" },
+                { d: "7", sub: "PQRS" },
+                { d: "8", sub: "TUV" },
+                { d: "9", sub: "WXYZ" },
+              ].map((k) => (
+                <button
+                  key={k.d}
+                  type="button"
+                  onClick={() => setAdminCode((adminCode + k.d).slice(0, 6))}
+                  className="h-[58px] rounded-full bg-white border border-slate-300 shadow-sm flex flex-col items-center justify-center active:bg-slate-200 transition-colors"
+                >
+                  <span className="text-[22px] leading-6 font-normal text-slate-900">{k.d}</span>
+                  {k.sub ? (
+                    <span className="text-[8px] font-semibold tracking-[0.12em] text-slate-500">{k.sub}</span>
+                  ) : (
+                    <span className="h-[8px]" />
+                  )}
+                </button>
+              ))}
+              <span />
+              <button
+                type="button"
+                onClick={() => setAdminCode((adminCode + "0").slice(0, 6))}
+                className="h-[58px] rounded-full bg-white border border-slate-300 shadow-sm flex flex-col items-center justify-center active:bg-slate-200 transition-colors"
+              >
+                <span className="text-[22px] leading-6 font-normal text-slate-900">0</span>
+                <span className="h-[8px]" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setAdminCode(adminCode.slice(0, -1))}
+                className="h-[58px] rounded-full flex items-center justify-center active:bg-slate-200 transition-colors text-slate-500"
+                aria-label="Delete last digit"
+              >
+                <Delete className="w-6 h-6" />
+              </button>
+            </div>
           </div>
 
           <button

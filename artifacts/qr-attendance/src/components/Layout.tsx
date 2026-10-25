@@ -548,7 +548,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* ══════════ TOP NAV — LINK ROW (desktop) ══════════ */}
-        <nav className="hidden lg:flex items-center gap-1 px-4 sm:px-5 py-1.5 border-t border-slate-200 bg-white overflow-x-auto">
+        <nav className="hidden lg:flex items-center flex-wrap gap-1 px-4 sm:px-5 py-1.5 border-t border-slate-200 bg-white">
           {navLinks.map((l) => navLinkEl(l))}
           {(role === "hod" || role === "admin") && (
             <TrainingProgramsMenu location={location} onNavigate={() => {}} />
