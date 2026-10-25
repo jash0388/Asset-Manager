@@ -38,18 +38,46 @@ function timingSafeStringEqual(a: string, b: string): boolean {
   }
 }
 
-// ─── Rate Limiting (Disabled) ───────────────────────────────────────────────
+// ─── Rate Limiting ──────────────────────────────────────────────────────────
+// In-memory sliding window (per serverless instance): 5 failed logins per IP
+// within 15 minutes locks that IP out for 15 minutes. Instance-local, but it
+// raises the cost of online guessing substantially.
 
-function enforceLoginRateLimit(_ip: string): { allowed: boolean; retryAfterSec: number } {
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX_FAILS = 5;
+
+const failedLogins = new Map<string, { count: number; firstAt: number; lockedUntil: number }>();
+
+function enforceLoginRateLimit(ip: string): { allowed: boolean; retryAfterSec: number } {
+  const entry = failedLogins.get(ip);
+  if (!entry) return { allowed: true, retryAfterSec: 0 };
+  const now = Date.now();
+  if (entry.lockedUntil > now) {
+    return { allowed: false, retryAfterSec: Math.ceil((entry.lockedUntil - now) / 1000) };
+  }
+  if (now - entry.firstAt > LOGIN_WINDOW_MS) {
+    failedLogins.delete(ip);
+  }
   return { allowed: true, retryAfterSec: 0 };
 }
 
-function recordFailedAttempt(_ip: string): { remaining: number; resetMin: number } {
-  return { remaining: 99, resetMin: 0 };
+function recordFailedAttempt(ip: string): { remaining: number; resetMin: number } {
+  const now = Date.now();
+  const entry = failedLogins.get(ip);
+  if (!entry || now - entry.firstAt > LOGIN_WINDOW_MS) {
+    failedLogins.set(ip, { count: 1, firstAt: now, lockedUntil: 0 });
+    return { remaining: LOGIN_MAX_FAILS - 1, resetMin: 0 };
+  }
+  entry.count += 1;
+  if (entry.count >= LOGIN_MAX_FAILS) {
+    entry.lockedUntil = now + LOGIN_WINDOW_MS;
+    return { remaining: 0, resetMin: Math.ceil(LOGIN_WINDOW_MS / 60000) };
+  }
+  return { remaining: LOGIN_MAX_FAILS - entry.count, resetMin: 0 };
 }
 
-function resetLoginRateLimit(_ip: string) {
-  // no-op
+function resetLoginRateLimit(ip: string) {
+  failedLogins.delete(ip);
 }
 
 function getClientIp(req: any): string {
@@ -183,17 +211,14 @@ router.all("/auth/pin-login", async (req: any, res: any) => {
       return;
     }
 
-    const ADMIN_PIN = process.env["ADMIN_PIN"] || "038899";
-    const HOD_PIN = process.env["HOD_PIN"] || "038811";
-    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"] || "038877";
+    // PINs come strictly from the environment. No hardcoded fallbacks — the
+    // previous literals were public in the repository.
+    const ADMIN_PIN = process.env["ADMIN_PIN"];
+    const HOD_PIN = process.env["HOD_PIN"];
+    const PRINCIPAL_PIN = process.env["PRINCIPAL_PIN"];
 
-    // Principal Check (supports PRINCIPAL_PIN env, 038877, 778899, 038800)
-    if (
-      (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) ||
-      timingSafeStringEqual(cleanPin, "038877") ||
-      timingSafeStringEqual(cleanPin, "778899") ||
-      timingSafeStringEqual(cleanPin, "038800")
-    ) {
+    // Principal Check
+    if (PRINCIPAL_PIN && timingSafeStringEqual(cleanPin, PRINCIPAL_PIN)) {
       resetLoginRateLimit(ip);
       const token = jwt.sign({ adminId: -4, role: "principal" }, SESSION_SECRET, { expiresIn: "3650d" });
       return res.json({
@@ -202,12 +227,8 @@ router.all("/auth/pin-login", async (req: any, res: any) => {
       });
     }
 
-    // HOD Check (supports 998226, 038811, or 038899)
-    if (
-      (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN)) ||
-      timingSafeStringEqual(cleanPin, "998226") ||
-      timingSafeStringEqual(cleanPin, "038811")
-    ) {
+    // HOD Check
+    if (HOD_PIN && timingSafeStringEqual(cleanPin, HOD_PIN)) {
       resetLoginRateLimit(ip);
       const token = jwt.sign({ adminId: -2, role: "hod" }, SESSION_SECRET, { expiresIn: "3650d" });
       return res.json({
@@ -216,12 +237,8 @@ router.all("/auth/pin-login", async (req: any, res: any) => {
       });
     }
 
-    // Admin Check (supports 038899 or 998226)
-    if (
-      (ADMIN_PIN && timingSafeStringEqual(cleanPin, ADMIN_PIN)) ||
-      timingSafeStringEqual(cleanPin, "998226") ||
-      timingSafeStringEqual(cleanPin, "038899")
-    ) {
+    // Admin Check
+    if (ADMIN_PIN && timingSafeStringEqual(cleanPin, ADMIN_PIN)) {
       resetLoginRateLimit(ip);
       const token = jwt.sign({ adminId: -1, role: "admin" }, SESSION_SECRET, { expiresIn: "3650d" });
       return res.json({

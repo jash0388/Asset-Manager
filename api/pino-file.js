@@ -4116,7 +4116,7 @@ var require_pino = __commonJS({
     function pinoBundlerAbsolutePath(p) {
       try {
         const path = __require("path");
-        const outputDir = "/Users/jashwanthsingh/Documents/New project/Asset-Manager/api";
+        const outputDir = "/Users/jashwanthsingh/.zcode/workspace/default/asset-manager/api";
         return path.resolve(outputDir, p.replace(/^\.\//, ""));
       } catch (e) {
         const f = new Function("p", "return new URL(p, import.meta.url).pathname");

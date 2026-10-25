@@ -81,7 +81,7 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
 }
 
 export default function Login() {
-  const { loginMentorKey, loginPin, loginBypass } = useAuth();
+  const { loginMentorKey, loginPin } = useAuth();
   const [, navigate] = useLocation();
   const [adminCode, setAdminCode] = useState("");
   const [error, setError] = useState("");
@@ -95,23 +95,7 @@ export default function Login() {
 
     setSubmitting(true);
     try {
-      // Principal Access PINs (038877, 778899, 038800)
-      if (code === "038877" || code === "778899" || code === "038800" || code === "998227") {
-        try {
-          const role = await loginPin(code);
-          if (role === "principal") {
-            navigate("/principal-dashboard");
-            return;
-          }
-        } catch {
-          // Fallback to principal role session
-        }
-        loginBypass("principal");
-        navigate("/principal-dashboard");
-        return;
-      }
-
-      // 6-digit codes are Admin / HOD / Principal PINs
+      // All verification happens server-side. No codes live in the client.
       if (/^\d{6}$/.test(code)) {
         const role = await loginPin(code);
         if (role === "hod") navigate("/hod-dashboard");
