@@ -57,7 +57,7 @@ router.post("/users", authMiddleware, adminOnly, async (req: any, res: any) => {
         .insert(mentorId != null ? { name, unique_id: uid, role, mentor_id: mentorId } : { name, unique_id: uid, role })
         .select()
         .single();
-      if (attempt.error?.code === "42703") {
+      if (attempt.error?.code === "42703" || attempt.error?.code === "PGRST204") {
         const retry = await supabase.from("qr_users").insert({ name, unique_id: uid, role }).select().single();
         inserted = retry.data; error = retry.error;
       } else {
@@ -142,7 +142,7 @@ router.patch("/users/:id", authMiddleware, adminOnly, async (req: any, res: any)
         res.status(404).json({ error: "User not found" });
         return;
       }
-      if (error.code === "42703") {
+      if (error.code === "42703" || error.code === "PGRST204" || /mentor_id/.test(String(error.message || ""))) {
         res.status(400).json({
           error: "Mentor assignment is not configured on this database yet — run: ALTER TABLE qr_users ADD COLUMN mentor_id integer;",
         });

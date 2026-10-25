@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
+import bcrypt from "bcryptjs";
 import { supabase } from "../lib/supabase.js";
 import { authMiddleware, adminOnly, AuthRequest } from "../middlewares/auth.js";
 
@@ -49,9 +50,12 @@ router.post("/mentors", async (req: Request, res: Response) => {
       res.status(409).json({ error: "That login key is already taken" });
       return;
     }
+    // password_hash is NOT NULL on qr_mentors — store a bcrypt hash of the key
+    // so the email+password login path stays valid too.
+    const passwordHash = await bcrypt.hash(key, 10);
     const { data, error } = await supabase
       .from("qr_mentors")
-      .insert({ name, email, key })
+      .insert({ name, email, key, password_hash: passwordHash })
       .select("id, name, email, key")
       .single();
     if (error) throw error;
@@ -92,9 +96,10 @@ router.put("/mentors/:id", async (req: Request, res: Response) => {
       res.status(409).json({ error: "That login key is already taken" });
       return;
     }
+    const passwordHash = await bcrypt.hash(key, 10);
     const { data, error } = await supabase
       .from("qr_mentors")
-      .update({ key })
+      .update({ key, password_hash: passwordHash })
       .eq("id", id)
       .select("id, name, email, key")
       .single();
