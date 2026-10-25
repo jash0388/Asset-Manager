@@ -178,7 +178,9 @@ router.post("/admin/departments/import-students", async (req: Request, res: Resp
   const yearIdx = detectColumn(headers, ["year", "classyear", "studyyear"]);
   const sectionIdx = detectColumn(headers, ["sectionletter", "section", "sec"]);
   const classIdx = detectColumn(headers, ["class", "sectionclass", "classsection"]);
-  const batchIdx = detectColumn(headers, ["batch", "admissionyear", "passingyear"]);
+  // Batch must match exactly — a substring pass here would steal the "Year"
+  // column ("admissionyear" contains "year").
+  const batchIdx = headers.findIndex((hh) => ["batch", "admissionyear", "passingyear"].includes(hh));
 
   const problems: string[] = [];
 
