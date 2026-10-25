@@ -11,6 +11,7 @@ import facultyWorkloadRouter from "./faculty-workload.js";
 import notebookAttendanceRouter from "./notebook-attendance.js";
 import holidaysRouter from "./holidays.js";
 import mentorsRouter from "./mentors.js";
+import dbMigrateRouter from "./db-migrate.js";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use(facultyWorkloadRouter);
 router.use(notebookAttendanceRouter);
 router.use(holidaysRouter);
 router.use(mentorsRouter);
+router.use(dbMigrateRouter);
 
 export default router;
