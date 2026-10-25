@@ -2743,10 +2743,10 @@ export default function FacultyPortal() {
           Bounded to the viewport (minus the top header) so the sidebar —
           including the user card and logout — never scrolls away.
       ───────────────────────────────────────────────────────────── */}
-      <div className="hidden md:flex flex-1 min-h-0 overflow-hidden relative">
+      <div className="hidden md:flex flex-1 min-h-0 overflow-hidden relative md:h-[calc(100vh_-_4rem)] md:flex-none">
         {/* SIDEBAR NAVIGATION (CVR ERP HIERARCHY) */}
         <aside
-          className={`bg-white border-r border-slate-300 flex flex-col shrink-0 transition-all duration-300 z-20 sticky top-16 h-[calc(100vh-4rem)] ${
+          className={`bg-white border-r border-slate-300 flex flex-col shrink-0 transition-all duration-300 z-20 h-full ${
             sidebarOpen ? "w-64" : "w-20"
           } ${mobileMenuOpen ? "fixed inset-y-0 left-0 w-64 shadow-xl flex" : "hidden lg:flex"}`}
         >
