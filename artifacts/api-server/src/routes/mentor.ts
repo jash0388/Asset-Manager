@@ -786,6 +786,13 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
 
     if (schedulesErr) throw schedulesErr;
 
+    // Activity slots (sports / library / counselling) have no attendance —
+    // never surface them as an active class to take.
+    const ACTIVITY_SUBJECTS = ["SPORTS", "SPORTS/LIBRARY", "LIBRARY", "COUNSELLING"];
+    const takeableSchedules = (todaySchedules || []).filter(
+      (s: any) => !ACTIVITY_SUBJECTS.includes(String(s.subject || "").trim().toUpperCase())
+    );
+
     // Fetch all sessions for this mentor for today
     const { data: sessions, error: sessionErr } = await supabase
       .from("qr_mentor_sessions")
@@ -801,7 +808,7 @@ router.get("/mentor/active-schedule", authMiddleware, mentorOnly, async (req: an
     });
 
     // Find the currently active schedule (where start_time - 10m <= time <= end_time + 10m + extraBuffer OR isUnlockedByHod)
-    const activeSchedule = (todaySchedules || []).find(s => {
+    const activeSchedule = takeableSchedules.find(s => {
       const key = `${s.id}_${date}`;
       const override = scheduleOverridesMap.get(key);
       const isUnlockedByHod = override ? override.isUnlocked : false;
@@ -1606,6 +1613,13 @@ router.get("/admin/schedules-with-status", authMiddleware, async (req: any, res:
 
     if (scheduleErr) throw scheduleErr;
 
+    // Institutional activity slots (sports / library / counselling) have no
+    // attendance — keep them out of the hourly attendance console entirely.
+    const HOURLY_HIDDEN_SUBJECTS = ["SPORTS", "SPORTS/LIBRARY", "LIBRARY", "COUNSELLING"];
+    const visibleSchedules = (schedules || []).filter(
+      (s: any) => !HOURLY_HIDDEN_SUBJECTS.includes(String(s.subject || "").trim().toUpperCase())
+    );
+
     // 2. Fetch all sessions and hourly attendance for this date
     const { data: sessions, error: sessionErr } = await supabase
       .from("qr_mentor_sessions")
@@ -1637,7 +1651,7 @@ router.get("/admin/schedules-with-status", authMiddleware, async (req: any, res:
       if (r.marked_present) info.presentCount++;
     });
 
-    const mapped = (schedules || []).map((s: any) => {
+    const mapped = visibleSchedules.map((s: any) => {
       const session = sessionMap.get(s.id);
       const hourly = hourlyMap.get(s.id);
 

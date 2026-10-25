@@ -127,10 +127,17 @@ export default function HourlyAttendance() {
   const [creatingClass, setCreatingClass] = useState(false);
 
   // Fetch timetables with status for the selected date
-  const { data: schedules = [], isLoading: schedulesLoading, error: schedulesErr } = useQuery<Schedule[]>({
+  const { data: schedulesRaw = [], isLoading: schedulesLoading, error: schedulesErr } = useQuery<Schedule[]>({
     queryKey: ["admin-schedules-list-status", selectedDateFilter],
     queryFn: () => customFetch<Schedule[]>(`/api/admin/schedules-with-status?date=${selectedDateFilter}`)
   });
+
+  // Activity slots (sports / library / counselling) have no attendance — never
+  // show them in the hourly console, even if old rows exist in the timetable.
+  const schedules = useMemo(
+    () => schedulesRaw.filter((s: any) => !["SPORTS", "SPORTS/LIBRARY", "LIBRARY", "COUNSELLING"].includes(String(s.subject || "").trim().toUpperCase())),
+    [schedulesRaw]
+  );
 
   // Fetch Schedule Overrides for selected date
   const { data: scheduleOverrides = [] } = useQuery<any[]>({
