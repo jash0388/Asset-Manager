@@ -48,11 +48,22 @@ router.post("/users", authMiddleware, adminOnly, async (req: any, res: any) => {
   const uid = (parsed.data.uniqueId || "").trim() || generateUniqueId();
   const mentorId = parsed.data.mentorId ?? null;
   try {
-    const { data: inserted, error } = await supabase
-      .from("qr_users")
-      .insert({ name, unique_id: uid, role, mentor_id: mentorId })
-      .select()
-      .single();
+    // The mentor_id column is optional on older databases — if it is missing
+    // (42703), retry without it so user creation keeps working.
+    let inserted, error;
+    {
+      const attempt = await supabase
+        .from("qr_users")
+        .insert(mentorId != null ? { name, unique_id: uid, role, mentor_id: mentorId } : { name, unique_id: uid, role })
+        .select()
+        .single();
+      if (attempt.error?.code === "42703") {
+        const retry = await supabase.from("qr_users").insert({ name, unique_id: uid, role }).select().single();
+        inserted = retry.data; error = retry.error;
+      } else {
+        inserted = attempt.data; error = attempt.error;
+      }
+    }
 
     if (error) {
       if (error.code === "23505") {
@@ -129,6 +140,12 @@ router.patch("/users/:id", authMiddleware, adminOnly, async (req: any, res: any)
     if (error) {
       if (error.code === "PGRST116") {
         res.status(404).json({ error: "User not found" });
+        return;
+      }
+      if (error.code === "42703") {
+        res.status(400).json({
+          error: "Mentor assignment is not configured on this database yet — run: ALTER TABLE qr_users ADD COLUMN mentor_id integer;",
+        });
         return;
       }
       throw error;

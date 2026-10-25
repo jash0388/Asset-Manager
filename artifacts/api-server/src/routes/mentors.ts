@@ -98,10 +98,12 @@ router.put("/mentors/:id", async (req: Request, res: Response) => {
       .eq("id", id)
       .select("id, name, email, key")
       .single();
-    if (error) throw error;
-    if (!data) {
-      res.status(404).json({ error: "Mentor not found" });
-      return;
+    if (error) {
+      if (error.code === "PGRST116") {
+        res.status(404).json({ error: "Mentor not found" });
+        return;
+      }
+      throw error;
     }
     res.json(data);
   } catch (err: any) {
