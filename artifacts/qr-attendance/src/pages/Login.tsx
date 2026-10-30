@@ -45,25 +45,7 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
               placeholder="••••••"
               aria-describedby="access-help"
             />
-            {/* Mobile: passcode dots (old-iPhone style, on-screen keypad below) */}
-            <div
-              className="md:hidden flex items-center justify-center gap-4 h-14 rounded-md bg-slate-50 border border-slate-300"
-              role="textbox"
-              aria-label="Staff access code"
-              aria-describedby="access-help"
-            >
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <span
-                  key={i}
-                  className={`rounded-full transition-all ${
-                    i < adminCode.length
-                      ? "w-3 h-3 bg-slate-800"
-                      : "w-2 h-2 bg-slate-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <p id="access-help" className="text-center text-[11px] text-slate-500">
+            <p id="access-help" className="md:hidden text-center text-[11px] text-slate-500">
               Faculty keys &amp; administration PINs only
             </p>
           </div>
