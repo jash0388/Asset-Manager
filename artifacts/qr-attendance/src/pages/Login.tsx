@@ -50,13 +50,9 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
             </p>
             {/* Mobile: entered digits visible as you type */}
             <div className="md:hidden flex items-center justify-center h-12 rounded-md bg-slate-50 border border-slate-300">
-              {adminCode ? (
+              {adminCode && (
                 <span className="font-mono text-[22px] font-bold text-slate-900 tracking-[0.3em] pr-[0.1em]">
                   {adminCode.split("").join(" ")}
-                </span>
-              ) : (
-                <span className="font-mono text-[22px] text-slate-300 tracking-[0.3em] pr-[0.1em]">
-                  &ndash;&ndash;&ndash;&ndash;&ndash;&ndash;
                 </span>
               )}
             </div>
