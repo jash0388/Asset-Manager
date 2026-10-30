@@ -13,11 +13,11 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
   handleSubmit: (e: React.FormEvent) => void;
 }) {
   return (
-    <div className="w-full max-w-[380px] bg-card border border-slate-300/70 rounded-lg shadow-lg shadow-slate-950/5 overflow-hidden">
+    <div className="w-full max-w-[360px] bg-card border border-slate-300/70 rounded-lg shadow-lg shadow-slate-950/5 overflow-hidden">
       {/* Ledger top rule */}
       <div className="h-[3px] bg-emerald-600" aria-hidden />
 
-      <div className="p-7 sm:p-8">
+      <div className="px-5 py-5 sm:p-8">
         <p className="eyebrow text-slate-500 text-center">Restricted Access</p>
 
         {error && (
@@ -51,8 +51,8 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
           </div>
 
           {/* Mobile on-screen keypad — classic passcode style */}
-          <div className="md:hidden select-none mx-auto w-[264px]">
-            <div className="grid grid-cols-3 gap-x-5 gap-y-3">
+          <div className="md:hidden select-none mx-auto w-[244px]">
+            <div className="grid grid-cols-3 gap-x-4 gap-y-2.5">
               {[
                 { d: "1", sub: "" },
                 { d: "2", sub: "ABC" },
@@ -68,7 +68,7 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
                   key={k.d}
                   type="button"
                   onClick={() => setAdminCode((adminCode + k.d).slice(0, 6))}
-                  className="h-[58px] rounded-full bg-white border border-slate-300 shadow-sm flex flex-col items-center justify-center active:bg-slate-200 transition-colors"
+                  className="h-[52px] rounded-full bg-white border border-slate-300 shadow-sm flex flex-col items-center justify-center active:bg-slate-200 transition-colors"
                 >
                   <span className="text-[22px] leading-6 font-normal text-slate-900">{k.d}</span>
                   {k.sub ? (
@@ -82,7 +82,7 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
               <button
                 type="button"
                 onClick={() => setAdminCode((adminCode + "0").slice(0, 6))}
-                className="h-[58px] rounded-full bg-white border border-slate-300 shadow-sm flex flex-col items-center justify-center active:bg-slate-200 transition-colors"
+                className="h-[52px] rounded-full bg-white border border-slate-300 shadow-sm flex flex-col items-center justify-center active:bg-slate-200 transition-colors"
               >
                 <span className="text-[22px] leading-6 font-normal text-slate-900">0</span>
                 <span className="h-[8px]" />
@@ -90,7 +90,7 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
               <button
                 type="button"
                 onClick={() => setAdminCode(adminCode.slice(0, -1))}
-                className="h-[58px] rounded-full flex items-center justify-center active:bg-slate-200 transition-colors text-slate-500"
+                className="h-[52px] rounded-full flex items-center justify-center active:bg-slate-200 transition-colors text-slate-500"
                 aria-label="Delete last digit"
               >
                 <Delete className="w-6 h-6" />
@@ -101,7 +101,7 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
           <button
             type="submit"
             disabled={submitting}
-            className="group w-full py-3.5 px-6 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold font-mono uppercase tracking-[0.18em] transition-colors flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.99]"
+            className="group w-full py-3 px-6 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold font-mono uppercase tracking-[0.18em] transition-colors flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.99]"
           >
             {submitting ? (
               <>
@@ -166,13 +166,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-slate-100 ledger-ruled flex flex-col items-center px-4 py-10 sm:py-0 sm:justify-center">
+    <div className="min-h-[100dvh] bg-slate-100 ledger-ruled flex flex-col items-center px-4 py-5 sm:py-0 sm:justify-center">
       {/* Masthead */}
-      <div className="flex flex-col items-center text-center mb-8 sm:mb-10">
-        <div className="w-14 h-14 rounded-lg bg-emerald-600 flex items-center justify-center mb-4 shadow-md">
+      <div className="flex flex-col items-center text-center mb-5 sm:mb-10">
+        <div className="w-12 h-12 rounded-lg bg-emerald-600 flex items-center justify-center mb-3 shadow-md">
           <ShieldCheck className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-[26px] sm:text-3xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "var(--app-font-display)" }}>
           SPHN Attendance
         </h1>
         <p className="eyebrow text-slate-600 mt-1.5">Campus Control Console &middot; 2022&ndash;26</p>
@@ -186,7 +186,7 @@ export default function Login() {
         handleSubmit={handleSubmit}
       />
 
-      <p className="mt-8 text-[11px] text-slate-500 font-mono tracking-wide text-center">
+      <p className="mt-5 text-[11px] text-slate-500 font-mono tracking-wide text-center">
         Unauthorised access is logged and reviewed.
       </p>
     </div>
