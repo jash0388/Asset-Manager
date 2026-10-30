@@ -48,6 +48,18 @@ function AccessCard({ error, submitting, adminCode, setAdminCode, handleSubmit }
             <p id="access-help" className="md:hidden text-center text-[11px] text-slate-500">
               Faculty keys &amp; administration PINs only
             </p>
+            {/* Mobile: entered digits visible as you type */}
+            <div className="md:hidden flex items-center justify-center h-12 rounded-md bg-slate-50 border border-slate-300">
+              {adminCode ? (
+                <span className="font-mono text-[22px] font-bold text-slate-900 tracking-[0.3em] pr-[0.1em]">
+                  {adminCode.split("").join(" ")}
+                </span>
+              ) : (
+                <span className="font-mono text-[22px] text-slate-300 tracking-[0.3em] pr-[0.1em]">
+                  &ndash;&ndash;&ndash;&ndash;&ndash;&ndash;
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Mobile on-screen keypad — classic passcode style */}
